@@ -1,0 +1,87 @@
+# Changelog
+
+All notable changes to this project are documented in this file.
+
+The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## Unreleased
+
+## 0.1.0 - 2026-08-03
+
+### Added
+
+- A curated Washington catalog with 78 generated Favorites List entries
+  covering all 39 counties, statewide interoperability, public safety,
+  SAR, wildfire, mountain travel, aviation, military, marine, rail,
+  amateur radio, GMRS/FRS, MURS, CB, utilities, business and events.
+- A dependency-free Python 3.9+ CLI and loopback-only browser UI for
+  profile editing, previewing, generation, source updates, history,
+  rollback, validation and scanner-card installation.
+- Deterministic BCDx36HP HPE encoding and decoding, Sentinel HPDB parsing,
+  per-list HPE export and a bulk Sentinel import ZIP with CSV, Markdown,
+  instructions, checksums and a content manifest.
+- Automatic no-private-input generation for 58 Favorites Lists containing
+  510 structured conventional channels.
+- Fixed public channel plans and locally curated data for NPSPAC/STATEOPS,
+  DNR and NIFC wildfire, mountain safety, marine VHF, Seattle Center/FSS,
+  all 40 CB channels, FRS/GMRS, itinerant business, utilities, recurring
+  events, news aviation and 17 primary Washington-serving NOAA Weather
+  Radio transmitters.
+- Conservative automatic channel metadata for modulation mode, Sentinel
+  service type, universal distress/calling priority and carrier-only
+  APRS/Winlink avoids.
+- Read-only source adapters and update workflows for local Sentinel HPDB,
+  RadioReference Premium exports, NOAA, FAA NASR, FCC ULS, USCG, AMSAT,
+  NWAC, Washington DNR/EMD, WWARA and other documented sources.
+- Three-way profile merging that preserves local presentation choices,
+  reports conflicts and supports snapshot history and rollback.
+- An experimental guarded SD-card installer with dry-run defaults,
+  mandatory verified backups, explicit confirmation and post-write
+  verification.
+- A Sentinel HPDB completion plan describing the remaining trunked-system,
+  location-control, quick-key and encrypted-talkgroup curation work.
+- A comprehensive automated suite covering CLI, UI, generation, HPE/HPDB,
+  updates, merges, manifests and scanner-card safety.
+
+### Changed
+
+- Generation is transactional across CLI and browser workflows: requested
+  artifacts are staged and validated before publication, stale HPE files
+  are removed, unrelated files are preserved and failed publication rolls
+  back previous outputs.
+- Catalog/profile persistence now fails closed on structural problems while
+  retaining reserved quick-key guidance as an advisory warning.
+- Generated filenames are portable across Windows, macOS and Linux,
+  including case-insensitive collision handling and Windows reserved-name
+  protection.
+- Discovery-only and Sentinel-dependent lists remain explicit warnings
+  instead of producing empty or fabricated scanner files.
+- The packaged catalog now excludes the explicitly unverified FL42
+  Pomeroy frequency while retaining its verified statewide mountain safety
+  channels.
+
+### Fixed
+
+- Corrected BCDx36HP tone serialization to emit CTCSS as `TONE=Cnnn.n`,
+  DCS as `Dnnn` and supported NAC values in the expected Sentinel syntax.
+- Removed the duplicate FL65 FRS/GMRS channel and completed the non-linear
+  FCC CB channel ordering.
+- Fixed generation behavior for oversized individual lists, the scanner
+  list-count limit, web preview status codes and invalid source/catalog
+  persistence.
+- Prevented stale or partial output sets after validation or publication
+  failures.
+
+### Security
+
+- Added semantic validation for scanner frequency coverage, modes, tones,
+  service types, hierarchy, geolocation, names, file limits, deterministic
+  container round trips and exact model-to-record parity.
+- Added ZIP path traversal checks, complete manifest-set validation,
+  SHA-256 verification and validation of every embedded HPE file.
+- Hardened scanner-card writes with strict path allow-lists, symlink
+  rejection, temporary-file replacement, `fsync`, mandatory backup
+  verification and read-back checks for both HPE and `f_list.cfg` data.
+- Protected mutating browser API calls with a per-run token and loopback
+  binding.

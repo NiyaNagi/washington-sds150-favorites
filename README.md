@@ -1,6 +1,8 @@
 # Washington SDS150 Favorites
 
-A curated statewide programming plan for the Uniden SDS150, organized for practical use with Sentinel, location control, GPS, and quick keys.
+A curated statewide programming plan and generator for the Uniden SDS150,
+organized for practical use with Sentinel, location control, GPS and quick
+keys.
 
 The catalog covers all 39 Washington counties and includes:
 
@@ -13,12 +15,29 @@ The catalog covers all 39 Washington counties and includes:
 
 ## Files
 
-- [Master favorites guide](washington-sds150-favorites-master.md) - 75 Favorites Lists with regions, systems, sites, categories, modes, monitorability, and sources.
+- [Changelog](CHANGELOG.md) - release history and user-visible changes.
+- [Master favorites guide](washington-sds150-favorites-master.md) - 75 numbered slots represented by 78 generated entries where encrypted/clear variants are split.
 - [Programming inventory](washington-sds150-favorites.csv) - machine-readable inventory for filtering, review, and future tooling.
 - [Sentinel checklist](washington-sds150-programming-checklist.md) - build order, quick keys, GPS/location control, updates, testing, and backups.
 - [Sentinel HPDB completion plan](docs/sentinel-completion-plan.md) - exact ingestion, merge, curation, location, quick-key, and acceptance steps once an updated local HPDB is available.
+- [Data-source architecture](docs/data-sources.md) - source provenance, caching, update and merge behavior.
 
-## The `wasds150` tool
+## Current coverage
+
+| Measure | Current baseline |
+|---|---:|
+| Curated Favorites List entries | 78 |
+| Lists generated locally as validated HPE | 58 |
+| Structured conventional channels | 510 |
+| Sentinel/Discovery-dependent warnings | 20 |
+| Washington counties represented | 39 |
+
+The 20 warnings are deliberate: 17 require authoritative trunked-system
+data from an updated local Sentinel HPDB, FL30 is a cross-list rollup, and
+FL45/FL72 are on-site Discovery scenarios with no stable published channel
+set. No empty or guessed HPE is emitted.
+
+## Install and run
 
 `src/` contains a standard-library-only Python 3.9+ CLI and local browser UI
 that turns the catalog above into a working, importable programming
@@ -27,12 +46,23 @@ profile — with no code required to use it. See
 model; this is the short version.
 
 ```bash
-pip install -e .            # editable install; wasds150 = console entry point
-wasds150 init                # seed a profile from the packaged baseline (78 Favorites Lists)
-wasds150 preview              # what would be generated, with no files written
-wasds150 generate --out out/ # csv + markdown + a Sentinel import .zip (hpe/ inside) + loose hpe/
-wasds150 ui                   # the same workflow in a local browser tab
+git clone https://github.com/NiyaNagi/washington-sds150-favorites.git
+cd washington-sds150-favorites
+python3 -m venv .venv
+.venv/bin/pip install .
+.venv/bin/wasds150 init
+.venv/bin/wasds150 preview
+.venv/bin/wasds150 generate --out out/
+.venv/bin/wasds150 ui
 ```
+
+The generated `out/sentinel-import-pack.zip` is the bulk download. Its
+`hpe/` directory contains every currently available Favorites List with
+clear, stable names such as `FL01.hpe` and `FL75.hpe`. Sentinel imports HPE
+files individually, but after import it writes all selected Favorites
+Lists to the SDS150 in one scanner-write operation.
+
+## Generation and installation
 
 **End-to-end workflow: profile → generated Favorites Lists → install.**
 `generate` (CLI or the UI's Export tab) writes one importable `.hpe` file
@@ -81,6 +111,33 @@ CLI and web exports are built in a staging directory and published as a
 rollback-capable transaction, so failed validation cannot leave a partial
 or stale HPE set. Direct SD writes run the same document validation and
 verify the mandatory backup before changing the card.
+
+## Updating with Sentinel data
+
+When an updated Sentinel database is available:
+
+```bash
+wasds150 sources configure \
+  --sentinel-mount "/path/to/Sentinel" \
+  --sentinel-hpdb-cfg "/path/to/hpdb.cfg"
+wasds150 sources update --apply
+wasds150 preview
+wasds150 generate --out out/
+```
+
+Follow the [Sentinel HPDB completion plan](docs/sentinel-completion-plan.md)
+for the system-by-system priority order, merge rules, location-control
+pass, encrypted-talkgroup handling and release gates.
+
+## Development
+
+The runtime has no third-party dependencies. Install the development extra
+and run the suite with:
+
+```bash
+.venv/bin/pip install -e ".[dev]"
+.venv/bin/python -m pytest -q
+```
 
 ## Important limitations
 

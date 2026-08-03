@@ -1,5 +1,5 @@
-"""Change/diff records shared by :mod:`wasds150.diffing` (implemented) and
-:mod:`wasds150.merge` (placeholder, future phase).
+"""Change/diff records shared by :mod:`wasds150.diffing` and
+:mod:`wasds150.merge`.
 
 Kept separate from ``diffing.differ`` so the merge engine can reuse the same
 ``ChangeRecord`` shape without importing the (structural, local-only) diff

@@ -36,7 +36,7 @@ merge-inert, differ) — i.e. "generate a default import bundle from all
 facts available without private inputs" degrades gracefully to exactly
 today's shipped catalog's CSV fields and content hash, never silently
 corrupting it. A no-private-input `generate` still produces real per-list
-``.hpe`` output for roughly 56 of the 78 baseline rows, though, because
+``.hpe`` output for 58 of the 78 baseline rows, though, because
 :func:`wasds150.recipes.systems.static_systems_for` — a separate, pure,
 no-fact-matching-required tier — runs on every ``generate``/``preview``
 regardless (see that module's docstring). Supplying a local HPDB/RR export

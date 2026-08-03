@@ -44,7 +44,7 @@ def test_packaged_baseline_has_populated_systems_for_most_rows():
     systems with zero configuration."""
     catalog = baseline.load_baseline()
     with_systems = [fl for fl in catalog.favorites if fl.systems]
-    assert len(with_systems) >= 50  # roughly 56/78 at the time this was written
+    assert len(with_systems) >= 58
     # At least one channel with a real, explicit frequency, never a
     # placeholder/zero value.
     for fl in with_systems:
