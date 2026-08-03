@@ -1,0 +1,16 @@
+TargetModel	BCDx36HP
+FormatVersion	1.00
+Conventional			WASDS150 Sample County PS			Conventional								
+C-Group			Dispatch							
+C-Freq			Fire Disp		154280000	NFM	D023	3									On
+C-Freq			EMS Disp		155340000	NFM		4									
+C-Group			[E]-ENCRYPTED							
+C-Freq			PD Tac	On	453100000	NFM											
+Trunk			WASDS150 Sample P25			P25Standard															
+Site			Downtown Site		47.606200	-122.332100	25				Circle								
+T-Group			Fire-EMS						
+TGID			Fire Dispatch		101	P25	3									
+TGID			EMS Dispatch		102	P25	4									
+T-Freq				851012500	1	Control		
+T-Freq				851512500	2	Voice		
+File	HomePatrol Export File

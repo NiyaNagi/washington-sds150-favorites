@@ -1,0 +1,15 @@
+TargetModel	BCDx36HP
+FormatVersion	1.00
+Conventional	CountyId=5301	StateId=53	King County Public Safety			Conventional								
+AreaState	CountyId=5301	StateId=53
+AreaCounty	CountyId=5301	CountyId=5301
+C-Group	CGroupId=8001	CountyId=5301	Fire Dispatch		47.600000	-122.330000	10.0	Circle		
+C-Freq	CFreqId=7001	CGroupId=8001	Fire Disp 1		154280000	NFM		3									
+Trunk	TrunkId=6001	StateId=53	Regional P25			P25Standard															
+AreaState	TrunkId=6001	StateId=53
+AreaCounty	TrunkId=6001	CountyId=5301
+AreaCounty	TrunkId=6001	CountyId=5302
+Site	SiteId=7001	TrunkId=6001	Downtown Site		47.600000	-122.330000	25.0				Circle								
+T-Freq	TFreqId=9001	SiteId=7001		851012500				
+T-Group	TGroupId=8101	TrunkId=6001	Fire-EMS		47.600000	-122.330000	25.0	Circle	
+TGID	Tid=5001	TGroupId=8101	Fire Dispatch		101	P25	3									

@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.venv/
+
+# wasds150 generated/output artifacts
+wasds150-output/
+.wasds150-home/
+
+# Externally-fetched HPE research fixtures (GPL-2.0 sources) — never vendored
+# into version control; see scripts/fetch_hpe_fixtures.py and NOTICE.md.
+.fixture-cache/

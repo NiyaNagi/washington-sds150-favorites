@@ -1,0 +1,64 @@
+from wasds150.appctx import build_context
+from wasds150.config import AppConfig
+
+
+def test_build_context_with_csv_override(wasds_home, sample_csv_path):
+    config = AppConfig.default()
+    ctx = build_context(config, csv_override=sample_csv_path)
+    assert ctx.catalog_source == str(sample_csv_path)
+    assert len(ctx.catalog.favorites) == 3
+
+
+def test_build_context_default_uses_packaged_baseline(wasds_home):
+    config = AppConfig.default()
+    ctx = build_context(config)
+    assert ctx.catalog_source == "packaged-baseline"
+    assert len(ctx.catalog.favorites) == 78
+
+
+def test_load_profile_creates_new_when_missing(wasds_home, sample_csv_path):
+    config = AppConfig.default()
+    ctx = build_context(config, csv_override=sample_csv_path)
+    profile = ctx.load_profile()
+    assert profile.based_on_catalog_hash == ctx.catalog.content_hash()
+    assert profile.entries == {}
+
+
+def test_save_profile_then_load_profile_round_trips(wasds_home, sample_csv_path):
+    config = AppConfig.default()
+    ctx = build_context(config, csv_override=sample_csv_path)
+    profile = ctx.load_profile()
+    profile.set_enabled("fl01", False)
+    ctx.save_profile(profile)
+
+    reloaded = ctx.load_profile()
+    assert reloaded.entries["fl01"].enabled is False
+
+
+def test_save_catalog_persists_and_updates_in_memory_state(wasds_home, sample_csv_path):
+    from wasds150.models.catalog import Catalog
+
+    config = AppConfig.default()
+    ctx = build_context(config, csv_override=sample_csv_path)
+    new_catalog = Catalog(favorites=list(ctx.catalog.favorites)[:1])
+
+    ctx.save_catalog(new_catalog)
+
+    assert config.catalog_path.exists()
+    assert ctx.catalog is new_catalog  # in-memory context updated immediately
+    assert ctx.catalog_source == "merged"
+
+
+def test_save_catalog_is_preferred_over_baseline_on_next_build_context(wasds_home, sample_csv_path):
+    from wasds150.models.catalog import Catalog
+
+    config = AppConfig.default()
+    ctx = build_context(config, csv_override=sample_csv_path)
+    trimmed = Catalog(favorites=list(ctx.catalog.favorites)[:1])
+    ctx.save_catalog(trimmed)
+
+    # A fresh build_context (no csv_override this time) should now load the
+    # persisted merged catalog instead of the packaged baseline.
+    reloaded_ctx = build_context(config)
+    assert reloaded_ctx.catalog_source == "merged"
+    assert len(reloaded_ctx.catalog.favorites) == 1

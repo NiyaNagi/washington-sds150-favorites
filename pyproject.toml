@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wasds150"
+version = "0.1.0"
+description = "Generate Uniden SDS150 Favorites Lists from the Washington catalog (local CLI + browser UI)"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "washington-sds150-favorites contributors" }]
+# Deliberately dependency-free: standard library only. Optional extras below
+# are for future phases (HPE research, RadioReference client, packaging) and
+# are not required to install or run phases 1-4.
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+
+[project.scripts]
+wasds150 = "wasds150.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"wasds150" = ["data/*.json", "webui/static/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

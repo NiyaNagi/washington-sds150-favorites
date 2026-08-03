@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>wasds150 — Washington SDS150 Favorites</title>
+<link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <h1>wasds150</h1>
+    <p class="subtitle">Washington SDS150 Favorites — local, offline generator</p>
+  </header>
+  <nav class="tabs" id="tabs">
+    <button data-tab="dashboard" class="tab-btn active">Dashboard</button>
+    <button data-tab="catalog" class="tab-btn">Catalog</button>
+    <button data-tab="profile" class="tab-btn">Profile</button>
+    <button data-tab="export" class="tab-btn">Export</button>
+    <button data-tab="advanced" class="tab-btn">Advanced</button>
+  </nav>
+
+  <main>
+    <section id="tab-dashboard" class="tab-panel active">
+      <h2>Dashboard</h2>
+      <div id="dashboard-content" class="cards"></div>
+    </section>
+
+    <section id="tab-catalog" class="tab-panel">
+      <h2>Baseline Catalog</h2>
+      <div class="toolbar">
+        <input type="text" id="catalog-region-filter" placeholder="Filter by region…" />
+      </div>
+      <table class="data-table" id="catalog-table">
+        <thead>
+          <tr><th>Key</th><th>Name</th><th>Region</th><th>Scenario</th><th>Mode</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section id="tab-profile" class="tab-panel">
+      <h2>Profile</h2>
+      <p class="hint">Enable/disable, edit, remove baseline lists, or add your own local lists. Changes save immediately.</p>
+      <div class="toolbar">
+        <button id="add-local-btn" class="primary">+ Add local Favorites List</button>
+      </div>
+      <table class="data-table" id="profile-table">
+        <thead>
+          <tr><th>State</th><th>Key</th><th>Origin</th><th>Name</th><th>Region</th><th>Actions</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section id="tab-export" class="tab-panel">
+      <h2>Export</h2>
+      <p class="hint">Generates from the currently enabled Favorites Lists. Commits a snapshot to history.</p>
+      <div class="toolbar">
+        <button id="export-csv" class="primary">Download CSV</button>
+        <button id="export-md" class="primary">Download Markdown overview</button>
+        <button id="export-zip" class="primary">Download Sentinel import pack (.zip, includes per-list .hpe)</button>
+        <button id="generate-btn">Generate + commit snapshot</button>
+      </div>
+      <pre id="export-result" class="result-box"></pre>
+
+      <h3>Per-list .hpe files</h3>
+      <p class="hint">One importable <code>.hpe</code> per enabled Favorites List with structured system data (from this catalog's own public checked-in facts, and/or a configured local Sentinel HPDB/RadioReference Premium match — see Advanced &gt; Sources). A list with no systems yet shows why, instead of a silently-empty file.</p>
+      <table class="data-table" id="hpe-list-table">
+        <thead><tr><th>Key</th><th>Name</th><th>Systems</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+
+      <h3>History</h3>
+      <table class="data-table" id="history-table">
+        <thead><tr><th>Snapshot</th><th>Created</th><th>Message</th><th>Content hash</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+
+    <section id="tab-advanced" class="tab-panel">
+      <h2>Advanced</h2>
+
+      <div class="panel">
+        <h3>HPE Inspector</h3>
+        <p class="hint">Inspect or validate a real <code>.hpe</code>/<code>.hpd</code> file (dialect, record hierarchy, BCDx36HP schema arity check). Nothing is uploaded anywhere outside this local server.</p>
+        <div class="toolbar">
+          <input type="file" id="hpe-file-input" />
+          <button id="hpe-inspect-btn">Inspect</button>
+          <button id="hpe-validate-btn">Validate</button>
+        </div>
+        <pre id="hpe-result" class="result-box"></pre>
+      </div>
+
+      <div class="panel">
+        <h3>Merge Upstream Catalog</h3>
+        <p class="hint">Three-way merge: your current catalog + profile vs. a freshly fetched/edited catalog CSV or JSON on this machine. Presentation overrides (notes, quick keys, enable/disable) are always preserved; fact fields (frequencies, coverage, etc.) update from upstream unless you've explicitly overridden them, in which case a conflict is reported instead of silently discarding your customization.</p>
+        <div class="toolbar">
+          <input type="text" id="merge-upstream-path" placeholder="/path/to/upstream.csv or .json" />
+          <button id="merge-preview-btn">Preview</button>
+          <button id="merge-apply-btn" class="danger">Apply</button>
+        </div>
+        <pre id="merge-result" class="result-box"></pre>
+      </div>
+
+      <div class="panel">
+        <h3>SD Card Installer <span class="pill overridden">EXPERIMENTAL</span></h3>
+        <p class="hint">Writes a Favorites List directly to an SDS150 microSD card. <strong>Dry-run by default.</strong> A full backup of the card's <code>BCDx36HP</code> tree is always taken before any real write, and you must type the exact confirmation phrase shown below to proceed.</p>
+        <div class="toolbar">
+          <button id="install-detect-btn">Detect volumes</button>
+        </div>
+        <table class="data-table" id="install-volumes-table">
+          <thead><tr><th>Mount point</th><th>SDS150?</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <div class="toolbar">
+          <input type="text" id="install-mount" placeholder="Mount point (e.g. /Volumes/SDS150)" />
+          <input type="text" id="install-backup-dir" placeholder="Backup directory" />
+        </div>
+        <div class="toolbar">
+          <input type="number" id="install-index" placeholder="Favorites slot index (0-255)" min="0" max="255" value="0" style="max-width:220px" />
+          <input type="text" id="install-user-name" placeholder="Favorites List display name (optional with a generated list)" />
+        </div>
+
+        <div class="toolbar">
+          <label class="hint"><input type="radio" name="install-source" id="install-source-generated" value="generated" checked /> Generated Favorites List (default)</label>
+          <label class="hint"><input type="radio" name="install-source" id="install-source-raw" value="raw" /> Raw Systems JSON (advanced/debug)</label>
+        </div>
+        <div id="install-generated-panel">
+          <label class="hint" for="install-slug-select">Favorites List (profile → generated favorites; only lists with structured systems are shown):</label>
+          <select id="install-slug-select" style="width:100%;padding:0.4rem;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;"></select>
+        </div>
+        <div id="install-raw-panel" class="hidden">
+          <label class="hint" for="install-systems-json">Systems JSON (same shape as <code>System.to_dict()</code> / the CLI's <code>--systems</code> file):</label>
+          <textarea id="install-systems-json" rows="4" style="width:100%;font-family:ui-monospace,monospace;font-size:0.8rem;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;">{"systems": []}</textarea>
+        </div>
+        <div class="toolbar">
+          <button id="install-backup-btn">Back up now</button>
+          <button id="install-dry-run-btn">Dry-run write</button>
+        </div>
+        <div class="toolbar">
+          <input type="text" id="install-confirm-phrase" placeholder="Type confirmation phrase to enable Execute" />
+          <button id="install-execute-btn" class="danger" disabled>Execute write</button>
+        </div>
+        <div class="toolbar">
+          <input type="text" id="install-rollback-backup" placeholder="Backup .zip path to restore" />
+          <button id="install-rollback-btn" class="danger">Rollback from backup</button>
+        </div>
+        <pre id="install-result" class="result-box"></pre>
+      </div>
+      <div class="panel">
+        <h3>Sources</h3>
+        <p class="hint">Online/local fact sources (FCC ULS, FAA NASR, NOAA NWR, USCG NAVCEN, AMSAT, WWARA, IACC, WA EMD/DNR, NIFC, local Sentinel HPDB, RadioReference Premium import). Public sources are read-only network fetches cached locally; local sources only ever read files you point them at. Running <strong>Update</strong> never rewrites the catalog's free-text fields — it only reports per-row coverage and attaches traceable provenance, and requires an explicit Apply to persist any merge.</p>
+        <div class="toolbar">
+          <button id="sources-list-btn">Refresh list</button>
+          <button id="sources-status-btn">Cache status</button>
+        </div>
+        <table class="data-table" id="sources-table">
+          <thead><tr><th>Name</th><th>Kind</th><th>Available</th><th>Cached URLs</th><th>Last fetch</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+
+        <h4>Configure local sources</h4>
+        <div class="toolbar">
+          <label class="hint"><input type="checkbox" id="sources-offline" /> Offline mode (serve cache only, never touch the network)</label>
+        </div>
+        <div class="toolbar">
+          <input type="text" id="sources-sentinel-mount" placeholder="Sentinel/SDS150 card mount point" />
+          <input type="text" id="sources-sentinel-hpdb-cfg" placeholder="...or a direct hpdb.cfg path" />
+        </div>
+        <div class="toolbar">
+          <input type="text" id="sources-rr-export-path" placeholder="RadioReference Premium export file (CSV/XML)" />
+        </div>
+        <div class="toolbar">
+          <button id="sources-configure-btn">Save configuration</button>
+        </div>
+
+        <h4>Run update</h4>
+        <div class="toolbar">
+          <input type="text" id="sources-only" placeholder="Only these sources (comma-separated, blank = all)" />
+          <button id="sources-update-preview-btn">Preview</button>
+          <button id="sources-update-apply-btn" class="danger">Apply</button>
+        </div>
+
+        <h4>Provenance lookup</h4>
+        <div class="toolbar">
+          <input type="text" id="sources-provenance-slug" placeholder="Favorite slug, e.g. fl04" />
+          <button id="sources-provenance-btn">Show provenance</button>
+        </div>
+        <pre id="sources-result" class="result-box"></pre>
+      </div>
+    </section>
+  </main>
+
+  <div id="modal-backdrop" class="modal-backdrop hidden">
+    <div class="modal" id="edit-modal">
+      <h3 id="modal-title">Edit</h3>
+      <div id="modal-body"></div>
+      <div class="modal-actions">
+        <button id="modal-cancel">Cancel</button>
+        <button id="modal-save" class="primary">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span id="status-line"></span>
+  </footer>
+</div>
+<script>window.WASDS150_TOKEN = "__WASDS150_TOKEN__";</script>
+<script src="/app.js"></script>
+</body>
+</html>

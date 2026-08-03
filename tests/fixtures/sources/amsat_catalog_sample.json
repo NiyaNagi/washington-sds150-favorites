@@ -1,0 +1,43 @@
+{
+  "data": [
+    {
+      "id": 153,
+      "name": "AO-123_[FM]",
+      "display_name": "AO-123 [FM]",
+      "website": "https://www.amsat.org/live-fm-satellites/",
+      "links": {
+        "self": "https://www.amsat.org/status/api/v1/catalog.php?name=AO-123_%5BFM%5D",
+        "reports": "https://www.amsat.org/status/api/v1/reports.php?name=AO-123_%5BFM%5D"
+      },
+      "report_count": 1434,
+      "latest_reported_time": "2026-08-03T05:30:00Z"
+    },
+    {
+      "id": 2,
+      "name": "AO-7_[U/v]",
+      "display_name": "AO-7 [U/v]",
+      "website": "https://www.amsat.org/live-linear-satellites/",
+      "links": {
+        "self": "https://www.amsat.org/status/api/v1/catalog.php?name=AO-7_%5BU%2Fv%5D",
+        "reports": "https://www.amsat.org/status/api/v1/reports.php?name=AO-7_%5BU%2Fv%5D"
+      },
+      "report_count": 2169,
+      "latest_reported_time": "2026-08-03T01:30:00Z"
+    },
+    {
+      "id": 7,
+      "name": "ISS_[FM]",
+      "display_name": "ISS [FM]",
+      "website": "https://www.amsat.org/live-fm-satellites/",
+      "links": {
+        "self": "https://www.amsat.org/status/api/v1/catalog.php?name=ISS_%5BFM%5D",
+        "reports": "https://www.amsat.org/status/api/v1/reports.php?name=ISS_%5BFM%5D"
+      },
+      "report_count": 4565,
+      "latest_reported_time": "2026-08-03T02:30:00Z"
+    }
+  ],
+  "meta": {
+    "count": 3
+  }
+}
