@@ -364,7 +364,7 @@ All FL 32–43 entries share: Air Guard 168.625 (mandatory near aerial ops), sta
 
 ### Group M — NOAA Weather Radio (FL 75)
 
-**FL 75 — NOAA Weather Radio — complete WA catalog.** Program all applicable transmitters for your travel footprint and enable SAME by county FIPS code (WA counties are 53xxx, e.g., King 053033, Pierce 053053, Spokane 053063 — full list https://www.weather.gov/nwr/fips6). This is the one Favorites List that should always run with Weather Alert Priority enabled, interrupting any other scan activity.
+**FL 75 — NOAA Weather Radio — complete primary WA-serving catalog.** The generated list includes the 17 primary transmitters in the current NWS Washington station listing: KAD93 Blaine 162.525; KEC91 Astoria 162.400; KHB60 Seattle 162.550; KIG75 Yakima 162.550; KIH36 Neah Bay 162.550; KXI27 Forks 162.425; KZZ73 Dayton 162.525; WNG604 Davis Peak 162.525; WWF49 Okanogan 162.525; WWF56 Richland 162.450; WWG24 Puget Sound Marine 162.425; WWH27 Plymouth 162.425; WXL86 Spokane 162.400; WXM48 Wenatchee 162.475; WXM62 Capitol Peak 162.475; WXN21 Cle Elum 162.400; and WZ2502 Randle 162.425. Program all applicable transmitters for your travel footprint and enable SAME by county FIPS code (WA counties are 53xxx, e.g., King 053033, Pierce 053053, Spokane 053063 — full list https://www.weather.gov/nwr/fips6). This is the one Favorites List that should always run with Weather Alert Priority enabled, interrupting any other scan activity.
 
 | Callsign | Freq (MHz) | Site | Primary counties |
 |----------|-----------|------|-------------------|

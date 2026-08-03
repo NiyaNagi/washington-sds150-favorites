@@ -5,6 +5,7 @@ without regenerating the baseline, ``test_baseline_matches_repo_csv`` fails
 loudly instead of silently shipping stale data.
 """
 from wasds150.catalog import baseline, loader
+from wasds150.recipes.systems import static_systems_for
 
 
 def test_load_baseline_returns_78_favorites():
@@ -54,6 +55,17 @@ def test_packaged_baseline_has_populated_systems_for_most_rows():
                         assert channel.freq_mhz > 0
 
 
+def test_packaged_baseline_static_systems_match_current_generation_policy():
+    """Changing static seeds/metadata requires regenerating the snapshot."""
+    catalog = baseline.load_baseline()
+    for favorite in catalog.favorites:
+        expected = static_systems_for(favorite)
+        if expected:
+            assert [system.to_dict() for system in favorite.systems] == [
+                system.to_dict() for system in expected
+            ], f"{favorite.favorite_key} packaged systems are stale"
+
+
 def test_packaged_baseline_no_private_input_rows_have_systems():
     """The specific "at minimum" categories the audit called out by name."""
     catalog = baseline.load_baseline()
@@ -70,4 +82,3 @@ def test_generate_baseline_from_csv_bakes_in_systems_without_changing_content_ha
     regenerated = baseline.generate_baseline_from_csv(repo_csv_path, tmp_path / "regenerated.json")
     assert any(fl.systems for fl in regenerated.favorites)  # sanity: something got baked in
     assert regenerated.content_hash() == plain.content_hash()
-

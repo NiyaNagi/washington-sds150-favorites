@@ -75,8 +75,8 @@ def test_every_baseline_generated_hpe_passes_full_semantic_and_parity_validation
     export = build_per_list_hpe(result.enabled_favorites)
 
     assert len(result.enabled_favorites) == 78
-    assert len(export.files) == 56
-    assert len(export.warnings) == 22
+    assert len(export.files) == 58
+    assert len(export.warnings) == 20
     by_key = {favorite.favorite_key: favorite for favorite in result.enabled_favorites}
     for filename, data in export.files.items():
         favorite = by_key[filename.removesuffix(".hpe")]
@@ -219,7 +219,7 @@ def test_bundle_manifest_hashes_and_all_embedded_hpes_validate(tmp_path):
     with zipfile.ZipFile(path) as archive:
         manifest = json.loads(archive.read("manifest.json"))
         declared = {entry["path"]: entry["sha256"] for entry in manifest["files"]}
-        assert len([name for name in declared if name.endswith(".hpe")]) == 56
+        assert len([name for name in declared if name.endswith(".hpe")]) == 58
         for name, digest in declared.items():
             assert hashlib.sha256(archive.read(name)).hexdigest() == digest
 

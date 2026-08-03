@@ -79,9 +79,72 @@ def test_static_systems_for_encodes_dcs_for_hpe():
     assert channel.tone == "D565"
 
 
+def test_static_systems_for_applies_conservative_scanner_metadata():
+    fl = _fl(
+        favorite_key="FL44",
+        scenario="Aviation/SAR",
+        mode="AM + FM",
+        departments_or_channels="GUARD121.500(AM);Marine-16 156.800(FM);USFS Air Guard168.625(FM)",
+    )
+    channels = static_systems_for(fl)[0].departments[0].channels
+    by_frequency = {channel.freq_mhz: channel for channel in channels}
+    assert by_frequency[121.5].mode == "AM"
+    assert by_frequency[121.5].service_type == 15
+    assert by_frequency[121.5].priority is True
+    assert by_frequency[156.8].mode == "FM"
+    assert by_frequency[156.8].service_type == 11
+    assert by_frequency[156.8].priority is True
+    assert by_frequency[168.625].priority is True
+
+
+def test_static_systems_for_omits_explicitly_unverified_channel():
+    fl = _fl(departments_or_channels="USFS R6 Pomeroy164.825(unverified);WA SAR155.160")
+    channels = static_systems_for(fl)[0].departments[0].channels
+    assert [channel.freq_mhz for channel in channels] == [155.16]
+
+
+def test_static_systems_for_avoids_carrier_only_packet_channels():
+    fl = _fl(
+        favorite_key="FL62",
+        scenario="Amateur/emergency mgmt",
+        departments_or_channels="Winlink144.950/145.630(carrier-only)",
+    )
+    channels = static_systems_for(fl)[0].departments[0].channels
+    assert len(channels) == 2
+    assert all(channel.avoid for channel in channels)
+
+
 def test_static_systems_for_seed_never_fires_for_unrelated_row_reusing_key():
     fl = _fl(slug="fl02", favorite_key="FL02", departments_or_channels="Bravo Dispatch, [E]-ENCRYPTED")
     assert static_systems_for(fl) == []
+
+
+def test_static_systems_for_expands_fixed_cb_channel_plan():
+    fl = _fl(
+        favorite_key="FL66",
+        scenario="Business/hobby",
+        mode="FM (MURS) + AM (CB)",
+        departments_or_channels="CB Ch9 27.065(emergency);Ch19 27.185(trucker highway)",
+    )
+    channels = static_systems_for(fl)[0].departments[0].channels
+    cb_channels = [channel for channel in channels if 26.9 <= channel.freq_mhz <= 27.5]
+    assert len(cb_channels) == 40
+    assert any(channel.label == "CB Ch23" and channel.freq_mhz == 27.255 for channel in cb_channels)
+    assert any(channel.label == "CB Ch24" and channel.freq_mhz == 27.235 for channel in cb_channels)
+    assert all(channel.mode == "AM" for channel in cb_channels)
+
+
+def test_static_systems_for_adds_mountain_safety_baseline():
+    fl = _fl(
+        favorite_key="FL34",
+        scenario="Mountain/wildland",
+        departments_or_channels="MBSNF Skykomish169.575;Darrington170.525",
+    )
+    frequencies = {
+        channel.freq_mhz
+        for channel in static_systems_for(fl)[0].departments[0].channels
+    }
+    assert {155.160, 159.420, 168.550, 168.625}.issubset(frequencies)
 
 
 def test_static_systems_for_is_deterministic():

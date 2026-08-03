@@ -78,13 +78,37 @@ def test_seed_channels_convert_to_conventional_channels_never_talkgroups():
     fabricated. Confirmed at the point they actually matter: once
     converted into catalog Channel objects (see
     wasds150.recipes.systems), none carry a tgid."""
+    from wasds150.models.catalog import FavoritesList
     from wasds150.recipes.systems import _channel_from_parsed
 
     text_frs = "Ch1-7 shared462.5625-462.7125;Ch8-14 FRS-only467.5625-467.7125;Ch15-22 GMRS/FRS462.5500-462.7250"
     text_npspac = "ICALL 866.0125; ITAC1-4 866.5125-868.0125"
     parsed = seed_channels_for("FL65", text_frs) + seed_channels_for("FL02", text_npspac)
-    channels = [_channel_from_parsed("slug", i, p) for i, p in enumerate(parsed)]
+    fl = FavoritesList(
+        id="slug", slug="slug", favorite_key="TEST", favorite_name="Test",
+        region="", counties="", scenario="", source_type="", system_or_category="",
+        sites_or_coverage="", departments_or_channels="", mode="FM",
+        monitorability="", upgrade_required="", source_url="", notes="",
+    )
+    channels = [_channel_from_parsed(fl, i, p) for i, p in enumerate(parsed)]
     assert channels  # sanity: the seeds actually produced something
     assert all(c.tgid is None for c in channels)
     assert all(c.freq_mhz is not None for c in channels)
 
+
+def test_cb_seed_preserves_non_linear_channel_order():
+    channels = seed_channels_for("FL66", "CB Ch9 27.065;Ch19 27.185")
+    by_label = {channel.label: channel.freq_mhz for channel in channels}
+    assert len(channels) == 40
+    assert by_label["CB Ch23"] == 27.255
+    assert by_label["CB Ch24"] == 27.235
+    assert by_label["CB Ch25"] == 27.245
+
+
+def test_marine_seed_requires_row_specific_anchors():
+    channels = seed_channels_for(
+        "FL54",
+        "Ch07A156.350;Ch05A156.250;Ch13/16/01A;Port of Seattle P25",
+    )
+    assert {channel.freq_mhz for channel in channels} == {156.05, 156.65, 156.8}
+    assert seed_channels_for("FL54", "unrelated Ch16 list") == []

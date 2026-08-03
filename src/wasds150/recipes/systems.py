@@ -43,6 +43,12 @@ from typing import List, Optional
 from wasds150.models.catalog import Channel, Department, FavoritesList, System
 from wasds150.sources.facts import NormalizedFact
 from wasds150.sources.static_channels import ParsedChannel, parse_department_text
+from wasds150.sources.static_metadata import (
+    channel_is_priority,
+    channel_mode,
+    channel_service_type,
+    channel_should_avoid,
+)
 from wasds150.sources.static_seeds import seed_channels_for
 from wasds150.util.hashing import stable_id
 
@@ -94,12 +100,16 @@ def dedupe_systems(systems: List[System]) -> List[System]:
 # ---------------------------------------------------------------------------
 
 
-def _channel_from_parsed(slug: str, index: int, parsed: ParsedChannel) -> Channel:
+def _channel_from_parsed(fl: FavoritesList, index: int, parsed: ParsedChannel) -> Channel:
     return Channel(
-        id=stable_id(f"{slug}:static:{index}:{parsed.label}:{parsed.freq_mhz}", kind="channel"),
+        id=stable_id(f"{fl.slug}:static:{index}:{parsed.label}:{parsed.freq_mhz}", kind="channel"),
         label=parsed.label,
         freq_mhz=parsed.freq_mhz,
+        mode=channel_mode(fl, parsed),
         tone=_hpe_tone(parsed.tone),
+        service_type=channel_service_type(fl, parsed),
+        priority=channel_is_priority(fl, parsed),
+        avoid=channel_should_avoid(fl, parsed),
         notes=parsed.note,
     )
 
@@ -111,7 +121,11 @@ def static_systems_for(fl: FavoritesList) -> List[System]:
     see :func:`wasds150.recipes.engine.evaluate_recipe`'s coverage warning
     for that case). Pure function of ``fl`` alone; safe to call on every
     ``generate``/``preview`` run regardless of catalog freshness."""
-    parsed = list(parse_department_text(fl.departments_or_channels).channels)
+    parsed = [
+        channel
+        for channel in parse_department_text(fl.departments_or_channels).channels
+        if "unverified" not in channel.note.lower()
+    ]
     # Curated seeds fill ranges/plans that prose cannot safely expand. If
     # the prose already names a literal frequency, prefer that richer,
     # row-specific entry instead of adding a second generic seed channel
@@ -125,7 +139,7 @@ def static_systems_for(fl: FavoritesList) -> List[System]:
     if not parsed:
         return []
 
-    channels = dedupe_channels([_channel_from_parsed(fl.slug, i, p) for i, p in enumerate(parsed)])
+    channels = dedupe_channels([_channel_from_parsed(fl, i, p) for i, p in enumerate(parsed)])
     if not channels:
         return []
     department = Department(id=stable_id(f"{fl.slug}:static-text-channels", kind="department"), label="Channels", channels=channels)

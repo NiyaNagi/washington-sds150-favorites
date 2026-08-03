@@ -16,6 +16,7 @@ The catalog covers all 39 Washington counties and includes:
 - [Master favorites guide](washington-sds150-favorites-master.md) - 75 Favorites Lists with regions, systems, sites, categories, modes, monitorability, and sources.
 - [Programming inventory](washington-sds150-favorites.csv) - machine-readable inventory for filtering, review, and future tooling.
 - [Sentinel checklist](washington-sds150-programming-checklist.md) - build order, quick keys, GPS/location control, updates, testing, and backups.
+- [Sentinel HPDB completion plan](docs/sentinel-completion-plan.md) - exact ingestion, merge, curation, location, quick-key, and acceptance steps once an updated local HPDB is available.
 
 ## The `wasds150` tool
 
@@ -46,8 +47,10 @@ the same catalog:
   FRS/GMRS/MURS/CB, marine VHF, common aviation/guard frequencies, and
   more — are parsed and populated automatically (see
   `wasds150.recipes.systems` / `wasds150.sources.static_channels` /
-  `wasds150.sources.static_seeds`). Roughly 56 of the 78 baseline rows are
-  populated this way with zero configuration.
+  `wasds150.sources.static_seeds`). Currently 58 of the 78 baseline rows
+  are populated this way with zero configuration. Static channels also
+  receive conservative modulation, service-type, and distress/calling
+  priority metadata; location and trunk-specific metadata are never guessed.
 - **Local Sentinel HPDB or RadioReference Premium data**: for trunked
   systems (WSP, PSERN, SREC, ...), point `wasds150 sources configure` at
   your own already-updated Sentinel database (`--sentinel-mount`/

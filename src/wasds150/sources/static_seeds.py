@@ -22,18 +22,14 @@ without notice:
   already gives the exact endpoints (866.5125 and 868.0125) for
   "ITAC1-4"; this table supplies the two literal intermediate channels.
 
+* ``FL52``-``FL54`` use the fixed U.S. marine VHF channel plan.
+* ``FL66`` uses the fixed FCC 40-channel Class D CB plan, including its
+  historical non-linear channel 23/24/25 ordering.
+
 **What is deliberately NOT seeded**: this module never seeds a
-system-specific or state-specific plan that is not independently,
-nationally standardized -- e.g. WA's own STATEOPS1-5 channels (also
-mentioned only as a range on FL02) are state-specific interoperability
-assignments, not an FCC-mandated nationwide table, so they are left for a
-local Sentinel HPDB/RadioReference Premium match or manual entry instead
-of being interpolated here. The same discipline applies to the CB Class D
-40-channel plan (FL66): only the two channels already spelled out
-verbatim in the baseline text (Ch9/Ch19) are populated, because the full
-plan has a well-known non-linear channel/frequency mapping (channels
-22-23 historically interleave for RC-control legacy reasons) that this
-project has no independently verified source to reproduce correctly.
+system-specific or state-specific plan that is not independently verified. WA's STATEOPS
+channels are therefore included only when their literal frequencies are
+checked into the catalog, never interpolated from a range.
 **Safety gate, not just a key lookup**: ``favorite_key`` strings like
 ``"FL02"``/``"FL65"`` are only unique *within* a given catalog -- a
 different/local/test catalog could coincidentally reuse one for something
@@ -85,6 +81,76 @@ _NPSPAC_INTEROP_CHANNELS: List[ParsedChannel] = [
     ParsedChannel(label="ITAC4", freq_mhz=868.0125, note="NPSPAC nationwide interoperability tactical channel"),
 ]
 
+_CB_CHANNELS: List[ParsedChannel] = [
+    ParsedChannel(label=f"CB Ch{number}", freq_mhz=frequency, note="FCC Class D CB channel")
+    for number, frequency in enumerate(
+        [
+            26.965, 26.975, 26.985, 27.005, 27.015, 27.025, 27.035, 27.055,
+            27.065, 27.075, 27.085, 27.105, 27.115, 27.125, 27.135, 27.155,
+            27.165, 27.175, 27.185, 27.205, 27.215, 27.225, 27.255, 27.235,
+            27.245, 27.265, 27.275, 27.285, 27.295, 27.305, 27.315, 27.325,
+            27.335, 27.345, 27.355, 27.365, 27.375, 27.385, 27.395, 27.405,
+        ],
+        start=1,
+    )
+]
+
+_MARINE_CHANNELS = {
+    "FL52": [
+        ParsedChannel("Ch5A VTS", 156.250, note="U.S. marine VHF"),
+        ParsedChannel("Ch6 Intership", 156.300, note="U.S. marine VHF"),
+        ParsedChannel("Ch14 VTS", 156.700, note="U.S. marine VHF"),
+        ParsedChannel("Ch67 Intership", 156.375, note="U.S. marine VHF"),
+    ],
+    "FL53": [
+        ParsedChannel("Ch14 VTS", 156.700, note="U.S. marine VHF"),
+        ParsedChannel("Ch16 Distress", 156.800, note="U.S. marine VHF"),
+        ParsedChannel("Ch78A", 156.925, note="U.S. marine VHF"),
+        ParsedChannel("Ch79A", 156.975, note="U.S. marine VHF"),
+    ],
+    "FL54": [
+        ParsedChannel("Ch01A", 156.050, note="U.S. marine VHF"),
+        ParsedChannel("Ch13 Bridge", 156.650, note="U.S. marine VHF"),
+        ParsedChannel("Ch16 Distress", 156.800, note="U.S. marine VHF"),
+    ],
+}
+_MARINE_ANCHORS = {
+    "FL52": ("Ch16", "Ch22A"),
+    "FL53": ("Ch14", "Ch79A"),
+    "FL54": ("Ch07A", "Port of Seattle"),
+}
+
+_SEATTLE_CENTER_CHANNELS = [
+    ParsedChannel(label=f"ZSE {frequency:g}", freq_mhz=frequency, note="Seattle Center/FSS published channel")
+    for frequency in [119.1, 120.3, 124.85, 125.8, 126.1, 126.3, 128.3, 128.5, 132.6, 133.65, 269.35]
+] + [
+    ParsedChannel("Seattle Radio FSS", 122.2, note="Flight Service"),
+    ParsedChannel("Civil Guard", 121.5, note="AM"),
+    ParsedChannel("Military Guard", 243.0, note="AM"),
+]
+
+_MOUNTAIN_COMMON_CHANNELS = [
+    ParsedChannel("USFS Air Guard", 168.625, note="National wildfire aviation guard"),
+    ParsedChannel("WA SAR", 155.160, note="Washington statewide SAR"),
+    ParsedChannel("WA DNR Main", 159.420, note="Washington DNR statewide"),
+    ParsedChannel("NIFC ICP", 168.550, note="National incident command"),
+]
+
+_MOUNTAIN_ANCHORS = {
+    "FL32": "168.525",
+    "FL33": "169.925",
+    "FL34": "169.575",
+    "FL35": "169.900",
+    "FL36": "171.500",
+    "FL37": "169.7250",
+    "FL38": "171.425",
+    "FL39": "172.225",
+    "FL40": "172.350",
+    "FL41": "171.475",
+    "FL42": "164.825",
+    "FL43": "172.325",
+}
+
 
 @dataclass(frozen=True)
 class SeedTable:
@@ -111,6 +177,8 @@ class SeedTable:
 SEED_TABLES_BY_FAVORITE_KEY: Dict[str, SeedTable] = {
     "FL65": SeedTable(required_anchors=("462.5625", "467.5625", "462.5500"), channels=_FRS_GMRS_CHANNELS),
     "FL02": SeedTable(required_anchors=("866.0125", "866.5125", "868.0125"), channels=_NPSPAC_INTEROP_CHANNELS),
+    "FL48": SeedTable(required_anchors=("119.1", "133.65", "269.35"), channels=_SEATTLE_CENTER_CHANNELS),
+    "FL66": SeedTable(required_anchors=("27.065", "27.185"), channels=_CB_CHANNELS),
 }
 
 
@@ -122,10 +190,16 @@ def seed_channels_for(favorite_key: str, departments_or_channels: str) -> List[P
     ``favorite_key`` collision in an unrelated/local/test catalog can
     never pull in this seed's channels (see module docstring). Always
     returns a fresh list (never a shared mutable reference)."""
-    table = SEED_TABLES_BY_FAVORITE_KEY.get(favorite_key)
-    if table is None:
-        return []
     text = departments_or_channels or ""
-    if not all(anchor in text for anchor in table.required_anchors):
-        return []
-    return list(table.channels)
+    channels: List[ParsedChannel] = []
+    table = SEED_TABLES_BY_FAVORITE_KEY.get(favorite_key)
+    if table is not None and all(anchor in text for anchor in table.required_anchors):
+        channels.extend(table.channels)
+    marine_channels = _MARINE_CHANNELS.get(favorite_key)
+    marine_anchors = _MARINE_ANCHORS.get(favorite_key, ())
+    if marine_channels and all(anchor in text for anchor in marine_anchors):
+        channels.extend(marine_channels)
+    mountain_anchor = _MOUNTAIN_ANCHORS.get(favorite_key)
+    if mountain_anchor and mountain_anchor in text:
+        channels.extend(_MOUNTAIN_COMMON_CHANNELS)
+    return list(channels)
