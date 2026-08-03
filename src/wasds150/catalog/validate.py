@@ -14,6 +14,14 @@ from wasds150.models.profile import EDITABLE_FIELDS, Profile
 FLQK_MIN = 0
 FLQK_MAX = 99
 FLQK_RESERVED = (0, 99)
+_ADVISORY_MARKER = "is reserved (all-off/debug-scratch)"
+
+
+def partition_validation_issues(issues: List[str]):
+    """Split structural failures from advisory policy warnings."""
+    fatal = [issue for issue in issues if _ADVISORY_MARKER not in issue]
+    warnings = [issue for issue in issues if _ADVISORY_MARKER in issue]
+    return fatal, warnings
 
 
 def validate_catalog(catalog: Catalog) -> List[str]:

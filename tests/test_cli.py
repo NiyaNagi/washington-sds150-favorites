@@ -301,16 +301,13 @@ def test_hpe_build_encode_decode_inspect_validate_round_trip(wasds_home, tmp_pat
     assert data["issues"] == []
 
 
-def test_hpe_build_reports_validation_issues_and_requires_force(wasds_home, tmp_path, capsys):
-    # A hand-crafted, arity-broken document via a System with no channels
-    # cannot itself be broken through the builder (it always emits correct
-    # arities), so we instead confirm --force is accepted/documented by
-    # building a valid doc and confirming force still succeeds.
+def test_hpe_build_rejects_empty_output_even_with_force(wasds_home, tmp_path, capsys):
     systems_path = tmp_path / "systems.json"
     systems_path.write_text(json.dumps({"systems": []}), encoding="utf-8")
     out_hpe = tmp_path / "empty.hpe"
     code = run(["hpe", "build", "--systems", str(systems_path), "--out", str(out_hpe), "--force"])
-    assert code == 0
+    assert code == 1
+    assert not out_hpe.exists()
 
 
 def test_hpe_decode_rejects_corrupt_file(wasds_home, tmp_path, capsys):
@@ -401,7 +398,24 @@ def test_install_detect_write_dry_run_and_rollback_cli(wasds_home, tmp_path, cap
 
     systems_path = tmp_path / "systems.json"
     systems_path.write_text(
-        json.dumps({"systems": [{"id": "s1", "label": "Test", "departments": []}]}), encoding="utf-8"
+        json.dumps(
+            {
+                "systems": [
+                    {
+                        "id": "s1",
+                        "label": "Test",
+                        "departments": [
+                            {
+                                "id": "d1",
+                                "label": "Ops",
+                                "channels": [{"id": "c1", "label": "Test", "freq_mhz": 154.1, "mode": "NFM"}],
+                            }
+                        ],
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
     )
     backup_dir = tmp_path / "backups"
 

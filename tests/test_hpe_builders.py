@@ -140,7 +140,17 @@ def test_built_document_round_trips_through_hpe_container():
 
 
 def test_build_favorites_list_hpe_convenience_function():
-    system = System(id="s1", label="Conv", departments=[])
+    system = System(
+        id="s1",
+        label="Conv",
+        departments=[
+            Department(
+                id="d1",
+                label="Ops",
+                channels=[Channel(id="c1", label="Channel", freq_mhz=154.1, mode="NFM")],
+            )
+        ],
+    )
     fl = FavoritesList(
         id="fl1", slug="fl1", favorite_key="FL01", favorite_name="Test", region="", counties="",
         scenario="", source_type="", system_or_category="", sites_or_coverage="",

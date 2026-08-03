@@ -48,7 +48,8 @@ def hpd_filename(index: int) -> str:
 def is_sds150_card(mount_point: Path) -> bool:
     """The documented marker for an SDS150-family card: a ``BCDx36HP``
     directory at the volume root."""
-    return (Path(mount_point) / BCDX36HP_DIR).is_dir()
+    marker = Path(mount_point) / BCDX36HP_DIR
+    return marker.is_dir() and not marker.is_symlink()
 
 
 def is_within_allowed_write_path(mount_point: Path, target: Path) -> bool:
@@ -56,10 +57,18 @@ def is_within_allowed_write_path(mount_point: Path, target: Path) -> bool:
     ``favorites_lists/f_NNNNNN.hpd`` under ``mount_point`` — the sole
     allow-listed write targets."""
     mount_point = Path(mount_point)
-    allowed_dir = (mount_point / FAVORITES_LISTS_DIR).resolve()
+    configured_dir = mount_point / FAVORITES_LISTS_DIR
+    if configured_dir.is_symlink() or Path(target).is_symlink():
+        return False
     try:
+        mount_resolved = mount_point.resolve()
+        allowed_dir = configured_dir.resolve()
         resolved = Path(target).resolve()
     except OSError:
+        return False
+    try:
+        allowed_dir.relative_to(mount_resolved)
+    except ValueError:
         return False
     if resolved.parent != allowed_dir:
         return False

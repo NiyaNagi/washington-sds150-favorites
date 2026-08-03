@@ -299,8 +299,12 @@ def format_ctcss_tone(freq_hz_tenths: float) -> str:
 
 
 def format_dcs_tone(code: str) -> str:
-    """``TONE=D<code>`` — DCS digital code, e.g. ``TONE=D023``."""
-    return f"TONE=D{code}"
+    """``D<code>`` — DCS digital code, e.g. ``D023``.
+
+    This asymmetric spelling (CTCSS uses ``TONE=C...``) is intentional and
+    matches the directly inspected BCDx36HP fixture in ``tests/fixtures``.
+    """
+    return f"D{code}"
 
 
 def format_p25_nac(nac_hex: str) -> str:

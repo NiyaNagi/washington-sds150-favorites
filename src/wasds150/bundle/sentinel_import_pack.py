@@ -16,13 +16,15 @@ from __future__ import annotations
 
 import tempfile
 import zipfile
+import os
 from pathlib import Path
 from typing import List
 
 from wasds150.bundle.csv_export import export_csv
-from wasds150.bundle.hpe_export import build_per_list_hpe
+from wasds150.bundle.hpe_export import HpeExportResult, build_per_list_hpe
 from wasds150.bundle.manifest import build_manifest, write_manifest
 from wasds150.bundle.markdown_export import export_markdown
+from wasds150.bundle.validation import validate_sentinel_import_pack
 from wasds150.generate.pipeline import GeneratedResult
 
 _INSTRUCTIONS = """\
@@ -54,7 +56,12 @@ web UI's Advanced > Sources panel, then regenerate).
 """
 
 
-def build_sentinel_import_pack(result: GeneratedResult, output_zip: Path) -> Path:
+def build_sentinel_import_pack(
+    result: GeneratedResult,
+    output_zip: Path,
+    *,
+    hpe_export: HpeExportResult = None,
+) -> Path:
     favorites = result.enabled_favorites
     output_zip = Path(output_zip)
     output_zip.parent.mkdir(parents=True, exist_ok=True)
@@ -66,7 +73,7 @@ def build_sentinel_import_pack(result: GeneratedResult, output_zip: Path) -> Pat
         instructions_path = base_dir / "SENTINEL_IMPORT_INSTRUCTIONS.txt"
         instructions_path.write_text(_INSTRUCTIONS, encoding="utf-8")
 
-        hpe_export = build_per_list_hpe(favorites)
+        hpe_export = hpe_export or build_per_list_hpe(favorites)
         hpe_dir = base_dir / "hpe"
         hpe_paths: List[Path] = []
         if hpe_export.files:
@@ -88,12 +95,18 @@ def build_sentinel_import_pack(result: GeneratedResult, output_zip: Path) -> Pat
         )
         manifest_path = write_manifest(manifest, base_dir / "manifest.json")
 
-        if output_zip.exists():
-            output_zip.unlink()
-        with zipfile.ZipFile(output_zip, "w", zipfile.ZIP_DEFLATED) as zf:
-            for path in content_files + [manifest_path]:
-                arcname = str(path.relative_to(base_dir))
-                zf.write(path, arcname=arcname)
+        fd, candidate_name = tempfile.mkstemp(prefix=output_zip.name + ".", suffix=".tmp", dir=output_zip.parent)
+        os.close(fd)
+        candidate = Path(candidate_name)
+        try:
+            with zipfile.ZipFile(candidate, "w", zipfile.ZIP_DEFLATED) as zf:
+                for path in content_files + [manifest_path]:
+                    arcname = str(path.relative_to(base_dir))
+                    zf.write(path, arcname=arcname)
+            validate_sentinel_import_pack(candidate)
+            os.replace(candidate, output_zip)
+        finally:
+            if candidate.exists():
+                candidate.unlink()
 
     return output_zip
-

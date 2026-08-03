@@ -16,6 +16,7 @@ from typing import Optional
 from wasds150.catalog import baseline as baseline_mod
 from wasds150.catalog import loader
 from wasds150.config import AppConfig
+from wasds150.catalog.validate import partition_validation_issues, validate_catalog
 from wasds150.models.catalog import Catalog
 from wasds150.models.profile import Profile
 
@@ -40,6 +41,9 @@ class AppContext:
         so a long-running process (the web UI server) reflects the change
         on its very next request without needing a restart. See
         :mod:`wasds150.merge.three_way`."""
+        fatal_issues, _ = partition_validation_issues(validate_catalog(catalog))
+        if fatal_issues:
+            raise ValueError("refusing to persist invalid catalog: " + "; ".join(fatal_issues))
         self.config.ensure_dirs()
         loader.save_json(catalog, self.config.catalog_path)
         self.catalog = catalog
@@ -57,4 +61,3 @@ def build_context(config: AppConfig, csv_override: Optional[Path] = None) -> App
         catalog = baseline_mod.load_baseline()
         source = "packaged-baseline"
     return AppContext(config=config, catalog=catalog, catalog_source=source)
-

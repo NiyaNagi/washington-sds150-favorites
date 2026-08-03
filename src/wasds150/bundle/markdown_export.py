@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from wasds150.models.catalog import FavoritesList
+from wasds150.bundle.validation import validate_markdown_bytes
 
 _COLUMNS = (
     ("favorite_key", "Key"),
@@ -55,4 +56,5 @@ def render_markdown(favorites: List[FavoritesList], *, generated_at: Optional[st
 def export_markdown(favorites: List[FavoritesList], path: Path) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(render_markdown(favorites), encoding="utf-8")
+    validate_markdown_bytes(path.read_bytes(), favorites)
     return path

@@ -54,6 +54,8 @@ def test_safe_filename_component_sanitizes_unsafe_characters():
     assert safe_filename_component("weird/name:here*") == "weird_name_here"
     assert safe_filename_component("   ") == "list"
     assert safe_filename_component("") == "list"
+    assert safe_filename_component("CON") == "_CON"
+    assert len(safe_filename_component("x" * 200)) == 80
 
 
 def test_hpe_filename_for_deterministic_and_disambiguates_collisions():
@@ -76,6 +78,12 @@ def test_hpe_filename_for_is_order_dependent_not_iteration_order_dependent():
     seq1 = [hpe_filename_for(fl1, used_a), hpe_filename_for(fl2, used_a)]
     seq2 = [hpe_filename_for(fl1, used_b), hpe_filename_for(fl2, used_b)]
     assert seq1 == seq2 == ["FL01.hpe", "FL01-2.hpe"]
+
+
+def test_hpe_filename_collisions_are_case_insensitive_for_windows():
+    used = {}
+    assert hpe_filename_for(_fl("FL01"), used) == "FL01.hpe"
+    assert hpe_filename_for(_fl("fl01", slug="other"), used) == "fl01-2.hpe"
 
 
 # --------------------------------------------------------- build_per_list_hpe

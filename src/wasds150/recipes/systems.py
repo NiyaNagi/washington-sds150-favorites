@@ -56,7 +56,7 @@ def _hpe_tone(tone: str) -> str:
     if tone.startswith("CTCSS "):
         return f"TONE=C{tone.removeprefix('CTCSS ')}"
     if tone.startswith("DCS "):
-        return f"TONE=D{tone.removeprefix('DCS ')}"
+        return f"D{tone.removeprefix('DCS ')}"
     return tone
 
 
@@ -112,7 +112,16 @@ def static_systems_for(fl: FavoritesList) -> List[System]:
     for that case). Pure function of ``fl`` alone; safe to call on every
     ``generate``/``preview`` run regardless of catalog freshness."""
     parsed = list(parse_department_text(fl.departments_or_channels).channels)
-    parsed.extend(seed_channels_for(fl.favorite_key, fl.departments_or_channels))
+    # Curated seeds fill ranges/plans that prose cannot safely expand. If
+    # the prose already names a literal frequency, prefer that richer,
+    # row-specific entry instead of adding a second generic seed channel
+    # at the same frequency (FL65/FRS Ch7 is the canonical overlap).
+    parsed_frequencies = {_round_freq(channel.freq_mhz) for channel in parsed}
+    parsed.extend(
+        channel
+        for channel in seed_channels_for(fl.favorite_key, fl.departments_or_channels)
+        if _round_freq(channel.freq_mhz) not in parsed_frequencies
+    )
     if not parsed:
         return []
 

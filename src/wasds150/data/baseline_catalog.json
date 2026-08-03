@@ -213,7 +213,7 @@
                 {
                   "avoid": false,
                   "freq_mhz": 866.5125,
-                  "id": "f3407ced-557e-568a-82d6-1736c2dfb394",
+                  "id": "5a9c9e61-b3b5-5de7-a619-b38333906454",
                   "label": "ITAC1",
                   "mode": null,
                   "notes": "NPSPAC nationwide interoperability tactical channel",
@@ -225,7 +225,7 @@
                 {
                   "avoid": false,
                   "freq_mhz": 867.0125,
-                  "id": "2b399003-146e-5bed-a5e9-b3f0de57e30d",
+                  "id": "bf5b9ac4-abf3-5d61-8d48-e7e1d88e6212",
                   "label": "ITAC2",
                   "mode": null,
                   "notes": "NPSPAC nationwide interoperability tactical channel",
@@ -237,7 +237,7 @@
                 {
                   "avoid": false,
                   "freq_mhz": 867.5125,
-                  "id": "8596a2e3-56e7-5233-a379-1172c3b7c957",
+                  "id": "4d7ba7e5-84d0-5291-9eab-bdd14a32793a",
                   "label": "ITAC3",
                   "mode": null,
                   "notes": "NPSPAC nationwide interoperability tactical channel",
@@ -249,7 +249,7 @@
                 {
                   "avoid": false,
                   "freq_mhz": 868.0125,
-                  "id": "7e0eda46-3be6-559e-8206-86d6278e095c",
+                  "id": "b538bf51-9033-58d2-b1a4-ece58b2c7460",
                   "label": "ITAC4",
                   "mode": null,
                   "notes": "NPSPAC nationwide interoperability tactical channel",
@@ -2488,7 +2488,7 @@
                   "priority": false,
                   "service_type": null,
                   "tgid": null,
-                  "tone": "TONE=D565"
+                  "tone": "D565"
                 },
                 {
                   "avoid": false,
@@ -6370,20 +6370,8 @@
                 },
                 {
                   "avoid": false,
-                  "freq_mhz": 462.7125,
-                  "id": "1423dde4-5e16-5d1b-9664-2a5962f908b0",
-                  "label": "FRS/GMRS Ch7",
-                  "mode": null,
-                  "notes": "FRS/GMRS shared (462 MHz)",
-                  "priority": false,
-                  "service_type": null,
-                  "tgid": null,
-                  "tone": ""
-                },
-                {
-                  "avoid": false,
                   "freq_mhz": 467.5625,
-                  "id": "eca779dc-3f26-5451-a68c-24d26ecb56ac",
+                  "id": "ef95772b-4c37-5a8e-b3ec-ebd1e5b167af",
                   "label": "FRS Ch8",
                   "mode": null,
                   "notes": "FRS-only, 0.5W max (467 MHz)",
@@ -6395,7 +6383,7 @@
                 {
                   "avoid": false,
                   "freq_mhz": 467.5875,
-                  "id": "4bc8954e-9b6a-5a78-8bf3-ab3f594a4664",
+                  "id": "852b22db-63eb-57b3-a741-1cdf64352776",
                   "label": "FRS Ch9",
                   "mode": null,
                   "notes": "FRS-only, 0.5W max (467 MHz)",
@@ -6407,7 +6395,7 @@
                 {
                   "avoid": false,
                   "freq_mhz": 467.6125,
-                  "id": "895c8da5-d72b-5edb-9253-b1b7df24f1de",
+                  "id": "7cb5eb72-4d84-5134-b6ec-210a14e1d493",
                   "label": "FRS Ch10",
                   "mode": null,
                   "notes": "FRS-only, 0.5W max (467 MHz)",
@@ -6419,7 +6407,7 @@
                 {
                   "avoid": false,
                   "freq_mhz": 467.6375,
-                  "id": "262a0d4a-ff4d-55aa-ae7a-406df2753e7f",
+                  "id": "e8065048-f3a9-55d5-9d6b-5faa2de71b8e",
                   "label": "FRS Ch11",
                   "mode": null,
                   "notes": "FRS-only, 0.5W max (467 MHz)",
@@ -6431,7 +6419,7 @@
                 {
                   "avoid": false,
                   "freq_mhz": 467.6625,
-                  "id": "603b72ba-dffb-5476-8007-a05b561b2354",
+                  "id": "3dc3d7d7-7414-5864-9752-01a2a532b404",
                   "label": "FRS Ch12",
                   "mode": null,
                   "notes": "FRS-only, 0.5W max (467 MHz)",
@@ -6443,7 +6431,7 @@
                 {
                   "avoid": false,
                   "freq_mhz": 467.6875,
-                  "id": "0395f4cc-2e76-5eda-a8c3-d113df58b3de",
+                  "id": "2aed793b-24c9-57d0-be52-fb8422bd1e16",
                   "label": "FRS Ch13",
                   "mode": null,
                   "notes": "FRS-only, 0.5W max (467 MHz)",
@@ -6455,7 +6443,7 @@
                 {
                   "avoid": false,
                   "freq_mhz": 467.7125,
-                  "id": "bec6f9c6-dc63-5f3e-8283-0dcfb2e84866",
+                  "id": "0681d93e-ec07-5792-ab3f-618214e5d7eb",
                   "label": "FRS Ch14",
                   "mode": null,
                   "notes": "FRS-only, 0.5W max (467 MHz)",
@@ -6467,7 +6455,7 @@
                 {
                   "avoid": false,
                   "freq_mhz": 462.55,
-                  "id": "95639630-3a27-5bf4-b784-5b78f79c4fcb",
+                  "id": "5cd0a954-6471-586b-94ba-e3f94b66e308",
                   "label": "GMRS/FRS Ch15",
                   "mode": null,
                   "notes": "GMRS repeater-capable output (462 MHz)",
@@ -6479,7 +6467,7 @@
                 {
                   "avoid": false,
                   "freq_mhz": 462.575,
-                  "id": "02fade40-e378-5272-a27b-dad0c87ff154",
+                  "id": "bff3b881-b783-598f-bee3-75906cee888d",
                   "label": "GMRS/FRS Ch16",
                   "mode": null,
                   "notes": "GMRS repeater-capable output (462 MHz)",
@@ -6491,7 +6479,7 @@
                 {
                   "avoid": false,
                   "freq_mhz": 462.6,
-                  "id": "a72b4632-67d7-5627-88de-06a7f6ae558a",
+                  "id": "3e65e80c-6e5e-5b89-911d-1adf788fd521",
                   "label": "GMRS/FRS Ch17",
                   "mode": null,
                   "notes": "GMRS repeater-capable output (462 MHz)",
@@ -6503,7 +6491,7 @@
                 {
                   "avoid": false,
                   "freq_mhz": 462.625,
-                  "id": "ba4ecbb7-5051-5bee-a9d7-0a099b5b1cac",
+                  "id": "a4d5fa87-18fb-5ae5-b565-e4818311c114",
                   "label": "GMRS/FRS Ch18",
                   "mode": null,
                   "notes": "GMRS repeater-capable output (462 MHz)",
@@ -6515,7 +6503,7 @@
                 {
                   "avoid": false,
                   "freq_mhz": 462.65,
-                  "id": "d35cbf42-0e0c-57d4-b298-b24b8681f789",
+                  "id": "394dcf31-f6c0-50a6-9f39-2097771a63ca",
                   "label": "GMRS/FRS Ch19",
                   "mode": null,
                   "notes": "GMRS repeater-capable output (462 MHz)",
@@ -6527,7 +6515,7 @@
                 {
                   "avoid": false,
                   "freq_mhz": 462.675,
-                  "id": "3547790b-e203-5786-ae44-fab56717dc8c",
+                  "id": "f5638630-c3b9-521d-8806-3712614dfa6c",
                   "label": "GMRS/FRS Ch20",
                   "mode": null,
                   "notes": "GMRS repeater-capable output (462 MHz)",
@@ -6539,7 +6527,7 @@
                 {
                   "avoid": false,
                   "freq_mhz": 462.7,
-                  "id": "ae983a9a-3a36-509f-aaec-09f17e03dd02",
+                  "id": "61a5d625-4b94-57bf-8746-449ce17c331c",
                   "label": "GMRS/FRS Ch21",
                   "mode": null,
                   "notes": "GMRS repeater-capable output (462 MHz)",
@@ -6551,7 +6539,7 @@
                 {
                   "avoid": false,
                   "freq_mhz": 462.725,
-                  "id": "ef2894c5-0221-5af0-b4fe-267772e8738f",
+                  "id": "98760b39-55f0-5d95-b814-880262bf3063",
                   "label": "GMRS/FRS Ch22",
                   "mode": null,
                   "notes": "GMRS repeater-capable output (462 MHz)",

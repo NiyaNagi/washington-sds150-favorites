@@ -30,6 +30,7 @@ import importlib.resources
 from pathlib import Path
 
 from wasds150.catalog import loader
+from wasds150.catalog.validate import partition_validation_issues, validate_catalog
 from wasds150.models.catalog import Catalog
 from wasds150.recipes.systems import dedupe_systems, static_systems_for
 
@@ -64,6 +65,8 @@ def generate_baseline_from_csv(csv_path: Path, output_path: Path) -> Catalog:
         additional = static_systems_for(fl)
         if additional:
             fl.systems = dedupe_systems(fl.systems + additional)
+    fatal_issues, _ = partition_validation_issues(validate_catalog(catalog))
+    if fatal_issues:
+        raise ValueError("refusing to persist invalid baseline catalog: " + "; ".join(fatal_issues))
     loader.save_json(catalog, output_path)
     return catalog
-

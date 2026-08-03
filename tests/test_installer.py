@@ -72,6 +72,22 @@ def test_is_within_allowed_write_path_rejects_everything_else(tmp_path):
     )
 
 
+def test_is_within_allowed_write_path_rejects_symlinked_target_and_directory(tmp_path):
+    card = make_simulated_card(tmp_path)
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    external_file = outside / "external.hpd"
+    external_file.write_text("do not overwrite", encoding="ascii")
+    target = card / paths.FAVORITES_LISTS_DIR / "f_000007.hpd"
+    target.symlink_to(external_file)
+    assert not paths.is_within_allowed_write_path(card, target)
+
+    card2 = tmp_path / "card2"
+    (card2 / paths.BCDX36HP_DIR).mkdir(parents=True)
+    (card2 / paths.FAVORITES_LISTS_DIR).symlink_to(outside, target_is_directory=True)
+    assert not paths.is_within_allowed_write_path(card2, card2 / paths.FAVORITES_LISTS_DIR / "f_000007.hpd")
+
+
 def test_is_allowed_delete_path(tmp_path):
     card = make_simulated_card(tmp_path)
     assert paths.is_allowed_delete_path(card, card / paths.APP_DATA_CFG)

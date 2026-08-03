@@ -107,7 +107,7 @@ def test_f_list_schema_arity_and_named_fields():
 
 def test_tone_formatting_helpers():
     assert format_ctcss_tone(156.7) == "TONE=C156.7"
-    assert format_dcs_tone("023") == "TONE=D023"
+    assert format_dcs_tone("023") == "D023"
     assert format_p25_nac("293") == "NAC=293"
     assert format_p25_nac("Srch") == "NAC=Srch"
 

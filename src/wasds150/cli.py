@@ -17,10 +17,7 @@ from typing import List, Optional
 
 from wasds150 import __version__
 from wasds150.appctx import AppContext, build_context
-from wasds150.bundle.csv_export import export_csv
-from wasds150.bundle.hpe_export import build_per_list_hpe
-from wasds150.bundle.markdown_export import export_markdown
-from wasds150.bundle.sentinel_import_pack import build_sentinel_import_pack
+from wasds150.bundle.generate_outputs import generate_outputs
 from wasds150.catalog import baseline as catalog_baseline
 from wasds150.catalog import loader as catalog_loader
 from wasds150.catalog.ids import slugify, stable_id
@@ -36,6 +33,13 @@ from wasds150.hpe import hpdb as hpe_hpdb
 from wasds150.hpe import schema as hpe_schema
 from wasds150.hpe import tree as hpe_tree
 from wasds150.hpe.record import parse_records, serialize_records
+from wasds150.hpe.validation import (
+    HpeValidationError,
+    require_valid_document,
+    require_valid_hpe_container,
+    validate_document,
+    validate_systems,
+)
 from wasds150.installer import detect as installer_detect
 from wasds150.installer import hpdb_reader as installer_hpdb_reader
 from wasds150.installer.backup import InstallerError, backup_card, verify_backup
@@ -353,31 +357,18 @@ def cmd_generate(args: argparse.Namespace) -> int:
     out_dir = Path(args.out)
     out_dir.mkdir(parents=True, exist_ok=True)
     formats = [f.strip() for f in args.formats.split(",") if f.strip()]
-    written: List[Path] = []
-    hpe_warnings: List[str] = []
-
-    if "csv" in formats:
-        written.append(export_csv(result.enabled_favorites, out_dir / "favorites.csv"))
-    if "md" in formats:
-        written.append(export_markdown(result.enabled_favorites, out_dir / "favorites-overview.md"))
-    if "zip" in formats:
-        written.append(build_sentinel_import_pack(result, out_dir / "sentinel-import-pack.zip"))
-    if "hpe" in formats:
-        hpe_export = build_per_list_hpe(result.enabled_favorites)
-        hpe_warnings = hpe_export.warnings
-        if hpe_export.files:
-            hpe_dir = out_dir / "hpe"
-            hpe_dir.mkdir(parents=True, exist_ok=True)
-            for filename, hpe_bytes in hpe_export.files.items():
-                path = hpe_dir / filename
-                path.write_bytes(hpe_bytes)
-                written.append(path)
+    try:
+        published = generate_outputs(result, out_dir, formats)
+    except (HpeValidationError, ValueError, OSError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 1
+    written = published.files
 
     ctx.config.ensure_dirs()
     store = SnapshotStore(ctx.config.history_dir)
     snap = store.commit(profile, result, message=args.message or "")
 
-    all_warnings = list(result.warnings) + hpe_warnings
+    all_warnings = list(result.warnings) + published.warnings
     if args.json:
         _print_json(
             {
@@ -522,8 +513,11 @@ def cmd_hpe_decode(args: argparse.Namespace) -> int:
 def cmd_hpe_encode(args: argparse.Namespace) -> int:
     text = Path(args.file).read_bytes().decode("ascii")
     try:
+        document = parse_records(text)
+        require_valid_document(document, context=str(args.file))
         data = hpe_codec.encode_container(text)
-    except hpe_codec.HpeError as exc:
+        require_valid_hpe_container(data, context=str(args.out))
+    except (hpe_codec.HpeError, HpeValidationError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
     out_path = Path(args.out)
@@ -577,7 +571,8 @@ def cmd_hpe_validate(args: argparse.Namespace) -> int:
     text = _load_hpe_text(Path(args.file), args.max_size)
     doc = parse_records(text)
     dialect = hpe_schema.detect_dialect(doc)
-    issues = hpe_schema.validate_schema(doc, dialect)
+    semantic_issues = validate_document(doc) if dialect and dialect.is_bcdx36hp else []
+    issues = [str(issue) for issue in semantic_issues] or hpe_schema.validate_schema(doc, dialect)
 
     if args.json:
         _print_json({"issues": issues, "dialect": dialect.target_model if dialect else None})
@@ -597,25 +592,31 @@ def cmd_hpe_build(args: argparse.Namespace) -> int:
     raw_systems = data["systems"] if isinstance(data, dict) else data
     systems = [System.from_dict(s) for s in raw_systems]
     doc = hpe_builders.build_favorites_document(systems)
-
-    issues = hpe_schema.validate_schema(doc)
-    if issues and not args.force:
-        print(f"Schema validation failed ({len(issues)} issue(s)); use --force to write anyway:", file=sys.stderr)
-        for issue in issues:
+    model_issues = validate_systems(systems)
+    if model_issues:
+        print(f"Validation failed ({len(model_issues)} issue(s)):", file=sys.stderr)
+        for issue in model_issues:
             print(f"  - {issue}", file=sys.stderr)
+        return 1
+    try:
+        require_valid_document(doc)
+    except HpeValidationError as exc:
+        print(f"Validation failed: {exc}", file=sys.stderr)
         return 1
 
     text = serialize_records(doc)
     out_path = Path(args.out)
     if out_path.suffix == ".hpe":
-        out_path.write_bytes(hpe_codec.encode_container(text))
+        data = hpe_codec.encode_container(text)
+        try:
+            require_valid_hpe_container(data)
+        except HpeValidationError as exc:
+            print(f"Validation failed: {exc}", file=sys.stderr)
+            return 1
+        out_path.write_bytes(data)
     else:
         out_path.write_bytes(text.encode("ascii"))
     print(f"wrote {out_path} ({len(systems)} system(s), {len(doc.records)} records)")
-    if issues:
-        print(f"Warnings ({len(issues)}):")
-        for issue in issues:
-            print(f"  - {issue}")
     return 0
 
 
@@ -700,11 +701,27 @@ def cmd_hpe_hpdb_extract(args: argparse.Namespace) -> int:
 
     subset_doc = new_document(records, line_ending="\r\n")
     fav_doc = hpe_hpdb.to_favorites_dialect(subset_doc, synthesize_dqks=not args.no_dqks)
+    if fav_doc.find_first("File") is None:
+        from wasds150.hpe.record import Record
+
+        fav_doc.records.append(Record(tag="File", fields=["HomePatrol Export File"]))
+        fav_doc.line_endings.append("\r\n")
 
     text = serialize_records(fav_doc)
+    try:
+        require_valid_document(fav_doc, context="HPDB extraction")
+    except HpeValidationError as exc:
+        print(f"Validation failed: {exc}", file=sys.stderr)
+        return 1
     out_path = Path(args.out)
     if out_path.suffix == ".hpe":
-        out_path.write_bytes(hpe_codec.encode_container(text))
+        data = hpe_codec.encode_container(text)
+        try:
+            require_valid_hpe_container(data, context="HPDB extraction")
+        except HpeValidationError as exc:
+            print(f"Validation failed: {exc}", file=sys.stderr)
+            return 1
+        out_path.write_bytes(data)
     else:
         out_path.write_bytes(text.encode("ascii"))
     print(f"wrote {out_path} ({len(systems)} system(s) extracted)")

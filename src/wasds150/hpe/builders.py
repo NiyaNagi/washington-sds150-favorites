@@ -218,10 +218,14 @@ def build_favorites_list_hpe(favorites_list: FavoritesList) -> bytes:
     """Convenience entry point: a canonical :class:`FavoritesList` (with its
     ``systems`` populated) -> a ready-to-import ``.hpe`` file's bytes."""
     from wasds150.hpe.codec import encode_container
+    from wasds150.hpe.validation import require_valid_favorites_list, require_valid_hpe_container
 
+    require_valid_favorites_list(favorites_list)
     doc = build_favorites_document(favorites_list.systems)
     text = record_text(doc)
-    return encode_container(text)
+    data = encode_container(text)
+    require_valid_hpe_container(data, context=favorites_list.favorite_key)
+    return data
 
 
 def record_text(doc: RecordDocument) -> str:

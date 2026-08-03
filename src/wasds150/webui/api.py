@@ -14,6 +14,7 @@ from typing import Any, Dict, List
 
 from wasds150.appctx import AppContext
 from wasds150.bundle.csv_export import export_csv
+from wasds150.bundle.generate_outputs import generate_outputs
 from wasds150.bundle.hpe_export import build_per_list_hpe
 from wasds150.bundle.markdown_export import export_markdown
 from wasds150.bundle.sentinel_import_pack import build_sentinel_import_pack
@@ -30,6 +31,13 @@ from wasds150.hpe import hpdb as hpe_hpdb
 from wasds150.hpe import schema as hpe_schema
 from wasds150.hpe import tree as hpe_tree
 from wasds150.hpe.record import parse_records, serialize_records
+from wasds150.hpe.validation import (
+    HpeValidationError,
+    require_valid_document,
+    require_valid_hpe_container,
+    validate_document,
+    validate_systems,
+)
 from wasds150.installer import detect as installer_detect
 from wasds150.installer import hpdb_reader as installer_hpdb_reader
 from wasds150.installer.backup import InstallerError, backup_card, verify_backup
@@ -98,7 +106,10 @@ def get_profile(ctx: AppContext, req: RequestContext) -> Response:
 
 def get_preview(ctx: AppContext, req: RequestContext) -> Response:
     profile = ctx.load_profile()
-    result = apply_profile(ctx.catalog, profile)
+    try:
+        result = apply_profile(ctx.catalog, profile)
+    except ValueError as exc:
+        return _error(422, str(exc))
     changes = diff_profile(ctx.catalog, profile)
     return Response.json(
         200,
@@ -238,29 +249,20 @@ def delete_profile_local(ctx: AppContext, req: RequestContext) -> Response:
 def post_generate(ctx: AppContext, req: RequestContext) -> Response:
     body = req.json_body() or {}
     profile = ctx.load_profile()
-    result = apply_profile(ctx.catalog, profile)
+    try:
+        result = apply_profile(ctx.catalog, profile)
+    except ValueError as exc:
+        return _error(422, str(exc))
 
     out_dir = Path(body.get("out") or (ctx.config.state_dir / "generated"))
     out_dir.mkdir(parents=True, exist_ok=True)
     formats = body.get("formats") or ["csv", "md", "zip", "hpe"]
-    written = []
-    hpe_warnings: List[str] = []
-    if "csv" in formats:
-        written.append(str(export_csv(result.enabled_favorites, out_dir / "favorites.csv")))
-    if "md" in formats:
-        written.append(str(export_markdown(result.enabled_favorites, out_dir / "favorites-overview.md")))
-    if "zip" in formats:
-        written.append(str(build_sentinel_import_pack(result, out_dir / "sentinel-import-pack.zip")))
-    if "hpe" in formats:
-        hpe_export = build_per_list_hpe(result.enabled_favorites)
-        hpe_warnings = hpe_export.warnings
-        if hpe_export.files:
-            hpe_dir = out_dir / "hpe"
-            hpe_dir.mkdir(parents=True, exist_ok=True)
-            for filename, hpe_bytes in hpe_export.files.items():
-                path = hpe_dir / filename
-                path.write_bytes(hpe_bytes)
-                written.append(str(path))
+    try:
+        published = generate_outputs(result, out_dir, formats)
+    except (HpeValidationError, OSError) as exc:
+        return _error(422, str(exc))
+    except ValueError as exc:
+        return _error(400, str(exc))
 
     store = SnapshotStore(ctx.config.history_dir)
     snap = store.commit(profile, result, message=body.get("message", ""))
@@ -270,8 +272,8 @@ def post_generate(ctx: AppContext, req: RequestContext) -> Response:
             "snapshot_id": snap.id,
             "content_hash": result.content_hash,
             "counts": result.counts,
-            "warnings": list(result.warnings) + hpe_warnings,
-            "files": written,
+            "warnings": list(result.warnings) + published.warnings,
+            "files": [str(path) for path in published.files],
         },
     )
 
@@ -609,7 +611,8 @@ def post_hpe_validate(ctx: AppContext, req: RequestContext) -> Response:
         return _error(400, str(exc))
     doc = parse_records(text)
     dialect = hpe_schema.detect_dialect(doc)
-    issues = hpe_schema.validate_schema(doc, dialect)
+    semantic_issues = validate_document(doc) if dialect and dialect.is_bcdx36hp else []
+    issues = [str(issue) for issue in semantic_issues] or hpe_schema.validate_schema(doc, dialect)
     return Response.json(200, {"issues": issues, "dialect": dialect.target_model if dialect else None})
 
 
@@ -623,12 +626,22 @@ def post_hpe_build(ctx: AppContext, req: RequestContext) -> Response:
         doc = hpe_builders.build_favorites_document(systems)
     except (KeyError, TypeError, ValueError) as exc:
         return _error(400, f"invalid system definition: {exc}")
-    issues = hpe_schema.validate_schema(doc)
+    model_issues = validate_systems(systems)
+    if model_issues:
+        return _error(422, "; ".join(str(issue) for issue in model_issues))
+    try:
+        require_valid_document(doc)
+    except HpeValidationError as exc:
+        return _error(422, str(exc))
     hpe_bytes = hpe_codec.encode_container(serialize_records(doc))
+    try:
+        require_valid_hpe_container(hpe_bytes)
+    except HpeValidationError as exc:
+        return _error(422, str(exc))
     return Response.json(
         200,
         {
-            "issues": issues,
+            "issues": [],
             "record_count": len(doc.records),
             "hpe_content_base64": base64.b64encode(hpe_bytes).decode("ascii"),
         },
@@ -718,8 +731,21 @@ def post_hpdb_extract(ctx: AppContext, req: RequestContext) -> Response:
         records.extend(s.records)
     subset_doc = new_document(records, line_ending="\r\n")
     fav_doc = hpe_hpdb.to_favorites_dialect(subset_doc, synthesize_dqks=not body.get("no_dqks", False))
+    if fav_doc.find_first("File") is None:
+        from wasds150.hpe.record import Record
 
+        fav_doc.records.append(Record(tag="File", fields=["HomePatrol Export File"]))
+        fav_doc.line_endings.append("\r\n")
+
+    try:
+        require_valid_document(fav_doc, context="HPDB extraction")
+    except HpeValidationError as exc:
+        return _error(422, str(exc))
     hpe_bytes = hpe_codec.encode_container(serialize_records(fav_doc))
+    try:
+        require_valid_hpe_container(hpe_bytes, context="HPDB extraction")
+    except HpeValidationError as exc:
+        return _error(422, str(exc))
     return Response.json(
         200,
         {

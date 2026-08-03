@@ -69,6 +69,16 @@ Sentinel's own "Append to Favorites List" workflow (see the
 meantime, or pass `--systems <path-to-System-JSON>` as an advanced/debug
 alternative to `--slug`.
 
+Every generation path is fail-closed and uses the same validation gates:
+catalog/profile integrity, channel and talkgroup semantics, SDS150
+frequency coverage, mode/tone/service-type syntax, record hierarchy,
+BCDx36HP dialect/signature, deterministic container round trips,
+model-to-record parity, file/count limits, and ZIP manifest checksums.
+CLI and web exports are built in a staging directory and published as a
+rollback-capable transaction, so failed validation cannot leave a partial
+or stale HPE set. Direct SD writes run the same document validation and
+verify the mandatory backup before changing the card.
+
 ## Important limitations
 
 RadioReference is community-maintained, and radio systems change regularly. Update Sentinel's master database and verify system sites, talkgroups, modes, and encryption before each major trip.

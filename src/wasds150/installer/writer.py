@@ -26,13 +26,15 @@ by this module.
 from __future__ import annotations
 
 import os
+import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Optional, Tuple
 
 from wasds150.hpe.flist import find_entry_by_filename, new_entry, parse_f_list, patch_entry, render
 from wasds150.hpe.record import Record, RecordDocument, new_document, serialize_records
-from wasds150.installer.backup import InstallerError, backup_card
+from wasds150.hpe.validation import HpeValidationError, require_valid_document
+from wasds150.installer.backup import InstallerError, backup_card, verify_backup
 from wasds150.installer.confirm import confirm_phrase_for, verify_confirmation
 from wasds150.installer.paths import (
     APP_DATA_CFG,
@@ -59,11 +61,18 @@ class WriteResult:
 
 def _write_synced(path: Path, data: bytes) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("wb") as f:
-        f.write(data)
-        f.flush()
-        os.fsync(f.fileno())
-    _fsync_dir_best_effort(path.parent)
+    fd, candidate_name = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=path.parent)
+    candidate = Path(candidate_name)
+    try:
+        with os.fdopen(fd, "wb") as f:
+            f.write(data)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(candidate, path)
+        _fsync_dir_best_effort(path.parent)
+    finally:
+        if candidate.exists():
+            candidate.unlink()
 
 
 def _fsync_dir_best_effort(directory: Path) -> None:
@@ -112,6 +121,10 @@ def write_favorites_list(
     mount_point = Path(mount_point)
     if not is_sds150_card(mount_point):
         raise InstallerError(f"{mount_point} does not look like an SDS150 card (no BCDx36HP directory)")
+    try:
+        require_valid_document(document, context="SD-card Favorites List")
+    except HpeValidationError as exc:
+        raise InstallerError(str(exc)) from exc
 
     target_hpd, target_flist = plan_write(mount_point, index)
     planned_writes = [str(target_hpd.relative_to(mount_point)), str(target_flist.relative_to(mount_point))]
@@ -133,6 +146,11 @@ def write_favorites_list(
 
     # Mandatory backup — the entire point of running this before any write.
     backup_path = backup_card(mount_point, backup_dir)
+    backup_issues = verify_backup(backup_path)
+    if backup_issues:
+        raise InstallerError(
+            "mandatory pre-write backup failed verification: " + "; ".join(backup_issues)
+        )
 
     # 1) Write the .hpd file as plain text (NOT gzip/XOR — that's only for
     #    exported .hpe files, never for on-card .hpd files).
@@ -155,7 +173,8 @@ def write_favorites_list(
     else:
         flist_doc.records.append(new_entry(user_name, filename))
         flist_doc.line_endings.append("\r\n")
-    _write_synced(target_flist, render(flist_doc).encode("ascii"))
+    flist_bytes = render(flist_doc).encode("ascii")
+    _write_synced(target_flist, flist_bytes)
 
     # 3) Delete app_data.cfg — mandatory after any program-data write.
     app_data_path = mount_point / APP_DATA_CFG
@@ -173,6 +192,9 @@ def write_favorites_list(
     if target_hpd.read_bytes() != hpd_bytes:
         verified = False
         warnings.append(f"post-write verification failed: {target_hpd} does not match what was written")
+    if target_flist.read_bytes() != flist_bytes:
+        verified = False
+        warnings.append(f"post-write verification failed: {target_flist} does not match what was written")
     if app_data_path.exists():
         verified = False
         warnings.append("app_data.cfg still exists after deletion — resume state may be stale")

@@ -513,6 +513,17 @@ def test_install_detect_endpoint(live_server, tmp_path):
     assert data["volumes"][0]["is_sds150_candidate"] is True
 
 
+def test_preview_reports_invalid_profile_as_422(live_server):
+    base_url, token, ctx = live_server
+    profile = ctx.load_profile()
+    profile.set_enabled("unknown-baseline-slug", True)
+    ctx.save_profile(profile)
+
+    status, body, _ = _request(base_url, "/api/v1/preview", token=token)
+    assert status == 422
+    assert "unknown baseline slug" in json.loads(body)["error"]
+
+
 def test_install_backup_endpoint(live_server, tmp_path):
     base_url, token, _ = live_server
     card = tmp_path / "card"
@@ -533,7 +544,19 @@ def test_install_write_dry_run_and_execute_endpoints(live_server, tmp_path):
     card = tmp_path / "card"
     (card / "BCDx36HP" / "favorites_lists").mkdir(parents=True)
     (card / "BCDx36HP" / "app_data.cfg").write_text("resume", encoding="ascii")
-    systems = [{"id": "s1", "label": "Test", "departments": []}]
+    systems = [
+        {
+            "id": "s1",
+            "label": "Test",
+            "departments": [
+                {
+                    "id": "d1",
+                    "label": "Ops",
+                    "channels": [{"id": "c1", "label": "Test", "freq_mhz": 154.1, "mode": "NFM"}],
+                }
+            ],
+        }
+    ]
 
     status, body, _ = _request(
         base_url, "/api/v1/install/write", token=token, method="POST",
@@ -775,4 +798,3 @@ def test_install_hpdb_inspect_requires_mount(live_server):
     base_url, token, _ = live_server
     status, body, _ = _request(base_url, "/api/v1/install/hpdb-inspect", token=token)
     assert status == 400
-

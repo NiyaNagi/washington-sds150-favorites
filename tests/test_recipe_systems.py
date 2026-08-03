@@ -67,19 +67,16 @@ def test_static_systems_for_applies_curated_seed_when_anchors_present():
     systems = static_systems_for(fl)
     assert len(systems) == 1
     channels = systems[0].departments[0].channels
-    # 22 seeded FRS/GMRS channels + the one literal NWAC-labeled channel at
-    # the same 462.7125 frequency (kept distinct: dedup keys on label too,
-    # since two different labels at the same frequency are not necessarily
-    # the same real-world channel entry).
-    assert len(channels) == 23
-    assert sum(1 for c in channels if c.freq_mhz == 462.7125) == 2
+    # 21 non-overlapping seed channels + the richer literal NWAC Ch7 entry.
+    assert len(channels) == 22
+    assert sum(1 for c in channels if c.freq_mhz == 462.7125) == 1
     assert next(c for c in channels if c.label.startswith("NWAC FRS Ch7")).tone == "TONE=C71.9"
 
 
 def test_static_systems_for_encodes_dcs_for_hpe():
     fl = _fl(departments_or_channels="SAR154.1075(DCS-565)")
     channel = static_systems_for(fl)[0].departments[0].channels[0]
-    assert channel.tone == "TONE=D565"
+    assert channel.tone == "D565"
 
 
 def test_static_systems_for_seed_never_fires_for_unrelated_row_reusing_key():

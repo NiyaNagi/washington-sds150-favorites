@@ -31,12 +31,16 @@ import copy
 from dataclasses import dataclass, field
 from typing import Dict, List
 
-from wasds150.catalog.validate import validate_catalog, validate_profile
+from wasds150.catalog.validate import partition_validation_issues, validate_catalog, validate_profile
 from wasds150.generate.determinism import generation_content_hash, sort_favorites
 from wasds150.models.catalog import Catalog, FavoritesList
 from wasds150.models.profile import Profile
 from wasds150.recipes.systems import dedupe_systems, static_systems_for
 from wasds150.util.hashing import content_hash
+
+
+class GenerationValidationError(ValueError):
+    pass
 
 
 @dataclass
@@ -87,6 +91,14 @@ def apply_profile(catalog: Catalog, profile: Profile) -> GeneratedResult:
       docstring) after overrides are applied, so an edited
       ``departments_or_channels`` is what gets parsed.
     """
+    fatal_issues, validation_warnings = partition_validation_issues(
+        validate_catalog(catalog) + validate_profile(profile, catalog)
+    )
+    if fatal_issues:
+        raise GenerationValidationError(
+            "catalog/profile validation failed: " + "; ".join(fatal_issues)
+        )
+
     effective: List[FavoritesList] = []
     counts = {
         "baseline_total": len(catalog.favorites),
@@ -131,15 +143,11 @@ def apply_profile(catalog: Catalog, profile: Profile) -> GeneratedResult:
 
     ordered = sort_favorites(effective)
 
-    warnings: List[str] = list(validate_catalog(catalog))
-    warnings.extend(validate_profile(profile, catalog))
-
     return GeneratedResult(
         favorites=ordered,
         catalog_hash=catalog.content_hash(),
         profile_hash=profile_content_hash(profile),
         content_hash=generation_content_hash(ordered),
         counts=counts,
-        warnings=warnings,
+        warnings=validation_warnings,
     )
-
