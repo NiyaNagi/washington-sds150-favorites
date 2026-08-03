@@ -73,6 +73,13 @@ def test_static_systems_for_applies_curated_seed_when_anchors_present():
     # the same real-world channel entry).
     assert len(channels) == 23
     assert sum(1 for c in channels if c.freq_mhz == 462.7125) == 2
+    assert next(c for c in channels if c.label.startswith("NWAC FRS Ch7")).tone == "TONE=C71.9"
+
+
+def test_static_systems_for_encodes_dcs_for_hpe():
+    fl = _fl(departments_or_channels="SAR154.1075(DCS-565)")
+    channel = static_systems_for(fl)[0].departments[0].channels[0]
+    assert channel.tone == "TONE=D565"
 
 
 def test_static_systems_for_seed_never_fires_for_unrelated_row_reusing_key():

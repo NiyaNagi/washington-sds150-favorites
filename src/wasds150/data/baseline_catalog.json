@@ -324,7 +324,7 @@
                   "priority": false,
                   "service_type": null,
                   "tgid": null,
-                  "tone": "CTCSS 127.3"
+                  "tone": "TONE=C127.3"
                 },
                 {
                   "avoid": false,
@@ -336,7 +336,7 @@
                   "priority": false,
                   "service_type": null,
                   "tgid": null,
-                  "tone": "CTCSS 127.3"
+                  "tone": "TONE=C127.3"
                 },
                 {
                   "avoid": false,
@@ -348,7 +348,7 @@
                   "priority": false,
                   "service_type": null,
                   "tgid": null,
-                  "tone": "CTCSS 127.3"
+                  "tone": "TONE=C127.3"
                 },
                 {
                   "avoid": false,
@@ -512,7 +512,7 @@
                   "priority": false,
                   "service_type": null,
                   "tgid": null,
-                  "tone": "CTCSS 103.5"
+                  "tone": "TONE=C103.5"
                 }
               ],
               "dqk": null,
@@ -2440,7 +2440,7 @@
                   "priority": false,
                   "service_type": null,
                   "tgid": null,
-                  "tone": "CTCSS 162.2"
+                  "tone": "TONE=C162.2"
                 },
                 {
                   "avoid": false,
@@ -2488,7 +2488,7 @@
                   "priority": false,
                   "service_type": null,
                   "tgid": null,
-                  "tone": "DCS 565"
+                  "tone": "TONE=D565"
                 },
                 {
                   "avoid": false,
@@ -2950,7 +2950,7 @@
                   "priority": false,
                   "service_type": null,
                   "tgid": null,
-                  "tone": "CTCSS 127.3"
+                  "tone": "TONE=C127.3"
                 }
               ],
               "dqk": null,
@@ -3170,7 +3170,7 @@
                   "priority": false,
                   "service_type": null,
                   "tgid": null,
-                  "tone": "CTCSS 71.9"
+                  "tone": "TONE=C71.9"
                 }
               ],
               "dqk": null,
@@ -5678,7 +5678,7 @@
                   "priority": false,
                   "service_type": null,
                   "tgid": null,
-                  "tone": "CTCSS 150.0"
+                  "tone": "TONE=C150.0"
                 },
                 {
                   "avoid": false,
@@ -5782,7 +5782,7 @@
                   "priority": false,
                   "service_type": null,
                   "tgid": null,
-                  "tone": "CTCSS 100.0"
+                  "tone": "TONE=C100.0"
                 },
                 {
                   "avoid": false,
@@ -5794,7 +5794,7 @@
                   "priority": false,
                   "service_type": null,
                   "tgid": null,
-                  "tone": "CTCSS 100.0"
+                  "tone": "TONE=C100.0"
                 },
                 {
                   "avoid": false,
@@ -5806,7 +5806,7 @@
                   "priority": false,
                   "service_type": null,
                   "tgid": null,
-                  "tone": "CTCSS 127.3"
+                  "tone": "TONE=C127.3"
                 },
                 {
                   "avoid": false,
@@ -5818,7 +5818,7 @@
                   "priority": false,
                   "service_type": null,
                   "tgid": null,
-                  "tone": "CTCSS 127.3"
+                  "tone": "TONE=C127.3"
                 },
                 {
                   "avoid": false,
@@ -5830,7 +5830,7 @@
                   "priority": false,
                   "service_type": null,
                   "tgid": null,
-                  "tone": "CTCSS 156.7"
+                  "tone": "TONE=C156.7"
                 },
                 {
                   "avoid": false,
@@ -5842,7 +5842,7 @@
                   "priority": false,
                   "service_type": null,
                   "tgid": null,
-                  "tone": "CTCSS 156.7"
+                  "tone": "TONE=C156.7"
                 },
                 {
                   "avoid": false,
@@ -5854,7 +5854,7 @@
                   "priority": false,
                   "service_type": null,
                   "tgid": null,
-                  "tone": "CTCSS 100.0"
+                  "tone": "TONE=C100.0"
                 },
                 {
                   "avoid": false,
@@ -5866,7 +5866,7 @@
                   "priority": false,
                   "service_type": null,
                   "tgid": null,
-                  "tone": "CTCSS 100.0"
+                  "tone": "TONE=C100.0"
                 }
               ],
               "dqk": null,
@@ -5934,7 +5934,7 @@
                   "priority": false,
                   "service_type": null,
                   "tgid": null,
-                  "tone": "CTCSS 100.0"
+                  "tone": "TONE=C100.0"
                 },
                 {
                   "avoid": false,
@@ -5946,7 +5946,7 @@
                   "priority": false,
                   "service_type": null,
                   "tgid": null,
-                  "tone": "CTCSS 100.0"
+                  "tone": "TONE=C100.0"
                 },
                 {
                   "avoid": false,
@@ -6294,7 +6294,7 @@
                   "priority": false,
                   "service_type": null,
                   "tgid": null,
-                  "tone": "CTCSS 71.9"
+                  "tone": "TONE=C71.9"
                 },
                 {
                   "avoid": false,

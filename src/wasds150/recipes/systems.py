@@ -51,6 +51,15 @@ def _round_freq(freq_mhz: Optional[float]) -> Optional[float]:
     return round(freq_mhz, 6) if freq_mhz is not None else None
 
 
+def _hpe_tone(tone: str) -> str:
+    """Convert the parser's readable tone notation to BCDx36HP syntax."""
+    if tone.startswith("CTCSS "):
+        return f"TONE=C{tone.removeprefix('CTCSS ')}"
+    if tone.startswith("DCS "):
+        return f"TONE=D{tone.removeprefix('DCS ')}"
+    return tone
+
+
 def dedupe_channels(channels: List[Channel]) -> List[Channel]:
     """Deterministic de-duplication of channels within one Department, by
     ``(freq_mhz, tgid, label)`` — first-seen order preserved."""
@@ -90,7 +99,7 @@ def _channel_from_parsed(slug: str, index: int, parsed: ParsedChannel) -> Channe
         id=stable_id(f"{slug}:static:{index}:{parsed.label}:{parsed.freq_mhz}", kind="channel"),
         label=parsed.label,
         freq_mhz=parsed.freq_mhz,
-        tone=parsed.tone,
+        tone=_hpe_tone(parsed.tone),
         notes=parsed.note,
     )
 
