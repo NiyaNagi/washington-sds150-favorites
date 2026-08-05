@@ -262,8 +262,10 @@ def test_display_palette_endpoints(live_server):
     custom = {
         "name": "API Custom",
         "colors": data["palettes"][0]["colors"],
-        "global_item_colors": {"Func||": {"text": "ABCDEF", "back": "101010"}},
+        "global_item_colors": {"Func": {"text": "ABCDEF", "back": "101010"}},
         "screen_item_colors": {"SimpleTrunk||0": {"text": "FEDCBA", "back": "202020"}},
+        "global_item_options": {"Option_3": "Time"},
+        "screen_item_options": {"SimpleTrunk||3": "GPS"},
     }
     status, body, headers = _request(
         base_url, "/api/v1/display/custom", token=token, method="POST", body=custom,
@@ -271,6 +273,10 @@ def test_display_palette_endpoints(live_server):
     assert status == 200
     assert b'Text="ABCDEF" Back="101010"' in body
     assert b'Text="FEDCBA" Back="202020"' in body
+    import xml.etree.ElementTree as ET
+    custom_root = ET.fromstring(body)
+    custom_option = custom_root.find("./Screen[@Name='SimpleTrunk']/Item[@Name='Option_3']")
+    assert custom_option.attrib["Option"] == "GPS"
     assert headers["Content-Type"].startswith("application/xml")
 
     status, _, _ = _request(

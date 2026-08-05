@@ -48,6 +48,14 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   matching-item colors across all views, per-item/per-view text and background
   pickers, whole-view color application, live effective contrast warnings,
   reset controls, browser-saved named palettes, and JSON import/export.
+- Made every field in every visual preview clickable and keyboard-accessible.
+  The focused editor offers all preset colors, generated in-between swatches,
+  persistent recent-color memory, arbitrary text/background pickers, live
+  contrast, reset controls, and synchronized or per-view application.
+- Added Sentinel-compatible displayed-item selection for editable option and
+  icon fields. Selection choices are constrained by field type, can synchronize
+  across matching fields in all modes, update previews immediately, and are
+  validated before custom XML export.
 - Added the original Sentinel display export as a checked-in structural
   reference plus a sourced display guide covering official item constraints,
   palette rationale, preview workflow, and Sentinel import steps.

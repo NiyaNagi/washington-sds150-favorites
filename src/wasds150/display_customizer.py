@@ -16,6 +16,30 @@ from typing import Dict, List, Optional, Tuple
 ItemSpec = Tuple[str, Optional[str]]
 COLOR_KEYS = ("background", "status", "system", "department", "channel", "metadata", "alert", "accent")
 
+SMALL_OPTION_CHOICES = (
+    "Empty", "ATT", "Bluetooth", "Day", "Time", "P25Status", "TdmaSlot",
+    "Volume", "Squelch", "GPS", "IFX", "Modulation", "P_Ch", "PRI",
+    "REC", "REP", "CC", "WxPRI", "SCR", "LVL", "BattVoltage", "Rssi",
+    "NumberTag",
+)
+ICON_OPTION_CHOICES = (
+    "Empty", "Modulation", "P_Ch", "IFX", "LVL", "REC", "GPS", "PRI",
+    "CC", "WxPRI", "SCR", "REP",
+)
+SYSTEM_OPTION_CHOICES = ("Empty", "FL_Name", "SystemId", "SysSubID", "WACN", "NumberTag")
+DEPARTMENT_OPTION_CHOICES = ("Empty", "SiteName")
+CHANNEL_OPTION_CHOICES = ("Empty", "Frequency", "TGID")
+EXACT_OPTION_CHOICES = {
+    "Option_1": ("Empty", "ATT"),
+    "Option_2": ("Empty", "Bluetooth"),
+    "Option_3": SMALL_OPTION_CHOICES,
+    "Option_4": SMALL_OPTION_CHOICES,
+    "Option_5": ("Empty", "Volume"),
+    "Option_6": ("Empty", "Squelch"),
+    "Option_7": ("Empty", "P25Status"),
+    "Option_8": ("Empty", "TdmaSlot"),
+}
+
 
 def _simple(department_option: str, channel_option: str) -> List[ItemSpec]:
     return [
@@ -176,7 +200,29 @@ def palette_by_id(palette_id: str) -> Optional[DisplayPalette]:
 
 
 def item_key(name: str, option: Optional[str]) -> str:
-    return f"{name}||{option or ''}"
+    return name
+
+
+def option_choices(name: str, screen_name: Optional[str] = None, default: Optional[str] = None) -> Tuple[str, ...]:
+    if screen_name in ("Weather", "Tone out"):
+        return ()
+    if name.startswith("Icon"):
+        return ICON_OPTION_CHOICES
+    if name == "System option":
+        return SYSTEM_OPTION_CHOICES
+    if name == "Department option":
+        return DEPARTMENT_OPTION_CHOICES
+    if name == "Channel option":
+        return CHANNEL_OPTION_CHOICES
+    if name.startswith("Option A") or name.startswith("Option B") or name.startswith("Option C"):
+        return tuple(dict.fromkeys(("Empty", default))) if default is not None else ()
+    if name == "Option_7" and default == "Empty":
+        return ("Empty",)
+    if name == "Option_8" and default == "Empty":
+        return ("Empty",)
+    if name in EXACT_OPTION_CHOICES:
+        return EXACT_OPTION_CHOICES[name]
+    return ()
 
 
 def _category(name: str, option: Optional[str]) -> str:
@@ -203,31 +249,43 @@ def generate_display_xml(
     *,
     global_item_colors: Optional[Dict[str, dict]] = None,
     screen_item_colors: Optional[Dict[str, dict]] = None,
+    global_item_options: Optional[Dict[str, str]] = None,
+    screen_item_options: Optional[Dict[str, str]] = None,
 ) -> bytes:
     root = ET.Element("UndienScanner", {"Model": "SDS100", "FileType": "DisplayCustomizer"})
     colors = palette.colors()
     global_item_colors = global_item_colors or {}
     screen_item_colors = screen_item_colors or {}
+    global_item_options = global_item_options or {}
+    screen_item_options = screen_item_options or {}
     for screen_name, items in SCREEN_SPECS.items():
         screen = ET.SubElement(root, "Screen", {"Name": screen_name})
         for index, (name, option) in enumerate(items):
             category = _category(name, option)
             override = dict(global_item_colors.get(item_key(name, option)) or {})
             override.update(screen_item_colors.get(f"{screen_name}||{index}") or {})
+            choices = option_choices(name, screen_name, option)
+            selected_option = option
+            global_option = global_item_options.get(item_key(name, option))
+            if global_option in choices:
+                selected_option = global_option
+            screen_option = screen_item_options.get(f"{screen_name}||{index}")
+            if screen_option in choices:
+                selected_option = screen_option
             attributes = {
                 "Name": name,
                 "Text": str(override.get("text") or colors[category]).upper(),
                 "Back": str(override.get("back") or palette.background).upper(),
             }
-            if option is not None:
-                attributes["Option"] = option
+            if selected_option is not None:
+                attributes["Option"] = selected_option
             ET.SubElement(screen, "Item", attributes)
     ET.indent(root, space="    ")
     return ET.tostring(root, encoding="utf-8", xml_declaration=True) + b"\n"
 
 
 def display_item_catalog() -> Dict[str, List[dict]]:
-    return {
+    catalog = {
         screen_name: [
             {
                 "index": index,
@@ -236,11 +294,25 @@ def display_item_catalog() -> Dict[str, List[dict]]:
                 "item_key": item_key(name, option),
                 "category": _category(name, option),
                 "screen_key": f"{screen_name}||{index}",
+                "option_choices": list(option_choices(name, screen_name, option)),
             }
             for index, (name, option) in enumerate(items)
         ]
         for screen_name, items in SCREEN_SPECS.items()
     }
+    grouped: Dict[str, List[set]] = {}
+    for items in catalog.values():
+        for item in items:
+            if item["option_choices"]:
+                grouped.setdefault(item["item_key"], []).append(set(item["option_choices"]))
+    synchronized = {
+        key: sorted(set.intersection(*choices)) if choices else []
+        for key, choices in grouped.items()
+    }
+    for items in catalog.values():
+        for item in items:
+            item["sync_option_choices"] = synchronized.get(item["item_key"], [])
+    return catalog
 
 
 def custom_palette_from_dict(data: dict) -> DisplayPalette:
@@ -284,6 +356,8 @@ def generate_custom_display_xml(data: dict) -> Tuple[bytes, List[str]]:
     palette = custom_palette_from_dict(data)
     global_overrides = dict(data.get("global_item_colors") or {})
     screen_overrides = dict(data.get("screen_item_colors") or {})
+    global_options = dict(data.get("global_item_options") or {})
+    screen_options = dict(data.get("screen_item_options") or {})
     catalog = display_item_catalog()
     global_keys = {item["item_key"] for items in catalog.values() for item in items}
     screen_keys = {item["screen_key"] for items in catalog.values() for item in items}
@@ -291,6 +365,16 @@ def generate_custom_display_xml(data: dict) -> Tuple[bytes, List[str]]:
     issues.extend(validate_color_overrides(screen_overrides, screen_keys))
     if issues:
         raise ValueError("; ".join(issues))
+    by_global_key = {item["item_key"]: item for items in catalog.values() for item in items if item["sync_option_choices"]}
+    by_screen_key = {item["screen_key"]: item for items in catalog.values() for item in items}
+    for key, selected in global_options.items():
+        item = by_global_key.get(key)
+        if item is None or selected not in item["sync_option_choices"]:
+            raise ValueError(f"{key}: unsupported synchronized display option {selected!r}")
+    for key, selected in screen_options.items():
+        item = by_screen_key.get(key)
+        if item is None or selected not in item["option_choices"]:
+            raise ValueError(f"{key}: unsupported display option {selected!r}")
     for mapping in (global_overrides, screen_overrides):
         for value in mapping.values():
             for field in ("text", "back"):
@@ -300,6 +384,8 @@ def generate_custom_display_xml(data: dict) -> Tuple[bytes, List[str]]:
         palette,
         global_item_colors=global_overrides,
         screen_item_colors=screen_overrides,
+        global_item_options=global_options,
+        screen_item_options=screen_options,
     )
     contrast_warnings: List[str] = []
     root = ET.fromstring(xml)
@@ -366,8 +452,14 @@ def validate_display_xml(data: bytes) -> List[str]:
         if actual is None:
             continue
         signature = [(item.attrib.get("Name"), item.attrib.get("Option")) for item in actual.findall("Item")]
-        if signature != expected:
-            issues.append(f"{screen_name}: item names/options/order differ from the Sentinel template")
+        if [name for name, _ in signature] != [name for name, _ in expected]:
+            issues.append(f"{screen_name}: item names/order differ from the Sentinel template")
+        for index, ((name, selected), (_, default)) in enumerate(zip(signature, expected)):
+            choices = option_choices(name, screen_name, default)
+            if choices and selected not in choices:
+                issues.append(f"{screen_name} item {index}: unsupported option {selected!r}")
+            elif not choices and selected != default:
+                issues.append(f"{screen_name} item {index}: fixed option changed")
         for item in actual.findall("Item"):
             if not all(re.fullmatch(r"[0-9A-F]{6}", item.attrib.get(field, "")) for field in ("Text", "Back")):
                 issues.append(f"{screen_name}: invalid item color")

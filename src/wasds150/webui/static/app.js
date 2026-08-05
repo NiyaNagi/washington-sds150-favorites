@@ -331,7 +331,10 @@
   let selectedDisplayPalette = null;
   let displayPaletteData = null;
   let displayCustomConfig = null;
+  let activeDisplayItem = null;
+  let displayDialogOpener = null;
   const DISPLAY_STORAGE_KEY = "wasds150.displayPalettes.v1";
+  const DISPLAY_RECENT_COLORS_KEY = "wasds150.displayRecentColors.v1";
 
   function copyJson(value) {
     return JSON.parse(JSON.stringify(value));
@@ -350,6 +353,38 @@
     return items.find((item) => (option ? item.option === option : item.name === name));
   }
 
+  function effectiveDisplayOption(item) {
+    if (!item) return null;
+    const screenOption = displayCustomConfig.screen_item_options[item.screen_key];
+    if (screenOption !== undefined) return screenOption;
+    const globalOption = displayCustomConfig.global_item_options[item.item_key];
+    return globalOption !== undefined ? globalOption : item.option;
+  }
+
+  function optionDisplayName(option) {
+    const labels = {
+      Empty: "(Empty)", ATT: "Attenuator", Bluetooth: "Bluetooth", Day: "Date",
+      P25Status: "Digital Status", TdmaSlot: "TDMA Slot", P_Ch: "P-Channel",
+      PRI: "Priority Scan", REC: "REC", REP: "Repeater Find", CC: "Close Call",
+      WxPRI: "WX Priority", SCR: "Broadcast Screen", FL_Name: "Favorites List Name",
+      SiteName: "Site Name", ServiceType: "Service Type", "CTCSS/DCS": "CTCSS/DCS/NAC",
+      SystemId: "System/Network ID", SysSubID: "RF Sub System (RFSS) ID",
+      SiteId: "Site ID", BattVoltage: "Battery Voltage", UnitId: "Unit ID",
+      Rssi: "RSSI", "Rssi Bar": "RSSI Graph", "Volume&Squelch": "Volume and Squelch",
+      P25Status: "Digital Status", Tgid: "TGID",
+    };
+    return labels[option] || option || "(Empty)";
+  }
+
+  function iconDisplayName(option) {
+    const labels = {
+      Empty: "(Empty)", Modulation: "Mod", P_Ch: "P-ch", IFX: "IFX", LVL: "LVL",
+      REC: "REC", GPS: "GPS", PRI: "Priority", CC: "Close", WxPRI: "WX",
+      SCR: "Broadc", REP: "Repeat",
+    };
+    return labels[option] || optionDisplayName(option);
+  }
+
   function resolvedDisplayColors(screenName, item, category) {
     const palette = displayPaletteView();
     const screenOverride = item ? displayCustomConfig.screen_item_colors[item.screen_key] : null;
@@ -364,12 +399,216 @@
   function displayField(text, category, palette, className, screenName, itemName, option, reverse) {
     const element = document.createElement("div");
     element.className = "scanner-field " + (className || "");
-    element.textContent = text;
-    const colors = resolvedDisplayColors(screenName, displayItemFor(screenName, itemName || text, option), category);
+    const item = displayItemFor(screenName, itemName || text, option);
+    const selectedOption = effectiveDisplayOption(item);
+    element.textContent = item && item.option_choices.length
+      ? (item.name.startsWith("Icon") ? iconDisplayName(selectedOption) : optionDisplayName(selectedOption))
+      : text;
+    const colors = resolvedDisplayColors(screenName, item, category);
     element.style.color = "#" + (reverse ? colors.back : colors.text);
     element.style.backgroundColor = "#" + (reverse ? colors.text : colors.back);
+    if (item) {
+      element.classList.add("editable");
+      element.tabIndex = 0;
+      element.title = `Customize ${screenName}: ${item.name}${selectedOption ? ` (${optionDisplayName(selectedOption)})` : ""}`;
+      element.addEventListener("click", () => openDisplayItemDialog(screenName, item));
+      element.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          openDisplayItemDialog(screenName, item);
+        }
+      });
+    }
     return element;
   }
+
+  function readRecentDisplayColors() {
+    try { return JSON.parse(localStorage.getItem(DISPLAY_RECENT_COLORS_KEY) || "[]"); }
+    catch (_) { return []; }
+  }
+
+  function rememberDisplayColors(colors) {
+    const recent = readRecentDisplayColors();
+    colors.forEach((color) => {
+      const normalized = color.toUpperCase();
+      const index = recent.indexOf(normalized);
+      if (index >= 0) recent.splice(index, 1);
+      recent.unshift(normalized);
+    });
+    localStorage.setItem(DISPLAY_RECENT_COLORS_KEY, JSON.stringify(recent.slice(0, 18)));
+  }
+
+  function blendDisplayColors(first, second) {
+    return [0, 2, 4].map((index) => Math.round((parseInt(first.slice(index, index + 2), 16) + parseInt(second.slice(index, index + 2), 16)) / 2)
+      .toString(16).padStart(2, "0")).join("").toUpperCase();
+  }
+
+  function updateDisplayDialogContrast() {
+    const text = document.getElementById("display-dialog-text").value.slice(1);
+    const back = document.getElementById("display-dialog-back").value.slice(1);
+    const ratio = jsContrast(text, back);
+    const badge = document.getElementById("display-dialog-contrast");
+    badge.textContent = `${ratio.toFixed(2)}:1${ratio < 4.5 ? " — low contrast" : ""}`;
+    badge.classList.toggle("low", ratio < 4.5);
+  }
+
+  function renderDisplayColorSwatches(containerId, colors) {
+    const container = document.getElementById(containerId);
+    container.replaceChildren();
+    colors.forEach((color) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "display-color-swatch";
+      button.style.backgroundColor = "#" + color;
+      button.title = "#" + color;
+      button.setAttribute("aria-label", "Choose #" + color);
+      button.addEventListener("click", () => {
+        const target = document.getElementById("display-swatch-target").value;
+        document.getElementById(target === "text" ? "display-dialog-text" : "display-dialog-back").value = "#" + color;
+        updateDisplayDialogContrast();
+      });
+      container.appendChild(button);
+    });
+  }
+
+  function updateDisplayDialogOptionChoices() {
+    if (!activeDisplayItem) return;
+    const item = activeDisplayItem.item;
+    const sync = document.getElementById("display-dialog-sync").checked;
+    const choices = sync ? item.sync_option_choices : item.option_choices;
+    const optionLabel = document.getElementById("display-item-option-label");
+    const optionSelect = document.getElementById("display-item-option");
+    const current = effectiveDisplayOption(item);
+    optionSelect.replaceChildren();
+    choices.forEach((choice) => {
+      const option = document.createElement("option");
+      option.value = choice;
+      option.textContent = optionDisplayName(choice);
+      optionSelect.appendChild(option);
+    });
+    optionSelect.value = choices.includes(current) ? current : (choices[0] || "");
+    optionLabel.classList.toggle("hidden", !choices.length);
+  }
+
+  function openDisplayItemDialog(screenName, item) {
+    displayDialogOpener = document.activeElement;
+    activeDisplayItem = { screenName, item };
+    const colors = resolvedDisplayColors(screenName, item, item.category);
+    document.getElementById("display-item-dialog-title").textContent = item.name;
+    document.getElementById("display-item-dialog-context").textContent =
+      `${screenName.replace(/([a-z])([A-Z])/g, "$1 $2")} · ${item.category} group`;
+    document.getElementById("display-dialog-text").value = "#" + colors.text;
+    document.getElementById("display-dialog-back").value = "#" + colors.back;
+    document.getElementById("display-dialog-sync").checked = document.getElementById("display-sync-items").checked;
+    updateDisplayDialogOptionChoices();
+    const baseColors = [];
+    displayPaletteData.palettes.forEach((palette) => {
+      const values = Object.values(palette.colors);
+      values.forEach((color) => baseColors.push(color));
+      ["system", "department", "channel", "metadata", "alert", "accent"].forEach((category) => {
+        baseColors.push(blendDisplayColors(palette.colors[category], palette.colors.background));
+      });
+    });
+    renderDisplayColorSwatches("display-color-swatches", Array.from(new Set(baseColors)));
+    renderDisplayColorSwatches("display-recent-colors", readRecentDisplayColors());
+    updateDisplayDialogContrast();
+    const dialog = document.getElementById("display-item-dialog");
+    dialog.classList.remove("hidden");
+    (!document.getElementById("display-item-option-label").classList.contains("hidden")
+      ? document.getElementById("display-item-option")
+      : document.getElementById("display-dialog-text")).focus();
+  }
+
+  function closeDisplayItemDialog() {
+    document.getElementById("display-item-dialog").classList.add("hidden");
+    activeDisplayItem = null;
+    if (displayDialogOpener && document.contains(displayDialogOpener)) {
+      displayDialogOpener.focus();
+    } else {
+      const displayTab = document.querySelector('[data-tab="display"]');
+      if (displayTab) displayTab.focus();
+    }
+    displayDialogOpener = null;
+  }
+
+  function applyDisplayDialog() {
+    if (!activeDisplayItem) return;
+    const { screenName, item } = activeDisplayItem;
+    const sync = document.getElementById("display-dialog-sync").checked;
+    const text = document.getElementById("display-dialog-text").value.slice(1).toUpperCase();
+    const back = document.getElementById("display-dialog-back").value.slice(1).toUpperCase();
+    const option = !document.getElementById("display-item-option-label").classList.contains("hidden")
+      ? document.getElementById("display-item-option").value
+      : null;
+    if (sync) {
+      displayCustomConfig.global_item_colors[item.item_key] = { text, back };
+      if (option !== null) displayCustomConfig.global_item_options[item.item_key] = option;
+      Object.values(displayPaletteData.items).flat().forEach((candidate) => {
+        if (candidate.item_key === item.item_key) {
+          delete displayCustomConfig.screen_item_colors[candidate.screen_key];
+          delete displayCustomConfig.screen_item_options[candidate.screen_key];
+        }
+      });
+    } else {
+      displayCustomConfig.screen_item_colors[item.screen_key] = { text, back };
+      if (option !== null) displayCustomConfig.screen_item_options[item.screen_key] = option;
+    }
+    rememberDisplayColors([text, back]);
+    closeDisplayItemDialog();
+    renderDisplayItemEditor();
+    renderDisplayPreviews();
+  }
+
+  function resetActiveDisplayItem() {
+    if (!activeDisplayItem) return;
+    const { item } = activeDisplayItem;
+    const sync = document.getElementById("display-dialog-sync").checked;
+    if (sync) {
+      delete displayCustomConfig.global_item_colors[item.item_key];
+      delete displayCustomConfig.global_item_options[item.item_key];
+      Object.values(displayPaletteData.items).flat().forEach((candidate) => {
+        if (candidate.item_key === item.item_key) {
+          delete displayCustomConfig.screen_item_colors[candidate.screen_key];
+          delete displayCustomConfig.screen_item_options[candidate.screen_key];
+        }
+      });
+    } else {
+      delete displayCustomConfig.screen_item_colors[item.screen_key];
+      delete displayCustomConfig.screen_item_options[item.screen_key];
+    }
+    closeDisplayItemDialog();
+    renderDisplayItemEditor();
+    renderDisplayPreviews();
+  }
+
+  document.getElementById("display-dialog-text").addEventListener("input", updateDisplayDialogContrast);
+  document.getElementById("display-dialog-back").addEventListener("input", updateDisplayDialogContrast);
+  document.getElementById("display-dialog-sync").addEventListener("change", updateDisplayDialogOptionChoices);
+  document.getElementById("display-dialog-apply").addEventListener("click", applyDisplayDialog);
+  document.getElementById("display-dialog-reset").addEventListener("click", resetActiveDisplayItem);
+  document.getElementById("display-dialog-cancel").addEventListener("click", closeDisplayItemDialog);
+  document.getElementById("display-item-dialog").addEventListener("click", (event) => {
+    if (event.target.id === "display-item-dialog") closeDisplayItemDialog();
+  });
+  document.addEventListener("keydown", (event) => {
+    const dialog = document.getElementById("display-item-dialog");
+    if (event.key === "Escape" && !dialog.classList.contains("hidden")) {
+      closeDisplayItemDialog();
+    } else if (event.key === "Tab" && !dialog.classList.contains("hidden")) {
+      const focusable = Array.from(dialog.querySelectorAll("button:not([disabled]), select:not([disabled]), input:not([disabled])"))
+        .filter((element) => !element.closest(".hidden"));
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+  });
 
   function renderScannerPreview(screenName, palette) {
     const preview = document.createElement("article");
@@ -518,7 +757,7 @@
     (displayPaletteData.items[screen] || []).forEach((item) => {
       const colors = resolvedDisplayColors(screen, item, item.category);
       const row = document.createElement("tr");
-      [item.name, item.option || "—", item.category].forEach((value) => {
+      [item.name, optionDisplayName(effectiveDisplayOption(item)) || "—", item.category].forEach((value) => {
         const cell = document.createElement("td");
         cell.textContent = value;
         row.appendChild(cell);
@@ -545,11 +784,16 @@
       reset.addEventListener("click", () => {
         if (document.getElementById("display-sync-items").checked) {
           delete displayCustomConfig.global_item_colors[item.item_key];
+          delete displayCustomConfig.global_item_options[item.item_key];
           Object.values(displayPaletteData.items).flat().forEach((candidate) => {
-            if (candidate.item_key === item.item_key) delete displayCustomConfig.screen_item_colors[candidate.screen_key];
+            if (candidate.item_key === item.item_key) {
+              delete displayCustomConfig.screen_item_colors[candidate.screen_key];
+              delete displayCustomConfig.screen_item_options[candidate.screen_key];
+            }
           });
         } else {
           delete displayCustomConfig.screen_item_colors[item.screen_key];
+          delete displayCustomConfig.screen_item_options[item.screen_key];
         }
         renderDisplayPreviews();
         renderDisplayItemEditor();
@@ -568,6 +812,8 @@
       colors: copyJson(palette.colors),
       global_item_colors: {},
       screen_item_colors: {},
+      global_item_options: {},
+      screen_item_options: {},
     };
     document.getElementById("display-custom-name").value = palette.name + " Custom";
     document.getElementById("display-view-text").value = "#" + palette.colors.status;
@@ -684,6 +930,8 @@
       throw new Error("Palette is missing item override maps");
     }
     displayCustomConfig = copyJson(config);
+    displayCustomConfig.global_item_options = displayCustomConfig.global_item_options || {};
+    displayCustomConfig.screen_item_options = displayCustomConfig.screen_item_options || {};
     selectedDisplayPalette = null;
     document.querySelectorAll(".display-palette-card").forEach((card) => {
       card.classList.remove("selected");
@@ -704,22 +952,37 @@
     Object.keys(displayCustomConfig.screen_item_colors).forEach((key) => {
       if (key.startsWith(screen)) delete displayCustomConfig.screen_item_colors[key];
     });
+    Object.keys(displayCustomConfig.screen_item_options).forEach((key) => {
+      if (key.startsWith(screen)) delete displayCustomConfig.screen_item_options[key];
+    });
     renderDisplayItemEditor();
     renderDisplayPreviews();
   });
   document.getElementById("display-reset-all-items").addEventListener("click", () => {
     displayCustomConfig.global_item_colors = {};
     displayCustomConfig.screen_item_colors = {};
+    displayCustomConfig.global_item_options = {};
+    displayCustomConfig.screen_item_options = {};
     renderDisplayItemEditor();
     renderDisplayPreviews();
   });
   function applyColorToCurrentView(field, pickerId) {
     const screen = document.getElementById("display-screen-select").value;
     const color = document.getElementById(pickerId).value.slice(1).toUpperCase();
+    const sync = document.getElementById("display-sync-items").checked;
     (displayPaletteData.items[screen] || []).forEach((item) => {
-      displayCustomConfig.screen_item_colors[item.screen_key] = Object.assign(
-        {}, displayCustomConfig.screen_item_colors[item.screen_key] || {}, { [field]: color }
-      );
+      if (sync) {
+        displayCustomConfig.global_item_colors[item.item_key] = Object.assign(
+          {}, displayCustomConfig.global_item_colors[item.item_key] || {}, { [field]: color }
+        );
+        Object.values(displayPaletteData.items).flat().forEach((candidate) => {
+          if (candidate.item_key === item.item_key) delete displayCustomConfig.screen_item_colors[candidate.screen_key];
+        });
+      } else {
+        displayCustomConfig.screen_item_colors[item.screen_key] = Object.assign(
+          {}, displayCustomConfig.screen_item_colors[item.screen_key] || {}, { [field]: color }
+        );
+      }
     });
     renderDisplayItemEditor();
     renderDisplayPreviews();

@@ -87,7 +87,10 @@ scanner display modes on one page. Every palette uses consistent semantic
 colors, reports contrast ratios, and downloads as validated Sentinel display
 customizer XML. A full editor supports semantic group colors, synchronized
 matching items, per-item/per-view text and background colors, whole-view
-coloring, saved browser palettes, and JSON import/export.
+coloring, saved browser palettes, and JSON import/export. Preview fields are
+clickable: choose preset and blended swatches, recent colors, arbitrary custom
+colors, and Sentinel-compatible displayed elements with synchronized or
+per-view behavior.
 
 The generated `out/sentinel-import-pack.zip` is the bulk download. Its
 `hpe/` directory contains every currently available Favorites List with

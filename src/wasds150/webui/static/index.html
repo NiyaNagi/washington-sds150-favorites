@@ -113,6 +113,34 @@
       </table>
     </section>
 
+    <div id="display-item-dialog" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="display-item-dialog-title">
+      <div class="modal display-item-dialog-card">
+        <h3 id="display-item-dialog-title">Customize display item</h3>
+        <p id="display-item-dialog-context" class="hint"></p>
+        <label id="display-item-option-label">Displayed item
+          <select id="display-item-option"></select>
+        </label>
+        <h4>Palette and in-between colors</h4>
+        <label>Swatches apply to
+          <select id="display-swatch-target"><option value="text">Text color</option><option value="back">Background color</option></select>
+        </label>
+        <div id="display-color-swatches" class="display-color-swatches"></div>
+        <h4>Recently selected colors</h4>
+        <div id="display-recent-colors" class="display-color-swatches"></div>
+        <div class="display-dialog-pickers">
+          <label>Text color <input type="color" id="display-dialog-text" /></label>
+          <label>Background color <input type="color" id="display-dialog-back" /></label>
+          <span id="display-dialog-contrast" class="contrast-badge"></span>
+        </div>
+        <label class="hint"><input type="checkbox" id="display-dialog-sync" checked /> Apply this item and its displayed option consistently across all matching views</label>
+        <div class="modal-actions">
+          <button id="display-dialog-reset">Reset item</button>
+          <button id="display-dialog-cancel">Cancel</button>
+          <button id="display-dialog-apply" class="primary">Apply</button>
+        </div>
+      </div>
+    </div>
+
     <section id="tab-export" class="tab-panel">
       <h2>Export</h2>
       <p class="hint">Generates from the currently enabled Favorites Lists. Commits a snapshot to history.</p>

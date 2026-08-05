@@ -85,6 +85,38 @@ deleted, and exported/imported as JSON for backup or sharing. Sentinel XML is
 always generated server-side from the current semantic and item overrides and
 validated before download.
 
+Every field in every visual preview is clickable and keyboard-accessible.
+Selecting a field opens a focused editor with:
+
+- every color used by all twelve presets;
+- automatically generated in-between colors blended with each palette's
+  background;
+- remembered recently selected colors across pages and browser sessions;
+- unrestricted native text/background color pickers;
+- live contrast feedback;
+- a synchronized/per-view application switch; and
+- a **Displayed item** selector when Sentinel allows that field to change.
+
+Displayed-item choices follow the supplied screenshots, Sentinel export, and
+official available-item list. Small option areas include Date, Time, Digital
+Status, TDMA Slot, Bluetooth, Attenuator, GPS, IFX, modulation, priority,
+recording, Close Call, Weather Priority, volume, and squelch. Larger areas can
+show Favorites List, site, frequency, TGID, service type, tone/NAC, system and
+site IDs, WACN, battery, unit ID, RSSI, number tag, and volume/squelch details.
+Icon areas are restricted to the compatible icon choices.
+
+Choices are constrained per field and screen rather than exposing one unsafe
+global list. Metadata slots can keep their exported item or be emptied;
+frequency/TGID and site/department fields only offer their evidenced variants.
+As specified by the official manual, Weather and Tone Out retain fixed items
+and support color customization only. Synchronized item choices are limited to
+the intersection supported by all compatible editable views.
+
+With synchronization enabled, both the color and displayed-item selection are
+remembered for the same field across all seven modes. Disable synchronization
+to customize one screen only. Preview labels update immediately to reflect the
+actual selected element that will be written into the XML.
+
 ## Information layout
 
 The item layout follows the supplied Sentinel export and the official list of

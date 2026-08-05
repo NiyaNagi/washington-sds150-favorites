@@ -151,6 +151,11 @@ h2 { margin-top: 0; }
   font-size: 0.68rem;
   font-weight: 650;
 }
+.scanner-field.editable { cursor: pointer; }
+.scanner-field.editable:hover, .scanner-field.editable:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
 .scanner-primary {
   min-height: 2.5rem;
   display: flex;
@@ -203,6 +208,32 @@ h2 { margin-top: 0; }
   cursor: pointer;
   font-size: 0.85rem;
 }
+.display-item-dialog-card { width: min(700px, 94vw); }
+.display-item-dialog-card select { width: 100%; }
+.display-color-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  min-height: 2rem;
+  margin-bottom: 0.75rem;
+}
+.display-color-swatch {
+  width: 2rem;
+  height: 2rem;
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  border-radius: 5px;
+  cursor: pointer;
+}
+.display-color-swatch:hover, .display-color-swatch:focus { outline: 2px solid var(--accent); }
+.display-dialog-pickers {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 0.75rem;
+  align-items: end;
+  margin: 0.75rem 0;
+}
+.display-dialog-pickers label { margin: 0; }
+.display-dialog-pickers input[type="color"] { width: 100%; height: 2.5rem; }
 
 button {
   background: var(--panel-alt);
