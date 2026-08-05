@@ -35,7 +35,7 @@ from wasds150.catalog.validate import partition_validation_issues, validate_cata
 from wasds150.generate.determinism import generation_content_hash, sort_favorites
 from wasds150.models.catalog import Catalog, FavoritesList
 from wasds150.models.profile import Profile
-from wasds150.recipes.systems import dedupe_systems, static_systems_for
+from wasds150.recipes.systems import dedupe_systems, populate_rollups, static_systems_for
 from wasds150.util.hashing import content_hash
 
 
@@ -127,8 +127,6 @@ def apply_profile(catalog: Catalog, profile: Profile) -> GeneratedResult:
             counts["baseline_enabled"] += 1
         else:
             counts["baseline_disabled"] += 1
-        if eff.systems:
-            counts["with_systems"] += 1
         effective.append(eff)
 
     for fl in profile.local_lists.values():
@@ -137,10 +135,13 @@ def apply_profile(catalog: Catalog, profile: Profile) -> GeneratedResult:
             counts["local_enabled"] += 1
         else:
             counts["local_disabled"] += 1
-        if eff.systems:
-            counts["with_systems"] += 1
         effective.append(eff)
 
+    # Explicit component rollups are derived after profile removals and
+    # overrides, so preview/generate always reflects the current effective
+    # components and fails closed when one is unavailable.
+    populate_rollups(Catalog(favorites=effective))
+    counts["with_systems"] = sum(bool(favorite.systems) for favorite in effective)
     ordered = sort_favorites(effective)
 
     return GeneratedResult(

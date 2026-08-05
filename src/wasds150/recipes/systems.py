@@ -38,10 +38,12 @@ idempotent.
 """
 from __future__ import annotations
 
+import copy
 import re
-from typing import List, Optional
+from typing import Dict, List, Optional
 
-from wasds150.models.catalog import Channel, Department, FavoritesList, System
+from wasds150.models.catalog import Catalog, Channel, Department, FavoritesList, System
+from wasds150.models.provenance import Provenance
 from wasds150.sources.facts import NormalizedFact
 from wasds150.sources.static_channels import ParsedChannel, parse_department_text
 from wasds150.sources.static_metadata import (
@@ -94,6 +96,48 @@ def dedupe_systems(systems: List[System]) -> List[System]:
         seen.add(system.id)
         result.append(system)
     return result
+
+
+def populate_rollups(catalog: Catalog) -> Dict[str, tuple]:
+    """Populate explicitly declared ``(reuses FLx/y/...)`` rollups.
+
+    Component systems are deep-copied whole, preserving every verified
+    identity, site, frequency, department, channel, and location field.
+    The rollup is filled only when every named component exists and is
+    populated; otherwise it remains fail-closed. No geographic filtering
+    or radio fact is inferred from prose.
+
+    Returns ``slug -> component keys`` for rollups that were populated.
+    """
+    by_key = {favorite.favorite_key.upper(): favorite for favorite in catalog.favorites}
+    populated: Dict[str, tuple] = {}
+    for favorite in catalog.favorites:
+        match = re.search(r"\breuses\s+FL(\d+(?:/\d+)*)", favorite.system_or_category, re.IGNORECASE)
+        if not match:
+            continue
+        component_keys = tuple(f"FL{int(value):02d}" for value in match.group(1).split("/"))
+        components = [by_key.get(key) for key in component_keys]
+        favorite.systems = []
+        favorite.provenance = [
+            item for item in favorite.provenance if item.source_adapter != "derived_rollup"
+        ]
+        if not components or any(component is None or not component.systems for component in components):
+            continue
+        favorite.systems = dedupe_systems([
+            copy.deepcopy(system)
+            for component in components
+            for system in component.systems
+        ])
+        favorite.provenance.extend(
+            Provenance(
+                source_adapter="derived_rollup",
+                source_url=f"catalog://{component.favorite_key}",
+                confidence="derived",
+            )
+            for component in components
+        )
+        populated[favorite.slug] = component_keys
+    return populated
 
 
 # ---------------------------------------------------------------------------

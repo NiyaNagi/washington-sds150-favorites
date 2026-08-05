@@ -188,7 +188,20 @@ def enrich_catalog(
                 new_fl.systems = systems_mod.dedupe_systems(new_fl.systems + new_systems)
         new_favorites.append(new_fl)
 
-    return EnrichResult(catalog=Catalog(favorites=new_favorites), coverage=coverage)
+    enriched_catalog = Catalog(favorites=new_favorites)
+    populated_rollups = systems_mod.populate_rollups(enriched_catalog)
+    if populated_rollups:
+        coverage_by_slug = {item.slug: item for item in coverage}
+        for slug in populated_rollups:
+            item = coverage_by_slug.get(slug)
+            if item is not None:
+                item.status = "full"
+                item.warnings = []
+                item.matched_fact_keys = [
+                    f"derived:{key}" for key in populated_rollups[slug]
+                ]
+
+    return EnrichResult(catalog=enriched_catalog, coverage=coverage)
 
 
 @dataclass

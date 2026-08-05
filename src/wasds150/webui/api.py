@@ -8,7 +8,9 @@ reused verbatim rather than re-implemented for the web UI.
 from __future__ import annotations
 
 import base64
+import re
 import tempfile
+import urllib.parse
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -72,12 +74,110 @@ def get_dashboard(ctx: AppContext, req: RequestContext) -> Response:
     )
 
 
+def _safe_source_reference(value: Any) -> Any:
+    if not isinstance(value, str) or not value:
+        return value
+    try:
+        parsed = urllib.parse.urlsplit(value)
+    except ValueError:
+        return "(invalid source reference redacted)"
+    if parsed.scheme in ("http", "https"):
+        hostname = parsed.hostname or ""
+        netloc = hostname
+        try:
+            if parsed.port is not None:
+                netloc = f"{netloc}:{parsed.port}"
+        except ValueError:
+            return "(invalid source reference redacted)"
+        return urllib.parse.urlunsplit((parsed.scheme, netloc, parsed.path, "", ""))
+    if parsed.scheme == "catalog" and re.fullmatch(r"catalog://FL\d+[A-Za-z]?", value):
+        return value
+    if parsed.scheme == "file" or value.startswith(("/", "\\")) or (len(value) > 2 and value[1:3] in (":\\", ":/")):
+        return "(local path redacted)"
+    if parsed.scheme:
+        return "(unsupported source reference redacted)"
+    return value
+
+
+def _profile_state(profile, fl: FavoritesList, *, include_overrides: bool = False) -> Dict[str, Any]:
+    entry = profile.entries.get(fl.slug)
+    enabled_override = entry.enabled if entry is not None else None
+    removed = entry.removed if entry is not None else False
+    effective_enabled = False if removed else (
+        enabled_override if enabled_override is not None else fl.enabled
+    )
+    overrides = dict(entry.overrides) if entry is not None else {}
+    state = {
+        "removed": removed,
+        "enabled_override": enabled_override,
+        "effective_enabled": effective_enabled,
+        "override_fields": sorted(overrides),
+        "note_present": bool(entry.note) if entry is not None else False,
+        "origin": fl.origin,
+        "is_local": fl.origin == ORIGIN_LOCAL,
+    }
+    if include_overrides:
+        state["overrides"] = {
+            key: (
+                "(private override value hidden)"
+                if key == "notes"
+                else _safe_source_reference(value) if key == "source_url" else value
+            )
+            for key, value in overrides.items()
+        }
+    return state
+
+
+def _catalog_detail(fl: FavoritesList, profile) -> Dict[str, Any]:
+    data = fl.to_dict()
+    data["source_url"] = _safe_source_reference(data.get("source_url"))
+    for item in data.get("provenance", []):
+        item["source_url"] = _safe_source_reference(item.get("source_url"))
+    data["profile_state"] = _profile_state(profile, fl, include_overrides=True)
+    return data
+
+
+def _catalog_summary(fl: FavoritesList, profile) -> Dict[str, Any]:
+    sites = [site for system in fl.systems for site in system.sites]
+    departments = [department for system in fl.systems for department in system.departments]
+    departments.extend(department for site in sites for department in site.departments)
+    return {
+        "slug": fl.slug,
+        "favorite_key": fl.favorite_key,
+        "favorite_name": fl.favorite_name,
+        "region": fl.region,
+        "scenario": fl.scenario,
+        "mode": fl.mode,
+        "origin": fl.origin,
+        "system_count": len(fl.systems),
+        "site_count": len(sites),
+        "department_count": len(departments),
+        "channel_count": sum(len(department.channels) for department in departments),
+        "trunk_frequency_count": sum(len(system.trunk_frequencies) for system in fl.systems),
+        "provenance_count": len(fl.provenance),
+        "profile_state": _profile_state(profile, fl),
+    }
+
+
 def get_catalog(ctx: AppContext, req: RequestContext) -> Response:
     favorites = ctx.catalog.favorites
+    profile = ctx.load_profile()
     region = (req.query.get("region") or [None])[0]
     if region:
         favorites = [fl for fl in favorites if region.lower() in fl.region.lower()]
-    return Response.json(200, {"favorites": [fl.to_dict() for fl in favorites]})
+    return Response.json(200, {"favorites": [_catalog_detail(fl, profile) for fl in favorites]})
+
+
+def get_catalog_summaries(ctx: AppContext, req: RequestContext) -> Response:
+    favorites = ctx.catalog.favorites
+    profile = ctx.load_profile()
+    region = (req.query.get("region") or [None])[0]
+    if region:
+        favorites = [fl for fl in favorites if region.lower() in fl.region.lower()]
+    return Response.json(200, {
+        "favorites": [_catalog_summary(fl, profile) for fl in favorites],
+        "total": len(favorites),
+    })
 
 
 def get_catalog_entry(ctx: AppContext, req: RequestContext) -> Response:
@@ -85,7 +185,7 @@ def get_catalog_entry(ctx: AppContext, req: RequestContext) -> Response:
     fl = ctx.catalog.by_slug(slug)
     if fl is None:
         return _error(404, f"Unknown baseline slug: {slug}")
-    return Response.json(200, fl.to_dict())
+    return Response.json(200, _catalog_detail(fl, ctx.load_profile()))
 
 
 def get_profile(ctx: AppContext, req: RequestContext) -> Response:
@@ -949,6 +1049,7 @@ def build_router(ctx: AppContext) -> Router:
     router = Router()
     router.add("GET", "/api/v1/dashboard", lambda req: get_dashboard(ctx, req))
     router.add("GET", "/api/v1/catalog", lambda req: get_catalog(ctx, req))
+    router.add("GET", "/api/v1/catalog-summaries", lambda req: get_catalog_summaries(ctx, req))
     router.add("GET", "/api/v1/catalog/{slug}", lambda req: get_catalog_entry(ctx, req))
     router.add("GET", "/api/v1/profile", lambda req: get_profile(ctx, req))
     router.add("GET", "/api/v1/preview", lambda req: get_preview(ctx, req))

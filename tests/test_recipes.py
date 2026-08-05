@@ -13,6 +13,9 @@ from wasds150.recipes import (
     evaluate_recipe,
 )
 from wasds150.sources.facts import NormalizedFact
+from wasds150.bundle.hpe_export import build_per_list_hpe
+from wasds150.generate.pipeline import apply_profile
+from wasds150.models.profile import Profile
 from wasds150.models.catalog import Channel, Department, Site, System
 from wasds150.recipes.systems import curate_split_systems
 
@@ -416,6 +419,103 @@ def test_rollup_recipe_does_not_claim_full_coverage_from_one_component_sid():
     )
     assert recipe.match.configured_sids() == ()
     assert evaluate_recipe(recipe, [fact]).status == "none"
+
+
+def test_enrich_catalog_populates_declared_rollup_from_complete_components():
+    def component(key, system_id):
+        favorite = _fl(key.lower(), key, "Interop", "conventional", "Component")
+        favorite.systems = [System(
+            id=system_id,
+            label=key,
+            departments=[Department(
+                id=f"{system_id}-department",
+                label="Operations",
+                channels=[Channel(id=f"{system_id}-channel", label="Channel", freq_mhz=155.0)],
+            )],
+        )]
+        return favorite
+
+    catalog = Catalog(favorites=[
+        component("FL01", "system-1"),
+        component("FL04", "system-4"),
+        component("FL05", "system-5"),
+        component("FL06", "system-6"),
+        _fl(
+            "fl30", "FL30", "Interop", "trunked P25 + conventional",
+            "WSP + WSDOT + DNR + Mutual Aid (reuses FL4/5/6/1)",
+        ),
+    ])
+
+    result = enrich_catalog(catalog, [], build_default_recipes(catalog))
+    rollup = result.catalog.by_slug("fl30")
+    coverage = next(item for item in result.coverage if item.slug == "fl30")
+
+    assert [system.id for system in rollup.systems] == ["system-4", "system-5", "system-6", "system-1"]
+    assert coverage.status == "full"
+    assert coverage.warnings == []
+    assert coverage.matched_fact_keys == ["derived:FL04", "derived:FL05", "derived:FL06", "derived:FL01"]
+    assert {item.source_adapter for item in rollup.provenance} == {"derived_rollup"}
+    export = build_per_list_hpe([rollup])
+    assert set(export.files) == {"FL30.hpe"}
+    assert export.warnings == []
+
+    generated = apply_profile(
+        catalog,
+        Profile(based_on_catalog_hash=catalog.content_hash()),
+    )
+    generated_rollup = next(item for item in generated.favorites if item.favorite_key == "FL30")
+    assert [system.id for system in generated_rollup.systems] == [
+        "system-4", "system-5", "system-6", "system-1",
+    ]
+    assert generated.counts["with_systems"] == 5
+
+
+def test_enrich_catalog_leaves_rollup_empty_when_component_is_missing():
+    catalog = Catalog(favorites=[
+        _fl(
+            "fl30", "FL30", "Interop", "trunked P25 + conventional",
+            "WSP + WSDOT + DNR + Mutual Aid (reuses FL4/5/6/1)",
+        ),
+    ])
+
+    result = enrich_catalog(catalog, [], build_default_recipes(catalog))
+
+    assert result.catalog.by_slug("fl30").systems == []
+    assert next(item for item in result.coverage if item.slug == "fl30").status == "none"
+
+
+def test_enrich_catalog_recomputes_existing_rollup_from_current_components():
+    def component(key, system_id):
+        favorite = _fl(key.lower(), key, "Interop", "conventional", "Component")
+        favorite.systems = [System(
+            id=system_id, label=key,
+            departments=[Department(
+                id=f"{system_id}-department", label="Operations",
+                channels=[Channel(id=f"{system_id}-channel", label="Channel", freq_mhz=155.0)],
+            )],
+        )]
+        return favorite
+
+    catalog = Catalog(favorites=[
+        component("FL01", "system-1"), component("FL04", "system-4"),
+        component("FL05", "system-5"), component("FL06", "system-6"),
+        _fl(
+            "fl30", "FL30", "Interop", "trunked P25 + conventional",
+            "Components (reuses FL4/5/6/1)",
+        ),
+    ])
+    first = enrich_catalog(catalog, [], build_default_recipes(catalog)).catalog
+    first.by_slug("fl04").systems = component("FL04", "system-4-new").systems
+
+    second = enrich_catalog(first, [], build_default_recipes(first)).catalog
+
+    assert [system.id for system in second.by_slug("fl30").systems] == [
+        "system-4-new", "system-5", "system-6", "system-1",
+    ]
+    assert sum(
+        item.source_adapter == "derived_rollup"
+        for item in second.by_slug("fl30").provenance
+    ) == 4
 
 
 def test_name_hint_alone_never_disables_the_keyword_source_fallback():

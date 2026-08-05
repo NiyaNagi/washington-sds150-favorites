@@ -30,13 +30,15 @@
       <h2>Baseline Catalog</h2>
       <div class="toolbar">
         <input type="text" id="catalog-region-filter" placeholder="Filter by region…" />
+        <span id="catalog-count" class="hint" aria-live="polite"></span>
       </div>
       <table class="data-table" id="catalog-table">
         <thead>
-          <tr><th>Key</th><th>Name</th><th>Region</th><th>Scenario</th><th>Mode</th></tr>
+          <tr><th></th><th>Key</th><th>Name</th><th>Region</th><th>Scenario</th><th>Mode</th><th>Contents</th></tr>
         </thead>
         <tbody></tbody>
       </table>
+      <div id="catalog-detail-status" class="visually-hidden" aria-live="polite"></div>
     </section>
 
     <section id="tab-profile" class="tab-panel">

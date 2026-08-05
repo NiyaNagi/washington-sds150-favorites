@@ -9,6 +9,8 @@ import pytest
 
 from wasds150.appctx import build_context
 from wasds150.config import AppConfig
+from wasds150.models.catalog import Channel, Department, Site, System, TrunkFrequency
+from wasds150.models.provenance import Provenance
 from wasds150.webui.server import build_server
 
 
@@ -95,11 +97,98 @@ def test_catalog_endpoint_and_filter(live_server):
     status, body, _ = _request(base_url, "/api/v1/catalog", token=token)
     data = json.loads(body)
     assert len(data["favorites"]) == 3
+    assert "systems" in data["favorites"][0]
+    assert "provenance" in data["favorites"][0]
+    assert "profile_state" in data["favorites"][0]
 
-    status, body, _ = _request(base_url, "/api/v1/catalog?region=Eastern", token=token)
+    status, body, _ = _request(base_url, "/api/v1/catalog-summaries", token=token)
+    data = json.loads(body)
+    assert data["total"] == 3
+    assert "systems" not in data["favorites"][0]
+    assert "provenance" not in data["favorites"][0]
+
+    status, body, _ = _request(base_url, "/api/v1/catalog-summaries?region=Eastern", token=token)
     data = json.loads(body)
     assert len(data["favorites"]) == 1
     assert data["favorites"][0]["slug"] == "fl09a"
+
+
+def test_catalog_entry_returns_all_nested_metadata_and_profile_state(live_server):
+    base_url, token, ctx = live_server
+    favorite = ctx.catalog.by_slug("fl01")
+    favorite.systems = [System(
+        id="system-1", label="Regional", sid=101, wacn="BEE00", tech="P25", avoid=True,
+        trunk_frequencies=[TrunkFrequency(id="frequency-1", freq_mhz=851.0125, lcn=7, usage="Control")],
+        sites=[Site(
+            id="site-1", label="Central", lat=47.5, lon=-122.3, range_miles=25.0,
+            shape="Circle", avoid=False,
+            departments=[Department(
+                id="department-1", label="Operations", encrypted_bucket=True, dqk=3,
+                lat=47.5, lon=-122.3, range_miles=10.0, shape="Circle", avoid=True,
+                channels=[Channel(
+                    id="channel-1", label="Dispatch", tgid=123, mode="P25", notes="Test",
+                    tone="NAC=123", service_type=3, priority=True, avoid=True,
+                )],
+            )],
+        )],
+    )]
+    favorite.provenance = [Provenance(
+        source_adapter="synthetic", source_url="https://example.invalid/source",
+        fetched_at="2026-08-04T00:00:00+00:00", confidence="verified",
+    )]
+    profile = ctx.load_profile()
+    profile.set_enabled("fl01", False)
+    profile.set_override("fl01", "notes", "Local note")
+    profile.save(ctx.config.profile_path)
+
+    status, body, _ = _request(base_url, "/api/v1/catalog/fl01", token=token)
+
+    assert status == 200
+    data = json.loads(body)
+    assert data["systems"][0]["sites"][0]["departments"][0]["channels"][0]["tgid"] == 123
+    assert data["systems"][0]["trunk_frequencies"][0]["lcn"] == 7
+    assert data["provenance"][0]["confidence"] == "verified"
+    assert data["profile_state"]["effective_enabled"] is False
+    assert data["profile_state"]["overrides"] == {"notes": "(private override value hidden)"}
+
+
+def test_catalog_metadata_redacts_credentials_queries_and_local_paths(live_server):
+    base_url, token, ctx = live_server
+    favorite = ctx.catalog.by_slug("fl01")
+    favorite.source_url = "https://user:secret@example.invalid/data?token=private#fragment"
+    favorite.provenance = [
+        Provenance(
+            source_adapter="local", source_url="file:///C:/private/hpdb.cfg",
+            confidence="verified",
+        ),
+        Provenance(
+            source_adapter="legacy", source_url="ftp://user:secret@example.invalid/private",
+            confidence="community",
+        ),
+        Provenance(
+            source_adapter="malicious", source_url="catalog://user:secret@host/private?token=secret",
+            confidence="community",
+        ),
+    ]
+    profile = ctx.load_profile()
+    profile.set_override("fl01", "source_url", "C:\\private\\export.csv")
+    profile.entry_for("fl01").note = "password=do-not-return"
+    profile.save(ctx.config.profile_path)
+
+    status, body, _ = _request(base_url, "/api/v1/catalog/fl01", token=token)
+
+    assert status == 200
+    payload = body.decode("utf-8")
+    data = json.loads(body)
+    assert data["source_url"] == "https://example.invalid/data"
+    assert data["provenance"][0]["source_url"] == "(local path redacted)"
+    assert data["provenance"][1]["source_url"] == "(unsupported source reference redacted)"
+    assert data["provenance"][2]["source_url"] == "(unsupported source reference redacted)"
+    assert data["profile_state"]["overrides"]["source_url"] == "(local path redacted)"
+    assert data["profile_state"]["note_present"] is True
+    assert "secret" not in payload
+    assert "private" not in payload
+    assert "do-not-return" not in payload
 
 
 def test_catalog_entry_not_found(live_server):

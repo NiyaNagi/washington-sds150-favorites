@@ -17,6 +17,15 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Added a Windows Sentinel refresh, HPE import, scanner-write, and local
   dashboard runbook, including the exact repeatable preview/apply/generate
   workflow and fail-safe device verification steps.
+- Added lazy, accessible expansion for every dashboard Catalog item. Full
+  on-demand detail includes every serialized catalog field, profile state,
+  provenance, systems, sites, trunk frequencies, departments, channels,
+  talkgroups, geolocation, service metadata, priority, and avoids. Large
+  collections render in bounded batches.
+- Added fail-closed rollup composition for catalog rows that explicitly
+  declare reusable component lists. FL30 now deep-copies complete
+  FL04/FL05/FL06/FL01 systems without flattening records or inventing a
+  geographic boundary.
 
 ### Fixed
 
@@ -50,6 +59,17 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Compared stable record identities with the previous local snapshot. The
   refreshed source added or retired records in FL09a/b, FL10, FL21,
   FL25a, FL50a/b, and FL58 while preserving the expected system hierarchy.
+- Revalidated the completed FL30 rollup and generated 76 HPE files. FL45
+  and FL72 remain intentionally unfilled because no authoritative stable
+  channel data exists outside lawful on-site Discovery.
+
+### Security
+
+- Added a bounded catalog-summary API for the dashboard while preserving the
+  existing full catalog API contract. Complete metadata is fetched one item
+  at a time, rendered with DOM `textContent` rather than catalog `innerHTML`,
+  and excludes source credentials, private profile notes, raw HPDB records,
+  cache data, and local paths.
 
 ## 0.1.0 - 2026-08-03
 

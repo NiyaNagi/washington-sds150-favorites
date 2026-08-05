@@ -1,8 +1,9 @@
 # Cross-Machine Sentinel Enrichment Handoff
 
 > **Completed refresh:** This handoff was executed against Sentinel master
-> database date August 2, 2026. The verified result produced 75 HPE files
-> with FL30/FL45/FL72 intentionally unresolved. See
+> database date August 2, 2026. The verified result now produces 76 HPE
+> files; FL30 is a validated full-component rollup, while only FL45/FL72
+> remain intentionally unresolved Discovery lists. See
 > [Sentinel Refresh, Import, and Dashboard Runbook](sentinel-refresh-runbook.md)
 > for the repeatable current workflow, validation record, device import, and
 > dashboard instructions.

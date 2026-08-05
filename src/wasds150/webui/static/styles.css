@@ -119,6 +119,53 @@ button.danger { border-color: var(--danger); color: var(--danger); }
 .data-table td.actions { white-space: nowrap; }
 .data-table button { margin-right: 0.3rem; padding: 0.25rem 0.55rem; font-size: 0.78rem; }
 
+.catalog-detail-row:hover { background: transparent !important; }
+.catalog-detail-row > td { padding: 0; }
+.catalog-detail {
+  max-height: 70vh;
+  overflow: auto;
+  padding: 1rem;
+  background: var(--bg);
+  border-left: 3px solid var(--accent-dark);
+}
+.metadata-grid {
+  display: grid;
+  grid-template-columns: minmax(150px, 240px) minmax(220px, 1fr);
+  gap: 0.25rem 0.75rem;
+  margin: 0 0 0.75rem;
+}
+.metadata-grid dt, .metadata-grid dd { margin: 0; padding: 0.2rem 0; }
+.metadata-key { color: var(--muted); font-weight: 600; }
+.metadata-value { overflow-wrap: anywhere; }
+.metadata-value a { color: var(--accent); }
+.metadata-section {
+  margin: 0.4rem 0 0.4rem 0.75rem;
+  border-left: 1px solid var(--border);
+  padding-left: 0.75rem;
+}
+.metadata-section > summary { cursor: pointer; color: var(--accent); padding: 0.25rem 0; }
+.nested-list { min-width: 0; }
+.empty-value { color: var(--muted); font-style: italic; }
+.detail-error { color: var(--danger); }
+.show-more { margin: 0.5rem 0; }
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 720px) {
+  .metadata-grid { grid-template-columns: 1fr; }
+  .metadata-grid dd { margin-bottom: 0.35rem; }
+  .catalog-detail { max-height: 75vh; }
+}
+
 .pill {
   display: inline-block;
   padding: 0.1rem 0.5rem;

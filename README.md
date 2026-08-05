@@ -68,6 +68,11 @@ On Windows, launch the same local dashboard from the repository root with:
 See the [Sentinel refresh/import/dashboard runbook](docs/sentinel-refresh-runbook.md)
 for the complete updated-database and device-import workflow.
 
+The dashboard's **Catalog** tab uses lightweight summary rows. Expand any
+row to load every available non-sensitive field on demand, including profile state,
+provenance, systems, sites, trunk frequencies, departments, conventional
+channels, talkgroups, geolocation, service metadata, priority, and avoids.
+
 The generated `out/sentinel-import-pack.zip` is the bulk download. Its
 `hpe/` directory contains every currently available Favorites List with
 clear, stable names such as `FL01.hpe` and `FL75.hpe`. Sentinel imports HPE

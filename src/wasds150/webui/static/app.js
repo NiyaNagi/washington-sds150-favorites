@@ -110,17 +110,206 @@
   }
 
   // ------------------------------------------------------------- catalog --
+  const catalogDetailCache = new Map();
+
+  function humanizeMetadataKey(key) {
+    return String(key).replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+  }
+
+  function scalarMetadataValue(value) {
+    const span = document.createElement("span");
+    span.className = "metadata-value";
+    if (value === null || value === undefined) {
+      span.textContent = "—";
+      span.classList.add("empty-value");
+    } else if (value === "") {
+      span.textContent = "(empty)";
+      span.classList.add("empty-value");
+    } else if (typeof value === "boolean") {
+      span.textContent = value ? "Yes" : "No";
+    } else if (typeof value === "string" && /^https?:\/\//i.test(value)) {
+      const link = document.createElement("a");
+      link.href = value;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = value;
+      span.appendChild(link);
+    } else {
+      span.textContent = String(value);
+    }
+    return span;
+  }
+
+  function metadataItemLabel(item, index) {
+    if (!item || typeof item !== "object") return `Item ${index + 1}`;
+    return item.favorite_key || item.label || item.name || item.id || `Item ${index + 1}`;
+  }
+
+  function attachLazyDetails(details, factory) {
+    details.addEventListener("toggle", () => {
+      if (!details.open || details.dataset.loaded === "true") return;
+      details.appendChild(factory());
+      details.dataset.loaded = "true";
+    });
+  }
+
+  function renderMetadataArray(values, depth) {
+    const container = document.createElement("div");
+    container.className = "nested-list";
+    if (!values.length) {
+      container.appendChild(scalarMetadataValue([]));
+      container.firstChild.textContent = "None";
+      return container;
+    }
+    let rendered = 0;
+    const batchSize = 100;
+    const renderNext = () => {
+      const fragment = document.createDocumentFragment();
+      const end = Math.min(rendered + batchSize, values.length);
+      for (let index = rendered; index < end; index += 1) {
+        const item = values[index];
+        if (item && typeof item === "object") {
+          const details = document.createElement("details");
+          details.className = "metadata-section";
+          const summary = document.createElement("summary");
+          summary.textContent = metadataItemLabel(item, index);
+          details.appendChild(summary);
+          attachLazyDetails(details, () => renderMetadataObject(item, depth + 1));
+          fragment.appendChild(details);
+        } else {
+          fragment.appendChild(scalarMetadataValue(item));
+        }
+      }
+      rendered = end;
+      container.appendChild(fragment);
+      const previous = container.querySelector("button.show-more");
+      if (previous) previous.remove();
+      if (rendered < values.length) {
+        const more = document.createElement("button");
+        more.type = "button";
+        more.className = "show-more";
+        more.textContent = `Show ${Math.min(batchSize, values.length - rendered)} more`;
+        more.addEventListener("click", renderNext);
+        container.appendChild(more);
+      }
+    };
+    renderNext();
+    return container;
+  }
+
+  function renderMetadataObject(value, depth) {
+    const container = document.createElement("div");
+    container.className = "metadata-object";
+    if (depth > 12) {
+      container.appendChild(scalarMetadataValue("Maximum display depth reached"));
+      return container;
+    }
+    const scalarGrid = document.createElement("dl");
+    scalarGrid.className = "metadata-grid";
+    const nested = [];
+    Object.entries(value || {}).forEach(([key, item]) => {
+      if (item !== null && typeof item === "object") {
+        nested.push([key, item]);
+        return;
+      }
+      const term = document.createElement("dt");
+      term.className = "metadata-key";
+      term.textContent = humanizeMetadataKey(key);
+      const definition = document.createElement("dd");
+      definition.appendChild(scalarMetadataValue(item));
+      scalarGrid.append(term, definition);
+    });
+    if (scalarGrid.children.length) container.appendChild(scalarGrid);
+    nested.forEach(([key, item]) => {
+      const details = document.createElement("details");
+      details.className = "metadata-section";
+      const summary = document.createElement("summary");
+      summary.textContent = `${humanizeMetadataKey(key)}${Array.isArray(item) ? ` (${item.length})` : ""}`;
+      details.appendChild(summary);
+      attachLazyDetails(details, () => (
+        Array.isArray(item) ? renderMetadataArray(item, depth + 1) : renderMetadataObject(item, depth + 1)
+      ));
+      container.appendChild(details);
+    });
+    return container;
+  }
+
+  function appendCatalogCell(row, value) {
+    const cell = document.createElement("td");
+    cell.textContent = value === null || value === undefined || value === "" ? "—" : String(value);
+    row.appendChild(cell);
+  }
+
+  async function toggleCatalogDetail(fl, button, detailRow, detailCell) {
+    const expanding = button.getAttribute("aria-expanded") !== "true";
+    button.setAttribute("aria-expanded", String(expanding));
+    button.textContent = expanding ? "Collapse" : "Expand";
+    detailRow.hidden = !expanding;
+    if (!expanding || detailRow.dataset.loaded === "true") return;
+    button.disabled = true;
+    detailCell.textContent = "Loading full metadata…";
+    try {
+      let detail = catalogDetailCache.get(fl.slug);
+      if (!detail) {
+        detail = await apiGet("/api/v1/catalog/" + encodeURIComponent(fl.slug));
+        catalogDetailCache.set(fl.slug, detail);
+      }
+      detailCell.textContent = "";
+      const wrapper = document.createElement("div");
+      wrapper.className = "catalog-detail";
+      wrapper.appendChild(renderMetadataObject(detail, 0));
+      detailCell.appendChild(wrapper);
+      detailRow.dataset.loaded = "true";
+      document.getElementById("catalog-detail-status").textContent = `Loaded full details for ${fl.favorite_key}`;
+    } catch (error) {
+      detailCell.textContent = "Unable to load details: " + error.message;
+      detailCell.classList.add("detail-error");
+      button.setAttribute("aria-expanded", "false");
+      button.textContent = "Expand";
+      detailRow.hidden = true;
+    } finally {
+      button.disabled = false;
+    }
+  }
+
   async function loadCatalog() {
     try {
       const region = document.getElementById("catalog-region-filter").value;
       const qs = region ? "?region=" + encodeURIComponent(region) : "";
-      const data = await apiGet("/api/v1/catalog" + qs);
+      const data = await apiGet("/api/v1/catalog-summaries" + qs);
       const tbody = document.querySelector("#catalog-table tbody");
-      tbody.innerHTML = "";
+      tbody.replaceChildren();
+      document.getElementById("catalog-count").textContent = `${data.total || 0} catalog items`;
       (data.favorites || []).forEach((fl) => {
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${fl.favorite_key}</td><td>${fl.favorite_name}</td><td>${fl.region}</td><td>${fl.scenario}</td><td>${fl.mode}</td>`;
-        tbody.appendChild(tr);
+        const detailId = `catalog-detail-${fl.slug}`;
+        const actionCell = document.createElement("td");
+        const expandButton = document.createElement("button");
+        expandButton.type = "button";
+        expandButton.textContent = "Expand";
+        expandButton.setAttribute("aria-expanded", "false");
+        expandButton.setAttribute("aria-controls", detailId);
+        actionCell.appendChild(expandButton);
+        tr.appendChild(actionCell);
+        appendCatalogCell(tr, fl.favorite_key);
+        appendCatalogCell(tr, fl.favorite_name);
+        appendCatalogCell(tr, fl.region);
+        appendCatalogCell(tr, fl.scenario);
+        appendCatalogCell(tr, fl.mode);
+        appendCatalogCell(
+          tr,
+          `${fl.system_count} systems / ${fl.site_count} sites / ${fl.channel_count} channels`
+        );
+
+        const detailRow = document.createElement("tr");
+        detailRow.id = detailId;
+        detailRow.className = "catalog-detail-row";
+        detailRow.hidden = true;
+        const detailCell = document.createElement("td");
+        detailCell.colSpan = 7;
+        detailRow.appendChild(detailCell);
+        expandButton.addEventListener("click", () => toggleCatalogDetail(fl, expandButton, detailRow, detailCell));
+        tbody.append(tr, detailRow);
       });
     } catch (e) {
       setStatus("Catalog error: " + e.message, true);

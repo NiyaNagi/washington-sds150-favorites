@@ -11,11 +11,13 @@ The August 2, 2026 Sentinel master database was read successfully on Windows:
 - 14,939 normalized local HPDB facts, with no source alerts.
 - All 17 intended SID-qualified trunked Favorites Lists matched exact
   TrunkId/SysId identities.
-- 75 validated HPE files were generated.
-- FL30 remains a deliberately unbuilt eastern/central rollup because safely
-  filtering its component systems requires a separate geographic curation
-  pass.
-- FL45 and FL72 remain intentional on-site Discovery lists.
+- 76 validated HPE files were generated.
+- FL30 is composed fail-closed from complete deep copies of FL04, FL05,
+  FL06, and FL01. It preserves each component's verified hierarchy and GPS
+  metadata without inventing a geographic boundary or radio fact. It should
+  be treated as a full-component location-controlled rollup; users wanting a
+  smaller scan cycle should review and avoid distant sites in Sentinel.
+- FL45 and FL72 remain the only intentional on-site Discovery lists.
 - Every generated HPE decoded and passed schema and semantic validation.
 - The import-pack manifest, file set, and SHA-256 checksums passed validation.
 - Clear/encrypted split pairs were distinct; every retained encrypted
