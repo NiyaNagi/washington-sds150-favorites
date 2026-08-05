@@ -24,6 +24,15 @@ from wasds150.catalog import loader as catalog_loader
 from wasds150.catalog.ids import slugify, stable_id
 from wasds150.catalog.validate import validate_catalog
 from wasds150.diffing.differ import diff_profile
+from wasds150.display_customizer import (
+    PALETTES,
+    SCREEN_SPECS,
+    generate_display_xml,
+    palette_by_id,
+    palette_summary,
+    validate_display_xml,
+    validate_palette,
+)
 from wasds150.generate.pipeline import apply_profile
 from wasds150.history.rollback import rollback_profile
 from wasds150.history.snapshots import SnapshotStore
@@ -238,6 +247,32 @@ def get_sentinel_workspace(ctx: AppContext, req: RequestContext) -> Response:
         "profiles": profiles,
         "default_backup_dir": str(workspace.parent / "wasds150-backups"),
     })
+
+
+def get_display_palettes(ctx: AppContext, req: RequestContext) -> Response:
+    return Response.json(200, {
+        "palettes": [palette_summary(palette) for palette in PALETTES],
+        "screens": list(SCREEN_SPECS),
+        "minimum_contrast_target": 4.5,
+    })
+
+
+def get_display_palette_xml(ctx: AppContext, req: RequestContext) -> Response:
+    palette_id = req.params["palette_id"]
+    palette = palette_by_id(palette_id)
+    if palette is None:
+        return _error(404, f"Unknown display palette: {palette_id}")
+    issues = validate_palette(palette)
+    data = generate_display_xml(palette)
+    issues.extend(validate_display_xml(data))
+    if issues:
+        return _error(500, "display palette failed validation: " + "; ".join(issues))
+    return Response(
+        status=200,
+        body=data,
+        content_type="application/xml",
+        headers={"Content-Disposition": f'attachment; filename="wasds150-display-{palette.id}.xml"'},
+    )
 
 
 def post_sentinel_workspace_install(ctx: AppContext, req: RequestContext) -> Response:
@@ -1112,6 +1147,8 @@ def build_router(ctx: AppContext) -> Router:
     router.add("GET", "/api/v1/preview", lambda req: get_preview(ctx, req))
     router.add("GET", "/api/v1/sentinel/workspace", lambda req: get_sentinel_workspace(ctx, req))
     router.add("POST", "/api/v1/sentinel/install", lambda req: post_sentinel_workspace_install(ctx, req))
+    router.add("GET", "/api/v1/display/palettes", lambda req: get_display_palettes(ctx, req))
+    router.add("GET", "/api/v1/display/palettes/{palette_id}", lambda req: get_display_palette_xml(ctx, req))
     router.add("POST", "/api/v1/profile/enable", lambda req: post_profile_enable(ctx, req))
     router.add("POST", "/api/v1/profile/edit", lambda req: post_profile_edit(ctx, req))
     router.add("POST", "/api/v1/profile/remove", lambda req: post_profile_remove(ctx, req))

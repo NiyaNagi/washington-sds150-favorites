@@ -15,6 +15,7 @@
   <nav class="tabs" id="tabs">
     <button data-tab="dashboard" class="tab-btn active">Dashboard</button>
     <button data-tab="catalog" class="tab-btn">Catalog</button>
+    <button data-tab="display" class="tab-btn">Display</button>
     <button data-tab="profile" class="tab-btn">Profile</button>
     <button data-tab="export" class="tab-btn">Export</button>
     <button data-tab="advanced" class="tab-btn">Advanced</button>
@@ -39,6 +40,27 @@
         <tbody></tbody>
       </table>
       <div id="catalog-detail-status" class="visually-hidden" aria-live="polite"></div>
+    </section>
+
+    <section id="tab-display" class="tab-panel">
+      <h2>Display Customizer</h2>
+      <p class="hint">Compare accessible SDS100/SDS150 palettes across all seven Sentinel display modes. Colors keep the same meaning everywhere: system, department/site, channel/TGID, technical metadata, status, alerts, and active indicators.</p>
+      <div id="display-palette-options" class="display-palette-options" role="radiogroup" aria-label="Display palette"></div>
+      <div class="toolbar">
+        <button id="display-download-btn" class="primary" disabled>Download selected Sentinel XML</button>
+        <span id="display-contrast-summary" class="hint" aria-live="polite"></span>
+      </div>
+      <div id="display-preview-grid" class="display-preview-grid"></div>
+      <div class="panel">
+        <h3>Import into Sentinel</h3>
+        <ol class="hint">
+          <li>Download the selected XML.</li>
+          <li>In Sentinel, use <strong>File → Import Display Customizing Settings</strong>.</li>
+          <li>Open <strong>Edit → Edit Profile → Display Options → Customize</strong> and inspect all seven modes.</li>
+          <li>Save the profile, then write it to the scanner normally.</li>
+        </ol>
+        <p class="hint">The XML retains Uniden's exported <code>UndienScanner</code> root spelling and the exact item names/options/order from the attached Sentinel export.</p>
+      </div>
     </section>
 
     <section id="tab-profile" class="tab-panel">

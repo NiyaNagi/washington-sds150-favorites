@@ -36,6 +36,15 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   all generated HPEs match observed shared record widths and the direct HPD
   writer emits Sentinel's plain ASCII/CRLF form without the HPE-only trailing
   signature.
+- Added a Display Customizer dashboard tab with all seven scanner modes shown
+  on one preview page, four coordinated semantic palettes, per-color contrast
+  ratios, and validated Sentinel XML downloads.
+- Added Night Ops, Daylight High Contrast, Colorblind Dark, and Low-Light
+  Amber palettes. System, department/site, channel/TGID, metadata, status,
+  alert, and active-icon colors keep the same meaning across every mode.
+- Added the original Sentinel display export as a checked-in structural
+  reference plus a sourced display guide covering official item constraints,
+  palette rationale, preview workflow, and Sentinel import steps.
 
 ### Fixed
 
@@ -88,6 +97,8 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   generated payloads, and every destination's pre-write state. Added one
   workspace-wide interprocess lock, explicit replacement approval, and
   preservation of unindexed/orphan HPD files.
+- Validate every display download for exact Sentinel root/screen/item shape,
+  RGB syntax, template parity, and a minimum 4.5:1 text/background contrast.
 
 ## 0.1.0 - 2026-08-03
 

@@ -1,0 +1,332 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<UndienScanner Model="SDS100" FileType="DisplayCustomizer">
+    <Screen Name="SimpleConventional">
+        <Item Name="Func" Text="ffffff" Back="000000" />
+        <Item Name="Option_1" Option="ATT" Text="ffffff" Back="000000" />
+        <Item Name="Option_2" Option="Bluetooth" Text="ffffff" Back="000000" />
+        <Item Name="Option_3" Option="Day" Text="ffffff" Back="000000" />
+        <Item Name="Option_4" Option="Time" Text="ffffff" Back="000000" />
+        <Item Name="SIG" Text="ffffff" Back="000000" />
+        <Item Name="BATT" Text="ffffff" Back="000000" />
+        <Item Name="SP0" Text="ffffff" Back="000000" />
+        <Item Name="Option_5" Option="Volume" Text="ffffff" Back="000000" />
+        <Item Name="Option_6" Option="Squelch" Text="ffffff" Back="000000" />
+        <Item Name="Option_7" Option="P25Status" Text="ffffff" Back="000000" />
+        <Item Name="Option_8" Option="TdmaSlot" Text="ffffff" Back="000000" />
+        <Item Name="key" Text="ffffff" Back="000000" />
+        <Item Name="Dir" Text="ffffff" Back="000000" />
+        <Item Name="System Name" Text="ff4600" Back="000000" />
+        <Item Name="System option" Option="FL_Name" Text="ff4600" Back="000000" />
+        <Item Name="Avoid" Text="ff4600" Back="000000" />
+        <Item Name="Department Name" Text="ff8800" Back="000000" />
+        <Item Name="Department option" Option="Empty" Text="ff8800" Back="000000" />
+        <Item Name="Avoid" Text="ff8800" Back="000000" />
+        <Item Name="Channel Name" Text="ffd600" Back="000000" />
+        <Item Name="Channel option" Option="Frequency" Text="ffd600" Back="000000" />
+        <Item Name="Avoid" Text="ffd600" Back="000000" />
+        <Item Name="Option A" Option="ServiceType" Text="e79473" Back="000000" />
+        <Item Name="Option B" Option="CTCSS/DCS" Text="e79473" Back="000000" />
+        <Item Name="Icon 1" Option="Modulation" Text="ffffff" Back="000000" />
+        <Item Name="Icon 2" Option="P_Ch" Text="ffffff" Back="000000" />
+        <Item Name="Icon 3" Option="IFX" Text="ffffff" Back="000000" />
+        <Item Name="Icon 4" Option="LVL" Text="ffffff" Back="000000" />
+        <Item Name="Icon 5" Option="Empty" Text="ffffff" Back="000000" />
+        <Item Name="Icon 6" Option="REC" Text="ffffff" Back="000000" />
+        <Item Name="Icon 7" Option="GPS" Text="ffffff" Back="000000" />
+        <Item Name="Icon 8" Option="PRI" Text="ffffff" Back="000000" />
+        <Item Name="Icon 9" Option="CC" Text="ffffff" Back="000000" />
+        <Item Name="Icon 10" Option="WxPRI" Text="ffffff" Back="000000" />
+        <Item Name="Soft1 Key" Text="ffffff" Back="000000" />
+        <Item Name="SP1" Text="ffffff" Back="000000" />
+        <Item Name="Soft2 Key" Text="ffffff" Back="000000" />
+        <Item Name="SP2" Text="ffffff" Back="000000" />
+        <Item Name="Soft3 Key" Text="ffffff" Back="000000" />
+    </Screen>
+    <Screen Name="SimpleTrunk">
+        <Item Name="Func" Text="ffffff" Back="000000" />
+        <Item Name="Option_1" Option="ATT" Text="ffffff" Back="000000" />
+        <Item Name="Option_2" Option="Bluetooth" Text="ffffff" Back="000000" />
+        <Item Name="Option_3" Option="Day" Text="ffffff" Back="000000" />
+        <Item Name="Option_4" Option="Time" Text="ffffff" Back="000000" />
+        <Item Name="SIG" Text="ffffff" Back="000000" />
+        <Item Name="BATT" Text="ffffff" Back="000000" />
+        <Item Name="SP0" Text="ffffff" Back="000000" />
+        <Item Name="Option_5" Option="Volume" Text="ffffff" Back="000000" />
+        <Item Name="Option_6" Option="Squelch" Text="ffffff" Back="000000" />
+        <Item Name="Option_7" Option="P25Status" Text="ffffff" Back="000000" />
+        <Item Name="Option_8" Option="TdmaSlot" Text="ffffff" Back="000000" />
+        <Item Name="key" Text="ffffff" Back="000000" />
+        <Item Name="Dir" Text="ffffff" Back="000000" />
+        <Item Name="System Name" Text="ff4600" Back="000000" />
+        <Item Name="System option" Option="FL_Name" Text="ff4600" Back="000000" />
+        <Item Name="Avoid" Text="ff4600" Back="000000" />
+        <Item Name="Department Name" Text="ff8800" Back="000000" />
+        <Item Name="Department option" Option="SiteName" Text="ff8800" Back="000000" />
+        <Item Name="Avoid" Text="ff8800" Back="000000" />
+        <Item Name="Channel Name" Text="ffd600" Back="000000" />
+        <Item Name="Channel option" Option="TGID" Text="ffd600" Back="000000" />
+        <Item Name="Avoid" Text="ffd600" Back="000000" />
+        <Item Name="Option A" Option="ServiceType" Text="e79473" Back="000000" />
+        <Item Name="Option B" Option="CTCSS/DCS" Text="e79473" Back="000000" />
+        <Item Name="Icon 1" Option="Modulation" Text="ffffff" Back="000000" />
+        <Item Name="Icon 2" Option="P_Ch" Text="ffffff" Back="000000" />
+        <Item Name="Icon 3" Option="IFX" Text="ffffff" Back="000000" />
+        <Item Name="Icon 4" Option="LVL" Text="ffffff" Back="000000" />
+        <Item Name="Icon 5" Option="Empty" Text="ffffff" Back="000000" />
+        <Item Name="Icon 6" Option="REC" Text="ffffff" Back="000000" />
+        <Item Name="Icon 7" Option="GPS" Text="ffffff" Back="000000" />
+        <Item Name="Icon 8" Option="PRI" Text="ffffff" Back="000000" />
+        <Item Name="Icon 9" Option="CC" Text="ffffff" Back="000000" />
+        <Item Name="Icon 10" Option="WxPRI" Text="ffffff" Back="000000" />
+        <Item Name="Soft1 Key" Text="ffffff" Back="000000" />
+        <Item Name="SP1" Text="ffffff" Back="000000" />
+        <Item Name="Soft2 Key" Text="ffffff" Back="000000" />
+        <Item Name="SP2" Text="ffffff" Back="000000" />
+        <Item Name="Soft3 Key" Text="ffffff" Back="000000" />
+    </Screen>
+    <Screen Name="DetailConventional">
+        <Item Name="Func" Text="ffffff" Back="000000" />
+        <Item Name="Option_1" Option="ATT" Text="ffffff" Back="000000" />
+        <Item Name="Option_2" Option="Bluetooth" Text="ffffff" Back="000000" />
+        <Item Name="Option_3" Option="Day" Text="ffffff" Back="000000" />
+        <Item Name="Option_4" Option="Time" Text="ffffff" Back="000000" />
+        <Item Name="SIG" Text="ffffff" Back="000000" />
+        <Item Name="BATT" Text="ffffff" Back="000000" />
+        <Item Name="Info Area 1" Text="ffffff" Back="000000" />
+        <Item Name="Option_7" Option="P25Status" Text="ffffff" Back="000000" />
+        <Item Name="Option_8" Option="TdmaSlot" Text="ffffff" Back="000000" />
+        <Item Name="key" Text="ffffff" Back="000000" />
+        <Item Name="Dir" Text="ffffff" Back="000000" />
+        <Item Name="Info Area 2" Text="ffffff" Back="000000" />
+        <Item Name="Option C-1" Option="Volume&amp;Squelch" Text="ffffff" Back="000000" />
+        <Item Name="Info Area 3" Text="ffffff" Back="000000" />
+        <Item Name="Option C-2" Option="NumberTag" Text="ffffff" Back="000000" />
+        <Item Name="System Name" Text="7bff00" Back="000000" />
+        <Item Name="System option" Option="FL_Name" Text="ff4600" Back="000000" />
+        <Item Name="Avoid" Text="ff4600" Back="000000" />
+        <Item Name="Department Name" Text="ff8800" Back="000000" />
+        <Item Name="Department option" Option="Empty" Text="ff8800" Back="000000" />
+        <Item Name="Avoid" Text="ff8800" Back="000000" />
+        <Item Name="Channel Name" Text="ffd600" Back="000000" />
+        <Item Name="Channel option" Option="Frequency" Text="ffd600" Back="000000" />
+        <Item Name="Avoid" Text="ffd600" Back="000000" />
+        <Item Name="Option A-1" Option="ServiceType" Text="ffd600" Back="000000" />
+        <Item Name="Option B-1" Option="CTCSS/DCS" Text="ffd600" Back="000000" />
+        <Item Name="Option A-2" Option="SystemId" Text="e79473" Back="000000" />
+        <Item Name="Option B-2" Option="TGID" Text="e79473" Back="000000" />
+        <Item Name="Option A-3" Option="SysSubID" Text="e79473" Back="000000" />
+        <Item Name="Option B-3" Option="SiteId" Text="e79473" Back="000000" />
+        <Item Name="Option A-4" Option="WACN" Text="e79473" Back="000000" />
+        <Item Name="Option B-4" Option="BattVoltage" Text="e79473" Back="000000" />
+        <Item Name="Option A-5" Option="UnitId" Text="e79473" Back="000000" />
+        <Item Name="Option B-5" Option="Rssi" Text="e79473" Back="000000" />
+        <Item Name="Icon 1" Option="Modulation" Text="ffffff" Back="000000" />
+        <Item Name="Icon 2" Option="P_Ch" Text="ffffff" Back="000000" />
+        <Item Name="Icon 3" Option="IFX" Text="ffffff" Back="000000" />
+        <Item Name="Icon 4" Option="LVL" Text="ffffff" Back="000000" />
+        <Item Name="Icon 5" Option="Empty" Text="ffffff" Back="000000" />
+        <Item Name="Icon 6" Option="REC" Text="ffffff" Back="000000" />
+        <Item Name="Icon 7" Option="GPS" Text="ffffff" Back="000000" />
+        <Item Name="Icon 8" Option="PRI" Text="ffffff" Back="000000" />
+        <Item Name="Icon 9" Option="CC" Text="ffffff" Back="000000" />
+        <Item Name="Icon 10" Option="WxPRI" Text="ffffff" Back="000000" />
+        <Item Name="Soft1 Key" Text="ffffff" Back="000000" />
+        <Item Name="SP1" Text="ffffff" Back="000000" />
+        <Item Name="Soft2 Key" Text="ffffff" Back="000000" />
+        <Item Name="SP2" Text="ffffff" Back="000000" />
+        <Item Name="Soft3 Key" Text="ffffff" Back="000000" />
+    </Screen>
+    <Screen Name="DetailTrunk">
+        <Item Name="Func" Text="ffffff" Back="000000" />
+        <Item Name="Option_1" Option="ATT" Text="ffffff" Back="000000" />
+        <Item Name="Option_2" Option="Bluetooth" Text="ffffff" Back="000000" />
+        <Item Name="Option_3" Option="Day" Text="ffffff" Back="000000" />
+        <Item Name="Option_4" Option="Time" Text="ffffff" Back="000000" />
+        <Item Name="SIG" Text="ffffff" Back="000000" />
+        <Item Name="BATT" Text="ffffff" Back="000000" />
+        <Item Name="Info Area 1" Text="ffffff" Back="000000" />
+        <Item Name="Option_7" Option="P25Status" Text="ffffff" Back="000000" />
+        <Item Name="Option_8" Option="TdmaSlot" Text="ffffff" Back="000000" />
+        <Item Name="key" Text="ffffff" Back="000000" />
+        <Item Name="Dir" Text="ffffff" Back="000000" />
+        <Item Name="Info Area 2" Text="ffffff" Back="000000" />
+        <Item Name="Option C-1" Option="Volume&amp;Squelch" Text="ffffff" Back="000000" />
+        <Item Name="Info Area 3" Text="ffffff" Back="000000" />
+        <Item Name="Option C-2" Option="NumberTag" Text="ffffff" Back="000000" />
+        <Item Name="System Name" Text="ff4600" Back="000000" />
+        <Item Name="System option" Option="FL_Name" Text="ff4600" Back="000000" />
+        <Item Name="Avoid" Text="ff4600" Back="000000" />
+        <Item Name="Department Name" Text="ff8800" Back="000000" />
+        <Item Name="Department option" Option="SiteName" Text="ff8800" Back="000000" />
+        <Item Name="Avoid" Text="ff8800" Back="000000" />
+        <Item Name="Channel Name" Text="ffd600" Back="000000" />
+        <Item Name="Channel option" Option="TGID" Text="ffd600" Back="000000" />
+        <Item Name="Avoid" Text="ffd600" Back="000000" />
+        <Item Name="Option A-1" Option="ServiceType" Text="ffd600" Back="000000" />
+        <Item Name="Option B-1" Option="CTCSS/DCS" Text="ffd600" Back="000000" />
+        <Item Name="Option A-2" Option="SystemId" Text="e79473" Back="000000" />
+        <Item Name="Option B-2" Option="Frequency" Text="e79473" Back="000000" />
+        <Item Name="Option A-3" Option="SysSubID" Text="e79473" Back="000000" />
+        <Item Name="Option B-3" Option="SiteId" Text="e79473" Back="000000" />
+        <Item Name="Option A-4" Option="WACN" Text="e79473" Back="000000" />
+        <Item Name="Option B-4" Option="BattVoltage" Text="e79473" Back="000000" />
+        <Item Name="Option A-5" Option="UnitId" Text="e79473" Back="000000" />
+        <Item Name="Option B-5" Option="Rssi" Text="e79473" Back="000000" />
+        <Item Name="Icon 1" Option="Modulation" Text="ffffff" Back="000000" />
+        <Item Name="Icon 2" Option="P_Ch" Text="ffffff" Back="000000" />
+        <Item Name="Icon 3" Option="IFX" Text="ffffff" Back="000000" />
+        <Item Name="Icon 4" Option="LVL" Text="ffffff" Back="000000" />
+        <Item Name="Icon 5" Option="Empty" Text="ffffff" Back="000000" />
+        <Item Name="Icon 6" Option="REC" Text="ffffff" Back="000000" />
+        <Item Name="Icon 7" Option="GPS" Text="ffffff" Back="000000" />
+        <Item Name="Icon 8" Option="PRI" Text="ffffff" Back="000000" />
+        <Item Name="Icon 9" Option="CC" Text="ffffff" Back="000000" />
+        <Item Name="Icon 10" Option="WxPRI" Text="ffffff" Back="000000" />
+        <Item Name="Soft1 Key" Text="ffffff" Back="000000" />
+        <Item Name="SP1" Text="ffffff" Back="000000" />
+        <Item Name="Soft2 Key" Text="ffffff" Back="000000" />
+        <Item Name="SP2" Text="ffffff" Back="000000" />
+        <Item Name="Soft3 Key" Text="ffffff" Back="000000" />
+    </Screen>
+    <Screen Name="Search">
+        <Item Name="Func" Text="ffffff" Back="000000" />
+        <Item Name="Option_1" Option="ATT" Text="ffffff" Back="000000" />
+        <Item Name="Option_2" Option="Bluetooth" Text="ffffff" Back="000000" />
+        <Item Name="Option_3" Option="Day" Text="ffffff" Back="000000" />
+        <Item Name="Option_4" Option="Time" Text="ffffff" Back="000000" />
+        <Item Name="SIG" Text="ffffff" Back="000000" />
+        <Item Name="BATT" Text="ffffff" Back="000000" />
+        <Item Name="Info Area 1" Text="ffffff" Back="000000" />
+        <Item Name="Option_7" Option="P25Status" Text="ffffff" Back="000000" />
+        <Item Name="Option_8" Option="TdmaSlot" Text="ffffff" Back="000000" />
+        <Item Name="key" Text="ffffff" Back="000000" />
+        <Item Name="Dir" Text="ffffff" Back="000000" />
+        <Item Name="Info Area 2" Text="ffffff" Back="000000" />
+        <Item Name="Option C-1" Option="Volume&amp;Squelch" Text="ffffff" Back="000000" />
+        <Item Name="Info Area 3" Text="ffffff" Back="000000" />
+        <Item Name="Option C-2" Option="Empty" Text="ffffff" Back="000000" />
+        <Item Name="Primary Area-1" Text="ff4600" Back="000000" />
+        <Item Name="Primary Area-2" Text="ff4600" Back="000000" />
+        <Item Name="Primary Area-3" Text="ffd600" Back="000000" />
+        <Item Name="Sub Info" Text="ffd600" Back="000000" />
+        <Item Name="Modulation" Text="ffd600" Back="000000" />
+        <Item Name="Avoid" Text="ffd600" Back="000000" />
+        <Item Name="Hold" Text="ffd600" Back="000000" />
+        <Item Name="Detail Info" Text="ffd600" Back="000000" />
+        <Item Name="Option A-1" Option="SystemId" Text="e79473" Back="000000" />
+        <Item Name="Option B-1" Option="BattVoltage" Text="e79473" Back="000000" />
+        <Item Name="Option A-2" Option="UnitId" Text="e79473" Back="000000" />
+        <Item Name="Option B-2" Option="Rssi" Text="e79473" Back="000000" />
+        <Item Name="Option A-3" Option="TGID" Text="e79473" Back="000000" />
+        <Item Name="Option B-3" Option="Rssi Bar" Text="e79473" Back="000000" />
+        <Item Name="Icon 1" Option="SCR" Text="ffffff" Back="000000" />
+        <Item Name="Icon 2" Option="REP" Text="ffffff" Back="000000" />
+        <Item Name="Icon 3" Option="IFX" Text="ffffff" Back="000000" />
+        <Item Name="Icon 4" Option="LVL" Text="ffffff" Back="000000" />
+        <Item Name="Icon 5" Option="Empty" Text="ffffff" Back="000000" />
+        <Item Name="Icon 6" Option="REC" Text="ffffff" Back="000000" />
+        <Item Name="Icon 7" Option="GPS" Text="ffffff" Back="000000" />
+        <Item Name="Icon 8" Option="PRI" Text="ffffff" Back="000000" />
+        <Item Name="Icon 9" Option="CC" Text="ffffff" Back="000000" />
+        <Item Name="Icon 10" Option="WxPRI" Text="ffffff" Back="000000" />
+        <Item Name="Soft1 Key" Text="ffffff" Back="000000" />
+        <Item Name="SP1" Text="ffffff" Back="000000" />
+        <Item Name="Soft2 Key" Text="ffffff" Back="000000" />
+        <Item Name="SP2" Text="ffffff" Back="000000" />
+        <Item Name="Soft3 Key" Text="ffffff" Back="000000" />
+    </Screen>
+    <Screen Name="Weather">
+        <Item Name="Func" Text="ffffff" Back="000000" />
+        <Item Name="Option_1" Option="ATT" Text="ffffff" Back="000000" />
+        <Item Name="Option_2" Option="Bluetooth" Text="ffffff" Back="000000" />
+        <Item Name="Option_3" Option="Day" Text="ffffff" Back="000000" />
+        <Item Name="Option_4" Option="Time" Text="ffffff" Back="000000" />
+        <Item Name="SIG" Text="ffffff" Back="000000" />
+        <Item Name="BATT" Text="ffffff" Back="000000" />
+        <Item Name="Info Area 1" Text="ffffff" Back="000000" />
+        <Item Name="Option_7" Option="Empty" Text="ffffff" Back="000000" />
+        <Item Name="Option_8" Option="Empty" Text="ffffff" Back="000000" />
+        <Item Name="key" Text="ffffff" Back="000000" />
+        <Item Name="Dir" Text="ffffff" Back="000000" />
+        <Item Name="Info Area 2" Text="ffffff" Back="000000" />
+        <Item Name="Option C-1" Option="Volume&amp;Squelch" Text="ffffff" Back="000000" />
+        <Item Name="Info Area 3" Text="ffffff" Back="000000" />
+        <Item Name="Option C-2" Option="Empty" Text="ffffff" Back="000000" />
+        <Item Name="Primary Area-1" Text="ff4600" Back="000000" />
+        <Item Name="Primary Area-2" Text="ff4600" Back="000000" />
+        <Item Name="Primary Area-3" Text="ffd600" Back="000000" />
+        <Item Name="Sub Info" Text="ffd600" Back="000000" />
+        <Item Name="Modulation" Text="ffd600" Back="000000" />
+        <Item Name="Avoid" Text="ffd600" Back="000000" />
+        <Item Name="Hold" Text="ffd600" Back="000000" />
+        <Item Name="Detail Info" Text="ffd600" Back="000000" />
+        <Item Name="Option A-1" Option="Empty" Text="e79473" Back="000000" />
+        <Item Name="Option B-1" Option="BattVoltage" Text="e79473" Back="000000" />
+        <Item Name="Option A-2" Option="Empty" Text="e79473" Back="000000" />
+        <Item Name="Option B-2" Option="Rssi" Text="e79473" Back="000000" />
+        <Item Name="Option A-3" Option="Empty" Text="e79473" Back="000000" />
+        <Item Name="Option B-3" Option="Rssi Bar" Text="e79473" Back="000000" />
+        <Item Name="Icon 1" Option="Empty" Text="ffffff" Back="000000" />
+        <Item Name="Icon 2" Option="Empty" Text="ffffff" Back="000000" />
+        <Item Name="Icon 3" Option="IFX" Text="ffffff" Back="000000" />
+        <Item Name="Icon 4" Option="LVL" Text="ffffff" Back="000000" />
+        <Item Name="Icon 5" Option="Empty" Text="ffffff" Back="000000" />
+        <Item Name="Icon 6" Option="REC" Text="ffffff" Back="000000" />
+        <Item Name="Icon 7" Option="GPS" Text="ffffff" Back="000000" />
+        <Item Name="Icon 8" Option="Empty" Text="ffffff" Back="000000" />
+        <Item Name="Icon 9" Option="Empty" Text="ffffff" Back="000000" />
+        <Item Name="Icon 10" Option="Empty" Text="ffffff" Back="000000" />
+        <Item Name="Soft1 Key" Text="ffffff" Back="000000" />
+        <Item Name="SP1" Text="ffffff" Back="000000" />
+        <Item Name="Soft2 Key" Text="ffffff" Back="000000" />
+        <Item Name="SP2" Text="ffffff" Back="000000" />
+        <Item Name="Soft3 Key" Text="ffffff" Back="000000" />
+    </Screen>
+    <Screen Name="Tone out">
+        <Item Name="Func" Text="ffffff" Back="000000" />
+        <Item Name="Option_1" Option="ATT" Text="ffffff" Back="000000" />
+        <Item Name="Option_2" Option="Bluetooth" Text="ffffff" Back="000000" />
+        <Item Name="Option_3" Option="Day" Text="ffffff" Back="000000" />
+        <Item Name="Option_4" Option="Time" Text="ffffff" Back="000000" />
+        <Item Name="SIG" Text="ffffff" Back="000000" />
+        <Item Name="BATT" Text="ffffff" Back="000000" />
+        <Item Name="Info Area 1" Text="ffffff" Back="000000" />
+        <Item Name="Option_7" Option="Empty" Text="ffffff" Back="000000" />
+        <Item Name="Option_8" Option="Empty" Text="ffffff" Back="000000" />
+        <Item Name="key" Text="ffffff" Back="000000" />
+        <Item Name="Dir" Text="ffffff" Back="000000" />
+        <Item Name="Info Area 2" Text="ffffff" Back="000000" />
+        <Item Name="Option C-1" Option="Volume&amp;Squelch" Text="ffffff" Back="000000" />
+        <Item Name="Info Area 3" Text="ffffff" Back="000000" />
+        <Item Name="Option C-2" Option="Empty" Text="ffffff" Back="000000" />
+        <Item Name="Primary Area-1" Text="ff4600" Back="000000" />
+        <Item Name="Primary Area-2" Text="ff4600" Back="000000" />
+        <Item Name="Primary Area-3" Text="ffd600" Back="000000" />
+        <Item Name="Sub Info" Text="ffd600" Back="000000" />
+        <Item Name="Modulation" Text="ffd600" Back="000000" />
+        <Item Name="Avoid" Text="ffd600" Back="000000" />
+        <Item Name="Hold" Text="ffd600" Back="000000" />
+        <Item Name="Detail Info" Text="ffd600" Back="000000" />
+        <Item Name="Option A-1" Option="Empty" Text="e79473" Back="000000" />
+        <Item Name="Option B-1" Option="BattVoltage" Text="e79473" Back="000000" />
+        <Item Name="Option A-2" Option="Empty" Text="e79473" Back="000000" />
+        <Item Name="Option B-2" Option="Rssi" Text="e79473" Back="000000" />
+        <Item Name="Option A-3" Option="Empty" Text="e79473" Back="000000" />
+        <Item Name="Option B-3" Option="Rssi Bar" Text="e79473" Back="000000" />
+        <Item Name="Icon 1" Option="Empty" Text="ffffff" Back="000000" />
+        <Item Name="Icon 2" Option="Empty" Text="ffffff" Back="000000" />
+        <Item Name="Icon 3" Option="IFX" Text="ffffff" Back="000000" />
+        <Item Name="Icon 4" Option="LVL" Text="ffffff" Back="000000" />
+        <Item Name="Icon 5" Option="Empty" Text="ffffff" Back="000000" />
+        <Item Name="Icon 6" Option="REC" Text="ffffff" Back="000000" />
+        <Item Name="Icon 7" Option="GPS" Text="ffffff" Back="000000" />
+        <Item Name="Icon 8" Option="Empty" Text="ffffff" Back="000000" />
+        <Item Name="Icon 9" Option="Empty" Text="ffffff" Back="000000" />
+        <Item Name="Icon 10" Option="Empty" Text="ffffff" Back="000000" />
+        <Item Name="Soft1 Key" Text="ffffff" Back="000000" />
+        <Item Name="SP1" Text="ffffff" Back="000000" />
+        <Item Name="Soft2 Key" Text="ffffff" Back="000000" />
+        <Item Name="SP2" Text="ffffff" Back="000000" />
+        <Item Name="Soft3 Key" Text="ffffff" Back="000000" />
+    </Screen>
+</UndienScanner>

@@ -16,7 +16,7 @@
       headers["Content-Type"] = "application/json";
     }
     const resp = await fetch(path, Object.assign({}, options, { headers }));
-    if (path.startsWith("/api/v1/export/") || path.startsWith("/api/v1/generate/hpe/")) {
+    if (path.startsWith("/api/v1/export/") || path.startsWith("/api/v1/generate/hpe/") || path.startsWith("/api/v1/display/palettes/")) {
       if (!resp.ok) {
         const err = await resp.json().catch(() => ({ error: resp.statusText }));
         throw new Error(err.error || "download failed");
@@ -56,6 +56,7 @@
   function refreshTab(name) {
     if (name === "dashboard") loadDashboard();
     if (name === "catalog") loadCatalog();
+    if (name === "display") loadDisplayPalettes();
     if (name === "profile") loadProfile();
     if (name === "export") {
       loadHistory();
@@ -325,6 +326,136 @@
       t = setTimeout(fn, ms);
     };
   }
+
+  // -------------------------------------------------------------- display --
+  let selectedDisplayPalette = null;
+
+  function displayField(text, category, palette, className) {
+    const element = document.createElement("div");
+    element.className = "scanner-field " + (className || "");
+    element.textContent = text;
+    element.style.color = "#" + palette.colors[category];
+    element.style.backgroundColor = "#" + palette.colors.background;
+    return element;
+  }
+
+  function renderScannerPreview(screenName, palette) {
+    const preview = document.createElement("article");
+    preview.className = "scanner-preview";
+    preview.style.backgroundColor = "#" + palette.colors.background;
+    const heading = document.createElement("h3");
+    heading.textContent = screenName.replace(/([a-z])([A-Z])/g, "$1 $2");
+    heading.style.color = "#" + palette.colors.status;
+    preview.appendChild(heading);
+
+    const status = document.createElement("div");
+    status.className = "scanner-status-row";
+    ["Fun", "ATT", "BT", "Date", "Time", "SIG", "BAT"].forEach((label) => {
+      status.appendChild(displayField(label, label === "Fun" ? "accent" : "status", palette));
+    });
+    preview.appendChild(status);
+
+    if (["Search", "Weather", "Tone out"].includes(screenName)) {
+      preview.appendChild(displayField(
+        screenName === "Search" ? "Search / Close Call" : screenName === "Weather" ? "Weather Scan" : "Tone-Out Standby",
+        "system", palette, "scanner-primary"
+      ));
+      preview.appendChild(displayField("Primary Area 2", "department", palette, "scanner-primary"));
+      preview.appendChild(displayField("Primary Area 3", "channel", palette, "scanner-primary"));
+      const info = document.createElement("div");
+      info.className = "scanner-info-row";
+      info.append(displayField("Sub Info", "channel", palette), displayField("Modulation", "channel", palette), displayField("Hold", "alert", palette));
+      preview.appendChild(info);
+    } else {
+      const trunked = screenName.includes("Trunk");
+      const detailed = screenName.includes("Detail");
+      preview.appendChild(displayField("System Name", "system", palette, "scanner-primary"));
+      preview.appendChild(displayField("Favorites List Name", "system", palette));
+      preview.appendChild(displayField("Department Name", "department", palette, "scanner-primary"));
+      preview.appendChild(displayField(trunked ? "Site Name" : detailed ? "Department Detail" : "(Empty)", "department", palette));
+      preview.appendChild(displayField("Channel Name", "channel", palette, "scanner-primary"));
+      preview.appendChild(displayField(trunked ? "TGID" : "Frequency", "channel", palette));
+      const info = document.createElement("div");
+      info.className = "scanner-info-row";
+      info.append(
+        displayField("Service Type", "metadata", palette),
+        displayField("CTCSS/DCS/NAC", "metadata", palette),
+        displayField("Avoid", "alert", palette)
+      );
+      preview.appendChild(info);
+    }
+    const icons = document.createElement("div");
+    icons.className = "scanner-icons";
+    ["Mod", "P-ch", "IFX", "LVL", "REC", "GPS", "PRI", "CC", "WX"].forEach((label) => {
+      icons.appendChild(displayField(label, label === "CC" || label === "WX" ? "alert" : "accent", palette));
+    });
+    preview.appendChild(icons);
+    return preview;
+  }
+
+  function selectDisplayPalette(palette, screens) {
+    selectedDisplayPalette = palette;
+    document.querySelectorAll(".display-palette-card").forEach((card) => {
+      const selected = card.dataset.paletteId === palette.id;
+      card.classList.toggle("selected", selected);
+      card.setAttribute("aria-checked", String(selected));
+    });
+    const grid = document.getElementById("display-preview-grid");
+    grid.replaceChildren();
+    screens.forEach((screen) => grid.appendChild(renderScannerPreview(screen, palette)));
+    document.getElementById("display-download-btn").disabled = false;
+    document.getElementById("display-contrast-summary").textContent =
+      `${palette.name}: minimum text/background contrast ${palette.minimum_contrast.toFixed(2)}:1`;
+  }
+
+  async function loadDisplayPalettes() {
+    try {
+      const data = await apiGet("/api/v1/display/palettes");
+      const container = document.getElementById("display-palette-options");
+      container.replaceChildren();
+      data.palettes.forEach((palette) => {
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = "display-palette-card";
+        card.dataset.paletteId = palette.id;
+        card.setAttribute("role", "radio");
+        card.setAttribute("aria-checked", "false");
+        const title = document.createElement("strong");
+        title.textContent = palette.name;
+        const description = document.createElement("span");
+        description.textContent = palette.description;
+        const swatches = document.createElement("span");
+        swatches.className = "palette-swatches";
+        ["system", "department", "channel", "metadata", "alert", "accent"].forEach((category) => {
+          const swatch = document.createElement("span");
+          swatch.className = "palette-swatch";
+          swatch.style.backgroundColor = "#" + palette.colors[category];
+          swatch.title = `${category}: #${palette.colors[category]} (${palette.contrast_ratios[category]}:1)`;
+          swatches.appendChild(swatch);
+        });
+        card.append(title, description, swatches);
+        card.addEventListener("click", () => selectDisplayPalette(palette, data.screens));
+        container.appendChild(card);
+      });
+      const preferred = selectedDisplayPalette
+        ? data.palettes.find((palette) => palette.id === selectedDisplayPalette.id)
+        : data.palettes[0];
+      if (preferred) selectDisplayPalette(preferred, data.screens);
+    } catch (error) {
+      setStatus("Display palette error: " + error.message, true);
+    }
+  }
+
+  document.getElementById("display-download-btn").addEventListener("click", async () => {
+    if (!selectedDisplayPalette) return;
+    try {
+      const fallback = `wasds150-display-${selectedDisplayPalette.id}.xml`;
+      const filename = await downloadBlobFrom("/api/v1/display/palettes/" + encodeURIComponent(selectedDisplayPalette.id), fallback);
+      setStatus("Downloaded " + filename);
+    } catch (error) {
+      setStatus("Display XML download failed: " + error.message, true);
+    }
+  });
 
   // ------------------------------------------------------------- profile --
   async function loadProfile() {

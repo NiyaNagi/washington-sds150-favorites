@@ -23,6 +23,7 @@ The catalog covers all 39 Washington counties and includes:
 - [Cross-machine Sentinel handoff](docs/sentinel-machine-handoff.md) - complete context and Windows workflow for resuming on a Sentinel-equipped machine.
 - [Sentinel reactivation prompt](prompts/continue-sentinel-enrichment.md) - copy-paste prompt for a new agent session.
 - [Sentinel refresh/import/dashboard runbook](docs/sentinel-refresh-runbook.md) - repeatable Windows HPDB refresh, validated HPE import, scanner-write, and local dashboard instructions.
+- [SDS100/SDS150 display palettes](docs/display-customizer.md) - coordinated high-contrast palettes, semantic color groups, all-mode previews, XML export, and Sentinel import instructions.
 - [Data-source architecture](docs/data-sources.md) - source provenance, caching, update and merge behavior.
 
 ## Current coverage
@@ -80,6 +81,11 @@ in one preflighted operation. It performs a dry-run plan first, requires
 Sentinel to be closed, takes and verifies a full workspace backup, preserves
 unselected lists and profile settings, and automatically rolls back detected
 write failures.
+
+The **Display** tab compares multiple coordinated palettes across all seven
+scanner display modes on one page. Every palette uses consistent semantic
+colors, reports contrast ratios, and downloads as validated Sentinel display
+customizer XML.
 
 The generated `out/sentinel-import-pack.zip` is the bulk download. Its
 `hpe/` directory contains every currently available Favorites List with

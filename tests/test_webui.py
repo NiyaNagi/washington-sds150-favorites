@@ -236,6 +236,30 @@ def test_sentinel_workspace_discovery_and_bulk_plan_endpoints(live_server, tmp_p
     assert not (tmp_path / "backups").exists()
 
 
+def test_display_palette_endpoints(live_server):
+    base_url, token, _ = live_server
+    status, body, _ = _request(base_url, "/api/v1/display/palettes", token=token)
+    assert status == 200
+    data = json.loads(body)
+    assert len(data["palettes"]) >= 4
+    assert data["screens"] == [
+        "SimpleConventional", "SimpleTrunk", "DetailConventional",
+        "DetailTrunk", "Search", "Weather", "Tone out",
+    ]
+    assert all(palette["minimum_contrast"] >= 4.5 for palette in data["palettes"])
+
+    palette_id = data["palettes"][0]["id"]
+    status, body, headers = _request(base_url, f"/api/v1/display/palettes/{palette_id}", token=token)
+    assert status == 200
+    assert body.startswith(b"<?xml")
+    assert b'<UndienScanner Model="SDS100" FileType="DisplayCustomizer">' in body
+    assert headers["Content-Type"].startswith("application/xml")
+    assert headers["Content-Disposition"].endswith(f'wasds150-display-{palette_id}.xml"')
+
+    status, _, _ = _request(base_url, "/api/v1/display/palettes/nope", token=token)
+    assert status == 404
+
+
 def test_profile_enable_disable_flow(live_server):
     base_url, token, _ = live_server
     status, body, _ = _request(
