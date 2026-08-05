@@ -366,11 +366,6 @@
     };
   }
 
-  function displayItemFor(screenName, name, option) {
-    const items = (displayPaletteData.items || {})[screenName] || [];
-    return items.find((item) => (option ? item.option === option : item.name === name));
-  }
-
   function effectiveDisplayOption(item) {
     if (!item) return null;
     const screenOption = displayCustomConfig.screen_item_options[item.screen_key];
@@ -414,29 +409,48 @@
     };
   }
 
-  function displayField(text, category, palette, className, screenName, itemName, option, reverse) {
+  function displayItemSample(item) {
+    const option = effectiveDisplayOption(item);
+    if (option === "Empty") return "";
+    if (item.name.startsWith("Icon")) return iconDisplayName(option);
+    if (option !== null && option !== undefined) return optionDisplayName(option);
+    const samples = {
+      Func: "Fun", SIG: "SIG", BATT: "BAT", key: "Key", Dir: "Dir",
+      "System Name": "System Name", "Department Name": "Department Name",
+      "Channel Name": "Channel Name", Avoid: "Avoid", Hold: "Hold",
+      "Primary Area-1": "Primary Area 1", "Primary Area-2": "Primary Area 2",
+      "Primary Area-3": "Primary Area 3", "Sub Info": "Sub Info",
+      Modulation: "Mod", "Detail Info": "Detail Info",
+      "Info Area 1": "Info 1", "Info Area 2": "Info 2", "Info Area 3": "Info 3",
+      "Soft1 Key": "Soft 1", "Soft2 Key": "Soft 2", "Soft3 Key": "Soft 3",
+      SP0: "", SP1: "", SP2: "",
+    };
+    return samples[item.name] !== undefined ? samples[item.name] : item.name;
+  }
+
+  function displayField(screenName, item, className) {
     const element = document.createElement("div");
     element.className = "scanner-field " + (className || "");
-    const item = displayItemFor(screenName, itemName || text, option);
     const selectedOption = effectiveDisplayOption(item);
-    element.textContent = item && item.option_choices.length
-      ? (item.name.startsWith("Icon") ? iconDisplayName(selectedOption) : optionDisplayName(selectedOption))
-      : text;
-    const colors = resolvedDisplayColors(screenName, item, category);
-    element.style.color = "#" + (reverse ? colors.back : colors.text);
-    element.style.backgroundColor = "#" + (reverse ? colors.text : colors.back);
-    if (item) {
-      element.classList.add("editable");
-      element.tabIndex = 0;
-      element.title = `Customize ${screenName}: ${item.name}${selectedOption ? ` (${optionDisplayName(selectedOption)})` : ""}`;
-      element.addEventListener("click", () => openDisplayItemDialog(screenName, item));
-      element.addEventListener("keydown", (event) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          openDisplayItemDialog(screenName, item);
-        }
-      });
-    }
+    element.textContent = displayItemSample(item);
+    element.dataset.itemIndex = String(item.index);
+    element.dataset.itemName = item.name;
+    const colors = resolvedDisplayColors(screenName, item, item.category);
+    element.dataset.textColor = colors.text;
+    element.dataset.backColor = colors.back;
+    element.style.color = "#" + colors.text;
+    element.style.backgroundColor = "#" + colors.back;
+    element.classList.add("editable");
+    if (!element.textContent) element.classList.add("scanner-spacer");
+    element.tabIndex = 0;
+    element.title = `Customize ${screenName}: ${item.name}${selectedOption ? ` (${optionDisplayName(selectedOption)})` : ""}`;
+    element.addEventListener("click", () => openDisplayItemDialog(screenName, item));
+    element.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        openDisplayItemDialog(screenName, item);
+      }
+    });
     return element;
   }
 
@@ -709,56 +723,28 @@
   function renderScannerPreview(screenName, palette) {
     const preview = document.createElement("article");
     preview.className = "scanner-preview";
+    preview.dataset.screen = screenName;
     preview.style.backgroundColor = "#" + palette.colors.background;
     const heading = document.createElement("h3");
     heading.textContent = screenName.replace(/([a-z])([A-Z])/g, "$1 $2");
     heading.style.color = "#" + palette.colors.status;
     preview.appendChild(heading);
 
-    const status = document.createElement("div");
-    status.className = "scanner-status-row";
-    ["Fun", "ATT", "BT", "Date", "Time", "SIG", "BAT"].forEach((label) => {
-      const map = { Fun: ["Func"], ATT: ["Option_1", "ATT"], BT: ["Option_2", "Bluetooth"], Date: ["Option_3", "Day"], Time: ["Option_4", "Time"], SIG: ["SIG"], BAT: ["BATT"] };
-      status.appendChild(displayField(label, "status", palette, "", screenName, map[label][0], map[label][1], label === "Fun"));
-    });
-    preview.appendChild(status);
+    const items = displayPaletteData.items[screenName];
+    const appendRow = (className, indices, primaryIndices) => {
+      const row = document.createElement("div");
+      row.className = `scanner-slot-row ${className}`;
+      indices.forEach((index) => row.appendChild(displayField(
+        screenName,
+        items[index],
+        (primaryIndices || []).includes(index) ? "scanner-primary" : ""
+      )));
+      preview.appendChild(row);
+    };
 
-    if (["Search", "Weather", "Tone out"].includes(screenName)) {
-      preview.appendChild(displayField(
-        screenName === "Search" ? "Search / Close Call" : screenName === "Weather" ? "Weather Scan" : "Tone-Out Standby",
-        "system", palette, "scanner-primary", screenName, "Primary Area-1"
-      ));
-      preview.appendChild(displayField("Primary Area 2", "department", palette, "scanner-primary", screenName, "Primary Area-2"));
-      preview.appendChild(displayField("Primary Area 3", "channel", palette, "scanner-primary", screenName, "Primary Area-3"));
-      const info = document.createElement("div");
-      info.className = "scanner-info-row";
-      info.append(displayField("Sub Info", "channel", palette, "", screenName, "Sub Info"), displayField("Modulation", "channel", palette, "", screenName, "Modulation"), displayField("Hold", "alert", palette, "", screenName, "Hold"));
-      preview.appendChild(info);
-    } else {
-      const trunked = screenName.includes("Trunk");
-      const detailed = screenName.includes("Detail");
-      preview.appendChild(displayField("System Name", "system", palette, "scanner-primary", screenName, "System Name"));
-      preview.appendChild(displayField("Favorites List Name", "system", palette, "", screenName, "System option", "FL_Name"));
-      preview.appendChild(displayField("Department Name", "department", palette, "scanner-primary", screenName, "Department Name"));
-      preview.appendChild(displayField(trunked ? "Site Name" : detailed ? "Department Detail" : "(Empty)", "department", palette, "", screenName, "Department option", trunked ? "SiteName" : "Empty"));
-      preview.appendChild(displayField("Channel Name", "channel", palette, "scanner-primary", screenName, "Channel Name"));
-      preview.appendChild(displayField(trunked ? "TGID" : "Frequency", "channel", palette, "", screenName, "Channel option", trunked ? "TGID" : "Frequency"));
-      const info = document.createElement("div");
-      info.className = "scanner-info-row";
-      info.append(
-        displayField("Service Type", "metadata", palette, "", screenName, detailed ? "Option A-1" : "Option A", "ServiceType"),
-        displayField("CTCSS/DCS/NAC", "metadata", palette, "", screenName, detailed ? "Option B-1" : "Option B", "CTCSS/DCS"),
-        displayField("Avoid", "alert", palette, "", screenName, "Avoid")
-      );
-      preview.appendChild(info);
-    }
-    const icons = document.createElement("div");
-    icons.className = "scanner-icons";
-    ["Mod", "P-ch", "IFX", "LVL", "REC", "GPS", "PRI", "CC", "WX"].forEach((label) => {
-      const options = { Mod: "Modulation", "P-ch": "P_Ch", IFX: "IFX", LVL: "LVL", REC: "REC", GPS: "GPS", PRI: "PRI", CC: "CC", WX: "WxPRI" };
-      icons.appendChild(displayField(label, label === "CC" || label === "WX" ? "alert" : "accent", palette, "", screenName, "", options[label]));
-    });
-    preview.appendChild(icons);
+    displayPaletteData.layouts[screenName].forEach((row) =>
+      appendRow(row.class_name, row.indices, row.primary_indices)
+    );
     return preview;
   }
 

@@ -122,7 +122,7 @@ h2 { margin-top: 0; }
 }
 .display-preview-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(285px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr));
   gap: 1rem;
   margin: 1rem 0;
 }
@@ -134,13 +134,19 @@ h2 { margin-top: 0; }
   font-family: "Segoe UI", Arial, sans-serif;
 }
 .scanner-preview h3 { margin: 0 0 0.4rem; font-size: 0.82rem; letter-spacing: 0.04em; }
-.scanner-status-row, .scanner-icons, .scanner-info-row {
+.scanner-slot-row {
   display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(0, 1fr);
   gap: 2px;
   margin-bottom: 2px;
 }
+.scanner-status-row, .scanner-utility-row { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.scanner-info-top { grid-template-columns: minmax(0, 2fr) repeat(4, minmax(0, 1fr)); }
+.scanner-info-pair, .scanner-detail-pair { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.scanner-hierarchy-row { grid-template-columns: minmax(0, 4fr) minmax(0, 2fr) minmax(0, 1fr); }
+.scanner-special-row { grid-template-columns: minmax(0, 5fr) minmax(0, 1fr); }
+.scanner-special-detail { grid-template-columns: minmax(0, 4fr) minmax(0, 2fr) minmax(0, 1fr) minmax(0, 2fr); }
+.scanner-icons { grid-template-columns: repeat(10, minmax(0, 1fr)); }
+.scanner-softkeys { grid-template-columns: minmax(0, 1fr) minmax(0, 0.2fr) minmax(0, 1fr) minmax(0, 0.2fr) minmax(0, 1fr); }
 .scanner-field {
   border: 1px solid #64748b;
   padding: 0.22rem 0.3rem;
@@ -151,6 +157,7 @@ h2 { margin-top: 0; }
   font-size: 0.68rem;
   font-weight: 650;
 }
+.scanner-spacer { opacity: 0.55; }
 .scanner-field.editable { cursor: pointer; }
 .scanner-field.editable:hover, .scanner-field.editable:focus {
   outline: 2px solid var(--accent);
@@ -163,7 +170,10 @@ h2 { margin-top: 0; }
   font-size: 1rem;
   margin-bottom: 2px;
 }
-.scanner-icons .scanner-field { text-align: center; padding-inline: 0.1rem; }
+.scanner-icons .scanner-field, .scanner-status-row .scanner-field, .scanner-utility-row .scanner-field {
+  text-align: center;
+  padding-inline: 0.1rem;
+}
 .display-editor > summary { cursor: pointer; margin-bottom: 0.8rem; }
 .display-editor-toolbar input[type="text"] { min-width: 220px; }
 .semantic-color-grid {

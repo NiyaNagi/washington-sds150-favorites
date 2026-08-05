@@ -4,6 +4,7 @@ from pathlib import Path
 from wasds150.display_customizer import (
     PALETTES,
     SCREEN_SPECS,
+    display_layout_catalog,
     generate_custom_display_xml,
     generate_display_xml,
     palette_summary,
@@ -62,6 +63,26 @@ def test_generated_display_xml_matches_real_sentinel_export_layout():
         assert generated.tag == "UndienScanner"  # Sentinel's exported spelling
         assert generated.attrib == {"Model": "SDS100", "FileType": "DisplayCustomizer"}
         assert _signature(generated) == expected
+
+
+def test_visual_layouts_cover_every_xml_item_exactly_once():
+    layouts = display_layout_catalog()
+    assert set(layouts) == set(SCREEN_SPECS)
+    for screen_name, items in SCREEN_SPECS.items():
+        indices = [index for row in layouts[screen_name] for index in row["indices"]]
+        assert sorted(indices) == list(range(len(items)))
+        assert len(indices) == len(set(indices))
+        assert all(set(row["primary_indices"]).issubset(row["indices"]) for row in layouts[screen_name])
+
+
+def test_func_uses_standard_text_and_background_mapping_on_every_screen():
+    palette = PALETTES[0]
+    root = ET.fromstring(generate_display_xml(palette))
+    for screen in root.findall("Screen"):
+        func = screen.find("./Item[@Name='Func']")
+        assert func is not None
+        assert func.attrib["Text"] == palette.status
+        assert func.attrib["Back"] == palette.background
 
 
 def test_palette_colors_are_consistent_by_semantic_group_across_screens():

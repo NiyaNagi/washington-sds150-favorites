@@ -56,6 +56,10 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Redesigned the display item editor as a bounded desktop dialog and full-height
   mobile sheet with sticky actions, selected-swatch feedback, touch-sized
   controls, reliable keyboard focus, and no horizontal overflow.
+- Replaced approximate display previews with canonical per-screen layouts from
+  the Sentinel export. All 40 Simple, 50 Detail, and 45 special-mode XML items
+  render exactly once by index, duplicate item names remain distinct, and the
+  erroneous preview-only `Func` text/background inversion was removed.
 - Added Sentinel-compatible displayed-item selection for editable option and
   icon fields. Selection choices are constrained by field type, can synchronize
   across matching fields in all modes, update previews immediately, and are

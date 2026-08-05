@@ -18,6 +18,13 @@ spelling. The current SDS-series specification identifies SDS150 support, but
 the compatible display interchange format retains this established root/model
 shape.
 
+The browser previews use the same canonical item indices as that export rather
+than a separate approximation. Every XML item appears exactly once: 40 items
+for each Simple screen, 50 for each Detail screen, and 45 for Search, Weather,
+and Tone Out. Repeated names such as the three `Avoid` fields remain distinct
+by index. Text and background colors are always previewed in the same direction
+written to XML; `Func` has no special inversion.
+
 ## Design goals
 
 Colors have one meaning across every display mode:

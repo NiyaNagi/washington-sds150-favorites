@@ -60,6 +60,10 @@ def test_static_js_and_css_served(live_server):
     status, body, headers = _request(base_url, "/app.js")
     assert status == 200
     assert headers["Content-Type"].startswith("application/javascript")
+    assert b'label === "Fun"' not in body
+    assert b"reverse ?" not in body
+    assert b'element.style.color = "#" + colors.text' in body
+    assert b'element.style.backgroundColor = "#" + colors.back' in body
 
     status, body, headers = _request(base_url, "/styles.css")
     assert status == 200
@@ -246,6 +250,10 @@ def test_display_palette_endpoints(live_server):
         "SimpleConventional", "SimpleTrunk", "DetailConventional",
         "DetailTrunk", "Search", "Weather", "Tone out",
     ]
+    assert set(data["layouts"]) == set(data["screens"])
+    for screen in data["screens"]:
+        indices = [index for row in data["layouts"][screen] for index in row["indices"]]
+        assert sorted(indices) == list(range(len(data["items"][screen])))
     assert all(palette["minimum_contrast"] >= 4.5 for palette in data["palettes"])
     assert len(data["supported_colors"]) == 147
     assert data["supported_colors"][0] == {

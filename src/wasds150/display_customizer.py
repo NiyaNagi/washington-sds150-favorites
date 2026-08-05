@@ -121,6 +121,56 @@ SCREEN_SPECS: Dict[str, List[ItemSpec]] = {
     "Tone out": _special("Tone out"),
 }
 
+_SIMPLE_LAYOUT = (
+    ("scanner-status-row", (0, 1, 2, 3, 4, 5, 6), ()),
+    ("scanner-utility-row", (7, 8, 9, 10, 11, 12, 13), ()),
+    ("scanner-hierarchy-row", (14, 15, 16), (14,)),
+    ("scanner-hierarchy-row", (17, 18, 19), (17,)),
+    ("scanner-hierarchy-row", (20, 21, 22), (20,)),
+    ("scanner-detail-pair", (23, 24), ()),
+    ("scanner-icons", tuple(range(25, 35)), ()),
+    ("scanner-softkeys", (35, 36, 37, 38, 39), ()),
+)
+_DETAIL_LAYOUT = (
+    ("scanner-status-row", (0, 1, 2, 3, 4, 5, 6), ()),
+    ("scanner-info-top", (7, 8, 9, 10, 11), ()),
+    ("scanner-info-pair", (12, 13), ()),
+    ("scanner-info-pair", (14, 15), ()),
+    ("scanner-hierarchy-row", (16, 17, 18), (16,)),
+    ("scanner-hierarchy-row", (19, 20, 21), (19,)),
+    ("scanner-hierarchy-row", (22, 23, 24), (22,)),
+    *(("scanner-detail-pair", (index, index + 1), ()) for index in (25, 27, 29, 31, 33)),
+    ("scanner-icons", tuple(range(35, 45)), ()),
+    ("scanner-softkeys", (45, 46, 47, 48, 49), ()),
+)
+_SPECIAL_LAYOUT = (
+    ("scanner-status-row", (0, 1, 2, 3, 4, 5, 6), ()),
+    ("scanner-info-top", (7, 8, 9, 10, 11), ()),
+    ("scanner-info-pair", (12, 13), ()),
+    ("scanner-info-pair", (14, 15), ()),
+    ("scanner-special-row", (16, 21), (16,)),
+    ("scanner-special-row", (17, 22), (17,)),
+    ("scanner-special-detail", (18, 19, 20, 23), (18,)),
+    *(("scanner-detail-pair", (index, index + 1), ()) for index in (24, 26, 28)),
+    ("scanner-icons", tuple(range(30, 40)), ()),
+    ("scanner-softkeys", (40, 41, 42, 43, 44), ()),
+)
+
+
+def display_layout_catalog() -> Dict[str, List[dict]]:
+    layouts = {}
+    for screen_name in SCREEN_SPECS:
+        source = (
+            _SIMPLE_LAYOUT if screen_name.startswith("Simple")
+            else _DETAIL_LAYOUT if screen_name.startswith("Detail")
+            else _SPECIAL_LAYOUT
+        )
+        layouts[screen_name] = [
+            {"class_name": class_name, "indices": list(indices), "primary_indices": list(primary_indices)}
+            for class_name, indices, primary_indices in source
+        ]
+    return layouts
+
 
 @dataclass(frozen=True)
 class DisplayPalette:
