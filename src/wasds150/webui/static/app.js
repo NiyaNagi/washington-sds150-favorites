@@ -60,6 +60,7 @@
     if (name === "export") {
       loadHistory();
       loadHpeList();
+      loadSentinelWorkspace();
     }
     if (name === "advanced") {
       loadSourcesList();
@@ -551,6 +552,8 @@
   });
 
   // ------------------------------------------------------- per-list .hpe --
+  let sentinelPlanId = "";
+
   async function loadHpeList() {
     try {
       const data = await apiGet("/api/v1/profile");
@@ -561,11 +564,30 @@
         .forEach((fl) => {
           const hasSystems = (fl.systems || []).length > 0;
           const tr = document.createElement("tr");
-          tr.innerHTML = `<td>${fl.favorite_key}</td><td>${fl.favorite_name}</td><td></td><td></td>`;
-          const statusCell = tr.children[2];
-          const actionCell = tr.children[3];
+          const selectCell = document.createElement("td");
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.className = "sentinel-list-select";
+          checkbox.dataset.slug = fl.slug;
+          checkbox.checked = hasSystems;
+          checkbox.disabled = !hasSystems;
+          checkbox.setAttribute("aria-label", `Select ${fl.favorite_key} for Sentinel bulk install`);
+          checkbox.addEventListener("change", updateSentinelSelectedCount);
+          selectCell.appendChild(checkbox);
+          tr.appendChild(selectCell);
+          [fl.favorite_key, fl.favorite_name].forEach((value) => {
+            const cell = document.createElement("td");
+            cell.textContent = value;
+            tr.appendChild(cell);
+          });
+          const statusCell = document.createElement("td");
+          const actionCell = document.createElement("td");
+          tr.append(statusCell, actionCell);
           if (hasSystems) {
-            statusCell.innerHTML = `<span class="pill enabled">${fl.systems.length} system(s)</span>`;
+            const pill = document.createElement("span");
+            pill.className = "pill enabled";
+            pill.textContent = `${fl.systems.length} system(s)`;
+            statusCell.appendChild(pill);
             const btn = document.createElement("button");
             btn.textContent = "Download .hpe";
             btn.addEventListener("click", async () => {
@@ -578,15 +600,105 @@
             });
             actionCell.appendChild(btn);
           } else {
-            statusCell.innerHTML = '<span class="pill disabled">none yet</span>';
+            const pill = document.createElement("span");
+            pill.className = "pill disabled";
+            pill.textContent = "none yet";
+            statusCell.appendChild(pill);
             actionCell.textContent = "needs local HPDB/RR match or manual entry";
           }
           tbody.appendChild(tr);
         });
+      updateSentinelSelectedCount();
     } catch (e) {
       setStatus("HPE list error: " + e.message, true);
     }
   }
+
+  function selectedSentinelSlugs() {
+    return Array.from(document.querySelectorAll(".sentinel-list-select:checked")).map(
+      (checkbox) => checkbox.dataset.slug
+    );
+  }
+
+  function updateSentinelSelectedCount() {
+    const count = selectedSentinelSlugs().length;
+    document.getElementById("sentinel-selected-count").textContent = `${count} selected`;
+    document.getElementById("sentinel-execute-btn").disabled = true;
+    sentinelPlanId = "";
+  }
+
+  async function loadSentinelWorkspace() {
+    const workspaceInput = document.getElementById("sentinel-workspace");
+    const query = workspaceInput.value ? "?path=" + encodeURIComponent(workspaceInput.value) : "";
+    try {
+      const data = await apiGet("/api/v1/sentinel/workspace" + query);
+      workspaceInput.value = data.workspace || "";
+      if (!document.getElementById("sentinel-backup-dir").value) {
+        document.getElementById("sentinel-backup-dir").value = data.default_backup_dir || "";
+      }
+      const profile = document.getElementById("sentinel-profile");
+      profile.replaceChildren();
+      (data.profiles || []).forEach((name) => {
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        profile.appendChild(option);
+      });
+      if (!data.exists) setStatus("Sentinel workspace was not found at the selected path.", true);
+    } catch (error) {
+      setStatus("Sentinel discovery failed: " + error.message, true);
+    }
+  }
+
+  async function runSentinelBulkInstall(execute) {
+    const body = {
+      workspace: document.getElementById("sentinel-workspace").value,
+      profile_name: document.getElementById("sentinel-profile").value,
+      backup_dir: document.getElementById("sentinel-backup-dir").value,
+      slugs: selectedSentinelSlugs(),
+      execute: Boolean(execute),
+      confirm: document.getElementById("sentinel-confirm").value,
+      plan_id: sentinelPlanId,
+      allow_replacements: document.getElementById("sentinel-allow-replacements").checked,
+    };
+    if (!body.slugs.length) {
+      setStatus("Select at least one populated Favorites List.", true);
+      return;
+    }
+    if (execute && !confirm(`Close Sentinel before continuing. Install ${body.slugs.length} selected lists into profile ${body.profile_name}?`)) {
+      return;
+    }
+    try {
+      setStatus(execute ? "Backing up and installing selected lists…" : "Planning Sentinel bulk install…");
+      const data = await apiPost("/api/v1/sentinel/install", body);
+      document.getElementById("sentinel-install-result").textContent = JSON.stringify(data, null, 2);
+      if (!execute) {
+        sentinelPlanId = data.plan_id;
+        document.getElementById("sentinel-confirm").placeholder = data.confirmation_phrase;
+        document.getElementById("sentinel-execute-btn").disabled = false;
+        setStatus(`Plan ready for ${data.assignments.length} lists. Type ${data.confirmation_phrase} to execute.`);
+      } else {
+        sentinelPlanId = "";
+        document.getElementById("sentinel-execute-btn").disabled = true;
+        setStatus(`Installed and verified ${data.assignments.length} lists. Reopen Sentinel to inspect them.`);
+      }
+    } catch (error) {
+      document.getElementById("sentinel-execute-btn").disabled = true;
+      setStatus("Sentinel bulk install failed: " + error.message, true);
+    }
+  }
+
+  document.getElementById("sentinel-select-all").addEventListener("click", () => {
+    document.querySelectorAll(".sentinel-list-select:not(:disabled)").forEach((checkbox) => { checkbox.checked = true; });
+    updateSentinelSelectedCount();
+  });
+  document.getElementById("sentinel-select-none").addEventListener("click", () => {
+    document.querySelectorAll(".sentinel-list-select").forEach((checkbox) => { checkbox.checked = false; });
+    updateSentinelSelectedCount();
+  });
+  document.getElementById("sentinel-discover-btn").addEventListener("click", loadSentinelWorkspace);
+  document.getElementById("sentinel-plan-btn").addEventListener("click", () => runSentinelBulkInstall(false));
+  document.getElementById("sentinel-execute-btn").addEventListener("click", () => runSentinelBulkInstall(true));
 
   async function loadHistory() {
     try {

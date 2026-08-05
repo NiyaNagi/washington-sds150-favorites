@@ -197,6 +197,45 @@ def test_catalog_entry_not_found(live_server):
     assert status == 404
 
 
+def test_sentinel_workspace_discovery_and_bulk_plan_endpoints(live_server, tmp_path):
+    base_url, token, _ = live_server
+    workspace = tmp_path / "Uniden" / "BCDx36HP"
+    favorites = workspace / "FavoriteLists"
+    profile = workspace / "Profile" / "Preset"
+    favorites.mkdir(parents=True)
+    profile.mkdir(parents=True)
+    index = "TargetModel\tBCDx36HP\r\nFormatVersion\t1.00\r\n"
+    (favorites / "f_list.cfg").write_bytes(index.encode("ascii"))
+    (profile / "f_list.cfg").write_bytes(index.encode("ascii"))
+    (profile / "profile.cfg").write_bytes(b"profile")
+
+    query = urllib.parse.urlencode({"path": str(workspace)})
+    status, body, _ = _request(base_url, f"/api/v1/sentinel/workspace?{query}", token=token)
+    assert status == 200
+    discovered = json.loads(body)
+    assert discovered["exists"] is True
+    assert discovered["profiles"] == ["Preset"]
+
+    status, body, _ = _request(
+        base_url,
+        "/api/v1/sentinel/install",
+        token=token,
+        method="POST",
+        body={
+            "workspace": str(workspace),
+            "profile_name": "Preset",
+            "backup_dir": str(tmp_path / "backups"),
+            "slugs": ["fl01"],
+        },
+    )
+    assert status == 200
+    plan = json.loads(body)
+    assert plan["dry_run"] is True
+    assert plan["confirmation_phrase"] == "IMPORT Preset"
+    assert len(plan["assignments"]) == 1
+    assert not (tmp_path / "backups").exists()
+
+
 def test_profile_enable_disable_flow(live_server):
     base_url, token, _ = live_server
     status, body, _ = _request(

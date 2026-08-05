@@ -69,9 +69,34 @@
       <h3>Per-list .hpe files</h3>
       <p class="hint">One importable <code>.hpe</code> per enabled Favorites List with structured system data (from this catalog's own public checked-in facts, and/or a configured local Sentinel HPDB/RadioReference Premium match — see Advanced &gt; Sources). A list with no systems yet shows why, instead of a silently-empty file.</p>
       <table class="data-table" id="hpe-list-table">
-        <thead><tr><th>Key</th><th>Name</th><th>Systems</th><th></th></tr></thead>
+        <thead><tr><th>Select</th><th>Key</th><th>Name</th><th>Systems</th><th></th></tr></thead>
         <tbody></tbody>
       </table>
+
+      <div class="panel sentinel-bulk-panel">
+        <h3>Bulk install selected lists into Sentinel</h3>
+        <p class="hint"><strong>Sentinel does not support one multi-list HPE import.</strong> This guarded local operation writes every selected generated list directly into a Sentinel profile's documented <code>FavoriteLists</code>/<code>f_list.cfg</code> workspace format. Close Sentinel first. A verified full-workspace backup is mandatory before execution.</p>
+        <div class="toolbar">
+          <button id="sentinel-select-all">Select all populated</button>
+          <button id="sentinel-select-none">Select none</button>
+          <span id="sentinel-selected-count" class="hint">0 selected</span>
+        </div>
+        <div class="toolbar">
+          <input type="text" id="sentinel-workspace" placeholder="Sentinel BCDx36HP workspace" />
+          <button id="sentinel-discover-btn">Discover profiles</button>
+          <select id="sentinel-profile"></select>
+        </div>
+        <div class="toolbar">
+          <input type="text" id="sentinel-backup-dir" placeholder="Backup directory outside the Sentinel workspace" />
+          <input type="text" id="sentinel-confirm" placeholder="Confirmation phrase shown by Plan" />
+        </div>
+        <label class="hint"><input type="checkbox" id="sentinel-allow-replacements" /> Explicitly allow replacement of existing entries shown as <strong>replacing: true</strong> in this plan.</label>
+        <div class="toolbar">
+          <button id="sentinel-plan-btn">Plan selected bulk install</button>
+          <button id="sentinel-execute-btn" class="danger" disabled>Back up + install selected</button>
+        </div>
+        <pre id="sentinel-install-result" class="result-box"></pre>
+      </div>
 
       <h3>History</h3>
       <table class="data-table" id="history-table">

@@ -26,6 +26,16 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   declare reusable component lists. FL30 now deep-copies complete
   FL04/FL05/FL06/FL01 systems without flattening records or inventing a
   geographic boundary.
+- Added guarded bulk installation of selected generated Favorites Lists into
+  a local BCDx36HP Sentinel profile. The dashboard discovers profiles, plans
+  deterministic slots, preserves existing global/profile index entries,
+  writes all selected plain HPD files in one backed-up operation, verifies
+  every output, and automatically restores the full workspace after a
+  detected transaction failure.
+- Added validation against a real Sentinel-created Favorites List workspace:
+  all generated HPEs match observed shared record widths and the direct HPD
+  writer emits Sentinel's plain ASCII/CRLF form without the HPE-only trailing
+  signature.
 
 ### Fixed
 
@@ -70,6 +80,14 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   at a time, rendered with DOM `textContent` rather than catalog `innerHTML`,
   and excludes source credentials, private profile notes, raw HPDB records,
   cache data, and local paths.
+- Added strict Sentinel workspace/profile path checks, symlink rejection,
+  mandatory backups outside the modified workspace, typed confirmation,
+  duplicate-selection/slot validation, post-write byte verification, and
+  automatic rollback for detected bulk-install failures.
+- Bound execution to a reviewed plan fingerprint covering both indexes,
+  generated payloads, and every destination's pre-write state. Added one
+  workspace-wide interprocess lock, explicit replacement approval, and
+  preservation of unindexed/orphan HPD files.
 
 ## 0.1.0 - 2026-08-03
 

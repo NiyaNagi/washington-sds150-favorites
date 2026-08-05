@@ -73,6 +73,14 @@ row to load every available non-sensitive field on demand, including profile sta
 provenance, systems, sites, trunk frequencies, departments, conventional
 channels, talkgroups, geolocation, service metadata, priority, and avoids.
 
+The **Export** tab also supports a guarded **Bulk install selected lists into
+Sentinel** operation. Sentinel has no native multi-list HPE container, so the
+tool writes all selected lists directly into a chosen local Sentinel profile
+in one preflighted operation. It performs a dry-run plan first, requires
+Sentinel to be closed, takes and verifies a full workspace backup, preserves
+unselected lists and profile settings, and automatically rolls back detected
+write failures.
+
 The generated `out/sentinel-import-pack.zip` is the bulk download. Its
 `hpe/` directory contains every currently available Favorites List with
 clear, stable names such as `FL01.hpe` and `FL75.hpe`. Sentinel imports HPE

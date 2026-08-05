@@ -85,6 +85,16 @@ h2 { margin-top: 0; }
   border-radius: 6px;
   min-width: 220px;
 }
+.toolbar select {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  min-width: 180px;
+}
+.sentinel-bulk-panel { margin-top: 1rem; }
+.sentinel-bulk-panel .toolbar input[type="text"] { flex: 1; }
 
 button {
   background: var(--panel-alt);

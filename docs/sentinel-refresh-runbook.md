@@ -66,6 +66,48 @@ Always review preview coverage and conflicts before `--apply`. Do not use
 
 ## Import into Sentinel
 
+### One-operation local profile installation
+
+Sentinel does not define a single HPE file that creates multiple Favorites
+Lists. The dashboard therefore offers a direct, guarded workspace operation:
+
+1. Close Sentinel completely.
+2. Open the dashboard's **Export** tab.
+3. Select the populated Favorites Lists to install.
+4. Under **Bulk install selected lists into Sentinel**, confirm the detected
+  BCDx36HP workspace and choose the target profile.
+5. Choose a backup directory outside the Sentinel workspace.
+6. Select **Plan selected bulk install**. Review every assigned slot, target
+  HPD filename, replacement flag, and planned index write.
+7. If the plan contains any `replacing: true` entries, explicitly enable
+  replacement approval after verifying each one. Unindexed/orphan HPD files
+  are treated as occupied and are never silently overwritten.
+8. Type the displayed `IMPORT <profile>` confirmation phrase.
+9. Select **Back up + install selected**. Execution is bound to the reviewed
+  index and target-file fingerprint; any change after planning requires a
+  new plan. A workspace-wide interprocess lock prevents overlapping installs.
+  The tool creates one verified full
+  workspace backup, writes all selected HPD files and both global/profile
+  indexes, verifies every byte, and automatically restores the backup on a
+  detected failure.
+10. Reopen Sentinel and inspect representative lists before writing to the
+  scanner.
+
+This uses the format verified from a real Sentinel-created test list:
+
+- `FavoriteLists\f_NNNNNN.hpd`: plain ASCII/CRLF Favorites List records,
+  without the HPE-only trailing `File` signature;
+- `FavoriteLists\f_list.cfg`: global Favorites List index;
+- `Profile\<profile>\f_list.cfg`: profile membership/settings index.
+
+Existing unselected entries and HPD files are preserved. Existing generated
+entries reuse their slots, and their quick/startup key fields are retained.
+The operation is backed up and recoverable, but removable-media or power loss
+cannot be physically atomic; retain the backup until Sentinel and the scanner
+have both been checked.
+
+### Standard per-HPE import
+
 1. Close any scanner write operation and back up both the current Sentinel
    profile and the scanner microSD card.
 2. Extract `wasds150-output\sentinel-import-pack.zip` to a temporary folder.
@@ -94,6 +136,14 @@ Always review preview coverage and conflicts before `--apply`. Do not use
 10. Safely eject the scanner, reboot it, and confirm the expected Favorites
     Lists are enabled. Time a complete scan cycle and disable distant sites
     if the active profile scans too slowly.
+
+### Reference validation
+
+The generated set was checked against a real Sentinel-created HPD example.
+All 76 generated HPE files passed container, schema, semantic, CRLF, header,
+and signature validation. Every record tag shared with the example matched
+Sentinel's observed field width. Direct-workspace HPD output removes only the
+HPE interchange signature and preserves the validated record hierarchy.
 
 Encrypted traffic cannot be decoded. Avoided encrypted departments are kept
 only for change detection and database-drift review.

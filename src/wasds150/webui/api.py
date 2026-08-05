@@ -45,6 +45,12 @@ from wasds150.installer import hpdb_reader as installer_hpdb_reader
 from wasds150.installer.backup import InstallerError, backup_card, verify_backup
 from wasds150.installer.rollback import rollback_from_backup
 from wasds150.installer.writer import write_favorites_list
+from wasds150.installer.sentinel_workspace import (
+    confirmation_phrase as sentinel_confirmation_phrase,
+    default_workspace_path,
+    discover_profiles as discover_sentinel_profiles,
+    install_selected_favorites,
+)
 from wasds150.merge.three_way import apply_merge, three_way_merge
 from wasds150.models.catalog import ORIGIN_LOCAL, FavoritesList, System
 from wasds150.models.profile import EDITABLE_FIELDS
@@ -220,6 +226,57 @@ def get_preview(ctx: AppContext, req: RequestContext) -> Response:
             "changes": [c.to_dict() for c in changes],
         },
     )
+
+
+def get_sentinel_workspace(ctx: AppContext, req: RequestContext) -> Response:
+    raw_path = (req.query.get("path") or [str(default_workspace_path())])[0]
+    workspace = Path(raw_path)
+    profiles = discover_sentinel_profiles(workspace) if workspace.is_dir() else []
+    return Response.json(200, {
+        "workspace": str(workspace),
+        "exists": workspace.is_dir(),
+        "profiles": profiles,
+        "default_backup_dir": str(workspace.parent / "wasds150-backups"),
+    })
+
+
+def post_sentinel_workspace_install(ctx: AppContext, req: RequestContext) -> Response:
+    body = req.json_body() or {}
+    workspace = body.get("workspace")
+    profile_name = str(body.get("profile_name") or "").strip()
+    slugs = body.get("slugs") or []
+    backup_dir = body.get("backup_dir")
+    execute = bool(body.get("execute", False))
+    if not workspace or not profile_name or not backup_dir:
+        return _error(400, "'workspace', 'profile_name', and 'backup_dir' are required")
+    if not isinstance(slugs, list) or not slugs:
+        return _error(400, "select at least one Favorites List slug")
+
+    generated = apply_profile(ctx.catalog, ctx.load_profile())
+    by_slug = {favorite.slug: favorite for favorite in generated.enabled_favorites}
+    normalized = [str(slug).strip().lower() for slug in slugs]
+    if len(set(normalized)) != len(normalized):
+        return _error(400, "duplicate Favorites List selection")
+    missing = [slug for slug in normalized if slug not in by_slug]
+    if missing:
+        return _error(404, f"unknown or disabled Favorites Lists: {missing}")
+    favorites = [by_slug[slug] for slug in normalized]
+    try:
+        result = install_selected_favorites(
+            Path(workspace),
+            profile_name,
+            favorites,
+            backup_dir=Path(backup_dir),
+            execute=execute,
+            confirm=str(body.get("confirm") or ""),
+            expected_plan_id=str(body.get("plan_id") or ""),
+            allow_replacements=bool(body.get("allow_replacements", False)),
+        )
+    except InstallerError as exc:
+        return _error(400, str(exc))
+    data = result.to_dict()
+    data["confirmation_phrase"] = sentinel_confirmation_phrase(profile_name)
+    return Response.json(200, data)
 
 
 def _resolve_slug(ctx: AppContext, profile, raw_slug: str):
@@ -1053,6 +1110,8 @@ def build_router(ctx: AppContext) -> Router:
     router.add("GET", "/api/v1/catalog/{slug}", lambda req: get_catalog_entry(ctx, req))
     router.add("GET", "/api/v1/profile", lambda req: get_profile(ctx, req))
     router.add("GET", "/api/v1/preview", lambda req: get_preview(ctx, req))
+    router.add("GET", "/api/v1/sentinel/workspace", lambda req: get_sentinel_workspace(ctx, req))
+    router.add("POST", "/api/v1/sentinel/install", lambda req: post_sentinel_workspace_install(ctx, req))
     router.add("POST", "/api/v1/profile/enable", lambda req: post_profile_enable(ctx, req))
     router.add("POST", "/api/v1/profile/edit", lambda req: post_profile_edit(ctx, req))
     router.add("POST", "/api/v1/profile/remove", lambda req: post_profile_remove(ctx, req))
