@@ -115,26 +115,54 @@
 
     <div id="display-item-dialog" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="display-item-dialog-title">
       <div class="modal display-item-dialog-card">
-        <h3 id="display-item-dialog-title">Customize display item</h3>
-        <p id="display-item-dialog-context" class="hint"></p>
-        <label id="display-item-option-label">Displayed item
-          <select id="display-item-option"></select>
-        </label>
-        <h4>Palette and in-between colors</h4>
-        <label>Swatches apply to
-          <select id="display-swatch-target"><option value="text">Text color</option><option value="back">Background color</option></select>
-        </label>
-        <div id="display-color-swatches" class="display-color-swatches"></div>
-        <h4>Recently selected colors</h4>
-        <div id="display-recent-colors" class="display-color-swatches"></div>
-        <div class="display-dialog-pickers">
-          <label>Text color <select id="display-dialog-text"></select></label>
-          <label>Background color <select id="display-dialog-back"></select></label>
-          <span id="display-dialog-contrast" class="contrast-badge"></span>
+        <header class="display-dialog-header">
+          <div>
+            <h3 id="display-item-dialog-title">Customize display item</h3>
+            <p id="display-item-dialog-context" class="hint"></p>
+          </div>
+          <button id="display-dialog-close" class="icon-button" type="button" aria-label="Close color editor">×</button>
+        </header>
+        <div class="display-dialog-body">
+          <label id="display-item-option-label">Displayed item
+            <select id="display-item-option"></select>
+          </label>
+          <section class="display-color-picker-section" aria-labelledby="display-color-picker-heading">
+            <div class="display-picker-heading">
+              <div>
+                <h4 id="display-color-picker-heading">Choose a Sentinel-supported color</h4>
+                <p class="hint">Colors are grouped by hue, then ordered from dark to light.</p>
+              </div>
+              <span id="display-color-count" class="color-count"></span>
+            </div>
+            <div class="display-picker-controls">
+              <label>Apply swatch to
+                <select id="display-swatch-target"><option value="text">Text color</option><option value="back">Background color</option></select>
+              </label>
+              <label>Find a color
+                <input id="display-color-filter" type="search" placeholder="Name, family, or hex…" autocomplete="off" />
+              </label>
+            </div>
+            <div id="display-color-swatches" class="display-color-family-list"></div>
+          </section>
+          <section id="display-recent-section" class="display-recent-section" aria-labelledby="display-recent-heading">
+            <h4 id="display-recent-heading">Recent choices</h4>
+            <div id="display-recent-colors" class="display-color-swatches compact"></div>
+          </section>
+          <div class="display-dialog-pickers">
+            <button id="display-dialog-text-card" class="current-color-card" type="button" data-target="text">
+              <span>Text color</span><strong id="display-dialog-text-label"></strong>
+            </button>
+            <button id="display-dialog-back-card" class="current-color-card" type="button" data-target="back">
+              <span>Background color</span><strong id="display-dialog-back-label"></strong>
+            </button>
+            <input id="display-dialog-text" type="hidden" />
+            <input id="display-dialog-back" type="hidden" />
+            <span id="display-dialog-contrast" class="contrast-badge" aria-live="polite"></span>
+          </div>
+          <label class="display-sync-control"><input type="checkbox" id="display-dialog-sync" checked /> <span>Apply this item and its displayed option consistently across all matching views</span></label>
         </div>
-        <label class="hint"><input type="checkbox" id="display-dialog-sync" checked /> Apply this item and its displayed option consistently across all matching views</label>
         <div class="modal-actions">
-          <button id="display-dialog-reset">Reset item</button>
+          <button id="display-dialog-reset" class="danger-subtle">Reset item</button>
           <button id="display-dialog-cancel">Cancel</button>
           <button id="display-dialog-apply" class="primary">Apply</button>
         </div>

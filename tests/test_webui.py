@@ -248,7 +248,17 @@ def test_display_palette_endpoints(live_server):
     ]
     assert all(palette["minimum_contrast"] >= 4.5 for palette in data["palettes"])
     assert len(data["supported_colors"]) == 147
-    assert data["supported_colors"][0] == {"index": 0, "name": "AliceBlue", "value": "EFF7FF"}
+    assert data["supported_colors"][0] == {
+        "index": 0,
+        "sentinel_index": 7,
+        "name": "Black",
+        "value": "000000",
+        "family": "Neutrals",
+        "family_order": 0,
+        "hue": 0.0,
+        "lightness": 0.0,
+        "saturation": 0.0,
+    }
 
     palette_id = data["palettes"][0]["id"]
     status, body, headers = _request(base_url, f"/api/v1/display/palettes/{palette_id}", token=token)

@@ -88,14 +88,22 @@ validated before download.
 Every field in every visual preview is clickable and keyboard-accessible.
 Selecting a field opens a focused editor with:
 
-- all 147 colors from Sentinel's exact internal display-color table, kept in
-  Sentinel's alphabetical table order and labeled by name, index, and RGB;
+- all 147 colors from Sentinel's exact internal display-color table, grouped
+  into neutrals and hue families and ordered from dark to light within each
+  family;
+- search by color name, hue family, or hexadecimal value;
 - remembered recently selected supported colors across pages and browser
   sessions;
 - supported-only text/background selectors for semantic, item, and view edits;
 - live contrast feedback;
 - a synchronized/per-view application switch; and
 - a **Displayed item** selector when Sentinel allows that field to change.
+
+The item editor uses a bounded, scrollable color browser so the action buttons
+remain available even with all 147 colors. Current text/background colors are
+shown as compact target cards, selected swatches are outlined, and the editor
+becomes a full-height sheet on small screens. The same controls remain usable
+with touch, mouse, or keyboard, including focus trapping and Escape-to-close.
 
 Displayed-item choices follow the supplied screenshots, Sentinel export, and
 official available-item list. Small option areas include Date, Time, Digital

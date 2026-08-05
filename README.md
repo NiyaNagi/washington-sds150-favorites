@@ -106,9 +106,9 @@ colors, reports contrast ratios, and downloads as validated Sentinel display
 customizer XML. A full editor supports semantic group colors, synchronized
 matching items, per-item/per-view text and background colors, whole-view
 coloring, saved browser palettes, and JSON import/export. Preview fields are
-clickable: choose from Sentinel's exact 147 supported swatches, recent supported
-colors, and Sentinel-compatible displayed elements with synchronized or
-per-view behavior.
+clickable: search Sentinel's exact 147 supported swatches grouped by hue and
+brightness, reuse recent supported colors, and choose Sentinel-compatible
+displayed elements with synchronized or per-view behavior.
 
 The generated `out/sentinel-import-pack.zip` is the bulk download. Its
 `hpe/` directory contains every currently available Favorites List with

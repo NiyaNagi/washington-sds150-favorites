@@ -349,7 +349,7 @@
     (displayPaletteData.supported_colors || []).forEach((color) => {
       const option = document.createElement("option");
       option.value = color.value;
-      option.textContent = `${String(color.index + 1).padStart(3, "0")} · ${color.name} · #${color.value}`;
+      option.textContent = `${color.name} · #${color.value}`;
       option.style.backgroundColor = "#" + color.value;
       const contrast = jsContrast(color.value, "FFFFFF");
       option.style.color = contrast >= 4.5 ? "#FFFFFF" : "#000000";
@@ -465,30 +465,103 @@
   function updateDisplayDialogContrast() {
     const text = document.getElementById("display-dialog-text").value;
     const back = document.getElementById("display-dialog-back").value;
+    [["text", text], ["back", back]].forEach(([target, color]) => {
+      const metadata = colorMetadata(color);
+      const card = document.getElementById(`display-dialog-${target}-card`);
+      card.style.setProperty("--choice-color", "#" + color);
+      document.getElementById(`display-dialog-${target}-label`).textContent = `${metadata ? metadata.name : "Color"} · #${color}`;
+    });
     const ratio = jsContrast(text, back);
     const badge = document.getElementById("display-dialog-contrast");
     badge.textContent = `${ratio.toFixed(2)}:1${ratio < 4.5 ? " — low contrast" : ""}`;
     badge.classList.toggle("low", ratio < 4.5);
+    updateDisplaySwatchSelection();
+  }
+
+  function colorMetadata(value) {
+    return (displayPaletteData.supported_colors || []).find((color) => color.value === value);
+  }
+
+  function updateDisplaySwatchSelection() {
+    const target = document.getElementById("display-swatch-target").value;
+    const selected = document.getElementById(target === "text" ? "display-dialog-text" : "display-dialog-back").value;
+    document.querySelectorAll("#display-item-dialog .display-color-swatch").forEach((swatch) => {
+      const active = swatch.dataset.color === selected;
+      swatch.classList.toggle("selected", active);
+      swatch.setAttribute("aria-pressed", String(active));
+    });
+    document.querySelectorAll(".current-color-card").forEach((card) => {
+      const active = card.dataset.target === target;
+      card.classList.toggle("active", active);
+      card.setAttribute("aria-pressed", String(active));
+    });
+  }
+
+  function makeDisplayColorSwatch(color) {
+    const metadata = colorMetadata(color);
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "display-color-swatch";
+    button.dataset.color = color;
+    button.style.backgroundColor = "#" + color;
+    button.title = metadata ? `${metadata.name} · #${color}` : "#" + color;
+    button.setAttribute("aria-label", metadata ? `Choose ${metadata.name} #${color}` : "Choose #" + color);
+    button.addEventListener("click", () => {
+      const target = document.getElementById("display-swatch-target").value;
+      document.getElementById(target === "text" ? "display-dialog-text" : "display-dialog-back").value = color;
+      updateDisplayDialogContrast();
+    });
+    return button;
   }
 
   function renderDisplayColorSwatches(containerId, colors) {
     const container = document.getElementById(containerId);
     container.replaceChildren();
+    if (!colors.length) {
+      const placeholder = document.createElement("p");
+      placeholder.className = "swatch-placeholder";
+      placeholder.textContent = "No recent colors yet. Selected colors will appear here.";
+      container.appendChild(placeholder);
+      return;
+    }
     colors.forEach((color) => {
-      const metadata = (displayPaletteData.supported_colors || []).find((entry) => entry.value === color);
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "display-color-swatch";
-      button.style.backgroundColor = "#" + color;
-      button.title = metadata ? `${metadata.index + 1}. ${metadata.name} #${color}` : "#" + color;
-      button.setAttribute("aria-label", metadata ? `Choose ${metadata.name} #${color}` : "Choose #" + color);
-      button.addEventListener("click", () => {
-        const target = document.getElementById("display-swatch-target").value;
-        document.getElementById(target === "text" ? "display-dialog-text" : "display-dialog-back").value = color;
-        updateDisplayDialogContrast();
-      });
-      container.appendChild(button);
+      container.appendChild(makeDisplayColorSwatch(color));
     });
+    updateDisplaySwatchSelection();
+  }
+
+  function renderSupportedDisplayColorPicker() {
+    const container = document.getElementById("display-color-swatches");
+    const query = document.getElementById("display-color-filter").value.trim().toLowerCase().replace(/^#/, "");
+    const colors = (displayPaletteData.supported_colors || []).filter((color) =>
+      !query || color.name.toLowerCase().includes(query) || color.family.toLowerCase().includes(query) || color.value.toLowerCase().includes(query)
+    );
+    container.replaceChildren();
+    document.getElementById("display-color-count").textContent = `${colors.length} of ${displayPaletteData.supported_colors.length}`;
+    if (!colors.length) {
+      const empty = document.createElement("p");
+      empty.className = "swatch-placeholder";
+      empty.textContent = "No supported colors match that search.";
+      container.appendChild(empty);
+      return;
+    }
+    const families = new Map();
+    colors.forEach((color) => {
+      if (!families.has(color.family)) families.set(color.family, []);
+      families.get(color.family).push(color);
+    });
+    families.forEach((familyColors, family) => {
+      const section = document.createElement("section");
+      section.className = "display-color-family";
+      const heading = document.createElement("h5");
+      heading.textContent = `${family} (${familyColors.length})`;
+      const grid = document.createElement("div");
+      grid.className = "display-color-swatches";
+      familyColors.forEach((color) => grid.appendChild(makeDisplayColorSwatch(color.value)));
+      section.append(heading, grid);
+      container.appendChild(section);
+    });
+    updateDisplaySwatchSelection();
   }
 
   function updateDisplayDialogOptionChoices() {
@@ -517,22 +590,22 @@
     document.getElementById("display-item-dialog-title").textContent = item.name;
     document.getElementById("display-item-dialog-context").textContent =
       `${screenName.replace(/([a-z])([A-Z])/g, "$1 $2")} · ${item.category} group`;
-    populateSupportedColorSelect(document.getElementById("display-dialog-text"), colors.text);
-    populateSupportedColorSelect(document.getElementById("display-dialog-back"), colors.back);
-    if (preferredTarget) document.getElementById("display-swatch-target").value = preferredTarget;
+    document.getElementById("display-dialog-text").value = colors.text;
+    document.getElementById("display-dialog-back").value = colors.back;
+    document.getElementById("display-swatch-target").value = preferredTarget || "text";
+    document.getElementById("display-color-filter").value = "";
     document.getElementById("display-dialog-sync").checked = document.getElementById("display-sync-items").checked;
     updateDisplayDialogOptionChoices();
-    renderDisplayColorSwatches(
-      "display-color-swatches",
-      (displayPaletteData.supported_colors || []).map((color) => color.value)
-    );
-    renderDisplayColorSwatches("display-recent-colors", readRecentDisplayColors());
+    renderSupportedDisplayColorPicker();
+    const recent = readRecentDisplayColors();
+    renderDisplayColorSwatches("display-recent-colors", recent);
+    document.getElementById("display-recent-section").classList.toggle("hidden", !recent.length);
     updateDisplayDialogContrast();
     const dialog = document.getElementById("display-item-dialog");
     dialog.classList.remove("hidden");
     (!document.getElementById("display-item-option-label").classList.contains("hidden")
       ? document.getElementById("display-item-option")
-      : document.getElementById("display-dialog-text")).focus();
+      : document.getElementById("display-color-filter")).focus();
   }
 
   function closeDisplayItemDialog() {
@@ -599,10 +672,17 @@
 
   document.getElementById("display-dialog-text").addEventListener("input", updateDisplayDialogContrast);
   document.getElementById("display-dialog-back").addEventListener("input", updateDisplayDialogContrast);
+  document.getElementById("display-swatch-target").addEventListener("change", updateDisplaySwatchSelection);
+  document.querySelectorAll(".current-color-card").forEach((card) => card.addEventListener("click", () => {
+    document.getElementById("display-swatch-target").value = card.dataset.target;
+    updateDisplaySwatchSelection();
+  }));
+  document.getElementById("display-color-filter").addEventListener("input", renderSupportedDisplayColorPicker);
   document.getElementById("display-dialog-sync").addEventListener("change", updateDisplayDialogOptionChoices);
   document.getElementById("display-dialog-apply").addEventListener("click", applyDisplayDialog);
   document.getElementById("display-dialog-reset").addEventListener("click", resetActiveDisplayItem);
   document.getElementById("display-dialog-cancel").addEventListener("click", closeDisplayItemDialog);
+  document.getElementById("display-dialog-close").addEventListener("click", closeDisplayItemDialog);
   document.getElementById("display-item-dialog").addEventListener("click", (event) => {
     if (event.target.id === "display-item-dialog") closeDisplayItemDialog();
   });
@@ -611,8 +691,8 @@
     if (event.key === "Escape" && !dialog.classList.contains("hidden")) {
       closeDisplayItemDialog();
     } else if (event.key === "Tab" && !dialog.classList.contains("hidden")) {
-      const focusable = Array.from(dialog.querySelectorAll("button:not([disabled]), select:not([disabled]), input:not([disabled])"))
-        .filter((element) => !element.closest(".hidden"));
+      const focusable = Array.from(dialog.querySelectorAll("button:not([disabled]), select:not([disabled]), input:not([disabled]):not([type='hidden'])"))
+        .filter((element) => !element.closest(".hidden") && element.offsetParent !== null);
       if (!focusable.length) return;
       const first = focusable[0];
       const last = focusable[focusable.length - 1];

@@ -7,6 +7,7 @@ from wasds150.display_customizer import (
     generate_custom_display_xml,
     generate_display_xml,
     palette_summary,
+    supported_color_catalog,
     validate_display_xml,
     validate_palette,
 )
@@ -37,6 +38,18 @@ def test_supported_display_color_table_is_exact_and_unique():
     assert SUPPORTED_DISPLAY_COLORS[0] == ("AliceBlue", "EFF7FF")
     assert SUPPORTED_DISPLAY_COLORS[-1] == ("YellowGreen", "94CA31")
     assert all(color in SUPPORTED_DISPLAY_COLOR_VALUES for palette in PALETTES for color in palette.colors().values())
+
+
+def test_supported_colors_are_grouped_by_hue_then_dark_to_light():
+    catalog = supported_color_catalog()
+    assert len(catalog) == 147
+    assert catalog[0]["name"] == "Black"
+    assert catalog[0]["sentinel_index"] == 7
+    assert [color["index"] for color in catalog] == list(range(147))
+    assert [color["family_order"] for color in catalog] == sorted(color["family_order"] for color in catalog)
+    for family in {color["family"] for color in catalog}:
+        lightness = [color["lightness"] for color in catalog if color["family"] == family]
+        assert lightness == sorted(lightness)
 
 
 def test_generated_display_xml_matches_real_sentinel_export_layout():

@@ -7,6 +7,7 @@ information layout.
 """
 from __future__ import annotations
 
+import colorsys
 import re
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
@@ -473,7 +474,71 @@ def validate_display_xml(data: bytes) -> List[str]:
 
 
 def supported_color_catalog() -> List[dict]:
-    return [
-        {"index": index, "name": name, "value": value}
+    families = (
+        ("Neutrals", 0),
+        ("Reds", 1),
+        ("Oranges", 2),
+        ("Yellows", 3),
+        ("Yellow-greens", 4),
+        ("Greens", 5),
+        ("Teals", 6),
+        ("Cyans", 7),
+        ("Blues", 8),
+        ("Violets", 9),
+        ("Magentas", 10),
+        ("Pinks", 11),
+    )
+
+    def color_details(sentinel_index: int, name: str, value: str) -> dict:
+        red, green, blue = (int(value[index:index + 2], 16) / 255 for index in (0, 2, 4))
+        hue, lightness, saturation = colorsys.rgb_to_hls(red, green, blue)
+        degrees = hue * 360
+        if saturation < 0.12 or lightness <= 0.08 or lightness >= 0.94:
+            family, family_order = families[0]
+        elif degrees < 15 or degrees >= 345:
+            family, family_order = families[1]
+        elif degrees < 45:
+            family, family_order = families[2]
+        elif degrees < 70:
+            family, family_order = families[3]
+        elif degrees < 100:
+            family, family_order = families[4]
+        elif degrees < 155:
+            family, family_order = families[5]
+        elif degrees < 185:
+            family, family_order = families[6]
+        elif degrees < 205:
+            family, family_order = families[7]
+        elif degrees < 255:
+            family, family_order = families[8]
+        elif degrees < 285:
+            family, family_order = families[9]
+        elif degrees < 325:
+            family, family_order = families[10]
+        else:
+            family, family_order = families[11]
+        return {
+            "sentinel_index": sentinel_index,
+            "name": name,
+            "value": value,
+            "family": family,
+            "family_order": family_order,
+            "hue": round(degrees, 2),
+            "lightness": round(lightness, 4),
+            "saturation": round(saturation, 4),
+        }
+
+    catalog = [
+        color_details(index, name, value)
         for index, (name, value) in enumerate(SUPPORTED_DISPLAY_COLORS)
     ]
+    catalog.sort(key=lambda color: (
+        color["family_order"],
+        color["lightness"],
+        color["hue"],
+        -color["saturation"],
+        color["name"],
+    ))
+    for index, color in enumerate(catalog):
+        color["index"] = index
+    return catalog

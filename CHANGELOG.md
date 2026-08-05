@@ -49,10 +49,13 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   pickers, whole-view color application, live effective contrast warnings,
   reset controls, browser-saved named palettes, and JSON import/export.
 - Made every field in every visual preview clickable and keyboard-accessible.
-  The focused editor offers Sentinel's exact 147 supported display swatches in
-  table order, persistent supported-color memory, fixed text/background
-  selectors, live
-  contrast, reset controls, and synchronized or per-view application.
+  The focused editor offers Sentinel's exact 147 supported display swatches
+  grouped by hue and ordered by brightness, name/family/hex search, persistent
+  supported-color memory, compact text/background target cards, live contrast,
+  reset controls, and synchronized or per-view application.
+- Redesigned the display item editor as a bounded desktop dialog and full-height
+  mobile sheet with sticky actions, selected-swatch feedback, touch-sized
+  controls, reliable keyboard focus, and no horizontal overflow.
 - Added Sentinel-compatible displayed-item selection for editable option and
   icon fields. Selection choices are constrained by field type, can synchronize
   across matching fields in all modes, update previews immediately, and are
