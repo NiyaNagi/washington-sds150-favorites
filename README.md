@@ -46,6 +46,19 @@ all 39 city lists, Ames Lake/Eastside profiles, FL30, and OUT01 are populated.
 Only FL45/FL72 remain on-site Discovery scenarios with no stable published
 channel set. No empty or guessed HPE is emitted.
 
+## Repository privacy and local data
+
+This repository is maintained as a **private GitHub repository**. Private
+visibility is an access-control layer, not permission to redistribute licensed
+Sentinel/RadioReference content. Local HPDB files, merged catalogs, generated
+HPE files, scanner-card data, previews, backups, and import bundles remain
+git-ignored and must stay on the authorized user's machine.
+
+Commit only reusable source code, public intent/location metadata, synthetic
+fixtures, tests, and documentation. Before every push, verify that `git status`
+contains no `hpdb.cfg`, `s_*.hpd`, local catalog, generated HPE/HPD, Sentinel
+workspace, scanner backup, or preview JSON artifacts.
+
 ## Install and run
 
 `src/` contains a standard-library-only Python 3.9+ CLI and local browser UI
