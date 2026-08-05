@@ -159,6 +159,50 @@ h2 { margin-top: 0; }
   margin-bottom: 2px;
 }
 .scanner-icons .scanner-field { text-align: center; padding-inline: 0.1rem; }
+.display-editor > summary { cursor: pointer; margin-bottom: 0.8rem; }
+.display-editor-toolbar input[type="text"] { min-width: 220px; }
+.semantic-color-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+.semantic-color-control {
+  display: grid;
+  grid-template-columns: 2.25rem 1fr;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.semantic-color-control input[type="color"], .item-color-input {
+  width: 2.25rem;
+  height: 2rem;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+}
+.semantic-color-label { display: grid; gap: 0.15rem; }
+.semantic-color-label strong { text-transform: capitalize; }
+.contrast-badge { color: var(--ok); font-size: 0.72rem; }
+.contrast-badge.low { color: var(--danger); font-weight: 700; }
+.display-item-editor-wrap { max-height: 55vh; overflow: auto; margin-bottom: 0.75rem; }
+#display-item-editor th { position: sticky; top: 0; background: var(--panel); z-index: 1; }
+#display-item-editor td { vertical-align: middle; }
+.button-like {
+  display: inline-flex;
+  align-items: center;
+  background: var(--panel-alt);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 0.45rem 0.85rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
 
 button {
   background: var(--panel-alt);

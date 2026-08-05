@@ -39,9 +39,15 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Added a Display Customizer dashboard tab with all seven scanner modes shown
   on one preview page, four coordinated semantic palettes, per-color contrast
   ratios, and validated Sentinel XML downloads.
-- Added Night Ops, Daylight High Contrast, Colorblind Dark, and Low-Light
-  Amber palettes. System, department/site, channel/TGID, metadata, status,
-  alert, and active-icon colors keep the same meaning across every mode.
+- Added twelve coordinated presets: Night Ops, Daylight High Contrast,
+  Colorblind Dark, Low-Light Amber, Oceanic, Forest Watch, Cyber Neon, Solar
+  Dark, Solar Light, Monochrome Ice, Purple Dusk, and Slate Professional.
+  System, department/site, channel/TGID, metadata, status, alert, and
+  active-icon colors keep the same meaning across every mode.
+- Added full palette customization: semantic group pickers, synchronized
+  matching-item colors across all views, per-item/per-view text and background
+  pickers, whole-view color application, live effective contrast warnings,
+  reset controls, browser-saved named palettes, and JSON import/export.
 - Added the original Sentinel display export as a checked-in structural
   reference plus a sourced display guide covering official item constraints,
   palette rationale, preview workflow, and Sentinel import steps.

@@ -47,9 +47,45 @@
       <p class="hint">Compare accessible SDS100/SDS150 palettes across all seven Sentinel display modes. Colors keep the same meaning everywhere: system, department/site, channel/TGID, technical metadata, status, alerts, and active indicators.</p>
       <div id="display-palette-options" class="display-palette-options" role="radiogroup" aria-label="Display palette"></div>
       <div class="toolbar">
-        <button id="display-download-btn" class="primary" disabled>Download selected Sentinel XML</button>
+        <button id="display-download-btn" class="primary" disabled>Download current Sentinel XML</button>
         <span id="display-contrast-summary" class="hint" aria-live="polite"></span>
       </div>
+      <details class="panel display-editor" open>
+        <summary><strong>Customize palette</strong></summary>
+        <div class="toolbar display-editor-toolbar">
+          <input type="text" id="display-custom-name" value="My Custom Palette" aria-label="Custom palette name" />
+          <select id="display-saved-palettes" aria-label="Saved custom palettes"><option value="">Saved palettes…</option></select>
+          <button id="display-save-custom">Save</button>
+          <button id="display-delete-custom" class="danger">Delete</button>
+          <button id="display-reset-custom">Reset to preset</button>
+        </div>
+        <h3>Semantic colors</h3>
+        <p class="hint">Change a group once to recolor all matching fields. Contrast badges update immediately.</p>
+        <div id="display-semantic-colors" class="semantic-color-grid"></div>
+        <div class="toolbar">
+          <label class="hint"><input type="checkbox" id="display-sync-items" checked /> Keep the same item synchronized across all display modes</label>
+          <select id="display-screen-select" aria-label="Display mode to edit"></select>
+          <button id="display-reset-screen">Reset this view's item overrides</button>
+          <button id="display-reset-all-items">Reset all item overrides</button>
+        </div>
+        <div class="toolbar">
+          <label class="hint">View text <input type="color" id="display-view-text" value="#ffffff" /></label>
+          <button id="display-apply-view-text">Apply text to every item in this view</button>
+          <label class="hint">View background <input type="color" id="display-view-back" value="#000000" /></label>
+          <button id="display-apply-view-back">Apply background to every item in this view</button>
+        </div>
+        <div class="display-item-editor-wrap">
+          <table class="data-table" id="display-item-editor">
+            <thead><tr><th>Item</th><th>Option</th><th>Group</th><th>Text</th><th>Background</th><th>Contrast</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="toolbar">
+          <button id="display-export-json">Export custom palette JSON</button>
+          <label class="button-like" for="display-import-json">Import custom palette JSON</label>
+          <input type="file" id="display-import-json" accept="application/json,.json" class="visually-hidden" />
+        </div>
+      </details>
       <div id="display-preview-grid" class="display-preview-grid"></div>
       <div class="panel">
         <h3>Import into Sentinel</h3>

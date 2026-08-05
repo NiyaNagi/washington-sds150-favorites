@@ -259,6 +259,25 @@ def test_display_palette_endpoints(live_server):
     status, _, _ = _request(base_url, "/api/v1/display/palettes/nope", token=token)
     assert status == 404
 
+    custom = {
+        "name": "API Custom",
+        "colors": data["palettes"][0]["colors"],
+        "global_item_colors": {"Func||": {"text": "ABCDEF", "back": "101010"}},
+        "screen_item_colors": {"SimpleTrunk||0": {"text": "FEDCBA", "back": "202020"}},
+    }
+    status, body, headers = _request(
+        base_url, "/api/v1/display/custom", token=token, method="POST", body=custom,
+    )
+    assert status == 200
+    assert b'Text="ABCDEF" Back="101010"' in body
+    assert b'Text="FEDCBA" Back="202020"' in body
+    assert headers["Content-Type"].startswith("application/xml")
+
+    status, _, _ = _request(
+        base_url, "/api/v1/display/custom", token=token, method="POST", body=[],
+    )
+    assert status == 400
+
 
 def test_profile_enable_disable_flow(live_server):
     base_url, token, _ = live_server

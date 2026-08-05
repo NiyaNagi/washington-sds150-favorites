@@ -16,7 +16,7 @@
       headers["Content-Type"] = "application/json";
     }
     const resp = await fetch(path, Object.assign({}, options, { headers }));
-    if (path.startsWith("/api/v1/export/") || path.startsWith("/api/v1/generate/hpe/") || path.startsWith("/api/v1/display/palettes/")) {
+    if (path.startsWith("/api/v1/export/") || path.startsWith("/api/v1/generate/hpe/") || path.startsWith("/api/v1/display/palettes/") || path === "/api/v1/display/custom") {
       if (!resp.ok) {
         const err = await resp.json().catch(() => ({ error: resp.statusText }));
         throw new Error(err.error || "download failed");
@@ -329,13 +329,45 @@
 
   // -------------------------------------------------------------- display --
   let selectedDisplayPalette = null;
+  let displayPaletteData = null;
+  let displayCustomConfig = null;
+  const DISPLAY_STORAGE_KEY = "wasds150.displayPalettes.v1";
 
-  function displayField(text, category, palette, className) {
+  function copyJson(value) {
+    return JSON.parse(JSON.stringify(value));
+  }
+
+  function displayPaletteView() {
+    return {
+      id: selectedDisplayPalette ? selectedDisplayPalette.id : "custom",
+      name: displayCustomConfig.name,
+      colors: displayCustomConfig.colors,
+    };
+  }
+
+  function displayItemFor(screenName, name, option) {
+    const items = (displayPaletteData.items || {})[screenName] || [];
+    return items.find((item) => (option ? item.option === option : item.name === name));
+  }
+
+  function resolvedDisplayColors(screenName, item, category) {
+    const palette = displayPaletteView();
+    const screenOverride = item ? displayCustomConfig.screen_item_colors[item.screen_key] : null;
+    const globalOverride = item ? displayCustomConfig.global_item_colors[item.item_key] : null;
+    const override = Object.assign({}, globalOverride || {}, screenOverride || {});
+    return {
+      text: override.text || palette.colors[category],
+      back: override.back || palette.colors.background,
+    };
+  }
+
+  function displayField(text, category, palette, className, screenName, itemName, option, reverse) {
     const element = document.createElement("div");
     element.className = "scanner-field " + (className || "");
     element.textContent = text;
-    element.style.color = "#" + palette.colors[category];
-    element.style.backgroundColor = "#" + palette.colors.background;
+    const colors = resolvedDisplayColors(screenName, displayItemFor(screenName, itemName || text, option), category);
+    element.style.color = "#" + (reverse ? colors.back : colors.text);
+    element.style.backgroundColor = "#" + (reverse ? colors.text : colors.back);
     return element;
   }
 
@@ -351,64 +383,213 @@
     const status = document.createElement("div");
     status.className = "scanner-status-row";
     ["Fun", "ATT", "BT", "Date", "Time", "SIG", "BAT"].forEach((label) => {
-      status.appendChild(displayField(label, label === "Fun" ? "accent" : "status", palette));
+      const map = { Fun: ["Func"], ATT: ["Option_1", "ATT"], BT: ["Option_2", "Bluetooth"], Date: ["Option_3", "Day"], Time: ["Option_4", "Time"], SIG: ["SIG"], BAT: ["BATT"] };
+      status.appendChild(displayField(label, "status", palette, "", screenName, map[label][0], map[label][1], label === "Fun"));
     });
     preview.appendChild(status);
 
     if (["Search", "Weather", "Tone out"].includes(screenName)) {
       preview.appendChild(displayField(
         screenName === "Search" ? "Search / Close Call" : screenName === "Weather" ? "Weather Scan" : "Tone-Out Standby",
-        "system", palette, "scanner-primary"
+        "system", palette, "scanner-primary", screenName, "Primary Area-1"
       ));
-      preview.appendChild(displayField("Primary Area 2", "department", palette, "scanner-primary"));
-      preview.appendChild(displayField("Primary Area 3", "channel", palette, "scanner-primary"));
+      preview.appendChild(displayField("Primary Area 2", "department", palette, "scanner-primary", screenName, "Primary Area-2"));
+      preview.appendChild(displayField("Primary Area 3", "channel", palette, "scanner-primary", screenName, "Primary Area-3"));
       const info = document.createElement("div");
       info.className = "scanner-info-row";
-      info.append(displayField("Sub Info", "channel", palette), displayField("Modulation", "channel", palette), displayField("Hold", "alert", palette));
+      info.append(displayField("Sub Info", "channel", palette, "", screenName, "Sub Info"), displayField("Modulation", "channel", palette, "", screenName, "Modulation"), displayField("Hold", "alert", palette, "", screenName, "Hold"));
       preview.appendChild(info);
     } else {
       const trunked = screenName.includes("Trunk");
       const detailed = screenName.includes("Detail");
-      preview.appendChild(displayField("System Name", "system", palette, "scanner-primary"));
-      preview.appendChild(displayField("Favorites List Name", "system", palette));
-      preview.appendChild(displayField("Department Name", "department", palette, "scanner-primary"));
-      preview.appendChild(displayField(trunked ? "Site Name" : detailed ? "Department Detail" : "(Empty)", "department", palette));
-      preview.appendChild(displayField("Channel Name", "channel", palette, "scanner-primary"));
-      preview.appendChild(displayField(trunked ? "TGID" : "Frequency", "channel", palette));
+      preview.appendChild(displayField("System Name", "system", palette, "scanner-primary", screenName, "System Name"));
+      preview.appendChild(displayField("Favorites List Name", "system", palette, "", screenName, "System option", "FL_Name"));
+      preview.appendChild(displayField("Department Name", "department", palette, "scanner-primary", screenName, "Department Name"));
+      preview.appendChild(displayField(trunked ? "Site Name" : detailed ? "Department Detail" : "(Empty)", "department", palette, "", screenName, "Department option", trunked ? "SiteName" : "Empty"));
+      preview.appendChild(displayField("Channel Name", "channel", palette, "scanner-primary", screenName, "Channel Name"));
+      preview.appendChild(displayField(trunked ? "TGID" : "Frequency", "channel", palette, "", screenName, "Channel option", trunked ? "TGID" : "Frequency"));
       const info = document.createElement("div");
       info.className = "scanner-info-row";
       info.append(
-        displayField("Service Type", "metadata", palette),
-        displayField("CTCSS/DCS/NAC", "metadata", palette),
-        displayField("Avoid", "alert", palette)
+        displayField("Service Type", "metadata", palette, "", screenName, detailed ? "Option A-1" : "Option A", "ServiceType"),
+        displayField("CTCSS/DCS/NAC", "metadata", palette, "", screenName, detailed ? "Option B-1" : "Option B", "CTCSS/DCS"),
+        displayField("Avoid", "alert", palette, "", screenName, "Avoid")
       );
       preview.appendChild(info);
     }
     const icons = document.createElement("div");
     icons.className = "scanner-icons";
     ["Mod", "P-ch", "IFX", "LVL", "REC", "GPS", "PRI", "CC", "WX"].forEach((label) => {
-      icons.appendChild(displayField(label, label === "CC" || label === "WX" ? "alert" : "accent", palette));
+      const options = { Mod: "Modulation", "P-ch": "P_Ch", IFX: "IFX", LVL: "LVL", REC: "REC", GPS: "GPS", PRI: "PRI", CC: "CC", WX: "WxPRI" };
+      icons.appendChild(displayField(label, label === "CC" || label === "WX" ? "alert" : "accent", palette, "", screenName, "", options[label]));
     });
     preview.appendChild(icons);
     return preview;
   }
 
-  function selectDisplayPalette(palette, screens) {
+  function jsLuminance(hex) {
+    const values = [0, 2, 4].map((index) => parseInt(hex.slice(index, index + 2), 16) / 255)
+      .map((value) => value <= 0.04045 ? value / 12.92 : Math.pow((value + 0.055) / 1.055, 2.4));
+    return 0.2126 * values[0] + 0.7152 * values[1] + 0.0722 * values[2];
+  }
+
+  function jsContrast(first, second) {
+    const values = [jsLuminance(first), jsLuminance(second)].sort((a, b) => b - a);
+    return (values[0] + 0.05) / (values[1] + 0.05);
+  }
+
+  function renderDisplayPreviews() {
+    const palette = displayPaletteView();
+    const grid = document.getElementById("display-preview-grid");
+    grid.replaceChildren();
+    displayPaletteData.screens.forEach((screen) => grid.appendChild(renderScannerPreview(screen, palette)));
+    let minimum = Infinity;
+    let low = 0;
+    Object.entries(displayPaletteData.items).forEach(([screen, items]) => items.forEach((item) => {
+      const colors = resolvedDisplayColors(screen, item, item.category);
+      const ratio = jsContrast(colors.text, colors.back);
+      minimum = Math.min(minimum, ratio);
+      if (ratio < 4.5) low += 1;
+    }));
+    const summary = document.getElementById("display-contrast-summary");
+    summary.textContent = `${displayCustomConfig.name}: minimum contrast ${minimum.toFixed(2)}:1${low ? ` — ${low} item(s) below 4.5:1` : " — all items pass 4.5:1"}`;
+    summary.style.color = low ? "#f87171" : "";
+  }
+
+  function renderSemanticColors() {
+    const container = document.getElementById("display-semantic-colors");
+    container.replaceChildren();
+    ["background", "status", "system", "department", "channel", "metadata", "alert", "accent"].forEach((category) => {
+      const wrapper = document.createElement("label");
+      wrapper.className = "semantic-color-control";
+      const input = document.createElement("input");
+      input.type = "color";
+      input.value = "#" + displayCustomConfig.colors[category];
+      input.setAttribute("aria-label", `${category} color`);
+      const label = document.createElement("span");
+      label.className = "semantic-color-label";
+      const strong = document.createElement("strong");
+      strong.textContent = category;
+      const badge = document.createElement("span");
+      badge.className = "contrast-badge";
+      const updateBadge = () => {
+        if (category === "background") {
+          badge.textContent = input.value.toUpperCase();
+          return;
+        }
+        const ratio = jsContrast(input.value.slice(1), displayCustomConfig.colors.background);
+        badge.textContent = `${input.value.toUpperCase()} · ${ratio.toFixed(2)}:1`;
+        badge.classList.toggle("low", ratio < 4.5);
+      };
+      input.addEventListener("input", () => {
+        displayCustomConfig.colors[category] = input.value.slice(1).toUpperCase();
+        updateBadge();
+        renderDisplayPreviews();
+        renderDisplayItemEditor();
+      });
+      if (category === "background") input.addEventListener("change", renderSemanticColors);
+      label.append(strong, badge);
+      wrapper.append(input, label);
+      container.appendChild(wrapper);
+      updateBadge();
+    });
+  }
+
+  function applyItemColor(item, field, color) {
+    const screen = document.getElementById("display-screen-select").value;
+    const sync = document.getElementById("display-sync-items").checked;
+    const mapping = sync ? displayCustomConfig.global_item_colors : displayCustomConfig.screen_item_colors;
+    const key = sync ? item.item_key : item.screen_key;
+    if (sync) {
+      Object.values(displayPaletteData.items).flat().forEach((candidate) => {
+        if (candidate.item_key === item.item_key) delete displayCustomConfig.screen_item_colors[candidate.screen_key];
+      });
+    }
+    mapping[key] = Object.assign({}, mapping[key] || {}, { [field]: color.toUpperCase() });
+    renderDisplayPreviews();
+    renderDisplayItemEditor();
+  }
+
+  function renderDisplayItemEditor() {
+    if (!displayPaletteData || !displayCustomConfig) return;
+    const screen = document.getElementById("display-screen-select").value || displayPaletteData.screens[0];
+    const tbody = document.querySelector("#display-item-editor tbody");
+    tbody.replaceChildren();
+    (displayPaletteData.items[screen] || []).forEach((item) => {
+      const colors = resolvedDisplayColors(screen, item, item.category);
+      const row = document.createElement("tr");
+      [item.name, item.option || "—", item.category].forEach((value) => {
+        const cell = document.createElement("td");
+        cell.textContent = value;
+        row.appendChild(cell);
+      });
+      ["text", "back"].forEach((field) => {
+        const cell = document.createElement("td");
+        const picker = document.createElement("input");
+        picker.type = "color";
+        picker.className = "item-color-input";
+        picker.value = "#" + colors[field];
+        picker.setAttribute("aria-label", `${screen} ${item.name} ${field} color`);
+        picker.addEventListener("change", () => applyItemColor(item, field, picker.value.slice(1)));
+        cell.appendChild(picker);
+        row.appendChild(cell);
+      });
+      const ratioCell = document.createElement("td");
+      const ratio = jsContrast(colors.text, colors.back);
+      ratioCell.textContent = ratio.toFixed(2) + ":1";
+      ratioCell.className = "contrast-badge" + (ratio < 4.5 ? " low" : "");
+      row.appendChild(ratioCell);
+      const resetCell = document.createElement("td");
+      const reset = document.createElement("button");
+      reset.textContent = "Reset";
+      reset.addEventListener("click", () => {
+        if (document.getElementById("display-sync-items").checked) {
+          delete displayCustomConfig.global_item_colors[item.item_key];
+          Object.values(displayPaletteData.items).flat().forEach((candidate) => {
+            if (candidate.item_key === item.item_key) delete displayCustomConfig.screen_item_colors[candidate.screen_key];
+          });
+        } else {
+          delete displayCustomConfig.screen_item_colors[item.screen_key];
+        }
+        renderDisplayPreviews();
+        renderDisplayItemEditor();
+      });
+      resetCell.appendChild(reset);
+      row.appendChild(resetCell);
+      tbody.appendChild(row);
+    });
+  }
+
+  function selectDisplayPalette(palette) {
     selectedDisplayPalette = palette;
+    displayCustomConfig = {
+      name: palette.name,
+      description: palette.description,
+      colors: copyJson(palette.colors),
+      global_item_colors: {},
+      screen_item_colors: {},
+    };
+    document.getElementById("display-custom-name").value = palette.name + " Custom";
+    document.getElementById("display-view-text").value = "#" + palette.colors.status;
+    document.getElementById("display-view-back").value = "#" + palette.colors.background;
     document.querySelectorAll(".display-palette-card").forEach((card) => {
       const selected = card.dataset.paletteId === palette.id;
       card.classList.toggle("selected", selected);
       card.setAttribute("aria-checked", String(selected));
     });
-    const grid = document.getElementById("display-preview-grid");
-    grid.replaceChildren();
-    screens.forEach((screen) => grid.appendChild(renderScannerPreview(screen, palette)));
     document.getElementById("display-download-btn").disabled = false;
-    document.getElementById("display-contrast-summary").textContent =
-      `${palette.name}: minimum text/background contrast ${palette.minimum_contrast.toFixed(2)}:1`;
+    renderSemanticColors();
+    renderDisplayItemEditor();
+    renderDisplayPreviews();
   }
 
   async function loadDisplayPalettes() {
+    if (displayPaletteData && displayCustomConfig) {
+      renderSemanticColors();
+      renderDisplayItemEditor();
+      renderDisplayPreviews();
+      return;
+    }
     try {
       const data = await apiGet("/api/v1/display/palettes");
       const container = document.getElementById("display-palette-options");
@@ -434,27 +615,178 @@
           swatches.appendChild(swatch);
         });
         card.append(title, description, swatches);
-        card.addEventListener("click", () => selectDisplayPalette(palette, data.screens));
+        card.addEventListener("click", () => selectDisplayPalette(palette));
         container.appendChild(card);
+      });
+      displayPaletteData = data;
+      const screenSelect = document.getElementById("display-screen-select");
+      screenSelect.replaceChildren();
+      data.screens.forEach((screen) => {
+        const option = document.createElement("option");
+        option.value = screen;
+        option.textContent = screen.replace(/([a-z])([A-Z])/g, "$1 $2");
+        screenSelect.appendChild(option);
       });
       const preferred = selectedDisplayPalette
         ? data.palettes.find((palette) => palette.id === selectedDisplayPalette.id)
         : data.palettes[0];
-      if (preferred) selectDisplayPalette(preferred, data.screens);
+      if (preferred) selectDisplayPalette(preferred);
+      refreshSavedDisplayPalettes();
     } catch (error) {
       setStatus("Display palette error: " + error.message, true);
     }
   }
 
   document.getElementById("display-download-btn").addEventListener("click", async () => {
-    if (!selectedDisplayPalette) return;
+    if (!displayCustomConfig) return;
     try {
-      const fallback = `wasds150-display-${selectedDisplayPalette.id}.xml`;
-      const filename = await downloadBlobFrom("/api/v1/display/palettes/" + encodeURIComponent(selectedDisplayPalette.id), fallback);
+      displayCustomConfig.name = document.getElementById("display-custom-name").value || displayCustomConfig.name;
+      const filename = await downloadBlobFrom(
+        "/api/v1/display/custom",
+        "wasds150-display-custom.xml",
+        { method: "POST", body: JSON.stringify(displayCustomConfig) }
+      );
       setStatus("Downloaded " + filename);
     } catch (error) {
       setStatus("Display XML download failed: " + error.message, true);
     }
+  });
+
+  function readSavedDisplayPalettes() {
+    try { return JSON.parse(localStorage.getItem(DISPLAY_STORAGE_KEY) || "[]"); }
+    catch (_) { return []; }
+  }
+
+  function refreshSavedDisplayPalettes() {
+    const select = document.getElementById("display-saved-palettes");
+    const current = select.value;
+    select.replaceChildren();
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = "Saved palettes…";
+    select.appendChild(placeholder);
+    readSavedDisplayPalettes().forEach((saved) => {
+      const option = document.createElement("option");
+      option.value = saved.id;
+      option.textContent = saved.name;
+      select.appendChild(option);
+    });
+    select.value = current;
+  }
+
+  function loadCustomDisplayConfig(config) {
+    const colorKeys = ["background", "status", "system", "department", "channel", "metadata", "alert", "accent"];
+    if (!config || !config.colors || !colorKeys.every((key) => /^[0-9a-f]{6}$/i.test(config.colors[key] || ""))) {
+      throw new Error("Palette is missing valid semantic colors");
+    }
+    if (!config.global_item_colors || typeof config.global_item_colors !== "object" ||
+        !config.screen_item_colors || typeof config.screen_item_colors !== "object") {
+      throw new Error("Palette is missing item override maps");
+    }
+    displayCustomConfig = copyJson(config);
+    selectedDisplayPalette = null;
+    document.querySelectorAll(".display-palette-card").forEach((card) => {
+      card.classList.remove("selected");
+      card.setAttribute("aria-checked", "false");
+    });
+    document.getElementById("display-custom-name").value = displayCustomConfig.name || "My Custom Palette";
+    document.getElementById("display-view-text").value = "#" + displayCustomConfig.colors.status;
+    document.getElementById("display-view-back").value = "#" + displayCustomConfig.colors.background;
+    renderSemanticColors();
+    renderDisplayItemEditor();
+    renderDisplayPreviews();
+  }
+
+  document.getElementById("display-screen-select").addEventListener("change", renderDisplayItemEditor);
+  document.getElementById("display-sync-items").addEventListener("change", renderDisplayItemEditor);
+  document.getElementById("display-reset-screen").addEventListener("click", () => {
+    const screen = document.getElementById("display-screen-select").value + "||";
+    Object.keys(displayCustomConfig.screen_item_colors).forEach((key) => {
+      if (key.startsWith(screen)) delete displayCustomConfig.screen_item_colors[key];
+    });
+    renderDisplayItemEditor();
+    renderDisplayPreviews();
+  });
+  document.getElementById("display-reset-all-items").addEventListener("click", () => {
+    displayCustomConfig.global_item_colors = {};
+    displayCustomConfig.screen_item_colors = {};
+    renderDisplayItemEditor();
+    renderDisplayPreviews();
+  });
+  function applyColorToCurrentView(field, pickerId) {
+    const screen = document.getElementById("display-screen-select").value;
+    const color = document.getElementById(pickerId).value.slice(1).toUpperCase();
+    (displayPaletteData.items[screen] || []).forEach((item) => {
+      displayCustomConfig.screen_item_colors[item.screen_key] = Object.assign(
+        {}, displayCustomConfig.screen_item_colors[item.screen_key] || {}, { [field]: color }
+      );
+    });
+    renderDisplayItemEditor();
+    renderDisplayPreviews();
+  }
+  document.getElementById("display-apply-view-text").addEventListener("click", () => applyColorToCurrentView("text", "display-view-text"));
+  document.getElementById("display-apply-view-back").addEventListener("click", () => applyColorToCurrentView("back", "display-view-back"));
+  document.getElementById("display-reset-custom").addEventListener("click", () => {
+    const palette = selectedDisplayPalette || (displayPaletteData && displayPaletteData.palettes[0]);
+    if (palette) selectDisplayPalette(palette);
+  });
+  document.getElementById("display-custom-name").addEventListener("input", (event) => {
+    if (!displayCustomConfig) return;
+    displayCustomConfig.name = event.target.value || "My Custom Palette";
+    renderDisplayPreviews();
+  });
+  document.getElementById("display-save-custom").addEventListener("click", () => {
+    displayCustomConfig.name = document.getElementById("display-custom-name").value || "My Custom Palette";
+    const saved = readSavedDisplayPalettes();
+    const select = document.getElementById("display-saved-palettes");
+    const id = select.value || `custom-${Date.now()}`;
+    const entry = { id, name: displayCustomConfig.name, config: copyJson(displayCustomConfig) };
+    const index = saved.findIndex((item) => item.id === id);
+    if (index >= 0) saved[index] = entry; else saved.push(entry);
+    localStorage.setItem(DISPLAY_STORAGE_KEY, JSON.stringify(saved));
+    refreshSavedDisplayPalettes();
+    select.value = id;
+    setStatus(`Saved custom palette ${entry.name}`);
+  });
+  document.getElementById("display-saved-palettes").addEventListener("change", (event) => {
+    const saved = readSavedDisplayPalettes().find((item) => item.id === event.target.value);
+    if (saved) {
+      try { loadCustomDisplayConfig(saved.config); }
+      catch (error) { setStatus("Saved palette is invalid: " + error.message, true); }
+    }
+  });
+  document.getElementById("display-delete-custom").addEventListener("click", () => {
+    const select = document.getElementById("display-saved-palettes");
+    if (!select.value) return;
+    const saved = readSavedDisplayPalettes().filter((item) => item.id !== select.value);
+    localStorage.setItem(DISPLAY_STORAGE_KEY, JSON.stringify(saved));
+    refreshSavedDisplayPalettes();
+    setStatus("Deleted saved custom palette");
+  });
+  document.getElementById("display-export-json").addEventListener("click", () => {
+    displayCustomConfig.name = document.getElementById("display-custom-name").value || displayCustomConfig.name;
+    const blob = new Blob([JSON.stringify(displayCustomConfig, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "wasds150-custom-display-palette.json";
+    link.click();
+    URL.revokeObjectURL(url);
+  });
+  document.getElementById("display-import-json").addEventListener("change", (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const config = JSON.parse(reader.result);
+        loadCustomDisplayConfig(config);
+        setStatus("Imported custom display palette JSON");
+      } catch (error) {
+        setStatus("Custom palette import failed: " + error.message, true);
+      }
+    };
+    reader.readAsText(file);
   });
 
   // ------------------------------------------------------------- profile --
@@ -639,8 +971,8 @@
   });
 
   // -------------------------------------------------------------- export --
-  async function downloadBlobFrom(path, fallbackName) {
-    const resp = await api(path);
+  async function downloadBlobFrom(path, fallbackName, options) {
+    const resp = await api(path, options);
     const blob = await resp.blob();
     const disposition = resp.headers.get("Content-Disposition") || "";
     const match = /filename="([^"]+)"/.exec(disposition);

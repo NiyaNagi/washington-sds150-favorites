@@ -14,6 +14,7 @@ from typing import Dict, List, Optional, Tuple
 
 
 ItemSpec = Tuple[str, Optional[str]]
+COLOR_KEYS = ("background", "status", "system", "department", "channel", "metadata", "alert", "accent")
 
 
 def _simple(department_option: str, channel_option: str) -> List[ItemSpec]:
@@ -135,11 +136,47 @@ PALETTES: Tuple[DisplayPalette, ...] = (
         "low-light-amber", "Low-Light Amber", "Warm amber hierarchy with restrained red accents to preserve night vision.",
         "000000", "FFE8D6", "FF6B35", "FF9F1C", "FFD166", "E6A8D7", "FF4D6D", "C7F9CC",
     ),
+    DisplayPalette(
+        "oceanic", "Oceanic", "Cool marine blues with warm orange and sand hierarchy accents.",
+        "001219", "F0FDFA", "5BC0EB", "F4A261", "E9C46A", "CDB4DB", "FF758F", "2EC4B6",
+    ),
+    DisplayPalette(
+        "forest-watch", "Forest Watch", "Natural green field palette with wildfire-ready amber and red accents.",
+        "071A12", "F4F7F5", "74C69D", "F4A261", "F9C74F", "B8C0FF", "FF6B6B", "80ED99",
+    ),
+    DisplayPalette(
+        "cyber-neon", "Cyber Neon", "High-energy cyan, orange, yellow, and magenta on near-black violet.",
+        "090014", "F8F7FF", "00E5FF", "FF9E00", "F9F871", "D58BFF", "FF4D9D", "00F5A0",
+    ),
+    DisplayPalette(
+        "solar-dark", "Solar Dark", "Muted solar colors for long monitoring sessions with reduced glare.",
+        "002B36", "FDF6E3", "6FC2BB", "F4A261", "EBCB8B", "C7B5E8", "FF7B72", "7BD88F",
+    ),
+    DisplayPalette(
+        "solar-light", "Solar Light", "Warm paper background with restrained, saturated hierarchy colors.",
+        "FDF6E3", "073642", "075985", "9A3412", "6B4F00", "6D28D9", "B91C1C", "166534",
+    ),
+    DisplayPalette(
+        "monochrome-ice", "Monochrome Ice", "Calm pale blues and lavender on deep navy with a distinct alert pink.",
+        "06111C", "F8FAFC", "BDE0FE", "A2D2FF", "E0FBFC", "CDB4DB", "FF8FA3", "90E0EF",
+    ),
+    DisplayPalette(
+        "purple-dusk", "Purple Dusk", "Soft dusk pastels on deep violet for an expressive but readable display.",
+        "160B2D", "F8F4FF", "9BD1E5", "FFADAD", "FFE66D", "D0BFFF", "FF7096", "80FFDB",
+    ),
+    DisplayPalette(
+        "slate-professional", "Slate Professional", "Conservative slate background with crisp operational accents.",
+        "111827", "F9FAFB", "7DD3FC", "FBBF24", "FDE68A", "C4B5FD", "FDA4AF", "86EFAC",
+    ),
 )
 
 
 def palette_by_id(palette_id: str) -> Optional[DisplayPalette]:
     return next((palette for palette in PALETTES if palette.id == palette_id), None)
+
+
+def item_key(name: str, option: Optional[str]) -> str:
+    return f"{name}||{option or ''}"
 
 
 def _category(name: str, option: Optional[str]) -> str:
@@ -161,23 +198,119 @@ def _category(name: str, option: Optional[str]) -> str:
     return "status"
 
 
-def generate_display_xml(palette: DisplayPalette) -> bytes:
+def generate_display_xml(
+    palette: DisplayPalette,
+    *,
+    global_item_colors: Optional[Dict[str, dict]] = None,
+    screen_item_colors: Optional[Dict[str, dict]] = None,
+) -> bytes:
     root = ET.Element("UndienScanner", {"Model": "SDS100", "FileType": "DisplayCustomizer"})
     colors = palette.colors()
+    global_item_colors = global_item_colors or {}
+    screen_item_colors = screen_item_colors or {}
     for screen_name, items in SCREEN_SPECS.items():
         screen = ET.SubElement(root, "Screen", {"Name": screen_name})
-        for name, option in items:
+        for index, (name, option) in enumerate(items):
             category = _category(name, option)
+            override = dict(global_item_colors.get(item_key(name, option)) or {})
+            override.update(screen_item_colors.get(f"{screen_name}||{index}") or {})
             attributes = {
                 "Name": name,
-                "Text": colors[category],
-                "Back": palette.background,
+                "Text": str(override.get("text") or colors[category]).upper(),
+                "Back": str(override.get("back") or palette.background).upper(),
             }
             if option is not None:
                 attributes["Option"] = option
             ET.SubElement(screen, "Item", attributes)
     ET.indent(root, space="    ")
     return ET.tostring(root, encoding="utf-8", xml_declaration=True) + b"\n"
+
+
+def display_item_catalog() -> Dict[str, List[dict]]:
+    return {
+        screen_name: [
+            {
+                "index": index,
+                "name": name,
+                "option": option,
+                "item_key": item_key(name, option),
+                "category": _category(name, option),
+                "screen_key": f"{screen_name}||{index}",
+            }
+            for index, (name, option) in enumerate(items)
+        ]
+        for screen_name, items in SCREEN_SPECS.items()
+    }
+
+
+def custom_palette_from_dict(data: dict) -> DisplayPalette:
+    if not isinstance(data, dict):
+        raise ValueError("custom palette payload must be an object")
+    colors = dict(data.get("colors") or {})
+    missing = [key for key in COLOR_KEYS if key not in colors]
+    if missing:
+        raise ValueError(f"missing custom palette colors: {missing}")
+    for key in COLOR_KEYS:
+        value = str(colors[key]).removeprefix("#").upper()
+        if not re.fullmatch(r"[0-9A-F]{6}", value):
+            raise ValueError(f"{key}: invalid RGB color")
+        colors[key] = value
+    return DisplayPalette(
+        id="custom",
+        name=str(data.get("name") or "Custom Palette")[:80],
+        description=str(data.get("description") or "User-customized display palette")[:240],
+        **colors,
+    )
+
+
+def validate_color_overrides(overrides: dict, valid_keys: set) -> List[str]:
+    issues: List[str] = []
+    if not isinstance(overrides, dict):
+        return ["color overrides must be an object"]
+    for key, value in overrides.items():
+        if key not in valid_keys:
+            issues.append(f"unknown item override key: {key}")
+            continue
+        if not isinstance(value, dict):
+            issues.append(f"{key}: override must be an object")
+            continue
+        for field in ("text", "back"):
+            if field in value and not re.fullmatch(r"[0-9A-Fa-f]{6}", str(value[field]).removeprefix("#")):
+                issues.append(f"{key}: invalid {field} color")
+    return issues
+
+
+def generate_custom_display_xml(data: dict) -> Tuple[bytes, List[str]]:
+    palette = custom_palette_from_dict(data)
+    global_overrides = dict(data.get("global_item_colors") or {})
+    screen_overrides = dict(data.get("screen_item_colors") or {})
+    catalog = display_item_catalog()
+    global_keys = {item["item_key"] for items in catalog.values() for item in items}
+    screen_keys = {item["screen_key"] for items in catalog.values() for item in items}
+    issues = validate_color_overrides(global_overrides, global_keys)
+    issues.extend(validate_color_overrides(screen_overrides, screen_keys))
+    if issues:
+        raise ValueError("; ".join(issues))
+    for mapping in (global_overrides, screen_overrides):
+        for value in mapping.values():
+            for field in ("text", "back"):
+                if field in value:
+                    value[field] = str(value[field]).removeprefix("#").upper()
+    xml = generate_display_xml(
+        palette,
+        global_item_colors=global_overrides,
+        screen_item_colors=screen_overrides,
+    )
+    contrast_warnings: List[str] = []
+    root = ET.fromstring(xml)
+    for screen in root.findall("Screen"):
+        for index, item in enumerate(screen.findall("Item")):
+            ratio = contrast_ratio(item.attrib["Text"], item.attrib["Back"])
+            if ratio < 4.5:
+                contrast_warnings.append(
+                    f"{screen.attrib['Name']} item {index} ({item.attrib.get('Name')}): {ratio:.2f}:1"
+                )
+    return xml, contrast_warnings
 
 
 def _relative_luminance(color: str) -> float:

@@ -35,7 +35,7 @@ Colors have one meaning across every display mode:
 This grouping makes the hierarchy recognizable by color before the text is
 read. Text/background pairs are checked with the WCAG relative-luminance
 formula as a conservative readability heuristic. Every supplied pair is at
-least 4.5:1; actual minimums range from 5.62:1 to 7.80:1. Scanner brightness,
+least 4.5:1; preset minimums range from 5.62:1 to 9.38:1. Scanner brightness,
 viewing angle, direct sunlight, and color vision still affect practical
 readability, so the tab provides full visual previews before export.
 
@@ -47,10 +47,43 @@ readability, so the tab provides full visual previews before export.
 | Daylight High Contrast | `#FFFFFF` | `#075985` | `#9A3412` | `#713F12` | `#5B21B6` | `#B91C1C` | 6.47:1 |
 | Colorblind Dark | `#0B0F14` | `#56B4E9` | `#E69F00` | `#F0E442` | `#CC79A7` | `#F25F5C` | 5.62:1 |
 | Low-Light Amber | `#000000` | `#FF6B35` | `#FF9F1C` | `#FFD166` | `#E6A8D7` | `#FF4D6D` | 6.53:1 |
+| Oceanic | `#001219` | `#5BC0EB` | `#F4A261` | `#E9C46A` | `#CDB4DB` | `#FF758F` | 7.44:1 |
+| Forest Watch | `#071A12` | `#74C69D` | `#F4A261` | `#F9C74F` | `#B8C0FF` | `#FF6B6B` | 6.49:1 |
+| Cyber Neon | `#090014` | `#00E5FF` | `#FF9E00` | `#F9F871` | `#D58BFF` | `#FF4D9D` | 6.66:1 |
+| Solar Dark | `#002B36` | `#6FC2BB` | `#F4A261` | `#EBCB8B` | `#C7B5E8` | `#FF7B72` | 5.95:1 |
+| Solar Light | `#FDF6E3` | `#075985` | `#9A3412` | `#6B4F00` | `#6D28D9` | `#B91C1C` | 6.00:1 |
+| Monochrome Ice | `#06111C` | `#BDE0FE` | `#A2D2FF` | `#E0FBFC` | `#CDB4DB` | `#FF8FA3` | 8.79:1 |
+| Purple Dusk | `#160B2D` | `#9BD1E5` | `#FFADAD` | `#FFE66D` | `#D0BFFF` | `#FF7096` | 7.15:1 |
+| Slate Professional | `#111827` | `#7DD3FC` | `#FBBF24` | `#FDE68A` | `#C4B5FD` | `#FDA4AF` | 9.38:1 |
 
 **Night Ops** is the balanced default. **Daylight High Contrast** is intended
 for bright environments. **Colorblind Dark** uses an Okabe-Ito-inspired
 separation. **Low-Light Amber** limits cool light while keeping alerts distinct.
+Oceanic, Forest Watch, Cyber Neon, Solar Dark/Light, Monochrome Ice, Purple
+Dusk, and Slate Professional provide additional environment and style choices.
+
+## Full customization
+
+Open **Customize palette** below the presets to edit at three levels:
+
+1. **Semantic groups** — change system, department/site, channel, metadata,
+  status, alert, accent, or background once and update every matching field.
+2. **Matching items across views** — keep synchronization enabled, then change
+  an item's text or background color to apply that item consistently to all
+  seven modes where it appears.
+3. **One item in one view** — disable synchronization and edit an individual
+  field without affecting any other screen.
+
+The view-level controls can apply one text or background color to every item
+in the selected mode. Each item row displays its effective contrast and has a
+reset button. The summary reports the minimum effective contrast and counts
+items below 4.5:1 immediately; custom colors are permitted so users can make
+intentional tradeoffs, but low-contrast items are clearly flagged.
+
+Custom palettes can be named and saved in browser local storage, reloaded or
+deleted, and exported/imported as JSON for backup or sharing. Sentinel XML is
+always generated server-side from the current semantic and item overrides and
+validated before download.
 
 ## Information layout
 

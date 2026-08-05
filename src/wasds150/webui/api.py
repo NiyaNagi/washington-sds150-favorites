@@ -27,6 +27,8 @@ from wasds150.diffing.differ import diff_profile
 from wasds150.display_customizer import (
     PALETTES,
     SCREEN_SPECS,
+    display_item_catalog,
+    generate_custom_display_xml,
     generate_display_xml,
     palette_by_id,
     palette_summary,
@@ -253,6 +255,7 @@ def get_display_palettes(ctx: AppContext, req: RequestContext) -> Response:
     return Response.json(200, {
         "palettes": [palette_summary(palette) for palette in PALETTES],
         "screens": list(SCREEN_SPECS),
+        "items": display_item_catalog(),
         "minimum_contrast_target": 4.5,
     })
 
@@ -272,6 +275,26 @@ def get_display_palette_xml(ctx: AppContext, req: RequestContext) -> Response:
         body=data,
         content_type="application/xml",
         headers={"Content-Disposition": f'attachment; filename="wasds150-display-{palette.id}.xml"'},
+    )
+
+
+def post_custom_display_xml(ctx: AppContext, req: RequestContext) -> Response:
+    body = req.json_body() or {}
+    try:
+        data, warnings = generate_custom_display_xml(body)
+    except (TypeError, ValueError) as exc:
+        return _error(400, str(exc))
+    issues = validate_display_xml(data)
+    if issues:
+        return _error(400, "custom display XML failed validation: " + "; ".join(issues))
+    return Response(
+        status=200,
+        body=data,
+        content_type="application/xml",
+        headers={
+            "Content-Disposition": 'attachment; filename="wasds150-display-custom.xml"',
+            "X-Contrast-Warnings": str(len(warnings)),
+        },
     )
 
 
@@ -1149,6 +1172,7 @@ def build_router(ctx: AppContext) -> Router:
     router.add("POST", "/api/v1/sentinel/install", lambda req: post_sentinel_workspace_install(ctx, req))
     router.add("GET", "/api/v1/display/palettes", lambda req: get_display_palettes(ctx, req))
     router.add("GET", "/api/v1/display/palettes/{palette_id}", lambda req: get_display_palette_xml(ctx, req))
+    router.add("POST", "/api/v1/display/custom", lambda req: post_custom_display_xml(ctx, req))
     router.add("POST", "/api/v1/profile/enable", lambda req: post_profile_enable(ctx, req))
     router.add("POST", "/api/v1/profile/edit", lambda req: post_profile_edit(ctx, req))
     router.add("POST", "/api/v1/profile/remove", lambda req: post_profile_remove(ctx, req))

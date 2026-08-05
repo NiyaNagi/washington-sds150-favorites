@@ -82,10 +82,12 @@ Sentinel to be closed, takes and verifies a full workspace backup, preserves
 unselected lists and profile settings, and automatically rolls back detected
 write failures.
 
-The **Display** tab compares multiple coordinated palettes across all seven
+The **Display** tab compares twelve coordinated palettes across all seven
 scanner display modes on one page. Every palette uses consistent semantic
 colors, reports contrast ratios, and downloads as validated Sentinel display
-customizer XML.
+customizer XML. A full editor supports semantic group colors, synchronized
+matching items, per-item/per-view text and background colors, whole-view
+coloring, saved browser palettes, and JSON import/export.
 
 The generated `out/sentinel-import-pack.zip` is the bulk download. Its
 `hpe/` directory contains every currently available Favorites List with
