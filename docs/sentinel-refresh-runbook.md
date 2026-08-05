@@ -11,7 +11,10 @@ The August 2, 2026 Sentinel master database was read successfully on Windows:
 - 14,939 normalized local HPDB facts, with no source alerts.
 - All 17 intended SID-qualified trunked Favorites Lists matched exact
   TrunkId/SysId identities.
-- 76 validated HPE files were generated.
+- 118 validated HPE files were generated from 120 catalog entries.
+- All 39 King County municipal lists, the Ames Lake home profile, the
+  Eastside regional profile, and the comprehensive outdoor rollup were
+  populated and location-tagged.
 - FL30 is composed fail-closed from complete deep copies of FL04, FL05,
   FL06, and FL01. It preserves each component's verified hierarchy and GPS
   metadata without inventing a geographic boundary or radio fact. It should
@@ -140,7 +143,7 @@ have both been checked.
 ### Reference validation
 
 The generated set was checked against a real Sentinel-created HPD example.
-All 76 generated HPE files passed container, schema, semantic, CRLF, header,
+All 118 generated HPE files passed container, schema, semantic, CRLF, header,
 and signature validation. Every record tag shared with the example matched
 Sentinel's observed field width. Direct-workspace HPD output removes only the
 HPE interchange signature and preserves the validated record hierarchy.

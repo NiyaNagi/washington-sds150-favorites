@@ -30,6 +30,7 @@ import importlib.resources
 from pathlib import Path
 
 from wasds150.catalog import loader
+from wasds150.catalog.ames_lake import favorites as ames_lake_favorites
 from wasds150.catalog.validate import partition_validation_issues, validate_catalog
 from wasds150.models.catalog import Catalog
 from wasds150.recipes.systems import dedupe_systems, static_systems_for
@@ -42,7 +43,10 @@ def load_baseline() -> Catalog:
     """Load the packaged baseline catalog snapshot."""
     resource = importlib.resources.files(_DATA_PACKAGE).joinpath(BASELINE_RESOURCE)
     with importlib.resources.as_file(resource) as path:
-        return loader.load_json(Path(path))
+        catalog = loader.load_json(Path(path))
+    existing = {favorite.slug for favorite in catalog.favorites}
+    catalog.favorites.extend(favorite for favorite in ames_lake_favorites() if favorite.slug not in existing)
+    return catalog
 
 
 def baseline_resource_path() -> Path:
@@ -61,6 +65,8 @@ def generate_baseline_from_csv(csv_path: Path, output_path: Path) -> Catalog:
     in.
     """
     catalog = loader.load_csv(csv_path)
+    existing = {favorite.slug for favorite in catalog.favorites}
+    catalog.favorites.extend(favorite for favorite in ames_lake_favorites() if favorite.slug not in existing)
     for fl in catalog.favorites:
         additional = static_systems_for(fl)
         if additional:

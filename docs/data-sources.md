@@ -97,7 +97,9 @@ Matched facts are attached to the row as additional provenance entries
 (source, URL, retrieval time, confidence) — additive and inert to the merge
 engine (never a *fact-field*, i.e. CSV column, change) — so running an
 update with **no** local HPDB/RadioReference input reproduces the shipped
-78-row catalog's CSV fields and content hash exactly. Matched facts are
+120-row catalog's public fields and content hash exactly. The original 78
+statewide/core rows still match the checked-in CSV, while 42 public local-area
+intent rows are appended deterministically. Matched facts are
 **also** converted into a real, populated `FavoritesList.systems` entry
 (see the next section) — this is additive/structural, not a rewrite of the
 free-text fields, and likewise never changes the content hash (`systems`
@@ -203,6 +205,20 @@ remains an unimplemented placeholder — out of scope for this phase). The
 application may retain links or import a file that the user has lawfully
 exported for personal use in a future phase. Coordinator data such as WWARA
 is preferred where available.
+
+### King County municipal locations and local curation
+
+The 39 incorporated King County place centers use the U.S. Census Bureau
+2023 Gazetteer internal points. These public coordinates and conservative
+municipal radii are used only for Sentinel department location control.
+
+City names, dispatch relationships, and service intent are grounded in public
+municipal, King County, NORCOM, Eastside Fire & Rescue, and Valley
+Communications information. They do not provide radio frequencies or
+talkgroups. Exact PSERN/PSRS systems and complete record trees are still read
+from the user's local Sentinel HPDB by stable SID. Curation uses reviewed
+agency/service labels, rejects unmatched records, and keeps law-reference
+groups avoided. Licensed source records never enter the public repository.
 
 
 ## Information that cannot be refreshed automatically

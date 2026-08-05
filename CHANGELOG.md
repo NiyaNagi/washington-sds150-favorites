@@ -59,6 +59,18 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Added the original Sentinel display export as a checked-in structural
   reference plus a sourced display guide covering official item constraints,
   palette rationale, preview workflow, and Sentinel import steps.
+- Added one location-controlled Favorites List for every incorporated King
+  County city/town, plus Ames Lake Home and Eastside Regional profiles. Public
+  Census Gazetteer centers/ranges drive department location tags; exact radio
+  records remain user-local and are resolved by stable Sentinel identities.
+- Added conservative municipal curation for city services, NORCOM/ValleyCom
+  fire and EMS, King County emergency/interop, hospitals, transit, and reviewed
+  sheriff/police references. Law groups are retained in clearly marked avoided
+  encrypted departments; unmatched records are excluded.
+- Added OUT01, a fail-closed comprehensive outdoor safety rollup spanning SAR,
+  mutual aid, WSP/WSDOT, DNR/NIFC, mountain/park/forest profiles, aviation,
+  marine/ferries/ports, amateur/ARES/simplex, personal radio, hospitals,
+  roadside support, and NOAA Weather.
 
 ### Fixed
 
@@ -83,8 +95,8 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 - Reconstructed the personal local catalog against Sentinel master database
   date August 2, 2026: 14,939 normalized HPDB facts, zero source alerts,
-  exact identity coverage for all 17 intended trunked targets, 75 generated
-  HPE files, and only FL30/FL45/FL72 intentionally unresolved.
+  exact identity coverage for all 17 intended trunked targets, initially 75
+  generated HPE files, and FL30/FL45/FL72 initially unresolved.
 - Decoded and semantically validated every generated HPE; validated the
   import-pack file set, manifest, and SHA-256 checksums; confirmed all
   clear/encrypted split pairs differ and every retained encrypted department
@@ -92,8 +104,9 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Compared stable record identities with the previous local snapshot. The
   refreshed source added or retired records in FL09a/b, FL10, FL21,
   FL25a, FL50a/b, and FL58 while preserving the expected system hierarchy.
-- Revalidated the completed FL30 rollup and generated 76 HPE files. FL45
-  and FL72 remain intentionally unfilled because no authoritative stable
+- Revalidated FL30, all local city profiles, and OUT01 and generated 118 HPE
+  files from 120 entries. FL45 and FL72 remain intentionally unfilled because
+  no authoritative stable
   channel data exists outside lawful on-site Discovery.
 
 ### Security

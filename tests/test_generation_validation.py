@@ -83,9 +83,9 @@ def test_every_baseline_generated_hpe_passes_full_semantic_and_parity_validation
     result = apply_profile(catalog, Profile(based_on_catalog_hash=catalog.content_hash()))
     export = build_per_list_hpe(result.enabled_favorites)
 
-    assert len(result.enabled_favorites) == 78
+    assert len(result.enabled_favorites) == 120
     assert len(export.files) == 58
-    assert len(export.warnings) == 20
+    assert len(export.warnings) == 62
     by_key = {favorite.favorite_key: favorite for favorite in result.enabled_favorites}
     for filename, data in export.files.items():
         favorite = by_key[filename.removesuffix(".hpe")]

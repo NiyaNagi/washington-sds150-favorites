@@ -8,7 +8,8 @@ warnings rather than filled with guessed sites or talkgroups.
 
 ## Local baseline status
 
-- 78 curated Favorites Lists are defined.
+- 120 curated Favorites Lists are defined: 78 statewide/core entries plus
+  39 King County municipalities, Ames Lake/Eastside profiles, and OUT01.
 - 58 lists currently produce validated HPE files with no private input.
 - 510 conventional channels are structured with explicit mode and service
   type metadata.
@@ -17,8 +18,11 @@ warnings rather than filled with guessed sites or talkgroups.
   reference but avoided.
 - FL42's explicitly unverified Pomeroy frequency is not emitted; its
   statewide mountain safety baseline remains available.
-- The remaining 20 warnings comprise trunked-system dependencies,
-  intentional Discovery lists, and the FL30 cross-list rollup.
+- The no-private-input baseline has 62 warnings: the original 20 plus 42
+  local-HPDB-dependent city/profile/rollup rows. The original 20 comprise
+  trunked-system dependencies, intentional Discovery lists, and FL30.
+- After the current local Sentinel enrichment, only the two Discovery lists
+  remain unresolved.
 
 ## Before importing the HPDB
 

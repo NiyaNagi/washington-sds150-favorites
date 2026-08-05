@@ -15,10 +15,11 @@ First read these files completely:
 
 Goal: use this machine's updated, local Uniden Sentinel HPDB to fill every
 authoritative trunked-system gap and generate the most complete possible
-personal Sentinel import pack. The current public baseline has 78 Favorites
-List entries, 58 generated HPE files, 510 conventional channels, and 20
-warnings. Seventeen warnings are Sentinel-dependent trunked lists; FL30 is
-a rollup; FL45 and FL72 are intentional Discovery lists.
+personal Sentinel import pack. The current public baseline has 120 Favorites
+List entries: 78 statewide/core entries plus 39 King County cities,
+Ames Lake/Eastside profiles, and OUT01. With no private input it generates 58
+HPE files; after current local enrichment it generates 118. FL45 and FL72 are
+the only intentional Discovery lists.
 
 Work end-to-end rather than only proposing a plan:
 1. Inspect the repository and confirm it is on the latest main branch.
@@ -43,9 +44,9 @@ Work end-to-end rather than only proposing a plan:
 11. Run the complete test suite, artifact validation, manifest/checksum
     validation, deterministic clean-wheel generation, and inspect the final
     warning list.
-12. Target at least 75 valid HPE files with only FL30/FL45/FL72 unresolved;
-    then build FL30 if it can be assembled safely, targeting 76 files and
-    only the two Discovery warnings.
+12. Target 118 valid HPE files from 120 entries, including FL30, all 39 King
+   County cities, Ames Lake/Eastside profiles, and OUT01, with only the two
+   Discovery warnings.
 13. Verify git status contains no hpdb.cfg, s_*.hpd, HPE, local catalog,
     generated bundle, or preview JSON. Licensed/generated data stays local.
 14. Commit and push only reusable code, synthetic tests and documentation.

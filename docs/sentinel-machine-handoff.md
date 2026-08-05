@@ -1,8 +1,9 @@
 # Cross-Machine Sentinel Enrichment Handoff
 
 > **Completed refresh:** This handoff was executed against Sentinel master
-> database date August 2, 2026. The verified result now produces 76 HPE
-> files; FL30 is a validated full-component rollup, while only FL45/FL72
+> database date August 2, 2026. The expanded verified result now produces
+> 118 HPE files from 120 entries, including all 39 King County cities,
+> Ames Lake/Eastside profiles, FL30, and OUT01; only FL45/FL72
 > remain intentionally unresolved Discovery lists. See
 > [Sentinel Refresh, Import, and Dashboard Runbook](sentinel-refresh-runbook.md)
 > for the repeatable current workflow, validation record, device import, and
@@ -20,7 +21,7 @@ The copy-paste agent prompt is in
 Start from the latest `main` branch. The last completed release-documentation
 commit before this handoff was `6bdc86e`.
 
-## Current project state
+## Original pre-expansion project state
 
 | Measure | State before Sentinel enrichment |
 |---|---:|
@@ -60,16 +61,18 @@ from Sentinel:
 - FL50a / FL50b — JBLM support / command-security
 - FL58 — Sound Transit/Link operations
 
-The other three warnings are intentional:
+In the original 78-entry handoff, the other three warnings were:
 
 - FL30 is a rollup assembled only after FL01/FL04/FL05/FL06 are complete.
 - FL45 ski-area operations remain on-site Discovery because stable public
   frequencies are unavailable.
 - FL72 schools/malls/stadiums remains venue-specific Discovery.
 
-Phase-one success is therefore at least 75 generated HPE files with no
-warnings except FL30/FL45/FL72. Completing the FL30 rollup can raise the
-total to 76, leaving only the two true Discovery lists.
+That historical phase produced 75 files, then 76 after FL30. The current
+expanded acceptance target is 118 generated HPE files from 120 entries:
+the statewide/core lists, FL30, all 39 King County cities, Ames Lake and
+Eastside profiles, and OUT01 must be populated, leaving only FL45/FL72 as
+true Discovery warnings.
 
 ## Non-negotiable data rules
 

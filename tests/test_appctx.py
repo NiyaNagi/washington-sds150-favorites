@@ -13,7 +13,7 @@ def test_build_context_default_uses_packaged_baseline(wasds_home):
     config = AppConfig.default()
     ctx = build_context(config)
     assert ctx.catalog_source == "packaged-baseline"
-    assert len(ctx.catalog.favorites) == 78
+    assert len(ctx.catalog.favorites) == 120
 
 
 def test_load_profile_creates_new_when_missing(wasds_home, sample_csv_path):
@@ -62,3 +62,19 @@ def test_save_catalog_is_preferred_over_baseline_on_next_build_context(wasds_hom
     reloaded_ctx = build_context(config)
     assert reloaded_ctx.catalog_source == "merged"
     assert len(reloaded_ctx.catalog.favorites) == 1
+
+
+def test_legacy_statewide_merged_catalog_gets_local_area_extension(wasds_home):
+    from wasds150.catalog import baseline, loader
+
+    config = AppConfig.default()
+    legacy = loader.load_json(baseline.baseline_resource_path())
+    assert len(legacy.favorites) == 78
+    config.ensure_dirs()
+    loader.save_json(legacy, config.catalog_path)
+
+    ctx = build_context(config)
+
+    assert ctx.catalog_source == "merged"
+    assert len(ctx.catalog.favorites) == 120
+    assert len([favorite for favorite in ctx.catalog.favorites if favorite.favorite_key.startswith("KC")]) == 39

@@ -98,6 +98,19 @@ def dedupe_systems(systems: List[System]) -> List[System]:
     return result
 
 
+def _rollup_component_keys(text: str) -> tuple:
+    legacy = re.search(r"\breuses\s+FL(\d+(?:/\d+)+)", text, re.IGNORECASE)
+    if legacy:
+        return tuple(f"FL{int(value):02d}" for value in legacy.group(1).split("/"))
+    declaration = re.search(r"\breuses\s+([^\)]+)", text, re.IGNORECASE)
+    if not declaration:
+        return ()
+    return tuple(
+        key.upper()
+        for key in re.findall(r"\b(?:FL|KC|LA|OUT)\d+[A-Za-z]?\b", declaration.group(1), re.IGNORECASE)
+    )
+
+
 def populate_rollups(catalog: Catalog) -> Dict[str, tuple]:
     """Populate explicitly declared ``(reuses FLx/y/...)`` rollups.
 
@@ -112,10 +125,9 @@ def populate_rollups(catalog: Catalog) -> Dict[str, tuple]:
     by_key = {favorite.favorite_key.upper(): favorite for favorite in catalog.favorites}
     populated: Dict[str, tuple] = {}
     for favorite in catalog.favorites:
-        match = re.search(r"\breuses\s+FL(\d+(?:/\d+)*)", favorite.system_or_category, re.IGNORECASE)
-        if not match:
+        component_keys = _rollup_component_keys(favorite.system_or_category)
+        if not component_keys:
             continue
-        component_keys = tuple(f"FL{int(value):02d}" for value in match.group(1).split("/"))
         components = [by_key.get(key) for key in component_keys]
         favorite.systems = []
         favorite.provenance = [
@@ -334,4 +346,6 @@ def systems_from_matched_facts(fl: FavoritesList, matched_facts: List[Normalized
         if system is not None:
             systems.append(system)
     systems.extend(systems_from_flat_facts(fl, matched_facts))
-    return curate_split_systems(fl, systems)
+    systems = curate_split_systems(fl, systems)
+    from wasds150.recipes.local_area import curate_local_area_systems
+    return curate_local_area_systems(fl, systems)

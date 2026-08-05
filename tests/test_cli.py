@@ -195,7 +195,7 @@ def test_catalog_regenerate_baseline_is_deterministic(wasds_home, sample_csv_pat
 
     assert data1["content_hash"] == data2["content_hash"]
     assert out1.read_text(encoding="utf-8") == out2.read_text(encoding="utf-8")
-    assert data1["favorites"] == 3
+    assert data1["favorites"] == 45
     assert data1["with_systems"] == 2  # FL01 and FL09a; FL02 has no explicit frequency
 
 
@@ -241,7 +241,7 @@ def test_doctor_uses_packaged_baseline_by_default(wasds_home, capsys):
     data = json.loads(capsys.readouterr().out)
     assert data["ok"] is True
     catalog_check = next(c for c in data["checks"] if c["name"] == "catalog_loads")
-    assert "78" in catalog_check["detail"]
+    assert "120" in catalog_check["detail"]
 
 
 def test_version_flag(capsys):

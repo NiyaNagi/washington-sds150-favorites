@@ -9,6 +9,7 @@ place that knows how to load/save the profile.
 """
 from __future__ import annotations
 
+import copy
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
@@ -19,6 +20,16 @@ from wasds150.config import AppConfig
 from wasds150.catalog.validate import partition_validation_issues, validate_catalog
 from wasds150.models.catalog import Catalog
 from wasds150.models.profile import Profile
+
+
+def _append_local_area_extension(catalog: Catalog) -> None:
+    """Upgrade a real statewide/core catalog without changing small custom catalogs."""
+    existing = {favorite.slug for favorite in catalog.favorites}
+    if len(existing) < 75 or "fl75" not in existing:
+        return
+    for favorite in baseline_mod.load_baseline().favorites:
+        if favorite.favorite_key.startswith(("KC", "LA", "OUT")) and favorite.slug not in existing:
+            catalog.favorites.append(copy.deepcopy(favorite))
 
 
 @dataclass
@@ -53,9 +64,11 @@ class AppContext:
 def build_context(config: AppConfig, csv_override: Optional[Path] = None) -> AppContext:
     if csv_override is not None:
         catalog = loader.load_csv(Path(csv_override))
+        _append_local_area_extension(catalog)
         source = str(csv_override)
     elif config.catalog_path.exists():
         catalog = loader.load_json(config.catalog_path)
+        _append_local_area_extension(catalog)
         source = "merged"
     else:
         catalog = baseline_mod.load_baseline()
