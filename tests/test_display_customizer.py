@@ -10,6 +10,7 @@ from wasds150.display_customizer import (
     validate_display_xml,
     validate_palette,
 )
+from wasds150.display_colors import SUPPORTED_DISPLAY_COLORS, SUPPORTED_DISPLAY_COLOR_VALUES
 
 
 def _signature(root):
@@ -28,6 +29,14 @@ def test_all_display_palettes_meet_contrast_and_xml_validation():
         assert validate_palette(palette) == []
         assert palette_summary(palette)["minimum_contrast"] >= 4.5
         assert validate_display_xml(generate_display_xml(palette)) == []
+
+
+def test_supported_display_color_table_is_exact_and_unique():
+    assert len(SUPPORTED_DISPLAY_COLORS) == 147
+    assert len(SUPPORTED_DISPLAY_COLOR_VALUES) == 147
+    assert SUPPORTED_DISPLAY_COLORS[0] == ("AliceBlue", "EFF7FF")
+    assert SUPPORTED_DISPLAY_COLORS[-1] == ("YellowGreen", "94CA31")
+    assert all(color in SUPPORTED_DISPLAY_COLOR_VALUES for palette in PALETTES for color in palette.colors().values())
 
 
 def test_generated_display_xml_matches_real_sentinel_export_layout():
@@ -75,8 +84,8 @@ def test_custom_item_colors_sync_globally_and_allow_per_view_override():
     config = {
         "name": "Custom",
         "colors": PALETTES[0].colors(),
-        "global_item_colors": {"Func": {"text": "ABCDEF", "back": "101010"}},
-        "screen_item_colors": {"SimpleTrunk||0": {"text": "FEDCBA"}},
+        "global_item_colors": {"Func": {"text": "EFF7FF", "back": "000000"}},
+        "screen_item_colors": {"SimpleTrunk||0": {"text": "F7EBD6"}},
         "global_item_options": {"Option_3": "Time"},
         "screen_item_options": {"SimpleTrunk||3": "GPS"},
     }
@@ -90,10 +99,10 @@ def test_custom_item_colors_sync_globally_and_allow_per_view_override():
     detail_trunk_option = root.find("./Screen[@Name='DetailTrunk']/Item[@Name='Option_3']")
     weather_option = root.find("./Screen[@Name='Weather']/Item[@Name='Option_3']")
 
-    assert simple_conventional.attrib["Text"] == "ABCDEF"
-    assert detail_trunk.attrib["Text"] == "ABCDEF"
-    assert simple_trunk.attrib["Text"] == "FEDCBA"
-    assert simple_trunk.attrib["Back"] == "101010"
+    assert simple_conventional.attrib["Text"] == "EFF7FF"
+    assert detail_trunk.attrib["Text"] == "EFF7FF"
+    assert simple_trunk.attrib["Text"] == "F7EBD6"
+    assert simple_trunk.attrib["Back"] == "000000"
     assert simple_conventional_option.attrib["Option"] == "Time"
     assert detail_trunk_option.attrib["Option"] == "Time"
     assert simple_trunk_option.attrib["Option"] == "GPS"
@@ -113,6 +122,21 @@ def test_custom_display_rejects_unknown_item_override():
         assert "unknown item override" in str(exc)
     else:
         raise AssertionError("unknown item override was accepted")
+
+
+def test_custom_display_rejects_arbitrary_rgb_color():
+    config = {
+        "name": "Invalid Color",
+        "colors": {**PALETTES[0].colors(), "system": "ABCDEF"},
+        "global_item_colors": {},
+        "screen_item_colors": {},
+    }
+    try:
+        generate_custom_display_xml(config)
+    except ValueError as exc:
+        assert "not supported by Sentinel" in str(exc)
+    else:
+        raise AssertionError("arbitrary RGB color was accepted")
 
 
 def test_custom_display_rejects_non_object_payload():

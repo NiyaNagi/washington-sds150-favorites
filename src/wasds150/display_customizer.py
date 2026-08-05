@@ -12,6 +12,11 @@ import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
+from wasds150.display_colors import (
+    SUPPORTED_DISPLAY_COLORS,
+    SUPPORTED_DISPLAY_COLOR_VALUES,
+)
+
 
 ItemSpec = Tuple[str, Optional[str]]
 COLOR_KEYS = ("background", "status", "system", "department", "channel", "metadata", "alert", "accent")
@@ -146,51 +151,51 @@ class DisplayPalette:
 PALETTES: Tuple[DisplayPalette, ...] = (
     DisplayPalette(
         "night-ops", "Night Ops", "Cool hierarchy colors on true black for dark cabins and general use.",
-        "000000", "F8FAFC", "38BDF8", "FB923C", "FDE047", "C4B5FD", "FB7185", "4ADE80",
+        "000000", "FFFFFF", "00BDFF", "FF8800", "FFD600", "E79473", "FF108C", "00FF7B",
     ),
     DisplayPalette(
         "daylight-high-contrast", "Daylight High Contrast", "Dark saturated labels on white for bright outdoor viewing.",
-        "FFFFFF", "111827", "075985", "9A3412", "713F12", "5B21B6", "B91C1C", "166534",
+        "FFFFFF", "000000", "000084", "840000", "526B29", "4A007B", "AD2121", "006300",
     ),
     DisplayPalette(
         "colorblind-dark", "Colorblind Dark", "Okabe-Ito-inspired blue, orange, yellow, and purple grouping.",
-        "0B0F14", "F2F2F2", "56B4E9", "E69F00", "F0E442", "CC79A7", "F25F5C", "009E73",
+        "000000", "FFFFFF", "00BDFF", "FFA100", "FFFF00", "D66FD6", "FF7F4A", "00CACE",
     ),
     DisplayPalette(
         "low-light-amber", "Low-Light Amber", "Warm amber hierarchy with restrained red accents to preserve night vision.",
-        "000000", "FFE8D6", "FF6B35", "FF9F1C", "FFD166", "E6A8D7", "FF4D6D", "C7F9CC",
+        "000000", "FFF7D6", "FF4600", "FFA100", "FFD600", "E79473", "FF108C", "94CA31",
     ),
     DisplayPalette(
         "oceanic", "Oceanic", "Cool marine blues with warm orange and sand hierarchy accents.",
-        "001219", "F0FDFA", "5BC0EB", "F4A261", "E9C46A", "CDB4DB", "FF758F", "2EC4B6",
+        "00007B", "FFFFFF", "84CAF7", "FFA100", "FFD600", "D6BDD6", "FF7F4A", "39DECE",
     ),
     DisplayPalette(
         "forest-watch", "Forest Watch", "Natural green field palette with wildfire-ready amber and red accents.",
-        "071A12", "F4F7F5", "74C69D", "F4A261", "F9C74F", "B8C0FF", "FF6B6B", "80ED99",
+        "000000", "FFFFFF", "8CEB8C", "FFA100", "FFFF00", "DEE3F7", "EF7F7B", "00FF7B",
     ),
     DisplayPalette(
         "cyber-neon", "Cyber Neon", "High-energy cyan, orange, yellow, and magenta on near-black violet.",
-        "090014", "F8F7FF", "00E5FF", "FF9E00", "F9F871", "D58BFF", "FF4D9D", "00F5A0",
+        "000000", "F7F7FF", "00FFFF", "FF8800", "FFFF00", "E780E7", "FF108C", "00F794",
     ),
     DisplayPalette(
         "solar-dark", "Solar Dark", "Muted solar colors for long monitoring sessions with reduced glare.",
-        "002B36", "FDF6E3", "6FC2BB", "F4A261", "EBCB8B", "C7B5E8", "FF7B72", "7BD88F",
+        "294E4A", "FFFFFF", "84CAF7", "FFE3BD", "FFF7C6", "D6BDD6", "FFB1BD", "94FB94",
     ),
     DisplayPalette(
         "solar-light", "Solar Light", "Warm paper background with restrained, saturated hierarchy colors.",
-        "FDF6E3", "073642", "075985", "9A3412", "6B4F00", "6D28D9", "B91C1C", "166534",
+        "FFF7D6", "294E4A", "000084", "840000", "526B29", "4A007B", "AD2121", "006300",
     ),
     DisplayPalette(
         "monochrome-ice", "Monochrome Ice", "Calm pale blues and lavender on deep navy with a distinct alert pink.",
-        "06111C", "F8FAFC", "BDE0FE", "A2D2FF", "E0FBFC", "CDB4DB", "FF8FA3", "90E0EF",
+        "18186B", "FFFFFF", "ADD6DE", "84CAF7", "DEFFFF", "D6BDD6", "EF7F7B", "39DECE",
     ),
     DisplayPalette(
         "purple-dusk", "Purple Dusk", "Soft dusk pastels on deep violet for an expressive but readable display.",
-        "160B2D", "F8F4FF", "9BD1E5", "FFADAD", "FFE66D", "D0BFFF", "FF7096", "80FFDB",
+        "4A007B", "FFFFFF", "ADD6DE", "FF9C73", "FFFF00", "D6BDD6", "FFB1BD", "7BFFCE",
     ),
     DisplayPalette(
         "slate-professional", "Slate Professional", "Conservative slate background with crisp operational accents.",
-        "111827", "F9FAFB", "7DD3FC", "FBBF24", "FDE68A", "C4B5FD", "FDA4AF", "86EFAC",
+        "294E4A", "FFFFFF", "84CAE7", "FFE3BD", "FFFFDE", "D6BDD6", "FFB1BD", "8CEB8C",
     ),
 )
 
@@ -324,8 +329,8 @@ def custom_palette_from_dict(data: dict) -> DisplayPalette:
         raise ValueError(f"missing custom palette colors: {missing}")
     for key in COLOR_KEYS:
         value = str(colors[key]).removeprefix("#").upper()
-        if not re.fullmatch(r"[0-9A-F]{6}", value):
-            raise ValueError(f"{key}: invalid RGB color")
+        if value not in SUPPORTED_DISPLAY_COLOR_VALUES:
+            raise ValueError(f"{key}: color #{value} is not supported by Sentinel")
         colors[key] = value
     return DisplayPalette(
         id="custom",
@@ -347,8 +352,8 @@ def validate_color_overrides(overrides: dict, valid_keys: set) -> List[str]:
             issues.append(f"{key}: override must be an object")
             continue
         for field in ("text", "back"):
-            if field in value and not re.fullmatch(r"[0-9A-Fa-f]{6}", str(value[field]).removeprefix("#")):
-                issues.append(f"{key}: invalid {field} color")
+            if field in value and str(value[field]).removeprefix("#").upper() not in SUPPORTED_DISPLAY_COLOR_VALUES:
+                issues.append(f"{key}: unsupported {field} color")
     return issues
 
 
@@ -429,8 +434,8 @@ def palette_summary(palette: DisplayPalette) -> dict:
 def validate_palette(palette: DisplayPalette, minimum_ratio: float = 4.5) -> List[str]:
     issues = []
     for category, color in palette.colors().items():
-        if not re.fullmatch(r"[0-9A-F]{6}", color):
-            issues.append(f"{category}: invalid RGB hex {color!r}")
+        if color not in SUPPORTED_DISPLAY_COLOR_VALUES:
+            issues.append(f"{category}: unsupported Sentinel color {color!r}")
         if category != "background" and contrast_ratio(color, palette.background) < minimum_ratio:
             issues.append(f"{category}: contrast is below {minimum_ratio}:1")
     return issues
@@ -461,7 +466,14 @@ def validate_display_xml(data: bytes) -> List[str]:
             elif not choices and selected != default:
                 issues.append(f"{screen_name} item {index}: fixed option changed")
         for item in actual.findall("Item"):
-            if not all(re.fullmatch(r"[0-9A-F]{6}", item.attrib.get(field, "")) for field in ("Text", "Back")):
-                issues.append(f"{screen_name}: invalid item color")
+            if not all(item.attrib.get(field, "").upper() in SUPPORTED_DISPLAY_COLOR_VALUES for field in ("Text", "Back")):
+                issues.append(f"{screen_name}: unsupported Sentinel item color")
                 break
     return issues
+
+
+def supported_color_catalog() -> List[dict]:
+    return [
+        {"index": index, "name": name, "value": value}
+        for index, (name, value) in enumerate(SUPPORTED_DISPLAY_COLORS)
+    ]

@@ -174,22 +174,15 @@ h2 { margin-top: 0; }
 }
 .semantic-color-control {
   display: grid;
-  grid-template-columns: 2.25rem 1fr;
+  grid-template-columns: 1fr;
   align-items: center;
   gap: 0.55rem;
   padding: 0.5rem;
   border: 1px solid var(--border);
   border-radius: 6px;
 }
-.semantic-color-control input[type="color"], .item-color-input {
-  width: 2.25rem;
-  height: 2rem;
-  padding: 0;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  background: transparent;
-  cursor: pointer;
-}
+.semantic-color-select { width: 100%; min-width: 12rem; }
+.item-color-button { min-width: 7rem; font-family: ui-monospace, monospace; }
 .semantic-color-label { display: grid; gap: 0.15rem; }
 .semantic-color-label strong { text-transform: capitalize; }
 .contrast-badge { color: var(--ok); font-size: 0.72rem; }
@@ -211,8 +204,8 @@ h2 { margin-top: 0; }
 .display-item-dialog-card { width: min(700px, 94vw); }
 .display-item-dialog-card select { width: 100%; }
 .display-color-swatches {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(2rem, 1fr));
   gap: 0.35rem;
   min-height: 2rem;
   margin-bottom: 0.75rem;
@@ -233,7 +226,7 @@ h2 { margin-top: 0; }
   margin: 0.75rem 0;
 }
 .display-dialog-pickers label { margin: 0; }
-.display-dialog-pickers input[type="color"] { width: 100%; height: 2.5rem; }
+.display-dialog-pickers select { width: 100%; min-width: 12rem; }
 
 button {
   background: var(--panel-alt);

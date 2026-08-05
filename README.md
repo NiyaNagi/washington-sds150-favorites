@@ -106,7 +106,7 @@ colors, reports contrast ratios, and downloads as validated Sentinel display
 customizer XML. A full editor supports semantic group colors, synchronized
 matching items, per-item/per-view text and background colors, whole-view
 coloring, saved browser palettes, and JSON import/export. Preview fields are
-clickable: choose preset and blended swatches, recent colors, arbitrary custom
+clickable: choose from Sentinel's exact 147 supported swatches, recent supported
 colors, and Sentinel-compatible displayed elements with synchronized or
 per-view behavior.
 

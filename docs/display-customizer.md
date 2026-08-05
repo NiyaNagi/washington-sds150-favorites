@@ -35,7 +35,7 @@ Colors have one meaning across every display mode:
 This grouping makes the hierarchy recognizable by color before the text is
 read. Text/background pairs are checked with the WCAG relative-luminance
 formula as a conservative readability heuristic. Every supplied pair is at
-least 4.5:1; preset minimums range from 5.62:1 to 9.38:1. Scanner brightness,
+least 4.5:1; preset minimums range from 5.07:1 to 7.99:1. Scanner brightness,
 viewing angle, direct sunlight, and color vision still affect practical
 readability, so the tab provides full visual previews before export.
 
@@ -43,18 +43,18 @@ readability, so the tab provides full visual previews before export.
 
 | Palette | Background | System | Department/site | Channel | Metadata | Alert | Minimum contrast |
 |---|---|---|---|---|---|---|---:|
-| Night Ops | `#000000` | `#38BDF8` | `#FB923C` | `#FDE047` | `#C4B5FD` | `#FB7185` | 7.80:1 |
-| Daylight High Contrast | `#FFFFFF` | `#075985` | `#9A3412` | `#713F12` | `#5B21B6` | `#B91C1C` | 6.47:1 |
-| Colorblind Dark | `#0B0F14` | `#56B4E9` | `#E69F00` | `#F0E442` | `#CC79A7` | `#F25F5C` | 5.62:1 |
-| Low-Light Amber | `#000000` | `#FF6B35` | `#FF9F1C` | `#FFD166` | `#E6A8D7` | `#FF4D6D` | 6.53:1 |
-| Oceanic | `#001219` | `#5BC0EB` | `#F4A261` | `#E9C46A` | `#CDB4DB` | `#FF758F` | 7.44:1 |
-| Forest Watch | `#071A12` | `#74C69D` | `#F4A261` | `#F9C74F` | `#B8C0FF` | `#FF6B6B` | 6.49:1 |
-| Cyber Neon | `#090014` | `#00E5FF` | `#FF9E00` | `#F9F871` | `#D58BFF` | `#FF4D9D` | 6.66:1 |
-| Solar Dark | `#002B36` | `#6FC2BB` | `#F4A261` | `#EBCB8B` | `#C7B5E8` | `#FF7B72` | 5.95:1 |
-| Solar Light | `#FDF6E3` | `#075985` | `#9A3412` | `#6B4F00` | `#6D28D9` | `#B91C1C` | 6.00:1 |
-| Monochrome Ice | `#06111C` | `#BDE0FE` | `#A2D2FF` | `#E0FBFC` | `#CDB4DB` | `#FF8FA3` | 8.79:1 |
-| Purple Dusk | `#160B2D` | `#9BD1E5` | `#FFADAD` | `#FFE66D` | `#D0BFFF` | `#FF7096` | 7.15:1 |
-| Slate Professional | `#111827` | `#7DD3FC` | `#FBBF24` | `#FDE68A` | `#C4B5FD` | `#FDA4AF` | 9.38:1 |
+| Night Ops | `#000000` | `#00BDFF` | `#FF8800` | `#FFD600` | `#E79473` | `#FF108C` | 5.70:1 |
+| Daylight High Contrast | `#FFFFFF` | `#000084` | `#840000` | `#526B29` | `#4A007B` | `#AD2121` | 6.01:1 |
+| Colorblind Dark | `#000000` | `#00BDFF` | `#FFA100` | `#FFFF00` | `#D66FD6` | `#FF7F4A` | 7.10:1 |
+| Low-Light Amber | `#000000` | `#FF4600` | `#FFA100` | `#FFD600` | `#E79473` | `#FF108C` | 5.70:1 |
+| Oceanic | `#00007B` | `#84CAF7` | `#FFA100` | `#FFD600` | `#D6BDD6` | `#FF7F4A` | 6.52:1 |
+| Forest Watch | `#000000` | `#8CEB8C` | `#FFA100` | `#FFFF00` | `#DEE3F7` | `#EF7F7B` | 7.99:1 |
+| Cyber Neon | `#000000` | `#00FFFF` | `#FF8800` | `#FFFF00` | `#E780E7` | `#FF108C` | 5.70:1 |
+| Solar Dark | `#294E4A` | `#84CAF7` | `#FFE3BD` | `#FFF7C6` | `#D6BDD6` | `#FFB1BD` | 5.16:1 |
+| Solar Light | `#FFF7D6` | `#000084` | `#840000` | `#526B29` | `#4A007B` | `#AD2121` | 5.59:1 |
+| Monochrome Ice | `#18186B` | `#ADD6DE` | `#84CAF7` | `#DEFFFF` | `#D6BDD6` | `#EF7F7B` | 5.78:1 |
+| Purple Dusk | `#4A007B` | `#ADD6DE` | `#FF9C73` | `#FFFF00` | `#D6BDD6` | `#FFB1BD` | 6.50:1 |
+| Slate Professional | `#294E4A` | `#84CAE7` | `#FFE3BD` | `#FFFFDE` | `#D6BDD6` | `#FFB1BD` | 5.07:1 |
 
 **Night Ops** is the balanced default. **Daylight High Contrast** is intended
 for bright environments. **Colorblind Dark** uses an Okabe-Ito-inspired
@@ -77,8 +77,8 @@ Open **Customize palette** below the presets to edit at three levels:
 The view-level controls can apply one text or background color to every item
 in the selected mode. Each item row displays its effective contrast and has a
 reset button. The summary reports the minimum effective contrast and counts
-items below 4.5:1 immediately; custom colors are permitted so users can make
-intentional tradeoffs, but low-contrast items are clearly flagged.
+items below 4.5:1 immediately; custom combinations are permitted so users can
+make intentional tradeoffs, but low-contrast items are clearly flagged.
 
 Custom palettes can be named and saved in browser local storage, reloaded or
 deleted, and exported/imported as JSON for backup or sharing. Sentinel XML is
@@ -88,11 +88,11 @@ validated before download.
 Every field in every visual preview is clickable and keyboard-accessible.
 Selecting a field opens a focused editor with:
 
-- every color used by all twelve presets;
-- automatically generated in-between colors blended with each palette's
-  background;
-- remembered recently selected colors across pages and browser sessions;
-- unrestricted native text/background color pickers;
+- all 147 colors from Sentinel's exact internal display-color table, kept in
+  Sentinel's alphabetical table order and labeled by name, index, and RGB;
+- remembered recently selected supported colors across pages and browser
+  sessions;
+- supported-only text/background selectors for semantic, item, and view edits;
 - live contrast feedback;
 - a synchronized/per-view application switch; and
 - a **Displayed item** selector when Sentinel allows that field to change.
@@ -151,8 +151,10 @@ black-on-white and white-on-black sunlight modes through **F**, then holding
    it to the scanner normally.
 
 The generated XML is validated before download. Validation covers the root
-attributes, seven-screen set, exact item names/options/order, RGB syntax, and
-minimum palette contrast.
+attributes, seven-screen set, exact item names/options/order, membership in
+Sentinel's 147-color table, and minimum palette contrast. Unsupported RGB
+values are rejected from API payloads, imported JSON, and saved browser data
+rather than being written into XML that Sentinel may silently ignore.
 
 ## Sources
 
@@ -167,3 +169,6 @@ minimum palette contrast.
 
 Community examples informed usability review only. Screen structure and option
 codes are grounded in the supplied Sentinel export and official Uniden material.
+The exact color names, values, and ordering were extracted from the installed
+Sentinel `DispColorItemList.table`; no screenshot approximation or generated
+RGB interpolation is used.

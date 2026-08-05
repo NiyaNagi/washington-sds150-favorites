@@ -247,6 +247,8 @@ def test_display_palette_endpoints(live_server):
         "DetailTrunk", "Search", "Weather", "Tone out",
     ]
     assert all(palette["minimum_contrast"] >= 4.5 for palette in data["palettes"])
+    assert len(data["supported_colors"]) == 147
+    assert data["supported_colors"][0] == {"index": 0, "name": "AliceBlue", "value": "EFF7FF"}
 
     palette_id = data["palettes"][0]["id"]
     status, body, headers = _request(base_url, f"/api/v1/display/palettes/{palette_id}", token=token)
@@ -262,8 +264,8 @@ def test_display_palette_endpoints(live_server):
     custom = {
         "name": "API Custom",
         "colors": data["palettes"][0]["colors"],
-        "global_item_colors": {"Func": {"text": "ABCDEF", "back": "101010"}},
-        "screen_item_colors": {"SimpleTrunk||0": {"text": "FEDCBA", "back": "202020"}},
+        "global_item_colors": {"Func": {"text": "EFF7FF", "back": "000000"}},
+        "screen_item_colors": {"SimpleTrunk||0": {"text": "F7EBD6", "back": "000084"}},
         "global_item_options": {"Option_3": "Time"},
         "screen_item_options": {"SimpleTrunk||3": "GPS"},
     }
@@ -271,8 +273,8 @@ def test_display_palette_endpoints(live_server):
         base_url, "/api/v1/display/custom", token=token, method="POST", body=custom,
     )
     assert status == 200
-    assert b'Text="ABCDEF" Back="101010"' in body
-    assert b'Text="FEDCBA" Back="202020"' in body
+    assert b'Text="EFF7FF" Back="000000"' in body
+    assert b'Text="F7EBD6" Back="000084"' in body
     import xml.etree.ElementTree as ET
     custom_root = ET.fromstring(body)
     custom_option = custom_root.find("./Screen[@Name='SimpleTrunk']/Item[@Name='Option_3']")
@@ -283,6 +285,13 @@ def test_display_palette_endpoints(live_server):
         base_url, "/api/v1/display/custom", token=token, method="POST", body=[],
     )
     assert status == 400
+
+    custom["colors"]["system"] = "ABCDEF"
+    status, body, _ = _request(
+        base_url, "/api/v1/display/custom", token=token, method="POST", body=custom,
+    )
+    assert status == 400
+    assert b"not supported by Sentinel" in body
 
 
 def test_profile_enable_disable_flow(live_server):

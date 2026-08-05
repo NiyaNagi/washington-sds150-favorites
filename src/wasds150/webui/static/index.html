@@ -69,9 +69,9 @@
           <button id="display-reset-all-items">Reset all item overrides</button>
         </div>
         <div class="toolbar">
-          <label class="hint">View text <input type="color" id="display-view-text" value="#ffffff" /></label>
+          <label class="hint">View text <select id="display-view-text"></select></label>
           <button id="display-apply-view-text">Apply text to every item in this view</button>
-          <label class="hint">View background <input type="color" id="display-view-back" value="#000000" /></label>
+          <label class="hint">View background <select id="display-view-back"></select></label>
           <button id="display-apply-view-back">Apply background to every item in this view</button>
         </div>
         <div class="display-item-editor-wrap">
@@ -128,8 +128,8 @@
         <h4>Recently selected colors</h4>
         <div id="display-recent-colors" class="display-color-swatches"></div>
         <div class="display-dialog-pickers">
-          <label>Text color <input type="color" id="display-dialog-text" /></label>
-          <label>Background color <input type="color" id="display-dialog-back" /></label>
+          <label>Text color <select id="display-dialog-text"></select></label>
+          <label>Background color <select id="display-dialog-back"></select></label>
           <span id="display-dialog-contrast" class="contrast-badge"></span>
         </div>
         <label class="hint"><input type="checkbox" id="display-dialog-sync" checked /> Apply this item and its displayed option consistently across all matching views</label>

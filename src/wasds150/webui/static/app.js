@@ -340,6 +340,24 @@
     return JSON.parse(JSON.stringify(value));
   }
 
+  function supportedDisplayColorValues() {
+    return new Set((displayPaletteData.supported_colors || []).map((color) => color.value));
+  }
+
+  function populateSupportedColorSelect(select, value) {
+    select.replaceChildren();
+    (displayPaletteData.supported_colors || []).forEach((color) => {
+      const option = document.createElement("option");
+      option.value = color.value;
+      option.textContent = `${String(color.index + 1).padStart(3, "0")} · ${color.name} · #${color.value}`;
+      option.style.backgroundColor = "#" + color.value;
+      const contrast = jsContrast(color.value, "FFFFFF");
+      option.style.color = contrast >= 4.5 ? "#FFFFFF" : "#000000";
+      select.appendChild(option);
+    });
+    select.value = value;
+  }
+
   function displayPaletteView() {
     return {
       id: selectedDisplayPalette ? selectedDisplayPalette.id : "custom",
@@ -423,14 +441,20 @@
   }
 
   function readRecentDisplayColors() {
-    try { return JSON.parse(localStorage.getItem(DISPLAY_RECENT_COLORS_KEY) || "[]"); }
+    try {
+      const supported = supportedDisplayColorValues();
+      return JSON.parse(localStorage.getItem(DISPLAY_RECENT_COLORS_KEY) || "[]")
+        .filter((color) => supported.has(color));
+    }
     catch (_) { return []; }
   }
 
   function rememberDisplayColors(colors) {
     const recent = readRecentDisplayColors();
+    const supported = supportedDisplayColorValues();
     colors.forEach((color) => {
       const normalized = color.toUpperCase();
+      if (!supported.has(normalized)) return;
       const index = recent.indexOf(normalized);
       if (index >= 0) recent.splice(index, 1);
       recent.unshift(normalized);
@@ -438,14 +462,9 @@
     localStorage.setItem(DISPLAY_RECENT_COLORS_KEY, JSON.stringify(recent.slice(0, 18)));
   }
 
-  function blendDisplayColors(first, second) {
-    return [0, 2, 4].map((index) => Math.round((parseInt(first.slice(index, index + 2), 16) + parseInt(second.slice(index, index + 2), 16)) / 2)
-      .toString(16).padStart(2, "0")).join("").toUpperCase();
-  }
-
   function updateDisplayDialogContrast() {
-    const text = document.getElementById("display-dialog-text").value.slice(1);
-    const back = document.getElementById("display-dialog-back").value.slice(1);
+    const text = document.getElementById("display-dialog-text").value;
+    const back = document.getElementById("display-dialog-back").value;
     const ratio = jsContrast(text, back);
     const badge = document.getElementById("display-dialog-contrast");
     badge.textContent = `${ratio.toFixed(2)}:1${ratio < 4.5 ? " — low contrast" : ""}`;
@@ -456,15 +475,16 @@
     const container = document.getElementById(containerId);
     container.replaceChildren();
     colors.forEach((color) => {
+      const metadata = (displayPaletteData.supported_colors || []).find((entry) => entry.value === color);
       const button = document.createElement("button");
       button.type = "button";
       button.className = "display-color-swatch";
       button.style.backgroundColor = "#" + color;
-      button.title = "#" + color;
-      button.setAttribute("aria-label", "Choose #" + color);
+      button.title = metadata ? `${metadata.index + 1}. ${metadata.name} #${color}` : "#" + color;
+      button.setAttribute("aria-label", metadata ? `Choose ${metadata.name} #${color}` : "Choose #" + color);
       button.addEventListener("click", () => {
         const target = document.getElementById("display-swatch-target").value;
-        document.getElementById(target === "text" ? "display-dialog-text" : "display-dialog-back").value = "#" + color;
+        document.getElementById(target === "text" ? "display-dialog-text" : "display-dialog-back").value = color;
         updateDisplayDialogContrast();
       });
       container.appendChild(button);
@@ -490,26 +510,22 @@
     optionLabel.classList.toggle("hidden", !choices.length);
   }
 
-  function openDisplayItemDialog(screenName, item) {
+  function openDisplayItemDialog(screenName, item, preferredTarget) {
     displayDialogOpener = document.activeElement;
     activeDisplayItem = { screenName, item };
     const colors = resolvedDisplayColors(screenName, item, item.category);
     document.getElementById("display-item-dialog-title").textContent = item.name;
     document.getElementById("display-item-dialog-context").textContent =
       `${screenName.replace(/([a-z])([A-Z])/g, "$1 $2")} · ${item.category} group`;
-    document.getElementById("display-dialog-text").value = "#" + colors.text;
-    document.getElementById("display-dialog-back").value = "#" + colors.back;
+    populateSupportedColorSelect(document.getElementById("display-dialog-text"), colors.text);
+    populateSupportedColorSelect(document.getElementById("display-dialog-back"), colors.back);
+    if (preferredTarget) document.getElementById("display-swatch-target").value = preferredTarget;
     document.getElementById("display-dialog-sync").checked = document.getElementById("display-sync-items").checked;
     updateDisplayDialogOptionChoices();
-    const baseColors = [];
-    displayPaletteData.palettes.forEach((palette) => {
-      const values = Object.values(palette.colors);
-      values.forEach((color) => baseColors.push(color));
-      ["system", "department", "channel", "metadata", "alert", "accent"].forEach((category) => {
-        baseColors.push(blendDisplayColors(palette.colors[category], palette.colors.background));
-      });
-    });
-    renderDisplayColorSwatches("display-color-swatches", Array.from(new Set(baseColors)));
+    renderDisplayColorSwatches(
+      "display-color-swatches",
+      (displayPaletteData.supported_colors || []).map((color) => color.value)
+    );
     renderDisplayColorSwatches("display-recent-colors", readRecentDisplayColors());
     updateDisplayDialogContrast();
     const dialog = document.getElementById("display-item-dialog");
@@ -535,8 +551,8 @@
     if (!activeDisplayItem) return;
     const { screenName, item } = activeDisplayItem;
     const sync = document.getElementById("display-dialog-sync").checked;
-    const text = document.getElementById("display-dialog-text").value.slice(1).toUpperCase();
-    const back = document.getElementById("display-dialog-back").value.slice(1).toUpperCase();
+    const text = document.getElementById("display-dialog-text").value;
+    const back = document.getElementById("display-dialog-back").value;
     const option = !document.getElementById("display-item-option-label").classList.contains("hidden")
       ? document.getElementById("display-item-option").value
       : null;
@@ -701,9 +717,9 @@
     ["background", "status", "system", "department", "channel", "metadata", "alert", "accent"].forEach((category) => {
       const wrapper = document.createElement("label");
       wrapper.className = "semantic-color-control";
-      const input = document.createElement("input");
-      input.type = "color";
-      input.value = "#" + displayCustomConfig.colors[category];
+      const input = document.createElement("select");
+      input.className = "semantic-color-select";
+      populateSupportedColorSelect(input, displayCustomConfig.colors[category]);
       input.setAttribute("aria-label", `${category} color`);
       const label = document.createElement("span");
       label.className = "semantic-color-label";
@@ -713,15 +729,15 @@
       badge.className = "contrast-badge";
       const updateBadge = () => {
         if (category === "background") {
-          badge.textContent = input.value.toUpperCase();
+          badge.textContent = "#" + input.value;
           return;
         }
-        const ratio = jsContrast(input.value.slice(1), displayCustomConfig.colors.background);
-        badge.textContent = `${input.value.toUpperCase()} · ${ratio.toFixed(2)}:1`;
+        const ratio = jsContrast(input.value, displayCustomConfig.colors.background);
+        badge.textContent = `#${input.value} · ${ratio.toFixed(2)}:1`;
         badge.classList.toggle("low", ratio < 4.5);
       };
       input.addEventListener("input", () => {
-        displayCustomConfig.colors[category] = input.value.slice(1).toUpperCase();
+        displayCustomConfig.colors[category] = input.value;
         updateBadge();
         renderDisplayPreviews();
         renderDisplayItemEditor();
@@ -732,21 +748,6 @@
       container.appendChild(wrapper);
       updateBadge();
     });
-  }
-
-  function applyItemColor(item, field, color) {
-    const screen = document.getElementById("display-screen-select").value;
-    const sync = document.getElementById("display-sync-items").checked;
-    const mapping = sync ? displayCustomConfig.global_item_colors : displayCustomConfig.screen_item_colors;
-    const key = sync ? item.item_key : item.screen_key;
-    if (sync) {
-      Object.values(displayPaletteData.items).flat().forEach((candidate) => {
-        if (candidate.item_key === item.item_key) delete displayCustomConfig.screen_item_colors[candidate.screen_key];
-      });
-    }
-    mapping[key] = Object.assign({}, mapping[key] || {}, { [field]: color.toUpperCase() });
-    renderDisplayPreviews();
-    renderDisplayItemEditor();
   }
 
   function renderDisplayItemEditor() {
@@ -764,12 +765,14 @@
       });
       ["text", "back"].forEach((field) => {
         const cell = document.createElement("td");
-        const picker = document.createElement("input");
-        picker.type = "color";
-        picker.className = "item-color-input";
-        picker.value = "#" + colors[field];
-        picker.setAttribute("aria-label", `${screen} ${item.name} ${field} color`);
-        picker.addEventListener("change", () => applyItemColor(item, field, picker.value.slice(1)));
+        const picker = document.createElement("button");
+        picker.type = "button";
+        picker.className = "item-color-button";
+        picker.textContent = "#" + colors[field];
+        picker.style.backgroundColor = "#" + colors[field];
+        picker.style.color = jsContrast(colors[field], "FFFFFF") >= 4.5 ? "#FFFFFF" : "#000000";
+        picker.setAttribute("aria-label", `${screen} ${item.name} ${field} color #${colors[field]}`);
+        picker.addEventListener("click", () => openDisplayItemDialog(screen, item, field));
         cell.appendChild(picker);
         row.appendChild(cell);
       });
@@ -816,8 +819,8 @@
       screen_item_options: {},
     };
     document.getElementById("display-custom-name").value = palette.name + " Custom";
-    document.getElementById("display-view-text").value = "#" + palette.colors.status;
-    document.getElementById("display-view-back").value = "#" + palette.colors.background;
+    populateSupportedColorSelect(document.getElementById("display-view-text"), palette.colors.status);
+    populateSupportedColorSelect(document.getElementById("display-view-back"), palette.colors.background);
     document.querySelectorAll(".display-palette-card").forEach((card) => {
       const selected = card.dataset.paletteId === palette.id;
       card.classList.toggle("selected", selected);
@@ -922,14 +925,29 @@
 
   function loadCustomDisplayConfig(config) {
     const colorKeys = ["background", "status", "system", "department", "channel", "metadata", "alert", "accent"];
-    if (!config || !config.colors || !colorKeys.every((key) => /^[0-9a-f]{6}$/i.test(config.colors[key] || ""))) {
-      throw new Error("Palette is missing valid semantic colors");
+    const supported = supportedDisplayColorValues();
+    if (!config || !config.colors || !colorKeys.every((key) => supported.has((config.colors[key] || "").toUpperCase()))) {
+      throw new Error("Palette contains a semantic color not supported by Sentinel");
     }
     if (!config.global_item_colors || typeof config.global_item_colors !== "object" ||
         !config.screen_item_colors || typeof config.screen_item_colors !== "object") {
       throw new Error("Palette is missing item override maps");
     }
+    [config.global_item_colors, config.screen_item_colors].forEach((overrides) => {
+      Object.values(overrides).forEach((colors) => {
+        if (!colors || ["text", "back"].some((field) => colors[field] && !supported.has(colors[field].toUpperCase()))) {
+          throw new Error("Palette contains an item color not supported by Sentinel");
+        }
+      });
+    });
     displayCustomConfig = copyJson(config);
+    colorKeys.forEach((key) => { displayCustomConfig.colors[key] = displayCustomConfig.colors[key].toUpperCase(); });
+    [displayCustomConfig.global_item_colors, displayCustomConfig.screen_item_colors].forEach((overrides) => {
+      Object.values(overrides).forEach((colors) => {
+        if (colors.text) colors.text = colors.text.toUpperCase();
+        if (colors.back) colors.back = colors.back.toUpperCase();
+      });
+    });
     displayCustomConfig.global_item_options = displayCustomConfig.global_item_options || {};
     displayCustomConfig.screen_item_options = displayCustomConfig.screen_item_options || {};
     selectedDisplayPalette = null;
@@ -938,8 +956,8 @@
       card.setAttribute("aria-checked", "false");
     });
     document.getElementById("display-custom-name").value = displayCustomConfig.name || "My Custom Palette";
-    document.getElementById("display-view-text").value = "#" + displayCustomConfig.colors.status;
-    document.getElementById("display-view-back").value = "#" + displayCustomConfig.colors.background;
+    populateSupportedColorSelect(document.getElementById("display-view-text"), displayCustomConfig.colors.status);
+    populateSupportedColorSelect(document.getElementById("display-view-back"), displayCustomConfig.colors.background);
     renderSemanticColors();
     renderDisplayItemEditor();
     renderDisplayPreviews();
@@ -968,7 +986,7 @@
   });
   function applyColorToCurrentView(field, pickerId) {
     const screen = document.getElementById("display-screen-select").value;
-    const color = document.getElementById(pickerId).value.slice(1).toUpperCase();
+    const color = document.getElementById(pickerId).value;
     const sync = document.getElementById("display-sync-items").checked;
     (displayPaletteData.items[screen] || []).forEach((item) => {
       if (sync) {
