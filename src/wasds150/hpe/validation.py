@@ -22,8 +22,11 @@ _SCANNER_BANDS: Tuple[Tuple[float, float], ...] = (
     (894.0, 960.0),
     (1240.0, 1300.0),
 )
-_MODES = {"AUTO", "AM", "FM", "NFM", "WFM", "FMB", "P25", "DMR", "NXDN"}
-_TONE_RE = re.compile(r"^(?:TONE=C\d{1,3}(?:\.\d{1,2})?|D\d{3}|NAC=(?:[0-9A-Fa-f]{1,3}|Srch))$")
+_MODES = {"AUTO", "ALL", "AM", "FM", "NFM", "WFM", "FMB", "P25", "DMR", "NXDN"}
+_TONE_RE = re.compile(
+    r"^(?:TONE=C\d{1,3}(?:\.\d{1,2})?|(?:TONE=)?D\d{3}|"
+    r"NAC=(?:[0-9A-Fa-f]{1,3}|Srch)|ColorCode=\d{1,2})$"
+)
 _GENERATED_TAGS = {
     "TargetModel", "FormatVersion", "Conventional", "C-Group", "C-Freq",
     "Trunk", "Site", "T-Group", "TGID", "T-Freq", "DQKs_Status",
@@ -59,8 +62,14 @@ def tone_is_valid(tone: str) -> bool:
             return 60.0 <= float(tone.removeprefix("TONE=C")) <= 260.0
         except ValueError:
             return False
-    if tone.startswith("D"):
-        return all(digit in "01234567" for digit in tone[1:])
+    dcs = tone.removeprefix("TONE=")
+    if dcs.startswith("D"):
+        return all(digit in "01234567" for digit in dcs[1:])
+    if tone.startswith("ColorCode="):
+        try:
+            return 0 <= int(tone.removeprefix("ColorCode=")) <= 15
+        except ValueError:
+            return False
     return True
 
 
@@ -137,8 +146,6 @@ def _site_issues(site: Site, path: str) -> List[ValidationIssue]:
     issues = _text_issues(site.label, f"{path}.label")
     issues.extend(_text_issues(site.id, f"{path}.id"))
     issues.extend(_geo_issues(site.lat, site.lon, site.range_miles, path))
-    if not site.departments:
-        issues.append(ValidationIssue("empty-site", f"{path} contains no talkgroup departments"))
     for index, department in enumerate(site.departments):
         issues.extend(_department_issues(department, f"{path}.departments[{index}]", trunked=True))
     return issues
@@ -169,9 +176,10 @@ def validate_systems(systems: Iterable[System]) -> List[ValidationIssue]:
                 issues.append(ValidationIssue("missing-sites", f"{path} is trunked but has no sites"))
             if not system.trunk_frequencies:
                 issues.append(ValidationIssue("missing-trunk-frequencies", f"{path} is trunked but has no site frequencies"))
+            if not any(site.departments for site in system.sites):
+                issues.append(ValidationIssue("missing-talkgroups", f"{path} is trunked but has no talkgroup departments"))
             for site_index, site in enumerate(system.sites):
                 issues.extend(_site_issues(site, f"{path}.sites[{site_index}]"))
-            seen_freqs = set()
             for freq_index, trunk_frequency in enumerate(system.trunk_frequencies):
                 freq_path = f"{path}.trunk_frequencies[{freq_index}]"
                 issues.extend(_text_issues(trunk_frequency.id, f"{freq_path}.id"))
@@ -179,9 +187,6 @@ def validate_systems(systems: Iterable[System]) -> List[ValidationIssue]:
                     issues.append(ValidationIssue("missing-trunk-frequency", f"{freq_path} has no frequency"))
                 elif not frequency_is_scannable(trunk_frequency.freq_mhz):
                     issues.append(ValidationIssue("unsupported-frequency", f"{freq_path} frequency {trunk_frequency.freq_mhz:g} MHz is outside SDS150 coverage"))
-                if trunk_frequency.freq_mhz in seen_freqs:
-                    issues.append(ValidationIssue("duplicate-trunk-frequency", f"{freq_path} duplicates a frequency in {path}"))
-                seen_freqs.add(trunk_frequency.freq_mhz)
         else:
             if not system.departments:
                 issues.append(ValidationIssue("empty-system", f"{path} contains no conventional departments"))

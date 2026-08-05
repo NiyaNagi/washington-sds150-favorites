@@ -6,6 +6,7 @@ none of these tests touch the network.
 from __future__ import annotations
 
 import json
+import os
 import stat
 
 from wasds150 import cli
@@ -60,8 +61,9 @@ def test_sources_configure_persists_and_has_restrictive_perms(wasds_home, sample
     assert saved["radioreference_username"] == "myuser"
     # Password is never a field at all -- nothing to leak.
     assert "radioreference_password" not in saved
-    mode = stat.S_IMODE(config_path.stat().st_mode)
-    assert mode == 0o600
+    if os.name == "posix":
+        mode = stat.S_IMODE(config_path.stat().st_mode)
+        assert mode == 0o600
 
 
 def test_sources_configure_never_prints_password_like_values(wasds_home, sample_csv_path, capsys):

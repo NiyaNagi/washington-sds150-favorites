@@ -19,6 +19,20 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 - Clarified that `--sentinel-hpdb-cfg` and `--sentinel-mount` are
   alternative source configurations rather than options to pass together.
+- Made generated ZIP, manifest, backup, rollback and installer paths use
+  portable forward-slash names on Windows.
+- Made local HPDB enrichment require exact, type-aware TrunkId/SysId
+  matches, including multiple SIDs and SIDs present only in source URLs,
+  instead of absorbing unrelated systems through county/name fallbacks.
+- Added fail-closed guards for Discovery-only and aggregate rollup rows so
+  a coincidental local match cannot incorrectly mark them complete.
+- Correctly parsed Sentinel master-HPDB eight-field trunk-frequency records
+  while retaining Favorites/HPE nine-field compatibility.
+- Accepted Sentinel's valid `ALL`, DCS, and color-code metadata forms and
+  valid multi-site systems with sites that do not repeat talkgroup trees.
+- Curated the documented clear/encrypted split pairs from public intent
+  categories; encrypted-side departments are clearly marked and avoided,
+  and unmatched talkgroups are not assigned an invented encryption state.
 
 ## 0.1.0 - 2026-08-03
 

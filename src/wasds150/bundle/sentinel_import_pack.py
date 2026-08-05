@@ -101,7 +101,7 @@ def build_sentinel_import_pack(
         try:
             with zipfile.ZipFile(candidate, "w", zipfile.ZIP_DEFLATED) as zf:
                 for path in content_files + [manifest_path]:
-                    arcname = str(path.relative_to(base_dir))
+                    arcname = path.relative_to(base_dir).as_posix()
                     zf.write(path, arcname=arcname)
             validate_sentinel_import_pack(candidate)
             os.replace(candidate, output_zip)

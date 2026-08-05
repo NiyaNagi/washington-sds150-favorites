@@ -55,7 +55,7 @@ def rollback_from_backup(mount_point: Path, backup_path: Path, *, remove_extrane
             for path in sorted(subtree_dir.rglob("*")):
                 if not path.is_file():
                     continue
-                rel_path = str(path.relative_to(mount_point))
+                rel_path = path.relative_to(mount_point).as_posix()
                 if rel_path not in backed_up_paths:
                     path.unlink()
 

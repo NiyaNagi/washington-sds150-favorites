@@ -38,6 +38,7 @@ idempotent.
 """
 from __future__ import annotations
 
+import re
 from typing import List, Optional
 
 from wasds150.models.catalog import Channel, Department, FavoritesList, System
@@ -155,6 +156,68 @@ def static_systems_for(fl: FavoritesList) -> List[System]:
 # Tier A: matched local Sentinel HPDB record tree (richest)
 # ---------------------------------------------------------------------------
 
+# Public catalog intent only: these category words come from each row's
+# departments_or_channels field, never from copied HPDB data. Unmatched
+# talkgroups remain excluded rather than having an encryption state guessed.
+_SPLIT_INTENT = {
+    "FL09a": (("fire", "transit", "public works"), False),
+    "FL09b": (("police", "sheriff", "law", "spd", "kcso"), True),
+    "FL20a": (("dispatch", "fire", "mutual aid", "srma#"), False),
+    "FL20b": (("tac4", "tac 4", "lops#", "inv#", "investigation", "investigations"), True),
+    "FL25a": (("fire", "ems", "amr"), False),
+    "FL25b": (("law", "police", "sheriff"), True),
+    "FL50a": (("logistics", "support", "fire", "range"), False),
+    "FL50b": (("command", "security"), True),
+}
+
+
+def _intent_matches(label: str, tokens: tuple) -> bool:
+    normalized = label.casefold()
+    return any(
+        re.search(
+            rf"(?<!\w){re.escape(token.removesuffix('#'))}{r'(?:[- ]?\d{1,2})(?!\w)' if token.endswith('#') else r'(?!\w)'}",
+            normalized,
+        )
+        for token in tokens
+    )
+
+
+def curate_split_systems(fl: FavoritesList, systems: List[System]) -> List[System]:
+    """Apply explicit public intent to a clear/encrypted split row.
+
+    Only departments or talkgroups whose labels match the row's documented
+    categories are retained. Encrypted-side departments are clearly marked
+    and avoided. No unmatched item is classified by inference.
+    """
+    intent = _SPLIT_INTENT.get(fl.favorite_key)
+    if intent is None:
+        return systems
+    tokens, encrypted = intent
+    curated: List[System] = []
+    for system in systems:
+        for site in system.sites:
+            kept_departments = []
+            for department in site.departments:
+                department_match = _intent_matches(department.label, tokens)
+                channels = [
+                    channel
+                    for channel in department.channels
+                    if department_match or _intent_matches(channel.label, tokens)
+                ]
+                if not channels:
+                    continue
+                department.channels = channels
+                if encrypted:
+                    if not department.label.startswith("[E]-ENCRYPTED "):
+                        department.label = f"[E]-ENCRYPTED {department.label}"
+                    department.encrypted_bucket = True
+                    department.avoid = True
+                kept_departments.append(department)
+            site.departments = kept_departments
+        if any(site.departments for site in system.sites):
+            curated.append(system)
+    return curated
+
 
 def system_from_hpdb_fact(fact: NormalizedFact) -> Optional[System]:
     """Tier A. ``None`` if ``fact`` is not a ``sentinel_local`` fact (or
@@ -227,4 +290,4 @@ def systems_from_matched_facts(fl: FavoritesList, matched_facts: List[Normalized
         if system is not None:
             systems.append(system)
     systems.extend(systems_from_flat_facts(fl, matched_facts))
-    return systems
+    return curate_split_systems(fl, systems)

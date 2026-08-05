@@ -2,6 +2,7 @@ import base64
 import json
 import threading
 import urllib.error
+import urllib.parse
 import urllib.request
 
 import pytest
@@ -506,7 +507,8 @@ def test_install_detect_endpoint(live_server, tmp_path):
     base_url, token, _ = live_server
     card = tmp_path / "card"
     (card / "BCDx36HP").mkdir(parents=True)
-    status, body, _ = _request(base_url, f"/api/v1/install/detect?dir={card}", token=token)
+    query = urllib.parse.urlencode({"dir": str(card)})
+    status, body, _ = _request(base_url, f"/api/v1/install/detect?{query}", token=token)
     assert status == 200
     data = json.loads(body)
     assert len(data["volumes"]) == 1
@@ -779,7 +781,8 @@ def test_install_hpdb_inspect_endpoint(live_server, tmp_path, synthetic_hpdb_cfg
     shutil.copy(synthetic_hpdb_cfg_path, card / "BCDx36HP" / "HPDB" / "hpdb.cfg")
     shutil.copy(synthetic_hpdb_state_path, card / "BCDx36HP" / "HPDB" / "s_000053.hpd")
 
-    status, body, _ = _request(base_url, f"/api/v1/install/hpdb-inspect?mount={card}", token=token)
+    query = urllib.parse.urlencode({"mount": str(card)})
+    status, body, _ = _request(base_url, f"/api/v1/install/hpdb-inspect?{query}", token=token)
     assert status == 200
     data = json.loads(body)
     assert data["states"]["53"] == "Washington"
@@ -790,7 +793,8 @@ def test_install_hpdb_inspect_missing_hpdb_returns_404(live_server, tmp_path):
     base_url, token, _ = live_server
     card = tmp_path / "card"
     (card / "BCDx36HP" / "favorites_lists").mkdir(parents=True)
-    status, body, _ = _request(base_url, f"/api/v1/install/hpdb-inspect?mount={card}", token=token)
+    query = urllib.parse.urlencode({"mount": str(card)})
+    status, body, _ = _request(base_url, f"/api/v1/install/hpdb-inspect?{query}", token=token)
     assert status == 404
 
 

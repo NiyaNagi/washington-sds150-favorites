@@ -176,6 +176,7 @@ class SentinelLocalSource(OnlineSourceAdapter):
                             # match by SID/TrunkId directly rather than only
                             # via an entity_key substring check.
                             "sid": identity[1] if identity else None,
+                            "sid_kind": identity[0] if identity else None,
                             # The full record tree (see
                             # wasds150.hpe.hpdb.serialize_system_slice),
                             # carried through so a matched recipe can build

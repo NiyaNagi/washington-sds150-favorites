@@ -163,13 +163,11 @@ def test_hpdb_source_to_recipe_to_favorites_list_to_hpe_end_to_end(
     assert codec.has_signature_line(text)
 
 
-def test_recipe_matches_multiple_systems_via_sid_and_county(
+def test_sid_recipe_excludes_unrelated_county_systems(
     tmp_path, synthetic_hpdb_cfg_path, synthetic_hpdb_state_path
 ):
-    """"Multiple systems may populate one Favorites List": a recipe that
-    matches both by SID (the Trunk system) and by county (the
-    Conventional system covering that same county) ends up with both,
-    deduplicated and in a stable order."""
+    """An authoritative SID recipe must not absorb an unrelated
+    conventional system merely because it covers the same county."""
     hpdb_cfg_path = _copy_synthetic_fixture(tmp_path, synthetic_hpdb_cfg_path, synthetic_hpdb_state_path)
     base_catalog = Catalog(favorites=[_trunked_row(counties="King")])
     profile = Profile(based_on_catalog_hash=base_catalog.content_hash())
@@ -177,14 +175,13 @@ def test_recipe_matches_multiple_systems_via_sid_and_county(
     _, built = _run_sentinel_pipeline(hpdb_cfg_path, base_catalog, profile)
     merged_fl = built["merge"].merged_catalog.by_slug("fltest")
 
-    assert len(merged_fl.systems) == 2
-    labels = {s.label for s in merged_fl.systems}
-    assert labels == {"Regional P25", "King County Public Safety"}
+    assert len(merged_fl.systems) == 1
+    assert merged_fl.systems[0].label == "Regional P25"
 
-    # Re-running enrichment again must not duplicate either system.
+    # Re-running enrichment again must not duplicate the matched system.
     rerun_facts = run_sources([SentinelLocalSource(hpdb_cfg_path=hpdb_cfg_path)]).facts
     built_again = build_and_merge(base_catalog, profile, rerun_facts)
-    assert len(built_again["merge"].merged_catalog.by_slug("fltest").systems) == 2
+    assert len(built_again["merge"].merged_catalog.by_slug("fltest").systems) == 1
 
 
 # ----------------------------------------------------- deterministic rerun

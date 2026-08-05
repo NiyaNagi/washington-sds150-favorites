@@ -50,6 +50,7 @@ _KEYWORD_SOURCES: Dict[str, str] = {
 }
 
 _SID_RE = re.compile(r"\bSID\s+(\d+)\b", re.IGNORECASE)
+_SID_URL_RE = re.compile(r"/sid/(\d+)(?:\b|/)", re.IGNORECASE)
 _TRUNK_HINTS = ("trunk", "p25", "wacn")
 _WASHINGTON_COUNTIES = (
     "Adams", "Asotin", "Benton", "Chelan", "Clallam", "Clark", "Columbia",
@@ -69,18 +70,24 @@ class RecipeMatch:
     name (a conservative, length-gated substring fallback for the many
     conventional rows that never cite a SID at all -- see
     :mod:`wasds150.recipes.engine`'s ``_fact_matches``). Any *one*
-    configured condition matching is sufficient; a recipe with no
+    configured condition matching is sufficient unless one or more SIDs
+    are configured, in which case exact SID identity is authoritative and
+    county/name fallbacks are not used. A recipe with no
     plausible automatic source (no condition configured at all) never
     matches anything, by design — a missed match only means "no automatic
     enrichment for this row yet", never a wrong one."""
 
     source_ids: tuple = ()
     sid: Optional[int] = None
+    sids: tuple = ()
     county_contains: tuple = ()
     name_hint: Optional[str] = None
 
     def matches_source(self, source_id: str) -> bool:
         return not self.source_ids or source_id in self.source_ids
+
+    def configured_sids(self) -> tuple:
+        return self.sids or ((self.sid,) if self.sid is not None else ())
 
 
 @dataclass
@@ -93,14 +100,21 @@ class Recipe:
     notes: str = ""
 
 
-def _detect_sid(system_or_category: str) -> Optional[int]:
-    m = _SID_RE.search(system_or_category)
-    return int(m.group(1)) if m else None
+def _detect_sids(system_or_category: str, source_url: str) -> tuple:
+    """Return every distinct RR SID stated in the row or its source URL,
+    preserving first-seen order."""
+    values = [int(value) for value in _SID_RE.findall(system_or_category or "")]
+    values.extend(int(value) for value in _SID_URL_RE.findall(source_url or ""))
+    return tuple(dict.fromkeys(values))
 
 
 def _detect_source_ids(*text_fields: str) -> tuple:
     haystack = " ".join(text_fields).lower()
-    found = {source for keyword, source in _KEYWORD_SOURCES.items() if keyword in haystack}
+    found = {
+        source
+        for keyword, source in _KEYWORD_SOURCES.items()
+        if re.search(rf"(?<!\w){re.escape(keyword)}(?!\w)", haystack)
+    }
     return tuple(sorted(found))
 
 
@@ -140,19 +154,32 @@ def build_default_recipes(catalog: Catalog) -> List[Recipe]:
     for fl in catalog.favorites:
         scenario_and_type = f"{fl.scenario} {fl.source_type} {fl.system_or_category}"
         requires_local_hpdb = any(hint in scenario_and_type.lower() for hint in _TRUNK_HINTS)
-        sid = _detect_sid(fl.system_or_category)
+        sids = _detect_sids(fl.system_or_category, fl.source_url)
         source_ids = _detect_source_ids(
             fl.scenario, fl.source_type, fl.system_or_category, fl.departments_or_channels, fl.notes
         )
         counties = _detect_counties(fl.counties)
         name_hint = _detect_name_hint(fl.favorite_name)
+        is_discovery_target = fl.source_type.strip().lower() == "discovery target"
+        is_rollup = "rollup" in fl.favorite_name.lower() or "reuses fl" in fl.system_or_category.lower()
+        if is_discovery_target or is_rollup:
+            source_ids = ()
+            sids = ()
+            counties = ()
+            name_hint = None
         recipes.append(
             Recipe(
                 slug=fl.slug,
                 favorite_key=fl.favorite_key,
                 label=fl.favorite_name,
                 requires_local_hpdb=requires_local_hpdb,
-                match=RecipeMatch(source_ids=source_ids, sid=sid, county_contains=counties, name_hint=name_hint),
+                match=RecipeMatch(
+                    source_ids=source_ids,
+                    sid=sids[0] if sids else None,
+                    sids=sids,
+                    county_contains=counties,
+                    name_hint=name_hint,
+                ),
                 notes=(
                     "Requires local Sentinel HPDB or RadioReference Premium data for full "
                     "site/talkgroup detail." if requires_local_hpdb else ""

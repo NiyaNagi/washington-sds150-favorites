@@ -455,13 +455,36 @@ def _site(record: Record) -> "Site":
 def _t_freq(record: Record) -> "TrunkFrequency":
     from wasds150.models.catalog import TrunkFrequency
 
-    schema = BCDX36HP_SCHEMA["T-Freq"]
-    freq_hz = _hpdb_float(record, schema, "freq_hz")
+    # Sentinel's master-HPDB 8-field layout places the frequency one
+    # column later than the Favorites/HPE 9-field layout. Locate the Hz
+    # value by semantics instead of applying one dialect's fixed offset to
+    # the other. The following fields are LCN and usage in both layouts.
+    freq_index = None
+    freq_hz = None
+    for index, value in enumerate(record.fields[2:], start=2):
+        try:
+            candidate = float(value)
+        except (TypeError, ValueError):
+            continue
+        if 1_000_000 <= candidate <= 2_000_000_000:
+            freq_index = index
+            freq_hz = candidate
+            break
+    lcn = None
+    usage = ""
+    if freq_index is not None:
+        if freq_index + 1 < len(record.fields):
+            try:
+                lcn = int(record.fields[freq_index + 1])
+            except (TypeError, ValueError):
+                pass
+        if freq_index + 2 < len(record.fields):
+            usage = record.fields[freq_index + 2]
     return TrunkFrequency(
         id=_keyed_id(record, stable_id_fallback(record, "t-freq")),
         freq_mhz=(freq_hz / 1_000_000) if freq_hz is not None else None,
-        lcn=_hpdb_int(record, schema, "lcn"),
-        usage=_field(record, schema, "usage"),
+        lcn=lcn,
+        usage=usage,
     )
 
 

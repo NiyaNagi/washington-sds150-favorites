@@ -358,6 +358,25 @@ def test_system_slice_to_system_trunk(synthetic_hpdb_state_path):
     assert tfreq.lcn is None  # genuinely blank in the fixture -- never guessed
 
 
+def test_system_slice_to_system_reads_master_hpdb_eight_field_t_freq_layout(
+    synthetic_hpdb_state_path,
+):
+    doc = hpdb.read_state_hpd(synthetic_hpdb_state_path)
+    original = next(s for s in hpdb.segment_systems(doc) if s.kind() == "Trunk")
+    records = list(original.records)
+    index = next(i for i, record in enumerate(records) if record.tag == "T-Freq")
+    records[index] = Record(
+        tag="T-Freq",
+        fields=["TFreqId=9001", "SiteId=7001", "", "", "851012500", "7", "Control", "P25"],
+    )
+
+    system = hpdb.system_slice_to_system(hpdb.SystemSlice(records=records))
+
+    assert system.trunk_frequencies[0].freq_mhz == 851.0125
+    assert system.trunk_frequencies[0].lcn == 7
+    assert system.trunk_frequencies[0].usage == "Control"
+
+
 def test_system_slice_to_system_ids_are_stable_hpdb_identifiers(synthetic_hpdb_state_path):
     """Preserving ids for merge: every id must be traceable back to the
     real RadioReference identifier, not a freshly-generated random one."""

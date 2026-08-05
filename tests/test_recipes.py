@@ -13,9 +13,14 @@ from wasds150.recipes import (
     evaluate_recipe,
 )
 from wasds150.sources.facts import NormalizedFact
+from wasds150.models.catalog import Channel, Department, Site, System
+from wasds150.recipes.systems import curate_split_systems
 
 
-def _fl(slug, favorite_key, scenario, source_type, system_or_category, counties="All 39 counties", notes=""):
+def _fl(
+    slug, favorite_key, scenario, source_type, system_or_category,
+    counties="All 39 counties", notes="", source_url="",
+):
     return FavoritesList(
         id=slug,
         slug=slug,
@@ -31,7 +36,7 @@ def _fl(slug, favorite_key, scenario, source_type, system_or_category, counties=
         mode="FM",
         monitorability="Full",
         upgrade_required="None",
-        source_url="",
+        source_url=source_url,
         notes=notes,
     )
 
@@ -47,6 +52,7 @@ def test_build_default_recipes_detects_sid_and_trunk_requirement():
     by_key = {r.favorite_key: r for r in recipes}
     assert by_key["FL04"].requires_local_hpdb is True
     assert by_key["FL04"].match.sid == 7971
+    assert by_key["FL04"].match.sids == (7971,)
     assert by_key["FL01"].requires_local_hpdb is False
 
 
@@ -74,6 +80,16 @@ def test_build_default_recipes_distinguishes_nifc_from_wa_dnr():
     by_key = {r.favorite_key: r for r in recipes}
     assert by_key["FL06"].match.source_ids == ("wa_dnr",)
     assert by_key["FL07"].match.source_ids == ("nifc",)
+
+
+def test_keyword_sources_do_not_match_inside_place_names():
+    catalog = Catalog(
+        favorites=[
+            _fl("fl58", "FL58", "Transit", "trunked", "Graham regional system SID 11628"),
+        ]
+    )
+    recipe = build_default_recipes(catalog)[0]
+    assert "wwara" not in recipe.match.source_ids
 
 
 def test_build_default_recipes_treats_statewide_as_no_county_filter():
@@ -222,8 +238,8 @@ def test_fact_matches_by_name_hint_when_no_sid_present():
         match=RecipeMatch(name_hint="King County Public Safety Radio"),
     )
     fact = NormalizedFact(
-        entity_key="hpdb:CountyId:5301", fact_type="system", source_id="sentinel_local",
-        name="King County Public Safety",
+        entity_key="public:king-safety", fact_type="system", source_id="public_source",
+        name="King County Public Safety Radio Network",
     )
     coverage = evaluate_recipe(recipe, [fact])
     assert coverage.status == "full"
@@ -235,7 +251,7 @@ def test_fact_does_not_match_by_name_hint_when_names_are_unrelated():
         match=RecipeMatch(name_hint="Totally Different Name"),
     )
     fact = NormalizedFact(
-        entity_key="hpdb:CountyId:5301", fact_type="system", source_id="sentinel_local",
+        entity_key="public:king-safety", fact_type="system", source_id="public_source",
         name="King County Public Safety",
     )
     coverage = evaluate_recipe(recipe, [fact])
@@ -248,24 +264,158 @@ def test_fact_does_not_match_by_name_hint_when_too_short():
     _fact_matches docstring)."""
     recipe = Recipe(slug="flx", favorite_key="FLX", label="PD", match=RecipeMatch(name_hint="PD"))
     fact = NormalizedFact(
-        entity_key="hpdb:x", fact_type="system", source_id="sentinel_local", name="Some PD Dispatch",
+        entity_key="public:x", fact_type="system", source_id="public_source", name="Some PD Dispatch",
     )
     coverage = evaluate_recipe(recipe, [fact])
     assert coverage.status == "none"
 
 
-def test_fact_matching_checks_all_configured_criteria_not_just_the_first():
-    """A recipe with both sid and county_contains configured: a fact that
-    fails the sid check must still be tested against county_contains
-    (this is a behavior change from a strict if/elif precedence chain to
-    independently-checked OR conditions)."""
+def test_sid_identity_takes_precedence_over_county_fallback():
+    """A SID-qualified trunk recipe must not absorb every system in one of
+    its counties when the fact's authoritative system identity differs."""
     recipe = Recipe(
         slug="flx", favorite_key="FLX", label="Test",
         match=RecipeMatch(sid=9999, county_contains=("King",)),
     )
     fact = NormalizedFact(entity_key="hpdb:x", fact_type="system", source_id="sentinel_local", county="King")
     coverage = evaluate_recipe(recipe, [fact])
-    assert coverage.status == "full"  # matched via county, even though sid didn't match
+    assert coverage.status == "none"
+
+
+def test_local_database_fact_without_sid_recipe_never_matches_by_county_or_name():
+    recipe = Recipe(
+        slug="flx", favorite_key="FLX", label="Regional",
+        match=RecipeMatch(county_contains=("King",), name_hint="Regional"),
+    )
+    fact = NormalizedFact(
+        entity_key="hpdb:CountyId:1", fact_type="system", source_id="sentinel_local",
+        county="King", name="Regional Public Safety",
+    )
+    assert evaluate_recipe(recipe, [fact]).status == "none"
+
+
+def test_build_default_recipes_detects_multiple_and_url_only_sids():
+    catalog = Catalog(favorites=[
+        _fl("fl15", "FL15", "Business", "trunked", "Boeing SID 7665 + Port SID 11481"),
+        _fl(
+            "fl58", "FL58", "Transit", "trunked", "Sound Transit Link",
+            source_url="https://www.radioreference.com/db/sid/11628",
+        ),
+    ])
+    by_key = {recipe.favorite_key: recipe for recipe in build_default_recipes(catalog)}
+    assert by_key["FL15"].match.sids == (7665, 11481)
+    assert by_key["FL58"].match.sids == (11628,)
+
+
+def test_multi_sid_recipe_matches_either_sid_but_not_county_or_superstring():
+    recipe = Recipe(
+        slug="flx", favorite_key="FLX", label="Test", requires_local_hpdb=True,
+        match=RecipeMatch(sid=7665, sids=(7665, 11481), county_contains=("King",)),
+    )
+    facts = [
+        NormalizedFact(
+            entity_key="hpdb:TrunkId:11481", fact_type="system", source_id="sentinel_local",
+            raw={"sid": 11481},
+        ),
+        NormalizedFact(
+            entity_key="hpdb:TrunkId:17665", fact_type="system", source_id="sentinel_local",
+            county="King", raw={},
+        ),
+    ]
+    coverage = evaluate_recipe(recipe, facts)
+    assert coverage.matched_fact_keys == ["hpdb:TrunkId:11481"]
+
+
+def test_trunk_sid_recipe_rejects_same_number_in_agency_namespace():
+    recipe = Recipe(
+        slug="flx", favorite_key="FLX", label="Test", requires_local_hpdb=True,
+        match=RecipeMatch(sid=7971, sids=(7971,)),
+    )
+    facts = [
+        NormalizedFact(
+            entity_key="hpdb:AgencyId:7971", fact_type="system", source_id="sentinel_local",
+            raw={"sid": 7971, "sid_kind": "AgencyId"},
+        ),
+        NormalizedFact(
+            entity_key="hpdb:TrunkId:7971", fact_type="system", source_id="sentinel_local",
+            raw={"sid": 7971, "sid_kind": "TrunkId"},
+        ),
+    ]
+    assert evaluate_recipe(recipe, facts).matched_fact_keys == ["hpdb:TrunkId:7971"]
+
+
+def test_discovery_target_recipe_never_auto_matches():
+    catalog = Catalog(favorites=[
+        _fl("fl72", "FL72", "Discovery", "discovery target", "Schools and stadiums", counties="King"),
+    ])
+    recipe = build_default_recipes(catalog)[0]
+    fact = NormalizedFact(
+        entity_key="hpdb:CountyId:1", fact_type="system", source_id="sentinel_local",
+        county="King", name="FL72 Schools and stadiums",
+    )
+    assert recipe.match.configured_sids() == ()
+    assert evaluate_recipe(recipe, [fact]).status == "none"
+
+
+def test_split_curator_keeps_explicit_intent_and_avoids_encrypted_departments():
+    clear = _fl("fl09a", "FL09a", "Public safety", "trunked", "SID 1")
+    encrypted = _fl("fl09b", "FL09b", "Public safety", "trunked", "SID 1")
+
+    def systems():
+        return [System(
+            id="s1", label="Regional", sid=1,
+            sites=[Site(id="site1", label="Site", departments=[
+                Department(id="fire", label="Fire Ops", channels=[Channel(id="f1", label="Dispatch", tgid=1)]),
+                Department(id="law", label="Police", channels=[Channel(id="p1", label="Patrol", tgid=2)]),
+                Department(id="other", label="Other", channels=[Channel(id="o1", label="Unknown", tgid=3)]),
+            ])],
+        )]
+
+    clear_result = curate_split_systems(clear, systems())
+    encrypted_result = curate_split_systems(encrypted, systems())
+
+    assert [d.id for d in clear_result[0].sites[0].departments] == ["fire"]
+    encrypted_department = encrypted_result[0].sites[0].departments[0]
+    assert encrypted_department.id == "law"
+    assert encrypted_department.encrypted_bucket is True
+    assert encrypted_department.avoid is True
+    assert encrypted_department.label.startswith("[E]-ENCRYPTED ")
+
+
+def test_split_curator_supports_documented_numbered_talkgroup_families():
+    encrypted = _fl("fl20b", "FL20b", "Public safety", "trunked", "SID 1")
+    systems = [System(
+        id="s1", label="Regional", sid=1,
+        sites=[Site(id="site1", label="Site", departments=[
+            Department(id="ops", label="Operations", channels=[
+                Channel(id="c1", label="LOPS11", tgid=1),
+                Channel(id="c2", label="INV 4", tgid=2),
+                Channel(id="c4", label="Investigations", tgid=4),
+                Channel(id="c3", label="Unrelated", tgid=3),
+            ]),
+        ])],
+    )]
+
+    result = curate_split_systems(encrypted, systems)
+
+    assert [channel.id for channel in result[0].sites[0].departments[0].channels] == ["c1", "c2", "c4"]
+
+
+def test_rollup_recipe_does_not_claim_full_coverage_from_one_component_sid():
+    catalog = Catalog(favorites=[
+        _fl(
+            "fl30", "FL30", "Interop", "trunked P25 + conventional",
+            "WSP + WSDOT + DNR + Mutual Aid (reuses FL4/5/6/1)",
+            source_url="https://www.radioreference.com/db/sid/7971",
+        ),
+    ])
+    recipe = build_default_recipes(catalog)[0]
+    fact = NormalizedFact(
+        entity_key="hpdb:TrunkId:7971", fact_type="system", source_id="sentinel_local",
+        raw={"sid": 7971},
+    )
+    assert recipe.match.configured_sids() == ()
+    assert evaluate_recipe(recipe, [fact]).status == "none"
 
 
 def test_name_hint_alone_never_disables_the_keyword_source_fallback():

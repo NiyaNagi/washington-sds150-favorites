@@ -21,7 +21,7 @@ def make_simulated_card(tmp_path, *, with_app_data=True):
     card = tmp_path / "card"
     (card / paths.FAVORITES_LISTS_DIR).mkdir(parents=True)
     (card / paths.HPDB_DIR).mkdir(parents=True)
-    (card / paths.PROFILE_CFG).write_text("dummy profile\r\n", encoding="ascii")
+    (card / paths.PROFILE_CFG).write_bytes(b"dummy profile\r\n")
     if with_app_data:
         (card / paths.APP_DATA_CFG).write_text("resume-state-blob", encoding="ascii")
     return card
@@ -79,7 +79,10 @@ def test_is_within_allowed_write_path_rejects_symlinked_target_and_directory(tmp
     external_file = outside / "external.hpd"
     external_file.write_text("do not overwrite", encoding="ascii")
     target = card / paths.FAVORITES_LISTS_DIR / "f_000007.hpd"
-    target.symlink_to(external_file)
+    try:
+        target.symlink_to(external_file)
+    except OSError as exc:
+        pytest.skip(f"symlink creation is unavailable: {exc}")
     assert not paths.is_within_allowed_write_path(card, target)
 
     card2 = tmp_path / "card2"

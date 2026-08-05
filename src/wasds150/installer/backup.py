@@ -61,7 +61,7 @@ def backup_card(mount_point: Path, backup_dir: Path, *, subtree: str = BCDX36HP_
     files = sorted(p for p in source_dir.rglob("*") if p.is_file())
     with zipfile.ZipFile(archive_path, "w", zipfile.ZIP_DEFLATED) as zf:
         for file_path in files:
-            arcname = str(file_path.relative_to(mount_point))
+            arcname = file_path.relative_to(mount_point).as_posix()
             zf.write(file_path, arcname=arcname)
             manifest["files"].append({"path": arcname, "sha256": _sha256_of_file(file_path)})
         zf.writestr(MANIFEST_ENTRY_NAME, json.dumps(manifest, indent=2, sort_keys=True))

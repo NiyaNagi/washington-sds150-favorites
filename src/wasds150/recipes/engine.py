@@ -21,6 +21,7 @@ identical merge changes, never its hash.
 from __future__ import annotations
 
 import copy
+import re
 from dataclasses import dataclass, field
 from typing import Any, Dict, List
 
@@ -56,16 +57,33 @@ class RecipeCoverage:
 
 
 def _fact_matches(recipe: Recipe, fact: NormalizedFact) -> bool:
+    configured_sids = recipe.match.configured_sids()
+    if configured_sids:
+        raw_sid = fact.raw.get("sid") if isinstance(fact.raw, dict) else None
+        raw_sid_kind = fact.raw.get("sid_kind") if isinstance(fact.raw, dict) else None
+        if (
+            recipe.requires_local_hpdb
+            and fact.source_id == "sentinel_local"
+            and raw_sid_kind not in (None, "TrunkId", "SysId")
+        ):
+            return False
+        try:
+            if raw_sid is not None and int(raw_sid) in configured_sids:
+                return True
+        except (TypeError, ValueError):
+            pass
+        # Some normalized imports may omit raw SID while retaining a stable
+        # HPDB/RR identity key. Match only a complete final numeric token;
+        # substring matching would make SID 8217 collide with 18217.
+        key_match = re.search(r"(?:^|:)(?:TrunkId|SysId):(\d+)$", fact.entity_key)
+        return bool(key_match and int(key_match.group(1)) in configured_sids)
+    if fact.source_id in ("sentinel_local", "radioreference_premium"):
+        # Licensed database systems require an exact stable identity.
+        # County and display-name fallbacks can absorb dozens of unrelated
+        # systems and are reserved for public conventional-source facts.
+        return False
     if not recipe.match.matches_source(fact.source_id):
         return False
-    if recipe.match.sid is not None:
-        raw_sid = fact.raw.get("sid") if isinstance(fact.raw, dict) else None
-        if raw_sid is not None and int(raw_sid) == recipe.match.sid:
-            return True
-        # Fall back to entity_key containing the SID (HPDB TrunkId/SysId
-        # keys embed it, see wasds150.sources.sentinel_local).
-        if str(recipe.match.sid) in fact.entity_key:
-            return True
     if recipe.match.county_contains:
         county = (fact.county or "").lower()
         if any(c.lower() in county for c in recipe.match.county_contains):
@@ -73,15 +91,14 @@ def _fact_matches(recipe: Recipe, fact: NormalizedFact) -> bool:
     if recipe.match.name_hint:
         # System-name fallback for rows with no SID to match on (most
         # conventional baseline rows): a conservative, length-gated
-        # substring check in either direction, so e.g. an HPDB system
-        # named "King County Public Safety" matches a recipe whose own
-        # favorite_name is the longer "King County Public Safety Radio"
-        # (or vice versa) without matching on a short/generic word alone.
+        # substring check from the specific recipe hint into the source
+        # name. Reverse containment lets short/generic source labels match
+        # overly broad Favorites List names.
         fact_name = (fact.name or "").strip().lower()
         hint = recipe.match.name_hint.strip().lower()
-        if fact_name and len(hint) >= 6 and (hint in fact_name or fact_name in hint):
+        if fact_name and len(hint) >= 6 and hint in fact_name:
             return True
-    if recipe.match.source_ids and not (recipe.match.sid or recipe.match.county_contains):
+    if recipe.match.source_ids and not (configured_sids or recipe.match.county_contains):
         # Keyword-derived source (service/scenario) match: any fact from
         # an already-matched source_id counts (the keyword match already
         # narrowed relevance) whenever there is no more specific SID/county

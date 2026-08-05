@@ -28,6 +28,7 @@ from wasds150.hpe.validation import (
     ValidationIssue,
     require_valid_document,
     require_valid_hpe_bytes,
+    tone_is_valid,
     validate_favorites_list,
     validate_hpe_container,
 )
@@ -39,6 +40,14 @@ from wasds150.models.profile import Profile
 
 def run(argv):
     return cli.main(argv)
+
+
+def test_validator_accepts_sentinel_tone_variants_and_rejects_invalid_values():
+    assert tone_is_valid("D023")
+    assert tone_is_valid("TONE=D023")
+    assert tone_is_valid("ColorCode=2")
+    assert tone_is_valid("RAN=14") is False
+    assert tone_is_valid("ColorCode=16") is False
 
 
 def _favorite(channel: Channel) -> FavoritesList:

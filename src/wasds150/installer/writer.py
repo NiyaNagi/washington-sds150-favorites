@@ -127,7 +127,10 @@ def write_favorites_list(
         raise InstallerError(str(exc)) from exc
 
     target_hpd, target_flist = plan_write(mount_point, index)
-    planned_writes = [str(target_hpd.relative_to(mount_point)), str(target_flist.relative_to(mount_point))]
+    planned_writes = [
+        target_hpd.relative_to(mount_point).as_posix(),
+        target_flist.relative_to(mount_point).as_posix(),
+    ]
     planned_deletes = [APP_DATA_CFG] if (mount_point / APP_DATA_CFG).exists() else []
 
     if dry_run:

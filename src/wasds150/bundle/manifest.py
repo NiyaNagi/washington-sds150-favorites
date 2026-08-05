@@ -44,7 +44,7 @@ def build_manifest(
         "counts": counts,
         "warnings": warnings,
         "files": [
-            {"path": str(p.relative_to(base_dir)), "sha256": file_hash(p)} for p in files
+            {"path": p.relative_to(base_dir).as_posix(), "sha256": file_hash(p)} for p in files
         ],
     }
 
