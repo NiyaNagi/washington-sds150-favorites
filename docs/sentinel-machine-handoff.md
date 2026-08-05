@@ -1,5 +1,12 @@
 # Cross-Machine Sentinel Enrichment Handoff
 
+> **Completed refresh:** This handoff was executed against Sentinel master
+> database date August 2, 2026. The verified result produced 75 HPE files
+> with FL30/FL45/FL72 intentionally unresolved. See
+> [Sentinel Refresh, Import, and Dashboard Runbook](sentinel-refresh-runbook.md)
+> for the repeatable current workflow, validation record, device import, and
+> dashboard instructions.
+
 This document contains the context needed to resume the project on a
 machine with Uniden Sentinel installed. The immediate goal is to read that
 machine's current local Sentinel HomePatrol database, fill the remaining

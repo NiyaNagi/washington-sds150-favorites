@@ -22,6 +22,7 @@ The catalog covers all 39 Washington counties and includes:
 - [Sentinel HPDB completion plan](docs/sentinel-completion-plan.md) - exact ingestion, merge, curation, location, quick-key, and acceptance steps once an updated local HPDB is available.
 - [Cross-machine Sentinel handoff](docs/sentinel-machine-handoff.md) - complete context and Windows workflow for resuming on a Sentinel-equipped machine.
 - [Sentinel reactivation prompt](prompts/continue-sentinel-enrichment.md) - copy-paste prompt for a new agent session.
+- [Sentinel refresh/import/dashboard runbook](docs/sentinel-refresh-runbook.md) - repeatable Windows HPDB refresh, validated HPE import, scanner-write, and local dashboard instructions.
 - [Data-source architecture](docs/data-sources.md) - source provenance, caching, update and merge behavior.
 
 ## Current coverage
@@ -57,6 +58,15 @@ python3 -m venv .venv
 .venv/bin/wasds150 generate --out out/
 .venv/bin/wasds150 ui
 ```
+
+On Windows, launch the same local dashboard from the repository root with:
+
+```powershell
+.\.venv\Scripts\wasds150.exe --home .wasds150-home ui --port 8765
+```
+
+See the [Sentinel refresh/import/dashboard runbook](docs/sentinel-refresh-runbook.md)
+for the complete updated-database and device-import workflow.
 
 The generated `out/sentinel-import-pack.zip` is the bulk download. Its
 `hpe/` directory contains every currently available Favorites List with

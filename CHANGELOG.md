@@ -14,6 +14,9 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   a Sentinel-equipped Windows machine.
 - Added repository ignore safeguards for user-local HPDB files and
   generated HPE/import bundles.
+- Added a Windows Sentinel refresh, HPE import, scanner-write, and local
+  dashboard runbook, including the exact repeatable preview/apply/generate
+  workflow and fail-safe device verification steps.
 
 ### Fixed
 
@@ -33,6 +36,20 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Curated the documented clear/encrypted split pairs from public intent
   categories; encrypted-side departments are clearly marked and avoided,
   and unmatched talkgroups are not assigned an invented encryption state.
+
+### Verified
+
+- Reconstructed the personal local catalog against Sentinel master database
+  date August 2, 2026: 14,939 normalized HPDB facts, zero source alerts,
+  exact identity coverage for all 17 intended trunked targets, 75 generated
+  HPE files, and only FL30/FL45/FL72 intentionally unresolved.
+- Decoded and semantically validated every generated HPE; validated the
+  import-pack file set, manifest, and SHA-256 checksums; confirmed all
+  clear/encrypted split pairs differ and every retained encrypted department
+  is avoided.
+- Compared stable record identities with the previous local snapshot. The
+  refreshed source added or retired records in FL09a/b, FL10, FL21,
+  FL25a, FL50a/b, and FL58 while preserving the expected system hierarchy.
 
 ## 0.1.0 - 2026-08-03
 
