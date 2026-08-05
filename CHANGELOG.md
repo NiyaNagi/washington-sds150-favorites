@@ -7,6 +7,19 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## Unreleased
 
+### Added
+
+- Added a self-contained cross-machine Sentinel enrichment handoff and a
+  copy-paste reactivation prompt for completing trunked Favorites Lists on
+  a Sentinel-equipped Windows machine.
+- Added repository ignore safeguards for user-local HPDB files and
+  generated HPE/import bundles.
+
+### Fixed
+
+- Clarified that `--sentinel-hpdb-cfg` and `--sentinel-mount` are
+  alternative source configurations rather than options to pass together.
+
 ## 0.1.0 - 2026-08-03
 
 ### Added

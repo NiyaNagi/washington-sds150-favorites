@@ -20,6 +20,8 @@ The catalog covers all 39 Washington counties and includes:
 - [Programming inventory](washington-sds150-favorites.csv) - machine-readable inventory for filtering, review, and future tooling.
 - [Sentinel checklist](washington-sds150-programming-checklist.md) - build order, quick keys, GPS/location control, updates, testing, and backups.
 - [Sentinel HPDB completion plan](docs/sentinel-completion-plan.md) - exact ingestion, merge, curation, location, quick-key, and acceptance steps once an updated local HPDB is available.
+- [Cross-machine Sentinel handoff](docs/sentinel-machine-handoff.md) - complete context and Windows workflow for resuming on a Sentinel-equipped machine.
+- [Sentinel reactivation prompt](prompts/continue-sentinel-enrichment.md) - copy-paste prompt for a new agent session.
 - [Data-source architecture](docs/data-sources.md) - source provenance, caching, update and merge behavior.
 
 ## Current coverage
@@ -118,12 +120,14 @@ When an updated Sentinel database is available:
 
 ```bash
 wasds150 sources configure \
-  --sentinel-mount "/path/to/Sentinel" \
   --sentinel-hpdb-cfg "/path/to/hpdb.cfg"
 wasds150 sources update --apply
 wasds150 preview
 wasds150 generate --out out/
 ```
+
+Use `--sentinel-mount "/path/to/card"` instead when pointing at an SDS150
+card root. The two Sentinel path options are alternatives.
 
 Follow the [Sentinel HPDB completion plan](docs/sentinel-completion-plan.md)
 for the system-by-system priority order, merge rules, location-control

@@ -10,6 +10,18 @@ dist/
 # wasds150 generated/output artifacts
 wasds150-output/
 .wasds150-home/
+out/
+generated/
+*.hpe
+
+# User-local Sentinel/RadioReference data must never be committed.
+hpdb.cfg
+s_*.hpd
+*.hpd
+!tests/fixtures/wasds150_synthetic_*.hpd
+f_list.cfg
+BCDx36HP/HPDB/
+local-sentinel/
 
 # Externally-fetched HPE research fixtures (GPL-2.0 sources) — never vendored
 # into version control; see scripts/fetch_hpe_fixtures.py and NOTICE.md.

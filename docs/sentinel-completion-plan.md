@@ -35,12 +35,14 @@ warnings rather than filled with guessed sites or talkgroups.
 
 ```bash
 wasds150 sources configure \
-  --sentinel-mount "/path/to/Sentinel" \
   --sentinel-hpdb-cfg "/path/to/hpdb.cfg"
 wasds150 sources update --apply
 wasds150 preview
 wasds150 generate --out out/
 ```
+
+Use `--sentinel-mount "/path/to/card"` instead when pointing at a mounted
+or copied SDS150 card. Configure exactly one of the two Sentinel paths.
 
 Use the browser UI's **Advanced > Sources** workflow if preferred. Never
 copy private RadioReference credentials into the repository.

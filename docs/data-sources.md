@@ -13,10 +13,10 @@ confidence so updates can be reviewed before they alter a profile.
 5. Optional credentialed RadioReference programming data
 6. Community references used only when no primary source exists
 
-User presentation choices such as names, quick keys, enabled state, alerts,
-recording, and avoids are maintained as local overrides. Upstream facts such
-as frequencies, talkgroups, sites, modes, and encryption status can update
-without erasing those choices.
+User presentation choices such as names, notes, quick keys and enabled
+state are maintained as local overrides. Upstream facts such as frequencies,
+talkgroups, sites, modes and encryption status can update without erasing
+those choices.
 
 ## Automatically refreshable public sources
 
@@ -102,9 +102,9 @@ update with **no** local HPDB/RadioReference input reproduces the shipped
 (see the next section) — this is additive/structural, not a rewrite of the
 free-text fields, and likewise never changes the content hash (`systems`
 is deliberately excluded from `FavoritesList.content_hash()`). Supplying a
-local HPDB export or RR Premium data lets the ~39 trunked rows that
-require it report full coverage with `confidence="verified"` provenance
-and a real per-list `.hpe` once matched by RadioReference system ID.
+local HPDB export or RR Premium data lets the Sentinel-dependent trunked
+rows report full coverage with `confidence="verified"` provenance and a
+real per-list `.hpe` once matched by RadioReference system ID.
 
 ## Structured systems and generated `.hpe` output
 
@@ -121,12 +121,12 @@ systems from more than one):
    literal frequencies (never a guess — a hyphen-joined range like
    `"866.5125-868.0125"` is deliberately *not* expanded, since
    interpolating the channels in between would be fabrication).
-   `wasds150.sources.static_seeds` adds a small, hand-curated, cited table
-   for the handful of rows (NOAA weather, national NPSPAC
-   interoperability, FRS/GMRS) whose own text only gives that row's
-   range endpoints, gated behind a check that those exact endpoints are
-   present in the row's own text (so the seed can never apply to an
-   unrelated row). This tier runs automatically on every
+   `wasds150.sources.static_seeds` adds small, hand-curated, cited fixed
+   channel plans where prose alone is insufficient, including NPSPAC,
+   FRS/GMRS, CB, marine VHF, Seattle Center/FSS and the shared mountain
+   safety baseline. Every seed is gated by row-specific anchors so it
+   cannot apply to an unrelated entry that reuses a key. This tier runs
+   automatically on every
    `generate`/`preview`, and is baked into the packaged baseline snapshot
    too (see `wasds150.catalog.baseline`) — no configuration needed.
 2. **Matched public-source facts (Tier B)**: once `wasds150 sources
