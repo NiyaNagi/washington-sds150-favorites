@@ -270,6 +270,19 @@ def test_layout_templates_do_not_repeat_huge_or_large_data_within_a_screen():
             assert len(selected_data) == len(set(selected_data)), (template.id, screen_name, selected_data)
 
 
+def test_layout_templates_do_not_repeat_any_editable_option_within_a_screen():
+    for template in LAYOUT_TEMPLATES:
+        for screen_name, items in SCREEN_SPECS.items():
+            selected_options = []
+            for index, (name, default) in enumerate(items):
+                if not option_choices(name, screen_name, default):
+                    continue
+                selected = template.screen_item_options.get(f"{screen_name}||{index}", default)
+                if selected not in (None, "Empty"):
+                    selected_options.append(selected)
+            assert len(selected_options) == len(set(selected_options)), (template.id, screen_name, selected_options)
+
+
 def test_authoritative_sentinel_option_tables_cover_all_exported_defaults():
     assert len(HUGE_OPTION_CHOICES) == 16
     assert len(LARGE_OPTION_CHOICES) == 33  # Sentinel has 34 rows; Fahrenheit/Celsius share one XML token.
@@ -338,7 +351,7 @@ def test_custom_display_rejects_unknown_layout_template():
 
 
 def test_color_groupings_offer_basic_colorful_rows_scenarios_and_accessibility():
-    assert len(COLOR_GROUPINGS) >= 12
+    assert len(COLOR_GROUPINGS) >= 13
     assert len(color_grouping_catalog()) == len(COLOR_GROUPINGS)
     assert {grouping.style for grouping in COLOR_GROUPINGS} >= {
         "Basic", "Colorful", "Rows", "Scenario", "Accessibility",
@@ -385,7 +398,7 @@ def test_every_grouping_generates_valid_xml_with_every_palette():
 def test_palette_spectra_are_distinct_supported_and_high_contrast():
     for palette in PALETTES:
         spectrum = palette_spectrum(palette)
-        assert len(spectrum) == len(set(spectrum)) == 18
+        assert len(spectrum) == len(set(spectrum)) == 30
         assert all(color in SUPPORTED_DISPLAY_COLOR_VALUES for color in spectrum)
         assert all(contrast_ratio(color, palette.background) >= 4.5 for color in spectrum)
 
@@ -399,6 +412,43 @@ def test_full_spectrum_granular_uses_all_eighteen_colors_in_xml():
         if item.attrib.get("Option") != "Empty" and item.attrib["Name"] not in ("SP0", "SP1", "SP2")
     }
     assert len(colors) >= 18
+
+
+def test_stable_item_rainbow_keeps_matching_meanings_the_same_color():
+    config = {
+        "name": "Stable Rainbow",
+        "layout_template_id": "dispatch",
+        "color_grouping_id": "stable-item-rainbow",
+        "colors": PALETTES[0].colors(),
+        "global_item_colors": {},
+        "screen_item_colors": {},
+    }
+    root = ET.fromstring(generate_custom_display_xml(config)[0])
+    frequencies = {
+        item.attrib["Text"]
+        for screen in root.findall("Screen")
+        for item in screen.findall("Item")
+        if item.attrib.get("Option") == "Frequency"
+    }
+    system_names = {
+        item.attrib["Text"]
+        for screen in root.findall("Screen")
+        for item in screen.findall("Item")
+        if item.attrib.get("Name") == "System Name"
+    }
+    assert len(frequencies) == 1
+    assert len(system_names) == 1
+    assert frequencies != system_names
+
+    config["layout_template_id"] = "technical"
+    technical = ET.fromstring(generate_custom_display_xml(config)[0])
+    technical_frequency = next(
+        item.attrib["Text"]
+        for screen in technical.findall("Screen")
+        for item in screen.findall("Item")
+        if item.attrib.get("Option") == "Frequency"
+    )
+    assert technical_frequency == next(iter(frequencies))
 
 
 def test_custom_display_rejects_unknown_color_grouping():

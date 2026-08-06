@@ -92,6 +92,13 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Added automatic per-screen deduplication for Huge/Large template data. When a
   hierarchy field already shows Frequency, TGID, Site Name, System ID, or
   another value, secondary slots receive a different supported data point.
+- Extended deduplication to Small and Icon slots. All ten templates now contain
+  zero repeated editable options within each of their seven screens; top-row
+  Bluetooth/GPS/recording/priority states are no longer duplicated below.
+- Added Stable Item Rainbow with a 30-color high-contrast theme spectrum.
+  Meaning-based color slots keep Frequency, TGID, system/site identity, signal,
+  power, controls, alerts, and other matching items consistent across every
+  screen and layout while different meanings receive different colors.
 - Added Sentinel-compatible displayed-item selection for editable option and
   icon fields. Selection choices are constrained by field type, can synchronize
   across matching fields in all modes, update previews immediately, and are

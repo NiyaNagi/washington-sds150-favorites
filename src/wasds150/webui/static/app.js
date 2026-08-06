@@ -420,9 +420,13 @@
     const screenOverride = item ? displayCustomConfig.screen_item_colors[item.screen_key] : null;
     const globalOverride = item ? displayCustomConfig.global_item_colors[item.item_key] : null;
     const override = Object.assign({}, globalOverride || {}, screenOverride || {});
-    const spectrumSlot = item && selectedDisplayGrouping
-      ? selectedDisplayGrouping.item_color_slots[item.screen_key]
+    const selectedOption = item ? effectiveDisplayOption(item) : null;
+    let spectrumSlot = item && selectedDisplayGrouping
+      ? selectedDisplayGrouping.option_color_slots[selectedOption]
       : undefined;
+    if (spectrumSlot === undefined && item && selectedDisplayGrouping) {
+      spectrumSlot = selectedDisplayGrouping.item_color_slots[item.screen_key];
+    }
     const groupedText = spectrumSlot !== undefined && displayCustomConfig.spectrum_colors
       ? displayCustomConfig.spectrum_colors[spectrumSlot % displayCustomConfig.spectrum_colors.length]
       : palette.colors[category];
@@ -1057,7 +1061,9 @@
         style.textContent = grouping.style;
         const swatches = document.createElement("span");
         swatches.className = "grouping-swatches";
-        const spectrumSlots = Array.from(new Set(Object.values(grouping.item_color_slots))).sort((a, b) => a - b);
+        const spectrumSlots = Array.from(new Set([
+          ...Object.values(grouping.item_color_slots), ...Object.values(grouping.option_color_slots),
+        ])).sort((a, b) => a - b);
         const baseCategories = ["status", "system", "department", "channel", "metadata", "alert", "accent"];
         const samples = spectrumSlots.length
           ? spectrumSlots.map((slot) => ({ spectrumSlot: slot }))
@@ -1149,10 +1155,13 @@
     const matchingPalette = displayPaletteData.palettes.find((palette) =>
       colorKeys.every((key) => palette.colors[key] === (config.colors[key] || "").toUpperCase())
     );
-    const spectrum = config.spectrum_colors || (matchingPalette || displayPaletteData.palettes[0]).spectrum_colors;
-    if (!Array.isArray(spectrum) || spectrum.length < 18 || spectrum.some((color) => !supported.has((color || "").toUpperCase()))) {
-      throw new Error("Palette spectrum must contain at least 18 Sentinel-supported colors");
+    const fallbackSpectrum = (matchingPalette || displayPaletteData.palettes[0]).spectrum_colors;
+    const savedSpectrum = config.spectrum_colors || [];
+    if (!Array.isArray(savedSpectrum) || savedSpectrum.some((color) => !supported.has((color || "").toUpperCase()))) {
+      throw new Error("Palette spectrum contains an unsupported Sentinel color");
     }
+    const spectrum = Array.from(new Set([...savedSpectrum, ...fallbackSpectrum]));
+    if (spectrum.length < 30) throw new Error("Palette spectrum must resolve to at least 30 colors");
     if (!config.global_item_colors || typeof config.global_item_colors !== "object" ||
         !config.screen_item_colors || typeof config.screen_item_colors !== "object") {
       throw new Error("Palette is missing item override maps");

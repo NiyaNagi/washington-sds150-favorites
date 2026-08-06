@@ -254,12 +254,14 @@ def test_display_palette_endpoints(live_server):
     assert len(data["layout_templates"]) >= 10
     assert data["layout_templates"][0]["id"] == "sentinel-export"
     assert any(template["id"] == "technical" for template in data["layout_templates"])
-    assert len(data["color_groupings"]) >= 12
+    assert len(data["color_groupings"]) >= 13
     assert data["color_groupings"][0]["id"] == "balanced"
     assert any(grouping["id"] == "full-spectrum" for grouping in data["color_groupings"])
-    assert all(len(palette["spectrum_colors"]) == 18 for palette in data["palettes"])
+    assert all(len(palette["spectrum_colors"]) == 30 for palette in data["palettes"])
     full_spectrum = next(grouping for grouping in data["color_groupings"] if grouping["id"] == "full-spectrum")
     assert len(set(full_spectrum["item_color_slots"].values())) == 18
+    stable_rainbow = next(grouping for grouping in data["color_groupings"] if grouping["id"] == "stable-item-rainbow")
+    assert stable_rainbow["option_color_slots"]["Frequency"] == 16
     for screen in data["screens"]:
         indices = [index for row in data["layouts"][screen] for index in row["indices"]]
         assert sorted(indices) == list(range(len(data["items"][screen])))

@@ -223,6 +223,7 @@ class DisplayColorGrouping:
     category_map: Dict[str, str]
     item_categories: Dict[str, str]
     item_color_slots: Optional[Dict[str, int]] = None
+    option_color_slots: Optional[Dict[str, int]] = None
 
 
 PALETTES: Tuple[DisplayPalette, ...] = (
@@ -358,6 +359,30 @@ def _build_layout_template(
                 else:
                     overrides[key] = selected
             used.add(selected)
+        non_icon_options = {
+            overrides.get(f"{screen_name}||{index}", default)
+            for index, (item_name, default) in enumerate(items)
+            if not item_name.startswith("Icon") and option_choices(item_name, screen_name, default)
+        }
+        icon_used = set()
+        for index, (item_name, default) in enumerate(items):
+            if not item_name.startswith("Icon"):
+                continue
+            key = f"{screen_name}||{index}"
+            selected = overrides.get(key, default)
+            if selected in non_icon_options or selected in icon_used:
+                replacement = next((
+                    choice for choice in ICON_OPTION_CHOICES
+                    if choice != "Empty" and choice not in non_icon_options and choice not in icon_used
+                ), None)
+                if replacement is not None:
+                    selected = replacement
+                    if selected == default:
+                        overrides.pop(key, None)
+                    else:
+                        overrides[key] = selected
+            if selected not in (None, "Empty"):
+                icon_used.add(selected)
     return DisplayLayoutTemplate(template_id, name, description, scenario, overrides)
 
 
@@ -439,7 +464,7 @@ LAYOUT_TEMPLATES: Tuple[DisplayLayoutTemplate, ...] = (
     _build_layout_template(
         "aviation-marine", "Aviation & Marine", "Prioritizes frequency, modulation, service, location, and signal strength.",
         "Civil/military aviation, marine traffic, rail, and conventional channel monitoring.",
-        small=("ATT", "Bluetooth", "GPS", "Time", "Volume", "Squelch", "Modulation", "REC"),
+        small=("ATT", "Day", "GPS", "Time", "Volume", "Squelch", "P25Status", "TdmaSlot"),
         simple_large=("Frequency", "ServiceType"),
         detail_large=("Volume&Squelch", "NumberTag", "Frequency", "ServiceType", "CTCSS/DCS", "latitude", "longitude", "SiteName", "Filter", "Noise", "Rssi", "Rssi Bar"),
         special_large=("Volume&Squelch", "NumberTag", "Frequency", "ServiceType", "latitude", "longitude", "Rssi", "Rssi Bar"),
@@ -449,7 +474,7 @@ LAYOUT_TEMPLATES: Tuple[DisplayLayoutTemplate, ...] = (
     _build_layout_template(
         "recording-alerts", "Recording & Alerts", "Makes recording, priority, Close Call, weather, and active-state indicators prominent.",
         "Event monitoring, unattended recording, and rapid attention to priority activity.",
-        small=("ATT", "Bluetooth", "REC", "Time", "Volume", "Squelch", "PRI", "WxPRI"),
+        small=("ATT", "Day", "REC", "Time", "Volume", "Squelch", "P25Status", "TdmaSlot"),
         simple_large=("ServiceType", "Frequency"),
         detail_large=("Volume&Squelch", "NumberTag", "ServiceType", "Frequency", "TGID", "UnitId", "UnitIdName", "SystemId", "BattVoltage", "Rssi", "Rssi Bar", "D_ErrorCount"),
         special_large=("Volume&Squelch", "NumberTag", "ServiceType", "Frequency", "TGID", "UnitId", "Rssi", "Rssi Bar"),
@@ -607,7 +632,59 @@ def _spectrum_matrix_slots() -> Dict[str, int]:
     return slots
 
 
-def palette_spectrum(palette: DisplayPalette, count: int = 18) -> List[str]:
+def _stable_item_slots() -> Dict[str, int]:
+    slots: Dict[str, int] = {}
+    fixed_slots = {
+        "Func": 0, "SIG": 5, "BATT": 6, "key": 9, "Dir": 9,
+        "System Name": 10, "System option": 10,
+        "Department Name": 13, "Department option": 13,
+        "Channel Name": 15, "Channel option": 15,
+        "Avoid": 22, "Hold": 22,
+        "Info Area 1": 25, "Primary Area-1": 25,
+        "Info Area 2": 26, "Primary Area-2": 26,
+        "Info Area 3": 27, "Primary Area-3": 27,
+        "Soft1 Key": 25, "Soft2 Key": 26, "Soft3 Key": 27,
+    }
+    for screen_name, items in SCREEN_SPECS.items():
+        for index, (name, _) in enumerate(items):
+            if name in ("SP0", "SP1", "SP2"):
+                continue
+            if name.startswith("Icon"):
+                slot = 28
+            elif name.startswith(("Option A", "Option B")):
+                slot = 29
+            elif name in ("Option_3", "Option_4"):
+                slot = 4
+            elif name in ("Option_5", "Option_6", "Option C-1", "Option C-2"):
+                slot = 7
+            elif name in ("Option_7", "Option_8"):
+                slot = 8
+            else:
+                slot = fixed_slots.get(name, 29)
+            slots[f"{screen_name}||{index}"] = slot
+    return slots
+
+
+def _stable_option_slots() -> Dict[str, int]:
+    groups = {
+        1: ("ATT",), 2: ("Bluetooth",), 3: ("GPS",), 4: ("Day", "Time"),
+        5: ("Rssi", "Rssi Bar"),
+        6: ("BATT", "Battery Current", "Battery Temperature", "BattVoltage", "USB2_vbus"),
+        7: ("Volume", "Squelch", "Volume&Squelch"),
+        8: ("P25Status",), 10: ("FL_Name",),
+        11: ("SystemType", "SystemId"), 12: ("SysSubID", "WACN"),
+        14: ("SiteName", "SiteId", "Lcn", "latitude", "longitude"),
+        16: ("Frequency",), 17: ("TGID",), 18: ("ServiceType",),
+        19: ("CTCSS/DCS", "Modulation", "TdmaSlot"),
+        20: ("UnitId", "UnitIdName", "UnitIdName_1", "UnitIdName_2", "UnitIdName_3", "UnitIdName_4"),
+        21: ("Filter", "Noise", "D_ErrorCount"),
+        23: ("REC", "PRI", "P_Ch"), 24: ("CC", "WxPRI", "SCR", "REP"),
+        28: ("IFX", "LVL"), 29: ("NumberTag",),
+    }
+    return {option: slot for slot, options in groups.items() for option in options}
+
+
+def palette_spectrum(palette: DisplayPalette, count: int = 30) -> List[str]:
     background = palette.background
     contrast_candidates = [
         value for _, value in SUPPORTED_DISPLAY_COLORS
@@ -678,6 +755,10 @@ COLOR_GROUPINGS: Tuple[DisplayColorGrouping, ...] = (
         "Colorful", {}, {}, _spectrum_matrix_slots(),
     ),
     DisplayColorGrouping(
+        "stable-item-rainbow", "Stable Item Rainbow", "Keeps each data meaning the same color across all screens and templates while different meanings use different spectrum colors.",
+        "Colorful", {}, {}, _stable_item_slots(), _stable_option_slots(),
+    ),
+    DisplayColorGrouping(
         "row-bands", "Colorful Row Bands", "Assigns distinct theme colors to top, utility, hierarchy, detail, icon, and bottom rows.",
         "Colorful", {}, _row_category_overrides({
             "scanner-status-row": ("accent",), "scanner-utility-row": ("metadata",),
@@ -740,6 +821,7 @@ def color_grouping_catalog() -> List[dict]:
             "category_map": dict(grouping.category_map),
             "item_categories": dict(grouping.item_categories),
             "item_color_slots": dict(grouping.item_color_slots or {}),
+            "option_color_slots": dict(grouping.option_color_slots or {}),
         }
         for grouping in COLOR_GROUPINGS
     ]
@@ -774,9 +856,12 @@ def generate_display_xml(
     grouping = color_grouping_by_id(color_grouping_id)
     if grouping is None:
         raise ValueError(f"unknown display color grouping: {color_grouping_id}")
-    spectrum = [str(color).removeprefix("#").upper() for color in (spectrum_colors or palette_spectrum(palette))]
-    if len(spectrum) < 18 or any(color not in SUPPORTED_DISPLAY_COLOR_VALUES for color in spectrum):
-        raise ValueError("display spectrum must contain at least 18 Sentinel-supported colors")
+    spectrum = [str(color).removeprefix("#").upper() for color in (spectrum_colors or [])]
+    if any(color not in SUPPORTED_DISPLAY_COLOR_VALUES for color in spectrum):
+        raise ValueError("display spectrum contains an unsupported Sentinel color")
+    spectrum.extend(color for color in palette_spectrum(palette) if color not in spectrum)
+    if len(spectrum) < 30:
+        raise ValueError("display spectrum must resolve to at least 30 Sentinel-supported colors")
     global_item_colors = global_item_colors or {}
     screen_item_colors = screen_item_colors or {}
     global_item_options = global_item_options or {}
@@ -795,7 +880,9 @@ def generate_display_xml(
             if screen_option in choices:
                 selected_option = screen_option
             category = grouped_category(grouping, screen_name, index, name, selected_option)
-            spectrum_slot = (grouping.item_color_slots or {}).get(f"{screen_name}||{index}")
+            spectrum_slot = (grouping.option_color_slots or {}).get(selected_option)
+            if spectrum_slot is None:
+                spectrum_slot = (grouping.item_color_slots or {}).get(f"{screen_name}||{index}")
             grouped_text = spectrum[spectrum_slot % len(spectrum)] if spectrum_slot is not None else colors[category]
             attributes = {
                 "Name": name,
