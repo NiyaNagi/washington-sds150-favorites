@@ -25,24 +25,27 @@ The catalog covers all 39 Washington counties and includes:
 - [Sentinel refresh/import/dashboard runbook](docs/sentinel-refresh-runbook.md) - repeatable Windows HPDB refresh, validated HPE import, scanner-write, and local dashboard instructions.
 - [SDS100/SDS150 display palettes](docs/display-customizer.md) - coordinated high-contrast palettes, semantic color groups, all-mode previews, XML export, and Sentinel import instructions.
 - [Ames Lake, King County, and outdoor lists](docs/ames-lake-king-county.md) - all 39 King County municipalities with Census location tags, Ames Lake profiles, reviewed local service curation, and the comprehensive outdoor safety rollup.
+- [Band-oriented scanning](docs/band-scanning.md) - twelve ready-to-scan listening packs, matching Custom Search ranges, noise/data avoidance, and additional scenario guidance.
+- [Upper Lena Lake profile](docs/upper-lena-lake.md) - compact and comprehensive Hood Canal/Olympic wilderness, SAR, weather, public-safety, aviation, marine, amateur, and personal-radio profiles.
 - [Data-source architecture](docs/data-sources.md) - source provenance, caching, update and merge behavior.
 
 ## Current coverage
 
 | Measure | Current baseline |
 |---|---:|
-| Curated Favorites List entries | 120 |
+| Curated Favorites List entries | 136 |
 | Statewide/core entries | 78 |
 | King County municipal entries | 39 |
-| Lists generated with no private input | 58 |
-| Lists generated after current local Sentinel enrichment | 118 |
-| Structured conventional channels | 510 |
+| Lists generated with no private input | 72 |
+| Lists generated after current local Sentinel enrichment | 134 |
+| Unique structured channel records after enrichment | 1,855 |
 | Remaining local warnings | 2 |
 | Washington counties represented | 39 |
 
 The packaged no-private-input baseline leaves the trunked local rows pending.
 After applying the current local Sentinel HPDB, all statewide trunk targets,
-all 39 city lists, Ames Lake/Eastside profiles, FL30, and OUT01 are populated.
+all 39 city lists, Ames Lake/Eastside profiles, twelve band packs, all four
+Upper Lena profiles, FL30, and OUT01 are populated.
 Only FL45/FL72 remain on-site Discovery scenarios with no stable published
 channel set. No empty or guessed HPE is emitted.
 
@@ -141,12 +144,12 @@ the same catalog:
 
 - **No private input needed, works out of the box**: national/public
   frequencies already spelled out in this repository's own catalog text —
-  NOAA Weather Radio, national interoperability (NPSPAC ICALL/ITAC),
+  NOAA Weather Radio, current NIFOG/WAFOG interoperability,
   FRS/GMRS/MURS/CB, marine VHF, common aviation/guard frequencies, and
   more — are parsed and populated automatically (see
   `wasds150.recipes.systems` / `wasds150.sources.static_channels` /
-  `wasds150.sources.static_seeds`). Currently 58 of the 120 baseline rows
-  are populated this way with zero configuration; the local city rows are
+  `wasds150.sources.static_seeds`). Currently 72 of the 136 catalog rows
+  are populated this way with zero configuration; most local city rows are
   deliberately HPDB-dependent. Static channels also
   receive conservative modulation, service-type, and distress/calling
   priority metadata; location and trunk-specific metadata are never guessed.

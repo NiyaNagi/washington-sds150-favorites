@@ -18,17 +18,27 @@ from wasds150.catalog import baseline as baseline_mod
 from wasds150.catalog import loader
 from wasds150.config import AppConfig
 from wasds150.catalog.validate import partition_validation_issues, validate_catalog
-from wasds150.models.catalog import Catalog
+from wasds150.models.catalog import CSV_FIELDS, Catalog
 from wasds150.models.profile import Profile
 
 
 def _append_local_area_extension(catalog: Catalog) -> None:
-    """Upgrade a real statewide/core catalog without changing small custom catalogs."""
+    """Upgrade a real persisted catalog without changing small custom catalogs.
+
+    Public baseline fields are refreshed in memory while locally enriched
+    systems/provenance and profile overrides remain untouched. Missing public
+    extension rows are appended.
+    """
     existing = {favorite.slug for favorite in catalog.favorites}
     if len(existing) < 75 or "fl75" not in existing:
         return
+    current_by_slug = {favorite.slug: favorite for favorite in catalog.favorites}
     for favorite in baseline_mod.load_baseline().favorites:
-        if favorite.favorite_key.startswith(("KC", "LA", "OUT")) and favorite.slug not in existing:
+        current = current_by_slug.get(favorite.slug)
+        if current is not None:
+            for field_name in CSV_FIELDS:
+                setattr(current, field_name, getattr(favorite, field_name))
+        elif favorite.favorite_key.startswith(("KC", "LA", "OUT", "BAND", "UL")):
             catalog.favorites.append(copy.deepcopy(favorite))
 
 

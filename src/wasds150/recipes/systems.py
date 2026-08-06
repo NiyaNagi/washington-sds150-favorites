@@ -40,6 +40,7 @@ from __future__ import annotations
 
 import copy
 import re
+from dataclasses import replace
 from typing import Dict, List, Optional
 
 from wasds150.models.catalog import Catalog, Channel, Department, FavoritesList, System
@@ -107,7 +108,7 @@ def _rollup_component_keys(text: str) -> tuple:
         return ()
     return tuple(
         key.upper()
-        for key in re.findall(r"\b(?:FL|KC|LA|OUT)\d+[A-Za-z]?\b", declaration.group(1), re.IGNORECASE)
+        for key in re.findall(r"\b(?:FL|KC|LA|OUT|BAND|UL)\d+[A-Za-z]?\b", declaration.group(1), re.IGNORECASE)
     )
 
 
@@ -148,6 +149,9 @@ def populate_rollups(catalog: Catalog) -> Dict[str, tuple]:
             )
             for component in components
         )
+        if favorite.favorite_key.upper().startswith("UL"):
+            from wasds150.catalog.upper_lena_lake import apply_location
+            apply_location(favorite)
         populated[favorite.slug] = component_keys
     return populated
 
@@ -187,10 +191,21 @@ def static_systems_for(fl: FavoritesList) -> List[System]:
     # the prose already names a literal frequency, prefer that richer,
     # row-specific entry instead of adding a second generic seed channel
     # at the same frequency (FL65/FRS Ch7 is the canonical overlap).
+    seeds = seed_channels_for(fl.favorite_key, fl.departments_or_channels)
+    seed_by_frequency = {_round_freq(channel.freq_mhz): channel for channel in seeds}
+    parsed = [
+        replace(
+            channel,
+            tone=channel.tone or seed_by_frequency[_round_freq(channel.freq_mhz)].tone,
+            note="; ".join(filter(None, (channel.note, seed_by_frequency[_round_freq(channel.freq_mhz)].note))),
+        )
+        if _round_freq(channel.freq_mhz) in seed_by_frequency else channel
+        for channel in parsed
+    ]
     parsed_frequencies = {_round_freq(channel.freq_mhz) for channel in parsed}
     parsed.extend(
         channel
-        for channel in seed_channels_for(fl.favorite_key, fl.departments_or_channels)
+        for channel in seeds
         if _round_freq(channel.freq_mhz) not in parsed_frequencies
     )
     if not parsed:

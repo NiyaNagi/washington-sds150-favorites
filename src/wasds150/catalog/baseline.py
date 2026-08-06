@@ -11,6 +11,11 @@ seeds a new profile against, so the tool works even when only the package
 The CSV itself remains the human-editable source of truth; nothing in this
 module writes to it.
 
+The JSON remains the 78-row CSV-backed core. Public-code extensions for King
+County/Ames Lake, band listening packs, and Upper Lena Lake are appended by
+:func:`load_baseline`; keeping them out of the generated snapshot avoids
+duplicating two sources of truth.
+
 **Baking in Tier C systems**: :func:`generate_baseline_from_csv` also
 applies :func:`wasds150.recipes.systems.static_systems_for` to every row
 before saving, so the *packaged* baseline already carries real, populated
@@ -31,6 +36,8 @@ from pathlib import Path
 
 from wasds150.catalog import loader
 from wasds150.catalog.ames_lake import favorites as ames_lake_favorites
+from wasds150.catalog.band_profiles import favorites as band_favorites
+from wasds150.catalog.upper_lena_lake import favorites as upper_lena_favorites
 from wasds150.catalog.validate import partition_validation_issues, validate_catalog
 from wasds150.models.catalog import Catalog
 from wasds150.recipes.systems import dedupe_systems, static_systems_for
@@ -45,7 +52,14 @@ def load_baseline() -> Catalog:
     with importlib.resources.as_file(resource) as path:
         catalog = loader.load_json(Path(path))
     existing = {favorite.slug for favorite in catalog.favorites}
-    catalog.favorites.extend(favorite for favorite in ames_lake_favorites() if favorite.slug not in existing)
+    extensions = ames_lake_favorites() + band_favorites() + upper_lena_favorites()
+    for favorite in extensions:
+        if favorite.slug in existing:
+            continue
+        additional = static_systems_for(favorite)
+        if additional:
+            favorite.systems = dedupe_systems(favorite.systems + additional)
+        catalog.favorites.append(favorite)
     return catalog
 
 
@@ -65,8 +79,6 @@ def generate_baseline_from_csv(csv_path: Path, output_path: Path) -> Catalog:
     in.
     """
     catalog = loader.load_csv(csv_path)
-    existing = {favorite.slug for favorite in catalog.favorites}
-    catalog.favorites.extend(favorite for favorite in ames_lake_favorites() if favorite.slug not in existing)
     for fl in catalog.favorites:
         additional = static_systems_for(fl)
         if additional:

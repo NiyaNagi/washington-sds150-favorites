@@ -71,7 +71,13 @@ def _populate_static_systems(fl: FavoritesList) -> FavoritesList:
     and return it, for a compact call site in :func:`apply_profile`."""
     additional = static_systems_for(fl)
     if additional:
-        fl.systems = dedupe_systems(fl.systems + additional)
+        refreshed_ids = {system.id for system in additional}
+        fl.systems = dedupe_systems([
+            system for system in fl.systems if system.id not in refreshed_ids
+        ] + additional)
+    if fl.favorite_key.upper().startswith("UL") and fl.systems:
+        from wasds150.catalog.upper_lena_lake import apply_location
+        apply_location(fl)
     return fl
 
 

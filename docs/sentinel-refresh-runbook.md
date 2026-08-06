@@ -11,10 +11,12 @@ The August 2, 2026 Sentinel master database was read successfully on Windows:
 - 14,939 normalized local HPDB facts, with no source alerts.
 - All 17 intended SID-qualified trunked Favorites Lists matched exact
   TrunkId/SysId identities.
-- 118 validated HPE files were generated from 120 catalog entries.
+- 134 validated HPE files were generated from 136 catalog entries.
 - All 39 King County municipal lists, the Ames Lake home profile, the
   Eastside regional profile, and the comprehensive outdoor rollup were
   populated and location-tagged.
+- All twelve band-oriented packs and UL00-UL03 Upper Lena profiles were
+  generated; Upper Lena components carry the official NPS campsite location.
 - FL30 is composed fail-closed from complete deep copies of FL04, FL05,
   FL06, and FL01. It preserves each component's verified hierarchy and GPS
   metadata without inventing a geographic boundary or radio fact. It should
@@ -23,6 +25,7 @@ The August 2, 2026 Sentinel master database was read successfully on Windows:
 - FL45 and FL72 remain the only intentional on-site Discovery lists.
 - Every generated HPE decoded and passed schema and semantic validation.
 - The import-pack manifest, file set, and SHA-256 checksums passed validation.
+- Current import-pack SHA-256: `8B258DD0186582C91F2BE228F4C25126603D6B07D75ACC70CB2F924C1BAD6E4B`.
 - Clear/encrypted split pairs were distinct; every retained encrypted
   department was clearly marked and avoided.
 
@@ -143,7 +146,7 @@ have both been checked.
 ### Reference validation
 
 The generated set was checked against a real Sentinel-created HPD example.
-All 118 generated HPE files passed container, schema, semantic, CRLF, header,
+All 134 generated HPE files passed container, schema, semantic, CRLF, header,
 and signature validation. Every record tag shared with the example matched
 Sentinel's observed field width. Direct-workspace HPD output removes only the
 HPE interchange signature and preserves the validated record hierarchy.

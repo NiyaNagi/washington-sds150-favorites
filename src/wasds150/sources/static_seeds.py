@@ -16,11 +16,9 @@ without notice:
   FL65 (462.5625, 467.5625/467.7125, 462.5500/462.7250) match this table's
   channel 1, 8, 14, 15 and 22 values exactly -- the table below only
   supplies the (also fixed, 12.5 kHz-spaced) values in between.
-* ``FL02`` (NPSPAC interoperability): ICALL/ITAC1-4 are the FCC's own
-  nationwide 800 MHz NPSPAC interoperability calling/tactical channels
-  (0.5 MHz spacing), not specific to Washington. The row's own text
-  already gives the exact endpoints (866.5125 and 868.0125) for
-  "ITAC1-4"; this table supplies the two literal intermediate channels.
+* ``FL02`` (nationwide interoperability): current NIFOG 2.02 VCALL/VTAC,
+    UCALL/UTAC, 7CALL/7TAC and post-rebanding 8CALL/8TAC receive/output
+    channels, plus current WAFOG STATEOPS1-5 assignments.
 
 * ``FL52``-``FL54`` use the fixed U.S. marine VHF channel plan.
 * ``FL66`` uses the fixed FCC 40-channel Class D CB plan, including its
@@ -68,17 +66,30 @@ _FRS_GMRS_CHANNELS: List[ParsedChannel] = [
     )
 ]
 
-#: FCC 800 MHz NPSPAC nationwide interoperability calling/tactical
-#: channels (0.5 MHz spacing starting at ICALL). ``ICALL`` matches the
-#: label the free-text parser already derives from this same row's own
-#: "ICALL 866.0125" text, so the two sources dedupe cleanly (see
-#: :mod:`wasds150.recipes.systems`).
-_NPSPAC_INTEROP_CHANNELS: List[ParsedChannel] = [
-    ParsedChannel(label="ICALL", freq_mhz=866.0125, note="NPSPAC nationwide interoperability calling channel"),
-    ParsedChannel(label="ITAC1", freq_mhz=866.5125, note="NPSPAC nationwide interoperability tactical channel"),
-    ParsedChannel(label="ITAC2", freq_mhz=867.0125, note="NPSPAC nationwide interoperability tactical channel"),
-    ParsedChannel(label="ITAC3", freq_mhz=867.5125, note="NPSPAC nationwide interoperability tactical channel"),
-    ParsedChannel(label="ITAC4", freq_mhz=868.0125, note="NPSPAC nationwide interoperability tactical channel"),
+_NIFOG_INTEROP_CHANNELS: List[ParsedChannel] = [
+    *[
+        ParsedChannel(
+            label, frequency, tone="CTCSS 156.7",
+            note=("FMN NIFOG 2.02 nationwide analog interoperability" if frequency < 500
+                  else "FM NIFOG 2.02 / WAFOG analog interoperability"),
+        )
+        for label, frequency in (
+            ("VCALL10", 155.7525), ("VTAC11", 151.1375), ("VTAC12", 154.4525),
+            ("VTAC13", 158.7375), ("VTAC14", 159.4725),
+            ("UCALL40", 453.2125), ("UTAC41", 453.4625), ("UTAC42", 453.7125),
+            ("UTAC43", 453.8625), ("8CALL90", 851.0125), ("8TAC91", 851.5125),
+            ("8TAC92", 852.0125), ("8TAC93", 852.5125), ("8TAC94", 853.0125),
+            ("STATEOPS1", 852.5375), ("STATEOPS2", 852.5625), ("STATEOPS3", 852.5875),
+            ("STATEOPS4", 852.6125), ("STATEOPS5", 852.6375),
+        )
+    ],
+    *[
+        ParsedChannel(label, frequency, note="P25 NIFOG 2.02 nationwide 700 MHz interoperability")
+        for label, frequency in (
+            ("7CALL50", 769.24375), ("7TAC51", 769.14375), ("7TAC52", 769.64375),
+            ("7TAC53", 770.14375), ("7TAC54", 770.64375),
+        )
+    ],
 ]
 
 _CB_CHANNELS: List[ParsedChannel] = [
@@ -176,7 +187,7 @@ class SeedTable:
 #: auditable table -- see module docstring for why each entry is safe.
 SEED_TABLES_BY_FAVORITE_KEY: Dict[str, SeedTable] = {
     "FL65": SeedTable(required_anchors=("462.5625", "467.5625", "462.5500"), channels=_FRS_GMRS_CHANNELS),
-    "FL02": SeedTable(required_anchors=("866.0125", "866.5125", "868.0125"), channels=_NPSPAC_INTEROP_CHANNELS),
+    "FL02": SeedTable(required_anchors=("155.7525", "769.24375", "851.0125", "852.5375"), channels=_NIFOG_INTEROP_CHANNELS),
     "FL48": SeedTable(required_anchors=("119.1", "133.65", "269.35"), channels=_SEATTLE_CENTER_CHANNELS),
     "FL66": SeedTable(required_anchors=("27.065", "27.185"), channels=_CB_CHANNELS),
 }

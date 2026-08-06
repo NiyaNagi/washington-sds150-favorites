@@ -9,6 +9,22 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Added
 
+- Added twelve band-oriented Favorites Lists for civil air, military air,
+  amateur VHF/UHF, marine, rail, personal/itinerant, public-safety interop,
+  weather/SAR, federal wildland, medical, transportation/utility, and
+  business/event listening.
+- Added UL00-UL03 Upper Lena Lake profiles using the official Olympic National
+  Park campsite coordinate. The compact static profile covers Olympic
+  park/forest, Mason/Jefferson public safety, SAR, wildfire, NOAA Weather,
+  aviation, Hood Canal marine, Mason amateur, national calling and FRS/GMRS;
+  broader profiles add regional P25 and all verified outdoor components.
+- Added a sourced band-scanning guide with SDS150 Custom Search ranges,
+  modulation guidance, scan-cycle strategy, data-carrier avoidance, and
+  recommendations for location/time-dependent discovery scenarios.
+- Updated FL02 from obsolete pre-rebanding ICALL/ITAC/STATEOPS assignments to
+  current NIFOG 2.02 VCALL/VTAC, UCALL/UTAC, 7CALL/7TAC, 8CALL/8TAC and WAFOG
+  1.10 STATEOPS receive/output frequencies.
+
 - Added a self-contained cross-machine Sentinel enrichment handoff and a
   copy-paste reactivation prompt for completing trunked Favorites Lists on
   a Sentinel-equipped Windows machine.

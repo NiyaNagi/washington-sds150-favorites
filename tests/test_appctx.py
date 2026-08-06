@@ -13,7 +13,7 @@ def test_build_context_default_uses_packaged_baseline(wasds_home):
     config = AppConfig.default()
     ctx = build_context(config)
     assert ctx.catalog_source == "packaged-baseline"
-    assert len(ctx.catalog.favorites) == 120
+    assert len(ctx.catalog.favorites) == 136
 
 
 def test_load_profile_creates_new_when_missing(wasds_home, sample_csv_path):
@@ -76,5 +76,24 @@ def test_legacy_statewide_merged_catalog_gets_local_area_extension(wasds_home):
     ctx = build_context(config)
 
     assert ctx.catalog_source == "merged"
-    assert len(ctx.catalog.favorites) == 120
+    assert len(ctx.catalog.favorites) == 136
     assert len([favorite for favorite in ctx.catalog.favorites if favorite.favorite_key.startswith("KC")]) == 39
+
+
+def test_persisted_catalog_refreshes_public_fields_and_preserves_systems(wasds_home):
+    from wasds150.catalog import baseline, loader
+    from wasds150.models.catalog import Department, System
+
+    config = AppConfig.default()
+    persisted = baseline.load_baseline()
+    fl02 = persisted.by_slug("fl02")
+    fl02.favorite_name = "Obsolete ICALL catalog row"
+    marker = System(id="local-marker", label="Locally enriched", departments=[Department(id="d", label="Ops")])
+    fl02.systems = [marker]
+    config.ensure_dirs()
+    loader.save_json(persisted, config.catalog_path)
+
+    ctx = build_context(config)
+    refreshed = ctx.catalog.by_slug("fl02")
+    assert refreshed.favorite_name == "Nationwide Interop + WA STATEOPS"
+    assert [system.id for system in refreshed.systems] == ["local-marker"]

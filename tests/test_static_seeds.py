@@ -26,29 +26,29 @@ def test_frs_gmrs_seed_channel_1_and_22_match_baseline_endpoints():
     assert by_label["GMRS/FRS Ch22"] == 462.7250
 
 
-def test_npspac_seed_applies_when_anchors_present():
-    text = "ICALL 866.0125; ITAC1-4 866.5125-868.0125; STATEOPS1-5 867.5375-867.6375 (Fire/EMS/Law/LocalGov)"
+def test_current_nifog_wafog_seed_applies_when_anchors_present():
+    text = "VCALL10 155.7525;7CALL50 769.24375;8CALL90 851.0125;STATEOPS1 852.5375"
     channels = seed_channels_for("FL02", text)
     labels = {c.label: c.freq_mhz for c in channels}
-    assert labels == {
-        "ICALL": 866.0125,
-        "ITAC1": 866.5125,
-        "ITAC2": 867.0125,
-        "ITAC3": 867.5125,
-        "ITAC4": 868.0125,
-    }
+    assert len(labels) == 24
+    assert labels["VCALL10"] == 155.7525
+    assert labels["UCALL40"] == 453.2125
+    assert labels["7CALL50"] == 769.24375
+    assert labels["8CALL90"] == 851.0125
+    assert labels["8TAC94"] == 853.0125
+    assert labels["STATEOPS5"] == 852.6375
+    assert all(c.tone == "CTCSS 156.7" for c in channels if not c.label.startswith("7"))
 
 
-def test_npspac_seed_never_seeds_state_specific_stateops():
-    text = "ICALL 866.0125; ITAC1-4 866.5125-868.0125; STATEOPS1-5 867.5375-867.6375"
-    channels = seed_channels_for("FL02", text)
-    assert not any("STATEOPS" in c.label for c in channels)
+def test_obsolete_pre_rebanding_npspac_does_not_trigger_current_seed():
+    text = "ICALL 866.0125;ITAC1 866.5125;ITAC4 868.0125"
+    assert seed_channels_for("FL02", text) == []
 
 
 def test_seed_does_not_fire_for_unrelated_row_reusing_the_same_key():
     """The safety-critical case: a favorite_key collision (e.g. a
     different/local/test catalog reusing "FL02") must never pull in the
-    NPSPAC seed unless the row's own text actually contains the anchors."""
+    NIFOG seed unless the row's own text actually contains the anchors."""
     channels = seed_channels_for("FL02", "Bravo Dispatch, [E]-ENCRYPTED")
     assert channels == []
 
@@ -64,12 +64,12 @@ def test_seed_requires_all_anchors_not_just_one():
 
 
 def test_seed_channels_for_returns_fresh_list_each_time():
-    text = "ICALL 866.0125; ITAC1-4 866.5125-868.0125"
+    text = "VCALL10 155.7525;7CALL50 769.24375;8CALL90 851.0125;STATEOPS1 852.5375"
     a = seed_channels_for("FL02", text)
     b = seed_channels_for("FL02", text)
     assert a is not b
     a.append(a[0])
-    assert len(seed_channels_for("FL02", text)) == 5  # unaffected by mutating `a`
+    assert len(seed_channels_for("FL02", text)) == 24  # unaffected by mutating `a`
 
 
 def test_seed_channels_convert_to_conventional_channels_never_talkgroups():
@@ -82,8 +82,8 @@ def test_seed_channels_convert_to_conventional_channels_never_talkgroups():
     from wasds150.recipes.systems import _channel_from_parsed
 
     text_frs = "Ch1-7 shared462.5625-462.7125;Ch8-14 FRS-only467.5625-467.7125;Ch15-22 GMRS/FRS462.5500-462.7250"
-    text_npspac = "ICALL 866.0125; ITAC1-4 866.5125-868.0125"
-    parsed = seed_channels_for("FL65", text_frs) + seed_channels_for("FL02", text_npspac)
+    text_interop = "VCALL10 155.7525;7CALL50 769.24375;8CALL90 851.0125;STATEOPS1 852.5375"
+    parsed = seed_channels_for("FL65", text_frs) + seed_channels_for("FL02", text_interop)
     fl = FavoritesList(
         id="slug", slug="slug", favorite_key="TEST", favorite_name="Test",
         region="", counties="", scenario="", source_type="", system_or_category="",

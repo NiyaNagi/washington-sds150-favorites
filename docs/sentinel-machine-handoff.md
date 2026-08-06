@@ -2,8 +2,9 @@
 
 > **Completed refresh:** This handoff was executed against Sentinel master
 > database date August 2, 2026. The expanded verified result now produces
-> 118 HPE files from 120 entries, including all 39 King County cities,
-> Ames Lake/Eastside profiles, FL30, and OUT01; only FL45/FL72
+> 134 HPE files from 136 entries, including all 39 King County cities,
+> Ames Lake/Eastside, twelve band packs, four Upper Lena profiles, FL30,
+> and OUT01; only FL45/FL72
 > remain intentionally unresolved Discovery lists. See
 > [Sentinel Refresh, Import, and Dashboard Runbook](sentinel-refresh-runbook.md)
 > for the repeatable current workflow, validation record, device import, and
@@ -69,9 +70,9 @@ In the original 78-entry handoff, the other three warnings were:
 - FL72 schools/malls/stadiums remains venue-specific Discovery.
 
 That historical phase produced 75 files, then 76 after FL30. The current
-expanded acceptance target is 118 generated HPE files from 120 entries:
-the statewide/core lists, FL30, all 39 King County cities, Ames Lake and
-Eastside profiles, and OUT01 must be populated, leaving only FL45/FL72 as
+expanded acceptance target is 134 generated HPE files from 136 entries:
+the statewide/core lists, FL30, all 39 King County cities, Ames Lake/Eastside,
+OUT01, twelve band packs, and UL00-UL03 must be populated, leaving only FL45/FL72 as
 true Discovery warnings.
 
 ## Non-negotiable data rules
