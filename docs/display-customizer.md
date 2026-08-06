@@ -105,6 +105,8 @@ theme colors to related fields. Changing any one preserves the other two.
 | Balanced Semantic | Basic | Logical color follows the selected data type |
 | Basic Hierarchy | Basic | Distinct hierarchy and alerts with restrained secondary data |
 | Full Spectrum Granular | Colorful | Colors every visible field by granular functional family |
+| Maximum Spectrum Rows | Colorful | One distinct spectrum color per physical row |
+| Rainbow Data Matrix | Colorful | Cycles all 18 spectrum colors across visible fields |
 | Colorful Row Bands | Colorful | Distinct top, utility, hierarchy, detail, icon, and bottom rows |
 | Top & Bottom Contrast | Rows | Strong top and bottom bands around semantic center rows |
 | Alternating Data Rows | Rows | Alternating detail-row colors for horizontal scanning |
@@ -113,12 +115,20 @@ theme colors to related fields. Changing any one preserves the other two.
 | Hierarchy Focus | Scenario | Emphasized system/department/channel identity |
 | Uniform Minimal | Accessibility | One foreground color except alerts |
 
-Full Spectrum Granular removes neutral white/status coloring from every visible
-field when the selected theme provides colored semantic groups. Related fields
-still match: controls, date/time, signal/decoding, power, hierarchy levels,
-info areas, icons, and the three soft keys each receive consistent functional
-grouping. Row-based choices instead differentiate physical top, middle, icon,
-and bottom areas while retaining theme contrast constraints.
+Each theme now includes a generated 18-color extended spectrum. Every spectrum
+color is an exact Sentinel-supported swatch with at least 4.5:1 contrast against
+that theme's background. Full Spectrum Granular uses all 18 colors while related
+fields still match: controls, date/time, signal/decoding, power, hierarchy
+levels, info areas, icons, and soft keys receive consistent functional roles.
+Near-white and near-black candidates are excluded when enough saturated choices
+exist. Maximum Spectrum Rows preserves row relationships; Rainbow Data Matrix
+prioritizes the strongest possible field-to-field separation.
+
+Generated scenario layouts also deduplicate displayed Huge/Large data within
+each individual screen. A hierarchy field such as Frequency, TGID, Site Name,
+or System ID is therefore not repeated in a secondary data slot; a different
+supported scenario-relevant field is substituted automatically. Repeated fixed
+controls and independent status icons remain intentional.
 
 ## Full customization
 

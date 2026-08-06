@@ -420,8 +420,14 @@
     const screenOverride = item ? displayCustomConfig.screen_item_colors[item.screen_key] : null;
     const globalOverride = item ? displayCustomConfig.global_item_colors[item.item_key] : null;
     const override = Object.assign({}, globalOverride || {}, screenOverride || {});
+    const spectrumSlot = item && selectedDisplayGrouping
+      ? selectedDisplayGrouping.item_color_slots[item.screen_key]
+      : undefined;
+    const groupedText = spectrumSlot !== undefined && displayCustomConfig.spectrum_colors
+      ? displayCustomConfig.spectrum_colors[spectrumSlot % displayCustomConfig.spectrum_colors.length]
+      : palette.colors[category];
     return {
-      text: override.text || palette.colors[category],
+      text: override.text || groupedText,
       back: override.back || palette.colors.background,
     };
   }
@@ -908,6 +914,7 @@
       name: palette.name,
       description: palette.description,
       colors: copyJson(palette.colors),
+      spectrum_colors: copyJson(palette.spectrum_colors),
       layout_template_id: selectedDisplayTemplate ? selectedDisplayTemplate.id : "sentinel-export",
       color_grouping_id: selectedDisplayGrouping ? selectedDisplayGrouping.id : "balanced",
       global_item_colors: {},
@@ -933,7 +940,10 @@
   function updateDisplayGroupingSwatches() {
     if (!displayCustomConfig) return;
     document.querySelectorAll(".grouping-swatch").forEach((swatch) => {
-      swatch.style.backgroundColor = "#" + displayCustomConfig.colors[swatch.dataset.category];
+      const color = swatch.dataset.spectrumSlot !== undefined
+        ? displayCustomConfig.spectrum_colors[Number(swatch.dataset.spectrumSlot)]
+        : displayCustomConfig.colors[swatch.dataset.category];
+      swatch.style.backgroundColor = "#" + color;
     });
   }
 
@@ -1047,16 +1057,24 @@
         style.textContent = grouping.style;
         const swatches = document.createElement("span");
         swatches.className = "grouping-swatches";
+        const spectrumSlots = Array.from(new Set(Object.values(grouping.item_color_slots))).sort((a, b) => a - b);
         const baseCategories = ["status", "system", "department", "channel", "metadata", "alert", "accent"];
-        const usedCategories = Array.from(new Set([
-          ...baseCategories.map((category) => grouping.category_map[category] || category),
-          ...Object.values(grouping.item_categories),
-        ]));
-        usedCategories.forEach((category) => {
+        const samples = spectrumSlots.length
+          ? spectrumSlots.map((slot) => ({ spectrumSlot: slot }))
+          : Array.from(new Set([
+              ...baseCategories.map((category) => grouping.category_map[category] || category),
+              ...Object.values(grouping.item_categories),
+            ])).map((category) => ({ category }));
+        samples.forEach((sample) => {
           const swatch = document.createElement("span");
           swatch.className = "grouping-swatch";
-          swatch.dataset.category = category;
-          swatch.title = category;
+          if (sample.spectrumSlot !== undefined) {
+            swatch.dataset.spectrumSlot = String(sample.spectrumSlot);
+            swatch.title = `Spectrum color ${sample.spectrumSlot + 1}`;
+          } else {
+            swatch.dataset.category = sample.category;
+            swatch.title = sample.category;
+          }
           swatches.appendChild(swatch);
         });
         card.append(title, description, style, swatches);
@@ -1128,6 +1146,13 @@
     if (!config || !config.colors || !colorKeys.every((key) => supported.has((config.colors[key] || "").toUpperCase()))) {
       throw new Error("Palette contains a semantic color not supported by Sentinel");
     }
+    const matchingPalette = displayPaletteData.palettes.find((palette) =>
+      colorKeys.every((key) => palette.colors[key] === (config.colors[key] || "").toUpperCase())
+    );
+    const spectrum = config.spectrum_colors || (matchingPalette || displayPaletteData.palettes[0]).spectrum_colors;
+    if (!Array.isArray(spectrum) || spectrum.length < 18 || spectrum.some((color) => !supported.has((color || "").toUpperCase()))) {
+      throw new Error("Palette spectrum must contain at least 18 Sentinel-supported colors");
+    }
     if (!config.global_item_colors || typeof config.global_item_colors !== "object" ||
         !config.screen_item_colors || typeof config.screen_item_colors !== "object") {
       throw new Error("Palette is missing item override maps");
@@ -1140,6 +1165,7 @@
       });
     });
     displayCustomConfig = copyJson(config);
+    displayCustomConfig.spectrum_colors = spectrum.map((color) => color.toUpperCase());
     colorKeys.forEach((key) => { displayCustomConfig.colors[key] = displayCustomConfig.colors[key].toUpperCase(); });
     [displayCustomConfig.global_item_colors, displayCustomConfig.screen_item_colors].forEach((overrides) => {
       Object.values(overrides).forEach((colors) => {

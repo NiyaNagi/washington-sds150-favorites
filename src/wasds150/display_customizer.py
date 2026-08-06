@@ -44,6 +44,13 @@ ICON_OPTION_CHOICES = (
     "Empty", "Bluetooth", "SCR", "CC", "GPS", "IFX", "Modulation", "P_Ch",
     "PRI", "REC", "REP", "LVL", "WxPRI",
 )
+DATA_DEDUP_FALLBACKS = (
+    "ServiceType", "CTCSS/DCS", "SystemType", "SystemId", "SysSubID", "WACN",
+    "SiteName", "SiteId", "Frequency", "TGID", "UnitId", "UnitIdName",
+    "NumberTag", "Rssi", "Rssi Bar", "Filter", "Noise", "D_ErrorCount", "Lcn",
+    "latitude", "longitude", "BattVoltage", "Battery Current", "Battery Temperature",
+    "USB2_vbus", "Volume&Squelch", "TdmaSlot", "FL_Name",
+)
 
 
 def _simple(department_option: str, channel_option: str) -> List[ItemSpec]:
@@ -215,6 +222,7 @@ class DisplayColorGrouping:
     style: str
     category_map: Dict[str, str]
     item_categories: Dict[str, str]
+    item_color_slots: Optional[Dict[str, int]] = None
 
 
 PALETTES: Tuple[DisplayPalette, ...] = (
@@ -326,6 +334,30 @@ def _build_layout_template(
                 icon_index += 1
             if selected is not None and selected != default:
                 overrides[f"{screen_name}||{index}"] = selected
+    for screen_name, items in SCREEN_SPECS.items():
+        used = set()
+        data_indices = [
+            index for index, (item_name, _) in enumerate(items)
+            if item_name in ("System option", "Department option", "Channel option")
+        ]
+        data_indices.extend(
+            index for index, (item_name, _) in enumerate(items)
+            if item_name.startswith(("Option A", "Option B", "Option C"))
+        )
+        for index in data_indices:
+            item_name, default = items[index]
+            key = f"{screen_name}||{index}"
+            selected = overrides.get(key, default)
+            if selected in (None, "Empty"):
+                continue
+            if selected in used:
+                choices = option_choices(item_name, screen_name, default)
+                selected = next(choice for choice in DATA_DEDUP_FALLBACKS if choice in choices and choice not in used)
+                if selected == default:
+                    overrides.pop(key, None)
+                else:
+                    overrides[key] = selected
+            used.add(selected)
     return DisplayLayoutTemplate(template_id, name, description, scenario, overrides)
 
 
@@ -521,6 +553,109 @@ def _granular_category_overrides() -> Dict[str, str]:
     return overrides
 
 
+def _spectrum_role_slots() -> Dict[str, int]:
+    slots: Dict[str, int] = {}
+    for screen_name, items in SCREEN_SPECS.items():
+        large_slot = 12
+        for index, (name, option) in enumerate(items):
+            slot: Optional[int] = None
+            if name in ("SP0", "SP1", "SP2") or option == "Empty":
+                continue
+            if name == "Func": slot = 0
+            elif name in ("Option_1", "Option_2"): slot = 1
+            elif name in ("Option_3", "Option_4"): slot = 2
+            elif name == "SIG": slot = 3
+            elif name == "BATT": slot = 4
+            elif name in ("Option_5", "Option_6", "Option C-1", "Option C-2"): slot = 5
+            elif name in ("Option_7", "Option_8"): slot = 6
+            elif name in ("key", "Dir"): slot = 7
+            elif name in ("System Name", "System option", "Primary Area-1", "Info Area 1", "Soft1 Key"): slot = 8
+            elif name in ("Department Name", "Department option", "Primary Area-2", "Info Area 2", "Soft2 Key"): slot = 9
+            elif name in ("Channel Name", "Channel option", "Primary Area-3", "Info Area 3", "Soft3 Key"): slot = 10
+            elif name in ("Avoid", "Hold"): slot = 11
+            elif name.startswith(("Option A", "Option B")):
+                slot = large_slot
+                large_slot = 12 + ((large_slot - 11) % 4)
+            elif name in ("Sub Info", "Modulation", "Detail Info"): slot = 16
+            elif name.startswith("Icon"):
+                slot = 17
+            if slot is not None:
+                slots[f"{screen_name}||{index}"] = slot
+    return slots
+
+
+def _spectrum_row_slots() -> Dict[str, int]:
+    slots: Dict[str, int] = {}
+    for screen_name, rows in display_layout_catalog().items():
+        for row_index, row in enumerate(rows):
+            for index in row["indices"]:
+                name, option = SCREEN_SPECS[screen_name][index]
+                if name not in ("SP0", "SP1", "SP2") and option != "Empty":
+                    slots[f"{screen_name}||{index}"] = row_index % 18
+    return slots
+
+
+def _spectrum_matrix_slots() -> Dict[str, int]:
+    slots: Dict[str, int] = {}
+    for screen_name, items in SCREEN_SPECS.items():
+        visible_index = 0
+        for index, (name, option) in enumerate(items):
+            if name in ("SP0", "SP1", "SP2") or option == "Empty":
+                continue
+            slots[f"{screen_name}||{index}"] = visible_index % 18
+            visible_index += 1
+    return slots
+
+
+def palette_spectrum(palette: DisplayPalette, count: int = 18) -> List[str]:
+    background = palette.background
+    contrast_candidates = [
+        value for _, value in SUPPORTED_DISPLAY_COLORS
+        if value != background and contrast_ratio(value, background) >= 4.5
+    ]
+
+    def hls(value: str) -> Tuple[float, float, float]:
+        red, green, blue = (int(value[index:index + 2], 16) / 255 for index in (0, 2, 4))
+        return colorsys.rgb_to_hls(red, green, blue)
+
+    dark_background = _relative_luminance(background) < 0.35
+    colorful = [
+        value for value in contrast_candidates
+        if hls(value)[2] >= 0.22
+        and ((hls(value)[1] <= 0.9) if dark_background else (hls(value)[1] >= 0.1))
+    ]
+    candidates = colorful if len(colorful) >= count else contrast_candidates
+    selected = []
+    for category, value in palette.colors().items():
+        if category not in ("background", "status") and value in candidates and value not in selected:
+            selected.append(value)
+
+    def coordinates(value: str) -> Tuple[float, float, float]:
+        red, green, blue = (int(value[index:index + 2], 16) / 255 for index in (0, 2, 4))
+        hue, lightness, saturation = colorsys.rgb_to_hls(red, green, blue)
+        return hue, lightness, saturation
+
+    points = {value: coordinates(value) for value in candidates}
+
+    def distance(first: str, second: str) -> float:
+        hue_a, light_a, saturation_a = points[first]
+        hue_b, light_b, saturation_b = points[second]
+        hue = min(abs(hue_a - hue_b), 1 - abs(hue_a - hue_b)) * 2
+        return (hue ** 2 + ((light_a - light_b) * 1.5) ** 2 + ((saturation_a - saturation_b) * 0.55) ** 2) ** 0.5
+
+    while len(selected) < count:
+        remaining = [value for value in candidates if value not in selected]
+        selected.append(max(
+            remaining,
+            key=lambda value: (
+                min(distance(value, existing) for existing in selected),
+                points[value][2],
+                contrast_ratio(value, background),
+            ),
+        ))
+    return selected[:count]
+
+
 COLOR_GROUPINGS: Tuple[DisplayColorGrouping, ...] = (
     DisplayColorGrouping(
         "balanced", "Balanced Semantic", "Uses the logical color of each selected data type.",
@@ -532,7 +667,15 @@ COLOR_GROUPINGS: Tuple[DisplayColorGrouping, ...] = (
     ),
     DisplayColorGrouping(
         "full-spectrum", "Full Spectrum Granular", "Colors hierarchy, controls, time, signal, power, info areas, icons, and soft keys in granular related groups.",
-        "Colorful", {}, _granular_category_overrides(),
+        "Colorful", {}, _granular_category_overrides(), _spectrum_role_slots(),
+    ),
+    DisplayColorGrouping(
+        "maximum-spectrum-rows", "Maximum Spectrum Rows", "Uses a distinct high-contrast theme color for each physical row while preserving row relationships.",
+        "Colorful", {}, {}, _spectrum_row_slots(),
+    ),
+    DisplayColorGrouping(
+        "rainbow-matrix", "Rainbow Data Matrix", "Cycles the full 18-color theme spectrum across visible fields for maximum visual separation.",
+        "Colorful", {}, {}, _spectrum_matrix_slots(),
     ),
     DisplayColorGrouping(
         "row-bands", "Colorful Row Bands", "Assigns distinct theme colors to top, utility, hierarchy, detail, icon, and bottom rows.",
@@ -596,6 +739,7 @@ def color_grouping_catalog() -> List[dict]:
             "style": grouping.style,
             "category_map": dict(grouping.category_map),
             "item_categories": dict(grouping.item_categories),
+            "item_color_slots": dict(grouping.item_color_slots or {}),
         }
         for grouping in COLOR_GROUPINGS
     ]
@@ -619,6 +763,7 @@ def generate_display_xml(
     palette: DisplayPalette,
     *,
     color_grouping_id: str = "balanced",
+    spectrum_colors: Optional[List[str]] = None,
     global_item_colors: Optional[Dict[str, dict]] = None,
     screen_item_colors: Optional[Dict[str, dict]] = None,
     global_item_options: Optional[Dict[str, str]] = None,
@@ -629,6 +774,9 @@ def generate_display_xml(
     grouping = color_grouping_by_id(color_grouping_id)
     if grouping is None:
         raise ValueError(f"unknown display color grouping: {color_grouping_id}")
+    spectrum = [str(color).removeprefix("#").upper() for color in (spectrum_colors or palette_spectrum(palette))]
+    if len(spectrum) < 18 or any(color not in SUPPORTED_DISPLAY_COLOR_VALUES for color in spectrum):
+        raise ValueError("display spectrum must contain at least 18 Sentinel-supported colors")
     global_item_colors = global_item_colors or {}
     screen_item_colors = screen_item_colors or {}
     global_item_options = global_item_options or {}
@@ -647,9 +795,11 @@ def generate_display_xml(
             if screen_option in choices:
                 selected_option = screen_option
             category = grouped_category(grouping, screen_name, index, name, selected_option)
+            spectrum_slot = (grouping.item_color_slots or {}).get(f"{screen_name}||{index}")
+            grouped_text = spectrum[spectrum_slot % len(spectrum)] if spectrum_slot is not None else colors[category]
             attributes = {
                 "Name": name,
-                "Text": str(override.get("text") or colors[category]).upper(),
+                "Text": str(override.get("text") or grouped_text).upper(),
                 "Back": str(override.get("back") or palette.background).upper(),
             }
             if selected_option is not None:
@@ -740,6 +890,15 @@ def generate_custom_display_xml(data: dict) -> Tuple[bytes, List[str]]:
     color_grouping_id = str(data.get("color_grouping_id") or "balanced")
     if color_grouping_by_id(color_grouping_id) is None:
         raise ValueError(f"unknown display color grouping: {color_grouping_id}")
+    raw_spectrum = data.get("spectrum_colors")
+    if raw_spectrum is None:
+        spectrum_colors = palette_spectrum(palette)
+    elif not isinstance(raw_spectrum, list):
+        raise ValueError("display spectrum must be a list")
+    else:
+        spectrum_colors = [str(color).removeprefix("#").upper() for color in raw_spectrum]
+    if len(spectrum_colors) < 18 or any(color not in SUPPORTED_DISPLAY_COLOR_VALUES for color in spectrum_colors):
+        raise ValueError("display spectrum must contain at least 18 Sentinel-supported colors")
     global_overrides = dict(data.get("global_item_colors") or {})
     screen_overrides = dict(data.get("screen_item_colors") or {})
     global_options = dict(data.get("global_item_options") or {})
@@ -773,6 +932,7 @@ def generate_custom_display_xml(data: dict) -> Tuple[bytes, List[str]]:
     xml = generate_display_xml(
         palette,
         color_grouping_id=color_grouping_id,
+        spectrum_colors=spectrum_colors,
         global_item_colors=global_overrides,
         screen_item_colors=screen_overrides,
         global_item_options=global_options,
@@ -812,6 +972,7 @@ def palette_summary(palette: DisplayPalette) -> dict:
         "name": palette.name,
         "description": palette.description,
         "colors": palette.colors(),
+        "spectrum_colors": palette_spectrum(palette),
         "contrast_ratios": ratios,
         "minimum_contrast": min(ratios.values()),
     }

@@ -108,10 +108,12 @@ matching items, per-item/per-view text and background colors, whole-view
 coloring, saved browser palettes, and JSON import/export. Preview fields are
 clickable. Ten palette-independent scenario layouts cover Sentinel Export,
 dispatch, technical, mobile/GPS, unit identification, SDS150 telemetry,
-discovery, trunk analysis, aviation/marine, and recording/alerts. Ten separate
+discovery, trunk analysis, aviation/marine, and recording/alerts. Twelve separate
 color groupings range from basic and accessibility-focused to scenario-based,
-row-banded, and fully granular colorful displays. Layout, theme, and grouping
-can each change without replacing the other two.
+row-banded, and fully granular colorful displays. Maximum-spectrum modes use
+18 distinct high-contrast Sentinel swatches per theme. Layout, theme, and
+grouping can each change without replacing the other two, and templates avoid
+repeating the same Huge/Large data element within a screen.
 Search Sentinel's exact 147 supported swatches grouped by hue and
 brightness, reuse recent supported colors, and choose Sentinel-compatible
 displayed elements with synchronized or per-view behavior.

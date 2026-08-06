@@ -85,6 +85,13 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Preserved layout and grouping through theme changes, preserved theme and
   layout through grouping changes, and included grouping selection in saved
   palettes, JSON portability, previews, validated XML, and reset behavior.
+- Expanded colorful choices with Maximum Spectrum Rows and Rainbow Data Matrix.
+  Full Spectrum Granular now uses 18 distinct, saturated, Sentinel-supported
+  colors instead of reusing seven semantic colors; every generated spectrum
+  maintains at least 4.5:1 contrast against its theme background.
+- Added automatic per-screen deduplication for Huge/Large template data. When a
+  hierarchy field already shows Frequency, TGID, Site Name, System ID, or
+  another value, secondary slots receive a different supported data point.
 - Added Sentinel-compatible displayed-item selection for editable option and
   icon fields. Selection choices are constrained by field type, can synchronize
   across matching fields in all modes, update previews immediately, and are

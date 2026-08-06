@@ -14,10 +14,12 @@ from wasds150.display_customizer import (
     generate_custom_display_xml,
     generate_display_xml,
     color_grouping_catalog,
+    contrast_ratio,
     grouped_category,
     layout_template_catalog,
     option_choices,
     palette_summary,
+    palette_spectrum,
     supported_color_catalog,
     validate_display_xml,
     validate_palette,
@@ -255,6 +257,19 @@ def test_layout_templates_fill_every_editable_slot_with_supported_options():
                 assert selected != "Empty"
 
 
+def test_layout_templates_do_not_repeat_huge_or_large_data_within_a_screen():
+    for template in LAYOUT_TEMPLATES:
+        for screen_name, items in SCREEN_SPECS.items():
+            selected_data = []
+            for index, (name, default) in enumerate(items):
+                if name not in ("System option", "Department option", "Channel option") and not name.startswith(("Option A", "Option B", "Option C")):
+                    continue
+                selected = template.screen_item_options.get(f"{screen_name}||{index}", default)
+                if selected not in (None, "Empty"):
+                    selected_data.append(selected)
+            assert len(selected_data) == len(set(selected_data)), (template.id, screen_name, selected_data)
+
+
 def test_authoritative_sentinel_option_tables_cover_all_exported_defaults():
     assert len(HUGE_OPTION_CHOICES) == 16
     assert len(LARGE_OPTION_CHOICES) == 33  # Sentinel has 34 rows; Fahrenheit/Celsius share one XML token.
@@ -283,7 +298,7 @@ def test_layout_templates_are_palette_independent_and_recolor_selected_data_logi
     dark_option_a = dark_root.find("./Screen[@Name='SimpleConventional']/Item[@Name='Option A']")
     dark_option_b = dark_root.find("./Screen[@Name='SimpleConventional']/Item[@Name='Option B']")
     light_option_a = light_root.find("./Screen[@Name='SimpleConventional']/Item[@Name='Option A']")
-    assert dark_option_a.attrib["Option"] == light_option_a.attrib["Option"] == "Frequency"
+    assert dark_option_a.attrib["Option"] == light_option_a.attrib["Option"] == "ServiceType"
     assert dark_option_a.attrib["Text"] == PALETTES[0].channel
     assert light_option_a.attrib["Text"] == PALETTES[1].channel
     assert dark_option_b.attrib["Option"] == "D_ErrorCount"
@@ -323,7 +338,7 @@ def test_custom_display_rejects_unknown_layout_template():
 
 
 def test_color_groupings_offer_basic_colorful_rows_scenarios_and_accessibility():
-    assert len(COLOR_GROUPINGS) >= 10
+    assert len(COLOR_GROUPINGS) >= 12
     assert len(color_grouping_catalog()) == len(COLOR_GROUPINGS)
     assert {grouping.style for grouping in COLOR_GROUPINGS} >= {
         "Basic", "Colorful", "Rows", "Scenario", "Accessibility",
@@ -365,6 +380,25 @@ def test_every_grouping_generates_valid_xml_with_every_palette():
     for grouping in COLOR_GROUPINGS:
         for palette in PALETTES:
             assert validate_display_xml(generate_display_xml(palette, color_grouping_id=grouping.id)) == []
+
+
+def test_palette_spectra_are_distinct_supported_and_high_contrast():
+    for palette in PALETTES:
+        spectrum = palette_spectrum(palette)
+        assert len(spectrum) == len(set(spectrum)) == 18
+        assert all(color in SUPPORTED_DISPLAY_COLOR_VALUES for color in spectrum)
+        assert all(contrast_ratio(color, palette.background) >= 4.5 for color in spectrum)
+
+
+def test_full_spectrum_granular_uses_all_eighteen_colors_in_xml():
+    root = ET.fromstring(generate_display_xml(PALETTES[0], color_grouping_id="full-spectrum"))
+    colors = {
+        item.attrib["Text"]
+        for screen in root.findall("Screen")
+        for item in screen.findall("Item")
+        if item.attrib.get("Option") != "Empty" and item.attrib["Name"] not in ("SP0", "SP1", "SP2")
+    }
+    assert len(colors) >= 18
 
 
 def test_custom_display_rejects_unknown_color_grouping():
