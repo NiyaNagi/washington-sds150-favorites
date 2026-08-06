@@ -242,6 +242,25 @@ Sentinel's 147-color table, and minimum palette contrast. Unsupported RGB
 values are rejected from API payloads, imported JSON, and saved browser data
 rather than being written into XML that Sentinel may silently ignore.
 
+Sentinel's importer matches color tokens case-sensitively against its lowercase
+internal HPDB table. Exports therefore use lowercase hexadecimal values and the
+same `Name`, optional `Option`, `Text`, `Back` attribute order as Sentinel's own
+files. This is required: uppercase values are valid XML but Sentinel silently
+keeps the previous color. A Windows integration test imports a generated
+technical/stable-rainbow file through the installed x86 Sentinel parser,
+re-exports it, and compares every importable option and color.
+
+Sentinel reverse-renders `Func` and the three soft-key fields: XML `Text`
+controls their visible background and XML `Back` controls visible text. The
+preview and editor now expose visual Text/Background behavior and translate it
+to the required XML direction automatically.
+
+Sentinel's XML parser addresses fields by `Name`, so only the first of the three
+identically named `Avoid` items on Simple and Detail screens accepts an imported
+color. Department/channel Avoid fields retain their existing Sentinel colors.
+Those eight non-importable fields have dashed borders and warnings in the web
+editor; all other options and colors roundtrip exactly.
+
 ## Sources
 
 - Uniden, *SDS100 Owner's Manual*, pp. 40-44, “Customizing the Display” and

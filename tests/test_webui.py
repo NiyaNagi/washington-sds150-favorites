@@ -61,7 +61,8 @@ def test_static_js_and_css_served(live_server):
     assert status == 200
     assert headers["Content-Type"].startswith("application/javascript")
     assert b'label === "Fun"' not in body
-    assert b"reverse ?" not in body
+    assert b"function visualDisplayColors" in body
+    assert b"item && item.reverse" in body
     assert b'element.style.color = "#" + colors.text' in body
     assert b'element.style.backgroundColor = "#" + colors.back' in body
 
@@ -302,8 +303,8 @@ def test_display_palette_endpoints(live_server):
         base_url, "/api/v1/display/custom", token=token, method="POST", body=custom,
     )
     assert status == 200
-    assert b'Text="EFF7FF" Back="000000"' in body
-    assert b'Text="F7EBD6" Back="000084"' in body
+    assert b'Text="eff7ff" Back="000000"' in body
+    assert b'Text="f7ebd6" Back="000084"' in body
     import xml.etree.ElementTree as ET
     custom_root = ET.fromstring(body)
     custom_option = custom_root.find("./Screen[@Name='SimpleTrunk']/Item[@Name='Option_3']")

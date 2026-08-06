@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ET
+import re
 from pathlib import Path
 
 from wasds150.display_customizer import (
@@ -10,6 +11,7 @@ from wasds150.display_customizer import (
     SMALL_OPTION_CHOICES,
     ICON_OPTION_CHOICES,
     SCREEN_SPECS,
+    display_item_catalog,
     display_layout_catalog,
     generate_custom_display_xml,
     generate_display_xml,
@@ -77,6 +79,30 @@ def test_generated_display_xml_matches_real_sentinel_export_layout():
         assert _signature(generated) == expected
 
 
+def test_generated_xml_matches_sentinel_serialization_contract():
+    data = generate_display_xml(PALETTES[0])
+    text = data.decode("utf-8")
+    colors = re.findall(r'(?:Text|Back)="([0-9a-f]{6})"', text)
+    assert len(colors) == sum(len(items) for items in SCREEN_SPECS.values()) * 2
+    assert not re.search(r'(?:Text|Back)="[0-9A-F]*[A-F][0-9A-F]*"', text)
+    assert '<Item Name="Option_1" Option="ATT" Text=' in text
+    assert "Volume&amp;Squelch" in text
+    assert "Volume&Squelch" not in text
+
+
+def test_catalog_models_sentinel_reverse_fields_and_duplicate_name_limitations():
+    catalog = display_item_catalog()
+    for items in catalog.values():
+        reverse_names = {item["name"] for item in items if item["reverse"]}
+        assert reverse_names == {"Func", "Soft1 Key", "Soft2 Key", "Soft3 Key"}
+    for screen_name in ("SimpleConventional", "SimpleTrunk", "DetailConventional", "DetailTrunk"):
+        avoids = [item for item in catalog[screen_name] if item["name"] == "Avoid"]
+        assert [item["xml_import_color_supported"] for item in avoids] == [True, False, False]
+    for screen_name in ("Search", "Weather", "Tone out"):
+        avoids = [item for item in catalog[screen_name] if item["name"] == "Avoid"]
+        assert [item["xml_import_color_supported"] for item in avoids] == [True]
+
+
 def test_visual_layouts_cover_every_xml_item_exactly_once():
     layouts = display_layout_catalog()
     assert set(layouts) == set(SCREEN_SPECS)
@@ -93,8 +119,8 @@ def test_func_uses_standard_text_and_background_mapping_on_every_screen():
     for screen in root.findall("Screen"):
         func = screen.find("./Item[@Name='Func']")
         assert func is not None
-        assert func.attrib["Text"] == palette.status
-        assert func.attrib["Back"] == palette.background
+        assert func.attrib["Text"] == palette.status.lower()
+        assert func.attrib["Back"] == palette.background.lower()
 
 
 def test_palette_colors_are_consistent_by_semantic_group_across_screens():
@@ -117,13 +143,13 @@ def test_palette_colors_are_consistent_by_semantic_group_across_screens():
         for item in screen.findall("Item")
         if item.attrib.get("Name") == "Channel Name"
     }
-    assert system_colors == {PALETTES[0].system}
-    assert department_colors == {PALETTES[0].department}
-    assert channel_colors == {PALETTES[0].channel}
+    assert system_colors == {PALETTES[0].system.lower()}
+    assert department_colors == {PALETTES[0].department.lower()}
+    assert channel_colors == {PALETTES[0].channel.lower()}
     for screen in root.findall("Screen"):
         for item in screen.findall("Item"):
             if item.attrib.get("Name") in ("Sub Info", "Modulation", "Detail Info"):
-                assert item.attrib["Text"] == PALETTES[0].channel
+                assert item.attrib["Text"] == PALETTES[0].channel.lower()
 
 
 def test_custom_item_colors_sync_globally_and_allow_per_view_override():
@@ -145,9 +171,9 @@ def test_custom_item_colors_sync_globally_and_allow_per_view_override():
     detail_trunk_option = root.find("./Screen[@Name='DetailTrunk']/Item[@Name='Option_3']")
     weather_option = root.find("./Screen[@Name='Weather']/Item[@Name='Option_3']")
 
-    assert simple_conventional.attrib["Text"] == "EFF7FF"
-    assert detail_trunk.attrib["Text"] == "EFF7FF"
-    assert simple_trunk.attrib["Text"] == "F7EBD6"
+    assert simple_conventional.attrib["Text"] == "eff7ff"
+    assert detail_trunk.attrib["Text"] == "eff7ff"
+    assert simple_trunk.attrib["Text"] == "f7ebd6"
     assert simple_trunk.attrib["Back"] == "000000"
     assert simple_conventional_option.attrib["Option"] == "Time"
     assert detail_trunk_option.attrib["Option"] == "Time"
@@ -312,10 +338,10 @@ def test_layout_templates_are_palette_independent_and_recolor_selected_data_logi
     dark_option_b = dark_root.find("./Screen[@Name='SimpleConventional']/Item[@Name='Option B']")
     light_option_a = light_root.find("./Screen[@Name='SimpleConventional']/Item[@Name='Option A']")
     assert dark_option_a.attrib["Option"] == light_option_a.attrib["Option"] == "ServiceType"
-    assert dark_option_a.attrib["Text"] == PALETTES[0].channel
-    assert light_option_a.attrib["Text"] == PALETTES[1].channel
+    assert dark_option_a.attrib["Text"] == PALETTES[0].channel.lower()
+    assert light_option_a.attrib["Text"] == PALETTES[1].channel.lower()
     assert dark_option_b.attrib["Option"] == "D_ErrorCount"
-    assert dark_option_b.attrib["Text"] == PALETTES[0].metadata
+    assert dark_option_b.attrib["Text"] == PALETTES[0].metadata.lower()
 
 
 def test_synchronized_and_per_screen_choices_override_template_defaults():
@@ -384,8 +410,8 @@ def test_color_grouping_changes_colors_without_changing_layout_or_theme_values()
     assert [(item.attrib["Name"], item.attrib.get("Option")) for item in grouped_items] == [
         (item.attrib["Name"], item.attrib.get("Option")) for item in balanced_items
     ]
-    assert grouped_items[0].attrib["Text"] == PALETTES[0].accent
-    assert grouped_items[-1].attrib["Text"] == PALETTES[0].alert
+    assert grouped_items[0].attrib["Text"] == PALETTES[0].accent.lower()
+    assert grouped_items[-1].attrib["Text"] == PALETTES[0].alert.lower()
     assert grouped_items[0].attrib["Text"] != balanced_items[0].attrib["Text"]
 
 

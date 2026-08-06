@@ -206,6 +206,8 @@ h2 { margin-top: 0; }
   outline: 2px solid var(--accent);
   outline-offset: -2px;
 }
+.scanner-field.import-limited { border-style: dashed; }
+#display-item-editor tr.import-limited td { border-bottom-style: dashed; }
 .scanner-primary {
   min-height: 2.5rem;
   display: flex;

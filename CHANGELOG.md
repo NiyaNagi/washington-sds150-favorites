@@ -99,6 +99,17 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   Meaning-based color slots keep Frequency, TGID, system/site identity, signal,
   power, controls, alerts, and other matching items consistent across every
   screen and layout while different meanings receive different colors.
+- Fixed Sentinel silently retaining old colors because generated HPDB color
+  tokens were uppercase. Display XML now uses Sentinel's required lowercase
+  values and canonical `Name`/`Option`/`Text`/`Back` attribute order.
+- Added a real x86 Sentinel parser roundtrip integration test that verifies all
+  seven screens, options, and importable colors survive import/re-export.
+- Restored authoritative reverse rendering for Func and Soft1/2/3 while making
+  editor Text/Background controls visual: values are translated to XML fields
+  automatically rather than appearing swapped after import.
+- Identified Sentinel's duplicate-name parser limitation: only the first Avoid
+  on Simple/Detail screens imports color. The eight affected department/channel
+  Avoid fields are now marked with dashed borders and explanatory warnings.
 - Added Sentinel-compatible displayed-item selection for editable option and
   icon fields. Selection choices are constrained by field type, can synchronize
   across matching fields in all modes, update previews immediately, and are

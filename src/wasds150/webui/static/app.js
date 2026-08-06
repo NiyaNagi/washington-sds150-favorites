@@ -436,6 +436,10 @@
     };
   }
 
+  function visualDisplayColors(item, colors) {
+    return item && item.reverse ? { text: colors.back, back: colors.text } : colors;
+  }
+
   function displayItemSample(item) {
     const option = effectiveDisplayOption(item);
     if (option === "Empty") return "";
@@ -462,15 +466,22 @@
     element.textContent = displayItemSample(item);
     element.dataset.itemIndex = String(item.index);
     element.dataset.itemName = item.name;
-    const colors = resolvedDisplayColors(screenName, item, effectiveDisplayCategory(item));
+    const xmlColors = resolvedDisplayColors(screenName, item, effectiveDisplayCategory(item));
+    const colors = visualDisplayColors(item, xmlColors);
     element.dataset.textColor = colors.text;
     element.dataset.backColor = colors.back;
+    element.dataset.xmlTextColor = xmlColors.text;
+    element.dataset.xmlBackColor = xmlColors.back;
     element.style.color = "#" + colors.text;
     element.style.backgroundColor = "#" + colors.back;
     element.classList.add("editable");
     if (!element.textContent) element.classList.add("scanner-spacer");
     element.tabIndex = 0;
     element.title = `Customize ${screenName}: ${item.name}${selectedOption ? ` (${optionDisplayName(selectedOption)})` : ""}`;
+    if (!item.xml_import_color_supported) {
+      element.classList.add("import-limited");
+      element.title += ` — ${item.xml_import_note}`;
+    }
     element.addEventListener("click", () => openDisplayItemDialog(screenName, item));
     element.addEventListener("keydown", (event) => {
       if (event.key === "Enter" || event.key === " ") {
@@ -628,10 +639,12 @@
     displayDialogOpener = document.activeElement;
     activeDisplayItem = { screenName, item };
     const category = effectiveDisplayCategory(item);
-    const colors = resolvedDisplayColors(screenName, item, category);
+    const colors = visualDisplayColors(item, resolvedDisplayColors(screenName, item, category));
     document.getElementById("display-item-dialog-title").textContent = item.name;
     document.getElementById("display-item-dialog-context").textContent =
-      `${screenName.replace(/([a-z])([A-Z])/g, "$1 $2")} · ${category} group`;
+      `${screenName.replace(/([a-z])([A-Z])/g, "$1 $2")} · ${category} group`
+      + (item.reverse ? " · Sentinel reverse-rendered field" : "")
+      + (!item.xml_import_color_supported ? ` · ${item.xml_import_note}` : "");
     document.getElementById("display-dialog-text").value = colors.text;
     document.getElementById("display-dialog-back").value = colors.back;
     document.getElementById("display-swatch-target").value = preferredTarget || "text";
@@ -674,11 +687,12 @@
     const sync = document.getElementById("display-dialog-sync").checked;
     const text = document.getElementById("display-dialog-text").value;
     const back = document.getElementById("display-dialog-back").value;
+    const xmlColors = item.reverse ? { text: back, back: text } : { text, back };
     const option = !document.getElementById("display-item-option-label").classList.contains("hidden")
       ? document.getElementById("display-item-option").value
       : null;
     if (sync) {
-      displayCustomConfig.global_item_colors[item.item_key] = { text, back };
+      displayCustomConfig.global_item_colors[item.item_key] = xmlColors;
       if (option !== null) displayCustomConfig.global_item_options[item.item_key] = option;
       Object.values(displayPaletteData.items).flat().forEach((candidate) => {
         if (candidate.item_key === item.item_key) {
@@ -687,7 +701,7 @@
         }
       });
     } else {
-      displayCustomConfig.screen_item_colors[item.screen_key] = { text, back };
+      displayCustomConfig.screen_item_colors[item.screen_key] = xmlColors;
       if (option !== null) displayCustomConfig.screen_item_options[item.screen_key] = option;
     }
     rememberDisplayColors([text, back]);
@@ -858,9 +872,13 @@
     tbody.replaceChildren();
     (displayPaletteData.items[screen] || []).forEach((item) => {
       const category = effectiveDisplayCategory(item);
-      const colors = resolvedDisplayColors(screen, item, category);
+      const colors = visualDisplayColors(item, resolvedDisplayColors(screen, item, category));
       const row = document.createElement("tr");
-      [item.name, optionDisplayName(effectiveDisplayOption(item)) || "—", category].forEach((value) => {
+      if (!item.xml_import_color_supported) {
+        row.classList.add("import-limited");
+        row.title = item.xml_import_note;
+      }
+      [item.name, optionDisplayName(effectiveDisplayOption(item)) || "—", category + (!item.xml_import_color_supported ? " ⚠" : "")].forEach((value) => {
         const cell = document.createElement("td");
         cell.textContent = value;
         row.appendChild(cell);
@@ -1248,16 +1266,17 @@
     const color = document.getElementById(pickerId).value;
     const sync = document.getElementById("display-sync-items").checked;
     (displayPaletteData.items[screen] || []).forEach((item) => {
+      const xmlField = item.reverse ? (field === "text" ? "back" : "text") : field;
       if (sync) {
         displayCustomConfig.global_item_colors[item.item_key] = Object.assign(
-          {}, displayCustomConfig.global_item_colors[item.item_key] || {}, { [field]: color }
+          {}, displayCustomConfig.global_item_colors[item.item_key] || {}, { [xmlField]: color }
         );
         Object.values(displayPaletteData.items).flat().forEach((candidate) => {
           if (candidate.item_key === item.item_key) delete displayCustomConfig.screen_item_colors[candidate.screen_key];
         });
       } else {
         displayCustomConfig.screen_item_colors[item.screen_key] = Object.assign(
-          {}, displayCustomConfig.screen_item_colors[item.screen_key] || {}, { [field]: color }
+          {}, displayCustomConfig.screen_item_colors[item.screen_key] || {}, { [xmlField]: color }
         );
       }
     });

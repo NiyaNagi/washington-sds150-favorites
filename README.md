@@ -119,6 +119,11 @@ Search Sentinel's exact 147 supported swatches grouped by hue and
 brightness, reuse recent supported colors, and choose Sentinel-compatible
 displayed elements with synchronized or per-view behavior.
 
+Display XML uses Sentinel's required lowercase color tokens and is roundtrip
+tested against the installed Sentinel importer. Reverse-rendered Func/soft-key
+colors are translated to visual editor semantics automatically; duplicate-name
+Avoid fields that Sentinel cannot independently import are clearly marked.
+
 The generated `out/sentinel-import-pack.zip` is the bulk download. Its
 `hpe/` directory contains every currently available Favorites List with
 clear, stable names such as `FL01.hpe` and `FL75.hpe`. Sentinel imports HPE

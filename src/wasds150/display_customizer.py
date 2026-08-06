@@ -21,6 +21,7 @@ from wasds150.display_colors import (
 
 ItemSpec = Tuple[str, Optional[str]]
 COLOR_KEYS = ("background", "status", "system", "department", "channel", "metadata", "alert", "accent")
+REVERSED_DISPLAY_ITEMS = frozenset(("Func", "Soft1 Key", "Soft2 Key", "Soft3 Key"))
 
 HUGE_OPTION_CHOICES = (
     "Empty", "CTCSS/DCS", "FL_Name", "Frequency", "NumberTag", "SysSubID",
@@ -884,13 +885,14 @@ def generate_display_xml(
             if spectrum_slot is None:
                 spectrum_slot = (grouping.item_color_slots or {}).get(f"{screen_name}||{index}")
             grouped_text = spectrum[spectrum_slot % len(spectrum)] if spectrum_slot is not None else colors[category]
-            attributes = {
-                "Name": name,
-                "Text": str(override.get("text") or grouped_text).upper(),
-                "Back": str(override.get("back") or palette.background).upper(),
-            }
+            attributes = {"Name": name}
             if selected_option is not None:
                 attributes["Option"] = selected_option
+            # Sentinel matches these HPDB color tokens case-sensitively against
+            # its lowercase internal table. Uppercase values silently retain
+            # the previous color during import.
+            attributes["Text"] = str(override.get("text") or grouped_text).lower()
+            attributes["Back"] = str(override.get("back") or palette.background).lower()
             ET.SubElement(screen, "Item", attributes)
     ET.indent(root, space="    ")
     return ET.tostring(root, encoding="utf-8", xml_declaration=True) + b"\n"
@@ -905,6 +907,7 @@ def display_item_catalog() -> Dict[str, List[dict]]:
                 "option": option,
                 "item_key": item_key(name, option),
                 "category": _category(name, option),
+                "reverse": name in REVERSED_DISPLAY_ITEMS,
                 "screen_key": f"{screen_name}||{index}",
                 "option_choices": list(option_choices(name, screen_name, option)),
                 "option_categories": {
@@ -918,7 +921,15 @@ def display_item_catalog() -> Dict[str, List[dict]]:
     }
     grouped: Dict[str, List[set]] = {}
     for items in catalog.values():
+        seen_names: Dict[str, int] = {}
         for item in items:
+            occurrence = seen_names.get(item["name"], 0)
+            item["xml_import_color_supported"] = occurrence == 0
+            item["xml_import_note"] = (
+                "Sentinel's XML importer only applies color to the first item with this name"
+                if occurrence else None
+            )
+            seen_names[item["name"]] = occurrence + 1
             if item["option_choices"]:
                 grouped.setdefault(item["item_key"], []).append(set(item["option_choices"]))
     synchronized = {
@@ -1102,6 +1113,9 @@ def validate_display_xml(data: bytes) -> List[str]:
         for item in actual.findall("Item"):
             if not all(item.attrib.get(field, "").upper() in SUPPORTED_DISPLAY_COLOR_VALUES for field in ("Text", "Back")):
                 issues.append(f"{screen_name}: unsupported Sentinel item color")
+                break
+            if not all(item.attrib.get(field, "") == item.attrib.get(field, "").lower() for field in ("Text", "Back")):
+                issues.append(f"{screen_name}: color tokens must be lowercase for Sentinel import")
                 break
     return issues
 
