@@ -329,6 +329,7 @@
 
   // -------------------------------------------------------------- display --
   let selectedDisplayPalette = null;
+  let selectedDisplayTemplate = null;
   let displayPaletteData = null;
   let displayCustomConfig = null;
   let activeDisplayItem = null;
@@ -374,6 +375,11 @@
     return globalOption !== undefined ? globalOption : item.option;
   }
 
+  function effectiveDisplayCategory(item) {
+    const option = effectiveDisplayOption(item);
+    return (item.option_categories || {})[option] || item.category;
+  }
+
   function optionDisplayName(option) {
     const labels = {
       Empty: "(Empty)", ATT: "Attenuator", Bluetooth: "Bluetooth", Day: "Date",
@@ -384,7 +390,13 @@
       SystemId: "System/Network ID", SysSubID: "RF Sub System (RFSS) ID",
       SiteId: "Site ID", BattVoltage: "Battery Voltage", UnitId: "Unit ID",
       Rssi: "RSSI", "Rssi Bar": "RSSI Graph", "Volume&Squelch": "Volume and Squelch",
-      P25Status: "Digital Status", Tgid: "TGID",
+      SystemType: "System Type", Frequency: "Frequency", TGID: "TGID", WACN: "WACN",
+      UnitIdName: "Unit ID Name", UnitIdName_1: "Unit ID Name 1–16",
+      UnitIdName_2: "Unit ID Name 17–30", UnitIdName_3: "Unit ID Name 31–46",
+      UnitIdName_4: "Unit ID Name 47–60", NumberTag: "Number Tag", Lcn: "LCN",
+      latitude: "Latitude", longitude: "Longitude", Filter: "Filter", Noise: "Noise",
+      D_ErrorCount: "Digital Error Count", "Battery Current": "Battery Current",
+      "Battery Temperature": "Battery Temperature", USB2_vbus: "USB Vbus Voltage",
     };
     return labels[option] || option || "(Empty)";
   }
@@ -435,7 +447,7 @@
     element.textContent = displayItemSample(item);
     element.dataset.itemIndex = String(item.index);
     element.dataset.itemName = item.name;
-    const colors = resolvedDisplayColors(screenName, item, item.category);
+    const colors = resolvedDisplayColors(screenName, item, effectiveDisplayCategory(item));
     element.dataset.textColor = colors.text;
     element.dataset.backColor = colors.back;
     element.style.color = "#" + colors.text;
@@ -600,10 +612,11 @@
   function openDisplayItemDialog(screenName, item, preferredTarget) {
     displayDialogOpener = document.activeElement;
     activeDisplayItem = { screenName, item };
-    const colors = resolvedDisplayColors(screenName, item, item.category);
+    const category = effectiveDisplayCategory(item);
+    const colors = resolvedDisplayColors(screenName, item, category);
     document.getElementById("display-item-dialog-title").textContent = item.name;
     document.getElementById("display-item-dialog-context").textContent =
-      `${screenName.replace(/([a-z])([A-Z])/g, "$1 $2")} · ${item.category} group`;
+      `${screenName.replace(/([a-z])([A-Z])/g, "$1 $2")} · ${category} group`;
     document.getElementById("display-dialog-text").value = colors.text;
     document.getElementById("display-dialog-back").value = colors.back;
     document.getElementById("display-swatch-target").value = preferredTarget || "text";
@@ -632,6 +645,12 @@
       if (displayTab) displayTab.focus();
     }
     displayDialogOpener = null;
+  }
+
+  function restoreTemplateOption(item) {
+    const selected = selectedDisplayTemplate && selectedDisplayTemplate.screen_item_options[item.screen_key];
+    if (selected !== undefined) displayCustomConfig.screen_item_options[item.screen_key] = selected;
+    else delete displayCustomConfig.screen_item_options[item.screen_key];
   }
 
   function applyDisplayDialog() {
@@ -672,12 +691,12 @@
       Object.values(displayPaletteData.items).flat().forEach((candidate) => {
         if (candidate.item_key === item.item_key) {
           delete displayCustomConfig.screen_item_colors[candidate.screen_key];
-          delete displayCustomConfig.screen_item_options[candidate.screen_key];
+          restoreTemplateOption(candidate);
         }
       });
     } else {
       delete displayCustomConfig.screen_item_colors[item.screen_key];
-      delete displayCustomConfig.screen_item_options[item.screen_key];
+      restoreTemplateOption(item);
     }
     closeDisplayItemDialog();
     renderDisplayItemEditor();
@@ -767,7 +786,7 @@
     let minimum = Infinity;
     let low = 0;
     Object.entries(displayPaletteData.items).forEach(([screen, items]) => items.forEach((item) => {
-      const colors = resolvedDisplayColors(screen, item, item.category);
+      const colors = resolvedDisplayColors(screen, item, effectiveDisplayCategory(item));
       const ratio = jsContrast(colors.text, colors.back);
       minimum = Math.min(minimum, ratio);
       if (ratio < 4.5) low += 1;
@@ -822,9 +841,10 @@
     const tbody = document.querySelector("#display-item-editor tbody");
     tbody.replaceChildren();
     (displayPaletteData.items[screen] || []).forEach((item) => {
-      const colors = resolvedDisplayColors(screen, item, item.category);
+      const category = effectiveDisplayCategory(item);
+      const colors = resolvedDisplayColors(screen, item, category);
       const row = document.createElement("tr");
-      [item.name, optionDisplayName(effectiveDisplayOption(item)) || "—", item.category].forEach((value) => {
+      [item.name, optionDisplayName(effectiveDisplayOption(item)) || "—", category].forEach((value) => {
         const cell = document.createElement("td");
         cell.textContent = value;
         row.appendChild(cell);
@@ -857,12 +877,12 @@
           Object.values(displayPaletteData.items).flat().forEach((candidate) => {
             if (candidate.item_key === item.item_key) {
               delete displayCustomConfig.screen_item_colors[candidate.screen_key];
-              delete displayCustomConfig.screen_item_options[candidate.screen_key];
+              restoreTemplateOption(candidate);
             }
           });
         } else {
           delete displayCustomConfig.screen_item_colors[item.screen_key];
-          delete displayCustomConfig.screen_item_options[item.screen_key];
+          restoreTemplateOption(item);
         }
         renderDisplayPreviews();
         renderDisplayItemEditor();
@@ -875,14 +895,18 @@
 
   function selectDisplayPalette(palette) {
     selectedDisplayPalette = palette;
+    const templateOptions = selectedDisplayTemplate ? copyJson(selectedDisplayTemplate.screen_item_options) : {};
+    const existingGlobalOptions = displayCustomConfig ? copyJson(displayCustomConfig.global_item_options) : {};
+    const existingScreenOptions = displayCustomConfig ? copyJson(displayCustomConfig.screen_item_options) : templateOptions;
     displayCustomConfig = {
       name: palette.name,
       description: palette.description,
       colors: copyJson(palette.colors),
+      layout_template_id: selectedDisplayTemplate ? selectedDisplayTemplate.id : "sentinel-export",
       global_item_colors: {},
       screen_item_colors: {},
-      global_item_options: {},
-      screen_item_options: {},
+      global_item_options: existingGlobalOptions,
+      screen_item_options: existingScreenOptions,
     };
     document.getElementById("display-custom-name").value = palette.name + " Custom";
     populateSupportedColorSelect(document.getElementById("display-view-text"), palette.colors.status);
@@ -898,6 +922,24 @@
     renderDisplayPreviews();
   }
 
+  function selectDisplayLayoutTemplate(template) {
+    selectedDisplayTemplate = template;
+    document.querySelectorAll(".display-layout-card").forEach((card) => {
+      const selected = card.dataset.templateId === template.id;
+      card.classList.toggle("selected", selected);
+      card.setAttribute("aria-checked", String(selected));
+    });
+    if (!displayCustomConfig) return;
+    displayCustomConfig.layout_template_id = template.id;
+    displayCustomConfig.global_item_options = {};
+    displayCustomConfig.screen_item_options = copyJson(template.screen_item_options);
+    displayCustomConfig.global_item_colors = {};
+    displayCustomConfig.screen_item_colors = {};
+    renderDisplayItemEditor();
+    renderDisplayPreviews();
+    setStatus(`Applied ${template.name} layout; color theme unchanged`);
+  }
+
   async function loadDisplayPalettes() {
     if (displayPaletteData && displayCustomConfig) {
       renderSemanticColors();
@@ -907,6 +949,30 @@
     }
     try {
       const data = await apiGet("/api/v1/display/palettes");
+      displayPaletteData = data;
+      const layoutContainer = document.getElementById("display-layout-options");
+      layoutContainer.replaceChildren();
+      data.layout_templates.forEach((template) => {
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = "display-layout-card";
+        card.dataset.templateId = template.id;
+        card.setAttribute("role", "radio");
+        card.setAttribute("aria-checked", "false");
+        const title = document.createElement("strong");
+        title.textContent = template.name;
+        const description = document.createElement("span");
+        description.textContent = template.description;
+        const scenario = document.createElement("em");
+        scenario.textContent = template.scenario;
+        card.append(title, description, scenario);
+        card.addEventListener("click", () => selectDisplayLayoutTemplate(template));
+        layoutContainer.appendChild(card);
+      });
+      selectedDisplayTemplate = selectedDisplayTemplate
+        ? data.layout_templates.find((template) => template.id === selectedDisplayTemplate.id) || data.layout_templates[0]
+        : data.layout_templates[0];
+      selectDisplayLayoutTemplate(selectedDisplayTemplate);
       const container = document.getElementById("display-palette-options");
       container.replaceChildren();
       data.palettes.forEach((palette) => {
@@ -933,7 +999,6 @@
         card.addEventListener("click", () => selectDisplayPalette(palette));
         container.appendChild(card);
       });
-      displayPaletteData = data;
       const screenSelect = document.getElementById("display-screen-select");
       screenSelect.replaceChildren();
       data.screens.forEach((screen) => {
@@ -1016,10 +1081,22 @@
     });
     displayCustomConfig.global_item_options = displayCustomConfig.global_item_options || {};
     displayCustomConfig.screen_item_options = displayCustomConfig.screen_item_options || {};
+    const templateId = displayCustomConfig.layout_template_id || "sentinel-export";
+    selectedDisplayTemplate = displayPaletteData.layout_templates.find((template) => template.id === templateId);
+    if (!selectedDisplayTemplate) throw new Error(`Unknown display layout template: ${templateId}`);
+    displayCustomConfig.layout_template_id = selectedDisplayTemplate.id;
+    displayCustomConfig.screen_item_options = Object.assign(
+      {}, copyJson(selectedDisplayTemplate.screen_item_options), displayCustomConfig.screen_item_options
+    );
     selectedDisplayPalette = null;
     document.querySelectorAll(".display-palette-card").forEach((card) => {
       card.classList.remove("selected");
       card.setAttribute("aria-checked", "false");
+    });
+    document.querySelectorAll(".display-layout-card").forEach((card) => {
+      const selected = card.dataset.templateId === selectedDisplayTemplate.id;
+      card.classList.toggle("selected", selected);
+      card.setAttribute("aria-checked", String(selected));
     });
     document.getElementById("display-custom-name").value = displayCustomConfig.name || "My Custom Palette";
     populateSupportedColorSelect(document.getElementById("display-view-text"), displayCustomConfig.colors.status);
@@ -1039,6 +1116,9 @@
     Object.keys(displayCustomConfig.screen_item_options).forEach((key) => {
       if (key.startsWith(screen)) delete displayCustomConfig.screen_item_options[key];
     });
+    Object.entries(selectedDisplayTemplate.screen_item_options).forEach(([key, value]) => {
+      if (key.startsWith(screen)) displayCustomConfig.screen_item_options[key] = value;
+    });
     renderDisplayItemEditor();
     renderDisplayPreviews();
   });
@@ -1046,7 +1126,7 @@
     displayCustomConfig.global_item_colors = {};
     displayCustomConfig.screen_item_colors = {};
     displayCustomConfig.global_item_options = {};
-    displayCustomConfig.screen_item_options = {};
+    displayCustomConfig.screen_item_options = copyJson(selectedDisplayTemplate.screen_item_options);
     renderDisplayItemEditor();
     renderDisplayPreviews();
   });

@@ -3,10 +3,17 @@ from pathlib import Path
 
 from wasds150.display_customizer import (
     PALETTES,
+    LAYOUT_TEMPLATES,
+    HUGE_OPTION_CHOICES,
+    LARGE_OPTION_CHOICES,
+    SMALL_OPTION_CHOICES,
+    ICON_OPTION_CHOICES,
     SCREEN_SPECS,
     display_layout_catalog,
     generate_custom_display_xml,
     generate_display_xml,
+    layout_template_catalog,
+    option_choices,
     palette_summary,
     supported_color_catalog,
     validate_display_xml,
@@ -140,7 +147,7 @@ def test_custom_item_colors_sync_globally_and_allow_per_view_override():
     assert simple_conventional_option.attrib["Option"] == "Time"
     assert detail_trunk_option.attrib["Option"] == "Time"
     assert simple_trunk_option.attrib["Option"] == "GPS"
-    assert weather_option.attrib["Option"] == "Day"
+    assert weather_option.attrib["Option"] == "Time"
 
 
 def test_custom_display_rejects_unknown_item_override():
@@ -199,13 +206,13 @@ def test_custom_display_rejects_unsupported_option():
         raise AssertionError("unsupported display option was accepted")
 
 
-def test_custom_display_rejects_option_valid_elsewhere_but_not_for_field():
+def test_custom_display_rejects_option_from_wrong_sentinel_field_type():
     config = {
         "name": "Invalid Field Option",
         "colors": PALETTES[0].colors(),
         "global_item_colors": {},
         "screen_item_colors": {},
-        "global_item_options": {"Channel option": "WACN"},
+        "global_item_options": {"Channel option": "Battery Current"},
         "screen_item_options": {},
     }
     try:
@@ -216,18 +223,97 @@ def test_custom_display_rejects_option_valid_elsewhere_but_not_for_field():
         raise AssertionError("field-incompatible display option was accepted")
 
 
-def test_weather_and_tone_out_item_options_are_fixed():
+def test_weather_and_tone_out_blank_slots_accept_their_sentinel_field_type():
     config = {
         "name": "Invalid Weather Option",
         "colors": PALETTES[0].colors(),
         "global_item_colors": {},
         "screen_item_colors": {},
         "global_item_options": {},
-        "screen_item_options": {"Weather||3": "Time"},
+        "screen_item_options": {"Weather||8": "P25Status", "Tone out||24": "Frequency"},
+    }
+    data, _ = generate_custom_display_xml(config)
+    root = ET.fromstring(data)
+    assert root.find("./Screen[@Name='Weather']/Item[@Name='Option_7']").attrib["Option"] == "P25Status"
+    assert root.find("./Screen[@Name='Tone out']/Item[@Name='Option A-1']").attrib["Option"] == "Frequency"
+
+
+def test_layout_templates_fill_every_editable_slot_with_supported_options():
+    assert len(LAYOUT_TEMPLATES) >= 6
+    assert len(layout_template_catalog()) == len(LAYOUT_TEMPLATES)
+    for template in LAYOUT_TEMPLATES[1:]:
+        for screen_name, items in SCREEN_SPECS.items():
+            for index, (name, default) in enumerate(items):
+                choices = option_choices(name, screen_name, default)
+                if not choices:
+                    continue
+                selected = template.screen_item_options.get(f"{screen_name}||{index}", default)
+                assert selected in choices
+                assert selected != "Empty"
+
+
+def test_authoritative_sentinel_option_tables_cover_all_exported_defaults():
+    assert len(HUGE_OPTION_CHOICES) == 16
+    assert len(LARGE_OPTION_CHOICES) == 33  # Sentinel has 34 rows; Fahrenheit/Celsius share one XML token.
+    assert len(SMALL_OPTION_CHOICES) == 20
+    assert len(ICON_OPTION_CHOICES) == 13
+    for screen_name, items in SCREEN_SPECS.items():
+        for name, default in items:
+            choices = option_choices(name, screen_name, default)
+            if default is not None:
+                assert default in choices
+
+
+def test_layout_templates_are_palette_independent_and_recolor_selected_data_logically():
+    config = {
+        "name": "Technical",
+        "layout_template_id": "technical",
+        "colors": PALETTES[0].colors(),
+        "global_item_colors": {},
+        "screen_item_colors": {},
+    }
+    dark, _ = generate_custom_display_xml(config)
+    config["colors"] = PALETTES[1].colors()
+    light, _ = generate_custom_display_xml(config)
+    dark_root = ET.fromstring(dark)
+    light_root = ET.fromstring(light)
+    dark_option_a = dark_root.find("./Screen[@Name='SimpleConventional']/Item[@Name='Option A']")
+    dark_option_b = dark_root.find("./Screen[@Name='SimpleConventional']/Item[@Name='Option B']")
+    light_option_a = light_root.find("./Screen[@Name='SimpleConventional']/Item[@Name='Option A']")
+    assert dark_option_a.attrib["Option"] == light_option_a.attrib["Option"] == "Frequency"
+    assert dark_option_a.attrib["Text"] == PALETTES[0].channel
+    assert light_option_a.attrib["Text"] == PALETTES[1].channel
+    assert dark_option_b.attrib["Option"] == "D_ErrorCount"
+    assert dark_option_b.attrib["Text"] == PALETTES[0].metadata
+
+
+def test_synchronized_and_per_screen_choices_override_template_defaults():
+    config = {
+        "name": "Technical Customized",
+        "layout_template_id": "technical",
+        "colors": PALETTES[0].colors(),
+        "global_item_colors": {},
+        "screen_item_colors": {},
+        "global_item_options": {"Option A": "ServiceType"},
+        "screen_item_options": {"SimpleTrunk||23": "TGID"},
+    }
+    data, _ = generate_custom_display_xml(config)
+    root = ET.fromstring(data)
+    assert root.find("./Screen[@Name='SimpleConventional']/Item[@Name='Option A']").attrib["Option"] == "ServiceType"
+    assert root.find("./Screen[@Name='SimpleTrunk']/Item[@Name='Option A']").attrib["Option"] == "TGID"
+
+
+def test_custom_display_rejects_unknown_layout_template():
+    config = {
+        "name": "Unknown Layout",
+        "layout_template_id": "not-a-layout",
+        "colors": PALETTES[0].colors(),
+        "global_item_colors": {},
+        "screen_item_colors": {},
     }
     try:
         generate_custom_display_xml(config)
     except ValueError as exc:
-        assert "unsupported" in str(exc)
+        assert "unknown display layout template" in str(exc)
     else:
-        raise AssertionError("Weather item option change was accepted")
+        raise AssertionError("unknown layout template was accepted")

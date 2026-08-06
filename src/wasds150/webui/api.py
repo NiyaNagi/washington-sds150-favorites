@@ -34,6 +34,7 @@ from wasds150.display_customizer import (
     palette_by_id,
     palette_summary,
     supported_color_catalog,
+    layout_template_catalog,
     validate_display_xml,
     validate_palette,
 )
@@ -259,6 +260,7 @@ def get_display_palettes(ctx: AppContext, req: RequestContext) -> Response:
         "screens": list(SCREEN_SPECS),
         "items": display_item_catalog(),
         "layouts": display_layout_catalog(),
+        "layout_templates": layout_template_catalog(),
         "supported_colors": supported_color_catalog(),
         "minimum_contrast_target": 4.5,
     })

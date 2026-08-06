@@ -60,6 +60,18 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   the Sentinel export. All 40 Simple, 50 Detail, and 45 special-mode XML items
   render exactly once by index, duplicate item names remain distinct, and the
   erroneous preview-only `Func` text/background inversion was removed.
+- Added six palette-independent layout starting points: Sentinel Export,
+  Dispatch Essentials, Technical Diagnostics, Mobile & GPS, Unit
+  Identification, and SDS150 Telemetry. Scenario templates fill every editable
+  slot, survive theme changes, remain fully customizable, and reset to template
+  defaults.
+- Replaced inferred display-option allowlists with Sentinel's exact Huge,
+  Large, Small, and Icon tables. This unlocks supported blank fields in Search,
+  Weather, and Tone Out and adds SDS150 battery, temperature, USB, filter,
+  location, unit-name, RF, and decoding data points.
+- Made semantic colors follow selected data rather than fixed slot history, so
+  template-selected frequency/TGID, system, site, diagnostics, status, alert,
+  and active indicators inherit the matching group from any color theme.
 - Added Sentinel-compatible displayed-item selection for editable option and
   icon fields. Selection choices are constrained by field type, can synchronize
   across matching fields in all modes, update previews immediately, and are

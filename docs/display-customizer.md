@@ -69,6 +69,27 @@ separation. **Low-Light Amber** limits cool light while keeping alerts distinct.
 Oceanic, Forest Watch, Cyber Neon, Solar Dark/Light, Monochrome Ice, Purple
 Dusk, and Slate Professional provide additional environment and style choices.
 
+## Layout starting points
+
+Layout templates and color themes are independent. Changing themes preserves
+the selected data layout; changing layouts preserves the theme. A template
+sets displayed-item choices, then each selected data type inherits its logical
+semantic color from the active theme.
+
+| Template | Scenario |
+|---|---|
+| Sentinel Export | Exact attached export, including its intentional blanks |
+| Dispatch Essentials | Service, tone, channel, system, site, and signal identification |
+| Technical Diagnostics | RF noise, filter, error count, RSSI, network, and decoding diagnostics |
+| Mobile & GPS | Coordinates, active site, GPS, signal, and power while roaming |
+| Unit Identification | Unit ID/name fragments, TGID, system, site, service, and RSSI |
+| SDS150 Telemetry | Battery current/temperature, USB voltage, filter, RF health, and power |
+
+Every scenario template except Sentinel Export fills every editable option
+slot with a supported non-empty choice. Templates are starting points:
+synchronized or per-screen edits remain available afterward, and reset returns
+a field or view to the selected template rather than discarding the template.
+
 ## Full customization
 
 Open **Customize palette** below the presets to edit at three levels:
@@ -113,19 +134,21 @@ becomes a full-height sheet on small screens. The same controls remain usable
 with touch, mouse, or keyboard, including focus trapping and Escape-to-close.
 
 Displayed-item choices follow the supplied screenshots, Sentinel export, and
-official available-item list. Small option areas include Date, Time, Digital
+the exact option tables extracted from the installed Sentinel application.
+Small option areas include Date, Time, Digital
 Status, TDMA Slot, Bluetooth, Attenuator, GPS, IFX, modulation, priority,
 recording, Close Call, Weather Priority, volume, and squelch. Larger areas can
 show Favorites List, site, frequency, TGID, service type, tone/NAC, system and
-site IDs, WACN, battery, unit ID, RSSI, number tag, and volume/squelch details.
+site IDs, WACN, battery current/temperature/voltage, USB voltage, filter,
+noise, error count, coordinates, unit ID/name fragments, RSSI, number tag, and
+volume/squelch details.
 Icon areas are restricted to the compatible icon choices.
 
-Choices are constrained per field and screen rather than exposing one unsafe
-global list. Metadata slots can keep their exported item or be emptied;
-frequency/TGID and site/department fields only offer their evidenced variants.
-As specified by the official manual, Weather and Tone Out retain fixed items
-and support color customization only. Synchronized item choices are limited to
-the intersection supported by all compatible editable views.
+Choices are constrained by Sentinel's actual field type: Huge, Large, Small,
+Icon, or fixed. This safely unlocks editable blank option and icon slots in
+Search, Weather, and Tone Out while preserving fixed labels and geometry.
+Synchronized choices are limited to the intersection supported by all matching
+editable fields.
 
 With synchronization enabled, both the color and displayed-item selection are
 remembered for the same field across all seven modes. Disable synchronization
@@ -144,8 +167,8 @@ field capabilities:
   ID, WACN, battery voltage, unit ID, and RSSI.
 - Search adds system ID, unit ID, TGID, RSSI graph, Broadcast Screen, and
   Repeater Find.
-- Weather and Tone Out retain their compatible fixed layout while suppressing
-  search-only fields.
+- Weather and Tone Out retain their fixed geometry while templates may populate
+  their supported Small, Large, and Icon option slots.
 - Icons consistently expose modulation, priority channel, IFX, level, record,
   GPS, priority, Close Call, and Weather Priority where the mode supports them.
 
@@ -158,11 +181,12 @@ black-on-white and white-on-black sunlight modes through **F**, then holding
 ## Preview and import
 
 1. Start the local dashboard and open **Display**.
-2. Select each palette card to preview all seven modes on one page.
-3. Inspect the displayed minimum contrast and individual swatch ratios.
-4. Select **Download selected Sentinel XML**.
-5. In Sentinel use **File > Import Display Customizing Settings**.
-6. Open the display customizer, inspect every mode, save the profile, and write
+2. Select a scenario layout starting point.
+3. Select a color theme and preview all seven modes on one page.
+4. Inspect the displayed minimum contrast and individual swatch ratios.
+5. Select **Download selected Sentinel XML**.
+6. In Sentinel use **File > Import Display Customizing Settings**.
+7. Open the display customizer, inspect every mode, save the profile, and write
    it to the scanner normally.
 
 The generated XML is validated before download. Validation covers the root

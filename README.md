@@ -106,7 +106,10 @@ colors, reports contrast ratios, and downloads as validated Sentinel display
 customizer XML. A full editor supports semantic group colors, synchronized
 matching items, per-item/per-view text and background colors, whole-view
 coloring, saved browser palettes, and JSON import/export. Preview fields are
-clickable: search Sentinel's exact 147 supported swatches grouped by hue and
+clickable. Six palette-independent scenario layouts provide Sentinel Export,
+dispatch, technical, mobile/GPS, unit-identification, and SDS150 telemetry
+starting points that fill supported slots and inherit logical theme colors.
+Search Sentinel's exact 147 supported swatches grouped by hue and
 brightness, reuse recent supported colors, and choose Sentinel-compatible
 displayed elements with synchronized or per-view behavior.
 

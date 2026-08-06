@@ -251,6 +251,9 @@ def test_display_palette_endpoints(live_server):
         "DetailTrunk", "Search", "Weather", "Tone out",
     ]
     assert set(data["layouts"]) == set(data["screens"])
+    assert len(data["layout_templates"]) >= 6
+    assert data["layout_templates"][0]["id"] == "sentinel-export"
+    assert any(template["id"] == "technical" for template in data["layout_templates"])
     for screen in data["screens"]:
         indices = [index for row in data["layouts"][screen] for index in row["indices"]]
         assert sorted(indices) == list(range(len(data["items"][screen])))
@@ -281,7 +284,7 @@ def test_display_palette_endpoints(live_server):
 
     custom = {
         "name": "API Custom",
-        "colors": data["palettes"][0]["colors"],
+        "colors": dict(data["palettes"][0]["colors"]),
         "global_item_colors": {"Func": {"text": "EFF7FF", "back": "000000"}},
         "screen_item_colors": {"SimpleTrunk||0": {"text": "F7EBD6", "back": "000084"}},
         "global_item_options": {"Option_3": "Time"},
@@ -310,6 +313,14 @@ def test_display_palette_endpoints(live_server):
     )
     assert status == 400
     assert b"not supported by Sentinel" in body
+
+    custom["colors"] = dict(data["palettes"][0]["colors"])
+    custom["layout_template_id"] = "not-a-layout"
+    status, body, _ = _request(
+        base_url, "/api/v1/display/custom", token=token, method="POST", body=custom,
+    )
+    assert status == 400
+    assert b"unknown display layout template" in body
 
 
 def test_profile_enable_disable_flow(live_server):

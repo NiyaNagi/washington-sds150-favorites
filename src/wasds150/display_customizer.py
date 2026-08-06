@@ -22,29 +22,28 @@ from wasds150.display_colors import (
 ItemSpec = Tuple[str, Optional[str]]
 COLOR_KEYS = ("background", "status", "system", "department", "channel", "metadata", "alert", "accent")
 
+HUGE_OPTION_CHOICES = (
+    "Empty", "CTCSS/DCS", "FL_Name", "Frequency", "NumberTag", "SysSubID",
+    "ServiceType", "SiteId", "SiteName", "SystemType", "SystemId", "TGID",
+    "UnitId", "UnitIdName", "Volume&Squelch", "WACN",
+)
+LARGE_OPTION_CHOICES = (
+    "Empty", "Battery Current", "Battery Temperature", "BattVoltage",
+    "CTCSS/DCS", "D_ErrorCount", "FL_Name", "Filter", "Frequency", "latitude",
+    "Lcn", "longitude", "Noise", "NumberTag", "SysSubID", "Rssi", "Rssi Bar",
+    "ServiceType", "SiteId", "SiteName", "SystemType", "SystemId", "TdmaSlot",
+    "TGID", "UnitId", "UnitIdName", "UnitIdName_1", "UnitIdName_2",
+    "UnitIdName_3", "UnitIdName_4", "USB2_vbus", "Volume&Squelch", "WACN",
+)
 SMALL_OPTION_CHOICES = (
-    "Empty", "ATT", "Bluetooth", "Day", "Time", "P25Status", "TdmaSlot",
-    "Volume", "Squelch", "GPS", "IFX", "Modulation", "P_Ch", "PRI",
-    "REC", "REP", "CC", "WxPRI", "SCR", "LVL", "BattVoltage", "Rssi",
-    "NumberTag",
+    "Empty", "ATT", "Bluetooth", "SCR", "CC", "Day", "P25Status", "GPS",
+    "IFX", "Modulation", "P_Ch", "PRI", "REC", "REP", "Squelch",
+    "TdmaSlot", "Time", "Volume", "LVL", "WxPRI",
 )
 ICON_OPTION_CHOICES = (
-    "Empty", "Modulation", "P_Ch", "IFX", "LVL", "REC", "GPS", "PRI",
-    "CC", "WxPRI", "SCR", "REP",
+    "Empty", "Bluetooth", "SCR", "CC", "GPS", "IFX", "Modulation", "P_Ch",
+    "PRI", "REC", "REP", "LVL", "WxPRI",
 )
-SYSTEM_OPTION_CHOICES = ("Empty", "FL_Name", "SystemId", "SysSubID", "WACN", "NumberTag")
-DEPARTMENT_OPTION_CHOICES = ("Empty", "SiteName")
-CHANNEL_OPTION_CHOICES = ("Empty", "Frequency", "TGID")
-EXACT_OPTION_CHOICES = {
-    "Option_1": ("Empty", "ATT"),
-    "Option_2": ("Empty", "Bluetooth"),
-    "Option_3": SMALL_OPTION_CHOICES,
-    "Option_4": SMALL_OPTION_CHOICES,
-    "Option_5": ("Empty", "Volume"),
-    "Option_6": ("Empty", "Squelch"),
-    "Option_7": ("Empty", "P25Status"),
-    "Option_8": ("Empty", "TdmaSlot"),
-}
 
 
 def _simple(department_option: str, channel_option: str) -> List[ItemSpec]:
@@ -199,6 +198,15 @@ class DisplayPalette:
         }
 
 
+@dataclass(frozen=True)
+class DisplayLayoutTemplate:
+    id: str
+    name: str
+    description: str
+    scenario: str
+    screen_item_options: Dict[str, str]
+
+
 PALETTES: Tuple[DisplayPalette, ...] = (
     DisplayPalette(
         "night-ops", "Night Ops", "Cool hierarchy colors on true black for dark cabins and general use.",
@@ -260,31 +268,152 @@ def item_key(name: str, option: Optional[str]) -> str:
 
 
 def option_choices(name: str, screen_name: Optional[str] = None, default: Optional[str] = None) -> Tuple[str, ...]:
-    if screen_name in ("Weather", "Tone out"):
-        return ()
     if name.startswith("Icon"):
         return ICON_OPTION_CHOICES
-    if name == "System option":
-        return SYSTEM_OPTION_CHOICES
-    if name == "Department option":
-        return DEPARTMENT_OPTION_CHOICES
-    if name == "Channel option":
-        return CHANNEL_OPTION_CHOICES
+    if name in ("System option", "Department option", "Channel option"):
+        return HUGE_OPTION_CHOICES
     if name.startswith("Option A") or name.startswith("Option B") or name.startswith("Option C"):
-        return tuple(dict.fromkeys(("Empty", default))) if default is not None else ()
-    if name == "Option_7" and default == "Empty":
-        return ("Empty",)
-    if name == "Option_8" and default == "Empty":
-        return ("Empty",)
-    if name in EXACT_OPTION_CHOICES:
-        return EXACT_OPTION_CHOICES[name]
+        return LARGE_OPTION_CHOICES
+    if name.startswith("Option_"):
+        return SMALL_OPTION_CHOICES
     return ()
+
+
+def _build_layout_template(
+    template_id: str,
+    name: str,
+    description: str,
+    scenario: str,
+    *,
+    small: Tuple[str, ...],
+    simple_large: Tuple[str, ...],
+    detail_large: Tuple[str, ...],
+    special_large: Tuple[str, ...],
+    icons: Tuple[str, ...],
+    system_option: str,
+) -> DisplayLayoutTemplate:
+    overrides: Dict[str, str] = {}
+    small_by_name = dict(zip((f"Option_{index}" for index in range(1, 9)), small))
+    for screen_name, items in SCREEN_SPECS.items():
+        large = simple_large if screen_name.startswith("Simple") else detail_large if screen_name.startswith("Detail") else special_large
+        large_index = icon_index = 0
+        for index, (item_name, default) in enumerate(items):
+            selected: Optional[str] = None
+            if item_name.startswith("Option_"):
+                selected = small_by_name[item_name]
+            elif item_name in ("System option", "Department option", "Channel option"):
+                if item_name == "System option":
+                    selected = system_option
+                elif item_name == "Department option":
+                    selected = "SiteName" if "Trunk" in screen_name else "NumberTag"
+                else:
+                    selected = "TGID" if "Trunk" in screen_name else "Frequency"
+            elif item_name.startswith("Option A") or item_name.startswith("Option B") or item_name.startswith("Option C"):
+                selected = large[large_index]
+                large_index += 1
+            elif item_name.startswith("Icon"):
+                selected = icons[icon_index]
+                icon_index += 1
+            if selected is not None and selected != default:
+                overrides[f"{screen_name}||{index}"] = selected
+    return DisplayLayoutTemplate(template_id, name, description, scenario, overrides)
+
+
+LAYOUT_TEMPLATES: Tuple[DisplayLayoutTemplate, ...] = (
+    DisplayLayoutTemplate(
+        "sentinel-export", "Sentinel Export", "Preserves the attached Sentinel export exactly.",
+        "Balanced starting point with familiar defaults and intentional empty slots.", {},
+    ),
+    _build_layout_template(
+        "dispatch", "Dispatch Essentials", "Prioritizes dispatch identity, frequency/TGID, service, tone, and signal details.",
+        "Everyday public-safety monitoring and fast channel identification.",
+        small=("ATT", "Bluetooth", "Day", "Time", "Volume", "Squelch", "P25Status", "TdmaSlot"),
+        simple_large=("ServiceType", "CTCSS/DCS"),
+        detail_large=("Volume&Squelch", "NumberTag", "ServiceType", "CTCSS/DCS", "SystemId", "Frequency", "SysSubID", "SiteId", "WACN", "BattVoltage", "UnitId", "Rssi"),
+        special_large=("Volume&Squelch", "NumberTag", "Frequency", "BattVoltage", "ServiceType", "Rssi", "TGID", "Rssi Bar"),
+        icons=("Modulation", "P_Ch", "IFX", "LVL", "Bluetooth", "REC", "GPS", "PRI", "CC", "WxPRI"),
+        system_option="FL_Name",
+    ),
+    _build_layout_template(
+        "technical", "Technical Diagnostics", "Surfaces decoding, RF, network, filter, and error diagnostics.",
+        "Troubleshooting reception, simulcast, digital decoding, and trunking behavior.",
+        small=("ATT", "Bluetooth", "Day", "Time", "Volume", "Squelch", "P25Status", "TdmaSlot"),
+        simple_large=("Frequency", "D_ErrorCount"),
+        detail_large=("Volume&Squelch", "NumberTag", "D_ErrorCount", "Noise", "Filter", "Frequency", "SystemId", "SysSubID", "WACN", "Rssi", "Rssi Bar", "BattVoltage"),
+        special_large=("Volume&Squelch", "NumberTag", "D_ErrorCount", "Noise", "Filter", "Frequency", "Rssi", "Rssi Bar"),
+        icons=("Modulation", "P_Ch", "IFX", "LVL", "Bluetooth", "REC", "GPS", "PRI", "SCR", "REP"),
+        system_option="SystemId",
+    ),
+    _build_layout_template(
+        "mobile-gps", "Mobile & GPS", "Emphasizes location, site, navigation, signal, and power information.",
+        "Vehicle use, location control, roaming, and identifying the active site.",
+        small=("ATT", "Bluetooth", "GPS", "Time", "Volume", "Squelch", "P25Status", "TdmaSlot"),
+        simple_large=("SiteName", "Frequency"),
+        detail_large=("Volume&Squelch", "NumberTag", "latitude", "longitude", "SiteName", "SiteId", "Frequency", "Rssi", "Filter", "BattVoltage", "USB2_vbus", "UnitId"),
+        special_large=("Volume&Squelch", "NumberTag", "latitude", "longitude", "SiteName", "SiteId", "Rssi", "BattVoltage"),
+        icons=("GPS", "Bluetooth", "Modulation", "P_Ch", "IFX", "LVL", "REC", "PRI", "CC", "WxPRI"),
+        system_option="FL_Name",
+    ),
+    _build_layout_template(
+        "unit-identification", "Unit Identification", "Maximizes unit, talkgroup, system, site, and service identity fields.",
+        "Following individual radios and identifying unknown unit activity.",
+        small=("ATT", "Bluetooth", "Day", "Time", "Volume", "Squelch", "P25Status", "TdmaSlot"),
+        simple_large=("UnitIdName", "UnitId"),
+        detail_large=("Volume&Squelch", "NumberTag", "UnitId", "UnitIdName", "UnitIdName_1", "UnitIdName_2", "UnitIdName_3", "UnitIdName_4", "TGID", "SystemId", "SiteId", "Rssi"),
+        special_large=("Volume&Squelch", "NumberTag", "UnitId", "UnitIdName", "TGID", "SystemId", "SiteId", "Rssi"),
+        icons=("Modulation", "P_Ch", "Bluetooth", "LVL", "IFX", "REC", "GPS", "PRI", "CC", "WxPRI"),
+        system_option="SystemId",
+    ),
+    _build_layout_template(
+        "sds150-telemetry", "SDS150 Telemetry", "Highlights SDS150 battery, temperature, USB power, filtering, and RF health.",
+        "Bench testing, power diagnostics, and monitoring receiver health.",
+        small=("ATT", "Bluetooth", "Day", "Time", "Volume", "Squelch", "P25Status", "TdmaSlot"),
+        simple_large=("Battery Current", "BattVoltage"),
+        detail_large=("Volume&Squelch", "NumberTag", "Battery Current", "Battery Temperature", "BattVoltage", "USB2_vbus", "Filter", "Noise", "D_ErrorCount", "Rssi", "Rssi Bar", "Frequency"),
+        special_large=("Volume&Squelch", "NumberTag", "Battery Current", "Battery Temperature", "BattVoltage", "USB2_vbus", "Rssi", "Rssi Bar"),
+        icons=("Bluetooth", "Modulation", "P_Ch", "IFX", "LVL", "REC", "GPS", "PRI", "CC", "WxPRI"),
+        system_option="SystemType",
+    ),
+)
+
+
+def layout_template_by_id(template_id: str) -> Optional[DisplayLayoutTemplate]:
+    return next((template for template in LAYOUT_TEMPLATES if template.id == template_id), None)
+
+
+def layout_template_catalog() -> List[dict]:
+    return [
+        {
+            "id": template.id,
+            "name": template.name,
+            "description": template.description,
+            "scenario": template.scenario,
+            "screen_item_options": dict(template.screen_item_options),
+        }
+        for template in LAYOUT_TEMPLATES
+    ]
 
 
 def _category(name: str, option: Optional[str]) -> str:
     combined = f"{name} {option or ''}".casefold()
     if name == "Avoid" or name == "Hold" or option in ("CC", "WxPRI") or "close call" in combined:
         return "alert"
+    if option in ("FL_Name", "SystemType", "SystemId", "SysSubID", "WACN"):
+        return "system"
+    if option in ("SiteName", "SiteId", "Lcn", "latitude", "longitude"):
+        return "department"
+    if option in (
+        "Frequency", "TGID", "CTCSS/DCS", "ServiceType", "TdmaSlot", "UnitId",
+        "UnitIdName", "UnitIdName_1", "UnitIdName_2", "UnitIdName_3", "UnitIdName_4",
+    ):
+        return "channel"
+    if option in ("ATT", "Bluetooth", "SCR", "GPS", "IFX", "Modulation", "P_Ch", "PRI", "REC", "REP", "LVL"):
+        return "accent"
+    if option in (
+        "Battery Current", "Battery Temperature", "BattVoltage", "D_ErrorCount",
+        "Filter", "Noise", "Rssi", "Rssi Bar", "USB2_vbus",
+    ):
+        return "metadata"
     if name in ("System Name", "System option", "Primary Area-1"):
         return "system"
     if name in ("Department Name", "Department option", "Primary Area-2"):
@@ -317,7 +446,6 @@ def generate_display_xml(
     for screen_name, items in SCREEN_SPECS.items():
         screen = ET.SubElement(root, "Screen", {"Name": screen_name})
         for index, (name, option) in enumerate(items):
-            category = _category(name, option)
             override = dict(global_item_colors.get(item_key(name, option)) or {})
             override.update(screen_item_colors.get(f"{screen_name}||{index}") or {})
             choices = option_choices(name, screen_name, option)
@@ -328,6 +456,7 @@ def generate_display_xml(
             screen_option = screen_item_options.get(f"{screen_name}||{index}")
             if screen_option in choices:
                 selected_option = screen_option
+            category = _category(name, selected_option)
             attributes = {
                 "Name": name,
                 "Text": str(override.get("text") or colors[category]).upper(),
@@ -351,6 +480,10 @@ def display_item_catalog() -> Dict[str, List[dict]]:
                 "category": _category(name, option),
                 "screen_key": f"{screen_name}||{index}",
                 "option_choices": list(option_choices(name, screen_name, option)),
+                "option_categories": {
+                    choice: _category(name, choice)
+                    for choice in option_choices(name, screen_name, option)
+                },
             }
             for index, (name, option) in enumerate(items)
         ]
@@ -410,6 +543,10 @@ def validate_color_overrides(overrides: dict, valid_keys: set) -> List[str]:
 
 def generate_custom_display_xml(data: dict) -> Tuple[bytes, List[str]]:
     palette = custom_palette_from_dict(data)
+    template_id = str(data.get("layout_template_id") or "sentinel-export")
+    template = layout_template_by_id(template_id)
+    if template is None:
+        raise ValueError(f"unknown display layout template: {template_id}")
     global_overrides = dict(data.get("global_item_colors") or {})
     screen_overrides = dict(data.get("screen_item_colors") or {})
     global_options = dict(data.get("global_item_options") or {})
@@ -423,6 +560,10 @@ def generate_custom_display_xml(data: dict) -> Tuple[bytes, List[str]]:
         raise ValueError("; ".join(issues))
     by_global_key = {item["item_key"]: item for items in catalog.values() for item in items if item["sync_option_choices"]}
     by_screen_key = {item["screen_key"]: item for items in catalog.values() for item in items}
+    for key, selected in template.screen_item_options.items():
+        item = by_screen_key[key]
+        if key not in screen_options and item["item_key"] not in global_options:
+            screen_options[key] = selected
     for key, selected in global_options.items():
         item = by_global_key.get(key)
         if item is None or selected not in item["sync_option_choices"]:

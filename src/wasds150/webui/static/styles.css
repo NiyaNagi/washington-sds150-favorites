@@ -102,6 +102,24 @@ h2 { margin-top: 0; }
   gap: 0.75rem;
   margin-bottom: 1rem;
 }
+.display-layout-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+.display-layout-card {
+  display: grid;
+  gap: 0.35rem;
+  text-align: left;
+  padding: 0.85rem;
+}
+.display-layout-card.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25);
+}
+.display-layout-card span { color: var(--muted); font-size: 0.78rem; }
+.display-layout-card em { color: var(--accent); font-size: 0.75rem; font-style: normal; }
 .display-palette-card {
   display: grid;
   gap: 0.45rem;
