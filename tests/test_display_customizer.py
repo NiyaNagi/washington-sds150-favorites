@@ -4,6 +4,7 @@ from pathlib import Path
 from wasds150.display_customizer import (
     PALETTES,
     LAYOUT_TEMPLATES,
+    COLOR_GROUPINGS,
     HUGE_OPTION_CHOICES,
     LARGE_OPTION_CHOICES,
     SMALL_OPTION_CHOICES,
@@ -12,6 +13,8 @@ from wasds150.display_customizer import (
     display_layout_catalog,
     generate_custom_display_xml,
     generate_display_xml,
+    color_grouping_catalog,
+    grouped_category,
     layout_template_catalog,
     option_choices,
     palette_summary,
@@ -239,7 +242,7 @@ def test_weather_and_tone_out_blank_slots_accept_their_sentinel_field_type():
 
 
 def test_layout_templates_fill_every_editable_slot_with_supported_options():
-    assert len(LAYOUT_TEMPLATES) >= 6
+    assert len(LAYOUT_TEMPLATES) >= 10
     assert len(layout_template_catalog()) == len(LAYOUT_TEMPLATES)
     for template in LAYOUT_TEMPLATES[1:]:
         for screen_name, items in SCREEN_SPECS.items():
@@ -317,3 +320,64 @@ def test_custom_display_rejects_unknown_layout_template():
         assert "unknown display layout template" in str(exc)
     else:
         raise AssertionError("unknown layout template was accepted")
+
+
+def test_color_groupings_offer_basic_colorful_rows_scenarios_and_accessibility():
+    assert len(COLOR_GROUPINGS) >= 10
+    assert len(color_grouping_catalog()) == len(COLOR_GROUPINGS)
+    assert {grouping.style for grouping in COLOR_GROUPINGS} >= {
+        "Basic", "Colorful", "Rows", "Scenario", "Accessibility",
+    }
+    full = next(grouping for grouping in COLOR_GROUPINGS if grouping.id == "full-spectrum")
+    for screen_name, items in SCREEN_SPECS.items():
+        for index, (name, option) in enumerate(items):
+            if name in ("SP0", "SP1", "SP2") or option == "Empty":
+                continue
+            category = grouped_category(full, screen_name, index, name, option)
+            assert category in {"system", "department", "channel", "metadata", "alert", "accent"}
+
+
+def test_color_grouping_changes_colors_without_changing_layout_or_theme_values():
+    config = {
+        "name": "Grouped",
+        "layout_template_id": "technical",
+        "color_grouping_id": "row-bands",
+        "colors": PALETTES[0].colors(),
+        "global_item_colors": {},
+        "screen_item_colors": {},
+    }
+    grouped, _ = generate_custom_display_xml(config)
+    config["color_grouping_id"] = "balanced"
+    balanced, _ = generate_custom_display_xml(config)
+    grouped_root = ET.fromstring(grouped)
+    balanced_root = ET.fromstring(balanced)
+    grouped_items = grouped_root.findall("./Screen[@Name='SimpleConventional']/Item")
+    balanced_items = balanced_root.findall("./Screen[@Name='SimpleConventional']/Item")
+    assert [(item.attrib["Name"], item.attrib.get("Option")) for item in grouped_items] == [
+        (item.attrib["Name"], item.attrib.get("Option")) for item in balanced_items
+    ]
+    assert grouped_items[0].attrib["Text"] == PALETTES[0].accent
+    assert grouped_items[-1].attrib["Text"] == PALETTES[0].alert
+    assert grouped_items[0].attrib["Text"] != balanced_items[0].attrib["Text"]
+
+
+def test_every_grouping_generates_valid_xml_with_every_palette():
+    for grouping in COLOR_GROUPINGS:
+        for palette in PALETTES:
+            assert validate_display_xml(generate_display_xml(palette, color_grouping_id=grouping.id)) == []
+
+
+def test_custom_display_rejects_unknown_color_grouping():
+    config = {
+        "name": "Unknown Grouping",
+        "color_grouping_id": "not-a-grouping",
+        "colors": PALETTES[0].colors(),
+        "global_item_colors": {},
+        "screen_item_colors": {},
+    }
+    try:
+        generate_custom_display_xml(config)
+    except ValueError as exc:
+        assert "unknown display color grouping" in str(exc)
+    else:
+        raise AssertionError("unknown color grouping was accepted")

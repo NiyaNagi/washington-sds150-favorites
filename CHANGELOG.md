@@ -72,6 +72,19 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Made semantic colors follow selected data rather than fixed slot history, so
   template-selected frequency/TGID, system, site, diagnostics, status, alert,
   and active indicators inherit the matching group from any color theme.
+- Added Discovery & Close Call, Trunk Network Analysis, Aviation & Marine, and
+  Recording & Alerts layouts, expanding palette-independent starting points
+  from six to ten.
+- Added ten independent color grouping choices spanning basic semantic,
+  hierarchy-focused, full-spectrum granular, colorful row bands, top/bottom
+  contrast, alternating rows, technical heatmap, activity/alerts, scenario,
+  and accessibility uses.
+- Full Spectrum Granular assigns every visible field to a related functional
+  color family, eliminating neutral white fields in colorful themes. Row-based
+  groupings can color top, middle, detail, icon, and soft-key areas distinctly.
+- Preserved layout and grouping through theme changes, preserved theme and
+  layout through grouping changes, and included grouping selection in saved
+  palettes, JSON portability, previews, validated XML, and reset behavior.
 - Added Sentinel-compatible displayed-item selection for editable option and
   icon fields. Selection choices are constrained by field type, can synchronize
   across matching fields in all modes, update previews immediately, and are

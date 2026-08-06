@@ -207,6 +207,16 @@ class DisplayLayoutTemplate:
     screen_item_options: Dict[str, str]
 
 
+@dataclass(frozen=True)
+class DisplayColorGrouping:
+    id: str
+    name: str
+    description: str
+    style: str
+    category_map: Dict[str, str]
+    item_categories: Dict[str, str]
+
+
 PALETTES: Tuple[DisplayPalette, ...] = (
     DisplayPalette(
         "night-ops", "Night Ops", "Cool hierarchy colors on true black for dark cabins and general use.",
@@ -374,6 +384,46 @@ LAYOUT_TEMPLATES: Tuple[DisplayLayoutTemplate, ...] = (
         icons=("Bluetooth", "Modulation", "P_Ch", "IFX", "LVL", "REC", "GPS", "PRI", "CC", "WxPRI"),
         system_option="SystemType",
     ),
+    _build_layout_template(
+        "discovery", "Discovery & Close Call", "Emphasizes unknown-signal identification, capture, and RF quality.",
+        "Close Call, limit/custom search, repeater finding, and identifying new activity.",
+        small=("ATT", "Bluetooth", "SCR", "Time", "Volume", "Squelch", "P25Status", "TdmaSlot"),
+        simple_large=("Frequency", "CTCSS/DCS"),
+        detail_large=("Volume&Squelch", "NumberTag", "Frequency", "CTCSS/DCS", "SystemType", "SystemId", "TGID", "UnitId", "D_ErrorCount", "Noise", "Rssi", "Rssi Bar"),
+        special_large=("Volume&Squelch", "NumberTag", "Frequency", "CTCSS/DCS", "SystemId", "UnitId", "Rssi", "Rssi Bar"),
+        icons=("SCR", "REP", "IFX", "LVL", "Bluetooth", "REC", "GPS", "PRI", "CC", "WxPRI"),
+        system_option="SystemType",
+    ),
+    _build_layout_template(
+        "trunk-network", "Trunk Network Analysis", "Surfaces P25 network, site, talkgroup, unit, and decoding context.",
+        "Analyzing multi-site trunked systems, roaming, and talkgroup behavior.",
+        small=("ATT", "Bluetooth", "Day", "Time", "Volume", "Squelch", "P25Status", "TdmaSlot"),
+        simple_large=("SystemId", "TGID"),
+        detail_large=("Volume&Squelch", "NumberTag", "SystemId", "SysSubID", "WACN", "SiteId", "SiteName", "TGID", "UnitId", "UnitIdName", "D_ErrorCount", "Rssi"),
+        special_large=("Volume&Squelch", "NumberTag", "SystemId", "SysSubID", "WACN", "SiteId", "TGID", "Rssi"),
+        icons=("Modulation", "P_Ch", "IFX", "LVL", "Bluetooth", "REC", "GPS", "PRI", "CC", "WxPRI"),
+        system_option="SystemId",
+    ),
+    _build_layout_template(
+        "aviation-marine", "Aviation & Marine", "Prioritizes frequency, modulation, service, location, and signal strength.",
+        "Civil/military aviation, marine traffic, rail, and conventional channel monitoring.",
+        small=("ATT", "Bluetooth", "GPS", "Time", "Volume", "Squelch", "Modulation", "REC"),
+        simple_large=("Frequency", "ServiceType"),
+        detail_large=("Volume&Squelch", "NumberTag", "Frequency", "ServiceType", "CTCSS/DCS", "latitude", "longitude", "SiteName", "Filter", "Noise", "Rssi", "Rssi Bar"),
+        special_large=("Volume&Squelch", "NumberTag", "Frequency", "ServiceType", "latitude", "longitude", "Rssi", "Rssi Bar"),
+        icons=("Modulation", "Bluetooth", "GPS", "IFX", "LVL", "REC", "P_Ch", "PRI", "CC", "WxPRI"),
+        system_option="FL_Name",
+    ),
+    _build_layout_template(
+        "recording-alerts", "Recording & Alerts", "Makes recording, priority, Close Call, weather, and active-state indicators prominent.",
+        "Event monitoring, unattended recording, and rapid attention to priority activity.",
+        small=("ATT", "Bluetooth", "REC", "Time", "Volume", "Squelch", "PRI", "WxPRI"),
+        simple_large=("ServiceType", "Frequency"),
+        detail_large=("Volume&Squelch", "NumberTag", "ServiceType", "Frequency", "TGID", "UnitId", "UnitIdName", "SystemId", "BattVoltage", "Rssi", "Rssi Bar", "D_ErrorCount"),
+        special_large=("Volume&Squelch", "NumberTag", "ServiceType", "Frequency", "TGID", "UnitId", "Rssi", "Rssi Bar"),
+        icons=("REC", "PRI", "CC", "WxPRI", "Bluetooth", "GPS", "Modulation", "P_Ch", "SCR", "REP"),
+        system_option="FL_Name",
+    ),
 )
 
 
@@ -429,9 +479,146 @@ def _category(name: str, option: Optional[str]) -> str:
     return "status"
 
 
+def _row_category_overrides(row_categories: Dict[str, Tuple[str, ...]]) -> Dict[str, str]:
+    overrides: Dict[str, str] = {}
+    for screen_name, rows in display_layout_catalog().items():
+        counters: Dict[str, int] = {}
+        for row in rows:
+            choices = row_categories.get(row["class_name"])
+            if not choices:
+                continue
+            occurrence = counters.get(row["class_name"], 0)
+            category = choices[occurrence % len(choices)]
+            counters[row["class_name"]] = occurrence + 1
+            for index in row["indices"]:
+                overrides[f"{screen_name}||{index}"] = category
+    return overrides
+
+
+def _granular_category_overrides() -> Dict[str, str]:
+    overrides: Dict[str, str] = {}
+    softkey_categories = {"Soft1 Key": "system", "Soft2 Key": "department", "Soft3 Key": "channel"}
+    info_categories = {"Info Area 1": "system", "Info Area 2": "department", "Info Area 3": "channel"}
+    for screen_name, items in SCREEN_SPECS.items():
+        for index, (name, option) in enumerate(items):
+            category: Optional[str] = None
+            if name in ("SP0", "SP1", "SP2"):
+                continue
+            if name in softkey_categories:
+                category = softkey_categories[name]
+            elif name in info_categories:
+                category = info_categories[name]
+            elif name in ("Func", "key", "Dir"):
+                category = "accent"
+            elif name in ("SIG", "Option_7", "Option_8"):
+                category = "channel"
+            elif name == "BATT":
+                category = "metadata"
+            elif name in ("Option_3", "Option_4", "Option_5", "Option_6", "Option C-1", "Option C-2"):
+                category = "metadata"
+            if category:
+                overrides[f"{screen_name}||{index}"] = category
+    return overrides
+
+
+COLOR_GROUPINGS: Tuple[DisplayColorGrouping, ...] = (
+    DisplayColorGrouping(
+        "balanced", "Balanced Semantic", "Uses the logical color of each selected data type.",
+        "Basic", {}, {},
+    ),
+    DisplayColorGrouping(
+        "basic", "Basic Hierarchy", "Keeps system, department, channel, and alerts distinct while simplifying secondary data.",
+        "Basic", {"metadata": "status", "accent": "status"}, {},
+    ),
+    DisplayColorGrouping(
+        "full-spectrum", "Full Spectrum Granular", "Colors hierarchy, controls, time, signal, power, info areas, icons, and soft keys in granular related groups.",
+        "Colorful", {}, _granular_category_overrides(),
+    ),
+    DisplayColorGrouping(
+        "row-bands", "Colorful Row Bands", "Assigns distinct theme colors to top, utility, hierarchy, detail, icon, and bottom rows.",
+        "Colorful", {}, _row_category_overrides({
+            "scanner-status-row": ("accent",), "scanner-utility-row": ("metadata",),
+            "scanner-info-top": ("system",), "scanner-info-pair": ("department", "channel"),
+            "scanner-hierarchy-row": ("system", "department", "channel"),
+            "scanner-special-row": ("system", "department"), "scanner-special-detail": ("channel",),
+            "scanner-detail-pair": ("metadata", "accent"), "scanner-icons": ("accent",),
+            "scanner-softkeys": ("alert",),
+        }),
+    ),
+    DisplayColorGrouping(
+        "top-bottom", "Top & Bottom Contrast", "Uses one strong group for the top rows and another for icons and soft keys while preserving the center hierarchy.",
+        "Rows", {}, _row_category_overrides({
+            "scanner-status-row": ("system",), "scanner-utility-row": ("department",),
+            "scanner-info-top": ("system",), "scanner-info-pair": ("metadata",),
+            "scanner-icons": ("accent",), "scanner-softkeys": ("channel",),
+        }),
+    ),
+    DisplayColorGrouping(
+        "alternating", "Alternating Data Rows", "Alternates related detail rows for fast horizontal scanning.",
+        "Rows", {}, _row_category_overrides({
+            "scanner-status-row": ("accent",), "scanner-utility-row": ("metadata",),
+            "scanner-info-top": ("system",), "scanner-info-pair": ("department", "channel"),
+            "scanner-hierarchy-row": ("system", "department", "channel"),
+            "scanner-special-row": ("system", "department"), "scanner-special-detail": ("channel",),
+            "scanner-detail-pair": ("metadata", "accent", "system", "department", "channel"),
+            "scanner-icons": ("accent",), "scanner-softkeys": ("metadata",),
+        }),
+    ),
+    DisplayColorGrouping(
+        "technical-emphasis", "Technical Heatmap", "Promotes diagnostics and alerts while muting routine status fields.",
+        "Scenario", {"status": "metadata", "metadata": "alert", "accent": "channel"}, {},
+    ),
+    DisplayColorGrouping(
+        "activity-alerts", "Activity & Alerts", "Makes active indicators, recordings, warnings, and alert states dominant.",
+        "Scenario", {"status": "metadata", "system": "status", "department": "status", "channel": "accent", "metadata": "channel"}, {},
+    ),
+    DisplayColorGrouping(
+        "hierarchy-focus", "Hierarchy Focus", "Emphasizes system, department, and channel identity with restrained operational details.",
+        "Scenario", {"status": "metadata", "accent": "metadata"}, {},
+    ),
+    DisplayColorGrouping(
+        "monochrome", "Uniform Minimal", "Uses one theme foreground for everything except alerts.",
+        "Accessibility", {"system": "status", "department": "status", "channel": "status", "metadata": "status", "accent": "status"}, {},
+    ),
+)
+
+
+def color_grouping_by_id(grouping_id: str) -> Optional[DisplayColorGrouping]:
+    return next((grouping for grouping in COLOR_GROUPINGS if grouping.id == grouping_id), None)
+
+
+def color_grouping_catalog() -> List[dict]:
+    return [
+        {
+            "id": grouping.id,
+            "name": grouping.name,
+            "description": grouping.description,
+            "style": grouping.style,
+            "category_map": dict(grouping.category_map),
+            "item_categories": dict(grouping.item_categories),
+        }
+        for grouping in COLOR_GROUPINGS
+    ]
+
+
+def grouped_category(
+    grouping: DisplayColorGrouping,
+    screen_name: str,
+    index: int,
+    name: str,
+    option: Optional[str],
+) -> str:
+    item_category = grouping.item_categories.get(f"{screen_name}||{index}")
+    if item_category:
+        return item_category
+    category = _category(name, option)
+    return grouping.category_map.get(category, category)
+
+
 def generate_display_xml(
     palette: DisplayPalette,
     *,
+    color_grouping_id: str = "balanced",
     global_item_colors: Optional[Dict[str, dict]] = None,
     screen_item_colors: Optional[Dict[str, dict]] = None,
     global_item_options: Optional[Dict[str, str]] = None,
@@ -439,6 +626,9 @@ def generate_display_xml(
 ) -> bytes:
     root = ET.Element("UndienScanner", {"Model": "SDS100", "FileType": "DisplayCustomizer"})
     colors = palette.colors()
+    grouping = color_grouping_by_id(color_grouping_id)
+    if grouping is None:
+        raise ValueError(f"unknown display color grouping: {color_grouping_id}")
     global_item_colors = global_item_colors or {}
     screen_item_colors = screen_item_colors or {}
     global_item_options = global_item_options or {}
@@ -456,7 +646,7 @@ def generate_display_xml(
             screen_option = screen_item_options.get(f"{screen_name}||{index}")
             if screen_option in choices:
                 selected_option = screen_option
-            category = _category(name, selected_option)
+            category = grouped_category(grouping, screen_name, index, name, selected_option)
             attributes = {
                 "Name": name,
                 "Text": str(override.get("text") or colors[category]).upper(),
@@ -547,6 +737,9 @@ def generate_custom_display_xml(data: dict) -> Tuple[bytes, List[str]]:
     template = layout_template_by_id(template_id)
     if template is None:
         raise ValueError(f"unknown display layout template: {template_id}")
+    color_grouping_id = str(data.get("color_grouping_id") or "balanced")
+    if color_grouping_by_id(color_grouping_id) is None:
+        raise ValueError(f"unknown display color grouping: {color_grouping_id}")
     global_overrides = dict(data.get("global_item_colors") or {})
     screen_overrides = dict(data.get("screen_item_colors") or {})
     global_options = dict(data.get("global_item_options") or {})
@@ -579,6 +772,7 @@ def generate_custom_display_xml(data: dict) -> Tuple[bytes, List[str]]:
                     value[field] = str(value[field]).removeprefix("#").upper()
     xml = generate_display_xml(
         palette,
+        color_grouping_id=color_grouping_id,
         global_item_colors=global_overrides,
         screen_item_colors=screen_overrides,
         global_item_options=global_options,

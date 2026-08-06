@@ -330,6 +330,7 @@
   // -------------------------------------------------------------- display --
   let selectedDisplayPalette = null;
   let selectedDisplayTemplate = null;
+  let selectedDisplayGrouping = null;
   let displayPaletteData = null;
   let displayCustomConfig = null;
   let activeDisplayItem = null;
@@ -377,7 +378,11 @@
 
   function effectiveDisplayCategory(item) {
     const option = effectiveDisplayOption(item);
-    return (item.option_categories || {})[option] || item.category;
+    const category = (item.option_categories || {})[option] || item.category;
+    if (!selectedDisplayGrouping) return category;
+    return selectedDisplayGrouping.item_categories[item.screen_key]
+      || selectedDisplayGrouping.category_map[category]
+      || category;
   }
 
   function optionDisplayName(option) {
@@ -824,6 +829,7 @@
       input.addEventListener("input", () => {
         displayCustomConfig.colors[category] = input.value;
         updateBadge();
+        updateDisplayGroupingSwatches();
         renderDisplayPreviews();
         renderDisplayItemEditor();
       });
@@ -903,6 +909,7 @@
       description: palette.description,
       colors: copyJson(palette.colors),
       layout_template_id: selectedDisplayTemplate ? selectedDisplayTemplate.id : "sentinel-export",
+      color_grouping_id: selectedDisplayGrouping ? selectedDisplayGrouping.id : "balanced",
       global_item_colors: {},
       screen_item_colors: {},
       global_item_options: existingGlobalOptions,
@@ -920,6 +927,30 @@
     renderSemanticColors();
     renderDisplayItemEditor();
     renderDisplayPreviews();
+    updateDisplayGroupingSwatches();
+  }
+
+  function updateDisplayGroupingSwatches() {
+    if (!displayCustomConfig) return;
+    document.querySelectorAll(".grouping-swatch").forEach((swatch) => {
+      swatch.style.backgroundColor = "#" + displayCustomConfig.colors[swatch.dataset.category];
+    });
+  }
+
+  function selectDisplayColorGrouping(grouping) {
+    selectedDisplayGrouping = grouping;
+    document.querySelectorAll(".display-grouping-card").forEach((card) => {
+      const selected = card.dataset.groupingId === grouping.id;
+      card.classList.toggle("selected", selected);
+      card.setAttribute("aria-checked", String(selected));
+    });
+    if (!displayCustomConfig) return;
+    displayCustomConfig.color_grouping_id = grouping.id;
+    displayCustomConfig.global_item_colors = {};
+    displayCustomConfig.screen_item_colors = {};
+    renderDisplayItemEditor();
+    renderDisplayPreviews();
+    setStatus(`Applied ${grouping.name} color grouping; layout and theme unchanged`);
   }
 
   function selectDisplayLayoutTemplate(template) {
@@ -999,6 +1030,43 @@
         card.addEventListener("click", () => selectDisplayPalette(palette));
         container.appendChild(card);
       });
+      const groupingContainer = document.getElementById("display-grouping-options");
+      groupingContainer.replaceChildren();
+      data.color_groupings.forEach((grouping) => {
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = "display-grouping-card";
+        card.dataset.groupingId = grouping.id;
+        card.setAttribute("role", "radio");
+        card.setAttribute("aria-checked", "false");
+        const title = document.createElement("strong");
+        title.textContent = grouping.name;
+        const description = document.createElement("span");
+        description.textContent = grouping.description;
+        const style = document.createElement("em");
+        style.textContent = grouping.style;
+        const swatches = document.createElement("span");
+        swatches.className = "grouping-swatches";
+        const baseCategories = ["status", "system", "department", "channel", "metadata", "alert", "accent"];
+        const usedCategories = Array.from(new Set([
+          ...baseCategories.map((category) => grouping.category_map[category] || category),
+          ...Object.values(grouping.item_categories),
+        ]));
+        usedCategories.forEach((category) => {
+          const swatch = document.createElement("span");
+          swatch.className = "grouping-swatch";
+          swatch.dataset.category = category;
+          swatch.title = category;
+          swatches.appendChild(swatch);
+        });
+        card.append(title, description, style, swatches);
+        card.addEventListener("click", () => selectDisplayColorGrouping(grouping));
+        groupingContainer.appendChild(card);
+      });
+      selectedDisplayGrouping = selectedDisplayGrouping
+        ? data.color_groupings.find((grouping) => grouping.id === selectedDisplayGrouping.id) || data.color_groupings[0]
+        : data.color_groupings[0];
+      selectDisplayColorGrouping(selectedDisplayGrouping);
       const screenSelect = document.getElementById("display-screen-select");
       screenSelect.replaceChildren();
       data.screens.forEach((screen) => {
@@ -1088,6 +1156,10 @@
     displayCustomConfig.screen_item_options = Object.assign(
       {}, copyJson(selectedDisplayTemplate.screen_item_options), displayCustomConfig.screen_item_options
     );
+    const groupingId = displayCustomConfig.color_grouping_id || "balanced";
+    selectedDisplayGrouping = displayPaletteData.color_groupings.find((grouping) => grouping.id === groupingId);
+    if (!selectedDisplayGrouping) throw new Error(`Unknown display color grouping: ${groupingId}`);
+    displayCustomConfig.color_grouping_id = selectedDisplayGrouping.id;
     selectedDisplayPalette = null;
     document.querySelectorAll(".display-palette-card").forEach((card) => {
       card.classList.remove("selected");
@@ -1098,10 +1170,16 @@
       card.classList.toggle("selected", selected);
       card.setAttribute("aria-checked", String(selected));
     });
+    document.querySelectorAll(".display-grouping-card").forEach((card) => {
+      const selected = card.dataset.groupingId === selectedDisplayGrouping.id;
+      card.classList.toggle("selected", selected);
+      card.setAttribute("aria-checked", String(selected));
+    });
     document.getElementById("display-custom-name").value = displayCustomConfig.name || "My Custom Palette";
     populateSupportedColorSelect(document.getElementById("display-view-text"), displayCustomConfig.colors.status);
     populateSupportedColorSelect(document.getElementById("display-view-back"), displayCustomConfig.colors.background);
     renderSemanticColors();
+    updateDisplayGroupingSwatches();
     renderDisplayItemEditor();
     renderDisplayPreviews();
   }

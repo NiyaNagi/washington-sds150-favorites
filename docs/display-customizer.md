@@ -84,11 +84,41 @@ semantic color from the active theme.
 | Mobile & GPS | Coordinates, active site, GPS, signal, and power while roaming |
 | Unit Identification | Unit ID/name fragments, TGID, system, site, service, and RSSI |
 | SDS150 Telemetry | Battery current/temperature, USB voltage, filter, RF health, and power |
+| Discovery & Close Call | Unknown-signal capture, search, repeater finding, and RF quality |
+| Trunk Network Analysis | P25 network, site, talkgroup, unit, and decoding context |
+| Aviation & Marine | Frequency, modulation, service, location, and signal strength |
+| Recording & Alerts | Recording, priority, Close Call, weather, and active-state indicators |
 
 Every scenario template except Sentinel Export fills every editable option
 slot with a supported non-empty choice. Templates are starting points:
 synchronized or per-screen edits remain available afterward, and reset returns
 a field or view to the selected template rather than discarding the template.
+
+## Color grouping choices
+
+Color grouping is a third independent choice: **layout** selects the data,
+**theme** supplies the actual supported colors, and **grouping** assigns those
+theme colors to related fields. Changing any one preserves the other two.
+
+| Grouping | Style | Behavior |
+|---|---|---|
+| Balanced Semantic | Basic | Logical color follows the selected data type |
+| Basic Hierarchy | Basic | Distinct hierarchy and alerts with restrained secondary data |
+| Full Spectrum Granular | Colorful | Colors every visible field by granular functional family |
+| Colorful Row Bands | Colorful | Distinct top, utility, hierarchy, detail, icon, and bottom rows |
+| Top & Bottom Contrast | Rows | Strong top and bottom bands around semantic center rows |
+| Alternating Data Rows | Rows | Alternating detail-row colors for horizontal scanning |
+| Technical Heatmap | Scenario | Prominent receiver diagnostics and RF warnings |
+| Activity & Alerts | Scenario | Prominent active channel, recording, and alert states |
+| Hierarchy Focus | Scenario | Emphasized system/department/channel identity |
+| Uniform Minimal | Accessibility | One foreground color except alerts |
+
+Full Spectrum Granular removes neutral white/status coloring from every visible
+field when the selected theme provides colored semantic groups. Related fields
+still match: controls, date/time, signal/decoding, power, hierarchy levels,
+info areas, icons, and the three soft keys each receive consistent functional
+grouping. Row-based choices instead differentiate physical top, middle, icon,
+and bottom areas while retaining theme contrast constraints.
 
 ## Full customization
 
