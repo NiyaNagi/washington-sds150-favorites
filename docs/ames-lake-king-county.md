@@ -112,7 +112,7 @@ After updating Sentinel's master database:
 5. Inspect representative city lists, location tags, clear/encrypted grouping,
    and `OUT01` in Sentinel before writing to the scanner.
 
-The current local validation produced 136 catalog entries and 134 HPE files;
+The current local validation produced 137 catalog entries and 135 HPE files;
 only FL45 and FL72 remain intentional Discovery-only gaps.
 
 ## Sources

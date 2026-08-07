@@ -7,6 +7,7 @@ loudly instead of silently shipping stale data.
 from wasds150.catalog import baseline, loader
 from wasds150.catalog.ames_lake import favorites as ames_lake_favorites
 from wasds150.catalog.band_profiles import favorites as band_favorites
+from wasds150.catalog.puget_ham import favorite as puget_ham_favorite
 from wasds150.catalog.upper_lena_lake import favorites as upper_lena_favorites
 from wasds150.models.catalog import Catalog
 from wasds150.recipes.systems import static_systems_for
@@ -14,9 +15,9 @@ from wasds150.recipes.systems import static_systems_for
 
 def test_load_baseline_returns_statewide_and_king_county_favorites():
     catalog = baseline.load_baseline()
-    assert len(catalog.favorites) == 136
+    assert len(catalog.favorites) == 137
     assert len([fl for fl in catalog.favorites if fl.favorite_key.startswith("KC")]) == 39
-    assert {fl.favorite_key for fl in catalog.favorites[-4:]} == {"UL00", "UL01", "UL02", "UL03"}
+    assert {fl.favorite_key for fl in catalog.favorites[-5:]} == {"UL00", "UL01", "UL02", "UL03", "PSHAM01"}
 
 
 def test_baseline_resource_path_exists():
@@ -32,7 +33,7 @@ def test_baseline_matches_repo_csv(repo_csv_path):
     assert statewide.content_hash() == from_csv.content_hash()
     assert [fl.slug for fl in statewide.favorites] == [fl.slug for fl in from_csv.favorites]
     assert [fl.slug for fl in from_baseline.favorites[len(from_csv.favorites):]] == [
-        fl.slug for fl in ames_lake_favorites() + band_favorites() + upper_lena_favorites()
+        fl.slug for fl in ames_lake_favorites() + band_favorites() + upper_lena_favorites() + [puget_ham_favorite()]
     ]
 
 

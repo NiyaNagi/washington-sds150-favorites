@@ -11,7 +11,7 @@ The August 2, 2026 Sentinel master database was read successfully on Windows:
 - 14,939 normalized local HPDB facts, with no source alerts.
 - All 17 intended SID-qualified trunked Favorites Lists matched exact
   TrunkId/SysId identities.
-- 134 validated HPE files were generated from 136 catalog entries.
+- 135 validated HPE files were generated from 137 catalog entries.
 - All 39 King County municipal lists, the Ames Lake home profile, the
   Eastside regional profile, and the comprehensive outdoor rollup were
   populated and location-tagged.
@@ -25,7 +25,11 @@ The August 2, 2026 Sentinel master database was read successfully on Windows:
 - FL45 and FL72 remain the only intentional on-site Discovery lists.
 - Every generated HPE decoded and passed schema and semantic validation.
 - The import-pack manifest, file set, and SHA-256 checksums passed validation.
-- Current import-pack SHA-256: `8B258DD0186582C91F2BE228F4C25126603D6B07D75ACC70CB2F924C1BAD6E4B`.
+- Current import-pack SHA-256: `08436455BAA1AE98B434697197DBEC168601D4A107F8C62915F73DE3D0B0B086`.
+- Current generated snapshot: `0027`; catalog content hash
+  `a65c7323fb2e134288c062792f39a6503a085d532382cc75437200fd28f40b3e`.
+- PSHAM01 contains 369 channels in 44 departments across two systems after
+  applying the 2026-08-06 WWARA extract.
 - Clear/encrypted split pairs were distinct; every retained encrypted
   department was clearly marked and avoided.
 
@@ -146,7 +150,7 @@ have both been checked.
 ### Reference validation
 
 The generated set was checked against a real Sentinel-created HPD example.
-All 134 generated HPE files passed container, schema, semantic, CRLF, header,
+All 135 generated HPE files passed container, schema, semantic, CRLF, header,
 and signature validation. Every record tag shared with the example matched
 Sentinel's observed field width. Direct-workspace HPD output removes only the
 HPE interchange signature and preserves the validated record hierarchy.

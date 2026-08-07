@@ -8,10 +8,10 @@ warnings rather than filled with guessed sites or talkgroups.
 
 ## Local baseline status
 
-- 136 curated Favorites Lists are defined: 78 statewide/core entries plus
+- 137 curated Favorites Lists are defined: 78 statewide/core entries plus
   39 King County municipalities, Ames Lake/Eastside, OUT01, twelve band packs,
   and four Upper Lena Lake profiles.
-- 72 lists currently produce validated HPE files with no private input.
+- 73 lists currently produce validated HPE files with no private input.
 - The current enriched catalog contains 1,855 unique structured channel records.
 - Universal distress/calling channels receive conservative priority flags.
 - Explicit carrier-only APRS/Winlink packet channels are retained for

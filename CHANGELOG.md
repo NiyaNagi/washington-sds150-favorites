@@ -9,6 +9,16 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Added
 
+- Added PSHAM01, a comprehensive Puget Sound amateur repeater/net monitor. It
+  always includes ten operator-published net channels and expands locally from
+  WWARA's current nightly coordination extract into region/band/mode departments.
+- Added mode-aware WWARA normalization for FM/NFM, P25 NAC, DMR color code, and
+  unsupported D-Star/Fusion-only carriers; unsupported digital departments are
+  retained but avoided.
+- Added sourced Puget repeater/net documentation covering PSRG, Seattle ACS,
+  Mike & Key, Mason, Island, Snoqualmie Valley, Tacoma, Kitsap, Whatcom, Skagit,
+  PNW VHF Society, WWARA, RepeaterBook and RadioReference research.
+
 - Added twelve band-oriented Favorites Lists for civil air, military air,
   amateur VHF/UHF, marine, rail, personal/itinerant, public-safety interop,
   weather/SAR, federal wildland, medical, transportation/utility, and

@@ -12,7 +12,7 @@ channels in a local Favorites List; permanently avoid constant data carriers.
 
 Band packs intentionally reuse existing lists. Enable a pack **or** its source
 components for a listening session, not both, or the same transmission may be
-scanned repeatedly. Do not install/enable all 136 catalog entries at once: use
+scanned repeatedly. Do not install/enable all 137 catalog entries at once: use
 the Profile and guarded bulk installer to select a practical subset, and keep
 only one or two scenario packs active for a responsive scan cycle.
 

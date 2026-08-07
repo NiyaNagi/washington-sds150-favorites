@@ -355,6 +355,11 @@ def systems_from_matched_facts(fl: FavoritesList, matched_facts: List[Normalized
     frequency (Tier B). Order is deterministic (input order preserved);
     combine with :func:`dedupe_systems` when merging into a row that may
     already carry systems from a prior run."""
+    if fl.favorite_key == "PSHAM01":
+        from wasds150.catalog.puget_ham import system_from_wwara_facts
+        system = system_from_wwara_facts(fl, matched_facts)
+        return [system] if system is not None else []
+
     systems: List[System] = []
     for fact in matched_facts:
         system = system_from_hpdb_fact(fact)

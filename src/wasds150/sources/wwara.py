@@ -118,6 +118,25 @@ class WwaraSource(OnlineSourceAdapter):
                 lat = lon = None
             record_id = row.get("FC_RECORD_ID", "").strip()
             entity_key = f"wwara:{record_id}" if record_id else f"wwara:{call}:{freq}"
+            if row.get("DMR") == "Y":
+                mode = "DMR"
+                color_code = re.sub(r"\D", "", row.get("DMR_COLOR_CODE", ""))
+                tone = f"ColorCode={color_code}" if color_code else None
+            elif row.get("P25_PHASE_1") == "Y" or row.get("P25_PHASE_2") == "Y":
+                mode = "P25"
+                nac = row.get("P25_NAC", "").strip()
+                tone = f"NAC={nac}" if nac else None
+            elif row.get("FM_NARROW") == "Y":
+                mode = "NFM"
+                tone = row.get("CTCSS_OUT", "").strip() or row.get("DCS_CDCSS", "").strip() or None
+            elif row.get("FM_WIDE") == "Y":
+                mode = "FM"
+                tone = row.get("CTCSS_OUT", "").strip() or row.get("DCS_CDCSS", "").strip() or None
+            else:
+                mode = "AUTO"  # D-STAR/Fusion/other carrier: scanner cannot decode voice.
+                tone = None
+            if tone and mode in ("FM", "NFM"):
+                tone = f"TONE=C{tone}" if row.get("CTCSS_OUT", "").strip() else f"D{tone.zfill(3)}"
             facts.append(
                 NormalizedFact(
                     entity_key=entity_key,
@@ -126,7 +145,7 @@ class WwaraSource(OnlineSourceAdapter):
                     freq_mhz=freq,
                     offset_mhz=offset_mhz,
                     tone=tone,
-                    mode="FM",
+                    mode=mode,
                     county=None,  # WWARA publishes city/locale, not county directly
                     lat=lat,
                     lon=lon,

@@ -162,6 +162,10 @@ def build_default_recipes(catalog: Catalog) -> List[Recipe]:
         name_hint = _detect_name_hint(fl.favorite_name)
         is_discovery_target = fl.source_type.strip().lower() == "discovery target"
         is_rollup = "rollup" in fl.favorite_name.lower() or "reuses fl" in fl.system_or_category.lower()
+        if fl.favorite_key == "PSHAM01":
+            source_ids = ("wwara",)
+            counties = ()
+            name_hint = None
         if is_discovery_target or is_rollup:
             source_ids = ()
             sids = ()

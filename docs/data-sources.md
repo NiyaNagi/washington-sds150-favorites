@@ -97,8 +97,8 @@ Matched facts are attached to the row as additional provenance entries
 (source, URL, retrieval time, confidence) — additive and inert to the merge
 engine (never a *fact-field*, i.e. CSV column, change) — so running an
 update with **no** local HPDB/RadioReference input reproduces the shipped
-136-row catalog's public fields and content hash exactly. The original 78
-statewide/core rows still match the checked-in CSV, while 58 public extension
+137-row catalog's public fields and content hash exactly. The original 78
+statewide/core rows still match the checked-in CSV, while 59 public extension
 rows (King County/Ames Lake, band packs, and Upper Lena) are appended
 deterministically. Matched facts are
 **also** converted into a real, populated `FavoritesList.systems` entry

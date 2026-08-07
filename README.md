@@ -27,17 +27,18 @@ The catalog covers all 39 Washington counties and includes:
 - [Ames Lake, King County, and outdoor lists](docs/ames-lake-king-county.md) - all 39 King County municipalities with Census location tags, Ames Lake profiles, reviewed local service curation, and the comprehensive outdoor safety rollup.
 - [Band-oriented scanning](docs/band-scanning.md) - twelve ready-to-scan listening packs, matching Custom Search ranges, noise/data avoidance, and additional scenario guidance.
 - [Upper Lena Lake profile](docs/upper-lena-lake.md) - compact and comprehensive Hood Canal/Olympic wilderness, SAR, weather, public-safety, aviation, marine, amateur, and personal-radio profiles.
+- [Puget Sound ham repeaters and nets](docs/puget-sound-ham.md) - current WWARA-coordinated repeaters, operator-published net channels/schedules, mode grouping, source hierarchy, and update workflow.
 - [Data-source architecture](docs/data-sources.md) - source provenance, caching, update and merge behavior.
 
 ## Current coverage
 
 | Measure | Current baseline |
 |---|---:|
-| Curated Favorites List entries | 136 |
+| Curated Favorites List entries | 137 |
 | Statewide/core entries | 78 |
 | King County municipal entries | 39 |
-| Lists generated with no private input | 72 |
-| Lists generated after current local Sentinel enrichment | 134 |
+| Lists generated with no private input | 73 |
+| Lists generated after current local Sentinel enrichment | 135 |
 | Unique structured channel records after enrichment | 1,855 |
 | Remaining local warnings | 2 |
 | Washington counties represented | 39 |
@@ -148,7 +149,7 @@ the same catalog:
   FRS/GMRS/MURS/CB, marine VHF, common aviation/guard frequencies, and
   more — are parsed and populated automatically (see
   `wasds150.recipes.systems` / `wasds150.sources.static_channels` /
-  `wasds150.sources.static_seeds`). Currently 72 of the 136 catalog rows
+  `wasds150.sources.static_seeds`). Currently 73 of the 137 catalog rows
   are populated this way with zero configuration; most local city rows are
   deliberately HPDB-dependent. Static channels also
   receive conservative modulation, service-type, and distress/calling
