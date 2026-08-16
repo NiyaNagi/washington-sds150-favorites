@@ -6,6 +6,10 @@ The antenna is a 40-meter end-fed half-wave design sold as the
 JYR8010-150W with a nominal 1:49/1:64 impedance transformer
 ([Amazon ASIN B0DBDCNVZD](https://www.amazon.com/dp/B0DBDCNVZD)).
 
+The separate [`manual-testing/`](manual-testing/) dataset contains the August
+15, 2026 broadband handheld-antenna sweeps, comparison report, charts, and
+Touchstone source files.
+
 ## Quick findings
 
 - Best measured match: **80m at
