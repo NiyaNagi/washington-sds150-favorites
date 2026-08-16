@@ -9,6 +9,10 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Added
 
+- Added a calibrated JYR8010 EFHW antenna-results package with supported-band
+  SWR zooms, impedance and return-loss plots, a Smith chart, usable-bandwidth
+  thresholds, an offline interactive report, summary tables, point data, full
+  Touchstone source, calibration metadata, and reproducible generation tooling.
 - Added PSHAM01, a comprehensive Puget Sound amateur repeater/net monitor. It
   always includes ten operator-published net channels and expands locally from
   WWARA's current nightly coordination extract into region/band/mode departments.

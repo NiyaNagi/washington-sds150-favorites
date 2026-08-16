@@ -1,0 +1,68 @@
+{
+  "report_generated_at": "2026-08-16T13:19:27.639221-07:00",
+  "antenna": {
+    "model": "JYR8010-150W",
+    "type": "end-fed half-wave",
+    "radiating_element_length_m": 40,
+    "nominal_transformer_ratio": "1:49 / 1:64",
+    "advertised_supported_bands": [
+      "80m",
+      "40m",
+      "30m",
+      "20m",
+      "17m",
+      "15m",
+      "12m",
+      "10m"
+    ],
+    "product_url": "https://www.amazon.com/dp/B0DBDCNVZD",
+    "asin": "B0DBDCNVZD"
+  },
+  "installation": {
+    "dedicated_ground": false,
+    "dedicated_counterpoise": false,
+    "note": "Feed line may be part of the RF return path; installation-specific common-mode effects are possible."
+  },
+  "instrument": {
+    "model": "NanoVNA-H",
+    "firmware": "1.2.50",
+    "measurement_bandwidth_hz": 1000,
+    "reference_impedance_ohm": 50.0
+  },
+  "calibration": {
+    "type": "software one-port ideal OSL",
+    "reference_plane": "antenna side of attached adapter",
+    "standards": [
+      "open",
+      "short",
+      "50-ohm load"
+    ],
+    "device_saved_calibration_preserved": true,
+    "created_at": "2026-08-16T12:46:31-07:00"
+  },
+  "sweep": {
+    "captured_at": "2026-08-16T12:50:57-07:00",
+    "start_hz": 1800000,
+    "stop_hz": 148000000,
+    "points": 40001,
+    "nominal_frequency_step_hz": 3655.0,
+    "segments": 400
+  },
+  "analysis": {
+    "band_plan": "United States amateur allocations",
+    "supported_bands_only": true,
+    "swr_thresholds": [
+      1.5,
+      2.0,
+      3.0
+    ],
+    "reference_impedance_ohm": 50.0
+  },
+  "load_reconnection_check": {
+    "note": "The calibration load was reconnected, so this establishes drift and connector repeatability rather than independent traceability.",
+    "160m_median_swr": 1.0000310168,
+    "60m_median_swr": 1.0000341673,
+    "median_resistance_ohm": 50.0,
+    "maximum_abs_reactance_ohm": 0.0037
+  }
+}
