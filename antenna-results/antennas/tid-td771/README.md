@@ -7,6 +7,7 @@ A long flexible whip that turned out to be the standout performer on the 222-225
 ## Measurement inventory
 
 - Connection: SMA antenna with an SMA-to-BNC adapter.
+- Measurement context: Handheld bench fixture.
 - Calibrated 50-1200 MHz broadband sweep: 40,001 points (~28.75 kHz spacing).
 - Three-pass complex-averaged service zooms override broadband data for the same configuration and service.
 - [with SMA-to-BNC adapter](measurements/2026-08-16-with-sma-bnc-adapter/antenna.s1p): Single fixed configuration measured through the required adapter.

@@ -7,6 +7,7 @@ A telescopic whip whose match moves predictably with length, so one antenna can 
 ## Measurement inventory
 
 - Connection: BNC, direct to the measurement plane.
+- Measurement context: Handheld bench fixture.
 - Calibrated 50-1200 MHz broadband sweep: 40,001 points (~28.75 kHz spacing).
 - Three-pass complex-averaged service zooms override broadband data for the same configuration and service.
 - [setting 1](measurements/setting-1-collapsed/antenna.s1p): Fully collapsed.

@@ -1,6 +1,6 @@
 {
   "captured_at": "2026-08-16T16:04:15.730136-07:00",
-  "calibration_file": "washington-sds150-favorites/antenna-results/calibration-baselines/sma-to-bnc/2026-08-16-nanovna-h/calibration.npz",
+  "calibration_file": "antenna-results/calibration-baselines/sma-to-bnc/2026-08-16-nanovna-h/calibration.npz",
   "calibration": {
     "created_at": "2026-08-16T14:18:52.528016-07:00",
     "reference_plane": "antenna side of attached adapter",

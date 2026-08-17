@@ -9,6 +9,10 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Added
 
+- Added the installed Taurus triband vehicle antenna with a separate BNC-plane
+  calibration baseline, three-pass averaged service zooms, raw complex S11
+  measurements, context-aware comparisons, an all-antenna coverage matrix, and
+  generated full-window gap analysis.
 - Added a reproducible calibrated scanner-antenna report package covering 20
   configurations and 20 receive-service windows, with authoritative averaged
   zooms, per-family analysis, practical recommendations, machine-readable

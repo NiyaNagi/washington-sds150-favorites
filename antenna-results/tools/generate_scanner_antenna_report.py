@@ -27,7 +27,7 @@ import numpy as np
 matplotlib.use("Agg")
 
 from matplotlib import pyplot as plt  # noqa: E402
-from matplotlib.colors import LinearSegmentedColormap  # noqa: E402
+from matplotlib.colors import LinearSegmentedColormap, ListedColormap  # noqa: E402
 
 REFERENCE_OHMS = 50.0
 SCHEMA_ID = "sds150-scanner-antenna-scorecard/1.0"
@@ -110,6 +110,11 @@ class Family:
     valid: bool
     configs: Tuple[Config, ...]
     overview: str
+    measurement_context: str = "handheld_bench"
+    fixture_note: str = (
+        "Fixed upright bench geometry, no added counterpoise; the USB cable "
+        "remained part of the RF environment."
+    )
     cautions: Tuple[str, ...] = ()
     invalid_reason: str = ""
 
@@ -158,6 +163,10 @@ SERVICES: Tuple[Service, ...] = (
 )
 
 SERVICE_BY_KEY: Dict[str, Service] = {service.key: service for service in SERVICES}
+CONTEXT_LABELS = {
+    "handheld_bench": "Handheld bench fixture",
+    "vehicle_installed": "Installed vehicle",
+}
 
 FAMILIES: Tuple[Family, ...] = (
     Family(
@@ -179,8 +188,8 @@ FAMILIES: Tuple[Family, ...] = (
             "A short fixed whip aimed at the 700/800/900 MHz public-safety and "
             "trunking downlinks. It is the only antenna measured here that holds a "
             "good match across every modern trunked public-safety window, and it is "
-            "also the best of the tested set at 33cm, 900 MHz trunking, and the "
-            "L-band aviation data frequencies."
+            "also the best of the handheld set at 33cm and 900 MHz trunking. Its "
+            "L-band aviation-data match is moderate rather than best overall."
         ),
         cautions=(
             "It is deliberately narrow-band: VHF, civil air, 2m, and the 220 MHz "
@@ -347,14 +356,57 @@ FAMILIES: Tuple[Family, ...] = (
         overview=(
             "The reference point: whatever the scanner already has on it. In this "
             "fixture it is usable around the 406-420 MHz federal band and near the "
-            "bottom edge of 70cm, moderate on UHF land mobile, and poor everywhere "
-            "else that was measured."
+            "bottom edge of 70cm, moderate on UHF land mobile, and unexpectedly the "
+            "broadest measured match across both UAT 978 and ADS-B 1090. Most other "
+            "windows are poor."
         ),
         cautions=(
             "A stock rubber duck is designed to work against the radio body. "
             "Measuring it on a bench fixture with no chassis understates VHF.",
             "Use it as the baseline the other antennas have to beat, not as a "
             "characterization of the shipped product.",
+        ),
+    ),
+    Family(
+        key="taurus-triband-vehicle",
+        label="Taurus triband vehicle antenna",
+        short_label="Taurus vehicle",
+        kind="vehicle",
+        connection=(
+            "NanoVNA BNC reference plane into the installed antenna feed; the "
+            "antenna-side BNC-to-PL-239 adapter remained part of the DUT"
+        ),
+        valid=True,
+        configs=(
+            Config(
+                key="taurus-triband-vehicle",
+                label="installed on vehicle",
+                directory="taurus-triband-vehicle/measurements/2026-08-16-installed",
+                note=(
+                    "Measured in the normal vehicle installation with the vehicle "
+                    "off, body closed, and feed line in its normal route."
+                ),
+            ),
+        ),
+        overview=(
+            "A permanently installed vehicle triband scanner antenna. Its measured "
+            "match is strongest near the upper end of VHF land mobile, around "
+            "856.5 MHz, and around 913.5 MHz. It provides useful installed coverage "
+            "for marine, railroad, NOAA weather, and parts of the 800/900 MHz range, "
+            "but it does not broadly cover every nominal triband service."
+        ),
+        measurement_context="vehicle_installed",
+        fixture_note=(
+            "Measured in the normal vehicle installation with the vehicle off, "
+            "doors/hood/trunk closed, and feed line in its normal route."
+        ),
+        cautions=(
+            "This installed-vehicle result uses a separate BNC-plane calibration "
+            "and must not be treated as a controlled gain comparison with the "
+            "handheld bench fixture.",
+            "The excellent minima at 856.472 and 913.518 MHz are narrow; median and "
+            "coverage figures describe the full service windows more honestly.",
+            "FM broadcast, civil air, 2m, 6m, UAT, and ADS-B remain weak matches.",
         ),
     ),
     Family(
@@ -423,19 +475,37 @@ RECOMMENDATIONS: Tuple[Recommendation, ...] = (
         "blocks. This is the normal SDS150 use case in Washington.",
     ),
     Recommendation(
+        "Installed vehicle monitoring: VHF high, 800 MHz, and 33cm",
+        (
+            "vhf-lmr",
+            "marine-vhf",
+            "railroad",
+            "noaa-weather",
+            "800-public-safety-downlink",
+            "33cm",
+        ),
+        "taurus-triband-vehicle",
+        (),
+        "The Taurus is the measured installed-vehicle option. It broadly stays "
+        "under 3:1 on marine, railroad, and NOAA, is uneven across 150-174 MHz, "
+        "and has narrow excellent matches near 856.5 and 913.5 MHz. This is not a "
+        "direct gain comparison with handheld antennas.",
+    ),
+    Recommendation(
         "900 MHz trunking, 33cm, and general 902-941 MHz listening",
         ("33cm", "900-trunking-downlink"),
         "remtronix-920",
         (),
-        "Nothing else tested comes close in this range.",
+        "The Remtronix remains the broad handheld-fixture choice. The installed "
+        "Taurus has narrow excellent matches in 33cm and partial 900 MHz coverage.",
     ),
     Recommendation(
         "VHF land mobile, marine, railroad, and NOAA weather (150-174 MHz)",
         ("vhf-lmr", "marine-vhf", "railroad", "noaa-weather"),
         "rh789:setting-5",
         (),
-        "Extend the RH789 to setting 5. Usable rather than excellent, but it is "
-        "the only tested configuration that works at all across 150-174 MHz.",
+        "Extend the RH789 to setting 5 for handheld use. The installed Taurus also "
+        "provides usable but uneven VHF-high coverage in its separate vehicle context.",
     ),
     Recommendation(
         "Federal UHF (406.1-420 MHz)",
@@ -489,26 +559,32 @@ RECOMMENDATIONS: Tuple[Recommendation, ...] = (
         "FM broadcast (88-108 MHz)",
         ("fm-broadcast",),
         None,
-        ("rh789:setting-2", "generic-extendable:setting-2"),
-        "Both options are narrow and geometry-sensitive: RH789 setting 2 near "
-        "97.66 MHz, generic extendable setting 2 near 101.25 MHz. Neither matches "
-        "the whole broadcast band.",
+        (
+            "generic-extendable:setting-4",
+            "rh789:setting-2",
+            "generic-extendable:setting-2",
+        ),
+        "Generic setting 4 has the largest measured partial coverage, but that "
+        "result is broadband-only and this family is session-sensitive. Averaged "
+        "zooms show narrow responses for RH789 setting 2 near 97.66 MHz and generic "
+        "setting 2 near 101.25 MHz. None matches the whole broadcast band.",
     ),
     Recommendation(
         "UAT 978 MHz and ADS-B 1090 MHz",
         ("uat-978", "ads-b-1090"),
-        "remtronix-920",
-        (),
-        "Best of the tested set but only a moderate match, and a moderate match is "
-        "not the same as usable aircraft-tracking sensitivity.",
+        "uniden-sds150-stock",
+        ("remtronix-920",),
+        "The stock antenna has the broadest measured match across both windows in "
+        "the handheld fixture. The Remtronix is close on UAT but only partial at "
+        "1090 MHz. Match is not the same as aircraft-tracking sensitivity.",
     ),
     Recommendation(
         "Civil air (118-137 MHz), 2m, and 6m",
         ("civil-air", "2m", "6m"),
         None,
         (),
-        "Nothing tested matched these bands in this no-radio-chassis fixture. No "
-        "recommendation is made; do not read a winner into the rankings here.",
+        "No tested configuration has a broad match on these bands. No recommendation "
+        "is made; do not read a winner into the numerical rankings here.",
     ),
 )
 
@@ -657,6 +733,10 @@ def build_rows(data: Dict[str, ConfigData]) -> List[Dict[str, object]]:
             row: Dict[str, object] = {
                 "family": config_data.family.key,
                 "family_label": config_data.family.label,
+                "measurement_context": config_data.family.measurement_context,
+                "measurement_context_label": CONTEXT_LABELS[
+                    config_data.family.measurement_context
+                ],
                 "configuration": config_data.config.key,
                 "configuration_label": config_data.config.label,
                 "service": service.key,
@@ -666,6 +746,7 @@ def build_rows(data: Dict[str, ConfigData]) -> List[Dict[str, object]]:
                 "source": source,
             }
             row.update(analyze_trace(trace))
+            row["coverage_status"] = coverage_status(row)
             rows.append(row)
     for service in SERVICES:
         service_rows = [row for row in rows if row["service"] == service.key]
@@ -677,7 +758,71 @@ def build_rows(data: Dict[str, ConfigData]) -> List[Dict[str, object]]:
         )
         for rank, row in enumerate(service_rows, 1):
             row["rank"] = rank
+        for context in CONTEXT_LABELS:
+            context_rows = [
+                row
+                for row in service_rows
+                if row["measurement_context"] == context
+            ]
+            for rank, row in enumerate(context_rows, 1):
+                row["context_rank"] = rank
     return rows
+
+
+def coverage_status(row: Dict[str, object]) -> str:
+    coverage_2 = float(row["coverage_at_or_below_2_percent"])
+    coverage_3 = float(row["coverage_at_or_below_3_percent"])
+    minimum = row["minimum_swr"]
+    if coverage_2 >= 80.0:
+        return "broad <=2:1"
+    if coverage_3 >= 80.0:
+        return "broad <=3:1"
+    if coverage_3 >= 20.0:
+        return "partial only"
+    if minimum is not None and float(minimum) <= 2.0:
+        return "isolated resonance"
+    return "gap"
+
+
+def coverage_selection_key(row: Dict[str, object]) -> Tuple[float, ...]:
+    status_order = {
+        "broad <=2:1": 0.0,
+        "broad <=3:1": 1.0,
+        "partial only": 2.0,
+        "isolated resonance": 3.0,
+        "gap": 4.0,
+    }
+    return (
+        status_order[str(row["coverage_status"])],
+        -float(row["coverage_at_or_below_3_percent"]),
+        -float(row["coverage_at_or_below_2_percent"]),
+        float(row["median_swr"]) if row["median_swr"] is not None else math.inf,
+        float(row["maximum_swr"]) if row["maximum_swr"] is not None else math.inf,
+    )
+
+
+def build_family_coverage(
+    rows: Sequence[Dict[str, object]]
+) -> List[Dict[str, object]]:
+    output: List[Dict[str, object]] = []
+    for family in VALID_FAMILIES:
+        candidates = family_rows(rows, family.key)
+        for service in SERVICES:
+            matching = [row for row in candidates if row["service"] == service.key]
+            output.append(min(matching, key=coverage_selection_key))
+    return output
+
+
+def build_inventory_coverage(
+    family_coverage: Sequence[Dict[str, object]]
+) -> List[Dict[str, object]]:
+    output: List[Dict[str, object]] = []
+    for service in SERVICES:
+        candidates = [
+            row for row in family_coverage if row["service"] == service.key
+        ]
+        output.append(min(candidates, key=coverage_selection_key))
+    return output
 
 
 def json_ready(value: object) -> object:
@@ -892,7 +1037,7 @@ def write_best_settings(
         "coverage_at_or_below_3_percent",
     ]
     with output.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fields)
+        writer = csv.DictWriter(handle, fieldnames=fields, lineterminator="\n")
         writer.writeheader()
         for row in selected:
             writer.writerow({field: row[field] if row[field] is not None else VERY_POOR for field in fields})
@@ -919,6 +1064,7 @@ def family_readme(
         "## Measurement inventory",
         "",
         f"- Connection: {family.connection}.",
+        f"- Measurement context: {CONTEXT_LABELS[family.measurement_context]}.",
         "- Calibrated 50-1200 MHz broadband sweep: 40,001 points (~28.75 kHz spacing).",
         "- Three-pass complex-averaged service zooms override broadband data for the same configuration and service.",
     ]
@@ -955,9 +1101,17 @@ def family_readme(
             "- Setting 2 has narrow responses near 101.25 MHz FM and 271.39 MHz military air.",
             "- The later setting 1 UHF zoom is poor. Do not recommend this whip over stable choices.",
         ])
+    elif family.key == "taurus-triband-vehicle":
+        lines.extend([
+            "- Broadly usable under 3:1 across marine, railroad, and NOAA weather; 150-174 MHz is useful but uneven.",
+            "- 800 MHz has an excellent 1.01 minimum at 856.472 MHz, but a 2.17 median and only 44.5% of the downlink window at or below 2:1.",
+            "- 33cm has an excellent 1.05 minimum at 913.518 MHz but only partial full-window coverage; 900 MHz trunking is also partial.",
+            "- 700 MHz, 70cm, federal/UHF LMR, T-band, UAT, and ADS-B are partial or weak; FM, civil air, 2m, and 6m are clear gaps.",
+        ])
     else:
         lines.extend([
             "- Useful around 406-470 MHz, strongest at the 420 MHz edge.",
+            "- Broadest measured handheld-fixture match across both UAT 978 and ADS-B 1090, though match alone does not establish tracking sensitivity.",
             "- Poor at VHF and 700/800 MHz in this no-radio-chassis fixture.",
         ])
     lines.extend(["", "## Analysis charts", ""])
@@ -988,9 +1142,18 @@ def family_readme(
             )
     lines.extend(["", "## Caveats", ""])
     lines.extend(f"- {caution}" for caution in family.cautions)
+    lines.append(f"- {family.fixture_note}")
+    if family.measurement_context == "handheld_bench":
+        lines.append(
+            "- Handheld antennas normally interact with the scanner chassis and "
+            "operator. Treat these as fixture-specific comparisons."
+        )
+    else:
+        lines.append(
+            "- Vehicle body, mounting location, feed line, and antenna-side adapter "
+            "are part of this installed result."
+        )
     lines.extend([
-        "- Fixed upright bench geometry, no added counterpoise; the USB cable remained part of the RF environment.",
-        "- Handheld antennas normally interact with the scanner chassis and operator. Treat these as fixture-specific comparisons.",
         "- [Package method and calibration notes](../../README.md) · [immutable historical manual testing](../../manual-testing/)",
         "",
     ])
@@ -1026,8 +1189,11 @@ def write_scorecards(rows: Sequence[Dict[str, object]], comparison: Path) -> Non
     comparison.mkdir(parents=True, exist_ok=True)
     fieldnames = [
         "rank",
+        "context_rank",
         "family",
         "family_label",
+        "measurement_context",
+        "measurement_context_label",
         "configuration",
         "configuration_label",
         "service",
@@ -1042,12 +1208,15 @@ def write_scorecards(rows: Sequence[Dict[str, object]], comparison: Path) -> Non
         "maximum_swr",
         "coverage_at_or_below_2_percent",
         "coverage_at_or_below_3_percent",
+        "coverage_status",
         "resistance_at_minimum_ohm",
         "reactance_at_minimum_ohm",
         "return_loss_at_minimum_swr_db",
     ]
     with (comparison / "scanner-band-scorecard.csv").open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer = csv.DictWriter(
+            handle, fieldnames=fieldnames, lineterminator="\n"
+        )
         writer.writeheader()
         for row in rows:
             writer.writerow({
@@ -1056,9 +1225,17 @@ def write_scorecards(rows: Sequence[Dict[str, object]], comparison: Path) -> Non
             })
     payload = {
         "$schema": SCHEMA_ID,
-        "description": "Valid measured configurations only; TIDRADIO H9 stock is excluded as invalid/inconclusive.",
+        "description": (
+            "Valid measured configurations only; results include distinct handheld "
+            "bench and installed-vehicle contexts. TIDRADIO H9 stock is excluded as "
+            "invalid/inconclusive."
+        ),
         "reference_impedance_ohm": REFERENCE_OHMS,
         "ranking": ["median_swr", "maximum_swr", "minimum_swr"],
+        "ranking_warning": (
+            "Global numeric ranks cross measurement contexts and are descriptive "
+            "only. Use context_rank or the coverage summary for practical selection."
+        ),
         "nonfinite_display": VERY_POOR,
         "services": [
             {
@@ -1077,10 +1254,193 @@ def write_scorecards(rows: Sequence[Dict[str, object]], comparison: Path) -> Non
     )
 
 
+def write_coverage_artifacts(
+    family_coverage: Sequence[Dict[str, object]],
+    inventory_coverage: Sequence[Dict[str, object]],
+    comparison: Path,
+) -> None:
+    family_fields = [
+        "family",
+        "family_label",
+        "measurement_context",
+        "measurement_context_label",
+        "service",
+        "service_label",
+        "configuration",
+        "configuration_label",
+        "source",
+        "coverage_status",
+        "minimum_swr",
+        "median_swr",
+        "maximum_swr",
+        "coverage_at_or_below_2_percent",
+        "coverage_at_or_below_3_percent",
+    ]
+    with (comparison / "family-coverage-summary.csv").open(
+        "w", newline="", encoding="utf-8"
+    ) as handle:
+        writer = csv.DictWriter(
+            handle, fieldnames=family_fields, lineterminator="\n"
+        )
+        writer.writeheader()
+        for row in family_coverage:
+            writer.writerow({
+                field: row[field] if row[field] is not None else VERY_POOR
+                for field in family_fields
+            })
+
+    inventory_fields = [
+        "service",
+        "service_label",
+        "coverage_status",
+        "family",
+        "family_label",
+        "measurement_context",
+        "measurement_context_label",
+        "configuration",
+        "configuration_label",
+        "minimum_swr",
+        "median_swr",
+        "maximum_swr",
+        "coverage_at_or_below_2_percent",
+        "coverage_at_or_below_3_percent",
+    ]
+    with (comparison / "inventory-coverage-gaps.csv").open(
+        "w", newline="", encoding="utf-8"
+    ) as handle:
+        writer = csv.DictWriter(
+            handle, fieldnames=inventory_fields, lineterminator="\n"
+        )
+        writer.writeheader()
+        for row in inventory_coverage:
+            writer.writerow({
+                field: row[field] if row[field] is not None else VERY_POOR
+                for field in inventory_fields
+            })
+
+    payload = {
+        "$schema": "sds150-scanner-antenna-coverage/1.0",
+        "description": (
+            "Best measured configuration within each family and best broad coverage "
+            "across the complete antenna inventory. Contexts remain distinct."
+        ),
+        "classification": {
+            "broad <=2:1": "at least 80% of the service window at or below 2:1 SWR",
+            "broad <=3:1": "at least 80% of the service window at or below 3:1 SWR",
+            "partial only": (
+                "at least 20% at or below 3:1 without broad coverage"
+            ),
+            "isolated resonance": (
+                "less than 20% at or below 3:1, but an isolated minimum at or "
+                "below 2:1"
+            ),
+            "gap": "does not meet the partial threshold",
+        },
+        "measurement_contexts": CONTEXT_LABELS,
+        "family_coverage": list(family_coverage),
+        "inventory_coverage": list(inventory_coverage),
+    }
+    (comparison / "coverage-summary.json").write_text(
+        json.dumps(json_ready(payload), indent=2, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+
+
+def plot_family_coverage(
+    family_coverage: Sequence[Dict[str, object]], comparison: Path
+) -> None:
+    status_value = {
+        "gap": 0,
+        "isolated resonance": 1,
+        "partial only": 2,
+        "broad <=3:1": 3,
+        "broad <=2:1": 4,
+    }
+    matrix = np.zeros((len(VALID_FAMILIES), len(SERVICES)), dtype=float)
+    annotations: List[List[str]] = []
+    for family_index, family in enumerate(VALID_FAMILIES):
+        family_rows_for_chart = [
+            row for row in family_coverage if row["family"] == family.key
+        ]
+        by_service = {str(row["service"]): row for row in family_rows_for_chart}
+        annotation_row = []
+        for service_index, service in enumerate(SERVICES):
+            row = by_service[service.key]
+            matrix[family_index, service_index] = status_value[
+                str(row["coverage_status"])
+            ]
+            annotation_row.append(short_number(row["median_swr"], 1))
+        annotations.append(annotation_row)
+
+    colors = ListedColormap(
+        ["#d6d6d6", "#e5989b", "#f6bd60", "#5aa9e6", "#2a9d6f"]
+    )
+    fig, axis = plt.subplots(figsize=(17, 5.8))
+    image = axis.imshow(matrix, aspect="auto", cmap=colors, vmin=-0.5, vmax=4.5)
+    axis.set_xticks(
+        np.arange(len(SERVICES)),
+        [service.label for service in SERVICES],
+        rotation=55,
+        ha="right",
+        fontsize=8,
+    )
+    axis.set_yticks(
+        np.arange(len(VALID_FAMILIES)),
+        [
+            f"{family.short_label}\n{CONTEXT_LABELS[family.measurement_context]}"
+            for family in VALID_FAMILIES
+        ],
+        fontsize=8,
+    )
+    for row_index, row in enumerate(annotations):
+        for column_index, value in enumerate(row):
+            axis.text(
+                column_index,
+                row_index,
+                value,
+                ha="center",
+                va="center",
+                fontsize=6.5,
+                color="#1f2937",
+            )
+    colorbar = fig.colorbar(image, ax=axis, ticks=[0, 1, 2, 3, 4], pad=0.01)
+    colorbar.ax.set_yticklabels(
+        [
+            "gap",
+            "isolated resonance",
+            "partial",
+            "broad <=3:1",
+            "broad <=2:1",
+        ]
+    )
+    axis.set_title(
+        "Antenna family coverage by service (cell text = median SWR)",
+        loc="left",
+        fontweight="bold",
+    )
+    axis.set_xlabel(
+        "Coverage class uses full-window percentage; measurement contexts are not "
+        "direct gain comparisons."
+    )
+    fig.tight_layout()
+    save_figure(fig, comparison / "family-coverage-matrix.png")
+
+
 def plot_comparisons(
     data: Dict[str, ConfigData], rows: Sequence[Dict[str, object]], comparison: Path
 ) -> None:
-    best = [min((row for row in rows if row["service"] == service.key), key=lambda row: int(row["rank"])) for service in SERVICES]
+    best = [
+        min(
+            (
+                row
+                for row in rows
+                if row["service"] == service.key
+                and row["measurement_context"] == "handheld_bench"
+            ),
+            key=lambda row: int(row["context_rank"]),
+        )
+        for service in SERVICES
+    ]
     fig, axis = plt.subplots(figsize=(13.5, 7.4))
     positions = np.arange(len(best))
     values = [min(float(row["median_swr"] or 10), 10) for row in best]
@@ -1092,7 +1452,7 @@ def plot_comparisons(
     axis.axvline(3, color="#f59e0b", linestyle=":")
     style_axis(
         axis,
-        "Numerically lowest measured median by service (not a recommendation)",
+        "Handheld fixture: numerically lowest median by service (not a recommendation)",
         "Authoritative median SWR (10+ clipped)",
     )
     axis.set_xlim(1, 10)
@@ -1101,7 +1461,11 @@ def plot_comparisons(
     fig.tight_layout()
     save_figure(fig, comparison / "best-config-by-service.png")
 
-    labels = [f"{CONFIG_FAMILY[key].short_label} · {CONFIG_BY_KEY[key].label}" for key in VALID_CONFIG_KEYS]
+    labels = [
+        f"{CONFIG_FAMILY[key].short_label} · {CONFIG_BY_KEY[key].label} · "
+        f"{CONTEXT_LABELS[CONFIG_FAMILY[key].measurement_context]}"
+        for key in VALID_CONFIG_KEYS
+    ]
     plot_heatmap(
         heatmap_matrix(rows, VALID_CONFIG_KEYS),
         labels,
@@ -1162,13 +1526,49 @@ def recommendation_table() -> List[str]:
     return lines
 
 
-def comparison_readme(output: Path) -> None:
+def coverage_table(inventory_coverage: Sequence[Dict[str, object]]) -> List[str]:
+    lines = [
+        "| Service | Inventory coverage | Best available full-window result | Context | Median | <=2 | <=3 |",
+        "|---|---|---|---|---:|---:|---:|",
+    ]
+    for row in inventory_coverage:
+        lines.append(
+            f"| {row['service_label']} | {row['coverage_status']} | "
+            f"{row['family_label']} - {row['configuration_label']} | "
+            f"{row['measurement_context_label']} | "
+            f"{short_number(row['median_swr'])} | "
+            f"{short_number(row['coverage_at_or_below_2_percent'], 1)}% | "
+            f"{short_number(row['coverage_at_or_below_3_percent'], 1)}% |"
+        )
+    return lines
+
+
+def comparison_readme(
+    output: Path, inventory_coverage: Sequence[Dict[str, object]]
+) -> None:
+    hard_gaps = [
+        str(row["service_label"])
+        for row in inventory_coverage
+        if row["coverage_status"] == "gap"
+    ]
+    partial_gaps = [
+        str(row["service_label"])
+        for row in inventory_coverage
+        if row["coverage_status"] == "partial only"
+    ]
+    isolated = [
+        str(row["service_label"])
+        for row in inventory_coverage
+        if row["coverage_status"] == "isolated resonance"
+    ]
     lines = [
         "# Scanner antenna comparison",
         "",
         "> **SWR is impedance match only—not receive gain, sensitivity, radiation pattern, or decoded-signal performance.**",
         "",
         "Rankings use the authoritative median SWR, then maximum, then minimum. An exact service/configuration averaged zoom overrides broadband data. The invalid TIDRADIO H9 stock capture is excluded.",
+        "",
+        "> The installed Taurus vehicle antenna has a separate calibration and RF environment. Its rows are included for complete inventory coverage, but numeric SWR ranks across vehicle and handheld contexts are descriptive rather than controlled gain comparisons.",
         "",
         "## Circumstance table",
         "",
@@ -1184,10 +1584,26 @@ def comparison_readme(output: Path) -> None:
         "",
         "**Remtronix 920 + RH789.** The pair combines modern trunking with manually tuned VHF/UHF flexibility. Substitute or add the **TD771** when 222-225 MHz is the priority; use the **Diamond SRH77CA** when broad 420-450 MHz performance is the priority.",
         "",
+        "## Performance and coverage at a glance",
+        "",
+        "Coverage classes use the complete service window, not an isolated low-SWR point: **broad <=2:1** means at least 80% of the window is <=2:1; **broad <=3:1** means at least 80% is <=3:1; **partial only** means at least 20% is <=3:1; **isolated resonance** means a <=2:1 minimum exists but less than 20% is <=3:1; everything else is a **gap**.",
+        "",
+        *coverage_table(inventory_coverage),
+        "",
+        "## Remaining inventory gaps",
+        "",
+        f"- **Hard gaps:** {', '.join(hard_gaps) if hard_gaps else 'none'}.",
+        f"- **Partial-only coverage:** {', '.join(partial_gaps) if partial_gaps else 'none'}.",
+        f"- **Isolated resonance only:** {', '.join(isolated) if isolated else 'none'}.",
+        "- These are impedance-match gaps, not proof that signals cannot be received. On-air RSSI/noise-floor/decode testing is still needed, especially across the two different fixture contexts.",
+        "",
         "## Files and charts",
         "",
         "- [CSV scorecard](scanner-band-scorecard.csv) · [standards-compliant JSON](scanner-band-scorecard.json)",
+        "- [Family coverage CSV](family-coverage-summary.csv) · [inventory gap CSV](inventory-coverage-gaps.csv) · [coverage JSON](coverage-summary.json)",
         "- [Offline interactive report](interactive-report.html)",
+        "",
+        "![Family coverage matrix](family-coverage-matrix.png)",
         "",
         "![Numerically lowest measured median by service](best-config-by-service.png)",
         "",
@@ -1203,7 +1619,7 @@ def comparison_readme(output: Path) -> None:
         "",
         "![Practical recommendations](practical-recommendations.png)",
         "",
-        "Civil air and 2m have no good measured winner in this no-radio-chassis fixture. Military air consists of split, narrow resonances rather than one broad solution.",
+        "The gap table above is generated from full-window coverage. Military air consists of split, narrow resonances rather than one broad solution.",
         "",
     ]
     output.write_text("\n".join(lines), encoding="utf-8")
@@ -1273,8 +1689,16 @@ html[data-theme="dark"] {
 def interactive_report(rows: Sequence[Dict[str, object]], output: Path) -> None:
     payload = json.dumps(json_ready(list(rows)), separators=(",", ":"), allow_nan=False)
     families = json.dumps([
-        {"key": family.key, "label": family.label}
+        {
+            "key": family.key,
+            "label": family.label,
+            "context": family.measurement_context,
+        }
         for family in VALID_FAMILIES
+    ], separators=(",", ":"))
+    contexts = json.dumps([
+        {"key": key, "label": label}
+        for key, label in CONTEXT_LABELS.items()
     ], separators=(",", ":"))
     html = f"""<!doctype html>
 <html lang="en">
@@ -1303,36 +1727,39 @@ canvas {{ width:100%; height:380px; display:block; }}
 .table-wrap {{ overflow:auto; }} table {{ width:100%; border-collapse:collapse; font-size:.88rem; }}
 th,td {{ padding:10px; border-bottom:1px solid var(--cp-border); text-align:left; white-space:nowrap; }}
 th {{ color:var(--cp-text-muted); }} tbody tr:hover {{ background:var(--cp-accent-soft); }}
-.source {{ color:var(--cp-link); }} footer {{ color:var(--cp-text-muted); margin-top:28px; }}
+.source {{ color:var(--cp-link); }} .status {{ font-weight:700; }} footer {{ color:var(--cp-text-muted); margin-top:28px; }}
 </style>
 </head>
 <body><main class="shell">
 <div class="eyebrow">Calibrated NanoVNA-H comparison</div>
 <h1>SDS150 scanner antennas</h1>
-<p>Explore all 400 valid configuration × service results. Exact averaged zooms override broadband points.</p>
-<div class="caveat">SWR is impedance match only—not receive gain, sensitivity, radiation pattern, or on-air decoding. The invalid/inconclusive TIDRADIO H9 stock capture is excluded.</div>
+<p>Explore all {len(rows)} valid configuration × service results. Exact averaged zooms override broadband points.</p>
+<div class="caveat">SWR is impedance match only—not receive gain, sensitivity, radiation pattern, or on-air decoding. Handheld-bench and installed-vehicle results use different RF environments and are not controlled gain comparisons. The invalid/inconclusive TIDRADIO H9 stock capture is excluded.</div>
 <div class="controls">
 <label>Service<select id="service"></select></label>
+<label>Measurement context<select id="context"></select></label>
 <label>Family<select id="family"></select></label>
 <label>Configuration<select id="config"></select></label>
 </div>
 <section class="panel"><h2 id="chart-title">Authoritative median SWR</h2><canvas id="chart" width="1200" height="380"></canvas></section>
-<section class="panel"><h2>Measured statistics</h2><div class="table-wrap"><table><thead><tr><th>Rank</th><th>Family</th><th>Configuration</th><th>Service</th><th>Source</th><th>Min @ MHz</th><th>Median</th><th>Max</th><th>≤2</th><th>≤3</th><th>R + jX at min</th><th>Return loss</th></tr></thead><tbody id="rows"></tbody></table></div></section>
+<section class="panel"><h2>Measured statistics</h2><div class="table-wrap"><table><thead><tr><th>Context rank</th><th>Context</th><th>Family</th><th>Configuration</th><th>Service</th><th>Coverage</th><th>Source</th><th>Min @ MHz</th><th>Median</th><th>Max</th><th>≤2</th><th>≤3</th><th>R + jX at min</th><th>Return loss</th></tr></thead><tbody id="rows"></tbody></table></div></section>
 <footer>Offline, self-contained report · 50 Ω reference · NanoVNA-H 1.2.50 · no network or local storage</footer>
 </main>
 <script>
 const DATA={payload};
 const FAMILIES={families};
+const CONTEXTS={contexts};
 const SERVICES=[...new Map(DATA.map(r=>[r.service,{{key:r.service,label:r.service_label}}])).values()];
-const service=document.querySelector("#service"), family=document.querySelector("#family"), config=document.querySelector("#config");
+const service=document.querySelector("#service"), context=document.querySelector("#context"), family=document.querySelector("#family"), config=document.querySelector("#config");
 function options(el,items,all){{el.innerHTML=`<option value="">${{all}}</option>`+items.map(x=>`<option value="${{x.key}}">${{x.label}}</option>`).join("");}}
-options(service,SERVICES,"All services"); options(family,FAMILIES,"All families");
-function configs(){{const old=config.value; const subset=[...new Map(DATA.filter(r=>!family.value||r.family===family.value).map(r=>[r.configuration,{{key:r.configuration,label:r.configuration_label}}])).values()]; options(config,subset,"All configurations"); if(subset.some(x=>x.key===old))config.value=old;}}
+options(service,SERVICES,"All services"); options(context,CONTEXTS,"All contexts");
+function families(){{const old=family.value; const subset=FAMILIES.filter(x=>!context.value||x.context===context.value); options(family,subset,"All families"); if(subset.some(x=>x.key===old))family.value=old;}}
+function configs(){{const old=config.value; const subset=[...new Map(DATA.filter(r=>(!context.value||r.measurement_context===context.value)&&(!family.value||r.family===family.value)).map(r=>[r.configuration,{{key:r.configuration,label:r.configuration_label}}])).values()]; options(config,subset,"All configurations"); if(subset.some(x=>x.key===old))config.value=old;}}
 function fmt(v,d=2){{return v===null?"very poor / outside calibrated dynamic range":Number(v).toFixed(d);}}
-function filtered(){{return DATA.filter(r=>(!service.value||r.service===service.value)&&(!family.value||r.family===family.value)&&(!config.value||r.configuration===config.value));}}
+function filtered(){{return DATA.filter(r=>(!service.value||r.service===service.value)&&(!context.value||r.measurement_context===context.value)&&(!family.value||r.family===family.value)&&(!config.value||r.configuration===config.value));}}
 function draw(rows){{const canvas=document.querySelector("#chart"),ctx=canvas.getContext("2d"),css=getComputedStyle(document.documentElement); const text=css.getPropertyValue("--cp-text").trim(), muted=css.getPropertyValue("--cp-text-muted").trim(), accent=css.getPropertyValue("--cp-accent").trim(), border=css.getPropertyValue("--cp-border").trim(); ctx.clearRect(0,0,canvas.width,canvas.height); const values=rows.slice().sort((a,b)=>(a.median_swr??1e9)-(b.median_swr??1e9)).slice(0,24); if(!values.length)return; const left=270,top=20,rowH=Math.min(28,320/values.length),max=10; ctx.font="12px Segoe UI, Aptos, sans-serif"; values.forEach((r,i)=>{{const y=top+i*rowH,w=Math.max(2,(Math.min(r.median_swr??max,max)-1)/(max-1)*(canvas.width-left-30));ctx.fillStyle=accent;ctx.fillRect(left,y,w,rowH*.62);ctx.fillStyle=text;ctx.textAlign="right";ctx.fillText((service.value?r.family_label+" · "+r.configuration_label:r.service_label+" · "+r.configuration_label).slice(0,42),left-8,y+12);ctx.textAlign="left";ctx.fillText(fmt(r.median_swr),left+w+6,y+12);}});ctx.strokeStyle=border;ctx.beginPath();ctx.moveTo(left,top-5);ctx.lineTo(left,top+values.length*rowH);ctx.stroke();ctx.fillStyle=muted;ctx.fillText("Median SWR · 10+ clipped",left,canvas.height-12);}}
-function render(){{const rows=filtered().sort((a,b)=>a.service.localeCompare(b.service)||a.rank-b.rank);draw(rows);document.querySelector("#rows").innerHTML=rows.map(r=>`<tr><td>${{r.rank}}</td><td>${{r.family_label}}</td><td>${{r.configuration_label}}</td><td>${{r.service_label}}</td><td class="source">${{r.source}}</td><td>${{fmt(r.minimum_swr)}} @ ${{r.minimum_swr_frequency_hz===null?"—":(r.minimum_swr_frequency_hz/1e6).toFixed(3)}}</td><td>${{fmt(r.median_swr)}}</td><td>${{fmt(r.maximum_swr)}}</td><td>${{fmt(r.coverage_at_or_below_2_percent,1)}}%</td><td>${{fmt(r.coverage_at_or_below_3_percent,1)}}%</td><td>${{fmt(r.resistance_at_minimum_ohm,1)}} + j${{fmt(r.reactance_at_minimum_ohm,1)}} Ω</td><td>${{fmt(r.return_loss_at_minimum_swr_db,1)}} dB</td></tr>`).join("");}}
-family.addEventListener("change",()=>{{configs();render();}}); service.addEventListener("change",render); config.addEventListener("change",render); window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change",render); configs();render();
+function render(){{const rows=filtered().sort((a,b)=>a.service.localeCompare(b.service)||a.context_rank-b.context_rank);draw(rows);document.querySelector("#rows").innerHTML=rows.map(r=>`<tr><td>${{r.context_rank}}</td><td>${{r.measurement_context_label}}</td><td>${{r.family_label}}</td><td>${{r.configuration_label}}</td><td>${{r.service_label}}</td><td class="status">${{r.coverage_status}}</td><td class="source">${{r.source}}</td><td>${{fmt(r.minimum_swr)}} @ ${{r.minimum_swr_frequency_hz===null?"—":(r.minimum_swr_frequency_hz/1e6).toFixed(3)}}</td><td>${{fmt(r.median_swr)}}</td><td>${{fmt(r.maximum_swr)}}</td><td>${{fmt(r.coverage_at_or_below_2_percent,1)}}%</td><td>${{fmt(r.coverage_at_or_below_3_percent,1)}}%</td><td>${{fmt(r.resistance_at_minimum_ohm,1)}} + j${{fmt(r.reactance_at_minimum_ohm,1)}} Ω</td><td>${{fmt(r.return_loss_at_minimum_swr_db,1)}} dB</td></tr>`).join("");}}
+context.addEventListener("change",()=>{{families();configs();render();}}); family.addEventListener("change",()=>{{configs();render();}}); service.addEventListener("change",render); config.addEventListener("change",render); window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change",render); families();configs();render();
 </script></body></html>
 """
     output.write_text(html, encoding="utf-8")
@@ -1346,13 +1773,14 @@ def package_readme(root: Path) -> None:
         ("Diamond SRH77CA", "antennas/diamond-srh77ca/README.md", "valid", "fixed; broad 420-450 MHz"),
         ("Generic extendable", "antennas/generic-extendable/README.md", "valid / experimental", "settings 1-10; geometry-sensitive"),
         ("Uniden SDS150 stock", "antennas/uniden-sds150-stock/README.md", "valid", "reference antenna"),
+        ("Taurus triband vehicle", "antennas/taurus-triband-vehicle/README.md", "valid / installed vehicle", "fixed installation; VHF-high and partial 800/900 MHz"),
         ("TIDRADIO H9 stock", "antennas/tidradio-h9-stock/README.md", "invalid / inconclusive", "preserved, excluded"),
         ("JYR8010 EFHW", "antennas/jyr8010-efhw/README.md", "preserved HF report", "separate prior report"),
     ]
     lines = [
         "# Antenna measurement results",
         "",
-        "Reproducible reports built from calibrated complex S11 measurements. The scanner survey compares six valid antenna families and 20 configurations across 20 receive-service windows; the earlier JYR8010 EFHW HF report remains intact.",
+        f"Reproducible reports built from calibrated complex S11 measurements. The scanner survey compares {len(VALID_FAMILIES)} valid antenna families and {len(VALID_CONFIG_KEYS)} configurations across {len(SERVICES)} receive-service windows; the earlier JYR8010 EFHW HF report remains intact.",
         "",
         "> **SWR is impedance match only.** It cannot establish receive gain, scanner sensitivity, radiation pattern, or decode performance.",
         "",
@@ -1362,9 +1790,10 @@ def package_readme(root: Path) -> None:
         "- **Best when manual VHF/UHF retuning matters more:** RH789, while accepting poor 700/800/900 MHz.",
         "- **Best two:** Remtronix 920 + RH789.",
         "- Add/substitute TD771 for 222-225 MHz; choose Diamond SRH77CA for broad 420-450 MHz.",
-        "- No good measured winner for civil air or 2m in this no-radio-chassis fixture.",
+        "- **Installed vehicle option:** Taurus triband for useful VHF-high and partial 800/900 MHz coverage.",
+        "- The generated inventory gap table identifies services with only partial or poor full-window match.",
         "",
-        "See the [full comparison and circumstance table](comparison/README.md) or open the [offline interactive report](comparison/interactive-report.html).",
+        "See the [full comparison, coverage matrix, and gap table](comparison/README.md) or open the [offline interactive report](comparison/interactive-report.html).",
         "",
         "## Inventory",
         "",
@@ -1377,20 +1806,23 @@ def package_readme(root: Path) -> None:
         "## Method",
         "",
         "- NanoVNA-H firmware 1.2.50, 50 Ω reference.",
-        "- Software ideal OSL calibration at the SMA-to-BNC output reference plane.",
+        "- Independent software ideal OSL calibrations for the handheld SMA-to-BNC bench fixture and the vehicle BNC reference plane.",
         "- Broadband: 50-1200 MHz, 40,001 points, nominal ~28.75 kHz spacing.",
         "- Service zooms: three complex-S11 passes averaged point by point. An exact configuration/service zoom is authoritative over broadband.",
         "- Every valid configuration × service records minimum SWR and frequency, median, maximum, coverage ≤2:1 and ≤3:1, source, R, X, and return loss derived from RI Touchstone data.",
-        "- Ranking: authoritative median SWR, then maximum, then minimum.",
+        "- Ranking: authoritative median SWR, then maximum, then minimum; context-specific ranks avoid treating the vehicle and handheld fixtures as controlled gain comparisons.",
+        "- Coverage classes use full-window percentages: broad <=2:1, broad <=3:1, partial only, or gap.",
         "- Nonfinite values become JSON `null` and display as “very poor / outside calibrated dynamic range.”",
         "",
         "## Calibration and fixture",
         "",
         "Load reconnect verification: median 1.00135, p95 1.01044, maximum 1.19335 across the full sweep; VHF maximum 1.00127. See the [preserved calibration baseline](calibration-baselines/sma-to-bnc/2026-08-16-nanovna-h/README.md).",
         "",
+        "The separate [vehicle-adapter baseline](calibration-baselines/vehicle-adapter/2026-08-16-nanovna-h/README.md) verifies the BNC reference plane used for the installed Taurus antenna. Full-span reconnect verification was median 1.02638, p95 1.11973, and maximum 1.23518; uncertainty is highest above 1 GHz.",
+        "",
         "The saved calibration is reusable only with the same unchanged adapter chain and a load verification each session. Calibration accuracy does not remove antenna-fixture uncertainty.",
         "",
-        "Measurements used fixed upright geometry, no added counterpoise, with the USB cable remaining part of the RF environment. Handheld antennas depend on the radio chassis, operator, adapter, nearby objects, and cable geometry.",
+        "Handheld measurements used fixed upright geometry with no added counterpoise; the installed Taurus measurement includes the vehicle body, mount, feed line, and antenna-side adapter. Compare impedance coverage within context, not as direct receive-gain measurements between contexts.",
         "",
         "## Layout and reproduction",
         "",
@@ -1447,6 +1879,44 @@ Immutable calibration capture used by the scanner-antenna measurements.
 The saved calibration is reusable only with the same unchanged adapter chain and a fresh 50 Ω load verification each session. Recalibrate after reconnecting or moving the chain if verification is not consistent. Fixture geometry still affects handheld antennas even when the reference-plane calibration is accurate.
 """
     path.write_text(text, encoding="utf-8")
+    vehicle_path = (
+        root
+        / "calibration-baselines/vehicle-adapter/2026-08-16-nanovna-h/README.md"
+    )
+    vehicle_text = """# NanoVNA-H vehicle-adapter calibration baseline - 2026-08-16
+
+Immutable calibration capture used for the installed Taurus triband vehicle antenna.
+
+## Reference plane and acquisition
+
+- NanoVNA-H firmware 1.2.50; 50 ohm reference.
+- 50-1200 MHz, 40,001 points, nominal 28.75 kHz spacing.
+- Reference plane: NanoVNA port 0 -> SMA-to-BNC-female adapter -> BNC plane.
+- The antenna-side BNC-to-PL-239 adapter, vehicle feed line, mount, and vehicle body remain part of the DUT.
+- This calibration is independent of the handheld SMA-to-BNC fixture baseline.
+
+## Preserved files
+
+- `open.npz` + `open.csv`
+- `short.npz` + `short.csv`
+- `load.npz` + `load.csv`
+- `calibration.npz`
+- `verification/load-reconnect-verification.csv`
+- `verification/load-reconnect-verification.json`
+
+## Reconnect verification
+
+| Region | Median SWR | p95 SWR | Maximum SWR |
+|---|---:|---:|---:|
+| Full 50-1200 MHz | 1.02638 | 1.11973 | 1.23518 |
+| VHF 50-225 MHz | 1.00438 | 1.00766 | 1.00813 |
+| UHF 225-512 MHz | 1.01454 | 1.02150 | 1.04843 |
+| 700-941 MHz | 1.03053 | 1.17585 | 1.20647 |
+| L-band 976-1092 MHz | 1.06803 | 1.11860 | 1.23518 |
+
+Repeatability is strong through VHF/UHF and acceptable through the scanner range, with visibly higher residual uncertainty above 1 GHz. Recalibrate whenever the NanoVNA-side adapter chain changes. Do not reuse the handheld fixture baseline for this vehicle chain.
+"""
+    vehicle_path.write_text(vehicle_text, encoding="utf-8")
 
 
 def remove_duplicate_derivatives(root: Path) -> None:
@@ -1465,8 +1935,11 @@ def generate(root: Path) -> Tuple[int, int]:
     remove_duplicate_derivatives(root)
     data = load_data(root)
     rows = build_rows(data)
+    family_coverage = build_family_coverage(rows)
+    inventory_coverage = build_inventory_coverage(family_coverage)
     comparison = root / "comparison"
     write_scorecards(rows, comparison)
+    write_coverage_artifacts(family_coverage, inventory_coverage, comparison)
     with plt.rc_context(PLOT_STYLE):
         for family in VALID_FAMILIES:
             directory = root / "antennas" / family.key
@@ -1487,8 +1960,9 @@ def generate(root: Path) -> Tuple[int, int]:
                 best_settings = write_best_settings(family, rows, directory / "best-setting-table.csv")
             family_readme(family, rows, directory / "README.md", best_settings)
         plot_comparisons(data, rows, comparison)
+        plot_family_coverage(family_coverage, comparison)
     invalid_readme(FAMILY_BY_KEY["tidradio-h9-stock"], root / "antennas/tidradio-h9-stock/README.md")
-    comparison_readme(comparison / "README.md")
+    comparison_readme(comparison / "README.md", inventory_coverage)
     interactive_report(rows, comparison / "interactive-report.html")
     package_readme(root)
     calibration_readme(root)

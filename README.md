@@ -26,7 +26,7 @@ The catalog covers all 39 Washington counties and includes:
 - [SDS100/SDS150 display palettes](docs/display-customizer.md) - coordinated high-contrast palettes, semantic color groups, all-mode previews, XML export, and Sentinel import instructions.
 - [Ames Lake, King County, and outdoor lists](docs/ames-lake-king-county.md) - all 39 King County municipalities with Census location tags, Ames Lake profiles, reviewed local service curation, and the comprehensive outdoor safety rollup.
 - [Band-oriented scanning](docs/band-scanning.md) - twelve ready-to-scan listening packs, matching Custom Search ranges, noise/data avoidance, and additional scenario guidance.
-- [Antenna measurement results](antenna-results/README.md) - calibrated scanner-antenna comparisons, recommendations, scorecards, offline interactive analysis, raw Touchstone data, and the preserved JYR8010 EFHW report.
+- [Antenna measurement results](antenna-results/README.md) - calibrated handheld and installed-vehicle comparisons, family/service coverage matrix, explicit gap analysis, recommendations, scorecards, offline interactive analysis, raw Touchstone data, and the preserved JYR8010 EFHW report.
 - [Upper Lena Lake profile](docs/upper-lena-lake.md) - compact and comprehensive Hood Canal/Olympic wilderness, SAR, weather, public-safety, aviation, marine, amateur, and personal-radio profiles.
 - [Puget Sound ham repeaters and nets](docs/puget-sound-ham.md) - current WWARA-coordinated repeaters, operator-published net channels/schedules, mode grouping, source hierarchy, and update workflow.
 - [Data-source architecture](docs/data-sources.md) - source provenance, caching, update and merge behavior.

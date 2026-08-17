@@ -1,12 +1,13 @@
 # Uniden SDS150 stock rubber duck
 
-The reference point: whatever the scanner already has on it. In this fixture it is usable around the 406-420 MHz federal band and near the bottom edge of 70cm, moderate on UHF land mobile, and poor everywhere else that was measured.
+The reference point: whatever the scanner already has on it. In this fixture it is usable around the 406-420 MHz federal band and near the bottom edge of 70cm, moderate on UHF land mobile, and unexpectedly the broadest measured match across both UAT 978 and ADS-B 1090. Most other windows are poor.
 
 > **SWR is impedance match only.** It does not measure receive gain, sensitivity, radiation pattern, or on-air decoding.
 
 ## Measurement inventory
 
 - Connection: stock scanner antenna with the required adapter.
+- Measurement context: Handheld bench fixture.
 - Calibrated 50-1200 MHz broadband sweep: 40,001 points (~28.75 kHz spacing).
 - Three-pass complex-averaged service zooms override broadband data for the same configuration and service.
 - [stock with adapter](measurements/2026-08-16/antenna.s1p): The antenna shipped with the scanner, measured through the required adapter.
@@ -14,6 +15,7 @@ The reference point: whatever the scanner already has on it. In this fixture it 
 ## Conclusions
 
 - Useful around 406-470 MHz, strongest at the 420 MHz edge.
+- Broadest measured handheld-fixture match across both UAT 978 and ADS-B 1090, though match alone does not establish tracking sensitivity.
 - Poor at VHF and 700/800 MHz in this no-radio-chassis fixture.
 
 ## Analysis charts

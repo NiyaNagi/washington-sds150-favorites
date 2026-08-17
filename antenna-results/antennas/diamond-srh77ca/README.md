@@ -7,6 +7,7 @@ A well-known dual-band flexible whip. In this fixture it is the strongest broad 
 ## Measurement inventory
 
 - Connection: SMA antenna with a BNC adapter.
+- Measurement context: Handheld bench fixture.
 - Calibrated 50-1200 MHz broadband sweep: 40,001 points (~28.75 kHz spacing).
 - Three-pass complex-averaged service zooms override broadband data for the same configuration and service.
 - [with BNC adapter](measurements/2026-08-16-with-bnc-adapter/antenna.s1p): Single fixed configuration measured through the required adapter.

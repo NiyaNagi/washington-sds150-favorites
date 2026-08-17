@@ -1,12 +1,13 @@
 # Remtronix 920
 
-A short fixed whip aimed at the 700/800/900 MHz public-safety and trunking downlinks. It is the only antenna measured here that holds a good match across every modern trunked public-safety window, and it is also the best of the tested set at 33cm, 900 MHz trunking, and the L-band aviation data frequencies.
+A short fixed whip aimed at the 700/800/900 MHz public-safety and trunking downlinks. It is the only antenna measured here that holds a good match across every modern trunked public-safety window, and it is also the best of the handheld set at 33cm and 900 MHz trunking. Its L-band aviation-data match is moderate rather than best overall.
 
 > **SWR is impedance match only.** It does not measure receive gain, sensitivity, radiation pattern, or on-air decoding.
 
 ## Measurement inventory
 
 - Connection: BNC, direct to the measurement plane.
+- Measurement context: Handheld bench fixture.
 - Calibrated 50-1200 MHz broadband sweep: 40,001 points (~28.75 kHz spacing).
 - Three-pass complex-averaged service zooms override broadband data for the same configuration and service.
 - [BNC direct](measurements/2026-08-16-bnc-plane/antenna.s1p): Single fixed configuration; no adjustment available.
