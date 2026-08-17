@@ -1,0 +1,2016 @@
+[
+  {
+    "service": "FM",
+    "start_mhz": 88,
+    "stop_mhz": 108,
+    "winner": {
+      "setting": "2",
+      "min_swr": 1.0452815608888066,
+      "min_mhz": 99.68,
+      "median_swr": 3.08416732786316,
+      "max_swr": null,
+      "coverage_le_2_pct": 27.729885057471265,
+      "coverage_le_3_pct": 48.41954022988506
+    },
+    "settings": [
+      {
+        "setting": "1",
+        "min_swr": 2.256971782583895,
+        "min_mhz": 104.625,
+        "median_swr": 9.273829111246478,
+        "max_swr": 45.56332428131226,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 17.385057471264368
+      },
+      {
+        "setting": "2",
+        "min_swr": 1.0452815608888066,
+        "min_mhz": 99.68,
+        "median_swr": 3.08416732786316,
+        "max_swr": null,
+        "coverage_le_2_pct": 27.729885057471265,
+        "coverage_le_3_pct": 48.41954022988506
+      },
+      {
+        "setting": "3",
+        "min_swr": 1.0467382640479896,
+        "min_mhz": 92.11875,
+        "median_swr": 3.49891927751965,
+        "max_swr": null,
+        "coverage_le_2_pct": 20.977011494252874,
+        "coverage_le_3_pct": 41.09195402298851
+      },
+      {
+        "setting": "4",
+        "min_swr": 1.0278572348603472,
+        "min_mhz": 92.52125,
+        "median_swr": 3.4311771516844867,
+        "max_swr": 14.365174904391058,
+        "coverage_le_2_pct": 22.701149425287355,
+        "coverage_le_3_pct": 41.66666666666667
+      },
+      {
+        "setting": "5",
+        "min_swr": 1.0100802849075416,
+        "min_mhz": 89.53125,
+        "median_swr": 5.289979057175948,
+        "max_swr": 16.974801079870122,
+        "coverage_le_2_pct": 19.10919540229885,
+        "coverage_le_3_pct": 27.442528735632184
+      },
+      {
+        "setting": "6",
+        "min_swr": 2.272596365454929,
+        "min_mhz": 88.0075,
+        "median_swr": 8.880660019723226,
+        "max_swr": 20.76192508042566,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 6.4655172413793105
+      },
+      {
+        "setting": "7",
+        "min_swr": 3.179341857606631,
+        "min_mhz": 88.0075,
+        "median_swr": 9.319540390212328,
+        "max_swr": 22.28134741990926,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "8",
+        "min_swr": 5.679735291068053,
+        "min_mhz": 88.03625,
+        "median_swr": 11.686036607794335,
+        "max_swr": 22.223038030605807,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "9",
+        "min_swr": 7.165277769056999,
+        "min_mhz": 88.0075,
+        "median_swr": 11.952284269113541,
+        "max_swr": 19.621125204110573,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "10",
+        "min_swr": 9.212016036513713,
+        "min_mhz": 88.0075,
+        "median_swr": 11.494938972116582,
+        "max_swr": 15.225092765287494,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      }
+    ]
+  },
+  {
+    "service": "Civil Air",
+    "start_mhz": 118,
+    "stop_mhz": 137,
+    "winner": {
+      "setting": "10",
+      "min_swr": 14.509986647869804,
+      "min_mhz": 118.0225,
+      "median_swr": 30.777312003334693,
+      "max_swr": 40.10784579566029,
+      "coverage_le_2_pct": 0.0,
+      "coverage_le_3_pct": 0.0
+    },
+    "settings": [
+      {
+        "setting": "1",
+        "min_swr": 30.002534190743077,
+        "min_mhz": 118.0225,
+        "median_swr": 72.45401842942269,
+        "max_swr": 107.0867556785618,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "2",
+        "min_swr": 1.6862327109398723,
+        "min_mhz": 128.66,
+        "median_swr": 55.303684174568986,
+        "max_swr": null,
+        "coverage_le_2_pct": 6.354009077155824,
+        "coverage_le_3_pct": 12.708018154311649
+      },
+      {
+        "setting": "3",
+        "min_swr": 1.6481513476331076,
+        "min_mhz": 128.7175,
+        "median_swr": 59.067557377887006,
+        "max_swr": null,
+        "coverage_le_2_pct": 5.900151285930408,
+        "coverage_le_3_pct": 14.37216338880484
+      },
+      {
+        "setting": "4",
+        "min_swr": 31.681512466393627,
+        "min_mhz": 118.0225,
+        "median_swr": 43.36102233566978,
+        "max_swr": 51.780442273271554,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "5",
+        "min_swr": 34.780636608714005,
+        "min_mhz": 118.0225,
+        "median_swr": 43.94103657168344,
+        "max_swr": 51.215210980868115,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "6",
+        "min_swr": 39.510421579122145,
+        "min_mhz": 118.0225,
+        "median_swr": 49.6610737682802,
+        "max_swr": 59.96064884265278,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "7",
+        "min_swr": 43.40470988919245,
+        "min_mhz": 118.0225,
+        "median_swr": 54.1654732555928,
+        "max_swr": 64.61763976275523,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "8",
+        "min_swr": 32.1637717180301,
+        "min_mhz": 132.42625,
+        "median_swr": 56.91552551123971,
+        "max_swr": 66.40487951676526,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "9",
+        "min_swr": 27.42183549075067,
+        "min_mhz": 118.05125,
+        "median_swr": 36.30776864866867,
+        "max_swr": 47.601336199980274,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "10",
+        "min_swr": 14.509986647869804,
+        "min_mhz": 118.0225,
+        "median_swr": 30.777312003334693,
+        "max_swr": 40.10784579566029,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      }
+    ]
+  },
+  {
+    "service": "2m",
+    "start_mhz": 144,
+    "stop_mhz": 148,
+    "winner": {
+      "setting": "10",
+      "min_swr": 35.384066224981005,
+      "min_mhz": 144.07,
+      "median_swr": 41.88886649676957,
+      "max_swr": 51.83226976862281,
+      "coverage_le_2_pct": 0.0,
+      "coverage_le_3_pct": 0.0
+    },
+    "settings": [
+      {
+        "setting": "1",
+        "min_swr": 137.76773547715888,
+        "min_mhz": 144.875,
+        "median_swr": 222.04570261159688,
+        "max_swr": 659.4690069963326,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "2",
+        "min_swr": 61.40136732765895,
+        "min_mhz": 144.09875,
+        "median_swr": 80.8345192009345,
+        "max_swr": 116.61404914181178,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "3",
+        "min_swr": 71.55512901455037,
+        "min_mhz": 144.3,
+        "median_swr": 90.55566025081032,
+        "max_swr": 136.3343760606227,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "4",
+        "min_swr": 45.03690194690157,
+        "min_mhz": 144.07,
+        "median_swr": 53.22861508501019,
+        "max_swr": 67.69230893158071,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "5",
+        "min_swr": 41.85739569480773,
+        "min_mhz": 144.1275,
+        "median_swr": 48.22337808411438,
+        "max_swr": 58.29266619403687,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "6",
+        "min_swr": 44.17378679069072,
+        "min_mhz": 144.07,
+        "median_swr": 49.90014384825797,
+        "max_swr": 60.79550171675056,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "7",
+        "min_swr": 55.30186507399448,
+        "min_mhz": 144.875,
+        "median_swr": 64.38237768347551,
+        "max_swr": 82.93450134779614,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "8",
+        "min_swr": 52.68865879989569,
+        "min_mhz": 144.07,
+        "median_swr": 60.52108075175171,
+        "max_swr": 75.84406655418425,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "9",
+        "min_swr": 41.20192196749209,
+        "min_mhz": 144.1275,
+        "median_swr": 48.183825148639116,
+        "max_swr": 61.82361766334578,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "10",
+        "min_swr": 35.384066224981005,
+        "min_mhz": 144.07,
+        "median_swr": 41.88886649676957,
+        "max_swr": 51.83226976862281,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      }
+    ]
+  },
+  {
+    "service": "VHF LMR",
+    "start_mhz": 150,
+    "stop_mhz": 174,
+    "winner": {
+      "setting": "6",
+      "min_swr": 23.995355352277713,
+      "min_mhz": 173.02125,
+      "median_swr": 44.29883480894412,
+      "max_swr": 92.35968544705084,
+      "coverage_le_2_pct": 0.0,
+      "coverage_le_3_pct": 0.0
+    },
+    "settings": [
+      {
+        "setting": "1",
+        "min_swr": null,
+        "min_mhz": 150.02125,
+        "median_swr": null,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "2",
+        "min_swr": 91.6883441375536,
+        "min_mhz": 151.11375,
+        "median_swr": null,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "3",
+        "min_swr": 141.45801032566274,
+        "min_mhz": 154.3625,
+        "median_swr": null,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "4",
+        "min_swr": 75.11510712252598,
+        "min_mhz": 151.11375,
+        "median_swr": 209.57031089057696,
+        "max_swr": 440.0892096097903,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "5",
+        "min_swr": 21.926192940073236,
+        "min_mhz": 173.99875,
+        "median_swr": 75.15691954483297,
+        "max_swr": 121.1703013455783,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "6",
+        "min_swr": 23.995355352277713,
+        "min_mhz": 173.02125,
+        "median_swr": 44.29883480894412,
+        "max_swr": 92.35968544705084,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "7",
+        "min_swr": 25.088707270379498,
+        "min_mhz": 171.21,
+        "median_swr": 48.918129428917304,
+        "max_swr": 151.2742778321617,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "8",
+        "min_swr": 36.00969925860445,
+        "min_mhz": 169.37,
+        "median_swr": 50.14598626355013,
+        "max_swr": 86.31200732402115,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "9",
+        "min_swr": 49.24680362793107,
+        "min_mhz": 151.11375,
+        "median_swr": 86.73398687728061,
+        "max_swr": 141.5217753261666,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "10",
+        "min_swr": 55.68342424039904,
+        "min_mhz": 151.11375,
+        "median_swr": 112.04723886850466,
+        "max_swr": 8244.521365093948,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      }
+    ]
+  },
+  {
+    "service": "Marine",
+    "start_mhz": 156,
+    "stop_mhz": 162,
+    "winner": {
+      "setting": "6",
+      "min_swr": 44.30515147896824,
+      "min_mhz": 161.98125,
+      "median_swr": 56.70342224377837,
+      "max_swr": 76.16500224085517,
+      "coverage_le_2_pct": 0.0,
+      "coverage_le_3_pct": 0.0
+    },
+    "settings": [
+      {
+        "setting": "1",
+        "min_swr": null,
+        "min_mhz": 156.00125,
+        "median_swr": null,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "2",
+        "min_swr": null,
+        "min_mhz": 156.00125,
+        "median_swr": null,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "3",
+        "min_swr": null,
+        "min_mhz": 156.00125,
+        "median_swr": null,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "4",
+        "min_swr": 141.1876303136214,
+        "min_mhz": 160.63,
+        "median_swr": 250.86759559727383,
+        "max_swr": 314.8718946861593,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "5",
+        "min_swr": 64.70702775642809,
+        "min_mhz": 160.63,
+        "median_swr": 96.56880967665903,
+        "max_swr": 115.73495338715982,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "6",
+        "min_swr": 44.30515147896824,
+        "min_mhz": 161.98125,
+        "median_swr": 56.70342224377837,
+        "max_swr": 76.16500224085517,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "7",
+        "min_swr": 48.54746846106768,
+        "min_mhz": 160.86,
+        "median_swr": 65.94798046059707,
+        "max_swr": 84.29919129289934,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "8",
+        "min_swr": 48.623639156802355,
+        "min_mhz": 161.895,
+        "median_swr": 63.74915194135105,
+        "max_swr": 85.28569900734128,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "9",
+        "min_swr": 68.54440310172092,
+        "min_mhz": 160.86,
+        "median_swr": 95.71182501479016,
+        "max_swr": 107.44610787123885,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "10",
+        "min_swr": 101.50090305674321,
+        "min_mhz": 161.98125,
+        "median_swr": 113.1058928640183,
+        "max_swr": 123.64061490481622,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      }
+    ]
+  },
+  {
+    "service": "Rail",
+    "start_mhz": 159.81,
+    "stop_mhz": 161.565,
+    "winner": {
+      "setting": "6",
+      "min_swr": 45.24383955556603,
+      "min_mhz": 161.4925,
+      "median_swr": 48.16623072414026,
+      "max_swr": 53.84893139787235,
+      "coverage_le_2_pct": 0.0,
+      "coverage_le_3_pct": 0.0
+    },
+    "settings": [
+      {
+        "setting": "1",
+        "min_swr": null,
+        "min_mhz": 159.825,
+        "median_swr": null,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "2",
+        "min_swr": null,
+        "min_mhz": 159.825,
+        "median_swr": null,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "3",
+        "min_swr": null,
+        "min_mhz": 159.825,
+        "median_swr": null,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "4",
+        "min_swr": 141.1876303136214,
+        "min_mhz": 160.63,
+        "median_swr": 263.25681326271376,
+        "max_swr": 314.8718946861593,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "5",
+        "min_swr": 64.70702775642809,
+        "min_mhz": 160.63,
+        "median_swr": 86.66207142094657,
+        "max_swr": 115.73495338715982,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "6",
+        "min_swr": 45.24383955556603,
+        "min_mhz": 161.4925,
+        "median_swr": 48.16623072414026,
+        "max_swr": 53.84893139787235,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "7",
+        "min_swr": 48.54746846106768,
+        "min_mhz": 160.86,
+        "median_swr": 57.15133269552767,
+        "max_swr": 61.54786457058819,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "8",
+        "min_swr": 51.02434641116331,
+        "min_mhz": 161.52125,
+        "median_swr": 55.75215528384937,
+        "max_swr": 85.28569900734128,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "9",
+        "min_swr": 68.54440310172092,
+        "min_mhz": 160.86,
+        "median_swr": 86.73012965222763,
+        "max_swr": 93.53952134353928,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "10",
+        "min_swr": 104.76051749294443,
+        "min_mhz": 160.86,
+        "median_swr": 111.26813566105366,
+        "max_swr": 117.39978463577528,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      }
+    ]
+  },
+  {
+    "service": "NOAA",
+    "start_mhz": 162.4,
+    "stop_mhz": 162.55,
+    "winner": {
+      "setting": "6",
+      "min_swr": 42.08023633370254,
+      "min_mhz": 162.47,
+      "median_swr": 43.17264495026429,
+      "max_swr": 43.63860219425449,
+      "coverage_le_2_pct": 0.0,
+      "coverage_le_3_pct": 0.0
+    },
+    "settings": [
+      {
+        "setting": "1",
+        "min_swr": null,
+        "min_mhz": 162.4125,
+        "median_swr": null,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "2",
+        "min_swr": null,
+        "min_mhz": 162.4125,
+        "median_swr": null,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "3",
+        "min_swr": null,
+        "min_mhz": 162.4125,
+        "median_swr": null,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "4",
+        "min_swr": 234.14936165283964,
+        "min_mhz": 162.47,
+        "median_swr": 255.97730630214403,
+        "max_swr": 266.4653241686428,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "5",
+        "min_swr": 67.45374614082512,
+        "min_mhz": 162.47,
+        "median_swr": 76.25723430690209,
+        "max_swr": 77.38438289739626,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "6",
+        "min_swr": 42.08023633370254,
+        "min_mhz": 162.47,
+        "median_swr": 43.17264495026429,
+        "max_swr": 43.63860219425449,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "7",
+        "min_swr": 45.940045891271396,
+        "min_mhz": 162.47,
+        "median_swr": 46.72533035239386,
+        "max_swr": 47.39976110331797,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "8",
+        "min_swr": 42.576761927665345,
+        "min_mhz": 162.47,
+        "median_swr": 46.60017107450421,
+        "max_swr": 46.71633486006221,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "9",
+        "min_swr": 69.24780539593654,
+        "min_mhz": 162.47,
+        "median_swr": 76.4552971157823,
+        "max_swr": 77.49822738112088,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "10",
+        "min_swr": 86.94987775015305,
+        "min_mhz": 162.47,
+        "median_swr": 101.43416923576379,
+        "max_swr": 104.69116686510101,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      }
+    ]
+  },
+  {
+    "service": "1.25m",
+    "start_mhz": 222,
+    "stop_mhz": 225,
+    "winner": {
+      "setting": "4",
+      "min_swr": 6.1373500631287,
+      "min_mhz": 224.9725,
+      "median_swr": 6.54303941295432,
+      "max_swr": 7.309361368087927,
+      "coverage_le_2_pct": 0.0,
+      "coverage_le_3_pct": 0.0
+    },
+    "settings": [
+      {
+        "setting": "1",
+        "min_swr": null,
+        "min_mhz": 222.01125,
+        "median_swr": null,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "2",
+        "min_swr": 1554.4170096335222,
+        "min_mhz": 222.01125,
+        "median_swr": null,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "3",
+        "min_swr": 18.487098414719952,
+        "min_mhz": 222.04,
+        "median_swr": 19.25752172550709,
+        "max_swr": 19.742520318055874,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "4",
+        "min_swr": 6.1373500631287,
+        "min_mhz": 224.9725,
+        "median_swr": 6.54303941295432,
+        "max_swr": 7.309361368087927,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "5",
+        "min_swr": 18.040216380338208,
+        "min_mhz": 222.06875,
+        "median_swr": 19.149826095416174,
+        "max_swr": 20.95206378304891,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "6",
+        "min_swr": 112.3325774343017,
+        "min_mhz": 222.27,
+        "median_swr": 123.24412322426512,
+        "max_swr": 134.9281586445595,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "7",
+        "min_swr": 57.915253282331705,
+        "min_mhz": 224.9725,
+        "median_swr": 70.25439102140572,
+        "max_swr": 89.39548083997276,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "8",
+        "min_swr": 10.213435322998905,
+        "min_mhz": 224.9725,
+        "median_swr": 11.53635244416892,
+        "max_swr": 13.178245698661128,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "9",
+        "min_swr": 6.887811657526891,
+        "min_mhz": 224.9725,
+        "median_swr": 7.392718808864136,
+        "max_swr": 7.741903273704838,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "10",
+        "min_swr": 9.876560087461701,
+        "min_mhz": 224.9725,
+        "median_swr": 10.322104399465474,
+        "max_swr": 10.780722232313776,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      }
+    ]
+  },
+  {
+    "service": "Mil Air",
+    "start_mhz": 225,
+    "stop_mhz": 400,
+    "winner": {
+      "setting": "2",
+      "min_swr": 1.125468790162052,
+      "min_mhz": 293.685,
+      "median_swr": 5.674651188487484,
+      "max_swr": null,
+      "coverage_le_2_pct": 4.369968785937243,
+      "coverage_le_3_pct": 16.231312633481192
+    },
+    "settings": [
+      {
+        "setting": "1",
+        "min_swr": 1.9769860306106046,
+        "min_mhz": 399.97375,
+        "median_swr": 59.25730308569335,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.2135699030721209,
+        "coverage_le_3_pct": 6.177098735009036
+      },
+      {
+        "setting": "2",
+        "min_swr": 1.125468790162052,
+        "min_mhz": 293.685,
+        "median_swr": 5.674651188487484,
+        "max_swr": null,
+        "coverage_le_2_pct": 4.369968785937243,
+        "coverage_le_3_pct": 16.231312633481192
+      },
+      {
+        "setting": "3",
+        "min_swr": 1.0073204044986694,
+        "min_mhz": 299.435,
+        "median_swr": 17.775538774192054,
+        "max_swr": null,
+        "coverage_le_2_pct": 6.620666995235748,
+        "coverage_le_3_pct": 13.29061935271891
+      },
+      {
+        "setting": "4",
+        "min_swr": 1.9150379384468352,
+        "min_mhz": 385.0525,
+        "median_swr": 13.916205606859409,
+        "max_swr": null,
+        "coverage_le_2_pct": 2.562838836865451,
+        "coverage_le_3_pct": 11.51634631181206
+      },
+      {
+        "setting": "5",
+        "min_swr": 2.8854623806524597,
+        "min_mhz": 317.26,
+        "median_swr": 9.41783409257496,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 2.7271233776901593
+      },
+      {
+        "setting": "6",
+        "min_swr": 2.4694577957521795,
+        "min_mhz": 287.935,
+        "median_swr": 13.313476348214905,
+        "max_swr": 217.76426223819072,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 7.343518974864466
+      },
+      {
+        "setting": "7",
+        "min_swr": 1.7473985268486443,
+        "min_mhz": 264.33125,
+        "median_swr": 12.77101762013478,
+        "max_swr": null,
+        "coverage_le_2_pct": 3.170691637916872,
+        "coverage_le_3_pct": 8.805651388204371
+      },
+      {
+        "setting": "8",
+        "min_swr": 2.4063184573879886,
+        "min_mhz": 245.27,
+        "median_swr": 8.50065496715854,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 5.043535403318548
+      },
+      {
+        "setting": "9",
+        "min_swr": 3.3610855904505863,
+        "min_mhz": 313.0625,
+        "median_swr": 8.373519064117685,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "10",
+        "min_swr": 2.7475444658049133,
+        "min_mhz": 293.6275,
+        "median_swr": 12.952717753054525,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 4.057828158370298
+      }
+    ]
+  },
+  {
+    "service": "Federal UHF",
+    "start_mhz": 406.1,
+    "stop_mhz": 420,
+    "winner": {
+      "setting": "1",
+      "min_swr": 1.1297160864854265,
+      "min_mhz": 414.34875,
+      "median_swr": 1.2455155352070404,
+      "max_swr": 1.5453154718027087,
+      "coverage_le_2_pct": 100.0,
+      "coverage_le_3_pct": 100.0
+    },
+    "settings": [
+      {
+        "setting": "1",
+        "min_swr": 1.1297160864854265,
+        "min_mhz": 414.34875,
+        "median_swr": 1.2455155352070404,
+        "max_swr": 1.5453154718027087,
+        "coverage_le_2_pct": 100.0,
+        "coverage_le_3_pct": 100.0
+      },
+      {
+        "setting": "2",
+        "min_swr": 4.917261991182803,
+        "min_mhz": 411.675,
+        "median_swr": 42.659808691977375,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "3",
+        "min_swr": 10.023296924244159,
+        "min_mhz": 419.92625,
+        "median_swr": 17.87661504420098,
+        "max_swr": 38.17106620620133,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "4",
+        "min_swr": 4.5856653458025205,
+        "min_mhz": 411.675,
+        "median_swr": 8.781305603735404,
+        "max_swr": 14.539679940530721,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "5",
+        "min_swr": null,
+        "min_mhz": 406.12625,
+        "median_swr": null,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "6",
+        "min_swr": 11.564637792729872,
+        "min_mhz": 419.92625,
+        "median_swr": 21.358820078436512,
+        "max_swr": 55.289152751985704,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "7",
+        "min_swr": 13.325556481129421,
+        "min_mhz": 406.27,
+        "median_swr": 30.609495900857166,
+        "max_swr": 95.91708608590748,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "8",
+        "min_swr": null,
+        "min_mhz": 406.12625,
+        "median_swr": null,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "9",
+        "min_swr": 17.420660629189094,
+        "min_mhz": 419.955,
+        "median_swr": 29.251515516488805,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "10",
+        "min_swr": 8.721525536362245,
+        "min_mhz": 411.675,
+        "median_swr": 22.526782004765316,
+        "max_swr": 177.80512107193664,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      }
+    ]
+  },
+  {
+    "service": "70cm",
+    "start_mhz": 420,
+    "stop_mhz": 450,
+    "winner": {
+      "setting": "1",
+      "min_swr": 1.3911169963585888,
+      "min_mhz": 420.04125,
+      "median_swr": 2.7580640137503485,
+      "max_swr": 4.1267223761934835,
+      "coverage_le_2_pct": 25.766283524904214,
+      "coverage_le_3_pct": 57.08812260536399
+    },
+    "settings": [
+      {
+        "setting": "1",
+        "min_swr": 1.3911169963585888,
+        "min_mhz": 420.04125,
+        "median_swr": 2.7580640137503485,
+        "max_swr": 4.1267223761934835,
+        "coverage_le_2_pct": 25.766283524904214,
+        "coverage_le_3_pct": 57.08812260536399
+      },
+      {
+        "setting": "2",
+        "min_swr": 65.97072433469243,
+        "min_mhz": 422.485,
+        "median_swr": null,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "3",
+        "min_swr": 2.626870245502357,
+        "min_mhz": 449.5675,
+        "median_swr": 4.1813225451637575,
+        "max_swr": 12.389793200022003,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 20.114942528735632
+      },
+      {
+        "setting": "4",
+        "min_swr": 11.078634339869788,
+        "min_mhz": 420.04125,
+        "median_swr": 35.93877781708319,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "5",
+        "min_swr": null,
+        "min_mhz": 420.0125,
+        "median_swr": null,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "6",
+        "min_swr": 6.402618435985098,
+        "min_mhz": 433.295,
+        "median_swr": 7.998680613337751,
+        "max_swr": 13.835320182642512,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "7",
+        "min_swr": 41.748380814504955,
+        "min_mhz": 420.04125,
+        "median_swr": 911.6449655805695,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "8",
+        "min_swr": null,
+        "min_mhz": 420.0125,
+        "median_swr": null,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "9",
+        "min_swr": 11.921973520099627,
+        "min_mhz": 428.9825,
+        "median_swr": 16.901707346541144,
+        "max_swr": 26.16978322065762,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "10",
+        "min_swr": 40.191331979491224,
+        "min_mhz": 420.78875,
+        "median_swr": null,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      }
+    ]
+  },
+  {
+    "service": "UHF LMR",
+    "start_mhz": 450,
+    "stop_mhz": 470,
+    "winner": {
+      "setting": "3",
+      "min_swr": 2.6448071169470015,
+      "min_mhz": 450.11375,
+      "median_swr": 3.345535862262551,
+      "max_swr": 4.121626441982546,
+      "coverage_le_2_pct": 0.0,
+      "coverage_le_3_pct": 29.928057553956833
+    },
+    "settings": [
+      {
+        "setting": "1",
+        "min_swr": 3.1287182085446155,
+        "min_mhz": 465.81125,
+        "median_swr": 4.834022036151373,
+        "max_swr": 5.724920791446159,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "2",
+        "min_swr": null,
+        "min_mhz": 450.0275,
+        "median_swr": null,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "3",
+        "min_swr": 2.6448071169470015,
+        "min_mhz": 450.11375,
+        "median_swr": 3.345535862262551,
+        "max_swr": 4.121626441982546,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 29.928057553956833
+      },
+      {
+        "setting": "4",
+        "min_swr": 10.536193437305553,
+        "min_mhz": 462.24625,
+        "median_swr": 86.25501373872865,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "5",
+        "min_swr": 44.18241166154087,
+        "min_mhz": 465.81125,
+        "median_swr": null,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "6",
+        "min_swr": 5.82520938524132,
+        "min_mhz": 465.81125,
+        "median_swr": 11.946764735267115,
+        "max_swr": 28.07647178470387,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "7",
+        "min_swr": 26.70738389703722,
+        "min_mhz": 462.59125,
+        "median_swr": null,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "8",
+        "min_swr": 11.255331644618114,
+        "min_mhz": 465.81125,
+        "median_swr": null,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "9",
+        "min_swr": 7.771913015746947,
+        "min_mhz": 465.81125,
+        "median_swr": 23.23185925379888,
+        "max_swr": 231.46879156349,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "10",
+        "min_swr": 56.408883405153915,
+        "min_mhz": 465.81125,
+        "median_swr": null,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      }
+    ]
+  },
+  {
+    "service": "T-Band",
+    "start_mhz": 470,
+    "stop_mhz": 512,
+    "winner": {
+      "setting": "3",
+      "min_swr": 2.9745898432993543,
+      "min_mhz": 470.21,
+      "median_swr": 6.134666411907015,
+      "max_swr": 10.752716687923353,
+      "coverage_le_2_pct": 0.0,
+      "coverage_le_3_pct": 0.06844626967830253
+    },
+    "settings": [
+      {
+        "setting": "1",
+        "min_swr": 5.164359592623444,
+        "min_mhz": 470.4975,
+        "median_swr": 8.09595293516466,
+        "max_swr": 11.295838577686434,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "2",
+        "min_swr": 25.315650880785025,
+        "min_mhz": 494.475,
+        "median_swr": null,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "3",
+        "min_swr": 2.9745898432993543,
+        "min_mhz": 470.21,
+        "median_swr": 6.134666411907015,
+        "max_swr": 10.752716687923353,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.06844626967830253
+      },
+      {
+        "setting": "4",
+        "min_swr": 15.695784109042137,
+        "min_mhz": 479.9275,
+        "median_swr": null,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "5",
+        "min_swr": 11.70499279623149,
+        "min_mhz": 486.51125,
+        "median_swr": 21.56555854935687,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "6",
+        "min_swr": 13.428486219518756,
+        "min_mhz": 470.325,
+        "median_swr": 447.85698765121083,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "7",
+        "min_swr": 151.3750937744419,
+        "min_mhz": 486.655,
+        "median_swr": null,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "8",
+        "min_swr": 7.989943977966388,
+        "min_mhz": 486.54,
+        "median_swr": 18.539606454211366,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "9",
+        "min_swr": 21.79211424365531,
+        "min_mhz": 470.2675,
+        "median_swr": null,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "10",
+        "min_swr": 16.675731935841988,
+        "min_mhz": 507.67125,
+        "median_swr": null,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      }
+    ]
+  },
+  {
+    "service": "700 PS",
+    "start_mhz": 769,
+    "stop_mhz": 775,
+    "winner": {
+      "setting": "8",
+      "min_swr": 20.570692873176757,
+      "min_mhz": 771.855,
+      "median_swr": 23.406683704729296,
+      "max_swr": 26.236960638144993,
+      "coverage_le_2_pct": 0.0,
+      "coverage_le_3_pct": 0.0
+    },
+    "settings": [
+      {
+        "setting": "1",
+        "min_swr": null,
+        "min_mhz": 769.00875,
+        "median_swr": null,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "2",
+        "min_swr": 66.46952969570673,
+        "min_mhz": 771.855,
+        "median_swr": 116.35270342351343,
+        "max_swr": 176.67026104407813,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "3",
+        "min_swr": 29.680401886079796,
+        "min_mhz": 774.3275,
+        "median_swr": 31.99262399193926,
+        "max_swr": 37.31695497866008,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "4",
+        "min_swr": null,
+        "min_mhz": 769.00875,
+        "median_swr": null,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "5",
+        "min_swr": 22.176316473896602,
+        "min_mhz": 771.855,
+        "median_swr": 26.142239582668452,
+        "max_swr": 30.769082371276546,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "6",
+        "min_swr": 22.079928052829725,
+        "min_mhz": 774.98875,
+        "median_swr": 25.77940274049259,
+        "max_swr": 31.094339620934296,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "7",
+        "min_swr": 30.622419678855945,
+        "min_mhz": 769.9575,
+        "median_swr": 36.685731168574584,
+        "max_swr": 56.72302136842455,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "8",
+        "min_swr": 20.570692873176757,
+        "min_mhz": 771.855,
+        "median_swr": 23.406683704729296,
+        "max_swr": 26.236960638144993,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "9",
+        "min_swr": 57.18498369330003,
+        "min_mhz": 769.9575,
+        "median_swr": 72.2426926103531,
+        "max_swr": 354.71102045904126,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "10",
+        "min_swr": 28.99950192139566,
+        "min_mhz": 771.855,
+        "median_swr": 32.81974719733602,
+        "max_swr": 35.5832957610468,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      }
+    ]
+  },
+  {
+    "service": "800 PS",
+    "start_mhz": 851,
+    "stop_mhz": 869,
+    "winner": {
+      "setting": "10",
+      "min_swr": 12.490852891685337,
+      "min_mhz": 866.5575,
+      "median_swr": 14.24715156385033,
+      "max_swr": 17.142508020383058,
+      "coverage_le_2_pct": 0.0,
+      "coverage_le_3_pct": 0.0
+    },
+    "settings": [
+      {
+        "setting": "1",
+        "min_swr": 65.40439626408642,
+        "min_mhz": 868.94375,
+        "median_swr": 134.73782655879313,
+        "max_swr": 6997.658894460456,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "2",
+        "min_swr": 1.0618890439788562,
+        "min_mhz": 853.07375,
+        "median_swr": null,
+        "max_swr": null,
+        "coverage_le_2_pct": 6.869009584664537,
+        "coverage_le_3_pct": 13.89776357827476
+      },
+      {
+        "setting": "3",
+        "min_swr": 1.01838249384193,
+        "min_mhz": 851.52125,
+        "median_swr": null,
+        "max_swr": null,
+        "coverage_le_2_pct": 5.9105431309904155,
+        "coverage_le_3_pct": 12.939297124600637
+      },
+      {
+        "setting": "4",
+        "min_swr": 23.728659752015762,
+        "min_mhz": 866.75875,
+        "median_swr": 28.88736425138594,
+        "max_swr": 35.38545849316394,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "5",
+        "min_swr": 23.009521880374088,
+        "min_mhz": 865.7525,
+        "median_swr": 29.76675921719618,
+        "max_swr": 43.46106911905794,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "6",
+        "min_swr": 17.94157822766554,
+        "min_mhz": 852.93,
+        "median_swr": 19.761273619683124,
+        "max_swr": 22.209189505390928,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "7",
+        "min_swr": 12.847506949819554,
+        "min_mhz": 866.615,
+        "median_swr": 14.631298311999815,
+        "max_swr": 17.08883606972097,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "8",
+        "min_swr": 19.07909861432955,
+        "min_mhz": 868.82875,
+        "median_swr": 24.905386685267786,
+        "max_swr": 30.42602096604875,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "9",
+        "min_swr": 14.460244656590389,
+        "min_mhz": 854.79875,
+        "median_swr": 15.429549602025705,
+        "max_swr": 17.11893264124342,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "10",
+        "min_swr": 12.490852891685337,
+        "min_mhz": 866.5575,
+        "median_swr": 14.24715156385033,
+        "max_swr": 17.142508020383058,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      }
+    ]
+  },
+  {
+    "service": "33cm",
+    "start_mhz": 902,
+    "stop_mhz": 928,
+    "winner": {
+      "setting": "8",
+      "min_swr": 4.249018111518275,
+      "min_mhz": 924.08625,
+      "median_swr": 6.221604502258021,
+      "max_swr": 9.660201481883265,
+      "coverage_le_2_pct": 0.0,
+      "coverage_le_3_pct": 0.0
+    },
+    "settings": [
+      {
+        "setting": "1",
+        "min_swr": 5.561585339201624,
+        "min_mhz": 910.0275,
+        "median_swr": 11.072230430426615,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "2",
+        "min_swr": 3.8989173610359353,
+        "min_mhz": 910.0275,
+        "median_swr": 9.358621217958804,
+        "max_swr": 19.568425936174116,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "3",
+        "min_swr": 3.734132952224567,
+        "min_mhz": 910.0275,
+        "median_swr": 8.703866319660085,
+        "max_swr": null,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "4",
+        "min_swr": 3.4340524408883195,
+        "min_mhz": 910.0275,
+        "median_swr": 7.690054597254819,
+        "max_swr": 15.36745627558911,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "5",
+        "min_swr": 3.8204616905896387,
+        "min_mhz": 910.0275,
+        "median_swr": 7.838153414177111,
+        "max_swr": 19.366807050688763,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "6",
+        "min_swr": 5.294295030366804,
+        "min_mhz": 910.0275,
+        "median_swr": 8.556879320043377,
+        "max_swr": 31.178473486647373,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "7",
+        "min_swr": 3.3844529258602845,
+        "min_mhz": 910.0275,
+        "median_swr": 6.456060129487433,
+        "max_swr": 22.865277033682133,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "8",
+        "min_swr": 4.249018111518275,
+        "min_mhz": 924.08625,
+        "median_swr": 6.221604502258021,
+        "max_swr": 9.660201481883265,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "9",
+        "min_swr": 4.150834127584352,
+        "min_mhz": 910.0275,
+        "median_swr": 7.053197105310838,
+        "max_swr": 18.286818647147353,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "10",
+        "min_swr": 3.7062175944536655,
+        "min_mhz": 910.0275,
+        "median_swr": 7.241273585798559,
+        "max_swr": 13.341744480105753,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      }
+    ]
+  },
+  {
+    "service": "900 trunk",
+    "start_mhz": 935,
+    "stop_mhz": 941,
+    "winner": {
+      "setting": "8",
+      "min_swr": 5.040844100964047,
+      "min_mhz": 935.73,
+      "median_swr": 5.508383939471382,
+      "max_swr": 5.947802283829623,
+      "coverage_le_2_pct": 0.0,
+      "coverage_le_3_pct": 0.0
+    },
+    "settings": [
+      {
+        "setting": "1",
+        "min_swr": 7.755811963892987,
+        "min_mhz": 935.73,
+        "median_swr": 8.646260924655218,
+        "max_swr": 9.982981559212279,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "2",
+        "min_swr": 6.442179607431137,
+        "min_mhz": 936.73625,
+        "median_swr": 7.499325731729202,
+        "max_swr": 8.472811241240267,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "3",
+        "min_swr": 6.722217083892378,
+        "min_mhz": 935.6725,
+        "median_swr": 7.356390647780393,
+        "max_swr": 8.820782824726896,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "4",
+        "min_swr": 5.972516036108417,
+        "min_mhz": 935.6725,
+        "median_swr": 6.451569708819857,
+        "max_swr": 7.192567903047641,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "5",
+        "min_swr": 5.488201810890795,
+        "min_mhz": 935.7875,
+        "median_swr": 6.279147762329421,
+        "max_swr": 7.170476739951138,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "6",
+        "min_swr": 6.279376781112936,
+        "min_mhz": 935.73,
+        "median_swr": 7.068941323630858,
+        "max_swr": 8.674069984432368,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "7",
+        "min_swr": 5.705542453474835,
+        "min_mhz": 936.79375,
+        "median_swr": 6.118886736977939,
+        "max_swr": 6.505299562613744,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "8",
+        "min_swr": 5.040844100964047,
+        "min_mhz": 935.73,
+        "median_swr": 5.508383939471382,
+        "max_swr": 5.947802283829623,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "9",
+        "min_swr": 5.106201794463121,
+        "min_mhz": 936.73625,
+        "median_swr": 5.61654718342239,
+        "max_swr": 6.236788263317221,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "10",
+        "min_swr": 5.27525228488042,
+        "min_mhz": 935.73,
+        "median_swr": 6.421553869550355,
+        "max_swr": 7.591714741367774,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      }
+    ]
+  },
+  {
+    "service": "UAT",
+    "start_mhz": 977.5,
+    "stop_mhz": 978.5,
+    "winner": {
+      "setting": "9",
+      "min_swr": 4.697758325221859,
+      "min_mhz": 978.3375,
+      "median_swr": 4.941457325763491,
+      "max_swr": 5.4361282301077205,
+      "coverage_le_2_pct": 0.0,
+      "coverage_le_3_pct": 0.0
+    },
+    "settings": [
+      {
+        "setting": "1",
+        "min_swr": 5.641428721012264,
+        "min_mhz": 978.28,
+        "median_swr": 6.3845429792920605,
+        "max_swr": 6.877465112818562,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "2",
+        "min_swr": 5.077023212013405,
+        "min_mhz": 977.59,
+        "median_swr": 5.762492957057176,
+        "max_swr": 6.022965649595113,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "3",
+        "min_swr": 5.620328607319557,
+        "min_mhz": 978.25125,
+        "median_swr": 6.086874129077807,
+        "max_swr": 6.469450203387769,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "4",
+        "min_swr": 5.071301722191071,
+        "min_mhz": 978.2225,
+        "median_swr": 5.391942022177853,
+        "max_swr": 5.933661828321414,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "5",
+        "min_swr": 4.977685656935461,
+        "min_mhz": 978.28,
+        "median_swr": 5.212879240667275,
+        "max_swr": 5.505392491611093,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "6",
+        "min_swr": 4.877274434389682,
+        "min_mhz": 978.165,
+        "median_swr": 5.194969180847087,
+        "max_swr": 5.532294945284149,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "7",
+        "min_swr": 5.134594224177128,
+        "min_mhz": 977.7625,
+        "median_swr": 5.343046811277248,
+        "max_swr": 5.727426997569104,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "8",
+        "min_swr": 4.546518867145705,
+        "min_mhz": 977.59,
+        "median_swr": 5.164049406967372,
+        "max_swr": 5.438332027114281,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "9",
+        "min_swr": 4.697758325221859,
+        "min_mhz": 978.3375,
+        "median_swr": 4.941457325763491,
+        "max_swr": 5.4361282301077205,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "10",
+        "min_swr": 4.759198752476811,
+        "min_mhz": 978.07875,
+        "median_swr": 5.058951171240821,
+        "max_swr": 5.488865332781219,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      }
+    ]
+  },
+  {
+    "service": "ADS-B",
+    "start_mhz": 1089.5,
+    "stop_mhz": 1090.5,
+    "winner": {
+      "setting": "7",
+      "min_swr": 3.427764748007147,
+      "min_mhz": 1090.405,
+      "median_swr": 3.5473287905228403,
+      "max_swr": 3.69709840821152,
+      "coverage_le_2_pct": 0.0,
+      "coverage_le_3_pct": 0.0
+    },
+    "settings": [
+      {
+        "setting": "1",
+        "min_swr": 3.7599196020076993,
+        "min_mhz": 1089.6,
+        "median_swr": 3.8274881025668477,
+        "max_swr": 3.958019353851571,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "2",
+        "min_swr": 3.573030501897312,
+        "min_mhz": 1090.2325,
+        "median_swr": 3.677695841840062,
+        "max_swr": 3.812676534282153,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "3",
+        "min_swr": 3.7197731699502476,
+        "min_mhz": 1090.49125,
+        "median_swr": 3.82179258816496,
+        "max_swr": 3.934472282873768,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "4",
+        "min_swr": 3.586136550961799,
+        "min_mhz": 1090.43375,
+        "median_swr": 3.71597417725194,
+        "max_swr": 3.8825911418149093,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "5",
+        "min_swr": 3.544591781715167,
+        "min_mhz": 1089.57125,
+        "median_swr": 3.729559478260089,
+        "max_swr": 3.8918084116870673,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "6",
+        "min_swr": 3.519743963331369,
+        "min_mhz": 1090.3475,
+        "median_swr": 3.620962231857768,
+        "max_swr": 3.811406347866522,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "7",
+        "min_swr": 3.427764748007147,
+        "min_mhz": 1090.405,
+        "median_swr": 3.5473287905228403,
+        "max_swr": 3.69709840821152,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "8",
+        "min_swr": 3.4708457465427602,
+        "min_mhz": 1090.1175,
+        "median_swr": 3.569471684503063,
+        "max_swr": 3.690505421788312,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "9",
+        "min_swr": 3.5884066256563814,
+        "min_mhz": 1090.405,
+        "median_swr": 3.704808948428952,
+        "max_swr": 3.870982510969588,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      },
+      {
+        "setting": "10",
+        "min_swr": 3.5926126697856353,
+        "min_mhz": 1090.405,
+        "median_swr": 3.715854523927668,
+        "max_swr": 3.8280416732748153,
+        "coverage_le_2_pct": 0.0,
+        "coverage_le_3_pct": 0.0
+      }
+    ]
+  }
+]

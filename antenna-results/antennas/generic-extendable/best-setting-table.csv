@@ -1,0 +1,21 @@
+service,service_label,configuration,configuration_label,source,minimum_swr,median_swr,maximum_swr,coverage_at_or_below_2_percent,coverage_at_or_below_3_percent
+6m,6m amateur,generic-extendable:setting-10,setting 10,broadband,26.037984964615813,40.7232847196659,53.577416238460884,0.0,0.0
+fm-broadcast,FM broadcast,generic-extendable:setting-4,setting 4,broadband,1.0278572348602828,3.431177151685989,14.365174904401071,22.701149425287355,41.666666666666664
+civil-air,Civil air,generic-extendable:setting-10,setting 10,broadband,14.509986647911628,30.777312003635597,40.10784579544031,0.0,0.0
+2m,2m amateur,generic-extendable:setting-10,setting 10,broadband,35.3840662248502,41.88886649696339,51.83226976806671,0.0,0.0
+vhf-lmr,VHF LMR,generic-extendable:setting-6,setting 6,broadband,23.99535535231444,44.29883480876289,92.3596854481714,0.0,0.0
+marine-vhf,Marine VHF,generic-extendable:setting-6,setting 6,broadband,44.30515147886262,56.70342224359095,76.16500224166268,0.0,0.0
+railroad,Railroad,generic-extendable:setting-6,setting 6,broadband,45.24383955564604,48.1662307236396,53.84893139833243,0.0,0.0
+noaa-weather,NOAA weather,generic-extendable:setting-6,setting 6,broadband,42.0802363340147,43.172644950122844,43.638602194583335,0.0,0.0
+1.25m,1.25m amateur,generic-extendable:setting-4,setting 4,broadband,6.1373500631279,6.54303941295685,7.309361368091341,0.0,0.0
+military-air,Military air,generic-extendable:setting-2,setting 2,averaged_zoom,1.2697021984119063,7.3113889533551655,very poor / outside calibrated dynamic range,6.54934506549345,12.17878212178782
+federal-uhf,Federal UHF,generic-extendable:setting-1,setting 1,averaged_zoom,3.3431641738428928,4.659164438672707,6.6353167695936675,0.0,0.0
+70cm,70cm amateur,generic-extendable:setting-3,setting 3,broadband,2.62687024550414,4.181322545164461,12.389793200031708,0.0,20.114942528735632
+uhf-lmr,UHF LMR,generic-extendable:setting-3,setting 3,broadband,2.6448071169439706,3.345535862264291,4.121626441976199,0.0,29.928057553956833
+t-band,T-band,generic-extendable:setting-3,setting 3,broadband,2.974589843299617,6.134666411913668,10.752716687904252,0.0,0.06844626967830253
+700-public-safety-downlink,700 MHz public safety,generic-extendable:setting-8,setting 8,broadband,20.570692873184196,23.406683704686507,26.23696063828464,0.0,0.0
+800-public-safety-downlink,800 MHz public safety,generic-extendable:setting-10,setting 10,broadband,12.490852891706849,14.247151563842273,17.142508020439937,0.0,0.0
+33cm,33cm amateur,generic-extendable:setting-8,setting 8,broadband,4.249018111520114,6.221604502255767,9.660201481856511,0.0,0.0
+900-trunking-downlink,900 MHz trunking,generic-extendable:setting-8,setting 8,broadband,5.040844100959882,5.5083839394690655,5.947802283838503,0.0,0.0
+uat-978,UAT 978,generic-extendable:setting-9,setting 9,broadband,4.165880611773095,4.94211472400632,5.66856828261232,0.0,0.0
+ads-b-1090,ADS-B 1090,generic-extendable:setting-7,setting 7,broadband,3.175748902275443,3.5561249982514425,3.8179634593662937,0.0,0.0

@@ -9,6 +9,10 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Added
 
+- Added a reproducible calibrated scanner-antenna report package covering 20
+  configurations and 20 receive-service windows, with authoritative averaged
+  zooms, per-family analysis, practical recommendations, machine-readable
+  scorecards, and a self-contained offline comparison.
 - Added a calibrated JYR8010 EFHW antenna-results package with supported-band
   SWR zooms, impedance and return-loss plots, a Smith chart, usable-bandwidth
   thresholds, an offline interactive report, summary tables, point data, full

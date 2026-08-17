@@ -1,0 +1,211 @@
+[
+  {
+    "service": "FM",
+    "start_mhz": 88,
+    "stop_mhz": 108,
+    "min_swr": 6.264380298319922,
+    "min_mhz": 103.90625,
+    "median_swr": 8.65406918193763,
+    "max_swr": 40.33111952919365,
+    "coverage_le_2_pct": 0.0,
+    "coverage_le_3_pct": 0.0
+  },
+  {
+    "service": "Civil Air",
+    "start_mhz": 118,
+    "stop_mhz": 137,
+    "min_swr": 135.31774796806266,
+    "min_mhz": 132.42625,
+    "median_swr": null,
+    "max_swr": null,
+    "coverage_le_2_pct": 0.0,
+    "coverage_le_3_pct": 0.0
+  },
+  {
+    "service": "2m",
+    "start_mhz": 144,
+    "stop_mhz": 148,
+    "min_swr": null,
+    "min_mhz": 144.0125,
+    "median_swr": null,
+    "max_swr": null,
+    "coverage_le_2_pct": 0.0,
+    "coverage_le_3_pct": 0.0
+  },
+  {
+    "service": "VHF LMR",
+    "start_mhz": 150,
+    "stop_mhz": 174,
+    "min_swr": null,
+    "min_mhz": 150.02125,
+    "median_swr": null,
+    "max_swr": null,
+    "coverage_le_2_pct": 0.0,
+    "coverage_le_3_pct": 0.0
+  },
+  {
+    "service": "Marine",
+    "start_mhz": 156,
+    "stop_mhz": 162,
+    "min_swr": null,
+    "min_mhz": 156.00125,
+    "median_swr": null,
+    "max_swr": null,
+    "coverage_le_2_pct": 0.0,
+    "coverage_le_3_pct": 0.0
+  },
+  {
+    "service": "Rail",
+    "start_mhz": 159.81,
+    "stop_mhz": 161.565,
+    "min_swr": null,
+    "min_mhz": 159.825,
+    "median_swr": null,
+    "max_swr": null,
+    "coverage_le_2_pct": 0.0,
+    "coverage_le_3_pct": 0.0
+  },
+  {
+    "service": "NOAA",
+    "start_mhz": 162.4,
+    "stop_mhz": 162.55,
+    "min_swr": null,
+    "min_mhz": 162.4125,
+    "median_swr": null,
+    "max_swr": null,
+    "coverage_le_2_pct": 0.0,
+    "coverage_le_3_pct": 0.0
+  },
+  {
+    "service": "1.25m",
+    "start_mhz": 222,
+    "stop_mhz": 225,
+    "min_swr": null,
+    "min_mhz": 222.01125,
+    "median_swr": null,
+    "max_swr": null,
+    "coverage_le_2_pct": 0.0,
+    "coverage_le_3_pct": 0.0
+  },
+  {
+    "service": "Mil Air",
+    "start_mhz": 225,
+    "stop_mhz": 400,
+    "min_swr": 1.292813245697271,
+    "min_mhz": 368.29125,
+    "median_swr": 12.654015216921687,
+    "max_swr": null,
+    "coverage_le_2_pct": 18.744866108099227,
+    "coverage_le_3_pct": 32.97190734351897
+  },
+  {
+    "service": "Federal UHF",
+    "start_mhz": 406.1,
+    "stop_mhz": 420,
+    "min_swr": 4.897764453662896,
+    "min_mhz": 406.18375,
+    "median_swr": 7.086992267369496,
+    "max_swr": 13.864988998990535,
+    "coverage_le_2_pct": 0.0,
+    "coverage_le_3_pct": 0.0
+  },
+  {
+    "service": "70cm",
+    "start_mhz": 420,
+    "stop_mhz": 450,
+    "min_swr": 9.47078159412886,
+    "min_mhz": 422.485,
+    "median_swr": 20.086425026168197,
+    "max_swr": 143.38618259970735,
+    "coverage_le_2_pct": 0.0,
+    "coverage_le_3_pct": 0.0
+  },
+  {
+    "service": "UHF LMR",
+    "start_mhz": 450,
+    "stop_mhz": 470,
+    "min_swr": 13.057861469012044,
+    "min_mhz": 465.81125,
+    "median_swr": null,
+    "max_swr": null,
+    "coverage_le_2_pct": 0.0,
+    "coverage_le_3_pct": 0.0
+  },
+  {
+    "service": "T-Band",
+    "start_mhz": 470,
+    "stop_mhz": 512,
+    "min_swr": 95.84566606718506,
+    "min_mhz": 480.76125,
+    "median_swr": null,
+    "max_swr": null,
+    "coverage_le_2_pct": 0.0,
+    "coverage_le_3_pct": 0.0
+  },
+  {
+    "service": "700 PS",
+    "start_mhz": 769,
+    "stop_mhz": 775,
+    "min_swr": 4.616733077567391,
+    "min_mhz": 774.98875,
+    "median_swr": 4.749785057100125,
+    "max_swr": 4.888854582720397,
+    "coverage_le_2_pct": 0.0,
+    "coverage_le_3_pct": 0.0
+  },
+  {
+    "service": "800 PS",
+    "start_mhz": 851,
+    "stop_mhz": 869,
+    "min_swr": 3.905453072674842,
+    "min_mhz": 868.34,
+    "median_swr": 3.988426152686539,
+    "max_swr": 4.036607965724107,
+    "coverage_le_2_pct": 0.0,
+    "coverage_le_3_pct": 0.0
+  },
+  {
+    "service": "33cm",
+    "start_mhz": 902,
+    "stop_mhz": 928,
+    "min_swr": 3.06361206264269,
+    "min_mhz": 910.0275,
+    "median_swr": 3.6293106013187932,
+    "max_swr": 3.9945127764129005,
+    "coverage_le_2_pct": 0.0,
+    "coverage_le_3_pct": 0.0
+  },
+  {
+    "service": "900 trunk",
+    "start_mhz": 935,
+    "stop_mhz": 941,
+    "min_swr": 3.3640604403334913,
+    "min_mhz": 940.41625,
+    "median_swr": 3.42733527895585,
+    "max_swr": 3.5287894398904416,
+    "coverage_le_2_pct": 0.0,
+    "coverage_le_3_pct": 0.0
+  },
+  {
+    "service": "UAT",
+    "start_mhz": 977.5,
+    "stop_mhz": 978.5,
+    "min_swr": 3.1771432498007703,
+    "min_mhz": 977.82,
+    "median_swr": 3.214732228158166,
+    "max_swr": 3.3777359428279885,
+    "coverage_le_2_pct": 0.0,
+    "coverage_le_3_pct": 0.0
+  },
+  {
+    "service": "ADS-B",
+    "start_mhz": 1089.5,
+    "stop_mhz": 1090.5,
+    "min_swr": 2.7554509884498466,
+    "min_mhz": 1089.715,
+    "median_swr": 2.818368559050421,
+    "max_swr": 2.8553852158440605,
+    "coverage_le_2_pct": 0.0,
+    "coverage_le_3_pct": 100.0
+  }
+]

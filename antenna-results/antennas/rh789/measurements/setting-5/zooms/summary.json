@@ -1,0 +1,97 @@
+{
+  "captured_at": "2026-08-16T15:53:23.393917-07:00",
+  "calibration_file": "washington-sds150-favorites/antenna-results/calibration-baselines/sma-to-bnc/2026-08-16-nanovna-h/calibration.npz",
+  "calibration": {
+    "created_at": "2026-08-16T14:18:52.528016-07:00",
+    "reference_plane": "antenna side of attached adapter",
+    "standards": "ideal open, short, and 50-ohm load",
+    "source_capture": {
+      "captured_at": "2026-08-16T14:09:38.010722-07:00",
+      "label": "open",
+      "port": "/dev/cu.usbmodem4001",
+      "start_hz": 50000000,
+      "stop_hz": 1200000000,
+      "segments": 400,
+      "points": 40001,
+      "nominal_frequency_step_hz": 28750.0,
+      "device": {
+        "version": "1.2.50",
+        "info": "Board: NanoVNA-H\n2019-2026 Copyright NanoVNA.com\nbased on  @DiSlord @edy555 ... source\nLicensed under GPL.\nVersion: 1.2.50 [p:101, IF:12k, ADC:192k, Lcd:320x240]\nBuild Time: May 16 2026 - 12:42:11\nArchitecture: ARMv6-M Core Variant: Cortex-M0\nPlatform: STM32F072xB Entry Level Medium Density devices",
+        "calibration": "load Es Er cal'ed",
+        "bandwidth": "bandwidth 3 (1000Hz)"
+      }
+    }
+  },
+  "device": {
+    "version": "1.2.50",
+    "info": "Board: NanoVNA-H\n2019-2026 Copyright NanoVNA.com\nbased on  @DiSlord @edy555 ... source\nLicensed under GPL.\nVersion: 1.2.50 [p:101, IF:12k, ADC:192k, Lcd:320x240]\nBuild Time: May 16 2026 - 12:42:11\nArchitecture: ARMv6-M Core Variant: Cortex-M0\nPlatform: STM32F072xB Entry Level Medium Density devices",
+    "calibration": "load Es Er cal'ed",
+    "bandwidth": "bandwidth 3 (1000Hz)"
+  },
+  "results": [
+    {
+      "service": "vhf-lmr",
+      "start_hz": 150000000,
+      "stop_hz": 174000000,
+      "points": 2001,
+      "frequency_step_hz": 12000.0,
+      "averages": 3,
+      "minimum_swr": 2.0111308333981714,
+      "minimum_swr_frequency_hz": 161868000,
+      "median_swr": 3.5882911668919917,
+      "maximum_swr": 9.484617465472983,
+      "coverage_at_or_below_2_percent": 0.0,
+      "coverage_at_or_below_3_percent": 39.530234882558716,
+      "resistance_at_minimum_ohm": 92.85955074787636,
+      "reactance_at_minimum_ohm": -22.877485503729332
+    },
+    {
+      "service": "marine-vhf",
+      "start_hz": 156000000,
+      "stop_hz": 162000000,
+      "points": 1001,
+      "frequency_step_hz": 6000.0,
+      "averages": 3,
+      "minimum_swr": 2.0508572696380973,
+      "minimum_swr_frequency_hz": 161994000,
+      "median_swr": 2.347391719876278,
+      "maximum_swr": 3.374304122357248,
+      "coverage_at_or_below_2_percent": 0.0,
+      "coverage_at_or_below_3_percent": 91.30869130869131,
+      "resistance_at_minimum_ohm": 93.96785935113832,
+      "reactance_at_minimum_ohm": -24.427766255772095
+    },
+    {
+      "service": "railroad",
+      "start_hz": 159810000,
+      "stop_hz": 161565000,
+      "points": 1001,
+      "frequency_step_hz": 1755.0,
+      "averages": 3,
+      "minimum_swr": 2.1392079899829164,
+      "minimum_swr_frequency_hz": 161356155,
+      "median_swr": 2.1834898833055036,
+      "maximum_swr": 2.235332833403209,
+      "coverage_at_or_below_2_percent": 0.0,
+      "coverage_at_or_below_3_percent": 100.0,
+      "resistance_at_minimum_ohm": 93.3087097045246,
+      "reactance_at_minimum_ohm": -30.898847118331318
+    },
+    {
+      "service": "noaa-weather",
+      "start_hz": 162400000,
+      "stop_hz": 162550000,
+      "points": 101,
+      "frequency_step_hz": 1500.0,
+      "averages": 3,
+      "minimum_swr": 2.3775722539626623,
+      "minimum_swr_frequency_hz": 162502000,
+      "median_swr": 2.3970572460257284,
+      "maximum_swr": 2.4192461977128032,
+      "coverage_at_or_below_2_percent": 0.0,
+      "coverage_at_or_below_3_percent": 100.0,
+      "resistance_at_minimum_ohm": 109.04474953482156,
+      "reactance_at_minimum_ohm": -29.419830525795575
+    }
+  ]
+}

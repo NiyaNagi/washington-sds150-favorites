@@ -1,0 +1,97 @@
+{
+  "captured_at": "2026-08-16T16:24:34.440062-07:00",
+  "calibration_file": "washington-sds150-favorites/antenna-results/calibration-baselines/sma-to-bnc/2026-08-16-nanovna-h/calibration.npz",
+  "calibration": {
+    "created_at": "2026-08-16T14:18:52.528016-07:00",
+    "reference_plane": "antenna side of attached adapter",
+    "standards": "ideal open, short, and 50-ohm load",
+    "source_capture": {
+      "captured_at": "2026-08-16T14:09:38.010722-07:00",
+      "label": "open",
+      "port": "/dev/cu.usbmodem4001",
+      "start_hz": 50000000,
+      "stop_hz": 1200000000,
+      "segments": 400,
+      "points": 40001,
+      "nominal_frequency_step_hz": 28750.0,
+      "device": {
+        "version": "1.2.50",
+        "info": "Board: NanoVNA-H\n2019-2026 Copyright NanoVNA.com\nbased on  @DiSlord @edy555 ... source\nLicensed under GPL.\nVersion: 1.2.50 [p:101, IF:12k, ADC:192k, Lcd:320x240]\nBuild Time: May 16 2026 - 12:42:11\nArchitecture: ARMv6-M Core Variant: Cortex-M0\nPlatform: STM32F072xB Entry Level Medium Density devices",
+        "calibration": "load Es Er cal'ed",
+        "bandwidth": "bandwidth 3 (1000Hz)"
+      }
+    }
+  },
+  "device": {
+    "version": "1.2.50",
+    "info": "Board: NanoVNA-H\n2019-2026 Copyright NanoVNA.com\nbased on  @DiSlord @edy555 ... source\nLicensed under GPL.\nVersion: 1.2.50 [p:101, IF:12k, ADC:192k, Lcd:320x240]\nBuild Time: May 16 2026 - 12:42:11\nArchitecture: ARMv6-M Core Variant: Cortex-M0\nPlatform: STM32F072xB Entry Level Medium Density devices",
+    "calibration": "load Es Er cal'ed",
+    "bandwidth": "bandwidth 3 (1000Hz)"
+  },
+  "results": [
+    {
+      "service": "1.25m",
+      "start_hz": 222000000,
+      "stop_hz": 225000000,
+      "points": 1001,
+      "frequency_step_hz": 3000.0,
+      "averages": 3,
+      "minimum_swr": 1.3300938347497622,
+      "minimum_swr_frequency_hz": 225000000,
+      "median_swr": 1.3950898597785466,
+      "maximum_swr": 1.4613932309074618,
+      "coverage_at_or_below_2_percent": 100.0,
+      "coverage_at_or_below_3_percent": 100.0,
+      "resistance_at_minimum_ohm": 57.18693048904881,
+      "reactance_at_minimum_ohm": -13.512479445614598
+    },
+    {
+      "service": "military-air",
+      "start_hz": 225000000,
+      "stop_hz": 400000000,
+      "points": 10001,
+      "frequency_step_hz": 17500.0,
+      "averages": 3,
+      "minimum_swr": 1.2292686588707582,
+      "minimum_swr_frequency_hz": 227485000,
+      "median_swr": 10.909688387740738,
+      "maximum_swr": 44.440669313222116,
+      "coverage_at_or_below_2_percent": 6.54934506549345,
+      "coverage_at_or_below_3_percent": 16.098390160983904,
+      "resistance_at_minimum_ohm": 58.634004071896086,
+      "reactance_at_minimum_ohm": -7.128455772411089
+    },
+    {
+      "service": "federal-uhf",
+      "start_hz": 406100000,
+      "stop_hz": 420000000,
+      "points": 2001,
+      "frequency_step_hz": 6950.0,
+      "averages": 3,
+      "minimum_swr": 1.8647525465701305,
+      "minimum_swr_frequency_hz": 419944400,
+      "median_swr": 2.6934246744552692,
+      "maximum_swr": 3.9994700069947893,
+      "coverage_at_or_below_2_percent": 6.946526736631683,
+      "coverage_at_or_below_3_percent": 64.8175912043978,
+      "resistance_at_minimum_ohm": 31.063399386856705,
+      "reactance_at_minimum_ohm": -16.255838891141412
+    },
+    {
+      "service": "70cm",
+      "start_hz": 420000000,
+      "stop_hz": 450000000,
+      "points": 3001,
+      "frequency_step_hz": 10000.0,
+      "averages": 3,
+      "minimum_swr": 1.4574442990420535,
+      "minimum_swr_frequency_hz": 426610000,
+      "median_swr": 1.8581095397645466,
+      "maximum_swr": 4.019074681604296,
+      "coverage_at_or_below_2_percent": 57.44751749416861,
+      "coverage_at_or_below_3_percent": 83.03898700433189,
+      "resistance_at_minimum_ohm": 43.55976606647532,
+      "reactance_at_minimum_ohm": -16.469126403570282
+    }
+  ]
+}

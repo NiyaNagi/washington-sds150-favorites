@@ -1,0 +1,55 @@
+{
+  "captured_at": "2026-08-16T15:29:34.543976-07:00",
+  "range_hz": [
+    50000000,
+    1200000000
+  ],
+  "calibration_file": "../../../../calibration-baselines/sma-to-bnc/2026-08-16-nanovna-h/calibration.npz",
+  "calibration": {
+    "created_at": "2026-08-16T14:18:52.528016-07:00",
+    "reference_plane": "antenna side of attached adapter",
+    "standards": "ideal open, short, and 50-ohm load",
+    "source_capture": {
+      "captured_at": "2026-08-16T14:09:38.010722-07:00",
+      "label": "open",
+      "port": "/dev/cu.usbmodem4001",
+      "start_hz": 50000000,
+      "stop_hz": 1200000000,
+      "segments": 400,
+      "points": 40001,
+      "nominal_frequency_step_hz": 28750.0,
+      "device": {
+        "version": "1.2.50",
+        "info": "Board: NanoVNA-H\n2019-2026 Copyright NanoVNA.com\nbased on  @DiSlord @edy555 ... source\nLicensed under GPL.\nVersion: 1.2.50 [p:101, IF:12k, ADC:192k, Lcd:320x240]\nBuild Time: May 16 2026 - 12:42:11\nArchitecture: ARMv6-M Core Variant: Cortex-M0\nPlatform: STM32F072xB Entry Level Medium Density devices",
+        "calibration": "load Es Er cal'ed",
+        "bandwidth": "bandwidth 3 (1000Hz)"
+      }
+    }
+  },
+  "device": {
+    "version": "1.2.50",
+    "info": "Board: NanoVNA-H\n2019-2026 Copyright NanoVNA.com\nbased on  @DiSlord @edy555 ... source\nLicensed under GPL.\nVersion: 1.2.50 [p:101, IF:12k, ADC:192k, Lcd:320x240]\nBuild Time: May 16 2026 - 12:42:11\nArchitecture: ARMv6-M Core Variant: Cortex-M0\nPlatform: STM32F072xB Entry Level Medium Density devices",
+    "calibration": "load Es Er cal'ed",
+    "bandwidth": "bandwidth 3 (1000Hz)"
+  },
+  "points": 40001,
+  "frequency_step_hz": 28750.0,
+  "minimum_swr": 1.1146645877651458,
+  "minimum_swr_frequency_hz": 400663750,
+  "bands": [
+    {
+      "band": "6m",
+      "start_hz": 50000000,
+      "stop_hz": 54000000,
+      "minimum_swr": 126.46732657947817,
+      "minimum_swr_frequency_hz": 53996250
+    },
+    {
+      "band": "2m",
+      "start_hz": 144000000,
+      "stop_hz": 148000000,
+      "minimum_swr": 24.54356732760598,
+      "minimum_swr_frequency_hz": 147433750
+    }
+  ]
+}

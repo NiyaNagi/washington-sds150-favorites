@@ -1,0 +1,76 @@
+{
+  "captured_at": "2026-08-16T14:23:14.280263-07:00",
+  "standard": "50-ohm load disconnected and reconnected once",
+  "device": {
+    "version": "1.2.50",
+    "info": "Board: NanoVNA-H\n2019-2026 Copyright NanoVNA.com\nbased on  @DiSlord @edy555 ... source\nLicensed under GPL.\nVersion: 1.2.50 [p:101, IF:12k, ADC:192k, Lcd:320x240]\nBuild Time: May 16 2026 - 12:42:11\nArchitecture: ARMv6-M Core Variant: Cortex-M0\nPlatform: STM32F072xB Entry Level Medium Density devices",
+    "calibration": "load Es Er cal'ed",
+    "bandwidth": "bandwidth 3 (1000Hz)"
+  },
+  "calibration_file": "../calibration.npz",
+  "results": [
+    {
+      "region": "full",
+      "start_hz": 50000000,
+      "stop_hz": 1200000000,
+      "points": 40001,
+      "median_swr": 1.0013538625735705,
+      "p95_swr": 1.0104381759236396,
+      "maximum_swr": 1.1933476908998155
+    },
+    {
+      "region": "low_vhf",
+      "start_hz": 50000000,
+      "stop_hz": 137000000,
+      "points": 3027,
+      "median_swr": 1.0002217506171553,
+      "p95_swr": 1.0002902188904652,
+      "maximum_swr": 1.0009769196839875
+    },
+    {
+      "region": "vhf_high",
+      "start_hz": 137000000,
+      "stop_hz": 225000000,
+      "points": 3060,
+      "median_swr": 1.000318438112115,
+      "p95_swr": 1.0004116265099496,
+      "maximum_swr": 1.001270321572591
+    },
+    {
+      "region": "uhf",
+      "start_hz": 225000000,
+      "stop_hz": 512000000,
+      "points": 9983,
+      "median_swr": 1.0007118591037556,
+      "p95_swr": 1.0017293879313875,
+      "maximum_swr": 1.0789894119139545
+    },
+    {
+      "region": "700_900",
+      "start_hz": 700000000,
+      "stop_hz": 941000000,
+      "points": 8383,
+      "median_swr": 1.0020596767010872,
+      "p95_swr": 1.006467553195825,
+      "maximum_swr": 1.0671243769851588
+    },
+    {
+      "region": "aviation_lband",
+      "start_hz": 978000000,
+      "stop_hz": 1090000000,
+      "points": 3895,
+      "median_swr": 1.0059772327002596,
+      "p95_swr": 1.012825898169942,
+      "maximum_swr": 1.1933476908998155
+    },
+    {
+      "region": "upper",
+      "start_hz": 1090000000,
+      "stop_hz": 1200000000,
+      "points": 3827,
+      "median_swr": 1.0082136026197648,
+      "p95_swr": 1.0177766980812675,
+      "maximum_swr": 1.035619366045144
+    }
+  ]
+}
