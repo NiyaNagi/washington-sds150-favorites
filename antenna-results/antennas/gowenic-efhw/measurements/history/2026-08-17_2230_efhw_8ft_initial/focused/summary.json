@@ -1,0 +1,42 @@
+{
+  "captured_at": "2026-08-17T22:31:29.670766-07:00",
+  "range_hz": [
+    6004000,
+    6604000
+  ],
+  "averages": 3,
+  "deployment": "approximate inverted V, apex about 8 ft, far end staked low",
+  "calibration_file": "nanovna_measurements/2026-08-17_2221_efhw_calibration/calibration.npz",
+  "calibration": {
+    "created_at": "2026-08-17T22:28:44.261833-07:00",
+    "reference_plane": "antenna side of attached adapter",
+    "standards": "ideal open, short, and 50-ohm load",
+    "source_capture": {
+      "captured_at": "2026-08-17T22:25:06.328935-07:00",
+      "label": "open",
+      "port": "/dev/cu.usbmodem4001",
+      "start_hz": 5500000,
+      "stop_hz": 8500000,
+      "segments": 20,
+      "points": 2001,
+      "nominal_frequency_step_hz": 1500.0,
+      "device": {
+        "version": "1.2.50",
+        "info": "Board: NanoVNA-H\n2019-2026 Copyright NanoVNA.com\nbased on  @DiSlord @edy555 ... source\nLicensed under GPL.\nVersion: 1.2.50 [p:101, IF:12k, ADC:192k, Lcd:320x240]\nBuild Time: May 16 2026 - 12:42:11\nArchitecture: ARMv6-M Core Variant: Cortex-M0\nPlatform: STM32F072xB Entry Level Medium Density devices",
+        "calibration": "load Es Er cal'ed",
+        "bandwidth": "bandwidth 3 (1000Hz)"
+      }
+    }
+  },
+  "device": {
+    "version": "1.2.50",
+    "info": "Board: NanoVNA-H\n2019-2026 Copyright NanoVNA.com\nbased on  @DiSlord @edy555 ... source\nLicensed under GPL.\nVersion: 1.2.50 [p:101, IF:12k, ADC:192k, Lcd:320x240]\nBuild Time: May 16 2026 - 12:42:11\nArchitecture: ARMv6-M Core Variant: Cortex-M0\nPlatform: STM32F072xB Entry Level Medium Density devices",
+    "calibration": "load Es Er cal'ed",
+    "bandwidth": "bandwidth 3 (1000Hz)"
+  },
+  "points": 1601,
+  "frequency_step_hz": 375.0,
+  "minimum_swr": 1.523729884942572,
+  "minimum_swr_frequency_hz": 6304375,
+  "bands": []
+}

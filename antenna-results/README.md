@@ -1,6 +1,6 @@
 # Antenna measurement results
 
-Reproducible reports built from calibrated complex S11 measurements. The scanner survey compares 7 valid antenna families and 21 configurations across 20 receive-service windows; the earlier JYR8010 EFHW HF report remains intact.
+Reproducible reports built from calibrated complex S11 measurements. The scanner survey compares 7 valid antenna families and 21 configurations across 20 receive-service windows; the JYR8010 and final GOWENIC-module EFHW HF reports are preserved separately.
 
 > **SWR is impedance match only.** It cannot establish receive gain, scanner sensitivity, radiation pattern, or decode performance.
 
@@ -28,6 +28,7 @@ See the [full comparison, coverage matrix, and gap table](comparison/README.md) 
 | [Taurus triband vehicle](antennas/taurus-triband-vehicle/README.md) | valid / installed vehicle | fixed installation; VHF-high and partial 800/900 MHz |
 | [TIDRADIO H9 stock](antennas/tidradio-h9-stock/README.md) | invalid / inconclusive | preserved, excluded |
 | [JYR8010 EFHW](antennas/jyr8010-efhw/README.md) | preserved HF report | separate prior report |
+| [GOWENIC-module 40m EFHW](antennas/gowenic-efhw/README.md) | valid final HF report | 62.5 ft sloper with grounded 96 in counterpoise |
 
 ## Method
 

@@ -9,6 +9,11 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Added
 
+- Added a final GOWENIC-module 40m EFHW package with a fresh 1.8-148 MHz,
+  40,001-point OSL calibration, full-span reconnect verification, final
+  counterpoise-installed sweep, all incremental tuning runs, band scorecards,
+  SWR/impedance/return-loss/Smith plots, build and tuning visuals, an offline
+  interactive report, reproduction instructions, and an LLM handoff prompt.
 - Added the installed Taurus triband vehicle antenna with a separate BNC-plane
   calibration baseline, three-pass averaged service zooms, raw complex S11
   measurements, context-aware comparisons, an all-antenna coverage matrix, and

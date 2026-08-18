@@ -1,0 +1,8 @@
+{
+  "minimum_swr_frequency_hz": 6459555,
+  "minimum_swr": 1.5851758587667555,
+  "resistance_ohm": 48.842553458394434,
+  "reactance_ohm": 22.939276949050715,
+  "zero_reactance_crossings": [],
+  "frequency_step_hz": 389.0
+}

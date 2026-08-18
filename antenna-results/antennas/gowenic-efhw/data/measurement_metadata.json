@@ -1,0 +1,102 @@
+{
+  "report_generated_at": "2026-08-18T00:27:25.447889-07:00",
+  "antenna": {
+    "module_brand": "GOWENIC",
+    "listing_name": "No Tune End Fed Half Antenna",
+    "type": "generic compensated end-fed half-wave module",
+    "identity_note": "QRPGuys-style generic board; not a QRPGuys-branded product.",
+    "rated_power_w": 10,
+    "listing_impedance_ohm": 50,
+    "published_transformer_ratio": null,
+    "advertised_supported_bands": null,
+    "intended_harmonic_bands": [
+      "40m",
+      "20m",
+      "15m",
+      "10m"
+    ],
+    "physical_radiator_length_ft": 62.5,
+    "product_url": "https://www.amazon.com/dp/B0C3JVM9SR",
+    "asin": "B0C3JVM9SR"
+  },
+  "installation": {
+    "configuration": "sloper",
+    "feed_end_height_ft": 3,
+    "far_end_height_ft": 25,
+    "feed_end_strain_loop_wire_in": 8,
+    "far_end_tie_off_loop_wire_in": 14,
+    "approximate_supported_span_ft": 60.666666666666664,
+    "counterpoise_length_in": 96,
+    "counterpoise_connection": "coax shield / transformer ground",
+    "counterpoise_layout": "straight on ground, angled away from antenna direction",
+    "feed_line_length_ft": 12,
+    "common_mode_choke": false
+  },
+  "instrument": {
+    "model": "NanoVNA-H",
+    "firmware": "1.2.50",
+    "measurement_bandwidth_hz": 1000,
+    "reference_impedance_ohm": 50.0
+  },
+  "calibration": {
+    "type": "software one-port ideal OSL",
+    "reference_plane": "antenna side of attached adapter",
+    "standards": [
+      "open",
+      "short",
+      "50-ohm load"
+    ],
+    "device_saved_calibration_preserved": true,
+    "created_at": "2026-08-18T00:18:10.227204-07:00"
+  },
+  "sweep": {
+    "captured_at": "2026-08-18T00:27:25.447889-07:00",
+    "start_hz": 1800000,
+    "stop_hz": 148000000,
+    "points": 40001,
+    "nominal_frequency_step_hz": 3655.0,
+    "segments": 400
+  },
+  "analysis": {
+    "band_plan": "United States amateur allocations",
+    "all_measured_amateur_bands": [
+      "160m",
+      "80m",
+      "60m",
+      "40m",
+      "30m",
+      "20m",
+      "17m",
+      "15m",
+      "12m",
+      "10m",
+      "6m",
+      "2m"
+    ],
+    "intended_harmonic_bands": [
+      "40m",
+      "20m",
+      "15m",
+      "10m"
+    ],
+    "swr_thresholds": [
+      1.5,
+      2.0,
+      3.0
+    ],
+    "reference_impedance_ohm": 50.0
+  },
+  "load_reconnection_check": {
+    "note": "The calibration load was reconnected, so this establishes drift and connector repeatability rather than independent traceability.",
+    "range_hz": [
+      1800000,
+      148000000
+    ],
+    "points": 40001,
+    "median_swr": 1.000518743210567,
+    "p95_swr": 1.0008795993501658,
+    "maximum_swr": 1.0111497728192607,
+    "median_resistance_ohm": 50.008349285302536,
+    "median_reactance_ohm": 0.02413502519939014
+  }
+}

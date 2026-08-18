@@ -1,0 +1,8 @@
+{
+  "scan": "20m-extended",
+  "minimum_swr_frequency_hz": 13341000,
+  "minimum_swr": 1.5509571144196508,
+  "resistance_ohm": 75.20686123670669,
+  "reactance_ohm": -10.02943159093239,
+  "frequency_step_hz": 1000.0
+}
