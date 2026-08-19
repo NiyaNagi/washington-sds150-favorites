@@ -40,6 +40,11 @@ from wasds150.export.ftx1_file import Ftx1File, Ftx1Record  # noqa: E402
 
 DEFAULT_OUT = pathlib.Path("radio-templates") / "ftx1-blank.FTX1"
 
+#: How many records at the front of the array are user memories. Everything
+#: after this is scan limits, HOME channels and radio configuration, all of
+#: which is preserved rather than blanked.
+MEMORY_COUNT = 999
+
 #: Runs of printable characters we treat as "readable text". Names and
 #: comments are UTF-16-LE; the container magic is plain ASCII.
 _UTF16_RUN = re.compile(rb"(?:[\x20-\x7e]\x00){3,}")
@@ -66,9 +71,19 @@ def find_clean_bases(source: Ftx1File) -> Dict[str, Ftx1Record]:
     "Clean" means: after blanking name and comment, the record's full 295
     bytes contain no readable text anywhere. Such a record carries the
     vendor's per-channel setting bytes without carrying any description.
+
+    Only real memories are considered. Scan limits and HOME channels live in
+    the same array but are a different kind of record, and an empty one of
+    those carries no per-channel settings at all - harvesting from them
+    yields a base that is blank, which defeats the point of having one.
+
+    A factory-reset file holds a single default memory, so one base is the
+    normal case. The duplex shape does not need to come from the base: the
+    export target sets receive, transmit and the direction byte explicitly,
+    because those are fields this project models.
     """
     bases: Dict[str, Ftx1Record] = {}
-    for record in source.records:
+    for record in source.records[:MEMORY_COUNT]:
         if record.empty:
             continue
         if record.tx_hz == record.rx_hz:
@@ -85,6 +100,15 @@ def find_clean_bases(source: Ftx1File) -> Dict[str, Ftx1Record]:
         bases[shape] = candidate
         if len(bases) == 3:
             break
+
+    # Fill any missing shape from whichever base we did find. Patching sets
+    # the frequencies and direction, so a simplex base serves a repeater
+    # channel correctly; what matters is that the surrounding setting bytes
+    # are genuine rather than invented.
+    if bases:
+        fallback = bases.get("simplex") or next(iter(bases.values()))
+        for shape in ("simplex", "plus", "minus"):
+            bases.setdefault(shape, fallback)
     return bases
 
 
@@ -110,8 +134,15 @@ def main(argv=None) -> int:
     record_size = len(ftx1.records[0].raw)
     blank_raw = bytes(record_size)
 
-    # 1. Zero every record outright.
-    for index in range(len(ftx1.records)):
+    # 1. Zero the MEMORY records only.
+    #
+    #    Everything past the memories - the programmable scan limits, the
+    #    HOME channels, and the configuration area beyond the record array
+    #    (CW messages, GPS setup, display data) - is carried through
+    #    untouched. Those are radio settings, not channel data, and blanking
+    #    them produced a file that loaded but silently reset the radio's
+    #    configuration.
+    for index in range(min(MEMORY_COUNT, len(ftx1.records))):
         ftx1.records[index] = Ftx1Record(index=index, raw=blank_raw)
 
     # 2. Restore verified-clean bases at the front, where the export target
@@ -122,7 +153,13 @@ def main(argv=None) -> int:
         if base is not None:
             ftx1.records[slot] = Ftx1Record(index=slot, raw=base.raw)
             restored += 1
-    print(f"  zeroed {len(ftx1.records)} records, restored {restored} clean bases")
+    if not restored:
+        raise SystemExit(
+            "no clean base record found in the source memories; the export "
+            "target has nothing genuine to patch from"
+        )
+    print(f"  zeroed {min(MEMORY_COUNT, len(ftx1.records))} memories, "
+          f"restored {restored} clean bases")
 
     out = pathlib.Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -131,24 +168,33 @@ def main(argv=None) -> int:
     if out.stat().st_size != len(original):
         raise SystemExit("template size differs from source; the record model is wrong")
 
-    # Verify: reload, confirm nothing is populated and no text survives in the
-    # record area. The container header legitimately holds the format magic
-    # and Yaesu's own preset message strings; those are structure, not data.
-    check_bytes = out.read_bytes()
+    # Verify: reload, confirm no memory is populated and no channel text
+    # survives IN THE MEMORY AREA.
+    #
+    # The check is deliberately scoped to the memories rather than the whole
+    # file. The configuration area past the record array legitimately holds
+    # readable text - the radio's CW messages, for instance - and an earlier
+    # version of this script scanned the entire body, concluded that text was
+    # channel data, and "fixed" it by zeroing the radio's settings.
     check = Ftx1File.load(out)
-    remaining = [r for r in check.memories() if not r.empty]
+    remaining = [r for r in check.memories()[:MEMORY_COUNT] if not r.empty]
     if remaining:
         raise SystemExit(f"{len(remaining)} memories survived clearing; refusing")
 
-    body_text = readable_text(check_bytes[len(check.header):])
+    memory_area = b"".join(r.raw for r in check.records[:MEMORY_COUNT])
+    body_text = readable_text(memory_area)
     if body_text:
-        print("\nREFUSING: readable text survives in the record area:")
+        print("\nREFUSING: readable text survives in the memory area:")
         for text in body_text[:20]:
             print(f"  {text!r}")
         return 1
 
+    settings_bytes = sum(
+        1 for r in check.records[MEMORY_COUNT:] for b in r.raw if b
+    ) + sum(1 for b in check.trailer if b)
     print(f"\nwrote {out} ({out.stat().st_size} bytes)")
-    print("verified: no channel text outside the container header")
+    print("verified: no channel data in the memory area")
+    print(f"preserved: {settings_bytes} non-zero bytes of radio settings")
     return 0
 
 

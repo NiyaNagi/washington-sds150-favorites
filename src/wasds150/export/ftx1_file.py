@@ -81,6 +81,12 @@ PMS_PAIRS = 50
 HOME_FIRST = 1189
 HOME_COUNT = 5
 
+#: Total length of the record array. The file continues past this point with
+#: radio configuration - CW messages, GPS setup, display data - that this
+#: project does not model. That area must be carried through verbatim, so it
+#: is deliberately NOT divided into records.
+RECORD_COUNT = HOME_FIRST + HOME_COUNT
+
 #: The 50 standard CTCSS tones, in the order radios index them.
 CTCSS_TONES: Tuple[float, ...] = (
     67.0, 69.3, 71.9, 74.4, 77.0, 79.7, 82.5, 85.4, 88.5, 91.5,
@@ -240,7 +246,17 @@ class Ftx1File:
 
         header = data[:HEADER_LEN]
         body = data[HEADER_LEN:]
-        count = len(body) // RECORD_LEN
+
+        # The record array is a FIXED length: 999 memories followed by 50
+        # scan-limit pairs. Everything after it is radio configuration - CW
+        # messages, GPS setup, display data - which this project does not
+        # model and must therefore preserve verbatim.
+        #
+        # Dividing the whole body by the record size instead would mint ~800
+        # phantom records out of that configuration area. Anything that then
+        # cleared "every record" would silently wipe the radio's settings
+        # while looking entirely correct.
+        count = min(RECORD_COUNT, len(body) // RECORD_LEN)
         records = [
             Ftx1Record(index=i, raw=body[i * RECORD_LEN : (i + 1) * RECORD_LEN])
             for i in range(count)

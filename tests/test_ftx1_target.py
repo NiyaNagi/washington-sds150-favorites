@@ -10,7 +10,13 @@ import pytest
 
 from wasds150.appctx import build_context
 from wasds150.config import AppConfig
-from wasds150.export.ftx1_file import PMS_PAIRS, Ftx1File
+from wasds150.export.ftx1_file import (
+    HOME_COUNT,
+    HOME_FIRST,
+    PMS_PAIRS,
+    RECORD_COUNT,
+    Ftx1File,
+)
 from wasds150.export.ftx1_target import (
     Ftx1ExportError,
     MEMORY_CAPACITY,
@@ -182,3 +188,50 @@ def test_ftx1_target_refuses_a_plan_for_another_radio(ctx):
     _plan, tdh9 = resolve_named_plan(ctx, "h9-ozette")
     with pytest.raises(ValueError):
         get_target("ftx1-file").check_radio(tdh9)
+
+
+# ------------------------------------------------- settings preservation --
+# A .FTX1 holds far more than channels: CW messages, GPS setup, display data
+# and the HOME channels all live past the memory array. An earlier version of
+# the format model divided the whole file by the record size, minting ~800
+# phantom records out of that configuration area; the template builder then
+# "cleared every record" and silently wiped the radio's settings. The file
+# still loaded, and the memories were still correct, so nothing looked wrong.
+class TestSettingsAreaPreserved:
+    def test_record_array_is_bounded(self):
+        """load() must not turn the configuration area into records."""
+        assert RECORD_COUNT == HOME_FIRST + HOME_COUNT
+        template = _template_or_skip()
+        parsed = Ftx1File.load(template)
+        assert len(parsed.records) == RECORD_COUNT
+        # Everything past the array survives as an opaque trailer.
+        assert len(parsed.trailer) > 0
+
+    def test_template_keeps_settings_and_home(self):
+        """The vendored template must be blank in memories but not elsewhere."""
+        template = _template_or_skip()
+        parsed = Ftx1File.load(template)
+
+        # Only the handful of base records the exporter patches from remain...
+        populated = [r for r in parsed.records[:MEMORY_CAPACITY] if not r.empty]
+        assert len(populated) <= 3
+        # ...but the radio's configuration is still there.
+        assert sum(1 for b in parsed.trailer if b) > 1000, (
+            "template lost its settings area; regenerate it with "
+            "scripts/radios/make_ftx1_template.py"
+        )
+        home = b"".join(r.raw for r in parsed.records[HOME_FIRST:HOME_FIRST + HOME_COUNT])
+        assert sum(1 for b in home if b) > 0, "template lost its HOME channels"
+
+    def test_export_leaves_settings_byte_identical(self, resolved):
+        """Exporting must change memories and scan limits, nothing else."""
+        template = _template_or_skip()
+        rendered, _result = render_ftx1(resolved)
+        base = Ftx1File.load(template)
+
+        assert rendered.trailer == base.trailer, "export modified radio settings"
+        assert rendered.header == base.header, "export modified the header"
+        for index in range(HOME_FIRST, HOME_FIRST + HOME_COUNT):
+            assert rendered.records[index].raw == base.records[index].raw, (
+                f"export modified HOME channel at record {index}"
+            )
