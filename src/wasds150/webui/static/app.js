@@ -2108,25 +2108,25 @@
 
   async function loadPlans() {
     try {
-      const data = await apiGet("/api/v1/plans");
-      planCache = data.plans || [];
+      const data = await apiGet("/api/v1/loadouts");
+      planCache = data.loadouts || [];
       planSelect.innerHTML = "";
-      planCache.forEach((plan) => {
+      planCache.forEach((entry) => {
         const option = document.createElement("option");
-        option.value = plan.id;
-        option.textContent = `${plan.label} (${plan.id})`;
+        option.value = entry.id;
+        const flag = entry.verified ? "" : "  [unverified]";
+        option.textContent = `${entry.radio_label} — ${entry.label}${flag}`;
         planSelect.appendChild(option);
       });
       if (planCache.length) loadPlanDetail(planCache[0].id);
     } catch (e) {
-      setStatus("Could not load plans: " + e.message, true);
+      setStatus("Could not load radio configurations: " + e.message, true);
     }
   }
 
-  function renderPlanTargets(planId) {
-    const plan = planCache.find((p) => p.id === planId);
+  function renderPlanTargets(loadoutId) {
     planTargetSelect.innerHTML = "";
-    const targets = (plan && plan.targets) || [];
+    const targets = (currentPlanDetail && currentPlanDetail.export_targets) || [];
     targets.forEach((target) => {
       const option = document.createElement("option");
       option.value = target.id;
@@ -2137,8 +2137,80 @@
     const available = targets.find((t) => t.available);
     if (available) planTargetSelect.value = available.id;
     const chosen = targets.find((t) => t.id === planTargetSelect.value);
-    document.getElementById("plan-target-description").textContent = chosen ? chosen.description : "";
+    document.getElementById("plan-target-description").textContent = chosen
+      ? chosen.description
+      : "This radio is written from the Export tab, not from a channel plan.";
     document.getElementById("plan-export-btn").disabled = !available;
+  }
+
+  function renderLoadoutSummary(detail) {
+    const box = document.getElementById("loadout-summary");
+    box.innerHTML = "";
+    const labels = {
+      memories_used: "Memories used",
+      memories_available: "Capacity",
+      reserved: "Reserved",
+      blocks: "Blocks",
+      transmit_enabled: "Transmit enabled",
+      receive_only: "Receive only",
+      dropped: "Dropped",
+      favorites_lists: "Favorites Lists",
+      systems: "Systems",
+      channels: "Channels",
+      talkgroups: "Talkgroups",
+    };
+    Object.keys(labels).forEach((key) => {
+      if (!(key in detail.summary)) return;
+      const card = document.createElement("div");
+      card.className = "card";
+      const title = document.createElement("div");
+      title.className = "label";
+      title.textContent = labels[key];
+      const value = document.createElement("div");
+      value.className = "value";
+      const raw = detail.summary[key];
+      value.textContent = raw === null ? "unlimited" : String(raw);
+      card.appendChild(title);
+      card.appendChild(value);
+      box.appendChild(card);
+    });
+  }
+
+  function renderLoadoutFavorites() {
+    if (!currentPlanDetail) return;
+    const needle = document.getElementById("loadout-favorites-filter").value.trim().toLowerCase();
+    const rows = (currentPlanDetail.favorites || []).filter((row) => {
+      if (!needle) return true;
+      return (
+        row.key.toLowerCase().includes(needle) ||
+        (row.name || "").toLowerCase().includes(needle)
+      );
+    });
+    const tbody = document.querySelector("#loadout-favorites-table tbody");
+    tbody.innerHTML = "";
+    rows.forEach((row) => {
+      const tr = document.createElement("tr");
+      [
+        row.key,
+        row.name,
+        String(row.systems),
+        row.trunked_systems ? String(row.trunked_systems) : "—",
+        String(row.departments),
+        String(row.channels),
+        row.talkgroups ? String(row.talkgroups) : "—",
+      ].forEach((text) => {
+        const td = document.createElement("td");
+        td.textContent = text;
+        tr.appendChild(td);
+      });
+      if (row.reference_only) {
+        tr.title = "Reference list: describes spectrum rather than a channel set";
+        tr.classList.add("muted");
+      }
+      tbody.appendChild(tr);
+    });
+    document.getElementById("loadout-favorites-count").textContent =
+      `${rows.length} of ${(currentPlanDetail.favorites || []).length} lists`;
   }
 
   function renderPlanChannels() {
@@ -2186,25 +2258,39 @@
       `${rows.length} of ${currentPlanDetail.channels.length} channels`;
   }
 
-  async function loadPlanDetail(planId) {
+  async function loadPlanDetail(loadoutId) {
     try {
-      setStatus("Resolving plan…");
-      const detail = await apiGet("/api/v1/plans/" + encodeURIComponent(planId));
+      setStatus("Resolving…");
+      const detail = await apiGet("/api/v1/loadouts/" + encodeURIComponent(loadoutId));
       currentPlanDetail = detail;
+      document.getElementById("loadout-diff").textContent = "";
 
-      const capacity = detail.capacity === null ? "unlimited" : detail.capacity;
-      document.getElementById("plan-summary").textContent =
-        `${detail.slots_used} of ${capacity} slots used on ${detail.radio.label}`;
-      document.getElementById("plan-description").textContent = detail.plan.description || "";
+      const isMemoryList = detail.kind === "memory-list";
+      document.getElementById("loadout-memory-panel").hidden = !isMemoryList;
+      document.getElementById("loadout-favorites-panel").hidden = isMemoryList;
+
+      if (isMemoryList) {
+        const capacity = detail.summary.memories_available === null
+          ? "unlimited"
+          : detail.summary.memories_available;
+        document.getElementById("plan-summary").textContent =
+          `${detail.summary.memories_used} of ${capacity} memories on ${detail.radio_label}`;
+      } else {
+        document.getElementById("plan-summary").textContent =
+          `${detail.summary.favorites_lists} Favorites Lists on ${detail.radio_label}`;
+      }
+      document.getElementById("plan-description").textContent = detail.description || "";
+
+      renderLoadoutSummary(detail);
 
       const blockBody = document.querySelector("#plan-blocks-table tbody");
       blockBody.innerHTML = "";
-      Object.keys(detail.block_counts).forEach((name) => {
+      (detail.groups || []).forEach((group) => {
         const tr = document.createElement("tr");
         const nameCell = document.createElement("td");
-        nameCell.textContent = name;
+        nameCell.textContent = group.label;
         const countCell = document.createElement("td");
-        countCell.textContent = String(detail.block_counts[name]);
+        countCell.textContent = String(group.count);
         tr.appendChild(nameCell);
         tr.appendChild(countCell);
         blockBody.appendChild(tr);
@@ -2218,32 +2304,83 @@
         li.textContent = text;
         warnList.appendChild(li);
       });
-      Object.keys(detail.drop_reasons || {}).forEach((reason) => {
-        const li = document.createElement("li");
-        li.textContent = `${detail.drop_reasons[reason]} channel(s) dropped: ${reason}`;
-        warnList.appendChild(li);
-      });
       if (!warnList.childElementCount) {
         const li = document.createElement("li");
-        li.textContent = "No warnings. Every selected channel fits the radio.";
+        li.textContent = "No warnings.";
         warnList.appendChild(li);
       }
       warnBox.appendChild(warnList);
 
-      renderPlanTargets(planId);
-      renderPlanChannels();
+      renderPlanTargets(loadoutId);
+      if (isMemoryList) {
+        renderPlanChannels();
+      } else {
+        renderLoadoutFavorites();
+      }
       updateProgrammerCommand();
-      setStatus(`Plan ${planId} resolved`);
+      setStatus(`${detail.radio_label} configuration loaded`);
     } catch (e) {
-      setStatus("Could not resolve plan: " + e.message, true);
+      setStatus("Could not load configuration: " + e.message, true);
     }
   }
 
   planSelect.addEventListener("change", () => loadPlanDetail(planSelect.value));
   planChannelFilter.addEventListener("input", renderPlanChannels);
+  document
+    .getElementById("loadout-favorites-filter")
+    .addEventListener("input", renderLoadoutFavorites);
   planTargetSelect.addEventListener("change", () => renderPlanTargets(planSelect.value));
   document.getElementById("plan-refresh-btn").addEventListener("click", () => {
     loadPlanDetail(planSelect.value);
+  });
+
+  document.getElementById("loadout-snapshot-btn").addEventListener("click", async () => {
+    try {
+      const result = await apiPost(
+        "/api/v1/loadouts/" + encodeURIComponent(planSelect.value) + "/snapshot",
+        {}
+      );
+      document.getElementById("loadout-diff").textContent =
+        `Saved ${result.path}\ncatalog hash ${result.catalog_hash}`;
+      setStatus("Snapshot saved");
+    } catch (e) {
+      setStatus("Snapshot failed: " + e.message, true);
+    }
+  });
+
+  document.getElementById("loadout-diff-btn").addEventListener("click", async () => {
+    const box = document.getElementById("loadout-diff");
+    try {
+      const diff = await apiGet(
+        "/api/v1/loadouts/" + encodeURIComponent(planSelect.value) + "/diff"
+      );
+      if (!diff.has_snapshot) {
+        box.textContent = diff.message;
+        setStatus("No snapshot to compare against");
+        return;
+      }
+      const lines = [
+        `Compared with the snapshot saved ${diff.saved_at}`,
+        `  catalog then : ${diff.catalog_hash_then}`,
+        `  catalog now  : ${diff.catalog_hash_now}`,
+        `  added   : ${diff.added}`,
+        `  removed : ${diff.removed}`,
+      ];
+      const detail = diff.detail || {};
+      (detail.added || []).slice(0, 30).forEach((row) => {
+        lines.push(`  + ${row.name || row.key || ""} ${row.rx_mhz || ""}`);
+      });
+      (detail.removed || []).slice(0, 30).forEach((row) => {
+        lines.push(`  - ${row.name || row.key || ""} ${row.rx_mhz || ""}`);
+      });
+      (detail.changed || []).slice(0, 30).forEach((row) => {
+        lines.push(`  ~ ${row.key}: ${row.channels_before} -> ${row.channels_after} channels`);
+      });
+      box.textContent = lines.join("\n");
+      setStatus("Comparison complete");
+    } catch (e) {
+      setStatus("Comparison failed: " + e.message, true);
+    }
   });
 
   document.getElementById("plan-export-btn").addEventListener("click", async () => {
@@ -2266,7 +2403,11 @@
 
   // ------------------------------------------------------- programmer --
   function currentCsvPath() {
-    const planId = planSelect.value;
+    // Only the TD-H9 has a hardware programming path in this project, and it
+    // consumes CHIRP CSV. Returning a path for any other radio would build a
+    // command that writes the wrong file to the wrong hardware.
+    if (!currentPlanDetail || currentPlanDetail.radio_id !== "td-h9") return "";
+    const planId = currentPlanDetail.plan_id;
     return planId ? `wasds150-output/radios/${planId}.csv` : "";
   }
 
@@ -2275,6 +2416,23 @@
     const label = document.getElementById("programmer-label").value.trim();
     const csv = currentCsvPath();
     const preview = document.getElementById("programmer-command");
+    const note = document.getElementById("programmer-availability");
+
+    const isTdh9 = currentPlanDetail && currentPlanDetail.radio_id === "td-h9";
+    ["programmer-backup-btn", "programmer-dryrun-btn", "programmer-flash-btn"].forEach((id) => {
+      document.getElementById(id).disabled = !programmerReady || !isTdh9;
+    });
+
+    if (!isTdh9) {
+      const name = currentPlanDetail ? currentPlanDetail.radio_label : "this radio";
+      preview.textContent = "—";
+      note.textContent =
+        `Direct programming is only wired up for the TIDRADIO TD-H9. Export a file ` +
+        `for ${name} above and load it with that radio's own programmer.`;
+      note.className = "hint";
+      return;
+    }
+
     if (!port || !csv) {
       preview.textContent = "—";
       return;
@@ -2311,9 +2469,6 @@
         note.textContent = "Programmer unavailable — " + (data.reasons || []).join("; ");
         note.className = "hint warn";
       }
-      ["programmer-backup-btn", "programmer-dryrun-btn", "programmer-flash-btn"].forEach((id) => {
-        document.getElementById(id).disabled = !programmerReady;
-      });
       updateProgrammerCommand();
     } catch (e) {
       note.textContent = "Could not check the programmer: " + e.message;

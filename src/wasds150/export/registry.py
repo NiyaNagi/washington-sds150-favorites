@@ -20,6 +20,7 @@ from pathlib import Path
 from typing import Callable, Dict, List
 
 from wasds150.export.chirp_csv import ChirpCsvResult, render_chirp_csv, write_chirp_csv
+from wasds150.export.ftx1_target import render_ftx1, write_ftx1
 from wasds150.plan.resolve import ResolvedPlan
 
 
@@ -86,9 +87,27 @@ RT_SYSTEMS_CSV_FTX1 = ExportTarget(
     available=False,
 )
 
+#: Native Yaesu memory file. Produced by patching a blank structural template
+#: that ships in the repository, so the bytes this project has not decoded
+#: keep whatever the programmer wrote rather than being guessed at.
+FTX1_FILE = ExportTarget(
+    id="ftx1-file",
+    radio_id="ftx1",
+    label="Yaesu FTX-1 memory file",
+    extension=".FTX1",
+    description=(
+        "Native .FTX1 memory file, openable directly in the RT Systems "
+        "programmer. Writes up to 999 memories plus the 50 programmable "
+        "scan-limit pairs."
+    ),
+    render=render_ftx1,
+    write=write_ftx1,
+)
+
 _REGISTRY: Dict[str, ExportTarget] = {
     CHIRP_CSV_TD_H9.id: CHIRP_CSV_TD_H9,
     RT_SYSTEMS_CSV_FTX1.id: RT_SYSTEMS_CSV_FTX1,
+    FTX1_FILE.id: FTX1_FILE,
 }
 
 

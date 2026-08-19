@@ -9,6 +9,20 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Added
 
+- Added per-radio loadouts. Every supported radio now has an inspectable saved
+  configuration reachable from one dropdown, each rendered in its own native
+  shape: the SDS150 as Favorites Lists with systems, sites and departments;
+  the TD-H9 and FTX-1 as ordered memory channels. Snapshots can be saved and
+  compared, so a refresh shows exactly what changed.
+- Added `ftx1-wa`, a 966-channel Washington plan for the Yaesu FTX-1 covering
+  amateur repeaters and simplex, GMRS/FRS/MURS, marine, aviation, NOAA,
+  public-safety interop, and Winlink/APRS data channels.
+- Added a native `.FTX1` export target, so the FTX-1 memory file is generated
+  from the catalog rather than hand-merged in the vendor programmer. Data
+  channels are programmed but flagged skip-scan.
+- Added `wasds150 loadout list|show|save|diff` for the same operations from
+  the terminal.
+
 - Added a final GOWENIC-module 40m EFHW package with a fresh 1.8-148 MHz,
   40,001-point OSL calibration, full-span reconnect verification, final
   counterpoise-installed sweep, all incremental tuning runs, band scorecards,

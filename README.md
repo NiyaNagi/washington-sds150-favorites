@@ -45,27 +45,39 @@ catalog is the source of truth. See
 
 ## Radios and channel plans
 
-| Radio | Role | Memories | Status |
-|---|---|---:|---|
-| Uniden SDS150 | Trunk-tracking scanner, receive only | unlimited | Verified |
-| TIDRADIO TD-H9 | Analog handheld transceiver | 199 | Verified against hardware |
-| Yaesu FTX-1 | HF/VHF/UHF transceiver | 999 | Profile from documentation, **unverified** |
+| Radio | Role | Memories | Loaded now | Status |
+|---|---|---:|---:|---|
+| Uniden SDS150 | Trunk-tracking scanner, receive only | unlimited | 140 Favorites Lists | Verified |
+| TIDRADIO TD-H9 | Analog handheld transceiver | 199 | 185 memories | Verified against hardware |
+| Yaesu FTX-1 | HF/VHF/UHF transceiver | 999 | 959 memories + 47 scan pairs | Profile from documentation, **unverified** |
 
-The SDS150 path is unchanged: the catalog is hierarchical (Favorites Lists
-containing systems, sites, departments) and exports as `.hpe`. Transceivers
-consume a flat, ordered list of memories instead, so they go through a channel
-plan and a separate export target. Neither path can reach the other's writer.
+Each radio's current configuration is inspectable in its **own shape**, because
+they genuinely differ. The SDS150's configuration is hierarchical - Favorites
+Lists containing systems, sites, departments and talkgroups - and is written as
+one `.hpe` per list. The transceivers take a flat, ordered memory list where the
+slot number is meaningful, because it is the order the radio scans in.
+Flattening the scanner into a memory list would silently discard every trunked
+talkgroup, so the tool does not offer to.
 
 ```bash
-wasds150 radios list                  # capability profiles
-wasds150 plan list                    # registered channel plans
-wasds150 plan show h9-ozette          # resolved memory map, drops, warnings
-wasds150 plan export h9-ozette --out wasds150-output/radios
+wasds150 loadout list              # one entry per radio
+wasds150 loadout show sds150       # Favorites Lists, systems, talkgroups
+wasds150 loadout show ftx1-wa      # numbered memory map
+wasds150 loadout save h9-ozette    # snapshot the current configuration
+wasds150 loadout diff h9-ozette    # what changed since that snapshot
+
+wasds150 radios list               # capability profiles
+wasds150 plan list                 # registered channel plans
+wasds150 plan show h9-ozette       # resolved memory map, drops, warnings
+wasds150 plan export ftx1-wa --target ftx1-file --out radio-configs
 ```
 
-Or use the **Radios** tab in `wasds150 ui`, which browses the resolved memory
-map, exports the programming file, detects serial ports, and can back up, dry
-run, or program a connected radio.
+The same thing is in the **Radios** tab of `wasds150 ui`: pick a radio from the
+dropdown to see what is loaded, save a snapshot, ask what changed since the last
+one, export a programming file, or program a connected TD-H9.
+
+Ready-made outputs are committed in [`radio-configs/`](radio-configs/) so they
+can be loaded without running anything.
 
 Programming hardware needs CHIRP, which is GPL-3 and therefore never vendored
 or imported. It lives in its own interpreter (`.venv-chirp`) and is driven as a
@@ -149,15 +161,19 @@ row to load every available non-sensitive field on demand, including profile sta
 provenance, systems, sites, trunk frequencies, departments, conventional
 channels, talkgroups, geolocation, service metadata, priority, and avoids.
 
-The **Radios** tab shows every supported radio's capability profile, resolves
-any channel plan against the current catalog, and lists the exact memory map
-that would be programmed — slot, name, frequency, transmit setting, mode,
-power, tone, and source block — with a filter and a per-block breakdown. From
-there it exports the programming file, detects attached serial ports, and can
-back up, dry run, or write a connected radio. Writing requires typed
-confirmation, backs the radio up first, and verifies the result afterwards.
-When the CHIRP interpreter is absent the tab explains how to create it and
-still shows the equivalent command line.
+The **Radios** tab shows every supported radio's capability profile and, for
+the radio chosen in the dropdown, exactly what is loaded for it — in that
+radio's own shape. The SDS150 appears as Favorites Lists with system,
+department, channel and talkgroup counts; the TD-H9 and FTX-1 appear as
+numbered memory maps with transmit setting, mode, power, tone and source
+block, filterable and broken down per block. **Save snapshot** writes the
+current configuration to disk and **What changed?** compares against the last
+one, so a catalog refresh can be reviewed before it reaches a radio. The tab
+also exports programming files, detects attached serial ports, and can back
+up, dry run, or write a connected TD-H9. Writing requires typed confirmation,
+backs the radio up first, and verifies the result afterwards. When the CHIRP
+interpreter is absent the tab explains how to create it and still shows the
+equivalent command line.
 
 The **Export** tab also supports a guarded **Bulk install selected lists into
 Sentinel** operation. Sentinel has no native multi-list HPE container, so the

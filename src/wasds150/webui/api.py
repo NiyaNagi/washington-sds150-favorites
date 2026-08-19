@@ -1265,6 +1265,58 @@ def get_programmer_status(ctx: AppContext, req: RequestContext) -> Response:
     return Response.json(200, payload)
 
 
+# -------------------------------------------------------------- loadouts --
+def get_loadouts(ctx: AppContext, req: RequestContext) -> Response:
+    """One entry per radio for the dropdown, with its shape declared."""
+    from wasds150.plan.loadout import loadout_index
+
+    return Response.json(200, {"loadouts": loadout_index()})
+
+
+def get_loadout_detail(ctx: AppContext, req: RequestContext) -> Response:
+    """Everything currently configured for one radio, in its native shape."""
+    from wasds150.plan.loadout import get_loadout
+
+    loadout_id = req.params.get("loadout_id", "")
+    try:
+        loadout = get_loadout(ctx, loadout_id)
+    except KeyError as exc:
+        return _error(404, str(exc))
+    return Response.json(200, loadout.to_dict())
+
+
+def post_loadout_snapshot(ctx: AppContext, req: RequestContext) -> Response:
+    """Persist the current loadout so later refreshes can be compared."""
+    from wasds150.plan.loadout import save_snapshot
+
+    loadout_id = req.params.get("loadout_id", "")
+    try:
+        info = save_snapshot(ctx, loadout_id)
+    except KeyError as exc:
+        return _error(404, str(exc))
+    except OSError as exc:
+        return _error(500, f"could not write snapshot: {exc}")
+    return Response.json(200, info)
+
+
+def get_loadout_snapshots(ctx: AppContext, req: RequestContext) -> Response:
+    from wasds150.plan.loadout import list_snapshots
+
+    loadout_id = req.params.get("loadout_id", "")
+    return Response.json(200, {"snapshots": list_snapshots(ctx, loadout_id)})
+
+
+def get_loadout_diff(ctx: AppContext, req: RequestContext) -> Response:
+    """What changed since the last saved snapshot."""
+    from wasds150.plan.loadout import diff_against_snapshot
+
+    loadout_id = req.params.get("loadout_id", "")
+    try:
+        return Response.json(200, diff_against_snapshot(ctx, loadout_id))
+    except KeyError as exc:
+        return _error(404, str(exc))
+
+
 def post_programmer_run(ctx: AppContext, req: RequestContext) -> Response:
     """Back up, and optionally write, a physical radio.
 
@@ -1351,4 +1403,9 @@ def build_router(ctx: AppContext) -> Router:
     router.add("POST", "/api/v1/plans/{plan_id}/export", lambda req: post_plan_export(ctx, req))
     router.add("GET", "/api/v1/programmer/status", lambda req: get_programmer_status(ctx, req))
     router.add("POST", "/api/v1/programmer/run", lambda req: post_programmer_run(ctx, req))
+    router.add("GET", "/api/v1/loadouts", lambda req: get_loadouts(ctx, req))
+    router.add("GET", "/api/v1/loadouts/{loadout_id}", lambda req: get_loadout_detail(ctx, req))
+    router.add("POST", "/api/v1/loadouts/{loadout_id}/snapshot", lambda req: post_loadout_snapshot(ctx, req))
+    router.add("GET", "/api/v1/loadouts/{loadout_id}/snapshots", lambda req: get_loadout_snapshots(ctx, req))
+    router.add("GET", "/api/v1/loadouts/{loadout_id}/diff", lambda req: get_loadout_diff(ctx, req))
     return router

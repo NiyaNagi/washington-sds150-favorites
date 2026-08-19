@@ -494,6 +494,118 @@ def cmd_plans_export(args: argparse.Namespace) -> int:
     return 0
 
 
+# ------------------------------------------------------------- loadouts ----
+def cmd_loadout_list(args: argparse.Namespace) -> int:
+    from wasds150.plan.loadout import loadout_index
+
+    entries = loadout_index()
+    if args.json:
+        _print_json(entries)
+        return 0
+    for entry in entries:
+        flag = "" if entry["verified"] else "  [UNVERIFIED]"
+        print(f"{entry['id']:<14} {entry['kind']:<12} {entry['radio_label']}{flag}")
+        if entry["description"]:
+            print(f"               {entry['description']}")
+    return 0
+
+
+def cmd_loadout_show(args: argparse.Namespace) -> int:
+    from wasds150.plan.loadout import KIND_MEMORY_LIST, get_loadout
+
+    ctx = _build_ctx(args)
+    try:
+        loadout = get_loadout(ctx, args.loadout)
+    except KeyError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 1
+
+    if args.json:
+        _print_json(loadout.to_dict())
+        return 0
+
+    print(f"{loadout.radio_label} - {loadout.label}")
+    if loadout.description:
+        print(f"  {loadout.description}")
+    if not loadout.verified:
+        print("  WARNING: this radio profile is unverified against hardware")
+    print()
+    for key, value in loadout.summary.items():
+        print(f"  {key.replace('_', ' '):<22} {value}")
+
+    if loadout.groups:
+        print("\n  Breakdown:")
+        for group in loadout.groups:
+            print(f"    {group['label'][:44]:<46} {group['count']:>5}")
+
+    if loadout.kind == KIND_MEMORY_LIST:
+        print(f"\n  {len(loadout.channels)} memories (first 10):")
+        for row in loadout.channels[:10]:
+            tx = "TX" if row["transmit"] else "rx"
+            print(f"    {row['slot']:>4} {row['name']:<13} {row['rx_mhz']:>10.4f} {tx}")
+    else:
+        print(f"\n  {len(loadout.favorites)} Favorites Lists (first 10):")
+        for row in loadout.favorites[:10]:
+            print(
+                f"    {row['key']:<8} {row['name'][:34]:<36} "
+                f"ch {row['channels']:>5}  tg {row['talkgroups']:>5}"
+            )
+
+    if loadout.warnings:
+        print(f"\n  Warnings ({len(loadout.warnings)}):")
+        for text in loadout.warnings[:10]:
+            print(f"    - {text}")
+    return 0
+
+
+def cmd_loadout_save(args: argparse.Namespace) -> int:
+    from wasds150.plan.loadout import save_snapshot
+
+    ctx = _build_ctx(args)
+    try:
+        info = save_snapshot(ctx, args.loadout)
+    except KeyError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 1
+    if args.json:
+        _print_json(info)
+        return 0
+    print(f"Saved snapshot of {info['loadout_id']}")
+    print(f"  {info['path']}")
+    print(f"  catalog hash {info['catalog_hash']}")
+    return 0
+
+
+def cmd_loadout_diff(args: argparse.Namespace) -> int:
+    from wasds150.plan.loadout import diff_against_snapshot
+
+    ctx = _build_ctx(args)
+    try:
+        diff = diff_against_snapshot(ctx, args.loadout)
+    except KeyError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 1
+    if args.json:
+        _print_json(diff)
+        return 0
+    if not diff["has_snapshot"]:
+        print(diff["message"])
+        return 0
+    print(f"Compared with the snapshot saved {diff['saved_at']}")
+    print(f"  catalog then : {diff['catalog_hash_then']}")
+    print(f"  catalog now  : {diff['catalog_hash_now']}")
+    print(f"  added        : {diff['added']}")
+    print(f"  removed      : {diff['removed']}")
+    detail = diff.get("detail", {})
+    for row in (detail.get("added") or [])[:20]:
+        print(f"  + {row.get('name') or row.get('key')} {row.get('rx_mhz', '')}")
+    for row in (detail.get("removed") or [])[:20]:
+        print(f"  - {row.get('name') or row.get('key')} {row.get('rx_mhz', '')}")
+    for row in (detail.get("changed") or [])[:20]:
+        print(f"  ~ {row['key']}: {row['channels_before']} -> {row['channels_after']} channels")
+    return 0
+
+
 # -------------------------------------------------------------- history ----
 def cmd_history_list(args: argparse.Namespace) -> int:
     ctx = _build_ctx(args)
@@ -1489,6 +1601,34 @@ def build_parser() -> argparse.ArgumentParser:
     p_plan_export.add_argument("--out", default="wasds150-output/radios", help="Output directory")
     p_plan_export.add_argument("--json", action="store_true")
     p_plan_export.set_defaults(func=cmd_plans_export)
+
+    p_loadout = subparsers.add_parser(
+        "loadout", help="What is currently configured for each radio"
+    )
+    loadout_sub = p_loadout.add_subparsers(dest="loadout_command", required=True)
+
+    p_loadout_list = loadout_sub.add_parser("list", help="One entry per radio")
+    p_loadout_list.add_argument("--json", action="store_true")
+    p_loadout_list.set_defaults(func=cmd_loadout_list)
+
+    p_loadout_show = loadout_sub.add_parser("show", help="Show one radio's configuration")
+    p_loadout_show.add_argument("loadout", help="A plan id or a radio id")
+    p_loadout_show.add_argument("--json", action="store_true")
+    p_loadout_show.set_defaults(func=cmd_loadout_show)
+
+    p_loadout_save = loadout_sub.add_parser(
+        "save", help="Save a snapshot of the current configuration"
+    )
+    p_loadout_save.add_argument("loadout")
+    p_loadout_save.add_argument("--json", action="store_true")
+    p_loadout_save.set_defaults(func=cmd_loadout_save)
+
+    p_loadout_diff = loadout_sub.add_parser(
+        "diff", help="Compare the current configuration with the last snapshot"
+    )
+    p_loadout_diff.add_argument("loadout")
+    p_loadout_diff.add_argument("--json", action="store_true")
+    p_loadout_diff.set_defaults(func=cmd_loadout_diff)
 
     p_hpe = subparsers.add_parser("hpe", help="Uniden .hpe/.hpd container/record engine")
     hpe_sub = p_hpe.add_subparsers(dest="hpe_command", required=True)

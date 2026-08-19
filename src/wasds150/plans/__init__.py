@@ -10,10 +10,12 @@ from __future__ import annotations
 from typing import Dict, List
 
 from wasds150.models.plan import ChannelPlan
+from wasds150.plans.ftx1_wa import FTX1_WA
 from wasds150.plans.h9_ozette import H9_OZETTE
 
 _REGISTRY: Dict[str, ChannelPlan] = {
     H9_OZETTE.id: H9_OZETTE,
+    FTX1_WA.id: FTX1_WA,
 }
 
 
@@ -35,4 +37,4 @@ def get_plan(plan_id: str) -> ChannelPlan:
         ) from None
 
 
-__all__ = ["H9_OZETTE", "get_plan", "list_plans", "plan_ids"]
+__all__ = ["FTX1_WA", "H9_OZETTE", "get_plan", "list_plans", "plan_ids"]

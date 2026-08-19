@@ -124,19 +124,23 @@
         <tbody></tbody>
       </table>
 
-      <h3>2. Channel plans</h3>
+      <h3>2. Loaded configuration</h3>
       <div class="toolbar">
-        <label for="plan-select">Plan</label>
+        <label for="plan-select">Radio</label>
         <select id="plan-select"></select>
         <button id="plan-refresh-btn">Refresh from catalog</button>
+        <button id="loadout-snapshot-btn">Save snapshot</button>
+        <button id="loadout-diff-btn">What changed?</button>
         <span id="plan-summary" class="hint" aria-live="polite"></span>
       </div>
       <p class="hint" id="plan-description"></p>
+      <div id="loadout-summary" class="cards"></div>
+      <pre id="loadout-diff" class="command-output" aria-live="polite"></pre>
 
       <details class="panel" id="plan-blocks-panel">
-        <summary>Memory map by block</summary>
+        <summary>Breakdown</summary>
         <table class="data-table" id="plan-blocks-table">
-          <thead><tr><th>Block</th><th>Slots</th></tr></thead>
+          <thead><tr><th>Group</th><th>Count</th></tr></thead>
           <tbody></tbody>
         </table>
       </details>
@@ -146,8 +150,8 @@
         <div id="plan-warnings"></div>
       </details>
 
-      <details class="panel" open>
-        <summary>Programmed channels</summary>
+      <details class="panel" open id="loadout-memory-panel">
+        <summary>Programmed memories</summary>
         <div class="toolbar">
           <input type="text" id="plan-channel-filter" placeholder="Filter by name, block, or frequency…" />
           <span id="plan-channel-count" class="hint" aria-live="polite"></span>
@@ -155,6 +159,25 @@
         <table class="data-table" id="plan-channels-table">
           <thead>
             <tr><th>#</th><th>Name</th><th>RX (MHz)</th><th>TX</th><th>Mode</th><th>Power</th><th>Tone</th><th>Block</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </details>
+
+      <details class="panel" open id="loadout-favorites-panel" hidden>
+        <summary>Loaded Favorites Lists</summary>
+        <p class="hint">
+          The scanner's configuration is hierarchical, so it is shown as lists rather than
+          numbered memories. Flattening it into a memory list would discard every trunked
+          talkgroup, which is most of what the scanner holds.
+        </p>
+        <div class="toolbar">
+          <input type="text" id="loadout-favorites-filter" placeholder="Filter by key or name…" />
+          <span id="loadout-favorites-count" class="hint" aria-live="polite"></span>
+        </div>
+        <table class="data-table" id="loadout-favorites-table">
+          <thead>
+            <tr><th>Key</th><th>Name</th><th>Systems</th><th>Trunked</th><th>Depts</th><th>Channels</th><th>Talkgroups</th></tr>
           </thead>
           <tbody></tbody>
         </table>
