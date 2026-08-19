@@ -16,6 +16,7 @@
     <button data-tab="dashboard" class="tab-btn active">Dashboard</button>
     <button data-tab="catalog" class="tab-btn">Catalog</button>
     <button data-tab="display" class="tab-btn">Display</button>
+    <button data-tab="radios" class="tab-btn">Radios</button>
     <button data-tab="profile" class="tab-btn">Profile</button>
     <button data-tab="export" class="tab-btn">Export</button>
     <button data-tab="advanced" class="tab-btn">Advanced</button>
@@ -104,6 +105,98 @@
         </ol>
         <p class="hint">The XML retains Uniden's exported <code>UndienScanner</code> root spelling and the exact item names/options/order from the attached Sentinel export.</p>
         <p class="hint"><strong>Sentinel limitation:</strong> on Simple and Detail screens, Sentinel's XML importer applies color only to the first of the three identically named <code>Avoid</code> fields. Department/channel Avoid colors keep their existing Sentinel values and are marked with dashed borders in previews.</p>
+      </div>
+    </section>
+
+    <section id="tab-radios" class="tab-panel">
+      <h2>Radios &amp; Channel Plans</h2>
+      <p class="hint">
+        A channel plan selects rows from the same unified catalog that feeds the scanner, orders them
+        into memory slots, and writes a programming file for one specific radio. Refresh a plan any
+        time: the catalog is the source of truth, so re-exporting picks up every catalog change.
+      </p>
+
+      <h3>1. Supported radios</h3>
+      <table class="data-table" id="radios-table">
+        <thead>
+          <tr><th>Radio</th><th>Channels</th><th>Name</th><th>Receive coverage</th><th>Modes</th><th>Status</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <h3>2. Channel plans</h3>
+      <div class="toolbar">
+        <label for="plan-select">Plan</label>
+        <select id="plan-select"></select>
+        <button id="plan-refresh-btn">Refresh from catalog</button>
+        <span id="plan-summary" class="hint" aria-live="polite"></span>
+      </div>
+      <p class="hint" id="plan-description"></p>
+
+      <details class="panel" id="plan-blocks-panel">
+        <summary>Memory map by block</summary>
+        <table class="data-table" id="plan-blocks-table">
+          <thead><tr><th>Block</th><th>Slots</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </details>
+
+      <details class="panel" id="plan-warnings-panel">
+        <summary>Warnings and dropped channels</summary>
+        <div id="plan-warnings"></div>
+      </details>
+
+      <details class="panel" open>
+        <summary>Programmed channels</summary>
+        <div class="toolbar">
+          <input type="text" id="plan-channel-filter" placeholder="Filter by name, block, or frequency…" />
+          <span id="plan-channel-count" class="hint" aria-live="polite"></span>
+        </div>
+        <table class="data-table" id="plan-channels-table">
+          <thead>
+            <tr><th>#</th><th>Name</th><th>RX (MHz)</th><th>TX</th><th>Mode</th><th>Power</th><th>Tone</th><th>Block</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </details>
+
+      <h3>3. Export a programming file</h3>
+      <div class="toolbar">
+        <label for="plan-target-select">Target</label>
+        <select id="plan-target-select"></select>
+        <button id="plan-export-btn" class="primary">Export</button>
+        <span id="plan-export-status" class="hint" aria-live="polite"></span>
+      </div>
+      <p class="hint" id="plan-target-description"></p>
+
+      <h3>4. Program a physical radio</h3>
+      <div class="panel" id="programmer-panel">
+        <p class="hint" id="programmer-availability" aria-live="polite">Checking for the CHIRP programmer…</p>
+        <div class="toolbar">
+          <label for="programmer-port">Serial port</label>
+          <select id="programmer-port"></select>
+          <button id="programmer-rescan-btn">Rescan ports</button>
+          <label for="programmer-label">Backup label</label>
+          <input type="text" id="programmer-label" value="td-h9" size="12" />
+        </div>
+        <div class="toolbar">
+          <button id="programmer-backup-btn">Back up only</button>
+          <button id="programmer-dryrun-btn">Dry run</button>
+          <button id="programmer-flash-btn" class="danger">Write to radio…</button>
+        </div>
+        <p class="hint">
+          Every run reads the radio and saves a timestamped backup to <code>radio-backups/</code>
+          before anything is written. <strong>Back up only</strong> and <strong>Dry run</strong> never
+          modify the radio. Writing requires typed confirmation, and the radio is read back and
+          verified channel by channel afterwards.
+        </p>
+        <p class="hint">
+          The radio must be powered <strong>on</strong> with the two-pin plug fully seated. The first
+          attempt commonly fails and retries automatically — that is normal for these cables.
+        </p>
+        <label class="hint" for="programmer-command">Equivalent command</label>
+        <pre id="programmer-command" class="command-preview">—</pre>
+        <pre id="programmer-output" class="command-output" aria-live="polite"></pre>
       </div>
     </section>
 

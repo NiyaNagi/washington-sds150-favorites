@@ -14,15 +14,14 @@ from typing import Iterable, List, Optional, Sequence, Tuple
 from wasds150.hpe import codec, schema
 from wasds150.hpe.record import Record, RecordDocument, parse_records, serialize_records
 from wasds150.models.catalog import Channel, Department, FavoritesList, Site, System
+from wasds150.radios.registry import SDS150
 
-_SCANNER_BANDS: Tuple[Tuple[float, float], ...] = (
-    (25.0, 512.0),
-    (758.0, 824.0),
-    (849.0, 869.0),
-    (894.0, 960.0),
-    (1240.0, 1300.0),
-)
-_MODES = {"AUTO", "ALL", "AM", "FM", "NFM", "WFM", "FMB", "P25", "DMR", "NXDN"}
+#: The HPE writer only ever targets the SDS150, so its coverage and
+#: modulation limits come from that radio's capability profile.  Keeping them
+#: in one place means a second radio cannot silently inherit them.
+_PROFILE = SDS150
+_SCANNER_BANDS: Tuple[Tuple[float, float], ...] = _PROFILE.rx_bands
+_MODES = set(_PROFILE.modes)
 _TONE_RE = re.compile(
     r"^(?:TONE=C\d{1,3}(?:\.\d{1,2})?|(?:TONE=)?D\d{3}|"
     r"NAC=(?:[0-9A-Fa-f]{1,3}|Srch)|ColorCode=\d{1,2})$"
@@ -51,7 +50,7 @@ class HpeValidationError(ValueError):
 
 
 def frequency_is_scannable(freq_mhz: float) -> bool:
-    return any(low <= freq_mhz <= high for low, high in _SCANNER_BANDS)
+    return _PROFILE.can_receive(freq_mhz)
 
 
 def tone_is_valid(tone: str) -> bool:

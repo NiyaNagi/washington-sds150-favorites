@@ -45,7 +45,7 @@ def test_psham01_is_a_deterministic_baseline_extension_with_fallback_channels():
     item = next(favorite for favorite in catalog.favorites if favorite.favorite_key == "PSHAM01")
     channels = [channel for system in item.systems for department in system.departments for channel in department.channels]
 
-    assert len(catalog.favorites) == 137
+    assert len(catalog.favorites) == 140
     assert len(channels) == 10
     assert {channel.freq_mhz for channel in channels} >= {52.87, 146.56, 146.82, 440.775}
     assert any("Saturday 20:00" in channel.notes for channel in channels)

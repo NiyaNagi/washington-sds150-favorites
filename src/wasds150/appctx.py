@@ -38,7 +38,7 @@ def _append_local_area_extension(catalog: Catalog) -> None:
         if current is not None:
             for field_name in CSV_FIELDS:
                 setattr(current, field_name, getattr(favorite, field_name))
-        elif favorite.favorite_key.startswith(("KC", "LA", "OUT", "BAND", "UL", "PSHAM")):
+        elif favorite.favorite_key.startswith(("KC", "LA", "OUT", "BAND", "UL", "PSHAM", "OZ", "HAM", "FTX")):
             catalog.favorites.append(copy.deepcopy(favorite))
 
 

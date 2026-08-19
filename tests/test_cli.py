@@ -241,7 +241,7 @@ def test_doctor_uses_packaged_baseline_by_default(wasds_home, capsys):
     data = json.loads(capsys.readouterr().out)
     assert data["ok"] is True
     catalog_check = next(c for c in data["checks"] if c["name"] == "catalog_loads")
-    assert "137" in catalog_check["detail"]
+    assert "140" in catalog_check["detail"]
 
 
 def test_version_flag(capsys):

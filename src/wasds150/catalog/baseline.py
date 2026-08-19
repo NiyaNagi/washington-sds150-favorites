@@ -39,6 +39,9 @@ from wasds150.catalog.ames_lake import favorites as ames_lake_favorites
 from wasds150.catalog.band_profiles import favorites as band_favorites
 from wasds150.catalog.upper_lena_lake import favorites as upper_lena_favorites
 from wasds150.catalog.puget_ham import favorite as puget_ham_favorite
+from wasds150.catalog.olympic_coast import favorites as olympic_coast_favorites
+from wasds150.catalog.ham_bandplan import favorites as ham_bandplan_favorites
+from wasds150.catalog.ftx1_import import favorites as ftx1_import_favorites
 from wasds150.catalog.validate import partition_validation_issues, validate_catalog
 from wasds150.models.catalog import Catalog
 from wasds150.recipes.systems import dedupe_systems, static_systems_for
@@ -53,7 +56,15 @@ def load_baseline() -> Catalog:
     with importlib.resources.as_file(resource) as path:
         catalog = loader.load_json(Path(path))
     existing = {favorite.slug for favorite in catalog.favorites}
-    extensions = ames_lake_favorites() + band_favorites() + upper_lena_favorites() + [puget_ham_favorite()]
+    extensions = (
+        ames_lake_favorites()
+        + band_favorites()
+        + upper_lena_favorites()
+        + [puget_ham_favorite()]
+        + olympic_coast_favorites()
+        + ham_bandplan_favorites()
+        + ftx1_import_favorites()
+    )
     for favorite in extensions:
         if favorite.slug in existing:
             continue

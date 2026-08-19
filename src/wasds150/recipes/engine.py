@@ -185,7 +185,13 @@ def enrich_catalog(
                     existing.add(key)
             new_systems = systems_mod.systems_from_matched_facts(new_fl, matched_facts)
             if new_systems:
-                new_fl.systems = systems_mod.dedupe_systems(new_fl.systems + new_systems)
+                if systems_mod.rebuilds_systems_from_facts(new_fl):
+                    # Freshly built systems win by id; anything the row carries
+                    # that the source did not produce (operator-published net
+                    # channels, for instance) is preserved.
+                    new_fl.systems = systems_mod.dedupe_systems(new_systems + new_fl.systems)
+                else:
+                    new_fl.systems = systems_mod.dedupe_systems(new_fl.systems + new_systems)
         new_favorites.append(new_fl)
 
     enriched_catalog = Catalog(favorites=new_favorites)

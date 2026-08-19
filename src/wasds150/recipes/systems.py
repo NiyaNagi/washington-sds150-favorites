@@ -347,6 +347,19 @@ def systems_from_flat_facts(fl: FavoritesList, facts: List[NormalizedFact]) -> L
     return [system]
 
 
+def rebuilds_systems_from_facts(fl: FavoritesList) -> bool:
+    """True when a row's systems are derived wholly from a public source.
+
+    Most rows accumulate: a locally enriched HPDB system is precious and must
+    survive a refresh that cannot see it.  A row like ``PSHAM01`` is different
+    - every channel in it comes from the WWARA coordination extract, and its
+    system carries a deterministic id, so merging by id would let the previous
+    run's copy win forever and the row would never pick up a new coordination,
+    a corrected tone or a repeater input.
+    """
+    return fl.favorite_key == "PSHAM01"
+
+
 def systems_from_matched_facts(fl: FavoritesList, matched_facts: List[NormalizedFact]) -> List[System]:
     """Tiers A + B together, as used by
     :func:`wasds150.recipes.engine.enrich_catalog`: every HPDB system

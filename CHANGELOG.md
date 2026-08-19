@@ -22,6 +22,38 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   configurations and 20 receive-service windows, with authoritative averaged
   zooms, per-family analysis, practical recommendations, machine-readable
   scorecards, and a self-contained offline comparison.
+- Added multi-radio support. One unified catalog now drives the Uniden SDS150
+  scanner, a TIDRADIO TD-H9 handheld, and a Yaesu FTX-1, through radio
+  capability profiles (`wasds150.radios`) and ordered channel plans
+  (`wasds150.plans`). Channels a radio cannot use are dropped with a stated
+  reason rather than silently coerced.
+- Added a **Radios** tab to the browser UI: capability profiles, the full
+  resolved memory map with filtering and per-block breakdown, programming-file
+  export, serial port detection, and guarded backup/dry-run/write against a
+  connected radio. Writing requires typed confirmation, backs the radio up
+  first, and verifies the result.
+- Added JSON API endpoints `/api/v1/radios`, `/api/v1/plans`,
+  `/api/v1/plans/{id}`, `/api/v1/plans/{id}/export`,
+  `/api/v1/programmer/status` and `/api/v1/programmer/run`.
+- Added `wasds150 radios list` and the `wasds150 plan list|show|export`
+  command group.
+- Added OZ01, a Lake Ozette / Olympic Coast profile with 141 cited channels
+  across twelve departments; HAM01, the US amateur band plan with 88 calling
+  and convention frequencies (reference only, never projected onto a radio);
+  and FTX01, a 453-channel FTX-1 factory memory import.
+- Added the US amateur band plan module: 14 bands, per-licence-class transmit
+  privileges per 47 CFR 97.301, ARRL mode segments, and 47 programmable scan
+  ranges.
+- Added a CHIRP Generic CSV export target for the TD-H9, and full read/write
+  support for the Yaesu `.FTX1` memory file format (round-trip byte-identical).
+- Added `scripts/radios/program_tdh9.py`: reads and backs up the radio before
+  any write, dry runs by default, requires `--execute`, verifies channel by
+  channel afterwards, and supports `--restore` from a saved image.
+- Added the [TD-H9 programming guide](docs/td-h9-programming.md) and
+  [agent runbook](docs/agent-runbook.md), documenting verified radio facts,
+  counterfeit-Prolific cable recovery, and the two failure modes that produce
+  a silently mis-programmed radio.
+
 - Added a calibrated JYR8010 EFHW antenna-results package with supported-band
   SWR zooms, impedance and return-loss plots, a Smith chart, usable-bandwidth
   thresholds, an offline interactive report, summary tables, point data, full
@@ -175,6 +207,16 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Fixed
 
+- Fixed CHIRP power levels being silently downgraded to Low on upload. The
+  driver maps power with `list.index()`, which compares by object identity, so
+  a level parsed from CSV never matched and fell back to index 0. The exported
+  file and the dry run both looked correct; only reading the radio back
+  revealed it.
+- Fixed GMRS channels being programmed out of order. GMRS main and interstitial
+  frequencies interleave within the band, so sorting by frequency produced
+  15, 1, 16, 2, 17, 3. Added digit-aware `SORT_NATURAL` ordering.
+- Fixed a patched upload path that dropped CHIRP's per-block acknowledgement
+  check, causing a write to report success while changing nothing.
 - Clarified that `--sentinel-hpdb-cfg` and `--sentinel-mount` are
   alternative source configurations rather than options to pass together.
 - Made generated ZIP, manifest, backup, rollback and installer paths use

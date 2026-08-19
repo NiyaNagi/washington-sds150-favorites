@@ -57,6 +57,11 @@
     if (name === "dashboard") loadDashboard();
     if (name === "catalog") loadCatalog();
     if (name === "display") loadDisplayPalettes();
+    if (name === "radios") {
+      loadRadios();
+      loadPlans();
+      loadProgrammerStatus();
+    }
     if (name === "profile") loadProfile();
     if (name === "export") {
       loadHistory();
@@ -2058,6 +2063,312 @@
     } catch (e) {
       setStatus("Provenance lookup failed: " + e.message, true);
     }
+  });
+
+  // ------------------------------------------------------------- radios --
+  let planCache = [];
+  let currentPlanDetail = null;
+  let programmerReady = false;
+
+  const planSelect = document.getElementById("plan-select");
+  const planTargetSelect = document.getElementById("plan-target-select");
+  const planChannelFilter = document.getElementById("plan-channel-filter");
+
+  async function loadRadios() {
+    try {
+      const data = await apiGet("/api/v1/radios");
+      const tbody = document.querySelector("#radios-table tbody");
+      tbody.innerHTML = "";
+      (data.radios || []).forEach((radio) => {
+        const tr = document.createElement("tr");
+        const capacity = radio.max_channels === null ? "unlimited" : radio.max_channels;
+        const nameLen = radio.name_max_len === null ? "—" : radio.name_max_len + " chars";
+        const status = radio.verified
+          ? "verified against hardware"
+          : "UNVERIFIED — from documentation only";
+        [
+          radio.label,
+          String(capacity),
+          nameLen,
+          radio.rx_coverage,
+          radio.modes.join(", "),
+          status,
+        ].forEach((text, index) => {
+          const td = document.createElement("td");
+          td.textContent = text;
+          if (index === 5 && !radio.verified) td.className = "warn";
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+    } catch (e) {
+      setStatus("Could not load radios: " + e.message, true);
+    }
+  }
+
+  async function loadPlans() {
+    try {
+      const data = await apiGet("/api/v1/plans");
+      planCache = data.plans || [];
+      planSelect.innerHTML = "";
+      planCache.forEach((plan) => {
+        const option = document.createElement("option");
+        option.value = plan.id;
+        option.textContent = `${plan.label} (${plan.id})`;
+        planSelect.appendChild(option);
+      });
+      if (planCache.length) loadPlanDetail(planCache[0].id);
+    } catch (e) {
+      setStatus("Could not load plans: " + e.message, true);
+    }
+  }
+
+  function renderPlanTargets(planId) {
+    const plan = planCache.find((p) => p.id === planId);
+    planTargetSelect.innerHTML = "";
+    const targets = (plan && plan.targets) || [];
+    targets.forEach((target) => {
+      const option = document.createElement("option");
+      option.value = target.id;
+      option.textContent = target.available ? target.label : `${target.label} — not implemented`;
+      option.disabled = !target.available;
+      planTargetSelect.appendChild(option);
+    });
+    const available = targets.find((t) => t.available);
+    if (available) planTargetSelect.value = available.id;
+    const chosen = targets.find((t) => t.id === planTargetSelect.value);
+    document.getElementById("plan-target-description").textContent = chosen ? chosen.description : "";
+    document.getElementById("plan-export-btn").disabled = !available;
+  }
+
+  function renderPlanChannels() {
+    if (!currentPlanDetail) return;
+    const needle = planChannelFilter.value.trim().toLowerCase();
+    const rows = currentPlanDetail.channels.filter((channel) => {
+      if (!needle) return true;
+      return (
+        channel.name.toLowerCase().includes(needle) ||
+        channel.label.toLowerCase().includes(needle) ||
+        channel.block.toLowerCase().includes(needle) ||
+        String(channel.rx_mhz).includes(needle)
+      );
+    });
+    const tbody = document.querySelector("#plan-channels-table tbody");
+    tbody.innerHTML = "";
+    rows.forEach((channel) => {
+      const tr = document.createElement("tr");
+      let tx = "receive only";
+      if (channel.transmit) {
+        tx = channel.tx_mhz && channel.tx_mhz !== channel.rx_mhz
+          ? channel.tx_mhz.toFixed(4)
+          : "simplex";
+      }
+      const tone = [channel.rx_tone, channel.tx_tone].filter(Boolean).join(" / ");
+      [
+        String(channel.slot),
+        channel.name,
+        channel.rx_mhz.toFixed(4),
+        tx,
+        channel.mode,
+        channel.power,
+        tone || "—",
+        channel.block,
+      ].forEach((text, index) => {
+        const td = document.createElement("td");
+        td.textContent = text;
+        if (index === 3 && !channel.transmit) td.className = "muted";
+        tr.appendChild(td);
+      });
+      tr.title = channel.comment || channel.label;
+      tbody.appendChild(tr);
+    });
+    document.getElementById("plan-channel-count").textContent =
+      `${rows.length} of ${currentPlanDetail.channels.length} channels`;
+  }
+
+  async function loadPlanDetail(planId) {
+    try {
+      setStatus("Resolving plan…");
+      const detail = await apiGet("/api/v1/plans/" + encodeURIComponent(planId));
+      currentPlanDetail = detail;
+
+      const capacity = detail.capacity === null ? "unlimited" : detail.capacity;
+      document.getElementById("plan-summary").textContent =
+        `${detail.slots_used} of ${capacity} slots used on ${detail.radio.label}`;
+      document.getElementById("plan-description").textContent = detail.plan.description || "";
+
+      const blockBody = document.querySelector("#plan-blocks-table tbody");
+      blockBody.innerHTML = "";
+      Object.keys(detail.block_counts).forEach((name) => {
+        const tr = document.createElement("tr");
+        const nameCell = document.createElement("td");
+        nameCell.textContent = name;
+        const countCell = document.createElement("td");
+        countCell.textContent = String(detail.block_counts[name]);
+        tr.appendChild(nameCell);
+        tr.appendChild(countCell);
+        blockBody.appendChild(tr);
+      });
+
+      const warnBox = document.getElementById("plan-warnings");
+      warnBox.innerHTML = "";
+      const warnList = document.createElement("ul");
+      (detail.warnings || []).forEach((text) => {
+        const li = document.createElement("li");
+        li.textContent = text;
+        warnList.appendChild(li);
+      });
+      Object.keys(detail.drop_reasons || {}).forEach((reason) => {
+        const li = document.createElement("li");
+        li.textContent = `${detail.drop_reasons[reason]} channel(s) dropped: ${reason}`;
+        warnList.appendChild(li);
+      });
+      if (!warnList.childElementCount) {
+        const li = document.createElement("li");
+        li.textContent = "No warnings. Every selected channel fits the radio.";
+        warnList.appendChild(li);
+      }
+      warnBox.appendChild(warnList);
+
+      renderPlanTargets(planId);
+      renderPlanChannels();
+      updateProgrammerCommand();
+      setStatus(`Plan ${planId} resolved`);
+    } catch (e) {
+      setStatus("Could not resolve plan: " + e.message, true);
+    }
+  }
+
+  planSelect.addEventListener("change", () => loadPlanDetail(planSelect.value));
+  planChannelFilter.addEventListener("input", renderPlanChannels);
+  planTargetSelect.addEventListener("change", () => renderPlanTargets(planSelect.value));
+  document.getElementById("plan-refresh-btn").addEventListener("click", () => {
+    loadPlanDetail(planSelect.value);
+  });
+
+  document.getElementById("plan-export-btn").addEventListener("click", async () => {
+    const planId = planSelect.value;
+    const statusEl = document.getElementById("plan-export-status");
+    try {
+      statusEl.textContent = "Exporting…";
+      const result = await apiPost(
+        "/api/v1/plans/" + encodeURIComponent(planId) + "/export",
+        { target: planTargetSelect.value }
+      );
+      statusEl.textContent = `Wrote ${result.rows} channels to ${result.csv_path}`;
+      setStatus(`Exported ${planId}`);
+      updateProgrammerCommand();
+    } catch (e) {
+      statusEl.textContent = "";
+      setStatus("Export failed: " + e.message, true);
+    }
+  });
+
+  // ------------------------------------------------------- programmer --
+  function currentCsvPath() {
+    const planId = planSelect.value;
+    return planId ? `wasds150-output/radios/${planId}.csv` : "";
+  }
+
+  function updateProgrammerCommand() {
+    const port = document.getElementById("programmer-port").value;
+    const label = document.getElementById("programmer-label").value.trim();
+    const csv = currentCsvPath();
+    const preview = document.getElementById("programmer-command");
+    if (!port || !csv) {
+      preview.textContent = "—";
+      return;
+    }
+    preview.textContent =
+      `.venv-chirp/Scripts/python.exe scripts/radios/program_tdh9.py ` +
+      `--port ${port} --label ${label} --csv ${csv} --execute`;
+  }
+
+  async function loadProgrammerStatus() {
+    const note = document.getElementById("programmer-availability");
+    try {
+      const data = await apiGet("/api/v1/programmer/status");
+      programmerReady = !!data.available;
+
+      const portSelect = document.getElementById("programmer-port");
+      const previous = portSelect.value;
+      portSelect.innerHTML = "";
+      (data.ports || []).forEach((row) => {
+        const option = document.createElement("option");
+        option.value = row.port;
+        option.textContent = row.detail ? `${row.port} — ${row.detail}` : row.port;
+        portSelect.appendChild(option);
+      });
+      if (previous) portSelect.value = previous;
+
+      if (programmerReady) {
+        const count = (data.ports || []).length;
+        note.textContent = count
+          ? `Programmer ready. ${count} serial port(s) detected.`
+          : "Programmer ready, but no serial ports detected. Plug in the cable and rescan.";
+        note.className = "hint";
+      } else {
+        note.textContent = "Programmer unavailable — " + (data.reasons || []).join("; ");
+        note.className = "hint warn";
+      }
+      ["programmer-backup-btn", "programmer-dryrun-btn", "programmer-flash-btn"].forEach((id) => {
+        document.getElementById(id).disabled = !programmerReady;
+      });
+      updateProgrammerCommand();
+    } catch (e) {
+      note.textContent = "Could not check the programmer: " + e.message;
+      note.className = "hint warn";
+    }
+  }
+
+  async function runProgrammer(options) {
+    const outputBox = document.getElementById("programmer-output");
+    const port = document.getElementById("programmer-port").value;
+    const label = document.getElementById("programmer-label").value.trim();
+    if (!port) {
+      setStatus("Choose a serial port first", true);
+      return;
+    }
+    const body = {
+      port,
+      label,
+      csv: options.backupOnly ? null : currentCsvPath(),
+      execute: !!options.execute,
+      backup_only: !!options.backupOnly,
+    };
+    outputBox.textContent = "Running… this takes a minute or two. Do not unplug the cable.";
+    setStatus("Programmer running…");
+    try {
+      const result = await apiPost("/api/v1/programmer/run", body);
+      outputBox.textContent = (result.stdout || "") + (result.stderr || "");
+      setStatus(result.ok ? "Programmer finished" : "Programmer reported a failure", !result.ok);
+    } catch (e) {
+      outputBox.textContent = "";
+      setStatus("Programmer failed: " + e.message, true);
+    }
+  }
+
+  document.getElementById("programmer-rescan-btn").addEventListener("click", loadProgrammerStatus);
+  document.getElementById("programmer-port").addEventListener("change", updateProgrammerCommand);
+  document.getElementById("programmer-label").addEventListener("input", updateProgrammerCommand);
+  document.getElementById("programmer-backup-btn").addEventListener("click", () =>
+    runProgrammer({ backupOnly: true })
+  );
+  document.getElementById("programmer-dryrun-btn").addEventListener("click", () =>
+    runProgrammer({ execute: false })
+  );
+  document.getElementById("programmer-flash-btn").addEventListener("click", () => {
+    const port = document.getElementById("programmer-port").value;
+    const typed = prompt(
+      `This will overwrite every memory channel on the radio connected to ${port}.\n\n` +
+        "A full backup is taken first and the result is verified afterwards.\n\n" +
+        `Type WRITE ${port} to continue:`
+    );
+    if (typed !== `WRITE ${port}`) {
+      setStatus("Write cancelled — confirmation did not match");
+      return;
+    }
+    runProgrammer({ execute: true });
   });
 
   // ------------------------------------------------------------- initial --

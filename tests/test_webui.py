@@ -4,6 +4,7 @@ import threading
 import urllib.error
 import urllib.parse
 import urllib.request
+from pathlib import Path
 
 import pytest
 
@@ -1034,3 +1035,165 @@ def test_install_hpdb_inspect_requires_mount(live_server):
     base_url, token, _ = live_server
     status, body, _ = _request(base_url, "/api/v1/install/hpdb-inspect", token=token)
     assert status == 400
+
+
+# ------------------------------------------------------- radios & plans --
+@pytest.fixture()
+def radio_server(tmp_path, repo_csv_path):
+    """A live server backed by the real catalog.
+
+    The shipped TD-H9 plan selects from the OZ01 Olympic Coast rows, which the
+    small sample fixture does not contain, so plan endpoints need the real one.
+    """
+    config = AppConfig(home=tmp_path / "home")
+    config.ensure_dirs()
+    ctx = build_context(config, csv_override=repo_csv_path)
+    server, token = build_server(ctx, port=0)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    host, port = server.server_address[0], server.server_address[1]
+    try:
+        yield f"http://{host}:{port}", token, ctx
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
+
+
+def test_radios_endpoint_lists_profiles(live_server):
+    base_url, token, _ = live_server
+    status, body, _ = _request(base_url, "/api/v1/radios", token)
+    assert status == 200
+    data = json.loads(body)
+    ids = {radio["id"] for radio in data["radios"]}
+    assert {"sds150", "td-h9", "ftx1"} <= ids
+
+
+def test_radios_endpoint_marks_unverified_profiles(live_server):
+    base_url, token, _ = live_server
+    _status, body, _ = _request(base_url, "/api/v1/radios", token)
+    radios = {r["id"]: r for r in json.loads(body)["radios"]}
+    assert radios["td-h9"]["verified"] is True
+    assert radios["td-h9"]["max_channels"] == 199
+    # The FTX-1 profile is documentation-derived and must say so, so the UI
+    # can warn before anyone trusts it with a real radio.
+    assert radios["ftx1"]["verified"] is False
+
+
+def test_radios_endpoint_requires_token(live_server):
+    base_url, _, _ = live_server
+    status, _, _ = _request(base_url, "/api/v1/radios")
+    assert status == 401
+
+
+def test_plans_endpoint_lists_plans_with_targets(radio_server):
+    base_url, token, _ = radio_server
+    status, body, _ = _request(base_url, "/api/v1/plans", token)
+    assert status == 200
+    plans = {p["id"]: p for p in json.loads(body)["plans"]}
+    assert "h9-ozette" in plans
+    targets = {t["id"]: t for t in plans["h9-ozette"]["targets"]}
+    assert targets["chirp-csv"]["available"] is True
+
+
+def test_plan_detail_endpoint_returns_memory_map(radio_server):
+    base_url, token, _ = radio_server
+    status, body, _ = _request(base_url, "/api/v1/plans/h9-ozette", token)
+    assert status == 200
+    data = json.loads(body)
+    assert data["radio"]["id"] == "td-h9"
+    assert data["slots_used"] > 100
+    assert data["slots_used"] <= data["capacity"]
+    assert len(data["channels"]) == data["slots_used"]
+    first = data["channels"][0]
+    for key in ("slot", "name", "rx_mhz", "transmit", "mode", "power", "block"):
+        assert key in first
+
+
+def test_plan_detail_unknown_plan_returns_404(radio_server):
+    base_url, token, _ = radio_server
+    status, _, _ = _request(base_url, "/api/v1/plans/not-a-plan", token)
+    assert status == 404
+
+
+def test_plan_export_endpoint_writes_files(radio_server, tmp_path):
+    base_url, token, _ = radio_server
+    out = tmp_path / "exported"
+    status, body, _ = _request(
+        base_url,
+        "/api/v1/plans/h9-ozette/export",
+        token,
+        method="POST",
+        body={"target": "chirp-csv", "out": str(out)},
+    )
+    assert status == 200
+    data = json.loads(body)
+    assert data["rows"] > 100
+    csv_path = Path(data["csv_path"])
+    assert csv_path.is_file()
+    assert csv_path.read_text(encoding="utf-8").startswith("Location,Name,Frequency")
+    assert Path(data["report_path"]).is_file()
+
+
+def test_plan_export_unimplemented_target_returns_error(radio_server, tmp_path):
+    base_url, token, _ = radio_server
+    status, _, _ = _request(
+        base_url,
+        "/api/v1/plans/h9-ozette/export",
+        token,
+        method="POST",
+        body={"target": "rtsystems-csv", "out": str(tmp_path)},
+    )
+    # Either "not implemented" or "wrong radio for this plan" is acceptable;
+    # what matters is that it fails cleanly rather than writing a bad file.
+    assert status in (400, 501)
+
+
+def test_programmer_status_endpoint(live_server):
+    base_url, token, _ = live_server
+    status, body, _ = _request(base_url, "/api/v1/programmer/status", token)
+    assert status == 200
+    data = json.loads(body)
+    assert "available" in data
+    assert isinstance(data["ports"], list)
+    if not data["available"]:
+        assert data["reasons"], "unavailable programmer must explain why"
+
+
+def test_programmer_run_rejects_hostile_port(live_server):
+    """Command injection attempt must be refused before any subprocess runs."""
+    base_url, token, _ = live_server
+    status, body, _ = _request(
+        base_url,
+        "/api/v1/programmer/run",
+        token,
+        method="POST",
+        body={"port": "COM7 && calc.exe", "label": "x", "backup_only": True},
+    )
+    assert status == 400
+    assert "invalid serial port" in json.loads(body)["error"]
+
+
+def test_programmer_run_rejects_traversal_label(live_server):
+    base_url, token, _ = live_server
+    status, body, _ = _request(
+        base_url,
+        "/api/v1/programmer/run",
+        token,
+        method="POST",
+        body={"port": "COM7", "label": "../../etc/passwd", "backup_only": True},
+    )
+    assert status == 400
+    assert "invalid label" in json.loads(body)["error"]
+
+
+def test_programmer_run_requires_token(live_server):
+    """The flash endpoint must never be reachable unauthenticated."""
+    base_url, _, _ = live_server
+    status, _, _ = _request(
+        base_url,
+        "/api/v1/programmer/run",
+        method="POST",
+        body={"port": "COM7", "backup_only": True},
+    )
+    assert status == 401

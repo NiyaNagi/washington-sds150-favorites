@@ -26,3 +26,20 @@ local-sentinel/
 # Externally-fetched HPE research fixtures (GPL-2.0 sources) — never vendored
 # into version control; see scripts/fetch_hpe_fixtures.py and NOTICE.md.
 .fixture-cache/
+
+# CHIRP driver modules fetched from chirpmyradio.com issue 12216. CHIRP is
+# GPL-3.0; its source is never committed here. See
+# scripts/radios/fetch_chirp_tdh9_module.py and NOTICE.md.
+.chirp-modules/
+.venv-chirp/
+.venv-cad/
+
+# Radio images and backups read off a user's own hardware.
+*.img
+radio-backups/
+
+# Third-party USB serial drivers fetched for programming cables.
+.drivers/
+
+# Scratch files from interactive debugging sessions.
+.tmp-*

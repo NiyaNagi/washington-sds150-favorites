@@ -1,8 +1,9 @@
 # Washington SDS150 Favorites
 
-A curated statewide programming plan and generator for the Uniden SDS150,
-organized for practical use with Sentinel, location control, GPS and quick
-keys.
+A curated statewide radio programming catalog and generator. One unified,
+source-cited database drives every radio: a Uniden SDS150 scanner (organized
+for Sentinel, location control, GPS and quick keys), a TIDRADIO TD-H9
+handheld, and a Yaesu FTX-1.
 
 The catalog covers all 39 Washington counties and includes:
 
@@ -11,7 +12,15 @@ The catalog covers all 39 Washington counties and includes:
 - Washington mountain regions and backcountry communications
 - Civil and military aviation, medevac, marine, ferries, and rail
 - Amateur radio, GMRS/FRS, MURS, CB, utilities, business, and events
+- The US amateur band plan, licence-class privileges, and scan ranges
 - Encryption, digital-mode upgrade, and Discovery/Close Call guidance
+
+**One database, many radios.** A *channel plan* selects rows from the catalog,
+orders them into memory slots, and writes a programming file for one specific
+radio — dropping anything that radio cannot use, with a stated reason, rather
+than silently coercing it. Refresh a list at any time by re-exporting: the
+catalog is the source of truth. See
+[Radios and channel plans](#radios-and-channel-plans).
 
 ## Files
 
@@ -30,12 +39,47 @@ The catalog covers all 39 Washington counties and includes:
 - [Upper Lena Lake profile](docs/upper-lena-lake.md) - compact and comprehensive Hood Canal/Olympic wilderness, SAR, weather, public-safety, aviation, marine, amateur, and personal-radio profiles.
 - [Puget Sound ham repeaters and nets](docs/puget-sound-ham.md) - current WWARA-coordinated repeaters, operator-published net channels/schedules, mode grouping, source hierarchy, and update workflow.
 - [Data-source architecture](docs/data-sources.md) - source provenance, caching, update and merge behavior.
+- [TD-H9 programming guide](docs/td-h9-programming.md) - complete hardware procedure, verified radio facts, cable troubleshooting, and the two failure modes that produce a silently wrong radio.
+- [Agent runbook](docs/agent-runbook.md) - copy-paste procedures for automating this repository, environment layout, API reference, and project invariants.
+- [Lake Ozette profile](docs/ozette-lake.md) - Olympic Peninsula coastal trip profile: Clallam County, SAR/interop, tribal, marine, aviation, and amateur coverage.
+
+## Radios and channel plans
+
+| Radio | Role | Memories | Status |
+|---|---|---:|---|
+| Uniden SDS150 | Trunk-tracking scanner, receive only | unlimited | Verified |
+| TIDRADIO TD-H9 | Analog handheld transceiver | 199 | Verified against hardware |
+| Yaesu FTX-1 | HF/VHF/UHF transceiver | 999 | Profile from documentation, **unverified** |
+
+The SDS150 path is unchanged: the catalog is hierarchical (Favorites Lists
+containing systems, sites, departments) and exports as `.hpe`. Transceivers
+consume a flat, ordered list of memories instead, so they go through a channel
+plan and a separate export target. Neither path can reach the other's writer.
+
+```bash
+wasds150 radios list                  # capability profiles
+wasds150 plan list                    # registered channel plans
+wasds150 plan show h9-ozette          # resolved memory map, drops, warnings
+wasds150 plan export h9-ozette --out wasds150-output/radios
+```
+
+Or use the **Radios** tab in `wasds150 ui`, which browses the resolved memory
+map, exports the programming file, detects serial ports, and can back up, dry
+run, or program a connected radio.
+
+Programming hardware needs CHIRP, which is GPL-3 and therefore never vendored
+or imported. It lives in its own interpreter (`.venv-chirp`) and is driven as a
+subprocess, so `wasds150` itself keeps zero runtime dependencies. Full
+procedure: [TD-H9 programming guide](docs/td-h9-programming.md).
+
+Writing to a radio always backs it up first, always requires an explicit
+`--execute`, and always reads the radio back to verify afterwards.
 
 ## Current coverage
 
 | Measure | Current baseline |
 |---|---:|
-| Curated Favorites List entries | 137 |
+| Curated Favorites List entries | 140 |
 | Statewide/core entries | 78 |
 | King County municipal entries | 39 |
 | Lists generated with no private input | 73 |
@@ -43,6 +87,14 @@ The catalog covers all 39 Washington counties and includes:
 | Unique structured channel records after enrichment | 1,855 |
 | Remaining local warnings | 2 |
 | Washington counties represented | 39 |
+| Registered radio profiles | 3 |
+| Registered channel plans | 1 |
+
+Three of the 140 entries are transceiver-oriented and carry fully cited
+channel lists rather than scanner metadata: **OZ01** (Olympic Coast / Lake
+Ozette, 141 channels), **HAM01** (US amateur band plan, 88 calling and
+convention frequencies, reference only) and **FTX01** (FTX-1 factory memory
+import, 453 channels).
 
 The packaged no-private-input baseline leaves the trunked local rows pending.
 After applying the current local Sentinel HPDB, all statewide trunk targets,
@@ -96,6 +148,16 @@ The dashboard's **Catalog** tab uses lightweight summary rows. Expand any
 row to load every available non-sensitive field on demand, including profile state,
 provenance, systems, sites, trunk frequencies, departments, conventional
 channels, talkgroups, geolocation, service metadata, priority, and avoids.
+
+The **Radios** tab shows every supported radio's capability profile, resolves
+any channel plan against the current catalog, and lists the exact memory map
+that would be programmed — slot, name, frequency, transmit setting, mode,
+power, tone, and source block — with a filter and a per-block breakdown. From
+there it exports the programming file, detects attached serial ports, and can
+back up, dry run, or write a connected radio. Writing requires typed
+confirmation, backs the radio up first, and verifies the result afterwards.
+When the CHIRP interpreter is absent the tab explains how to create it and
+still shows the equivalent command line.
 
 The **Export** tab also supports a guarded **Bulk install selected lists into
 Sentinel** operation. Sentinel has no native multi-list HPE container, so the
@@ -215,6 +277,23 @@ and run the suite with:
 .venv/bin/python -m pytest -q
 ```
 
+Hardware programming is the one exception, and it is deliberately kept outside
+the package. CHIRP is GPL-3.0 and needs Python 3.10+, so it lives in a separate
+interpreter that only `scripts/radios/` imports:
+
+```bash
+python -m venv .venv-chirp
+.venv-chirp/bin/pip install git+https://github.com/kk7ds/chirp.git
+python scripts/radios/fetch_chirp_tdh9_module.py
+```
+
+Neither `.venv-chirp/` nor the fetched driver module is committed.
+
+Project invariants that must not be broken — zero runtime dependencies, the
+MIT/GPL boundary, never committing licensed data, reporting dropped channels
+rather than coercing them — are listed in the
+[agent runbook](docs/agent-runbook.md#invariants--do-not-break-these).
+
 ## Important limitations
 
 RadioReference is community-maintained, and radio systems change regularly. Update Sentinel's master database and verify system sites, talkgroups, modes, and encryption before each major trip.
@@ -222,6 +301,17 @@ RadioReference is community-maintained, and radio systems change regularly. Upda
 Encrypted traffic cannot be decoded by the SDS150. Temporary incident assignments, ski-area operations, event channels, and some commercial systems may be unpublished and require lawful on-site Discovery or Close Call monitoring.
 
 This scanner is receive-only and is not a substitute for a satellite messenger, personal locator beacon, or authorized two-way radio in the backcountry.
+
+**Transmitting is your responsibility.** Channel plans mark most blocks receive
+only, and encode the power limits in 47 CFR Part 95 for GMRS and MURS. That is
+a convenience, not legal advice or a compliance guarantee. Transmitting on
+amateur frequencies requires an FCC licence with the relevant privileges; GMRS
+requires a separate licence; public-safety, marine, aviation and business
+channels require authorization you almost certainly do not have. Verify before
+you key up.
+
+The **Yaesu FTX-1 profile is unverified** — built from documentation, not
+tested against hardware. The UI and `radios list` both flag it.
 
 ## Primary sources
 

@@ -174,6 +174,18 @@ def _fact_channel(fact: NormalizedFact) -> Channel:
     offset = f"{fact.offset_mhz:+.4f} MHz" if fact.offset_mhz is not None else "offset unknown"
     modes = [label for label, field in (("FM", "FM_WIDE"), ("NFM", "FM_NARROW"), ("P25", "P25_PHASE_1"), ("DMR", "DMR"), ("D-Star", "DSTAR_DV"), ("Fusion", "FUSION")) if raw.get(field) == "Y"]
     details = [f"input {(raw.get('INPUT_FREQ') or '').strip()}", offset, "/".join(modes), (raw.get("LINK") or "").strip(), (raw.get("SPONSOR") or "").strip(), (raw.get("COMMENT") or "").strip(), fact.source_url]
+    # WWARA publishes the repeater input and its access tone, which a scanner
+    # ignores but a transceiver needs.  Record them structurally so a channel
+    # plan never has to re-derive a shift from a band-plan convention.
+    try:
+        input_freq = float((raw.get("INPUT_FREQ") or "").strip())
+    except (TypeError, ValueError):
+        input_freq = None
+    input_tone = (raw.get("CTCSS_IN") or "").strip()
+    try:
+        tx_tone = f"TONE=C{float(input_tone):g}" if input_tone else ""
+    except ValueError:
+        tx_tone = ""
     return Channel(
         id=stable_id(f"puget-ham:wwara:{fact.entity_key}", kind="channel"),
         label=f"{call} - {city}" if city else call,
@@ -183,6 +195,8 @@ def _fact_channel(fact: NormalizedFact) -> Channel:
         service_type=13,
         avoid=fact.mode == "AUTO",
         notes=_ascii("; ".join(value for value in details if value)),
+        tx_freq_mhz=input_freq,
+        tx_tone=tx_tone,
     )
 
 

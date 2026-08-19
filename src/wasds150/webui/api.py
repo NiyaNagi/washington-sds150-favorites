@@ -1168,6 +1168,140 @@ def post_install_rollback(ctx: AppContext, req: RequestContext) -> Response:
     return Response.json(200, {"restored": restored})
 
 
+# ---------------------------------------------------------------- radios ----
+def get_radios(ctx: AppContext, req: RequestContext) -> Response:
+    """Capability profiles for every supported radio."""
+    from wasds150.radios.registry import list_profiles
+
+    return Response.json(
+        200,
+        {
+            "radios": [
+                {
+                    "id": key,
+                    "label": profile.label,
+                    "vendor": profile.vendor,
+                    "model": profile.model,
+                    "rx_bands": [list(band) for band in profile.rx_bands],
+                    "tx_bands": [list(band) for band in profile.tx_bands],
+                    "rx_coverage": profile.rx_coverage_summary(),
+                    "modes": sorted(profile.modes),
+                    "max_channels": profile.max_channels,
+                    "name_max_len": profile.name_max_len,
+                    "supports_banks": profile.supports_banks,
+                    "supports_trunking": profile.supports_trunking,
+                    "supports_talkgroups": profile.supports_talkgroups,
+                    "verified": profile.verified,
+                }
+                for key, profile in sorted(list_profiles().items())
+            ]
+        },
+    )
+
+
+def get_plans(ctx: AppContext, req: RequestContext) -> Response:
+    """Every registered channel plan, with export targets that serve it."""
+    from wasds150.export.registry import list_targets
+    from wasds150.plan.service import plan_index
+
+    targets: Dict[str, List[Dict[str, Any]]] = {}
+    for target in list_targets().values():
+        targets.setdefault(target.radio_id, []).append(
+            {
+                "id": target.id,
+                "label": target.label,
+                "extension": target.extension,
+                "available": target.available,
+                "description": target.description,
+            }
+        )
+
+    rows = plan_index()
+    for row in rows:
+        row["targets"] = targets.get(row["radio_id"], [])
+    return Response.json(200, {"plans": rows})
+
+
+def get_plan_detail(ctx: AppContext, req: RequestContext) -> Response:
+    """The full resolved memory map for one plan."""
+    from wasds150.plan.service import plan_detail, resolve_named_plan
+
+    plan_id = req.params.get("plan_id", "")
+    try:
+        _plan, resolved = resolve_named_plan(ctx, plan_id)
+    except KeyError:
+        return _error(404, f"unknown plan {plan_id!r}")
+    return Response.json(200, plan_detail(resolved))
+
+
+def post_plan_export(ctx: AppContext, req: RequestContext) -> Response:
+    """Write the plan's programming file and report where it landed."""
+    from wasds150.plan.service import DEFAULT_OUT_DIR, export_plan
+
+    body = req.json_body() or {}
+    plan_id = req.params.get("plan_id", "")
+    target_id = body.get("target") or "chirp-csv"
+    out_dir = Path(body.get("out") or DEFAULT_OUT_DIR)
+
+    try:
+        export = export_plan(ctx, plan_id, target_id=target_id, out_dir=out_dir)
+    except KeyError as exc:
+        return _error(404, str(exc))
+    except NotImplementedError as exc:
+        return _error(501, str(exc))
+    except (ValueError, OSError) as exc:
+        return _error(400, str(exc))
+    return Response.json(200, export.to_dict())
+
+
+def get_programmer_status(ctx: AppContext, req: RequestContext) -> Response:
+    """Whether a flash can be attempted, plus the ports we can see."""
+    from wasds150.radios import programmer
+
+    state = programmer.status()
+    payload = state.to_dict()
+    payload["ports"] = programmer.list_serial_ports()
+    payload["setup_hint"] = programmer.which_chirp_hint()
+    return Response.json(200, payload)
+
+
+def post_programmer_run(ctx: AppContext, req: RequestContext) -> Response:
+    """Back up, and optionally write, a physical radio.
+
+    ``execute`` defaults to false so the default action is always the safe
+    one: read the radio, save a backup, stage the CSV, change nothing.
+    """
+    from wasds150.radios import programmer
+
+    body = req.json_body() or {}
+    port = body.get("port") or ""
+    label = body.get("label") or "td-h9"
+    csv_path = body.get("csv")
+    execute = bool(body.get("execute"))
+    backup_only = bool(body.get("backup_only"))
+
+    try:
+        argv = programmer.build_command(
+            port=port,
+            csv_path=Path(csv_path) if csv_path else None,
+            label=label,
+            execute=execute,
+            backup_only=backup_only,
+        )
+    except programmer.ProgrammerError as exc:
+        return _error(400, str(exc))
+
+    try:
+        result = programmer.run(argv)
+    except programmer.ProgrammerError as exc:
+        return _error(500, str(exc))
+
+    payload = result.to_dict()
+    payload["display_command"] = programmer.describe_command(argv)
+    payload["executed"] = execute and not backup_only
+    return Response.json(200, payload)
+
+
 def build_router(ctx: AppContext) -> Router:
     router = Router()
     router.add("GET", "/api/v1/dashboard", lambda req: get_dashboard(ctx, req))
@@ -1211,4 +1345,10 @@ def build_router(ctx: AppContext) -> Router:
     router.add("POST", "/api/v1/install/backup", lambda req: post_install_backup(ctx, req))
     router.add("POST", "/api/v1/install/write", lambda req: post_install_write(ctx, req))
     router.add("POST", "/api/v1/install/rollback", lambda req: post_install_rollback(ctx, req))
+    router.add("GET", "/api/v1/radios", lambda req: get_radios(ctx, req))
+    router.add("GET", "/api/v1/plans", lambda req: get_plans(ctx, req))
+    router.add("GET", "/api/v1/plans/{plan_id}", lambda req: get_plan_detail(ctx, req))
+    router.add("POST", "/api/v1/plans/{plan_id}/export", lambda req: post_plan_export(ctx, req))
+    router.add("GET", "/api/v1/programmer/status", lambda req: get_programmer_status(ctx, req))
+    router.add("POST", "/api/v1/programmer/run", lambda req: post_programmer_run(ctx, req))
     return router

@@ -43,6 +43,8 @@ from wasds150.hpe.validation import (
     require_valid_hpe_bytes,
 )
 from wasds150.models.catalog import FavoritesList
+from wasds150.radios.projection import project_favorites
+from wasds150.radios.registry import SDS150
 
 #: Characters kept verbatim in a generated filename; everything else
 #: becomes "_". Deliberately conservative (safe on Windows/macOS/Linux
@@ -62,6 +64,11 @@ class HpeExportResult:
     #: given (Python 3.7+ dicts preserve insertion order).
     files: Dict[str, bytes] = field(default_factory=dict)
     warnings: List[str] = field(default_factory=list)
+    #: The favorites the files were actually built from, after projection
+    #: onto SDS150 capabilities. Parity checks must compare against these
+    #: rather than the input, or a reference list will look corrupt when it
+    #: is merely narrower than the catalog it came from.
+    projected: Dict[str, FavoritesList] = field(default_factory=dict)
 
 
 def safe_filename_component(text: str, *, default: str = "list") -> str:
@@ -98,8 +105,17 @@ def build_per_list_hpe(favorites: List[FavoritesList]) -> HpeExportResult:
     Every produced file is decode/validate-checked before being included;
     a row that is empty, or that somehow fails validation, is reported as
     a warning and skipped rather than shipped as an empty/broken file.
+
+    The catalog is radio-neutral and now carries content no scanner can use —
+    HF calling frequencies, SSB and CW modes. Those are projected out against
+    the SDS150's capability profile first, so material that is valid for a
+    different radio is dropped with a warning instead of aborting this export.
     """
     result = HpeExportResult()
+    projection = project_favorites(favorites, SDS150)
+    result.warnings.extend(projection.warnings)
+    favorites = projection.favorites
+
     if len(favorites) > hpe_schema.MAX_FAVORITES_LISTS:
         raise HpeValidationError(
             "Favorites List bundle",
@@ -157,5 +173,6 @@ def build_per_list_hpe(favorites: List[FavoritesList]) -> HpeExportResult:
 
         filename = hpe_filename_for(fl, used_names)
         result.files[filename] = hpe_bytes
+        result.projected[filename] = fl
 
     return result

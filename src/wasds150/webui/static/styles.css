@@ -604,3 +604,36 @@ footer {
   border-top: 1px solid var(--border);
   background: var(--bg);
 }
+
+/* ------------------------------------------------------------- radios -- */
+.warn { color: var(--warn); }
+.muted { color: var(--muted); }
+
+.command-preview,
+.command-output {
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.6rem 0.75rem;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 0.8rem;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-all;
+  margin: 0.25rem 0 1rem;
+}
+
+.command-output {
+  max-height: 22rem;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: normal;
+  min-height: 2rem;
+}
+
+#radios-table td:last-child { font-size: 0.85rem; }
+#plan-channels-table td:first-child { text-align: right; color: var(--muted); }
+#plan-channels-table td:nth-child(3) {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  text-align: right;
+}

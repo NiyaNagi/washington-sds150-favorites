@@ -80,6 +80,15 @@ class Channel:
     service_type: Optional[int] = None
     priority: bool = False
     avoid: bool = False
+    #: Repeater input frequency, for transceivers that may work this channel.
+    #: ``None`` means the channel is simplex or has no published input; it
+    #: never means "transmit on the receive frequency", because whether
+    #: transmitting is appropriate at all is a decision for a channel plan
+    #: rather than a property of the signal.  Scanners ignore both fields.
+    tx_freq_mhz: Optional[float] = None
+    #: Tone required by the repeater to open its input, when it differs from
+    #: the tone carried on the output.
+    tx_tone: str = ""
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -252,6 +261,13 @@ class FavoritesList:
     enabled: bool = True
     flqk: Optional[int] = None
     origin: str = ORIGIN_BASELINE
+    #: True for lists that describe spectrum rather than a set of channels one
+    #: radio should hold - a band plan, for instance. Such a list legitimately
+    #: contains content no single radio can represent, so an exporter may drop
+    #: the parts its target cannot use. For every other list, content outside
+    #: the target's capability is a data error and stays fatal.
+    #: Excluded from ``content_hash`` because it is presentation, not fact.
+    reference_only: bool = False
     systems: List[System] = field(default_factory=list)
     provenance: List[Provenance] = field(default_factory=list)
 

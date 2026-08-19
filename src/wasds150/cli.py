@@ -393,6 +393,107 @@ def cmd_generate(args: argparse.Namespace) -> int:
     return 0
 
 
+# --------------------------------------------------------------- radios ----
+def cmd_radios_list(args: argparse.Namespace) -> int:
+    from wasds150.radios.registry import list_profiles
+
+    profiles = list_profiles()
+    if args.json:
+        _print_json(
+            {
+                key: {
+                    "vendor": p.vendor,
+                    "model": p.model,
+                    "rx_bands": [list(b) for b in p.rx_bands],
+                    "tx_bands": [list(b) for b in p.tx_bands],
+                    "modes": sorted(p.modes),
+                    "max_channels": p.max_channels,
+                    "name_max_len": p.name_max_len,
+                    "verified": p.verified,
+                }
+                for key, p in profiles.items()
+            }
+        )
+        return 0
+    for key, p in sorted(profiles.items()):
+        flag = "" if p.verified else "  [UNVERIFIED]"
+        capacity = p.max_channels if p.max_channels is not None else "unlimited"
+        print(f"{key:10} {p.label:18} channels={capacity} name={p.name_max_len or '-'}{flag}")
+        print(f"           rx {p.rx_coverage_summary()}")
+        print(f"           modes {', '.join(sorted(p.modes))}")
+    return 0
+
+
+def _resolve_named_plan(args: argparse.Namespace):
+    """Load the catalog, apply the profile, and resolve a named plan."""
+    from wasds150.plan.service import resolve_named_plan
+
+    ctx = _build_ctx(args)
+    plan, resolved = resolve_named_plan(ctx, args.plan)
+    return ctx, plan, resolved
+
+
+def cmd_plans_list(args: argparse.Namespace) -> int:
+    from wasds150.plans import list_plans
+
+    for key, plan in sorted(list_plans().items()):
+        print(f"{key:14} {plan.label}  (radio {plan.radio_id}, {len(plan.blocks)} blocks)")
+        if plan.description:
+            print(f"               {plan.description}")
+    return 0
+
+
+def cmd_plans_show(args: argparse.Namespace) -> int:
+    from wasds150.export.report import render_plan_report
+
+    _ctx, _plan, resolved = _resolve_named_plan(args)
+    if args.json:
+        _print_json(
+            {
+                "plan": resolved.plan.to_dict(),
+                "slots_used": resolved.slots_used,
+                "capacity": resolved.capacity,
+                "block_counts": resolved.block_counts,
+                "drop_reasons": resolved.drop_reasons(),
+                "warnings": resolved.warnings,
+                "channels": [
+                    {
+                        "slot": c.slot, "name": c.name, "label": c.label,
+                        "rx_mhz": c.rx_freq_mhz, "tx_mhz": c.tx_freq_mhz,
+                        "transmit": c.transmit, "mode": c.mode, "source": c.source,
+                    }
+                    for c in resolved.channels
+                ],
+            }
+        )
+        return 0
+    print(render_plan_report(resolved))
+    return 0
+
+
+def cmd_plans_export(args: argparse.Namespace) -> int:
+    from wasds150.plan.service import export_plan
+
+    ctx = _build_ctx(args)
+    try:
+        export = export_plan(ctx, args.plan, target_id=args.target, out_dir=Path(args.out))
+    except (KeyError, NotImplementedError, ValueError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 1
+
+    if args.json:
+        _print_json(export.to_dict())
+        return 0
+    print(f"Exported {export.rows} channels for plan {export.plan_id}")
+    print(f"  wrote {export.csv_path}")
+    print(f"  wrote {export.report_path}")
+    if export.warnings:
+        print(f"Warnings ({len(export.warnings)}):")
+        for w in export.warnings:
+            print(f"  - {w}")
+    return 0
+
+
 # -------------------------------------------------------------- history ----
 def cmd_history_list(args: argparse.Namespace) -> int:
     ctx = _build_ctx(args)
@@ -1358,6 +1459,36 @@ def build_parser() -> argparse.ArgumentParser:
     p_ui.add_argument("--port", type=int, default=0, help="TCP port (0 = pick a free port)")
     p_ui.add_argument("--no-browser", action="store_true", help="Do not auto-open a browser tab")
     p_ui.set_defaults(func=cmd_ui)
+
+    p_radios = subparsers.add_parser("radios", help="Radio capability profiles")
+    radios_sub = p_radios.add_subparsers(dest="radios_command", required=True)
+    p_radios_list = radios_sub.add_parser("list", help="List supported radios")
+    p_radios_list.add_argument("--json", action="store_true")
+    p_radios_list.set_defaults(func=cmd_radios_list)
+
+    p_plan = subparsers.add_parser(
+        "plan", help="Channel plans: select catalog channels for one radio"
+    )
+    plan_sub = p_plan.add_subparsers(dest="plan_command", required=True)
+
+    p_plan_list = plan_sub.add_parser("list", help="List available channel plans")
+    p_plan_list.set_defaults(func=cmd_plans_list)
+
+    p_plan_show = plan_sub.add_parser(
+        "show", help="Resolve a plan and show the memory map, channels and exclusions"
+    )
+    p_plan_show.add_argument("plan")
+    p_plan_show.add_argument("--json", action="store_true")
+    p_plan_show.set_defaults(func=cmd_plans_show)
+
+    p_plan_export = plan_sub.add_parser("export", help="Write a plan as a radio programming file")
+    p_plan_export.add_argument("plan")
+    p_plan_export.add_argument(
+        "--target", default="chirp-csv", help="Export target (see 'radios list')"
+    )
+    p_plan_export.add_argument("--out", default="wasds150-output/radios", help="Output directory")
+    p_plan_export.add_argument("--json", action="store_true")
+    p_plan_export.set_defaults(func=cmd_plans_export)
 
     p_hpe = subparsers.add_parser("hpe", help="Uniden .hpe/.hpd container/record engine")
     hpe_sub = p_hpe.add_subparsers(dest="hpe_command", required=True)
