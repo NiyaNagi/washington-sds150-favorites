@@ -42,6 +42,9 @@ catalog is the source of truth. See
 - [TD-H9 programming guide](docs/td-h9-programming.md) - complete hardware procedure, verified radio facts, cable troubleshooting, and the two failure modes that produce a silently wrong radio.
 - [Agent runbook](docs/agent-runbook.md) - copy-paste procedures for automating this repository, environment layout, API reference, and project invariants.
 - [Lake Ozette profile](docs/ozette-lake.md) - Olympic Peninsula coastal trip profile: Clallam County, SAR/interop, tribal, marine, aviation, and amateur coverage.
+- [Printable mounts and brackets](models/README.md) - parametric OpenSCAD visor mounts, Peak Design Capture bracket, and EFHW antenna enclosure, with print-ready 3MF/STL and the latch/fit reasoning behind each variant.
+- [Parametric modelling method](docs/modelling-method.md) - measurement-first workflow, tolerance and clearance conventions, and the automated geometry checks each model must pass.
+- [Peak Design capture bracket](docs/pd-capture-bracket.md) - the SDS150 bracket's dimensions, fastener options, and fit verification.
 
 ## Radios and channel plans
 
@@ -78,6 +81,14 @@ one, export a programming file, or program a connected TD-H9.
 
 Ready-made outputs are committed in [`radio-configs/`](radio-configs/) so they
 can be loaded without running anything.
+
+**Only channel data is written.** A radio's file holds far more than
+frequencies - the FTX-1's also carries CW messages, GPS setup, display data and
+the HOME channels. Exports start from a factory-reset baseline in
+[`radio-templates/`](radio-templates/) and patch only the memory slots, leaving
+every configuration byte identical. That is asserted by a test, because an
+earlier version zeroed about 100 KB of settings and still produced a file that
+loaded with correct memories.
 
 Programming hardware needs CHIRP, which is GPL-3 and therefore never vendored
 or imported. It lives in its own interpreter (`.venv-chirp`) and is driven as a
@@ -304,6 +315,16 @@ python scripts/radios/fetch_chirp_tdh9_module.py
 ```
 
 Neither `.venv-chirp/` nor the fetched driver module is committed.
+
+The 3D models are a third, equally separate environment. They need OpenSCAD
+plus a scientific stack for the geometry checks, none of which the package
+uses:
+
+```bash
+python -m venv .venv-cad
+.venv-cad/bin/pip install -r scripts/cad/requirements.txt
+.venv-cad/bin/python scripts/cad/export_models.py    # regenerate every 3MF/STL
+```
 
 Project invariants that must not be broken — zero runtime dependencies, the
 MIT/GPL boundary, never committing licensed data, reporting dropped channels

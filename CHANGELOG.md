@@ -22,6 +22,13 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   channels are programmed but flagged skip-scan.
 - Added `wasds150 loadout list|show|save|diff` for the same operations from
   the terminal.
+- Added parametric 3D-printable hardware: SDS150 visor mounts in four latch
+  variants, a Peak Design Capture bracket in three fastener styles, and an
+  EFHW antenna enclosure. OpenSCAD sources ship with print-ready 3MF/STL and
+  the automated geometry checks each model must pass.
+- Added a factory-reset FTX-1 baseline in `radio-templates/`, so the blank
+  export template can be regenerated from a known state rather than from
+  whatever happened to be on a radio.
 
 - Added a final GOWENIC-module 40m EFHW package with a fresh 1.8-148 MHz,
   40,001-point OSL calibration, full-span reconnect verification, final
@@ -221,6 +228,13 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Fixed
 
+- Fixed the FTX-1 export zeroing the radio's settings. A `.FTX1` holds CW
+  messages, GPS setup, display data and the HOME channels past the memory
+  array; the format model divided the whole file by the record size, minting
+  roughly 800 phantom records out of that area, which the template builder
+  then cleared. The file still loaded with correct memories, so nothing
+  looked wrong. Exports now leave every non-memory byte identical, asserted
+  by a test.
 - Fixed CHIRP power levels being silently downgraded to Low on upload. The
   driver maps power with `list.index()`, which compares by object identity, so
   a level parsed from CSV never matched and fell back to index 0. The exported
