@@ -14,7 +14,7 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   shape: the SDS150 as Favorites Lists with systems, sites and departments;
   the TD-H9 and FTX-1 as ordered memory channels. Snapshots can be saved and
   compared, so a refresh shows exactly what changed.
-- Added `ftx1-wa`, a 966-channel Washington plan for the Yaesu FTX-1 covering
+- Added `ftx1-wa`, a 959-channel Washington plan for the Yaesu FTX-1 covering
   amateur repeaters and simplex, GMRS/FRS/MURS, marine, aviation, NOAA,
   public-safety interop, and Winlink/APRS data channels.
 - Added a native `.FTX1` export target, so the FTX-1 memory file is generated
