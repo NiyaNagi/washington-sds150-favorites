@@ -56,6 +56,13 @@ RECORD_LEN = 295
 OFF_IN_USE = 0x00
 OFF_RX = 0x01
 OFF_TX = 0x05
+#: Repeater shift magnitude in Hz, uint32 LE. Redundant with the stored
+#: transmit frequency, but the programmer displays this field in its own
+#: column and the radio uses it when the operator retunes a memory. Verified
+#: against 963 of 967 records in a file saved from a real radio; the four
+#: exceptions are odd-split repeaters where the programmer kept the
+#: conventional shift for the band rather than the actual difference.
+OFF_OFFSET = 0x09
 OFF_DUPLEX = 0x0D
 OFF_NAME = 0x0F
 OFF_TONE_MODE = 0x2D
@@ -103,7 +110,13 @@ TONE_CTCSS_ENC = 2
 #: Longest name the programmer showed in the sample file.  The FTX-1 displays
 #: twelve characters; the field itself has room for more.
 NAME_MAX = 12
-COMMENT_MAX = 32
+
+#: The comment field is far larger than it first appeared. Records written by
+#: the programmer hold comments up to 79 characters, running from
+#: :data:`OFF_COMMENT` to 0x124; the final two bytes of the record are zero in
+#: every vendor record inspected. Modelling it as 32 characters silently
+#: truncated every longer description on export.
+COMMENT_MAX = 80
 
 
 def _read_utf16(data: bytes, start: int, limit: int) -> str:
@@ -203,6 +216,11 @@ class Ftx1Record:
                 buffer[OFF_DUPLEX] = DUPLEX_SIMPLEX
             else:
                 buffer[OFF_DUPLEX] = DUPLEX_PLUS if new_tx > new_rx else DUPLEX_MINUS
+            # The shift has its own field and its own column in the
+            # programmer. Leaving it at whatever the base record held shows a
+            # repeater with a blank or wrong offset even though the transmit
+            # frequency is right.
+            struct.pack_into("<I", buffer, OFF_OFFSET, abs(new_tx - new_rx))
         if name is not None:
             _write_utf16(buffer, OFF_NAME, name, NAME_MAX)
         if comment is not None:

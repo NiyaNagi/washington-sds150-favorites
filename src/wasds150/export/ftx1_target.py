@@ -23,6 +23,8 @@ from typing import Dict, List, Optional
 
 from wasds150.export.ftx1_file import (
     CTCSS_TONES,
+    HOME_COUNT,
+    HOME_FIRST,
     PMS_PAIRS,
     Ftx1File,
     Ftx1Record,
@@ -37,8 +39,9 @@ TEMPLATE_RELPATH = Path("radio-templates") / "ftx1-blank.FTX1"
 #: The FTX-1 shows twelve characters of a memory tag.
 NAME_LEN = 12
 
-#: Comment field width in the programmer.
-COMMENT_LEN = 32
+#: Comment field width in the programmer. Vendor records carry up to 79
+#: characters here, so the source citation in a catalog note mostly survives.
+COMMENT_LEN = 79
 
 #: Memories available before the programmable scan pairs begin.
 MEMORY_CAPACITY = 999
@@ -101,6 +104,67 @@ def _channel_tone(channel) -> Optional[float]:
     return None
 
 
+#: Base records chosen by band rather than by duplex shape.
+#:
+#: A memory record carries per-band settings this project does not model -
+#: operating mode, filter width, AGC, preamp, antenna selection. Patching
+#: every channel from one base stamps that base's band settings onto the
+#: whole file: an HF base makes 162 MHz weather come out as LSB with a 300 Hz
+#: filter.
+#:
+#: The factory file ships five HOME channels, one per band, written by the
+#: vendor. Those are exactly the per-band defaults wanted here, so each
+#: channel is patched from the HOME record for its own band. Ranges are
+#: chosen to bracket each HOME frequency out to the edge of what that band
+#: covers on this radio.
+_BAND_BASES = (
+    # (low MHz, high MHz, HOME frequency MHz this band should inherit from)
+    (0.03, 30.0, None),      # HF - no HOME record is SSB, see below
+    (30.0, 54.0, 51.525),    # 6 m
+    (54.0, 108.0, 51.525),   # VHF low / broadcast
+    (108.0, 137.0, 118.0),   # airband
+    (137.0, 174.0, 146.52),  # 2 m and VHF land mobile
+    (174.0, 400.0, 146.52),  # not receivable, kept for completeness
+    (400.0, 470.0, 446.0),   # 70 cm, GMRS/FRS, UHF business
+)
+
+
+def _band_bases(source: Ftx1File) -> Dict[str, Ftx1Record]:
+    """Map each band to the HOME record the vendor wrote for it.
+
+    Falls back to the first populated memory - on the shipped template that is
+    the factory HF record - for bands with no HOME channel.
+    """
+    home: Dict[float, Ftx1Record] = {}
+    for index in range(HOME_FIRST, HOME_FIRST + HOME_COUNT):
+        if index < len(source.records):
+            record = source.records[index]
+            if not record.empty:
+                home[round(record.rx_hz / 1_000_000, 4)] = record
+
+    fallback = None
+    for record in source.records[:MEMORY_CAPACITY]:
+        if not record.empty:
+            fallback = record
+            break
+    if fallback is None:
+        fallback = source.records[0]
+
+    bases: Dict[str, Ftx1Record] = {}
+    for low, high, home_mhz in _BAND_BASES:
+        key = f"{low}-{high}"
+        bases[key] = home.get(home_mhz, fallback) if home_mhz else fallback
+    bases["fallback"] = fallback
+    return bases
+
+
+def _base_for(bases: Dict[str, Ftx1Record], mhz: float) -> Ftx1Record:
+    for low, high, _home in _BAND_BASES:
+        if low <= mhz < high:
+            return bases[f"{low}-{high}"]
+    return bases["fallback"]
+
+
 def _pick_templates(source: Ftx1File) -> Dict[str, Ftx1Record]:
     """One real record per duplex shape, to patch new memories from."""
     templates: Dict[str, Ftx1Record] = {}
@@ -144,7 +208,7 @@ def render_ftx1(
         )
 
     result = Ftx1ExportResult()
-    templates = _pick_templates(ftx1)
+    bases = _band_bases(ftx1)
 
     channels = resolved.channels[:MEMORY_CAPACITY]
     if len(resolved.channels) > MEMORY_CAPACITY:
@@ -171,7 +235,7 @@ def render_ftx1(
 
         shape = "simplex" if tx == rx else ("plus" if tx > rx else "minus")
         comment = (channel.comment or channel.label)[:COMMENT_LEN]
-        ftx1.records[slot] = templates[shape].patched(
+        ftx1.records[slot] = _base_for(bases, channel.rx_freq_mhz).patched(
             rx_hz=rx,
             tx_hz=tx,
             name=channel.name[:NAME_LEN],
