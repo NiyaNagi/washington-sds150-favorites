@@ -25,6 +25,7 @@ from wasds150.export.ftx1_file import (
     CTCSS_TONES,
     HOME_COUNT,
     HOME_FIRST,
+    MODE_CODES,
     PMS_PAIRS,
     Ftx1File,
     Ftx1Record,
@@ -235,12 +236,26 @@ def render_ftx1(
 
         shape = "simplex" if tx == rx else ("plus" if tx > rx else "minus")
         comment = (channel.comment or channel.label)[:COMMENT_LEN]
+
+        # The mode is a real per-channel field, not a band default. Writing it
+        # is what stops an AM airband channel or a Fusion repeater being
+        # programmed as plain FM.
+        mode = channel.mode
+        if mode and mode.strip().upper() not in MODE_CODES:
+            result.warnings.append(
+                f"{channel.name}: the FTX-1 has no {mode} mode; left at the "
+                "band default"
+            )
+            mode = None
+
         ftx1.records[slot] = _base_for(bases, channel.rx_freq_mhz).patched(
             rx_hz=rx,
             tx_hz=tx,
             name=channel.name[:NAME_LEN],
             comment=comment,
             tone_hz=tone,
+            mode=mode,
+            skip=channel.skip_scan,
             in_use=True,
         )
         result.rows += 1

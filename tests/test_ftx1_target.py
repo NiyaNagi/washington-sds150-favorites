@@ -235,3 +235,82 @@ class TestSettingsAreaPreserved:
             assert rendered.records[index].raw == base.records[index].raw, (
                 f"export modified HOME channel at record {index}"
             )
+
+
+# --------------------------------------------------------- operating mode --
+# Decoded by writing one memory per mode in the RT Systems programmer and
+# diffing: all 18 rows were identical except the byte at 0x0E. Before this,
+# every channel inherited the base record's mode, so a file built from the
+# factory default (a 7 MHz HF memory) programmed 162 MHz weather as LSB.
+class TestOperatingMode:
+    def test_mode_codes_match_the_decoded_table(self):
+        from wasds150.export import ftx1_file as F
+
+        assert F.MODE_FM == 0x00
+        assert F.MODE_AM == 0x01
+        assert F.MODE_FM_NARROW == 0x03
+        assert F.MODE_LSB == 0x05
+        assert F.MODE_USB == 0x06
+        assert F.MODE_CW_U == 0x18
+        assert F.MODE_DN == 0x1C
+
+    def test_patched_writes_the_mode_byte(self):
+        from wasds150.export.ftx1_file import MODE_CODES, OFF_MODE
+
+        template = _template_or_skip()
+        record = Ftx1File.load(template).records[0]
+        for name, code in MODE_CODES.items():
+            assert record.patched(mode=name).raw[OFF_MODE] == code
+
+    def test_unknown_mode_is_rejected(self):
+        template = _template_or_skip()
+        record = Ftx1File.load(template).records[0]
+        with pytest.raises(ValueError, match="not a mode"):
+            record.patched(mode="P25")
+
+    def test_patched_writes_the_skip_flag(self):
+        from wasds150.export.ftx1_file import OFF_SKIP
+
+        template = _template_or_skip()
+        record = Ftx1File.load(template).records[0]
+        assert record.patched(skip=True).raw[OFF_SKIP] == 1
+        assert record.patched(skip=False).raw[OFF_SKIP] == 0
+
+    def test_export_sets_mode_per_band(self, resolved):
+        """Airband must be AM and VHF/UHF must be FM, not the base's mode."""
+        from wasds150.export.ftx1_file import MODE_AM, MODE_FM, OFF_MODE
+
+        _template_or_skip()
+        rendered, _result = render_ftx1(resolved)
+        records = [r for r in rendered.records[:MEMORY_CAPACITY] if not r.empty]
+
+        air = [r for r in records if 108e6 <= r.rx_hz <= 137e6]
+        assert air, "expected airband channels in the shipped plan"
+        assert all(r.raw[OFF_MODE] == MODE_AM for r in air)
+
+        weather = [r for r in records if 162e6 <= r.rx_hz <= 163e6]
+        assert weather, "expected NOAA weather channels in the shipped plan"
+        assert all(r.raw[OFF_MODE] == MODE_FM for r in weather)
+
+    def test_export_marks_data_channels_skip_scan(self, resolved):
+        """Winlink and APRS are programmed but must not stop a scan."""
+        from wasds150.export.ftx1_file import OFF_SKIP
+
+        _template_or_skip()
+        rendered, _result = render_ftx1(resolved)
+        records = [r for r in rendered.records[:MEMORY_CAPACITY] if not r.empty]
+        skipped = [r for r in records if r.raw[OFF_SKIP]]
+        assert skipped, "expected at least one skip-scan channel"
+
+    def test_offset_field_matches_the_shift(self, resolved):
+        """The shift has its own field and its own column in the programmer."""
+        import struct
+
+        from wasds150.export.ftx1_file import OFF_OFFSET
+
+        _template_or_skip()
+        rendered, _result = render_ftx1(resolved)
+        records = [r for r in rendered.records[:MEMORY_CAPACITY] if not r.empty]
+        for record in records:
+            stored = struct.unpack_from("<I", record.raw, OFF_OFFSET)[0]
+            assert stored == abs(record.tx_hz - record.rx_hz)

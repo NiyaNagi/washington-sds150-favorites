@@ -64,11 +64,90 @@ OFF_TX = 0x05
 #: conventional shift for the band rather than the actual difference.
 OFF_OFFSET = 0x09
 OFF_DUPLEX = 0x0D
+#: Operating mode. Decoded by writing one memory per mode in the programmer
+#: and diffing: every mode moved this byte and nothing else. See
+#: :data:`MODE_CODES`.
+OFF_MODE = 0x0E
 OFF_NAME = 0x0F
 OFF_TONE_MODE = 0x2D
 OFF_TX_TONE = 0x2E
 OFF_RX_TONE = 0x2F
+#: Skip this memory when scanning. 1 = skip, 0 = include.
+OFF_SKIP = 0x34
 OFF_COMMENT = 0x85
+
+#: Operating mode codes, decoded from a probe file where 18 memories differed
+#: only by mode. The names are the programmer's own dropdown labels, which do
+#: not all match the vendor DLL's internal string table.
+#:
+#: Independently confirmed against a file saved from a real radio: the only
+#: three values present there are 0x00 on general FM channels, 0x03 on the
+#: FRS/MURS channels that are genuinely narrowband, and 0x1C on the System
+#: Fusion repeaters.
+MODE_FM = 0x00
+MODE_AM = 0x01
+MODE_FM_NARROW = 0x03
+MODE_AM_NARROW = 0x04
+MODE_LSB = 0x05
+MODE_USB = 0x06
+MODE_PACKET = 0x0B
+MODE_RTTY = 0x0E
+MODE_RTTY_R = 0x0F
+MODE_PKT_FM = 0x12
+MODE_PKT_LSB = 0x13
+MODE_PKT_USB = 0x14
+MODE_CW_L = 0x17
+MODE_CW_U = 0x18
+MODE_PSK = 0x19
+MODE_DN = 0x1C
+MODE_VW = 0x1D
+MODE_AUTO = 0x20
+
+#: Programmer label for each code, for reporting.
+MODE_LABELS = {
+    MODE_FM: "FM",
+    MODE_AM: "AM",
+    MODE_FM_NARROW: "FM Narrow",
+    MODE_AM_NARROW: "AM Narrow",
+    MODE_LSB: "LSB",
+    MODE_USB: "USB",
+    MODE_PACKET: "Packet",
+    MODE_RTTY: "RTTY",
+    MODE_RTTY_R: "RTTY-R",
+    MODE_PKT_FM: "PKT-FM",
+    MODE_PKT_LSB: "PKT-LSB",
+    MODE_PKT_USB: "PKT-USB",
+    MODE_CW_L: "CWL",
+    MODE_CW_U: "CWU",
+    MODE_PSK: "PSK",
+    MODE_DN: "DN",
+    MODE_VW: "VW",
+    MODE_AUTO: "Auto",
+}
+
+#: Catalog mode names mapped onto those codes.
+#:
+#: CW maps to CW-U because that is the sideband a Yaesu selects by default;
+#: either decodes the same signal, and no catalog entry states which.
+MODE_CODES = {
+    "FM": MODE_FM,
+    "NFM": MODE_FM_NARROW,
+    "FMN": MODE_FM_NARROW,
+    "AM": MODE_AM,
+    "NAM": MODE_AM_NARROW,
+    "AMN": MODE_AM_NARROW,
+    "LSB": MODE_LSB,
+    "USB": MODE_USB,
+    "SSB": MODE_USB,
+    "CW": MODE_CW_U,
+    "RTTY": MODE_RTTY,
+    "PSK": MODE_PSK,
+    "PACKET": MODE_PACKET,
+    "DATA": MODE_PKT_FM,
+    "C4FM": MODE_DN,
+    "FUSION": MODE_DN,
+    "DN": MODE_DN,
+}
 
 #: Values for :data:`OFF_DUPLEX`. The transmit frequency is stored in full,
 #: so this is redundant with it - but the programmer displays this byte, and
@@ -197,6 +276,8 @@ class Ftx1Record:
         name: Optional[str] = None,
         comment: Optional[str] = None,
         tone_hz: Optional[float] = None,
+        mode: Optional[str] = None,
+        skip: Optional[bool] = None,
         in_use: Optional[bool] = None,
     ) -> "Ftx1Record":
         buffer = bytearray(self.raw)
@@ -232,6 +313,13 @@ class Ftx1Record:
             buffer[OFF_TONE_MODE] = TONE_CTCSS_ENC
             buffer[OFF_TX_TONE] = index
             buffer[OFF_RX_TONE] = index
+        if mode is not None:
+            code = MODE_CODES.get(mode.strip().upper())
+            if code is None:
+                raise ValueError(f"{mode!r} is not a mode the FTX-1 offers")
+            buffer[OFF_MODE] = code
+        if skip is not None:
+            buffer[OFF_SKIP] = 1 if skip else 0
         if in_use is not None:
             buffer[OFF_IN_USE] = 1 if in_use else 0
         return Ftx1Record(index=self.index, raw=bytes(buffer))
