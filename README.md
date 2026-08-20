@@ -53,7 +53,7 @@ catalog is the source of truth. See
 |---|---|---:|---:|---|
 | Uniden SDS150 | Trunk-tracking scanner, receive only | unlimited | 140 Favorites Lists | Verified |
 | TIDRADIO TD-H9 | Analog handheld transceiver | 199 | 185 memories | Verified against hardware |
-| Yaesu FTX-1 | HF/VHF/UHF transceiver | 999 | 959 memories + 47 scan pairs | Profile from documentation, **unverified** |
+| Yaesu FTX-1 | HF/VHF/UHF transceiver | 999 | 960 memories + 47 scan pairs | Profile from documentation, **unverified** |
 
 Each radio's current configuration is inspectable in its **own shape**, because
 they genuinely differ. The SDS150's configuration is hierarchical - Favorites
@@ -81,7 +81,9 @@ dropdown to see what is loaded, save a snapshot, ask what changed since the last
 one, export a programming file, or program a connected TD-H9.
 
 Ready-made outputs are committed in [`radio-configs/`](radio-configs/) so they
-can be loaded without running anything.
+can be loaded without running anything. Exporting writes there, inside the
+repository — pass `--copy-to` to also drop the file in the folder your
+programmer loads from, because a stale copy looks entirely normal.
 
 **Only channel data is written.** A radio's file holds far more than
 frequencies - the FTX-1's also carries CW messages, GPS setup, display data and
@@ -90,6 +92,15 @@ the HOME channels. Exports start from a factory-reset baseline in
 every configuration byte identical. That is asserted by a test, because an
 earlier version zeroed about 100 KB of settings and still produced a file that
 loaded with correct memories.
+
+**Per-channel settings are decoded, not guessed.** Operating mode, tone mode,
+CTCSS, repeater shift and scan-skip are each written from the catalog, and each
+was established by writing a probe file with one memory per setting, changing
+that single column in the vendor programmer, and diffing the result. The field
+map and the method are in [`radio-templates/`](radio-templates/README.md); the
+probe tooling is `scripts/radios/make_ftx1_probe.py`. Columns the radio derives
+rather than stores — Width, AGC, IPO, the Narrow flags — are inherited from the
+vendor's own per-band defaults instead of invented.
 
 Programming hardware needs CHIRP, which is GPL-3 and therefore never vendored
 or imported. It lives in its own interpreter (`.venv-chirp`) and is driven as a

@@ -11,7 +11,7 @@ callable from a test with nothing but an :class:`AppContext`.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -122,6 +122,8 @@ class PlanExport:
     csv_path: Path
     report_path: Path
     warnings: List[str]
+    #: Extra locations the programming file was copied to, if any.
+    copies: List[Path] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -131,6 +133,7 @@ class PlanExport:
             "csv_path": str(self.csv_path),
             "report_path": str(self.report_path),
             "files": [str(self.csv_path), str(self.report_path)],
+            "copies": [str(path) for path in self.copies],
             "warnings": list(self.warnings),
         }
 
@@ -141,13 +144,23 @@ def export_plan(
     *,
     target_id: str = "chirp-csv",
     out_dir: Optional[Path] = None,
+    copy_to: Optional[Path] = None,
 ) -> PlanExport:
     """Resolve and write a plan, returning the paths written.
+
+    ``copy_to`` additionally places the programming file in a second
+    directory. Exports land inside the repository, but a radio is programmed
+    from wherever the operator keeps their working copy; if the two drift, the
+    stale file still opens cleanly in the vendor programmer with the right
+    channel count and the right frequencies, and only the fields fixed since
+    are wrong. Copying in the same step removes that gap.
 
     Raises ``KeyError`` for an unknown plan or target, ``NotImplementedError``
     for a target that is registered but not yet built, and ``ValueError`` if
     the target does not serve the plan's radio.
     """
+    import shutil
+
     from wasds150.export.registry import get_target
     from wasds150.export.report import render_plan_report
 
@@ -163,11 +176,23 @@ def export_plan(
     report_path = directory / f"{plan.id}-report.md"
     report_path.write_text(render_plan_report(resolved), encoding="utf-8")
 
+    copies: List[Path] = []
+    if copy_to is not None:
+        destination = Path(copy_to)
+        destination.mkdir(parents=True, exist_ok=True)
+        for source in (csv_path, report_path):
+            target_path = destination / source.name
+            if target_path.resolve() == source.resolve():
+                continue
+            shutil.copy2(source, target_path)
+            copies.append(target_path)
+
     return PlanExport(
         plan_id=plan.id,
         target_id=target.id,
         rows=result.rows,
         csv_path=csv_path,
         report_path=report_path,
+        copies=copies,
         warnings=list(resolved.warnings) + list(result.warnings),
     )

@@ -14,12 +14,27 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   shape: the SDS150 as Favorites Lists with systems, sites and departments;
   the TD-H9 and FTX-1 as ordered memory channels. Snapshots can be saved and
   compared, so a refresh shows exactly what changed.
-- Added `ftx1-wa`, a 959-channel Washington plan for the Yaesu FTX-1 covering
+- Added `ftx1-wa`, a 960-channel Washington plan for the Yaesu FTX-1 covering
   amateur repeaters and simplex, GMRS/FRS/MURS, marine, aviation, NOAA,
   public-safety interop, and Winlink/APRS data channels.
 - Added a native `.FTX1` export target, so the FTX-1 memory file is generated
   from the catalog rather than hand-merged in the vendor programmer. Data
   channels are programmed but flagged skip-scan.
+- Added per-channel operating mode, tone mode and scan-skip to the FTX-1
+  export, each decoded from the vendor programmer rather than inferred: a
+  probe file with one memory per setting, one column changed, and the saved
+  result diffed. Airband is AM, FRS and MURS are FM Narrow, HF phone follows
+  the catalog's sideband, and Fusion repeaters are DN.
+- Added `--copy-to` on `plan export`, which places the programming file in a
+  second directory as well as the repository. A working copy kept elsewhere
+  does not update on its own, and a stale one opens cleanly in the vendor
+  programmer with the right channel count and frequencies, so the drift only
+  shows up as odd behaviour on the air.
+- Added `scripts/radios/make_ftx1_probe.py` and `decode_ftx1_probe.py`, which
+  generate those probe files and read back exactly which byte each setting
+  moved. This is how the record layout was established, including the finding
+  that Width, AGC, IPO and the other HF receiver controls are not stored per
+  memory at all.
 - Added `wasds150 loadout list|show|save|diff` for the same operations from
   the terminal.
 - Added parametric 3D-printable hardware: SDS150 visor mounts in four latch
@@ -228,6 +243,25 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Fixed
 
+- Fixed the FTX-1 tone mode meaning tone squelch rather than tone. The field
+  stores `0 None, 1 Tone, 2 Tone Sql, 3 DCS`, and this project had 1 and 2
+  the wrong way round, writing Tone Sql on 370 channels. Transmit still
+  worked, so repeaters keyed up normally - but the receiver muted unless the
+  far end sent a matching tone back, and many repeaters do not. Those
+  channels would have seemed dead while looking correct everywhere.
+- Fixed every FTX-1 channel inheriting one base record's operating mode.
+  Built from the factory default, a 7 MHz HF memory, that programmed 162 MHz
+  weather and 467 MHz FRS as LSB with a 300 Hz filter. Mode is now written
+  per channel, and each channel inherits its remaining band settings from the
+  vendor's own HOME record for that band.
+- Fixed the FTX-1 repeater shift never being written. It has its own field
+  and its own column in the programmer, separate from the stored transmit
+  frequency, so every repeater showed a blank offset.
+- Fixed FTX-1 comments being truncated at 32 characters; the field holds 79,
+  and 664 of 960 channels carry a longer one.
+- Fixed the probe generator overwriting probe files that had already been
+  edited in the vendor programmer, silently discarding that work. It now
+  refuses without `--force`.
 - Fixed the FTX-1 export zeroing the radio's settings. A `.FTX1` holds CW
   messages, GPS setup, display data and the HOME channels past the memory
   array; the format model divided the whole file by the record size, minting

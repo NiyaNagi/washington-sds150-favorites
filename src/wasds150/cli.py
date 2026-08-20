@@ -476,8 +476,14 @@ def cmd_plans_export(args: argparse.Namespace) -> int:
 
     ctx = _build_ctx(args)
     try:
-        export = export_plan(ctx, args.plan, target_id=args.target, out_dir=Path(args.out))
-    except (KeyError, NotImplementedError, ValueError) as exc:
+        export = export_plan(
+            ctx,
+            args.plan,
+            target_id=args.target,
+            out_dir=Path(args.out),
+            copy_to=Path(args.copy_to) if args.copy_to else None,
+        )
+    except (KeyError, NotImplementedError, ValueError, OSError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
 
@@ -487,6 +493,8 @@ def cmd_plans_export(args: argparse.Namespace) -> int:
     print(f"Exported {export.rows} channels for plan {export.plan_id}")
     print(f"  wrote {export.csv_path}")
     print(f"  wrote {export.report_path}")
+    for path in export.copies:
+        print(f"  copied to {path}")
     if export.warnings:
         print(f"Warnings ({len(export.warnings)}):")
         for w in export.warnings:
@@ -1599,6 +1607,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--target", default="chirp-csv", help="Export target (see 'radios list')"
     )
     p_plan_export.add_argument("--out", default="wasds150-output/radios", help="Output directory")
+    p_plan_export.add_argument(
+        "--copy-to",
+        help="Also copy the programming file here, e.g. the folder the vendor "
+        "programmer loads from",
+    )
     p_plan_export.add_argument("--json", action="store_true")
     p_plan_export.set_defaults(func=cmd_plans_export)
 

@@ -91,7 +91,7 @@ every memory was identical except one column (see
 | `0x0D` | u8 | Offset direction: 0 simplex, 1 minus, 2 plus | agrees on 967/967 |
 | `0x0E` | u8 | **Operating mode** | probe file, 18 modes |
 | `0x0F` | utf-16 | Name, 12 characters | round-trips |
-| `0x2D` | u8 | Tone mode: 0 off, 1 enc+dec, 2 enc | vendor records |
+| `0x2D` | u8 | **Tone mode**: 0 None, 1 Tone, 2 Tone Sql, 3 DCS, 8 Rev Tone | probe file |
 | `0x2E`/`0x2F` | u8 | Tx/Rx CTCSS index | 50-tone table |
 | `0x34` | u8 | Skip on scan | probe file |
 | `0x47`, `0x50` | u8 | Tx DGID (stored twice) | probe file |
@@ -130,3 +130,28 @@ receiver controls that the programmer greys out for FM, and Width in
 particular is displayed per mode - 300 Hz for SSB, 50 Hz for CW, 16 kHz for
 FM. They are not per-memory settings on a VHF/UHF channel, so there is
 nothing for this project to write.
+
+## Decoding a field yourself
+
+The offsets above were not read out of a manual. Each came from a file where
+every memory was identical except for one column:
+
+```bash
+# Write probe files with the memories already in place
+python scripts/radios/make_ftx1_probe.py --out "path/to/a/scratch/folder"
+
+# ... open each in the RT Systems programmer, set the single column each row's
+# Comment asks for, and save ...
+
+# Read back exactly which byte moved for which value
+python scripts/radios/decode_ftx1_probe.py "path/to/ftx1-modes.FTX1"
+```
+
+Because only one variable changes per row, the offset and its encoding fall
+straight out of the diff. That is how Operating Mode and Tone Mode were
+established, and how the claim "Width is not stored per memory" was tested
+rather than assumed.
+
+The generator refuses to overwrite an existing probe file: editing one takes
+real effort in the programmer, and regenerating over the top destroys that
+work while leaving a file that looks perfectly valid.

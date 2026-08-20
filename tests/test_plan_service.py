@@ -110,3 +110,29 @@ def test_default_out_dir_matches_cli_default():
     # The CLI advertises this path in --help; the UI builds the flash command
     # from it. If they diverge the Flash button points at a stale file.
     assert DEFAULT_OUT_DIR == "wasds150-output/radios"
+
+
+def test_export_can_copy_to_a_second_directory(real_ctx, tmp_path):
+    """Exports land in the repo, but radios are programmed from elsewhere.
+
+    A stale working copy opens cleanly in the vendor programmer with the right
+    channel count and frequencies, so the drift is invisible until something
+    behaves oddly on the air. Copying in the same step removes the gap.
+    """
+    out = tmp_path / "repo"
+    working = tmp_path / "programming-folder"
+    export = export_plan(real_ctx, "h9-ozette", out_dir=out, copy_to=working)
+
+    assert export.copies, "expected the programming file to be copied"
+    copied = working / export.csv_path.name
+    assert copied.is_file()
+    assert copied.read_bytes() == export.csv_path.read_bytes()
+    assert (working / export.report_path.name).is_file()
+
+
+def test_export_copy_to_same_directory_is_a_no_op(real_ctx, tmp_path):
+    """Copying a file onto itself must not truncate it."""
+    out = tmp_path / "radios"
+    export = export_plan(real_ctx, "h9-ozette", out_dir=out, copy_to=out)
+    assert export.copies == []
+    assert export.csv_path.stat().st_size > 0
