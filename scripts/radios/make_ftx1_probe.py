@@ -92,6 +92,19 @@ FIELD_ROWS = [
     ("IFSHIFT-ALT", "change IF Shift Frequency to any other value"),
 ]
 
+#: Tone Mode is the field that decides whether a repeater keys up, and whether
+#: the receiver stays muted. The record stores 0, 1, 2 and 3; only 0 is known
+#: for certain to mean "none". These rows pin the rest down.
+TONE_ROWS = [
+    ("TONE-NONE", "leave Tone Mode as None"),
+    ("TONE-TONE", "set Tone Mode to Tone (encode only)"),
+    ("TONE-TSQL", "set Tone Mode to Tone Sql / T Sql (encode and decode)"),
+    ("TONE-DCS", "set Tone Mode to DCS"),
+    ("TONE-REV", "set Tone Mode to Reverse Tone, if the list offers one"),
+    ("TONE-OTHER1", "set Tone Mode to any remaining option in the list"),
+    ("TONE-OTHER2", "set Tone Mode to another remaining option, if any"),
+]
+
 
 def build(rows, comments, template: pathlib.Path) -> Ftx1File:
     """A file whose memories differ only in name."""
@@ -123,6 +136,11 @@ def main(argv=None) -> int:
         help="Directory to write the probe files into",
     )
     parser.add_argument("--template", help="Override the .FTX1 template")
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Overwrite probe files that already exist",
+    )
     args = parser.parse_args(argv)
 
     template = pathlib.Path(args.template) if args.template else template_path()
@@ -131,6 +149,20 @@ def main(argv=None) -> int:
 
     out = pathlib.Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
+
+    # A probe file is only useful once somebody has spent time editing it in
+    # the programmer. Regenerating over the top destroys that work, and the
+    # file looks superficially fine afterwards, so refuse by default.
+    planned = ["ftx1-modes.FTX1", "ftx1-fields.FTX1", "ftx1-tones.FTX1"]
+    existing = [name for name in planned if (out / name).is_file()]
+    if existing and not args.force:
+        raise SystemExit(
+            "refusing to overwrite existing probe files:\n"
+            + "\n".join(f"  {out / name}" for name in existing)
+            + "\n\nThose may already hold edits made in the programmer. Move "
+            "them aside,\nchoose a different --out, or pass --force if you "
+            "are sure."
+        )
 
     modes = build(
         MODE_ROWS,
@@ -148,8 +180,17 @@ def main(argv=None) -> int:
     fields_path = out / "ftx1-fields.FTX1"
     fields.save(fields_path)
 
+    tones = build(
+        [name for name, _ in TONE_ROWS],
+        [note for _, note in TONE_ROWS],
+        template,
+    )
+    tones_path = out / "ftx1-tones.FTX1"
+    tones.save(tones_path)
+
     print(f"wrote {modes_path}  ({len(MODE_ROWS)} memories)")
     print(f"wrote {fields_path} ({len(FIELD_ROWS)} memories)")
+    print(f"wrote {tones_path}  ({len(TONE_ROWS)} memories)")
     print()
     print("Open each in the RT Systems programmer. Every memory is already on")
     print(f"{PROBE_HZ / 1e6:.3f} MHz and its Comment column says what to change.")
