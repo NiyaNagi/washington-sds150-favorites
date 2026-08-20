@@ -183,8 +183,24 @@ CTCSS_TONES: Tuple[float, ...] = (
 )
 
 TONE_OFF = 0
-TONE_CTCSS_ENC_DEC = 1
-TONE_CTCSS_ENC = 2
+#: Transmit the CTCSS tone; receive stays open. This is what a repeater
+#: channel wants: the tone opens the repeater, and anything the repeater sends
+#: back is heard whether or not it carries a tone.
+TONE_CTCSS_ENC = 1
+#: Transmit the tone AND require a matching tone to unmute. Correct only when
+#: the far end is known to send a tone; otherwise the channel appears dead.
+TONE_CTCSS_ENC_DEC = 2
+TONE_DCS = 3
+TONE_REVERSE = 8
+
+#: Programmer labels, for reporting.
+TONE_MODE_LABELS = {
+    TONE_OFF: "None",
+    TONE_CTCSS_ENC: "Tone",
+    TONE_CTCSS_ENC_DEC: "Tone Sql",
+    TONE_DCS: "DCS",
+    TONE_REVERSE: "Rev Tone",
+}
 
 #: Longest name the programmer showed in the sample file.  The FTX-1 displays
 #: twelve characters; the field itself has room for more.
@@ -310,6 +326,10 @@ class Ftx1Record:
             index = _tone_index(tone_hz)
             if index is None:
                 raise ValueError(f"{tone_hz} is not a standard CTCSS tone")
+            # Encode only. A repeater channel needs to *send* the access tone;
+            # requiring one to unmute as well (Tone Sql) would silence the
+            # channel whenever the repeater transmits without a tone, which
+            # many do. Tone Sql is a deliberate operator choice, not a default.
             buffer[OFF_TONE_MODE] = TONE_CTCSS_ENC
             buffer[OFF_TX_TONE] = index
             buffer[OFF_RX_TONE] = index

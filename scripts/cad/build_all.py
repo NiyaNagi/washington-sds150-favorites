@@ -29,6 +29,21 @@ Peak Design bracket, which shares the keyhole via models/sds150_stud.scad:
  14. printability  - unsupported regions, classified as bridge, chamfer
                      or genuine island
 
+EFHW antenna enclosure, which shares nothing with the two mounts except
+the method - it is a screw-lid cylinder built on models/thread_lib.scad:
+ 15. thread sizing - extrusions per crest, overhang angle, helix angle
+ 16. thread fit    - male and female screwed together as SEPARATE solids,
+                     including a deliberately miscoupled control, since a
+                     pair generated from one profile hides its own errors
+ 17. lettering     - stroke widths, and whether the counters in A and D
+                     survive being fattened
+ 18. cable slots   - a coax laid in from above, lowered down the slot,
+                     and the lid screwed down on top of it
+ 19. export        - body, lid and both coupons, in STL and 3MF
+ 20. solid audit   - the labyrinth, the weep holes, the carabiner ears
+                     and the floor's fall, probed on the exported mesh
+ 21. inspect       - watertight, single body, no thin walls
+
 Usage:
     .venv-cad/Scripts/python.exe scripts/cad/build_all.py
 """
@@ -53,6 +68,16 @@ VARIANTS = [
 
 # Tripod socket styles the Peak Design bracket is exported in.
 PD_STYLES = ["self_tap", "insert", "nut"]
+
+# The enclosure's four printable parts.  The coupons are first because
+# that is the order they should be printed in - they are the thread and
+# the knurl with the middle taken out, twenty minutes against five hours.
+ENCLOSURE_FILES = [
+    "efhw_coupon_body.stl",
+    "efhw_coupon_lid.stl",
+    "efhw_enclosure_body.stl",
+    "efhw_enclosure_lid.stl",
+]
 
 
 def run(label: str, args: list[str], required: bool = True) -> bool:
@@ -222,6 +247,43 @@ def main() -> None:
         for line in result.stdout.splitlines():
             if any(k in line for k in ("ISLAND", "PASS", "FAIL", "  - ")):
                 print(f"         {line.strip()}")
+        all_clean &= result.returncode == 0
+
+    # ------------------------------------------------------------------
+    #  EFHW antenna enclosure
+    # ------------------------------------------------------------------
+    # Nothing in common with the mounts but the method.  The thread comes
+    # from models/thread_lib.scad, which is generic, so these steps prove
+    # the library as much as they prove the enclosure.
+    #
+    # Sizing before fit before export, for the same reason as above: a
+    # thread that is wrong analytically cannot be made right by a
+    # clearance, and there is no point rendering for five minutes to find
+    # that out.
+
+    run("15. thread sizing", [str(HERE / "design_thread.py")])
+    run("16. thread fit", [str(HERE / "check_thread_fit.py")])
+    run("17. lid lettering", [str(HERE / "check_text.py")])
+    run("18. cable slots", [str(HERE / "check_cable_slot.py")])
+    run("19. enclosure export", [str(HERE / "export_enclosure.py")])
+    run("20. enclosure solid audit", [str(HERE / "check_enclosure.py")])
+
+    print(f"\n{'=' * 68}\n21. inspect enclosure exports\n{'=' * 68}",
+          flush=True)
+    for name in ENCLOSURE_FILES:
+        path = ROOT / "models" / name
+        result = subprocess.run(
+            [str(PYTHON), "-W", "ignore", str(HERE / "inspect_stl.py"), str(path)],
+            capture_output=True, text=True, cwd=ROOT,
+        )
+        summary = [
+            line.strip() for line in result.stdout.splitlines()
+            if any(k in line for k in ("min =", "bodies=", "PROBLEM", "no problems"))
+        ]
+        flag = "OK " if result.returncode == 0 else "BAD"
+        print(f"  [{flag}] {name}")
+        for line in summary:
+            print(f"         {line}")
         all_clean &= result.returncode == 0
 
     total = time.monotonic() - started

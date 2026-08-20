@@ -39,8 +39,12 @@ CTCSS_TONES = [
     171.3, 173.8, 177.3, 179.9, 183.5, 186.2, 189.9, 192.8, 196.6, 199.5,
     203.5, 206.5, 210.7, 218.1, 225.7, 229.1, 233.6, 241.8, 250.3, 254.1,
 ]
-OFF_TONE_MODE = 0x2C
-OFF_TX_TONE = 0x2D
+#: Tone fields, confirmed by probing the programmer: a file with one memory
+#: per Tone Mode setting moved exactly one byte, at 0x2D. These agree with
+#: :mod:`wasds150.export.ftx1_file`, which is what actually parses the file;
+#: they are repeated here only because ``tone_of`` below indexes raw bytes.
+OFF_TONE_MODE = 0x2D
+OFF_TX_TONE = 0x2E
 
 _CALLSIGN = re.compile(r"^[A-Z]{1,2}[0-9][A-Z]{1,3}$")
 

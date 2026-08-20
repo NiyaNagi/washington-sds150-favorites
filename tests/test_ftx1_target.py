@@ -314,3 +314,49 @@ class TestOperatingMode:
         for record in records:
             stored = struct.unpack_from("<I", record.raw, OFF_OFFSET)[0]
             assert stored == abs(record.tx_hz - record.rx_hz)
+
+
+# ------------------------------------------------------------- tone mode --
+# Decoded by probe: 0 None, 1 Tone, 2 Tone Sql, 3 DCS, 8 Rev Tone.
+# This project had 1 and 2 the wrong way round and wrote Tone Sql on every
+# toned channel. That transmits the access tone correctly, so a repeater keys
+# up - but it also mutes the receiver unless a matching tone comes back, and
+# many repeaters do not send one. The channel then appears dead while looking
+# perfectly programmed in the memory list.
+class TestToneMode:
+    def test_tone_mode_constants(self):
+        from wasds150.export import ftx1_file as F
+
+        assert F.TONE_OFF == 0
+        assert F.TONE_CTCSS_ENC == 1, "Tone (encode only) is 1"
+        assert F.TONE_CTCSS_ENC_DEC == 2, "Tone Sql (encode + decode) is 2"
+        assert F.TONE_DCS == 3
+
+    def test_a_tone_encodes_without_squelching(self):
+        """Setting a tone must not mute the receiver."""
+        from wasds150.export.ftx1_file import (
+            OFF_TONE_MODE,
+            OFF_TX_TONE,
+            TONE_CTCSS_ENC,
+        )
+
+        template = _template_or_skip()
+        record = Ftx1File.load(template).records[0]
+        patched = record.patched(tone_hz=103.5)
+        assert patched.raw[OFF_TONE_MODE] == TONE_CTCSS_ENC
+        assert patched.raw[OFF_TX_TONE] == 13  # index of 103.5
+
+    def test_export_never_sets_tone_squelch(self, resolved):
+        """No channel in the shipped plan may be programmed tone-squelched."""
+        from wasds150.export.ftx1_file import OFF_TONE_MODE, TONE_CTCSS_ENC_DEC
+
+        _template_or_skip()
+        rendered, _result = render_ftx1(resolved)
+        squelched = [
+            r for r in rendered.records[:MEMORY_CAPACITY]
+            if not r.empty and r.raw[OFF_TONE_MODE] == TONE_CTCSS_ENC_DEC
+        ]
+        assert not squelched, (
+            f"{len(squelched)} channels would stay muted unless the far end "
+            "sends a matching tone"
+        )

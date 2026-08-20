@@ -25,9 +25,11 @@ CTCSS_TONES = [
     203.5, 206.5, 210.7, 218.1, 225.7, 229.1, 233.6, 241.8, 250.3, 254.1,
 ]
 
-OFF_TONE_MODE = 0x2C
-OFF_TX_TONE = 0x2D
-OFF_RX_TONE = 0x2E
+#: Confirmed by probing the programmer, one memory per Tone Mode setting.
+#: Kept in step with :mod:`wasds150.export.ftx1_file`.
+OFF_TONE_MODE = 0x2D
+OFF_TX_TONE = 0x2E
+OFF_RX_TONE = 0x2F
 
 
 def wwara_tones(home: pathlib.Path):
