@@ -15,8 +15,13 @@ crests come to a knife edge measuring 0.004mm.  The number that mattered
 was the crest width, and nobody computed it until after the print failed.
 It is the first thing this script prints.
 
-Values are read from models/thread_lib.scad's callers rather than restated
-where possible; the defaults here are the library's own.
+Values are read out of the model by asking OpenSCAD to echo them, rather
+than restated here.  Reading them by regex would be simpler and was how
+this started, but it can only see literal assignments - and the ones that
+matter most, the thread's actual radius and its engaged length, are
+derived.  A regex that cannot find them either stops the build or, worse,
+falls back to a default that is quietly wrong: this script spent a while
+sizing a thread at r 69.2 when the real one is at 58.9.
 
 Usage:
     .venv-cad/Scripts/python.exe scripts/cad/design_thread.py
@@ -25,12 +30,19 @@ Usage:
 from __future__ import annotations
 
 import math
-import re
+import subprocess
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 MODELS = ROOT / "models"
+TMP = ROOT / ".tmp-cad"
+
+OPENSCAD_CANDIDATES = [
+    Path(r"C:\Program Files\OpenSCAD\openscad.exe"),
+    Path("/usr/bin/openscad"),
+    Path("/usr/local/bin/openscad"),
+]
 
 # Bambu H2C with a 0.4mm nozzle.  Extrusion width is what actually lands
 # on the plate, and it is what a crest has to be measured against - not
@@ -48,23 +60,48 @@ PLA_SHEAR = 40.0            # MPa, conservative for layer-adjacent shear
 
 
 def read_params(path: Path, names: list[str]) -> dict[str, float]:
-    """Pull literal numeric assignments out of a .scad file.
+    """Ask the model for its own values, derived ones included.
 
     Reading the model rather than restating its numbers here is the whole
     point - a second copy of a dimension is a dimension that can drift.
-
-    Only literal assignments can be read this way.  Asking for a derived
-    value fails loudly, which is the correct outcome: it means the model
-    computes that value and this script should too.
+    Going through OpenSCAD rather than through a regex means the ones that
+    are computed are as readable as the ones that are typed, which for a
+    thread is most of them.
     """
-    text = path.read_text(encoding="utf-8")
+    openscad = next((p for p in OPENSCAD_CANDIDATES if p.exists()), None)
+    if openscad is None:
+        raise SystemExit(
+            "OpenSCAD not found - install it or edit OPENSCAD_CANDIDATES")
+
+    TMP.mkdir(exist_ok=True)
+    listing = ", ".join(f'"{n}", {n}' for n in names)
+    scratch = MODELS / ".designthread.scad"
+    scratch.write_text(
+        f"include <{path.name}>\n"
+        'variant_render_mode = "none";\n'
+        f'echo("DIMS", {listing});\n',
+        encoding="utf-8",
+    )
+    try:
+        result = subprocess.run(
+            [str(openscad), "-o", str(TMP / "_null.stl"), str(scratch)],
+            capture_output=True, text=True,
+        )
+    finally:
+        scratch.unlink(missing_ok=True)
+
     out: dict[str, float] = {}
-    for name in names:
-        match = re.search(rf"^{name}\s*=\s*(-?[0-9.]+)\s*;", text,
-                          re.MULTILINE)
-        if not match:
-            raise SystemExit(f"could not find '{name}' in {path.name}")
-        out[name] = float(match.group(1))
+    for line in (result.stderr or "").splitlines():
+        if not line.startswith('ECHO: "DIMS"'):
+            continue
+        fields = [f.strip().strip('"') for f in line.split(",")[1:]]
+        for name, value in zip(fields[0::2], fields[1::2]):
+            out[name] = float(value)
+
+    missing = [n for n in names if n not in out]
+    if missing:
+        sys.stderr.write((result.stderr or "")[-2000:])
+        raise SystemExit(f"could not read {missing} from {path.name}")
     return out
 
 
@@ -74,7 +111,7 @@ def main() -> int:
         p = read_params(scad, [
             "thread_pitch", "thread_starts", "thread_crest_flat",
             "thread_root_flat", "thread_flank_ang", "thread_clr",
-            "thread_len", "thread_engage",
+            "thread_engage", "thread_r0",
         ])
         pitch = p["thread_pitch"]
         starts = int(p["thread_starts"])
@@ -83,10 +120,7 @@ def main() -> int:
         flank_ang = p["thread_flank_ang"]
         clr = p["thread_clr"]
         engage = p["thread_engage"]
-        r0 = read_params(scad, ["thread_minor_r"])["thread_minor_r"] \
-            if re.search(r"^thread_minor_r\s*=\s*-?[0-9.]",
-                         scad.read_text(encoding="utf-8"), re.MULTILINE) \
-            else 69.2
+        r0 = p["thread_r0"]
         source = scad.name
     else:
         # The library's own defaults, so this can be run before the

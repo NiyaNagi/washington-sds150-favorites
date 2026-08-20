@@ -1,4 +1,4 @@
-# SDS150 mounts
+# SDS150 mounts and field hardware
 
 Two ways to hold a Uniden SDS150 by its belt-clip stud:
 
@@ -11,6 +11,12 @@ Two ways to hold a Uniden SDS150 by its belt-clip stud:
 
 Both capture the stud with the same keyhole, defined once in
 `sds150_stud.scad` so the two cannot drift apart.
+
+And one unrelated part that happens to share the method:
+
+- **EFHW antenna enclosure** — a 128 mm screw-lid cylinder for an end-fed
+  half-wave transformer, meant to hang in a tree and shed rain. See
+  [docs/efhw-enclosure.md](../docs/efhw-enclosure.md).
 
 For the method behind these models — how they are structured, every helper
 script, the verification approach, and a full table of measured dimensions
@@ -48,6 +54,20 @@ if you are building a new part rather than adjusting an existing one.
 | `sds150_pd_bracket_insert.stl` / `.3mf` | For a 1/4"-20 heat-set brass insert. Strongest. |
 | `sds150_pd_bracket_nut.stl` / `.3mf` | For a captive 1/4"-20 hex nut. |
 | `pd_fit_check.scad` | Test harness used by `scripts/cad/pd_fit_check.py`. Not printable. |
+
+### EFHW antenna enclosure
+
+| File | What it is |
+| --- | --- |
+| `efhw_enclosure.scad` | Parameters and geometry for the whole enclosure. |
+| `thread_lib.scad` | Generic printable-thread library. Not specific to this part — reuse it. |
+| `efhw_coupon_body.stl` / `.3mf` | **Print these two first.** The thread and knurl with the middle removed. |
+| `efhw_coupon_lid.stl` / `.3mf` | |
+| `efhw_enclosure_body.stl` / `.3mf` | The can |
+| `efhw_enclosure_lid.stl` / `.3mf` | The lid, already flipped so the lettering prints against the plate |
+
+Full write-up, including how it seals without a gasket and why the thread
+is so coarse, is in [docs/efhw-enclosure.md](../docs/efhw-enclosure.md).
 
 ## How the original is reused
 
@@ -267,6 +287,38 @@ face. It discards grazing hits, without which tapered and filleted regions
 report phantom near-zero readings. Calibration: the untouched original model
 reports a 4.0mm minimum wall, matching its design. All four exports currently
 report a **1.98mm minimum wall and zero probes under 1.2mm**.
+
+### Rebuilding the enclosure
+
+The enclosure has its own set, because none of the checks above apply to
+a screw lid:
+
+```powershell
+# thread sizing, then thread fit as two SEPARATE solids
+.venv-cad\Scripts\python.exe scripts\cad\design_thread.py
+.venv-cad\Scripts\python.exe scripts\cad\check_thread_fit.py
+
+# lettering: stroke widths, and whether the counters survive fattening
+.venv-cad\Scripts\python.exe scripts\cad\check_text.py
+
+# lay a cable in from above and screw the lid down on top of it
+.venv-cad\Scripts\python.exe scripts\cad\check_cable_slot.py
+
+# probe the finished solid: labyrinth, weeps, ears, floor crown
+.venv-cad\Scripts\python.exe scripts\cad\check_enclosure.py
+
+# render body, lid and both coupons to STL and 3MF
+.venv-cad\Scripts\python.exe scripts\cad\export_enclosure.py
+```
+
+Everything, in order, stopping at the first failure:
+
+```powershell
+.venv-cad\Scripts\python.exe scripts\cad\build_all.py
+```
+
+Enclosure renders are slow — about 85s for the body and 60s for the lid —
+because the threads are swept polyhedra at 180 segments per turn.
 
 ## Provenance
 

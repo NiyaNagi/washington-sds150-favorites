@@ -45,6 +45,7 @@ catalog is the source of truth. See
 - [Printable mounts and brackets](models/README.md) - parametric OpenSCAD visor mounts, Peak Design Capture bracket, and EFHW antenna enclosure, with print-ready 3MF/STL and the latch/fit reasoning behind each variant.
 - [Parametric modelling method](docs/modelling-method.md) - measurement-first workflow, tolerance and clearance conventions, and the automated geometry checks each model must pass.
 - [Peak Design capture bracket](docs/pd-capture-bracket.md) - the SDS150 bracket's dimensions, fastener options, and fit verification.
+- [EFHW antenna enclosure](docs/efhw-enclosure.md) - a 128mm screw-lid cylinder for an end-fed half-wave transformer: how it sheds rain without a gasket, the open-topped cable exits, and why the thread is deliberately coarse.
 
 ## Radios and channel plans
 
@@ -324,7 +325,12 @@ uses:
 python -m venv .venv-cad
 .venv-cad/bin/pip install -r scripts/cad/requirements.txt
 .venv-cad/bin/python scripts/cad/export_models.py    # regenerate every 3MF/STL
+.venv-cad/bin/python scripts/cad/build_all.py        # verify everything, then export
 ```
+
+`build_all.py` runs all 21 geometry checks in order and stops at the first
+hard failure, so a broken model cannot overwrite good STLs. It goes quiet
+for minutes at a time while CGAL works.
 
 Project invariants that must not be broken — zero runtime dependencies, the
 MIT/GPL boundary, never committing licensed data, reporting dropped channels

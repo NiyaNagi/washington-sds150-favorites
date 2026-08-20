@@ -79,6 +79,54 @@ the project's own requirement, and merging them breaks one or the other.
 need `-D "var=\`"value\`""`. Long renders go quiet for minutes — that is
 normal, not a hang.
 
+> PSReadLine crashes on very long heredocs
+> (`ArgumentOutOfRangeException ... Parameter name: top`). Write scratch
+> `.scad` files with `[System.IO.File]::WriteAllText`, **never**
+> `Set-Content -Encoding utf8` — the BOM it adds breaks OpenSCAD's parser.
+
+---
+
+## 2a. `models/thread_lib.scad` — printable screw threads
+
+Generic and reusable; nothing in it is specific to the enclosure. It
+sweeps a trapezoidal profile along a helix as an explicit polyhedron,
+because `rotate_extrude` cannot make a helix and stacked slices leave
+stair-stepped flanks.
+
+```
+male_thread(r0, pitch, length, starts, crest_flat, root_flat,
+            flank_ang, lead_in, seg, overlap)
+female_thread_void(r0, pitch, length, starts, clr, ...)
+```
+
+The female is derived from the male profile by a mitred outward offset,
+so the two cannot drift apart.
+
+**Every one of these was a real failure, and most were invisible on
+screen.** They are recorded because they are the expensive kind — the
+model renders, the preview looks right, and the STL is broken.
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| Multi-start threads all on one helix | z derived from step index, then translated | `z = lead * a / 360` from the full angle |
+| `Simple: no`, 8 volumes, 72 broken faces | ribbons abutting at exactly one pitch → coincident face | `z_overlap = 0.4` |
+| 2 starts fail where 1 succeeds | root at `dr = 0` lies tangent to the core → zero-thickness pinch along a helix | `root_sink = 0.4` |
+| 72 mm³ jam that no clearance fixed | female void chamfered like the male — **shrinking a void adds material** | square trim on the void |
+| Slivers along the trim | `rotate_extrude` trim left at default `$fa` | `$fn = seg` on the trim |
+| `PolySet has nonplanar faces`, CGAL assertion | quads on a helix are non-planar | **two triangles per quad**, via an explicit third `for` loop |
+| `The given mesh is not closed!` | triangle fan from vertex 0 — the profile is not star-shaped | leave caps as n-gon polygons |
+
+> The nonplanar-faces fix has a trap of its own: `let` + `each` inside
+> nested list comprehensions does **not** bind, and silently yields an
+> unclosed mesh. Use a real nested `for`.
+
+**Structural rule that came out of this:** union a helix with a *simple*
+solid, then union that with the complex one. Unioning a thread directly
+with a full `rotate_extrude` body profile fails outright —
+`CGAL error in applyUnion3D: assertion violation`, no output at all. The
+enclosure's neck is built as its own plain tube, threaded, and only then
+joined to the can.
+
 ---
 
 ## 3. Measured dimensions
@@ -222,6 +270,36 @@ measured, removed rather than left as a trap.
 | PLA modulus | 2800 MPa | Along the layer plane |
 | Comfortable thumb press | ≤15 N | |
 
+### EFHW enclosure — `models/efhw_enclosure.scad`
+
+The radial stack is derived **outside-in**, which is the opposite of the
+mounts and is the honest direction here: the outside diameter is fixed at
+128 mm, and whatever is left after the skirt, the thread and the neck wall
+have taken their share *is* the mouth. Deriving it the other way would let
+the outside grow silently whenever anything inboard changed.
+
+| | Value |
+|---|---|
+| Interior | Ø120 × 70 mm |
+| Outside diameter | 128 mm, constant |
+| Mouth | Ø113.04 (on a 107 mm transformer) |
+| Assembled height | 96.18 mm |
+| Thread | 4 mm pitch × 2 starts, 3 crests, 1.5 turns |
+| Seal | none — 3 mm labyrinth rib at 0.30 mm, 10:1 |
+
+Three architectures were built before this one. **v1** put an external
+thread on the full diameter with a base flange, which buried the floor
+inside the flange — 74 mm of clear height instead of 75, and all four
+weep holes blind. **v2** used an internal thread and a plug lid, which
+fixed drainage but stacked the lid's height on top of a full-height wall
+and left the joint facing upward. **v3** wraps the lid over the body like
+a jam jar: 9 mm shorter, and the joint faces down.
+
+> The 45° cone between bore and mouth was not a styling choice. Without
+> it the neck's outer face at r 58.5 hung over a bore at r 60.0 touching
+> nothing, and the body exported as **two separate solids**. A flat ledge
+> would have been a 3.5 mm unsupported overhang.
+
 ---
 
 ## 4. The helper scripts
@@ -239,6 +317,22 @@ so the calculation cannot drift from the model.
 > derived values. When `plate_x_hi` became derived, `design_finger.py`
 > failed loudly — which is the correct behaviour, and better than silently
 > reading a stale number. Prefer `echo` (below) where you can.
+
+**`design_thread.py`** — sizes the enclosure's screw thread before any of
+it is drawn: extrusions per crest, overhang angle at the flanks, helix
+angle. A thread that is wrong analytically cannot be rescued by a
+clearance, and finding that out costs five minutes of rendering.
+
+> Its most useful output was the one that changed the design: the pitch
+> is coarse (4 mm, 2 starts) not for strength — 3 crests strip at 45 kN
+> against 0.004 kN applied — but for **warp tolerance**. 0.5 mm of warp
+> is 29% of a 1.73 mm deep thread and 57% of a 0.87 mm one.
+>
+> It originally read the model by regex and so could not see `thread_r0`,
+> which is derived. It fell back to a built-in 69.2 mm and sized a thread
+> that does not exist — the real one is at 58.9 mm. It now asks OpenSCAD
+> to `echo` the values instead. **A fallback default is worse than a hard
+> failure**, because it looks like a pass.
 
 ### Fit — does it assemble?
 
@@ -270,6 +364,26 @@ shared volume.
 > flat at the flexure's own footprint — that is the joint, not a
 > collision. Last run: ~18 mm³ flat across the whole stroke.
 
+**`check_thread_fit.py`** — the same idea applied to a screw. Builds the
+male and female as **separate solids** from `thread_lib.scad` and
+physically assembles them: free at rest, screwed down the helix, pulled
+straight up without turning, and a deliberately miscoupled control.
+
+> `lifted` must be **large**. A thread with far too much clearance passes
+> "free" and "screwed" perfectly and then pulls apart in your hand. The
+> miscoupled case tests the *harness* — if it cannot see a lead error
+> injected on purpose, it would not see a real one either.
+
+**`check_cable_slot.py`** — lays a coax into the enclosure's cable slot,
+lowers it down in steps, and screws the lid down on top of it.
+
+> Caught a slot that was open at the top and still unusable: it stopped
+> at the shoulder with 13 mm of neck standing directly above it, so there
+> was nothing to lower the cable *through*. 62.5 mm³ of collision on the
+> way down. The seat width is found by **bisection** rather than compared
+> as a volume, because a 0.2 mm squeeze on a 5 mm cable is about 1 mm³ —
+> asking "do they overlap enough?" answers nothing.
+
 ### Interference — does anything overlap anything else?
 
 **`audit_pd_bracket.py`** — probes the **exported STL**, not the model's
@@ -286,6 +400,23 @@ as a dip instead of being averaged away. It stops at the **first** gap:
 totalling material along the ray would count the far side and report a
 healthy wall straight across a hole.
 
+**`check_enclosure.py`** — probes the exported enclosure solid for the
+features nothing else looks at: the labyrinth rib's real depth, whether
+all four weep holes and all four carabiner ears break clean through, and
+whether the floor actually falls outward to the gutter.
+
+> Two lessons from its own first run, both in the *probe* rather than the
+> part. A radial band drawn **inside** a feature finds nothing, because a
+> revolved flat annulus has vertices only at its edges — the rib measured
+> −2.00 mm. And a control probe must be spun onto the feature it is meant
+> to jam in; left at 0° it hung in the air between two ears and looked
+> exactly like a broken probe.
+
+**`check_text.py`** — checks the lid's lettering survives being fattened:
+stroke widths, and whether the counters (the enclosed holes in A and D)
+close up. Last run: 12 outlines, 3 counters, narrowest stroke 3.72 mm,
+tightest counter 1.70 mm.
+
 ### Mesh quality and printability
 
 **`inspect_stl.py`** — watertight, body count, degenerate faces, and a
@@ -297,21 +428,29 @@ chamfers.
 
 ### Export and preview
 
-**`export_models.py`**, **`export_pd_bracket.py`** — render every variant
-to STL/3MF and verify each is a single watertight solid.
+**`export_models.py`**, **`export_pd_bracket.py`**, **`export_enclosure.py`**
+— render every variant to STL/3MF and verify each is a single watertight
+solid.
+
+> `export_enclosure.py` also renders the lid at two different interior
+> heights and diffs them, proving the lid is genuinely height-independent
+> (0.000 mm³, 0.0000 mm). That is a claim worth checking rather than
+> assuming, since it is what lets the body be resized alone.
 
 **`render_stl.py`** — preview PNGs.
 
 ### The pipeline
 
-**`build_all.py`** — 14 steps, ~740s. Stops at the first hard failure.
+**`build_all.py`** — 21 steps. Stops at the first hard failure.
 
 ```powershell
 .venv-cad\Scripts\python.exe scripts\cad\build_all.py
 ```
 
 **Run it to completion and report the verdict.** It goes silent for
-minutes at a time; that is CGAL working, not a hang.
+minutes at a time; that is CGAL working, not a hang. The enclosure steps
+at the end are the slowest — about 85s for the body and 60s for the lid,
+because the threads are swept polyhedra at 180 segments per turn.
 
 ---
 

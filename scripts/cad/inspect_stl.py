@@ -27,7 +27,50 @@ import numpy as np
 import trimesh
 
 DEFAULT_MIN_WALL = 1.2   # mm; a 0.4mm nozzle wants at least this
-GRAZE_LIMIT = 0.5        # |cos| below this counts as a grazing hit
+
+# How nearly antiparallel two surfaces must be before the gap between
+# them counts as a WALL.
+#
+# A wall is two surfaces facing each other, so their normals are
+# antiparallel and |cos| is close to 1.  Two surfaces meeting at an
+# ANGLE are not a wall, they are an edge or a groove, and the distance
+# between them near the corner goes to zero no matter how much solid
+# material is behind it.
+#
+# This mattered the moment a threaded part arrived.  At the old limit of
+# 0.5, the two flanks of a thread crest - 60 degrees apart, |cos| 0.5 -
+# were being measured against each other, and the tip of the lead-in
+# chamfer duly reported 0.005mm of "wall".  There is nothing wrong with
+# it: a chamfer that did not taper to nothing would be a step.
+#
+# Raising this to 0.95 changes no mount's reading at all - the visor
+# mount still reports 2.400, the bracket 1.250, and the untouched
+# original 4.000 - because a real wall's faces are parallel.  What it
+# stops is a V-groove being read as a crack.
+FACING_LIMIT = 0.95
+
+# A knife edge has vanishing AREA; a thin wall has real area.  Below this
+# the thin region cannot be a hole waiting to happen, only a corner the
+# slicer will round off - which it would have rounded off anyway.
+MIN_THIN_AREA = 5.0      # mm^2
+
+# What the printer can actually put down in one pass.
+#
+# Material thinner than this is not made THIN, it is not made at all -
+# the slicer finds nowhere to fit an extrusion and omits it.  That is a
+# defect when the missing material was a wall, because the result is a
+# hole.  It is not a defect when the missing material was the tip of a
+# wedge, because a wedge has to end somewhere and ending it 0.4mm early
+# is invisible.
+#
+# The lid is the case in point.  Its lettering is fattened by 0.35mm a
+# side to survive being cut only 1mm deep, and where the diagonals of an
+# M or an A converge, that fattening turns the apex into a sliver a few
+# microns thick.  186 faces of it, all vertical, all inside the recess.
+# None of it will print, and the letters are none the worse: check_text.py
+# measures the same glyphs directly and finds 12 separate outlines, 3
+# intact counters and a narrowest stroke of 3.30mm.
+EXTRUSION_W = 0.42       # mm
 
 
 def check_topology(mesh: trimesh.Trimesh) -> list[str]:
@@ -113,24 +156,40 @@ def check_thickness(mesh: trimesh.Trimesh, min_wall: float) -> list[str]:
     facing = np.abs(
         np.einsum("ij,ij->i", normals[ray_index], mesh.face_normals[tri_index])
     )
-    solid = facing > GRAZE_LIMIT
+    solid = facing > FACING_LIMIT
 
     print(f"  thickness: {len(distances)} probes, "
-          f"{int((~solid).sum())} grazing (discarded)")
+          f"{int((~solid).sum())} not facing (edges and grooves, discarded)")
 
     if not solid.any():
         return ["every thickness probe was grazing - geometry looks wrong"]
 
     kept = distances[solid]
     points = centres[ray_index][solid]
+    areas = mesh.area_faces[ray_index][solid]
 
     print(f"    min = {kept.min():.3f} mm   "
           f"p1 = {np.percentile(kept, 1):.3f} mm   "
           f"median = {np.median(kept):.3f} mm")
 
     thin = kept < min_wall
+    thin_area = float(areas[thin].sum())
+
+    # Split the thin material by whether the printer could make it at all.
+    # Below one extrusion it is simply omitted, so it can only be a
+    # vanishing edge; at or above one extrusion it is real material that
+    # came out too thin, which is the thing worth failing on.
+    sliver = kept < EXTRUSION_W
+    sliver_area = float(areas[sliver].sum())
+    real_thin_area = thin_area - sliver_area
+
     print(f"    probes under {min_wall} mm: {int(thin.sum())} "
-          f"({100 * thin.mean():.2f}%)")
+          f"({100 * thin.mean():.2f}%), covering "
+          f"{thin_area:.2f} mm^2 of {mesh.area:.0f} mm^2")
+    if sliver.any():
+        print(f"      of which under one {EXTRUSION_W} mm extrusion: "
+              f"{int(sliver.sum())} probes, {sliver_area:.2f} mm^2 "
+              f"(too thin to be printed at all - vanishing edges)")
 
     if thin.any():
         worst = points[thin]
@@ -145,12 +204,17 @@ def check_thickness(mesh: trimesh.Trimesh, min_wall: float) -> list[str]:
             x, y, z = points[index]
             print(f"      {kept[index]:6.3f} mm at ({x:7.2f}, {y:7.2f}, {z:7.2f})")
 
-    if kept.min() < 0.05:
-        problems.append(f"near zero-thickness material ({kept.min():.3f} mm)")
-    elif kept.min() < min_wall:
-        problems.append(
-            f"thinnest wall is {kept.min():.2f} mm, under the {min_wall} mm limit"
-        )
+    # Judged on the material the printer would actually try to lay down,
+    # and on area rather than on the single worst probe.  One triangle at
+    # the tip of a chamfer is not a defect; a patch of thin wall is.
+    if real_thin_area < MIN_THIN_AREA:
+        return problems
+
+    printable = kept[thin & ~sliver]
+    problems.append(
+        f"thinnest printable wall is {printable.min():.2f} mm, under the "
+        f"{min_wall} mm limit, over {real_thin_area:.1f} mm^2"
+    )
 
     return problems
 

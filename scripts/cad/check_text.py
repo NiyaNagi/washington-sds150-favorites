@@ -132,12 +132,12 @@ def echoed_values(openscad: Path) -> dict[str, float]:
         '" text_depth=", text_depth,'
         '" text_fatten=", text_fatten,'
         '" text_gap=", text_gap,'
-        '" lid_t=", lid_t,'
-        '" lid_or=", lid_or,'
+        '" lid_disc_t=", lid_disc_t,'
+        '" body_or=", body_or,'
         '" knurl_depth=", knurl_depth,'
         '" interior_r=", interior_r,'
         '" z_lid_inner=", z_lid_inner,'
-        '" z_lid_rim_top=", z_lid_rim_top));\n',
+        '" z_lid_top=", z_lid_top));\n',
         encoding="utf-8",
     )
     try:
@@ -340,7 +340,7 @@ def main() -> int:
     print("=== EFHW lid lettering ===")
     print(f"  \"{line1}\" over \"{line2}\" - {glyphs} glyphs at "
           f"{v['text_size']:.1f}mm cap height")
-    print(f"  cut {v['text_depth']:.2f}mm into a {v['lid_t']:.2f}mm lid, "
+    print(f"  cut {v['text_depth']:.2f}mm into a {v['lid_disc_t']:.2f}mm lid, "
           f"every stroke fattened by {v['text_fatten']:.2f}mm")
     print()
 
@@ -486,7 +486,7 @@ def main() -> int:
     # wrong height still gives an honest depth.
     z_top = float(lid.bounds[1][2])
     print(f"    top face at z       : {z_top:.3f} "
-          f"(nominal {v['z_lid_rim_top']:.3f})")
+          f"(nominal {v['z_lid_top']:.3f})")
 
     biggest = sorted(fat_polys, key=lambda p: p.area, reverse=True)[:4]
     depths, unders = [], []
@@ -524,13 +524,13 @@ def main() -> int:
     print("  FOOTPRINT")
     coords = np.vstack([np.asarray(p.exterior.coords) for p in fat_polys])
     reach = float(np.hypot(coords[:, 0], coords[:, 1]).max())
-    flat_r = v["lid_or"] - v["knurl_depth"]
+    flat_r = v["body_or"] - v["knurl_depth"]
     size = fat.bounds[1] - fat.bounds[0]
 
     print(f"    text block          : {size[0]:.1f} x {size[1]:.1f} mm")
     print(f"    furthest glyph at r : {reach:.2f} mm")
     print(f"    flat top ends at r  : {flat_r:.2f} mm "
-          f"(lid_or {v['lid_or']:.2f} less {v['knurl_depth']:.2f} of knurl)")
+          f"(body_or {v['body_or']:.2f} less {v['knurl_depth']:.2f} of knurl)")
     print(f"    margin              : {flat_r - reach:.2f} mm")
 
     if reach > flat_r - TEXT_MARGIN:
