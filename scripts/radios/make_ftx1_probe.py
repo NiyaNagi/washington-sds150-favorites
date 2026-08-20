@@ -105,19 +105,55 @@ TONE_ROWS = [
     ("TONE-OTHER2", "set Tone Mode to another remaining option, if any"),
 ]
 
+#: 20 m USB. The receiver controls below are greyed out on an FM memory, so
+#: probing them on 146.520 proved only that they were unavailable. On an HF
+#: SSB memory they are live, which is what decides whether they are stored per
+#: memory - and therefore whether this project can program them - or are
+#: global radio settings the operator sets once.
+HF_PROBE_HZ = 14_200_000
 
-def build(rows, comments, template: pathlib.Path) -> Ftx1File:
+HF_ROWS = [
+    ("HF-BASE", "leave every column at its default"),
+    ("HF-IPO-AMP1", "set IPO to AMP1"),
+    ("HF-IPO-AMP2", "set IPO to AMP2"),
+    ("HF-ATT-6", "set Attenuator to -6 dB"),
+    ("HF-ATT-12", "set Attenuator to -12 dB"),
+    ("HF-ATT-18", "set Attenuator to -18 dB"),
+    ("HF-AGC-FAST", "set AGC to Fast"),
+    ("HF-AGC-MID", "set AGC to Mid"),
+    ("HF-AGC-SLOW", "set AGC to Slow"),
+    ("HF-AGC-OFF", "set AGC to Off"),
+    ("HF-WIDTH-NAR", "narrow the Width one step from its default"),
+    ("HF-WIDTH-WID", "widen the Width one step from its default"),
+    ("HF-SSB-NAR", "tick SSB Narrow"),
+    ("HF-CONTOUR", "turn Contour/APF on"),
+    ("HF-CONT-FREQ", "turn Contour on and change Contour Frequency"),
+    ("HF-IFSHIFT", "change IF Shift Frequency away from +0 Hz"),
+    ("HF-NOTCH", "tick Notch Filter"),
+    ("HF-NOTCH-FRQ", "tick Notch Filter and change Notch Frequency"),
+    ("HF-DNF", "tick DNF"),
+    ("HF-DNR-1", "set DNR Algorithm to 1"),
+    ("HF-DNR-15", "set DNR Algorithm to 15"),
+    ("HF-NB", "turn Noise Blanker on"),
+    ("HF-ANT2", "set HF Antenna to Ant 2"),
+    ("HF-SUPERDX", "tick SuperDx"),
+]
+
+
+def build(rows, comments, template: pathlib.Path, probe_hz=None, mode=None) -> Ftx1File:
     """A file whose memories differ only in name."""
     ftx1 = Ftx1File.load(template)
     bases = _band_bases(ftx1)
-    base = _base_for(bases, PROBE_HZ / 1_000_000)
+    hz = PROBE_HZ if probe_hz is None else probe_hz
+    base = _base_for(bases, hz / 1_000_000)
 
     for slot, (name, note) in enumerate(zip(rows, comments)):
         ftx1.records[slot] = base.patched(
-            rx_hz=PROBE_HZ,
-            tx_hz=PROBE_HZ,
+            rx_hz=hz,
+            tx_hz=hz,
             name=name[:12],
             comment=note[:79],
+            mode=mode,
             in_use=True,
         )
     # Clear the rest so the file holds nothing but the probe rows.
@@ -153,7 +189,8 @@ def main(argv=None) -> int:
     # A probe file is only useful once somebody has spent time editing it in
     # the programmer. Regenerating over the top destroys that work, and the
     # file looks superficially fine afterwards, so refuse by default.
-    planned = ["ftx1-modes.FTX1", "ftx1-fields.FTX1", "ftx1-tones.FTX1"]
+    planned = ["ftx1-modes.FTX1", "ftx1-fields.FTX1", "ftx1-tones.FTX1",
+               "ftx1-hf.FTX1"]
     existing = [name for name in planned if (out / name).is_file()]
     if existing and not args.force:
         raise SystemExit(
@@ -188,9 +225,21 @@ def main(argv=None) -> int:
     tones_path = out / "ftx1-tones.FTX1"
     tones.save(tones_path)
 
+    hf = build(
+        [name for name, _ in HF_ROWS],
+        [note for _, note in HF_ROWS],
+        template,
+        probe_hz=HF_PROBE_HZ,
+        mode="USB",
+    )
+    hf_path = out / "ftx1-hf.FTX1"
+    hf.save(hf_path)
+
     print(f"wrote {modes_path}  ({len(MODE_ROWS)} memories)")
     print(f"wrote {fields_path} ({len(FIELD_ROWS)} memories)")
     print(f"wrote {tones_path}  ({len(TONE_ROWS)} memories)")
+    print(f"wrote {hf_path}     ({len(HF_ROWS)} memories on "
+          f"{HF_PROBE_HZ / 1e6:.3f} MHz USB)")
     print()
     print("Open each in the RT Systems programmer. Every memory is already on")
     print(f"{PROBE_HZ / 1e6:.3f} MHz and its Comment column says what to change.")
