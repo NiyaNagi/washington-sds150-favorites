@@ -1,0 +1,58 @@
+{
+  "report_generated_at": "2026-08-23T20:49:49.907359-07:00",
+  "antenna": {
+    "module": "GOWENIC No Tune End Fed Half Antenna, 10 W",
+    "physical_radiator_length_ft": 62.5,
+    "feed_end_loop_in": 8,
+    "far_end_loop_in": 14,
+    "counterpoise_in": 96,
+    "geometry": "25 ft to 3 ft sloper",
+    "common_mode_choke": false
+  },
+  "outdoor_baseline": {
+    "captured_at": "2026-08-18T00:27:25.447889-07:00",
+    "feed_path": "75 ft LS400 outdoors",
+    "correction": "Parent report previously recorded 12 ft; user clarified the final August 18 test used 75 ft LS400 outdoors.",
+    "range_hz": [
+      1800000,
+      148000000
+    ],
+    "points": 40001
+  },
+  "installed_office_feed": {
+    "captured_at": "2026-08-23T20:46:24.893558-07:00",
+    "repeat_captured_at": "2026-08-23T20:49:49.907359-07:00",
+    "feed_path": [
+      "75 ft LS400 outdoors",
+      "window flat-ribbon transition",
+      "25 ft LS400 into office"
+    ],
+    "environment": "office with substantial computer equipment",
+    "range_hz": [
+      500000,
+      54000000
+    ],
+    "points": 40001,
+    "nominal_step_hz": 1337.5,
+    "measurement_bandwidth_hz": 1000
+  },
+  "calibration": {
+    "type": "software one-port ideal OSL",
+    "reference_plane": "VNA-side CH0 adapter in office",
+    "corrected_at": "2026-08-23T20:32:58.778082-07:00",
+    "load_verification": {
+      "median_swr": 1.0000858186593053,
+      "p95_swr": 1.0003037887481392,
+      "maximum_swr": 1.000473539972914,
+      "median_resistance_ohm": 50.001752192414045,
+      "median_reactance_ohm": -0.002485303753368028
+    }
+  },
+  "invalid_run_handling": {
+    "issue": "Initial SHORT capture was electrically open-like.",
+    "action": "Rejected impossible near-1:1 connected and open-path traces, recaptured SHORT, recalculated OSL, repeated verification, repeated open-path diagnostic, and captured two final sweeps.",
+    "rejected_source_captures_preserved": false,
+    "note": "The rejected captures were overwritten during correction, so the package makes no exact numerical claim from those sources."
+  },
+  "interpretation": "Results are installed-system input impedance. Cable loss and electrical length can improve radio-end SWR without improving antenna radiation efficiency."
+}

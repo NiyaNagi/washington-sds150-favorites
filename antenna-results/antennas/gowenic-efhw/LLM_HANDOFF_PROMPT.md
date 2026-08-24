@@ -12,7 +12,7 @@ Build under test:
 - Sloper: feed end 3 ft, far end 25 ft.
 - 96 in counterpoise connected to coax shield / transformer ground, laid
   straight on the ground and angled away from the antenna direction.
-- 12 ft coax and no common-mode choke.
+- 75 ft LS400 outdoors and no common-mode choke.
 
 Measurement requirements:
 1. Preserve every run and record each physical configuration change.

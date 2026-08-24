@@ -29,7 +29,9 @@
     "counterpoise_length_in": 96,
     "counterpoise_connection": "coax shield / transformer ground",
     "counterpoise_layout": "straight on ground, angled away from antenna direction",
-    "feed_line_length_ft": 12,
+    "feed_line_length_ft": 75,
+    "feed_line_type": "LS400",
+    "feed_line_location": "outdoors",
     "common_mode_choke": false
   },
   "instrument": {

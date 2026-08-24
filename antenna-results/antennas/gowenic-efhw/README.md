@@ -21,6 +21,14 @@ publish a band list or transformer ratio.
   counterpoise routing, coax routing, and any future common-mode choke can move
   these results.
 
+## Later installed office-feed test
+
+The [August 23 installed-system comparison](installed-office-feed/README.md)
+measures the same antenna through the original 75 ft outdoor LS400, a window
+flat-ribbon transition, and another 25 ft LS400 into the office. It includes a
+fresh 0.5-54 MHz calibration, a far-end-open feed-path diagnostic, two
+repeatability sweeps, comparison visuals, and an offline interactive report.
+
 ## Final build
 
 | Item | Final value |
@@ -34,7 +42,7 @@ publish a band list or transformer ratio.
 | Counterpoise | 96 in (8 ft), straight on ground |
 | Counterpoise connection | Coax shield / transformer ground |
 | Counterpoise direction | Angled away from the antenna direction |
-| Feed line | 12 ft coax |
+| Feed line | 75 ft LS400 outdoors |
 | Common-mode choke | None |
 
 The final reproducible conductor length is **62.5 ft total physical wire**.

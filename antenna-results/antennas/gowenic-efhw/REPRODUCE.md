@@ -11,7 +11,8 @@
    far end 25 ft above ground.
 5. Connect a 96 in counterpoise to the coax shield / transformer ground.
 6. Lay the counterpoise straight on the ground, angled away from the radiator.
-7. Use the 12 ft coax route recorded for this test and do not install a choke.
+7. Use the 75 ft outdoor LS400 route recorded for the final August 18 test and
+   do not install a choke.
 
 ## Measure
 

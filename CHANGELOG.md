@@ -44,12 +44,17 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Added a factory-reset FTX-1 baseline in `radio-templates/`, so the blank
   export template can be regenerated from a known state rather than from
   whatever happened to be on a radio.
-
+- Added a 0.5-54 MHz, 40,001-point installed-system comparison for the GOWENIC
+  EFHW through 75 ft LS400, a window flat-ribbon transition, and another 25 ft
+  LS400 into the office, including corrected OSL calibration, load verification,
+  far-end-open diagnostics, repeatability sweeps, raw data, comparison charts,
+  and an offline interactive report.
 - Added a final GOWENIC-module 40m EFHW package with a fresh 1.8-148 MHz,
   40,001-point OSL calibration, full-span reconnect verification, final
   counterpoise-installed sweep, all incremental tuning runs, band scorecards,
   SWR/impedance/return-loss/Smith plots, build and tuning visuals, an offline
   interactive report, reproduction instructions, and an LLM handoff prompt.
+
 - Added the installed Taurus triband vehicle antenna with a separate BNC-plane
   calibration baseline, three-pass averaged service zooms, raw complex S11
   measurements, context-aware comparisons, an all-antenna coverage matrix, and
@@ -240,6 +245,12 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   mutual aid, WSP/WSDOT, DNR/NIFC, mountain/park/forest profiles, aviation,
   marine/ferries/ports, amateur/ARES/simplex, personal radio, hospitals,
   roadside support, and NOAA Weather.
+
+### Changed
+
+- Corrected the August 18 final GOWENIC EFHW feed-line description from 12 ft
+  coax to 75 ft LS400 outdoors; earlier tuning-history runs that actually used
+  12 ft remain unchanged.
 
 ### Fixed
 

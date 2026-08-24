@@ -946,6 +946,14 @@ publish a band list or transformer ratio.
   counterpoise routing, coax routing, and any future common-mode choke can move
   these results.
 
+## Later installed office-feed test
+
+The [August 23 installed-system comparison](installed-office-feed/README.md)
+measures the same antenna through the original 75 ft outdoor LS400, a window
+flat-ribbon transition, and another 25 ft LS400 into the office. It includes a
+fresh 0.5-54 MHz calibration, a far-end-open feed-path diagnostic, two
+repeatability sweeps, comparison visuals, and an offline interactive report.
+
 ## Final build
 
 | Item | Final value |
@@ -959,7 +967,7 @@ publish a band list or transformer ratio.
 | Counterpoise | 96 in (8 ft), straight on ground |
 | Counterpoise connection | Coax shield / transformer ground |
 | Counterpoise direction | Angled away from the antenna direction |
-| Feed line | 12 ft coax |
+| Feed line | 75 ft LS400 outdoors |
 | Common-mode choke | None |
 
 The final reproducible conductor length is **62.5 ft total physical wire**.
@@ -1088,7 +1096,8 @@ def write_reproduction_files(output: Path) -> None:
    far end 25 ft above ground.
 5. Connect a 96 in counterpoise to the coax shield / transformer ground.
 6. Lay the counterpoise straight on the ground, angled away from the radiator.
-7. Use the 12 ft coax route recorded for this test and do not install a choke.
+7. Use the 75 ft outdoor LS400 route recorded for the final August 18 test and
+   do not install a choke.
 
 ## Measure
 
@@ -1133,7 +1142,7 @@ Build under test:
 - Sloper: feed end 3 ft, far end 25 ft.
 - 96 in counterpoise connected to coax shield / transformer ground, laid
   straight on the ground and angled away from the antenna direction.
-- 12 ft coax and no common-mode choke.
+- 75 ft LS400 outdoors and no common-mode choke.
 
 Measurement requirements:
 1. Preserve every run and record each physical configuration change.
@@ -1371,7 +1380,7 @@ a {{ color: var(--cp-link); }}
     </div>
   </section>
   <div class="note"><p><strong>Hardware identity:</strong> this is the generic GOWENIC 10 W module sold under ASIN B0C3JVM9SR. It is QRPGuys-style, not a genuine QRPGuys-branded board.</p></div>
-  <div class="note"><p><strong>Installation note:</strong> the final build uses a 96 in counterpoise connected to transformer ground, straight on the ground and angled away from the radiator. There is no common-mode choke. Geometry, ground conditions, feed-line routing, and nearby objects can change these results.</p></div>
+  <div class="note"><p><strong>Installation note:</strong> the final build uses 75 ft of outdoor LS400 and a 96 in counterpoise connected to transformer ground, straight on the ground and angled away from the radiator. There is no common-mode choke. Geometry, ground conditions, feed-line routing, and nearby objects can change these results.</p></div>
   <div class="note"><p><strong>Interpretation:</strong> SWR measures impedance match. It does not establish antenna gain, efficiency, radiation pattern, or receive sensitivity.</p></div>
   <footer>Captured 2026-08-18 00:24-00:27 PDT | NanoVNA-H firmware 1.2.50 | 1.8-148 MHz | 50-ohm reference | report generated offline</footer>
 </div>
@@ -1668,7 +1677,9 @@ def main() -> None:
             "counterpoise_layout": (
                 "straight on ground, angled away from antenna direction"
             ),
-            "feed_line_length_ft": 12,
+            "feed_line_length_ft": 75,
+            "feed_line_type": "LS400",
+            "feed_line_location": "outdoors",
             "common_mode_choke": False,
         },
         "instrument": {

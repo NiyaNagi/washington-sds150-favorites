@@ -1,0 +1,118 @@
+{
+  "captured_at": "2026-08-23T20:46:24.893558-07:00",
+  "range_hz": [
+    500000,
+    54000000
+  ],
+  "calibration_file": "/Users/asteen/Documents/Microsoft Scout/nanovna_measurements/2026-08-23_1959_home_efhw_office_feed_calibration/calibration.npz",
+  "calibration": {
+    "created_at": "2026-08-23T20:32:58.778082-07:00",
+    "reference_plane": "antenna side of attached adapter",
+    "standards": "ideal open, short, and 50-ohm load",
+    "source_capture": {
+      "captured_at": "2026-08-23T20:02:34.843763-07:00",
+      "label": "open",
+      "port": "/dev/cu.usbmodem4001",
+      "start_hz": 500000,
+      "stop_hz": 54000000,
+      "segments": 400,
+      "points": 40001,
+      "nominal_frequency_step_hz": 1337.5,
+      "device": {
+        "version": "1.2.50",
+        "info": "Board: NanoVNA-H\n2019-2026 Copyright NanoVNA.com\nbased on  @DiSlord @edy555 ... source\nLicensed under GPL.\nVersion: 1.2.50 [p:101, IF:12k, ADC:192k, Lcd:320x240]\nBuild Time: May 16 2026 - 12:42:11\nArchitecture: ARMv6-M Core Variant: Cortex-M0\nPlatform: STM32F072xB Entry Level Medium Density devices",
+        "calibration": "load Es Er cal'ed",
+        "bandwidth": "bandwidth 3 (1000Hz)"
+      }
+    }
+  },
+  "device": {
+    "version": "1.2.50",
+    "info": "Board: NanoVNA-H\n2019-2026 Copyright NanoVNA.com\nbased on  @DiSlord @edy555 ... source\nLicensed under GPL.\nVersion: 1.2.50 [p:101, IF:12k, ADC:192k, Lcd:320x240]\nBuild Time: May 16 2026 - 12:42:11\nArchitecture: ARMv6-M Core Variant: Cortex-M0\nPlatform: STM32F072xB Entry Level Medium Density devices",
+    "calibration": "load Es Er cal'ed",
+    "bandwidth": "bandwidth 3 (1000Hz)"
+  },
+  "points": 40001,
+  "frequency_step_hz": 1337.5,
+  "minimum_swr": 1.1573960380175226,
+  "minimum_swr_frequency_hz": 3616375,
+  "bands": [
+    {
+      "band": "160m",
+      "start_hz": 1800000,
+      "stop_hz": 2000000,
+      "minimum_swr": 15.060714307231061,
+      "minimum_swr_frequency_hz": 1801388
+    },
+    {
+      "band": "80m",
+      "start_hz": 3500000,
+      "stop_hz": 4000000,
+      "minimum_swr": 1.1573960380175226,
+      "minimum_swr_frequency_hz": 3616375
+    },
+    {
+      "band": "60m",
+      "start_hz": 5330500,
+      "stop_hz": 5406400,
+      "minimum_swr": 7.805708569629158,
+      "minimum_swr_frequency_hz": 5404613
+    },
+    {
+      "band": "40m",
+      "start_hz": 7000000,
+      "stop_hz": 7300000,
+      "minimum_swr": 1.3962045955258213,
+      "minimum_swr_frequency_hz": 7210238
+    },
+    {
+      "band": "30m",
+      "start_hz": 10100000,
+      "stop_hz": 10150000,
+      "minimum_swr": 2.467084481995566,
+      "minimum_swr_frequency_hz": 10147388
+    },
+    {
+      "band": "20m",
+      "start_hz": 14000000,
+      "stop_hz": 14350000,
+      "minimum_swr": 1.2234110801155773,
+      "minimum_swr_frequency_hz": 14226763
+    },
+    {
+      "band": "17m",
+      "start_hz": 18068000,
+      "stop_hz": 18168000,
+      "minimum_swr": 1.8336817558026346,
+      "minimum_swr_frequency_hz": 18068063
+    },
+    {
+      "band": "15m",
+      "start_hz": 21000000,
+      "stop_hz": 21450000,
+      "minimum_swr": 1.4986247551838408,
+      "minimum_swr_frequency_hz": 21050688
+    },
+    {
+      "band": "12m",
+      "start_hz": 24890000,
+      "stop_hz": 24990000,
+      "minimum_swr": 1.6179976378369973,
+      "minimum_swr_frequency_hz": 24890650
+    },
+    {
+      "band": "10m",
+      "start_hz": 28000000,
+      "stop_hz": 29700000,
+      "minimum_swr": 1.6853042123603277,
+      "minimum_swr_frequency_hz": 28540688
+    },
+    {
+      "band": "6m",
+      "start_hz": 50000000,
+      "stop_hz": 54000000,
+      "minimum_swr": 5.47252011679527,
+      "minimum_swr_frequency_hz": 50895663
+    }
+  ]
+}

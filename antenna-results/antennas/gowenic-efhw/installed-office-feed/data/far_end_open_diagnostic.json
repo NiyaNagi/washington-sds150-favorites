@@ -1,0 +1,8 @@
+{
+  "median_open_magnitude": 0.8340610453416445,
+  "p05_open_magnitude": 0.7650051403533688,
+  "p95_open_magnitude": 0.9120492704144552,
+  "median_apparent_one_way_attenuation_db": 0.7880216197041735,
+  "apparent_one_way_attenuation_at_7_mhz_db": 0.5353567825763292,
+  "apparent_one_way_attenuation_at_54_mhz_db": 1.0004534462871408
+}
