@@ -89,6 +89,21 @@ class Channel:
     #: Tone required by the repeater to open its input, when it differs from
     #: the tone carried on the output.
     tx_tone: str = ""
+    #: Transmitter site, when the source publishes one per station rather
+    #: than only per department. A department's geo-fence is a single circle
+    #: covering everything inside it, which is the right shape for a scanner
+    #: deciding what to enable near a location; it is the wrong shape for
+    #: "which repeaters can I actually work from here", where each station's
+    #: own position is what matters. ``None`` means the source gave no
+    #: position, not that the channel has no location.
+    lat: Optional[float] = None
+    lon: Optional[float] = None
+    #: How far the position can be trusted: ``"exact"`` when the source
+    #: publishes a surveyed site, ``"unknown"`` when it may have been fuzzed
+    #: or rounded. WWARA lets owners obscure a site by up to ~50 miles, so a
+    #: radius filter built on those coordinates must allow for it rather than
+    #: treat a hard cutoff as authoritative.
+    location_precision: str = ""
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)

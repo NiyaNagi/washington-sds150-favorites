@@ -1,4 +1,4 @@
-from wasds150.appctx import build_context
+﻿from wasds150.appctx import build_context
 from wasds150.config import AppConfig
 
 
@@ -13,7 +13,7 @@ def test_build_context_default_uses_packaged_baseline(wasds_home):
     config = AppConfig.default()
     ctx = build_context(config)
     assert ctx.catalog_source == "packaged-baseline"
-    assert len(ctx.catalog.favorites) == 140
+    assert len(ctx.catalog.favorites) == 141
 
 
 def test_load_profile_creates_new_when_missing(wasds_home, sample_csv_path):
@@ -76,7 +76,7 @@ def test_legacy_statewide_merged_catalog_gets_local_area_extension(wasds_home):
     ctx = build_context(config)
 
     assert ctx.catalog_source == "merged"
-    assert len(ctx.catalog.favorites) == 140
+    assert len(ctx.catalog.favorites) == 141
     assert len([favorite for favorite in ctx.catalog.favorites if favorite.favorite_key.startswith("KC")]) == 39
 
 
@@ -97,3 +97,4 @@ def test_persisted_catalog_refreshes_public_fields_and_preserves_systems(wasds_h
     refreshed = ctx.catalog.by_slug("fl02")
     assert refreshed.favorite_name == "Nationwide Interop + WA STATEOPS"
     assert [system.id for system in refreshed.systems] == ["local-marker"]
+

@@ -7,6 +7,7 @@ but not republished wholesale by this repository.
 """
 from __future__ import annotations
 
+import datetime
 from collections import defaultdict
 from typing import Dict, Iterable, List, Optional, Tuple
 
@@ -167,6 +168,32 @@ def _mode_group(fact: NormalizedFact) -> str:
     return "Analog 23 Centimeter"
 
 
+def coordination_expired(raw: Dict[str, str], today: Optional[datetime.date] = None) -> bool:
+    """Has this repeater's WWARA coordination lapsed?
+
+    WWARA has no "on the air" flag. The coordination expiry is the closest
+    published proxy: a machine whose coordination has run out is usually off
+    the air or unmaintained, because keeping it current is a condition of
+    holding the pair. Roughly one in seven Washington entries is lapsed at any
+    time, so ignoring the field means programming a meaningful number of dead
+    channels.
+
+    An unparseable or missing date is treated as **current**. Guessing that a
+    malformed field means "dead" would silently drop live repeaters.
+    """
+    text = (raw.get("EXPIRATION_DATE") or "").strip()
+    if not text:
+        return False
+    for fmt in ("%Y-%m-%d", "%m/%d/%Y", "%Y%m%d"):
+        try:
+            return datetime.datetime.strptime(text, fmt).date() < (
+                today or datetime.date.today()
+            )
+        except ValueError:
+            continue
+    return False
+
+
 def _fact_channel(fact: NormalizedFact) -> Channel:
     raw = fact.raw if isinstance(fact.raw, dict) else {}
     city = _ascii((raw.get("CITY") or "").strip())
@@ -186,6 +213,9 @@ def _fact_channel(fact: NormalizedFact) -> Channel:
         tx_tone = f"TONE=C{float(input_tone):g}" if input_tone else ""
     except ValueError:
         tx_tone = ""
+    expired = coordination_expired(raw)
+    if expired:
+        details.append("coordination expired")
     return Channel(
         id=stable_id(f"puget-ham:wwara:{fact.entity_key}", kind="channel"),
         label=f"{call} - {city}" if city else call,
@@ -193,10 +223,20 @@ def _fact_channel(fact: NormalizedFact) -> Channel:
         mode=fact.mode or "AUTO",
         tone=fact.tone or "",
         service_type=13,
-        avoid=fact.mode == "AUTO",
+        # Avoided either because the radio cannot decode the mode, or because
+        # the coordination has lapsed and the machine is probably not there.
+        # Marking rather than dropping keeps the record visible for anyone
+        # who wants to look, while keeping it out of a generated channel list.
+        avoid=fact.mode == "AUTO" or expired,
         notes=_ascii("; ".join(value for value in details if value)),
         tx_freq_mhz=input_freq,
         tx_tone=tx_tone,
+        # WWARA publishes a position per repeater. Keeping it on the channel
+        # lets a plan ask "what can I work from here" rather than only "which
+        # region is this in", and carries the precision caveat with it.
+        lat=fact.lat,
+        lon=fact.lon,
+        location_precision=fact.location_precision or "",
     )
 
 

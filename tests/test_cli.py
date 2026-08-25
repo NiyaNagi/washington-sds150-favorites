@@ -1,4 +1,4 @@
-import json
+﻿import json
 from pathlib import Path
 
 import pytest
@@ -241,7 +241,7 @@ def test_doctor_uses_packaged_baseline_by_default(wasds_home, capsys):
     data = json.loads(capsys.readouterr().out)
     assert data["ok"] is True
     catalog_check = next(c for c in data["checks"] if c["name"] == "catalog_loads")
-    assert "140" in catalog_check["detail"]
+    assert "141" in catalog_check["detail"]
 
 
 def test_version_flag(capsys):
@@ -613,3 +613,4 @@ def test_install_hpdb_inspect_missing_hpdb_fails(wasds_home, tmp_path, capsys):
     (card / "BCDx36HP" / "favorites_lists").mkdir(parents=True)
     code = run(["install", "hpdb-inspect", str(card)])
     assert code == 1
+

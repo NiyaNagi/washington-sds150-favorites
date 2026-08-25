@@ -1,4 +1,4 @@
-"""Tests for the packaged baseline snapshot (data/baseline_catalog.json).
+﻿"""Tests for the packaged baseline snapshot (data/baseline_catalog.json).
 
 These pin the packaged JSON to the checked-in CSV: if someone edits the CSV
 without regenerating the baseline, ``test_baseline_matches_repo_csv`` fails
@@ -8,6 +8,7 @@ from wasds150.catalog import baseline, loader
 from wasds150.catalog.ames_lake import favorites as ames_lake_favorites
 from wasds150.catalog.band_profiles import favorites as band_favorites
 from wasds150.catalog.ftx1_import import favorites as ftx1_import_favorites
+from wasds150.catalog.hf_nets import favorites as hf_nets_favorites
 from wasds150.catalog.ham_bandplan import favorites as ham_bandplan_favorites
 from wasds150.catalog.olympic_coast import favorites as olympic_coast_favorites
 from wasds150.catalog.puget_ham import favorite as puget_ham_favorite
@@ -18,10 +19,10 @@ from wasds150.recipes.systems import static_systems_for
 
 def test_load_baseline_returns_statewide_and_king_county_favorites():
     catalog = baseline.load_baseline()
-    assert len(catalog.favorites) == 140
+    assert len(catalog.favorites) == 141
     assert len([fl for fl in catalog.favorites if fl.favorite_key.startswith("KC")]) == 39
     assert {fl.favorite_key for fl in catalog.favorites[-6:]} == {
-        "UL02", "UL03", "PSHAM01", "OZ01", "HAM01", "FTX01",
+        "UL03", "PSHAM01", "OZ01", "HAM01", "FTX01", "HFNET01",
     }
 
 
@@ -46,6 +47,7 @@ def test_baseline_matches_repo_csv(repo_csv_path):
         + olympic_coast_favorites()
         + ham_bandplan_favorites()
         + ftx1_import_favorites()
+        + hf_nets_favorites()
     ]
 
 
@@ -105,3 +107,4 @@ def test_generate_baseline_from_csv_bakes_in_systems_without_changing_content_ha
     regenerated = baseline.generate_baseline_from_csv(repo_csv_path, tmp_path / "regenerated.json")
     assert any(fl.systems for fl in regenerated.favorites)  # sanity: something got baked in
     assert regenerated.content_hash() == plain.content_hash()
+

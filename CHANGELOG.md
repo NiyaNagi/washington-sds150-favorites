@@ -9,6 +9,26 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Added
 
+- Added `ftx1-local`, a 351-channel FTX-1 loadout scoped to what is actually
+  reachable from home. Repeaters are filtered to a 60-mile radius of 98053 and
+  to current coordinations, which cuts 433 Washington entries to 163. The
+  remainder is HF: emergency and traffic nets, calling and QRP frequencies,
+  digital watering holes, propagation beacons, WWV, and utility/aeronautical
+  channels, so one file covers 160m through 70cm.
+- Added `HFNET01`, an HF nets and utility reference list of 54 channels in
+  eight departments, covering emergency and weather nets, IARU emergency
+  centres of activity, traffic and calling nets, Pacific Northwest nets,
+  utility and aeronautical, NCDXF propagation beacons, WWV time standards and
+  6m calling. Marked reference-only, since most of it sits below the SDS150's
+  25 MHz floor.
+- Added latitude and longitude to catalog channels, populated from WWARA. This
+  is separate from a department's coverage geo-fence: the fence describes where
+  a signal is useful, the coordinates describe where the transmitter stands,
+  and only the latter supports "within N miles of me".
+- Added `within_miles` to plan channel selectors, which builds a list by
+  distance from a point rather than by county or label. Channels with no
+  coordinates are dropped rather than passed through, so a source that omits
+  position cannot silently turn the filter into a no-op.
 - Added per-radio loadouts. Every supported radio now has an inspectable saved
   configuration reachable from one dropdown, each rendered in its own native
   shape: the SDS150 as Favorites Lists with systems, sites and departments;
@@ -254,6 +274,20 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Fixed
 
+- Fixed the persisted catalog keeping damage done by an earlier enrichment
+  run. Rebuilding the Puget Sound ham list from WWARA facts used to replace
+  its systems outright, discarding ten hand-written net channels. The rebuild
+  was corrected, but the loss survived, because enrichment builds on the saved
+  catalog rather than the packaged baseline, so nothing ever put the channels
+  back. Missing baseline systems are now restored on load, scoped to the lists
+  that are rebuilt from a public source so that hand-authored content is not
+  duplicated elsewhere.
+- Fixed expired WWARA coordinations being programmed as live repeaters. A
+  coordination is dropped when a repeater goes off the air, and about one in
+  seven Washington entries is lapsed at any time. Expired entries are now
+  marked avoid rather than deleted, since a lapsed record is still worth
+  seeing. An unreadable or missing date is treated as current: guessing that a
+  malformed field means dead would silently hide working repeaters.
 - Fixed the FTX-1 tone mode meaning tone squelch rather than tone. The field
   stores `0 None, 1 Tone, 2 Tone Sql, 3 DCS`, and this project had 1 and 2
   the wrong way round, writing Tone Sql on 370 channels. Transmit still

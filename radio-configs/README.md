@@ -9,6 +9,13 @@ can be picked up and loaded without running the toolchain first.
 | `h9-ozette-report.md` | | Human-readable memory map |
 | `ftx1-wa.FTX1` | Yaesu FTX-1 | 960 memories + 47 scan pairs, native format |
 | `ftx1-wa-report.md` | | Human-readable memory map |
+| `ftx1-local.FTX1` | Yaesu FTX-1 | 351 memories, native format |
+| `ftx1-local-report.md` | | Human-readable memory map |
+
+The two FTX-1 files are alternatives, not additions - loading one replaces the
+radio's memories with the other's. `ftx1-wa` is the statewide inventory;
+`ftx1-local` keeps only repeaters within 60 miles of home and fills the rest
+with HF nets, beacons and utility stations.
 
 Everything here is **generated**. The catalog is the source of truth, so these
 files go stale the moment the catalog changes. Regenerate with:
@@ -16,6 +23,7 @@ files go stale the moment the catalog changes. Regenerate with:
 ```bash
 wasds150 --home .wasds150-home plan export h9-ozette --out radio-configs
 wasds150 --home .wasds150-home plan export ftx1-wa --target ftx1-file --out radio-configs
+wasds150 --home .wasds150-home plan export ftx1-local --target ftx1-file --out radio-configs
 ```
 
 > **Copy the file to wherever you actually load it from.** Exporting writes

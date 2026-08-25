@@ -38,6 +38,7 @@ catalog is the source of truth. See
 - [Antenna measurement results](antenna-results/README.md) - calibrated handheld and installed-vehicle comparisons, family/service coverage matrix, explicit gap analysis, recommendations, scorecards, offline interactive analysis, raw Touchstone data, and the preserved JYR8010 EFHW report.
 - [Upper Lena Lake profile](docs/upper-lena-lake.md) - compact and comprehensive Hood Canal/Olympic wilderness, SAR, weather, public-safety, aviation, marine, amateur, and personal-radio profiles.
 - [Puget Sound ham repeaters and nets](docs/puget-sound-ham.md) - current WWARA-coordinated repeaters, operator-published net channels/schedules, mode grouping, source hierarchy, and update workflow.
+- [Radius-based lists and HF](docs/local-radius-lists.md) - building a list by distance from home rather than by county, why RepeaterBook could not be used, what the WWARA expiry date can and cannot tell you, and the HF nets and beacons worth tuning.
 - [Data-source architecture](docs/data-sources.md) - source provenance, caching, update and merge behavior.
 - [TD-H9 programming guide](docs/td-h9-programming.md) - complete hardware procedure, verified radio facts, cable troubleshooting, and the two failure modes that produce a silently wrong radio.
 - [Agent runbook](docs/agent-runbook.md) - copy-paste procedures for automating this repository, environment layout, API reference, and project invariants.
@@ -51,9 +52,16 @@ catalog is the source of truth. See
 
 | Radio | Role | Memories | Loaded now | Status |
 |---|---|---:|---:|---|
-| Uniden SDS150 | Trunk-tracking scanner, receive only | unlimited | 140 Favorites Lists | Verified |
+| Uniden SDS150 | Trunk-tracking scanner, receive only | unlimited | 141 Favorites Lists | Verified |
 | TIDRADIO TD-H9 | Analog handheld transceiver | 199 | 185 memories | Verified against hardware |
-| Yaesu FTX-1 | HF/VHF/UHF transceiver | 999 | 960 memories + 47 scan pairs | Profile from documentation, **unverified** |
+| Yaesu FTX-1 | HF/VHF/UHF transceiver | 999 | 960 statewide **or** 351 local memories | Profile from documentation, **unverified** |
+
+The FTX-1 has two loadouts, chosen from the same dropdown. `ftx1-wa` is the
+statewide inventory. `ftx1-local` is the working list: amateur repeaters within
+60 miles of home whose coordination is current — 163 of Washington's 433 — plus
+HF nets, calling frequencies, beacons and utility stations from 160 m to 6 m.
+The radius is applied to each repeater's own coordinates, so the list follows
+the home location rather than county lines.
 
 Each radio's current configuration is inspectable in its **own shape**, because
 they genuinely differ. The SDS150's configuration is hierarchical - Favorites
@@ -74,6 +82,7 @@ wasds150 radios list               # capability profiles
 wasds150 plan list                 # registered channel plans
 wasds150 plan show h9-ozette       # resolved memory map, drops, warnings
 wasds150 plan export ftx1-wa --target ftx1-file --out radio-configs
+wasds150 plan export ftx1-local --target ftx1-file --out radio-configs
 ```
 
 The same thing is in the **Radios** tab of `wasds150 ui`: pick a radio from the
@@ -114,7 +123,7 @@ Writing to a radio always backs it up first, always requires an explicit
 
 | Measure | Current baseline |
 |---|---:|
-| Curated Favorites List entries | 140 |
+| Curated Favorites List entries | 141 |
 | Statewide/core entries | 78 |
 | King County municipal entries | 39 |
 | Lists generated with no private input | 73 |
@@ -123,13 +132,19 @@ Writing to a radio always backs it up first, always requires an explicit
 | Remaining local warnings | 2 |
 | Washington counties represented | 39 |
 | Registered radio profiles | 3 |
-| Registered channel plans | 1 |
+| Registered channel plans | 3 |
 
-Three of the 140 entries are transceiver-oriented and carry fully cited
+Four of the 141 entries are transceiver-oriented and carry fully cited
 channel lists rather than scanner metadata: **OZ01** (Olympic Coast / Lake
 Ozette, 141 channels), **HAM01** (US amateur band plan, 88 calling and
-convention frequencies, reference only) and **FTX01** (FTX-1 factory memory
-import, 453 channels).
+convention frequencies, reference only), **FTX01** (FTX-1 factory memory
+import, 453 channels) and **HFNET01** (HF nets, beacons and utility stations,
+54 channels, reference only).
+
+`HAM01` and `HFNET01` are marked reference-only because most of their content
+lies below the SDS150's 25 MHz floor. They are carried in the catalog anyway,
+because the transceiver plans draw from them; generation projects away what the
+scanner cannot hear and says how many channels it dropped.
 
 The packaged no-private-input baseline leaves the trunked local rows pending.
 After applying the current local Sentinel HPDB, all statewide trunk targets,

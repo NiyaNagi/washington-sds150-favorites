@@ -27,8 +27,22 @@ def _append_local_area_extension(catalog: Catalog) -> None:
 
     Public baseline fields are refreshed in memory while locally enriched
     systems/provenance and profile overrides remain untouched. Missing public
-    extension rows are appended.
+    extension rows are appended, and hand-authored systems are restored to the
+    handful of rows that are rebuilt wholly from a public source.
+
+    That last part is narrower than it sounds, deliberately. Most rows
+    accumulate: a locally enriched HPDB system is precious and must survive a
+    refresh, and re-attaching baseline systems to those rows would duplicate
+    content the user has already curated. But a row like ``PSHAM01`` is
+    rebuilt from the WWARA extract on every run so a stale copy cannot win by
+    id - and an earlier version of that rebuild replaced the row's systems
+    outright, discarding hand-written net channels WWARA never supplied. Once
+    discarded they stayed discarded, because later runs enrich the *persisted*
+    catalog rather than the packaged baseline. Restoring by id repairs an
+    already-damaged catalog and is a no-op on a healthy one.
     """
+    from wasds150.recipes.systems import rebuilds_systems_from_facts
+
     existing = {favorite.slug for favorite in catalog.favorites}
     if len(existing) < 75 or "fl75" not in existing:
         return
@@ -38,7 +52,12 @@ def _append_local_area_extension(catalog: Catalog) -> None:
         if current is not None:
             for field_name in CSV_FIELDS:
                 setattr(current, field_name, getattr(favorite, field_name))
-        elif favorite.favorite_key.startswith(("KC", "LA", "OUT", "BAND", "UL", "PSHAM", "OZ", "HAM", "FTX")):
+            if rebuilds_systems_from_facts(current):
+                present = {system.id for system in current.systems}
+                for system in favorite.systems:
+                    if system.id not in present:
+                        current.systems.append(copy.deepcopy(system))
+        elif favorite.favorite_key.startswith(("KC", "LA", "OUT", "BAND", "UL", "PSHAM", "OZ", "HAM", "FTX", "HFNET")):
             catalog.favorites.append(copy.deepcopy(favorite))
 
 

@@ -42,6 +42,7 @@ from wasds150.catalog.puget_ham import favorite as puget_ham_favorite
 from wasds150.catalog.olympic_coast import favorites as olympic_coast_favorites
 from wasds150.catalog.ham_bandplan import favorites as ham_bandplan_favorites
 from wasds150.catalog.ftx1_import import favorites as ftx1_import_favorites
+from wasds150.catalog.hf_nets import favorites as hf_nets_favorites
 from wasds150.catalog.validate import partition_validation_issues, validate_catalog
 from wasds150.models.catalog import Catalog
 from wasds150.recipes.systems import dedupe_systems, static_systems_for
@@ -64,6 +65,7 @@ def load_baseline() -> Catalog:
         + olympic_coast_favorites()
         + ham_bandplan_favorites()
         + ftx1_import_favorites()
+        + hf_nets_favorites()
     )
     for favorite in extensions:
         if favorite.slug in existing:

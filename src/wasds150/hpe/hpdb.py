@@ -40,6 +40,7 @@ from typing import Dict, List, Optional, Tuple
 
 from wasds150.hpe.record import Record, RecordDocument, parse_records
 from wasds150.hpe.schema import BCDX36HP_SCHEMA, FieldSpec, TagSchema
+from wasds150.util.geo import haversine_miles as _haversine_miles
 
 # ---------------------------------------------------------------------------
 # HPDB-only tags (never appear in a Favorites List export). Arities/columns
@@ -105,8 +106,6 @@ SYSTEM_HEADER_TAGS = ("Conventional", "Trunk")
 #: Tags dropped entirely when converting HPDB -> Favorites dialect.
 AREA_TAGS = ("AreaState", "AreaCounty")
 
-EARTH_RADIUS_MILES = 3958.7613  # matches Uniden's mile-based `range` field
-
 
 def _schema_for(tag: str) -> Optional[TagSchema]:
     return BCDX36HP_SCHEMA.get(tag) or HPDB_ONLY_SCHEMA.get(tag)
@@ -148,13 +147,12 @@ class Geo:
 
 
 def haversine_miles(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
-    """Great-circle distance in statute miles (Earth radius 3958.7613 mi,
-    matching Uniden's mile-based ``range`` field)."""
-    phi1, phi2 = math.radians(lat1), math.radians(lat2)
-    dphi = math.radians(lat2 - lat1)
-    dlambda = math.radians(lon2 - lon1)
-    a = math.sin(dphi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2) ** 2
-    return 2 * EARTH_RADIUS_MILES * math.asin(min(1.0, math.sqrt(a)))
+    """Great-circle distance in statute miles.
+
+    Re-exported from :mod:`wasds150.util.geo` so the scanner's geo-fencing and
+    the channel planner's radius filter cannot drift apart.
+    """
+    return _haversine_miles(lat1, lon1, lat2, lon2)
 
 
 def geo_of(record: Record) -> Optional[Geo]:

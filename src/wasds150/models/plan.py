@@ -16,6 +16,8 @@ import re
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
+from wasds150.util.geo import haversine_miles
+
 #: Transmit policy for a block.  Receive-only is the default everywhere,
 #: because keying up on a frequency you are not authorized for is the one
 #: mistake this project must never make on a user's behalf.
@@ -62,6 +64,18 @@ class ChannelSelector:
     freq_ranges: Tuple[Tuple[float, float], ...] = ()
     modes: Tuple[str, ...] = ()
     service_types: Tuple[int, ...] = ()
+    #: ``(latitude, longitude, miles)`` - keep only channels whose own
+    #: transmitter site is within ``miles`` of that point.
+    #:
+    #: This filters on the channel's position, not its department's. A
+    #: department geo-fence is one circle around a whole region, which
+    #: answers "should this list be active near here"; a repeater list needs
+    #: "can I work this particular machine from here", which is per station.
+    #:
+    #: A channel with no coordinates is **dropped** when this is set. Silently
+    #: keeping unlocated channels would quietly turn a radius filter into no
+    #: filter at all for any source that omits positions.
+    within_miles: Optional[Tuple[float, float, float]] = None
     #: Channels the catalog marks as avoided are excluded unless asked for.
     include_avoided: bool = False
 
@@ -74,6 +88,7 @@ class ChannelSelector:
                 self.freq_ranges,
                 self.modes,
                 self.service_types,
+                self.within_miles,
             )
         )
 
@@ -108,6 +123,14 @@ class ChannelSelector:
                 return False
         if self.service_types and channel.service_type not in self.service_types:
             return False
+        if self.within_miles is not None:
+            lat, lon, miles = self.within_miles
+            channel_lat = getattr(channel, "lat", None)
+            channel_lon = getattr(channel, "lon", None)
+            if channel_lat is None or channel_lon is None:
+                return False
+            if haversine_miles(lat, lon, channel_lat, channel_lon) > miles:
+                return False
         if channel.avoid and not self.include_avoided:
             return False
         return True
