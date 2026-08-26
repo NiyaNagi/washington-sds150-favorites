@@ -8,7 +8,7 @@ pre-change file is private under `radio-backups/th-d75/`; its SHA-256 is:
 
 `B9AEFA8D9F5C153149059D98464E5EA05A64BB95A938B4D9FE8E55C35BFE0886`
 
-The final file is `radio-configs/thd75-ames-lake.d75`. It contains 538 ordinary
+The initial final file was `radio-configs/thd75-ames-lake.d75`. It contains 538 ordinary
 memories in 21 named groups and 21 nearby entries in the radio's separate
 native D-STAR repeater list. Final SHA-256:
 
@@ -23,6 +23,10 @@ ordinary-memory fields with zero semantic differences. The private read-back
 SHA-256 is:
 
 `A3F7AA7DF0C0FAE5D44766D8AFB1561BAC9A05798B2EB60650D3D9A148F8351E`
+
+The operator subsequently added three memories and updated personal settings.
+The current 541-memory image, complete typed settings snapshot and exact
+changes are documented in [the current configuration](th-d75-current-configuration.md).
 
 ## What is loaded
 
@@ -49,6 +53,7 @@ SHA-256 is:
 | AM broadcast | 29 |
 | HF time standards | 8 |
 | HF emergency and utility | 27 |
+| Operator additions in the 70 cm group | 3 |
 
 The broadcast groups are new catalog coverage derived from the FCC's current
 AM/FM radius queries. The D-STAR entries are from Kenwood's

@@ -1,10 +1,14 @@
 from __future__ import annotations
 
+import hashlib
+import json
+import struct
 from pathlib import Path
 
 from wasds150.catalog.baseline import load_baseline
 from wasds150.catalog.puget_broadcast import favorite as puget_broadcast
 from wasds150.catalog.thd75_local import favorite as thd75_local
+from wasds150.catalog.thd75_user import favorite as thd75_user
 from wasds150.export.thd75_target import (
     FILE_SIZE,
     MODE_CODES,
@@ -28,6 +32,48 @@ def _template(path: Path) -> bytes:
     return bytes(data)
 
 
+def _repo_root() -> Path:
+    return Path(__file__).resolve().parents[1]
+
+
+def test_current_operator_artifacts_are_complete_and_consistent() -> None:
+    root = _repo_root()
+    image_path = root / "radio-configs" / "thd75-current.d75"
+    settings_path = root / "radio-configs" / "thd75-current-settings.json"
+    bitmap_path = root / "radio-configs" / "thd75-power-on-KM7HKM.bmp"
+
+    image = image_path.read_bytes()
+    digest = hashlib.sha256(image).hexdigest().upper()
+    assert digest == "25E7330FA52E7AE50E4CE5C0406E41955C06FC0C3A7639C29968B6AF1B85116A"
+    rows = inspect_thd75(image)
+    assert len(rows) == 541
+    assert [(row["slot"], row["name"]) for row in rows[-3:]] == [
+        (538, "VAERPT"),
+        (539, "N7QTREDMOND"),
+        (540, "W7AUX"),
+    ]
+
+    settings = json.loads(settings_path.read_text(encoding="utf-8"))
+    assert settings["source_sha256"] == digest
+    assert settings["setting_count"] == 400
+    by_name = {entry["name"]: entry["value"] for entry in settings["settings"]}
+    assert by_name["aprs.MyCallsign"] == "KM7HKM"
+    assert by_name["radio.BluetoothOnOff"] is True
+    assert by_name["gps.MyPositionList[0].Name"] == "Home"
+
+    bitmap = bitmap_path.read_bytes()
+    assert hashlib.sha256(bitmap).hexdigest().upper() == (
+        "D299694C49260914F8BCE8D6A9E6836D07991A0975158DC8B66F3FA05375C785"
+    )
+    assert struct.unpack_from("<2sIHHI", bitmap, 0) == (
+        b"BM", len(bitmap), 0, 0, 66
+    )
+    assert struct.unpack_from("<IiiHHI", bitmap, 14) == (
+        40, 240, 180, 1, 16, 3
+    )
+    assert struct.unpack_from("<III", bitmap, 54) == (0xF800, 0x07E0, 0x001F)
+
+
 def test_thd75_profile_matches_verified_capabilities() -> None:
     assert TH_D75.max_channels == 1000
     assert TH_D75.name_max_len == 16
@@ -41,11 +87,18 @@ def test_thd75_profile_matches_verified_capabilities() -> None:
 
 def test_local_extensions_resolve_into_thd75_plan() -> None:
     catalog = load_baseline()
-    catalog.favorites.extend((puget_broadcast(), thd75_local()))
+    catalog.favorites.extend((puget_broadcast(), thd75_local(), thd75_user()))
     resolved = resolve_plan(THD75_AMES_LAKE, catalog)
     assert resolved.block_counts["D-STAR Local"] == 21
     assert resolved.block_counts["FM Broadcast"] == 32
     assert resolved.block_counts["AM Broadcast"] == 29
+    assert resolved.block_counts["Operator Additions"] == 3
+    additions = [
+        channel for channel in resolved.channels if channel.block == "Operator Additions"
+    ]
+    assert [channel.name for channel in additions] == ["VAERPT", "N7QTREDMOND", "W7AUX"]
+    assert all(channel.bank == "70cm Repeaters" for channel in additions)
+    assert [channel.tx_freq_mhz for channel in additions] == [443.65, 442.925, 442.825]
     assert any(channel.rx_freq_mhz == 223.5 for channel in resolved.channels)
     assert all(channel.mode != "P25" for channel in resolved.channels)
     assert all(channel.mode != "DMR" for channel in resolved.channels)
@@ -103,13 +156,26 @@ def test_native_export_preserves_settings_and_encodes_modes(tmp_path: Path) -> N
             source="test",
             skip_scan=True,
         ),
+        PlannedChannel(
+            slot=5,
+            name="USERADD",
+            label="User addition",
+            rx_freq_mhz=443.05,
+            tx_freq_mhz=443.65,
+            transmit=True,
+            tx_tone=parse_tone("TONE=C103.5"),
+            mode="FM",
+            block="Operator Additions",
+            bank="Analog",
+            source="test",
+        ),
     ]
     resolved = ResolvedPlan(plan=plan, profile=TH_D75, channels=channels)
 
     data, result = render_thd75(resolved, template=template)
     rows = inspect_thd75(data)
 
-    assert result.rows == 4
+    assert result.rows == 5
     assert result.groups == 4
     assert len(data) == FILE_SIZE
     assert data[:0x100] == original[:0x100]
@@ -124,6 +190,7 @@ def test_native_export_preserves_settings_and_encodes_modes(tmp_path: Path) -> N
     assert rows[2]["tx_value_mhz"] == RX_ONLY_TX_HZ / 1_000_000
     assert rows[3]["mode_code"] == MODE_CODES["WFM"]
     assert rows[3]["skip"] is True
+    assert rows[4]["group"] == rows[0]["group"] == 0
 
     mcp_saved = bytearray(data)
     unrelated = 0x3700

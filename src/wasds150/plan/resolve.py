@@ -58,6 +58,7 @@ class PlannedChannel:
     mode: str
     block: str
     source: str
+    bank: str = ""
     transmit: bool = False
     tx_freq_mhz: Optional[float] = None
     rx_tone: ToneSpec = NO_TONE
@@ -345,6 +346,7 @@ def resolve_plan(
                 mode=mode,
                 block=block.label,
                 source=f"{favorite.favorite_key}/{department.label}",
+                bank=block.bank or block.label,
                 transmit=transmit,
                 tx_freq_mhz=tx_freq,
                 rx_tone=rx_tone,

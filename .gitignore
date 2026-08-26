@@ -37,6 +37,7 @@ local-sentinel/
 # Radio images and backups read off a user's own hardware.
 *.img
 *.d75
+!radio-configs/thd75-current.d75
 radio-backups/
 
 # Third-party USB serial drivers fetched for programming cables.

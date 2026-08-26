@@ -41,8 +41,9 @@ def resolve_named_plan(ctx: AppContext, plan_id: str) -> Tuple[ChannelPlan, Reso
     if plan.radio_id == "th-d75":
         from wasds150.catalog.puget_broadcast import favorite as puget_broadcast
         from wasds150.catalog.thd75_local import favorite as thd75_local
+        from wasds150.catalog.thd75_user import favorite as thd75_user
 
-        favorites.extend((puget_broadcast(), thd75_local()))
+        favorites.extend((puget_broadcast(), thd75_local(), thd75_user()))
     catalog = Catalog(favorites=favorites)
     return plan, resolve_plan(plan, catalog)
 
@@ -76,6 +77,7 @@ def channel_row(channel) -> Dict[str, Any]:
         "mode": channel.mode,
         "power": channel.power,
         "block": channel.block,
+        "bank": channel.bank,
         "source": channel.source,
         "skip_scan": channel.skip_scan,
         "rx_tone": channel.rx_tone.raw if channel.rx_tone else "",

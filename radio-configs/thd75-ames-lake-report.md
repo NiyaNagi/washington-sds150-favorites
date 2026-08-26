@@ -2,7 +2,7 @@
 
 - Radio: Kenwood TH-D75A (th-d75)
 - Purpose: Tri-band analog and D-STAR repeaters within 50 miles of Ames Lake, plus the TH-D75A's useful wideband receive services, broadcasts, satellites, HF utility channels and native operating channels.
-- Channels programmed: 538 of 950 available (412 free, 50 reserved)
+- Channels programmed: 541 of 950 available (409 free, 50 reserved)
 - Coverage: 0.1-524 MHz
 
 ## Memory map
@@ -30,6 +30,7 @@
 | 475-503 | AM Broadcast | 29 | receive only |
 | 504-511 | HF Time Standards | 8 | receive only |
 | 512-538 | HF Emergency and Utility | 27 | receive only |
+| 539-541 | Operator Additions | 3 | repeater |
 
 ## Channels
 
@@ -573,6 +574,9 @@
 | 536 | SFOOCEANIC17904 | 17.9040 | RX only | USB | - | HFNET01/HF Utility and Aeronautical |
 | 537 | EMCOA17M | 18.1600 | RX only | USB | - | HFNET01/HF Emergency Centres of Activity |
 | 538 | EMCOA15M | 21.3600 | RX only | USB | - | HFNET01/HF Emergency Centres of Activity |
+| 539 | VAERPT | 443.0500 | 443.6500 | FM | TONE=C103.5 | THD75USER/Operator-Programmed Channels |
+| 540 | N7QTREDMOND | 442.3250 | 442.9250 | FM | TONE=C103.5 | THD75USER/Operator-Programmed Channels |
+| 541 | W7AUX | 442.8250 | 442.8250 | FM | TONE=C103.5 | THD75USER/Operator-Programmed Channels |
 
 ## Excluded channels
 

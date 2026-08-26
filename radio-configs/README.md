@@ -11,7 +11,10 @@ can be picked up and loaded without running the toolchain first.
 | `ftx1-wa-report.md` | | Human-readable memory map |
 | `ftx1-local.FTX1` | Yaesu FTX-1 | 351 memories, native format |
 | `ftx1-local-report.md` | | Human-readable memory map |
-| `thd75-ames-lake-report.md` | Kenwood TH-D75A | 538 ordinary memories in 21 groups; native `.d75` remains private |
+| `thd75-ames-lake-report.md` | Kenwood TH-D75A | 541 ordinary memories in 21 groups |
+| `thd75-current.d75` | Kenwood TH-D75A | Exact operator-requested 541-memory image with all settings |
+| `thd75-current-settings.json` | | All 400 typed MCP settings decoded for review |
+| `thd75-power-on-KM7HKM.bmp` | | 240x180 16-bit RGB565 power-on identification image |
 
 The two FTX-1 files are alternatives, not additions - loading one replaces the
 radio's memories with the other's. `ftx1-wa` is the statewide inventory;
@@ -59,6 +62,9 @@ per-channel text from the RT Systems programmer is present. See
   native D-STAR list, finalize settings preservation, write, and read back as
   documented in [the TH-D75 guide](../docs/th-d75-ames-lake.md). Native `.d75`
   files are ignored because they contain settings read from a specific radio.
+  The sole exception is `thd75-current.d75`, which is tracked at the operator's
+  explicit request; review its personal data before changing repository
+  visibility or redistributing it.
 
 The FTX-1 profile is **unverified against hardware**: it was built from
 documentation, and the generated file has been checked against a hand-merged

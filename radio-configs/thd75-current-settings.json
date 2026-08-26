@@ -1,0 +1,3211 @@
+{
+  "format": "MCP-D75 V1.00 typed settings snapshot",
+  "parser_commit": "2eb932db81ac82b53e8a2c99ab8bca99d5b22d4a",
+  "setting_count": 400,
+  "settings": [
+    {
+      "is_blob": true,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.PoweronBitmap",
+      "offset": 327680,
+      "value": {
+        "byte_length": 86400,
+        "byte_sum": 6730877
+      }
+    },
+    {
+      "is_blob": false,
+      "label": "LCD + Key",
+      "menu": "radio",
+      "name": "radio.InfoBacklight",
+      "offset": 4246,
+      "value": 2
+    },
+    {
+      "is_blob": false,
+      "label": "A:100/B:100",
+      "menu": "radio",
+      "name": "radio.Balance",
+      "offset": 4198,
+      "value": 4
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.TxEqualizerFmNfm",
+      "offset": 4199,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.TxEqualizerDv",
+      "offset": 4199,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.RxEqualizer",
+      "offset": 4199,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.TxEqLevel04",
+      "offset": 4200,
+      "value": 9
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.TxEqLevel08",
+      "offset": 4201,
+      "value": 9
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.TxEqLevel16",
+      "offset": 4202,
+      "value": 9
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.TxEqLevel32",
+      "offset": 4203,
+      "value": 9
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.RxEqLevel04",
+      "offset": 4204,
+      "value": 9
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.RxEqLevel08",
+      "offset": 4205,
+      "value": 9
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.RxEqLevel16",
+      "offset": 4206,
+      "value": 9
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.RxEqLevel32",
+      "offset": 4207,
+      "value": 9
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.RxEqLevel64",
+      "offset": 4208,
+      "value": 9
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.Beep",
+      "offset": 4209,
+      "value": true
+    },
+    {
+      "is_blob": false,
+      "label": "VOL Link",
+      "menu": "radio",
+      "name": "radio.BeepVolume",
+      "offset": 4210,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": "Off",
+      "menu": "radio",
+      "name": "radio.VoiceAnnounce",
+      "offset": 4211,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": "VOL Link",
+      "menu": "radio",
+      "name": "radio.VoiceAnnounceVolume",
+      "offset": 4212,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": "Level 7",
+      "menu": "radio",
+      "name": "radio.UsbAudioOutLevel",
+      "offset": 4213,
+      "value": 6
+    },
+    {
+      "is_blob": false,
+      "label": "Speed 1",
+      "menu": "radio",
+      "name": "radio.VoiceGuidanceSpeed",
+      "offset": 4247,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": "Standard",
+      "menu": "radio",
+      "name": "radio.CallsignReadout",
+      "offset": 4245,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": "1.0",
+      "menu": "radio",
+      "name": "radio.BatterySaver",
+      "offset": 4214,
+      "value": 5
+    },
+    {
+      "is_blob": false,
+      "label": "30",
+      "menu": "radio",
+      "name": "radio.AutoPowerOff",
+      "offset": 4215,
+      "value": 2
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.Charging",
+      "offset": 4244,
+      "value": true
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.BluetoothOnOff",
+      "offset": 4216,
+      "value": true
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.BluetoothAutoConnect",
+      "offset": 4217,
+      "value": true
+    },
+    {
+      "is_blob": false,
+      "label": "Balance",
+      "menu": "radio",
+      "name": "radio.Pf1PfKey",
+      "offset": 4218,
+      "value": 10
+    },
+    {
+      "is_blob": false,
+      "label": "GPS",
+      "menu": "radio",
+      "name": "radio.Pf2PfKey",
+      "offset": 4219,
+      "value": 11
+    },
+    {
+      "is_blob": false,
+      "label": "A/B",
+      "menu": "radio",
+      "name": "radio.Pf1Mic",
+      "offset": 4220,
+      "value": 34
+    },
+    {
+      "is_blob": false,
+      "label": "VFO",
+      "menu": "radio",
+      "name": "radio.Pf2Mic",
+      "offset": 4221,
+      "value": 35
+    },
+    {
+      "is_blob": false,
+      "label": "MR",
+      "menu": "radio",
+      "name": "radio.Pf3Mic",
+      "offset": 4222,
+      "value": 36
+    },
+    {
+      "is_blob": false,
+      "label": "Off",
+      "menu": "radio",
+      "name": "radio.CursorShift",
+      "offset": 4223,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.RemoteContorolCode",
+      "offset": 4224,
+      "value": "000"
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.TimeZone",
+      "offset": 4227,
+      "value": 28
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.KeyLockTypeKeyLock",
+      "offset": 4228,
+      "value": true
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.KeyLockTypeFrequencyLock",
+      "offset": 4228,
+      "value": true
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.DtmfKeys",
+      "offset": 4229,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.MicKeys",
+      "offset": 4230,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.VolumeLockOnOff",
+      "offset": 4231,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": "mi/h , mile",
+      "menu": "radio",
+      "name": "radio.SpeedDistance",
+      "offset": 4232,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": "feet , inch",
+      "menu": "radio",
+      "name": "radio.AltitudeRain",
+      "offset": 4233,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": "degree F",
+      "menu": "radio",
+      "name": "radio.Temperature",
+      "offset": 4234,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": "dd mm.mm",
+      "menu": "radio",
+      "name": "radio.LatitudeLongitude",
+      "offset": 4235,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": "Maidenhead Grid",
+      "menu": "radio",
+      "name": "radio.GridSquareFormat",
+      "offset": 4236,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": "COM + AF/IF Output",
+      "menu": "radio",
+      "name": "radio.UsbFunction",
+      "offset": 4237,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.PcOutputInterfaceGps",
+      "offset": 4238,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.PcOutputInterfaceAprs",
+      "offset": 4239,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.KissModeInterface",
+      "offset": 4240,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.DigitalModeInterface",
+      "offset": 4241,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.DvGatewayInterface",
+      "offset": 4243,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.Language",
+      "offset": 4242,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.GroupLink0",
+      "offset": 4256,
+      "value": 255
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.GroupLink1",
+      "offset": 4257,
+      "value": 255
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.GroupLink2",
+      "offset": 4258,
+      "value": 255
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.GroupLink3",
+      "offset": 4259,
+      "value": 255
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.GroupLink4",
+      "offset": 4260,
+      "value": 255
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.GroupLink5",
+      "offset": 4261,
+      "value": 255
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.GroupLink6",
+      "offset": 4262,
+      "value": 255
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.GroupLink7",
+      "offset": 4263,
+      "value": 255
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.GroupLink8",
+      "offset": 4264,
+      "value": 255
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.GroupLink9",
+      "offset": 4265,
+      "value": 255
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.GroupLink10",
+      "offset": 4266,
+      "value": 255
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.GroupLink11",
+      "offset": 4267,
+      "value": 255
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.GroupLink12",
+      "offset": 4268,
+      "value": 255
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.GroupLink13",
+      "offset": 4269,
+      "value": 255
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.GroupLink14",
+      "offset": 4270,
+      "value": 255
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.GroupLink15",
+      "offset": 4271,
+      "value": 255
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.GroupLink16",
+      "offset": 4272,
+      "value": 255
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.GroupLink17",
+      "offset": 4273,
+      "value": 255
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.GroupLink18",
+      "offset": 4274,
+      "value": 255
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.GroupLink19",
+      "offset": 4275,
+      "value": 255
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.GroupLink20",
+      "offset": 4276,
+      "value": 255
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.GroupLink21",
+      "offset": 4277,
+      "value": 255
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.GroupLink22",
+      "offset": 4278,
+      "value": 255
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.GroupLink23",
+      "offset": 4279,
+      "value": 255
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.GroupLink24",
+      "offset": 4280,
+      "value": 255
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.GroupLink25",
+      "offset": 4281,
+      "value": 255
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.GroupLink26",
+      "offset": 4282,
+      "value": 255
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.GroupLink27",
+      "offset": 4283,
+      "value": 255
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.GroupLink28",
+      "offset": 4284,
+      "value": 255
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.GroupLink29",
+      "offset": 4285,
+      "value": 255
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.PowerOnMessage",
+      "offset": 4288,
+      "value": "HELLO !!"
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.BluetoothDeviceName",
+      "offset": 4304,
+      "value": "TH-D75"
+    },
+    {
+      "is_blob": false,
+      "label": "Type1",
+      "menu": "radio",
+      "name": "radio.BeatShift",
+      "offset": 4096,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.TxInhibit",
+      "offset": 4097,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": "AF",
+      "menu": "radio",
+      "name": "radio.DetectOutput",
+      "offset": 4098,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": "10.0",
+      "menu": "radio",
+      "name": "radio.TimeOutTimer",
+      "offset": 4099,
+      "value": 10
+    },
+    {
+      "is_blob": false,
+      "label": "Bar Antenna",
+      "menu": "radio",
+      "name": "radio.BarAntenna",
+      "offset": 4101,
+      "value": 1
+    },
+    {
+      "is_blob": false,
+      "label": "Medium",
+      "menu": "radio",
+      "name": "radio.MicSensitivity",
+      "offset": 4102,
+      "value": 1
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.WxAlert",
+      "offset": 4103,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": "2.4",
+      "menu": "radio",
+      "name": "radio.SsbHighCut",
+      "offset": 4104,
+      "value": 1
+    },
+    {
+      "is_blob": false,
+      "label": "1.0",
+      "menu": "radio",
+      "name": "radio.CwWidth",
+      "offset": 4105,
+      "value": 2
+    },
+    {
+      "is_blob": false,
+      "label": "6.0",
+      "menu": "radio",
+      "name": "radio.AmHighCut",
+      "offset": 4106,
+      "value": 2
+    },
+    {
+      "is_blob": false,
+      "label": "Time Operate",
+      "menu": "radio",
+      "name": "radio.ScanResumeAnalog",
+      "offset": 4108,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": "Seek",
+      "menu": "radio",
+      "name": "radio.ScanResumeDigital",
+      "offset": 4109,
+      "value": 2
+    },
+    {
+      "is_blob": false,
+      "label": "5",
+      "menu": "radio",
+      "name": "radio.TimeRestart",
+      "offset": 4110,
+      "value": 5
+    },
+    {
+      "is_blob": false,
+      "label": "2",
+      "menu": "radio",
+      "name": "radio.CarrierRestart",
+      "offset": 4111,
+      "value": 2
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.PriorityScan",
+      "offset": 4113,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.ScanAutoBacklight",
+      "offset": 4114,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": "Off",
+      "menu": "radio",
+      "name": "radio.AutoWeatherScan",
+      "offset": 4115,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.AutoOffset",
+      "offset": 4120,
+      "value": true
+    },
+    {
+      "is_blob": false,
+      "label": "CALL",
+      "menu": "radio",
+      "name": "radio.CallKey",
+      "offset": 4121,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.TxHold1750Hz",
+      "offset": 4122,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.Vox",
+      "offset": 4123,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": "4",
+      "menu": "radio",
+      "name": "radio.VoxGain",
+      "offset": 4124,
+      "value": 4
+    },
+    {
+      "is_blob": false,
+      "label": "500",
+      "menu": "radio",
+      "name": "radio.VoxDelay",
+      "offset": 4125,
+      "value": 1
+    },
+    {
+      "is_blob": false,
+      "label": "Off",
+      "menu": "radio",
+      "name": "radio.VoxTxOnBusy",
+      "offset": 4126,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": "100",
+      "menu": "radio",
+      "name": "radio.DtmfSpeed",
+      "offset": 4127,
+      "value": 1
+    },
+    {
+      "is_blob": false,
+      "label": "500",
+      "menu": "radio",
+      "name": "radio.DtmfPauseTime",
+      "offset": 4128,
+      "value": 2
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.DtmfTxHold",
+      "offset": 4129,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.CwPitchFreq",
+      "offset": 4132,
+      "value": 4
+    },
+    {
+      "is_blob": false,
+      "label": "Normal",
+      "menu": "radio",
+      "name": "radio.CwReverse",
+      "offset": 4134,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.QsoLog",
+      "offset": 4135,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.LedControl_Receive",
+      "offset": 4136,
+      "value": true
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.LedControl_FmRadio",
+      "offset": 4136,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": "All Bands",
+      "menu": "radio",
+      "name": "radio.RecallMethod",
+      "offset": 4144,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": "A Band",
+      "menu": "radio",
+      "name": "radio.RecordingBand",
+      "offset": 4145,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.TxMonitor",
+      "offset": 4146,
+      "value": true
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.FmRadioMode",
+      "offset": 4160,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.AutoMuteRetTime",
+      "offset": 4161,
+      "value": 3
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "radio",
+      "name": "radio.EarphoneAntenna",
+      "offset": 4162,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": "Auto (DC-IN)",
+      "menu": "radio",
+      "name": "radio.BacklightControl",
+      "offset": 4192,
+      "value": 3
+    },
+    {
+      "is_blob": false,
+      "label": "10",
+      "menu": "radio",
+      "name": "radio.BacklightTimer",
+      "offset": 4193,
+      "value": 10
+    },
+    {
+      "is_blob": false,
+      "label": "High",
+      "menu": "radio",
+      "name": "radio.LcdBrightness",
+      "offset": 4194,
+      "value": 2
+    },
+    {
+      "is_blob": false,
+      "label": "Date",
+      "menu": "radio",
+      "name": "radio.SingleBandDisplay",
+      "offset": 4195,
+      "value": 3
+    },
+    {
+      "is_blob": false,
+      "label": "Type2",
+      "menu": "radio",
+      "name": "radio.MeterType",
+      "offset": 4196,
+      "value": 1
+    },
+    {
+      "is_blob": false,
+      "label": "Black",
+      "menu": "radio",
+      "name": "radio.BackgroundColor",
+      "offset": 4197,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.BuiltInGps",
+      "offset": 4352,
+      "value": true
+    },
+    {
+      "is_blob": false,
+      "label": "Off",
+      "menu": "gps",
+      "name": "gps.PositionAmbiguity",
+      "offset": 4353,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": "Normal",
+      "menu": "gps",
+      "name": "gps.OperatingMode",
+      "offset": 4354,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": "Auto",
+      "menu": "gps",
+      "name": "gps.BatterySaver",
+      "offset": 4355,
+      "value": 5
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.PcOutput",
+      "offset": 4356,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.Sentence_Gpgga",
+      "offset": 4357,
+      "value": true
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.Sentence_Gpgll",
+      "offset": 4357,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.Sentence_Gprmc",
+      "offset": 4357,
+      "value": true
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.Sentence_Gpvtg",
+      "offset": 4357,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.Sentence_Gpgsa",
+      "offset": 4357,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.Sentence_Gpgsv",
+      "offset": 4357,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.TrackLog",
+      "offset": 4358,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": "Time",
+      "menu": "gps",
+      "name": "gps.RecodeMethod",
+      "offset": 4360,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.Interval",
+      "offset": 4368,
+      "value": 10
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.Distance",
+      "offset": 4370,
+      "value": 1
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionSelect",
+      "offset": 4544,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[0].Altitude",
+      "offset": 4384,
+      "value": 122
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[0].NorthSouth",
+      "offset": 4396,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[0].LatitudeDegree",
+      "offset": 4388,
+      "value": 47
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[0].LatitudeMinute",
+      "offset": 4389,
+      "value": 38
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[0].LatitudeSecondEncoded",
+      "offset": 4390,
+      "value": 500
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[0].EastWest",
+      "offset": 4396,
+      "value": 1
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[0].LongitudeDegree",
+      "offset": 4392,
+      "value": 121
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[0].LongitudeMinute",
+      "offset": 4393,
+      "value": 59
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[0].LongitudeSecondEncoded",
+      "offset": 4394,
+      "value": 8100
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[0].Name",
+      "offset": 4398,
+      "value": "Home"
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[1].Altitude",
+      "offset": 4416,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[1].NorthSouth",
+      "offset": 4428,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[1].LatitudeDegree",
+      "offset": 4420,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[1].LatitudeMinute",
+      "offset": 4421,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[1].LatitudeSecondEncoded",
+      "offset": 4422,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[1].EastWest",
+      "offset": 4428,
+      "value": 1
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[1].LongitudeDegree",
+      "offset": 4424,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[1].LongitudeMinute",
+      "offset": 4425,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[1].LongitudeSecondEncoded",
+      "offset": 4426,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[1].Name",
+      "offset": 4430,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[2].Altitude",
+      "offset": 4448,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[2].NorthSouth",
+      "offset": 4460,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[2].LatitudeDegree",
+      "offset": 4452,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[2].LatitudeMinute",
+      "offset": 4453,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[2].LatitudeSecondEncoded",
+      "offset": 4454,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[2].EastWest",
+      "offset": 4460,
+      "value": 1
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[2].LongitudeDegree",
+      "offset": 4456,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[2].LongitudeMinute",
+      "offset": 4457,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[2].LongitudeSecondEncoded",
+      "offset": 4458,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[2].Name",
+      "offset": 4462,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[3].Altitude",
+      "offset": 4480,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[3].NorthSouth",
+      "offset": 4492,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[3].LatitudeDegree",
+      "offset": 4484,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[3].LatitudeMinute",
+      "offset": 4485,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[3].LatitudeSecondEncoded",
+      "offset": 4486,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[3].EastWest",
+      "offset": 4492,
+      "value": 1
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[3].LongitudeDegree",
+      "offset": 4488,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[3].LongitudeMinute",
+      "offset": 4489,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[3].LongitudeSecondEncoded",
+      "offset": 4490,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[3].Name",
+      "offset": 4494,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[4].Altitude",
+      "offset": 4512,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[4].NorthSouth",
+      "offset": 4524,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[4].LatitudeDegree",
+      "offset": 4516,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[4].LatitudeMinute",
+      "offset": 4517,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[4].LatitudeSecondEncoded",
+      "offset": 4518,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[4].EastWest",
+      "offset": 4524,
+      "value": 1
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[4].LongitudeDegree",
+      "offset": 4520,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[4].LongitudeMinute",
+      "offset": 4521,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[4].LongitudeSecondEncoded",
+      "offset": 4522,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "gps",
+      "name": "gps.MyPositionList[4].Name",
+      "offset": 4526,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.MessageGroup",
+      "offset": 6144,
+      "value": "ALL,QST,CQ,KWD"
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.BulletinGroup",
+      "offset": 6203,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": "All",
+      "menu": "aprs",
+      "name": "aprs.RxBeepType",
+      "offset": 6238,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.TxBeepOnOff",
+      "offset": 6239,
+      "value": true
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.SpecialCall",
+      "offset": 6240,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": "Entire Always",
+      "menu": "aprs",
+      "name": "aprs.InterruptDisplayArea",
+      "offset": 6249,
+      "value": 2
+    },
+    {
+      "is_blob": false,
+      "label": "10",
+      "menu": "aprs",
+      "name": "aprs.InterruptDisplayTime",
+      "offset": 6250,
+      "value": 2
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.CursorControl",
+      "offset": 6251,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.AprsVoice",
+      "offset": 4633,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.NavitraGroupModeOnOff",
+      "offset": 6257,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.NavitraGroupCode",
+      "offset": 6258,
+      "value": "000"
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.QsyInStatus",
+      "offset": 4961,
+      "value": true
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.QsyToneNarrow",
+      "offset": 4962,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.QsyShiftOffset",
+      "offset": 4963,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.QsyLimit",
+      "offset": 4964,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.FilterPositionLimit",
+      "offset": 4965,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.FilterType_Weather",
+      "offset": 4966,
+      "value": true
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.FilterType_Digipeater",
+      "offset": 4966,
+      "value": true
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.FilterType_Mobile",
+      "offset": 4966,
+      "value": true
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.FilterType_Object",
+      "offset": 4966,
+      "value": true
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.FilterType_Navitra",
+      "offset": 4966,
+      "value": true
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.FilterType_1Way",
+      "offset": 4966,
+      "value": true
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.FilterType_Others",
+      "offset": 4966,
+      "value": true
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.IconTableOverlay",
+      "offset": 4967,
+      "value": 47
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.IconSymbol",
+      "offset": 4968,
+      "value": 62
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.IconNavitra",
+      "offset": 4969,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": "Auto",
+      "menu": "aprs",
+      "name": "aprs.BeaconTxMethod",
+      "offset": 4970,
+      "value": 2
+    },
+    {
+      "is_blob": false,
+      "label": "1",
+      "menu": "aprs",
+      "name": "aprs.BeaconTxInterval",
+      "offset": 4971,
+      "value": 2
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.BeaconTxDecay",
+      "offset": 4972,
+      "value": true
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.BeaconTxProportion",
+      "offset": 4973,
+      "value": true
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.LowSpeedSpeed",
+      "offset": 4974,
+      "value": 5
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.HiSpeedSpeed",
+      "offset": 4975,
+      "value": 70
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.SlowRateTime",
+      "offset": 4976,
+      "value": 30
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.FastRateTime",
+      "offset": 4977,
+      "value": 120
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.TurnAngleDeg",
+      "offset": 4978,
+      "value": 28
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.TurnSlopeDegSpeed",
+      "offset": 4979,
+      "value": 26
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.TurnTimeTime",
+      "offset": 4980,
+      "value": 60
+    },
+    {
+      "is_blob": false,
+      "label": "New-N",
+      "menu": "aprs",
+      "name": "aprs.PacketPathType",
+      "offset": 4981,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.PacketPathNewNWide11",
+      "offset": 4982,
+      "value": true
+    },
+    {
+      "is_blob": false,
+      "label": "2",
+      "menu": "aprs",
+      "name": "aprs.PacketPathNewNHops",
+      "offset": 4983,
+      "value": 2
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.PacketPathRelayRelay",
+      "offset": 4984,
+      "value": true
+    },
+    {
+      "is_blob": false,
+      "label": "2",
+      "menu": "aprs",
+      "name": "aprs.PacketPathRelayHops",
+      "offset": 4985,
+      "value": 2
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.PacketPathAbbr",
+      "offset": 4986,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": "2",
+      "menu": "aprs",
+      "name": "aprs.PacketPathRegionHops",
+      "offset": 4991,
+      "value": 2
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.PacketPathOthers",
+      "offset": 4992,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.PacketPathOthers2",
+      "offset": 5071,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.PacketPathOthers3",
+      "offset": 5120,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": "APRS (APK005)",
+      "menu": "aprs",
+      "name": "aprs.NetworkType",
+      "offset": 5216,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.AltnetAddress",
+      "offset": 5217,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.AutoReplyOnOff",
+      "offset": 5296,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": "10",
+      "menu": "aprs",
+      "name": "aprs.AutoReplyDelayTime",
+      "offset": 5297,
+      "value": 1
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.AutoReplyMessage",
+      "offset": 5298,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.AutoReplyTargetCall",
+      "offset": 5365,
+      "value": "*"
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.DigipeatMyCallsign",
+      "offset": 5228,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.UIcheck",
+      "offset": 5229,
+      "value": 28
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.UIdigipeat",
+      "offset": 5230,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.UIdigiAliases",
+      "offset": 5231,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.UItrace",
+      "offset": 5280,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.UItraceAliases",
+      "offset": 5281,
+      "value": "TEMP"
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.UIflood",
+      "offset": 5286,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.UIfloodAliases",
+      "offset": 5287,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": "First",
+      "menu": "aprs",
+      "name": "aprs.UIfloodSubstitution",
+      "offset": 5292,
+      "value": 2
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.NavitraMessageSelect",
+      "offset": 6361,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.ObjectUsedNo",
+      "offset": 6592,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.MyCallsign",
+      "offset": 4608,
+      "value": "KM7HKM"
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.BeaconType",
+      "offset": 4617,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.Frequency",
+      "offset": 4618,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.Ptt",
+      "offset": 4618,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.AprsKey",
+      "offset": 4618,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": "A-Band",
+      "menu": "aprs",
+      "name": "aprs.TncDataBand",
+      "offset": 4619,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": "1200",
+      "menu": "aprs",
+      "name": "aprs.TncDataSpeed",
+      "offset": 4620,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": "Busy",
+      "menu": "aprs",
+      "name": "aprs.TncDcdSense",
+      "offset": 4621,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": "200",
+      "menu": "aprs",
+      "name": "aprs.TncTxDelay",
+      "offset": 4623,
+      "value": 2
+    },
+    {
+      "is_blob": false,
+      "label": "Off",
+      "menu": "aprs",
+      "name": "aprs.PcOutput",
+      "offset": 4630,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": "Off",
+      "menu": "aprs",
+      "name": "aprs.VoiceAlertOnOff",
+      "offset": 4634,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": "100.0",
+      "menu": "aprs",
+      "name": "aprs.VoiceAlertToneNo",
+      "offset": 4635,
+      "value": 12
+    },
+    {
+      "is_blob": false,
+      "label": "NMEA",
+      "menu": "aprs",
+      "name": "aprs.WaypointFormat",
+      "offset": 4627,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": "6-Character",
+      "menu": "aprs",
+      "name": "aprs.WaypointLength",
+      "offset": 4628,
+      "value": 6
+    },
+    {
+      "is_blob": false,
+      "label": "All",
+      "menu": "aprs",
+      "name": "aprs.WaypointOutput",
+      "offset": 4629,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.BeaconSpeedOff",
+      "offset": 4640,
+      "value": true
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.BeaconAltitudeOff",
+      "offset": 4641,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": "In Service",
+      "menu": "aprs",
+      "name": "aprs.PositionComment",
+      "offset": 4642,
+      "value": 2
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.StatusTextSelect",
+      "offset": 4655,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.NavitraMessageList[0].NavitraMessage",
+      "offset": 6261,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.NavitraMessageList[1].NavitraMessage",
+      "offset": 6281,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.NavitraMessageList[2].NavitraMessage",
+      "offset": 6301,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.NavitraMessageList[3].NavitraMessage",
+      "offset": 6321,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.NavitraMessageList[4].NavitraMessage",
+      "offset": 6341,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.StatusTextList[0].StatusText",
+      "offset": 4656,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": "1/4",
+      "menu": "aprs",
+      "name": "aprs.StatusTextList[0].TxRate",
+      "offset": 4698,
+      "value": 4
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.StatusTextList[1].StatusText",
+      "offset": 4704,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": "1/4",
+      "menu": "aprs",
+      "name": "aprs.StatusTextList[1].TxRate",
+      "offset": 4746,
+      "value": 4
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.StatusTextList[2].StatusText",
+      "offset": 4752,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": "1/4",
+      "menu": "aprs",
+      "name": "aprs.StatusTextList[2].TxRate",
+      "offset": 4794,
+      "value": 4
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.StatusTextList[3].StatusText",
+      "offset": 4800,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": "1/4",
+      "menu": "aprs",
+      "name": "aprs.StatusTextList[3].TxRate",
+      "offset": 4842,
+      "value": 4
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.StatusTextList[4].StatusText",
+      "offset": 4864,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": "1/4",
+      "menu": "aprs",
+      "name": "aprs.StatusTextList[4].TxRate",
+      "offset": 4906,
+      "value": 4
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.ObjectList[0].NorthSouth",
+      "offset": 6408,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.ObjectList[0].LatitudeDegree",
+      "offset": 6400,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.ObjectList[0].LatitudeMinute",
+      "offset": 6401,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.ObjectList[0].LatitudeSecondEncoded",
+      "offset": 6402,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.ObjectList[0].EastWest",
+      "offset": 6408,
+      "value": 1
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.ObjectList[0].LongitudeDegree",
+      "offset": 6404,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.ObjectList[0].LongitudeMinute",
+      "offset": 6405,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.ObjectList[0].LongitudeSecondEncoded",
+      "offset": 6406,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.ObjectList[0].Name",
+      "offset": 6409,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": "Live Object",
+      "menu": "aprs",
+      "name": "aprs.ObjectList[0].ObjectTxFormat",
+      "offset": 6418,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": "Temp.",
+      "menu": "aprs",
+      "name": "aprs.ObjectList[0].ObjectTxInterval",
+      "offset": 6419,
+      "value": 1
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.ObjectList[0].ObjectTable",
+      "offset": 6420,
+      "value": 47
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.ObjectList[0].ObjectSymbol",
+      "offset": 6421,
+      "value": 69
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.ObjectList[0].ObjectComment",
+      "offset": 6422,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.ObjectList[1].NorthSouth",
+      "offset": 6472,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.ObjectList[1].LatitudeDegree",
+      "offset": 6464,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.ObjectList[1].LatitudeMinute",
+      "offset": 6465,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.ObjectList[1].LatitudeSecondEncoded",
+      "offset": 6466,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.ObjectList[1].EastWest",
+      "offset": 6472,
+      "value": 1
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.ObjectList[1].LongitudeDegree",
+      "offset": 6468,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.ObjectList[1].LongitudeMinute",
+      "offset": 6469,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.ObjectList[1].LongitudeSecondEncoded",
+      "offset": 6470,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.ObjectList[1].Name",
+      "offset": 6473,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": "Live Object",
+      "menu": "aprs",
+      "name": "aprs.ObjectList[1].ObjectTxFormat",
+      "offset": 6482,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": "Temp.",
+      "menu": "aprs",
+      "name": "aprs.ObjectList[1].ObjectTxInterval",
+      "offset": 6483,
+      "value": 1
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.ObjectList[1].ObjectTable",
+      "offset": 6484,
+      "value": 47
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.ObjectList[1].ObjectSymbol",
+      "offset": 6485,
+      "value": 69
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.ObjectList[1].ObjectComment",
+      "offset": 6486,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.ObjectList[2].NorthSouth",
+      "offset": 6536,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.ObjectList[2].LatitudeDegree",
+      "offset": 6528,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.ObjectList[2].LatitudeMinute",
+      "offset": 6529,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.ObjectList[2].LatitudeSecondEncoded",
+      "offset": 6530,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.ObjectList[2].EastWest",
+      "offset": 6536,
+      "value": 1
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.ObjectList[2].LongitudeDegree",
+      "offset": 6532,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.ObjectList[2].LongitudeMinute",
+      "offset": 6533,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.ObjectList[2].LongitudeSecondEncoded",
+      "offset": 6534,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.ObjectList[2].Name",
+      "offset": 6537,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": "Live Object",
+      "menu": "aprs",
+      "name": "aprs.ObjectList[2].ObjectTxFormat",
+      "offset": 6546,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": "Temp.",
+      "menu": "aprs",
+      "name": "aprs.ObjectList[2].ObjectTxInterval",
+      "offset": 6547,
+      "value": 1
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.ObjectList[2].ObjectTable",
+      "offset": 6548,
+      "value": 47
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.ObjectList[2].ObjectSymbol",
+      "offset": 6549,
+      "value": 69
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.ObjectList[2].ObjectComment",
+      "offset": 6550,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.UserPhraseList[0].UserPhrase",
+      "offset": 5376,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.UserPhraseList[1].UserPhrase",
+      "offset": 5408,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.UserPhraseList[2].UserPhrase",
+      "offset": 5440,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.UserPhraseList[3].UserPhrase",
+      "offset": 5472,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.UserPhraseList[4].UserPhrase",
+      "offset": 5504,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.UserPhraseList[5].UserPhrase",
+      "offset": 5536,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.UserPhraseList[6].UserPhrase",
+      "offset": 5568,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.UserPhraseList[7].UserPhrase",
+      "offset": 5600,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.UserPhraseList[8].UserPhrase",
+      "offset": 5632,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.UserPhraseList[9].UserPhrase",
+      "offset": 5664,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.UserPhraseList[10].UserPhrase",
+      "offset": 5696,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.UserPhraseList[11].UserPhrase",
+      "offset": 5728,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.UserPhraseList[12].UserPhrase",
+      "offset": 5760,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.UserPhraseList[13].UserPhrase",
+      "offset": 5792,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.UserPhraseList[14].UserPhrase",
+      "offset": 5824,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.UserPhraseList[15].UserPhrase",
+      "offset": 5856,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.UserPhraseList[16].UserPhrase",
+      "offset": 5888,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.UserPhraseList[17].UserPhrase",
+      "offset": 5920,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.UserPhraseList[18].UserPhrase",
+      "offset": 5952,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "aprs",
+      "name": "aprs.UserPhraseList[19].UserPhrase",
+      "offset": 5984,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": "Off",
+      "menu": "dv",
+      "name": "dv.DvGatewayModeDvGateway",
+      "offset": 7328,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "dv",
+      "name": "dv.MyCallsignSelectDvGateway",
+      "offset": 7329,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "dv",
+      "name": "dv.RPT1DvGateway",
+      "offset": 7408,
+      "value": "DIRECT"
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "dv",
+      "name": "dv.RPT2DvGateway",
+      "offset": 7416,
+      "value": "DIRECT"
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "dv",
+      "name": "dv.DeviceNameDvGateway",
+      "offset": 6864,
+      "value": "TH-D75"
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "dv",
+      "name": "dv.DirectReplyTxRx",
+      "offset": 6656,
+      "value": true
+    },
+    {
+      "is_blob": false,
+      "label": "Immediate",
+      "menu": "dv",
+      "name": "dv.AutoReplyTimingTxRx",
+      "offset": 6657,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": "Off",
+      "menu": "dv",
+      "name": "dv.DataTxEndTimingTxRx",
+      "offset": 6658,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": "Level 25",
+      "menu": "dv",
+      "name": "dv.EmrVolumeLevelTxRx",
+      "offset": 6659,
+      "value": 25
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "dv",
+      "name": "dv.RxAfcTxRx",
+      "offset": 6660,
+      "value": true
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "dv",
+      "name": "dv.FmAutoDetOnDvTxRx",
+      "offset": 6661,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": "All",
+      "menu": "dv",
+      "name": "dv.DataFrameOutputTxRx",
+      "offset": 6662,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "dv",
+      "name": "dv.GpsInfoInFrameGpsDataTx",
+      "offset": 6666,
+      "value": true
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "dv",
+      "name": "dv.SentenceGpsDataTx_Gpgga",
+      "offset": 6667,
+      "value": true
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "dv",
+      "name": "dv.SentenceGpsDataTx_Gpgll",
+      "offset": 6667,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "dv",
+      "name": "dv.SentenceGpsDataTx_Gprmc",
+      "offset": 6667,
+      "value": true
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "dv",
+      "name": "dv.SentenceGpsDataTx_Gpvtg",
+      "offset": 6667,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "dv",
+      "name": "dv.SentenceGpsDataTx_Gpgsa",
+      "offset": 6667,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "dv",
+      "name": "dv.SentenceGpsDataTx_Gpgsv",
+      "offset": 6667,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "dv",
+      "name": "dv.SentenceGpsDataTx_Aprs",
+      "offset": 6667,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": "Off",
+      "menu": "dv",
+      "name": "dv.AutoTxGpsDataTx",
+      "offset": 6668,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": "All",
+      "menu": "dv",
+      "name": "dv.DisplayMethodRxNotification",
+      "offset": 6669,
+      "value": 1
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "dv",
+      "name": "dv.SingleDisplaySizeRxNotification",
+      "offset": 6670,
+      "value": 1
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "dv",
+      "name": "dv.DualDisplaySizeRxNotification",
+      "offset": 6671,
+      "value": 1
+    },
+    {
+      "is_blob": false,
+      "label": "10",
+      "menu": "dv",
+      "name": "dv.DisplayHoldTimeRxNotification",
+      "offset": 6672,
+      "value": 3
+    },
+    {
+      "is_blob": false,
+      "label": "Off",
+      "menu": "dv",
+      "name": "dv.CallsignAnnounceRxNotification",
+      "offset": 6673,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "dv",
+      "name": "dv.StandbyBeepRxNotification",
+      "offset": 6674,
+      "value": false
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "dv",
+      "name": "dv.AutoReply",
+      "offset": 6688,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "dv",
+      "name": "dv.MyDvMessageSelect",
+      "offset": 6752,
+      "value": 0
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "dv",
+      "name": "dv.MyDvMessageList[0].MyDvMessage",
+      "offset": 6753,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "dv",
+      "name": "dv.MyDvMessageList[1].MyDvMessage",
+      "offset": 6773,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "dv",
+      "name": "dv.MyDvMessageList[2].MyDvMessage",
+      "offset": 6793,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "dv",
+      "name": "dv.MyDvMessageList[3].MyDvMessage",
+      "offset": 6813,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "dv",
+      "name": "dv.MyDvMessageList[4].MyDvMessage",
+      "offset": 6833,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "dv",
+      "name": "dv.MyCallsignDvGatewayList[0].MyCallsignDvGateway",
+      "offset": 7336,
+      "value": "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000"
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "dv",
+      "name": "dv.MyCallsignDvGatewayList[0].MemoDvGateway",
+      "offset": 7344,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "dv",
+      "name": "dv.MyCallsignDvGatewayList[1].MyCallsignDvGateway",
+      "offset": 7348,
+      "value": "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000"
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "dv",
+      "name": "dv.MyCallsignDvGatewayList[1].MemoDvGateway",
+      "offset": 7356,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "dv",
+      "name": "dv.MyCallsignDvGatewayList[2].MyCallsignDvGateway",
+      "offset": 7360,
+      "value": "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000"
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "dv",
+      "name": "dv.MyCallsignDvGatewayList[2].MemoDvGateway",
+      "offset": 7368,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "dv",
+      "name": "dv.MyCallsignDvGatewayList[3].MyCallsignDvGateway",
+      "offset": 7372,
+      "value": "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000"
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "dv",
+      "name": "dv.MyCallsignDvGatewayList[3].MemoDvGateway",
+      "offset": 7380,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "dv",
+      "name": "dv.MyCallsignDvGatewayList[4].MyCallsignDvGateway",
+      "offset": 7384,
+      "value": "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000"
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "dv",
+      "name": "dv.MyCallsignDvGatewayList[4].MemoDvGateway",
+      "offset": 7392,
+      "value": ""
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "dv",
+      "name": "dv.MyCallsignDvGatewayList[5].MyCallsignDvGateway",
+      "offset": 7396,
+      "value": "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000"
+    },
+    {
+      "is_blob": false,
+      "label": null,
+      "menu": "dv",
+      "name": "dv.MyCallsignDvGatewayList[5].MemoDvGateway",
+      "offset": 7404,
+      "value": ""
+    }
+  ],
+  "source_sha256": "25E7330FA52E7AE50E4CE5C0406E41955C06FC0C3A7639C29968B6AF1B85116A"
+}

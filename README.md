@@ -42,6 +42,7 @@ catalog is the source of truth. See
 - [Data-source architecture](docs/data-sources.md) - source provenance, caching, update and merge behavior.
 - [TD-H9 programming guide](docs/td-h9-programming.md) - complete hardware procedure, verified radio facts, cable troubleshooting, and the two failure modes that produce a silently wrong radio.
 - [TH-D75A Ames Lake loadout](docs/th-d75-ames-lake.md) - verified capabilities, 50-mile analog/D-STAR and wideband-receive plan, native-image safety, installed software, hashes, hardware write, and read-back results.
+- [TH-D75A current operator configuration](docs/th-d75-current-configuration.md) - exact tracked MCP image, all 400 decoded settings, power-on bitmap, three recovered manual memories, source conflicts, and regeneration safety.
 - [Agent runbook](docs/agent-runbook.md) - copy-paste procedures for automating this repository, environment layout, API reference, and project invariants.
 - [Lake Ozette profile](docs/ozette-lake.md) - Olympic Peninsula coastal trip profile: Clallam County, SAR/interop, tribal, marine, aviation, and amateur coverage.
 - [Printable mounts and brackets](models/README.md) - parametric OpenSCAD visor mounts, Peak Design Capture bracket, and EFHW antenna enclosure, with print-ready 3MF/STL and the latch/fit reasoning behind each variant.
@@ -55,7 +56,7 @@ catalog is the source of truth. See
 |---|---|---:|---:|---|
 | Uniden SDS150 | Trunk-tracking scanner, receive only | unlimited | 141 Favorites Lists | Verified |
 | TIDRADIO TD-H9 | Analog handheld transceiver | 199 | 185 memories | Verified against hardware |
-| Kenwood TH-D75A | Tri-band analog/D-STAR and wideband receiver | 1,000 + 1,500 DR | 538 memories + 21 DR repeaters | Verified, written and read back |
+| Kenwood TH-D75A | Tri-band analog/D-STAR and wideband receiver | 1,000 + 1,500 DR | 541 memories + 21 DR repeaters | Verified; current image tracked |
 | Yaesu FTX-1 | HF/VHF/UHF transceiver | 999 | 960 statewide **or** 351 local memories | Profile from documentation, **unverified** |
 
 The FTX-1 has two loadouts, chosen from the same dropdown. `ftx1-wa` is the

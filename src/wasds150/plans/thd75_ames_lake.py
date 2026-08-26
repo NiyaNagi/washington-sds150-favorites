@@ -9,6 +9,7 @@ are dropped by the verified TH-D75 profile rather than coerced to analog.
 from __future__ import annotations
 
 from wasds150.models.plan import (
+    SORT_CATALOG,
     SORT_FREQ,
     SORT_NATURAL,
     TX_NONE,
@@ -126,6 +127,7 @@ THD75_AMES_LAKE = ChannelPlan(
             tx_policy=TX_NONE,
             sort=SORT_FREQ,
             limit=10,
+            skip_scan=True,
         ),
         PlanBlock(
             label="SAR and Interop",
@@ -227,6 +229,20 @@ THD75_AMES_LAKE = ChannelPlan(
             sort=SORT_FREQ,
             limit=40,
             skip_scan=True,
+        ),
+        PlanBlock(
+            label="Operator Additions",
+            selectors=(_sel("THD75USER"),),
+            tx_policy=TX_REPEATER,
+            power="5.0W",
+            sort=SORT_CATALOG,
+            limit=20,
+            bank="70cm Repeaters",
+            notes=(
+                "Recovered from the operator's current radio image and kept "
+                "in the existing 70 cm memory group. Settings are preserved "
+                "exactly but are not independently verified."
+            ),
         ),
     ),
 )

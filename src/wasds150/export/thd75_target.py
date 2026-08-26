@@ -255,9 +255,10 @@ def render_thd75(
 
     group_by_block: Dict[str, int] = {}
     for planned in resolved.channels:
-        if len(group_by_block) >= GROUP_COUNT and planned.block not in group_by_block:
+        bank = planned.bank or planned.block
+        if len(group_by_block) >= GROUP_COUNT and bank not in group_by_block:
             raise Thd75ExportError("plan uses more than the TH-D75's 30 memory groups")
-        group_by_block.setdefault(planned.block, len(group_by_block))
+        group_by_block.setdefault(bank, len(group_by_block))
 
     for block, group in group_by_block.items():
         offset = HEADER_SIZE + NAMES_OFFSET + (GROUP_NAME_INDEX + group) * NAME_SIZE
@@ -269,7 +270,7 @@ def render_thd75(
             f"plan resolved {len(resolved.channels)} channels; only the first {MEMORY_COUNT} were written"
         )
     for slot, channel in enumerate(channels):
-        group = group_by_block[channel.block]
+        group = group_by_block[channel.bank or channel.block]
         output[_flag_offset(slot):_flag_offset(slot) + FLAG_SIZE] = bytes((
             _band_code(channel.rx_freq_mhz),
             1 if channel.skip_scan else 0,

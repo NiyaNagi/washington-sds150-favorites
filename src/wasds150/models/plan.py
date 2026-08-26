@@ -153,6 +153,9 @@ class PlanBlock:
     #: Programmed but excluded from the scan sweep.
     skip_scan: bool = False
     notes: str = ""
+    #: Optional radio bank/group name. Blocks remain distinct in reports and
+    #: ordering while sharing a physical group when this names another block.
+    bank: str = ""
 
     def __post_init__(self) -> None:
         if self.tx_policy not in TX_POLICIES:
@@ -202,6 +205,7 @@ class ChannelPlan:
                     "limit": block.limit,
                     "skip_scan": block.skip_scan,
                     "notes": block.notes,
+                    "bank": block.bank,
                 }
                 for block in self.blocks
             ],
