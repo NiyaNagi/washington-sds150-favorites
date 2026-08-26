@@ -17,7 +17,7 @@ from wasds150.radios.tones import (
 
 class TestRegistry:
     def test_known_radios_are_registered(self):
-        assert profile_ids() == ["ftx1", "sds150", "td-h9"]
+        assert profile_ids() == ["ftx1", "sds150", "td-h9", "th-d75"]
 
     def test_lookup_is_case_insensitive(self):
         assert get_profile("TD-H9") is TD_H9

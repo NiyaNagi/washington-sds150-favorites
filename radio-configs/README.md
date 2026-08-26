@@ -11,6 +11,7 @@ can be picked up and loaded without running the toolchain first.
 | `ftx1-wa-report.md` | | Human-readable memory map |
 | `ftx1-local.FTX1` | Yaesu FTX-1 | 351 memories, native format |
 | `ftx1-local-report.md` | | Human-readable memory map |
+| `thd75-ames-lake-report.md` | Kenwood TH-D75A | 538 ordinary memories in 21 groups; native `.d75` remains private |
 
 The two FTX-1 files are alternatives, not additions - loading one replaces the
 radio's memories with the other's. `ftx1-wa` is the statewide inventory;
@@ -24,6 +25,7 @@ files go stale the moment the catalog changes. Regenerate with:
 wasds150 --home .wasds150-home plan export h9-ozette --out radio-configs
 wasds150 --home .wasds150-home plan export ftx1-wa --target ftx1-file --out radio-configs
 wasds150 --home .wasds150-home plan export ftx1-local --target ftx1-file --out radio-configs
+wasds150 --home .wasds150-home plan export thd75-ames-lake --target thd75-file --out radio-configs
 ```
 
 > **Copy the file to wherever you actually load it from.** Exporting writes
@@ -53,6 +55,10 @@ per-channel text from the RT Systems programmer is present. See
   `scripts/radios/program_tdh9.py`. See
   [the programming guide](../docs/td-h9-programming.md).
 - **FTX-1** - open the `.FTX1` directly in the RT Systems programmer.
+- **TH-D75A** - open the private `.d75` in Kenwood MCP-D75, import the filtered
+  native D-STAR list, finalize settings preservation, write, and read back as
+  documented in [the TH-D75 guide](../docs/th-d75-ames-lake.md). Native `.d75`
+  files are ignored because they contain settings read from a specific radio.
 
 The FTX-1 profile is **unverified against hardware**: it was built from
 documentation, and the generated file has been checked against a hand-merged

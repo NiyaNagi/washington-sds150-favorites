@@ -13,11 +13,13 @@ from wasds150.models.plan import ChannelPlan
 from wasds150.plans.ftx1_local import FTX1_LOCAL
 from wasds150.plans.ftx1_wa import FTX1_WA
 from wasds150.plans.h9_ozette import H9_OZETTE
+from wasds150.plans.thd75_ames_lake import THD75_AMES_LAKE
 
 _REGISTRY: Dict[str, ChannelPlan] = {
     H9_OZETTE.id: H9_OZETTE,
     FTX1_WA.id: FTX1_WA,
     FTX1_LOCAL.id: FTX1_LOCAL,
+    THD75_AMES_LAKE.id: THD75_AMES_LAKE,
 }
 
 
@@ -43,6 +45,7 @@ __all__ = [
     "FTX1_LOCAL",
     "FTX1_WA",
     "H9_OZETTE",
+    "THD75_AMES_LAKE",
     "get_plan",
     "list_plans",
     "plan_ids",

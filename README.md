@@ -3,7 +3,7 @@
 A curated statewide radio programming catalog and generator. One unified,
 source-cited database drives every radio: a Uniden SDS150 scanner (organized
 for Sentinel, location control, GPS and quick keys), a TIDRADIO TD-H9
-handheld, and a Yaesu FTX-1.
+handheld, a Kenwood TH-D75A, and a Yaesu FTX-1.
 
 The catalog covers all 39 Washington counties and includes:
 
@@ -41,6 +41,7 @@ catalog is the source of truth. See
 - [Radius-based lists and HF](docs/local-radius-lists.md) - building a list by distance from home rather than by county, why RepeaterBook could not be used, what the WWARA expiry date can and cannot tell you, and the HF nets and beacons worth tuning.
 - [Data-source architecture](docs/data-sources.md) - source provenance, caching, update and merge behavior.
 - [TD-H9 programming guide](docs/td-h9-programming.md) - complete hardware procedure, verified radio facts, cable troubleshooting, and the two failure modes that produce a silently wrong radio.
+- [TH-D75A Ames Lake loadout](docs/th-d75-ames-lake.md) - verified capabilities, 50-mile analog/D-STAR and wideband-receive plan, native-image safety, installed software, hashes, hardware write, and read-back results.
 - [Agent runbook](docs/agent-runbook.md) - copy-paste procedures for automating this repository, environment layout, API reference, and project invariants.
 - [Lake Ozette profile](docs/ozette-lake.md) - Olympic Peninsula coastal trip profile: Clallam County, SAR/interop, tribal, marine, aviation, and amateur coverage.
 - [Printable mounts and brackets](models/README.md) - parametric OpenSCAD visor mounts, Peak Design Capture bracket, and EFHW antenna enclosure, with print-ready 3MF/STL and the latch/fit reasoning behind each variant.
@@ -54,6 +55,7 @@ catalog is the source of truth. See
 |---|---|---:|---:|---|
 | Uniden SDS150 | Trunk-tracking scanner, receive only | unlimited | 141 Favorites Lists | Verified |
 | TIDRADIO TD-H9 | Analog handheld transceiver | 199 | 185 memories | Verified against hardware |
+| Kenwood TH-D75A | Tri-band analog/D-STAR and wideband receiver | 1,000 + 1,500 DR | 538 memories + 21 DR repeaters | Verified, written and read back |
 | Yaesu FTX-1 | HF/VHF/UHF transceiver | 999 | 960 statewide **or** 351 local memories | Profile from documentation, **unverified** |
 
 The FTX-1 has two loadouts, chosen from the same dropdown. `ftx1-wa` is the
@@ -81,26 +83,28 @@ wasds150 loadout diff h9-ozette    # what changed since that snapshot
 wasds150 radios list               # capability profiles
 wasds150 plan list                 # registered channel plans
 wasds150 plan show h9-ozette       # resolved memory map, drops, warnings
+wasds150 plan show thd75-ames-lake # 50-mile + wideband memory map
 wasds150 plan export ftx1-wa --target ftx1-file --out radio-configs
 wasds150 plan export ftx1-local --target ftx1-file --out radio-configs
+wasds150 plan export thd75-ames-lake --target thd75-file --out radio-configs
 ```
 
 The same thing is in the **Radios** tab of `wasds150 ui`: pick a radio from the
 dropdown to see what is loaded, save a snapshot, ask what changed since the last
 one, export a programming file, or program a connected TD-H9.
 
-Ready-made outputs are committed in [`radio-configs/`](radio-configs/) so they
-can be loaded without running anything. Exporting writes there, inside the
-repository — pass `--copy-to` to also drop the file in the folder your
-programmer loads from, because a stale copy looks entirely normal.
+Redistributable ready-made outputs and the TH-D75 report are committed in
+[`radio-configs/`](radio-configs/). Native `.d75` files are deliberately
+ignored because they preserve operator settings from the attached radio.
+Exporting writes the private working file there; pass `--copy-to` to also drop
+it in the folder the programmer loads from.
 
-**Only channel data is written.** A radio's file holds far more than
-frequencies - the FTX-1's also carries CW messages, GPS setup, display data and
-the HOME channels. Exports start from a factory-reset baseline in
-[`radio-templates/`](radio-templates/) and patch only the memory slots, leaving
-every configuration byte identical. That is asserted by a test, because an
-earlier version zeroed about 100 KB of settings and still produced a file that
-loaded with correct memories.
+**Only intended radio regions are written.** A radio file holds far more than
+frequencies. FTX-1 exports start from a factory-reset structural baseline and
+patch memory slots. TH-D75 exports start from an exact private read of that
+radio and replace only ordinary memories, group names and, when imported by
+MCP-D75, the native D-STAR region. APRS/MYCALL, GPS, Bluetooth, display, audio,
+special memories and menu settings remain byte-identical to the backup.
 
 **Per-channel settings are decoded, not guessed.** Operating mode, tone mode,
 CTCSS, repeater shift and scan-skip are each written from the catalog, and each
@@ -111,10 +115,10 @@ probe tooling is `scripts/radios/make_ftx1_probe.py`. Columns the radio derives
 rather than stores — Width, AGC, IPO, the Narrow flags — are inherited from the
 vendor's own per-band defaults instead of invented.
 
-Programming hardware needs CHIRP, which is GPL-3 and therefore never vendored
-or imported. It lives in its own interpreter (`.venv-chirp`) and is driven as a
-subprocess, so `wasds150` itself keeps zero runtime dependencies. Full
-procedure: [TD-H9 programming guide](docs/td-h9-programming.md).
+TD-H9 hardware programming needs CHIRP, which is GPL-3 and therefore never
+vendored. The TH-D75 uses Kenwood's official VCP driver and MCP-D75 for the
+hardware transfer; a pinned GPL-2.0-or-later Rust library independently
+validates the image offline. Full procedures are in the radio-specific guides.
 
 Writing to a radio always backs it up first, always requires an explicit
 `--execute`, and always reads the radio back to verify afterwards.

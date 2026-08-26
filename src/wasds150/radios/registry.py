@@ -139,10 +139,49 @@ FTX1 = RadioProfile(
     verified=False,
 )
 
+#: Kenwood TH-D75A, North American model, firmware 1.03.
+#:
+#: Sources: Kenwood's product specification and in-depth manual, MCP-D75
+#: 1.00, and a physical TH-D75A running firmware 1.03. Band B is the
+#: wideband receiver; Band A's narrower coverage is a subset of it, so the
+#: union is one continuous receive range here. The 1,500-entry native D-STAR
+#: repeater list is separate from the 1,000 ordinary memory channels.
+TH_D75 = RadioProfile(
+    id="th-d75",
+    vendor="Kenwood",
+    model="TH-D75A",
+    rx_bands=((0.1, 524.0),),
+    modes=frozenset({"FM", "NFM", "DV", "AM", "USB", "LSB", "CW", "WFM"}),
+    tx_bands=(
+        (144.0, 148.0),
+        (222.0, 225.0),
+        (430.0, 450.0),
+    ),
+    max_channels=1000,
+    name_max_len=16,
+    name_charset=string.ascii_letters + string.digits + " !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~",
+    supports_trunking=False,
+    supports_talkgroups=False,
+    supports_banks=True,
+    supports_per_channel_tone=True,
+    supports_per_channel_mode=True,
+    supports_per_channel_step=True,
+    notes=(
+        "Tri-band 144/222/430 MHz FM/NFM/D-STAR transceiver with a 0.1-524 "
+        "MHz Band B receiver supporting AM, SSB, CW and WFM. Holds 1,000 "
+        "ordinary memories in 30 named groups plus a separate 1,500-entry "
+        "D-STAR repeater list. No P25, DMR, NXDN, trunk tracking or Fusion "
+        "voice decode. APRS identity is operator-specific and is preserved "
+        "from the radio rather than synthesized."
+    ),
+    verified=True,
+)
+
 _REGISTRY: Dict[str, RadioProfile] = {
     SDS150.id: SDS150,
     TD_H9.id: TD_H9,
     FTX1.id: FTX1,
+    TH_D75.id: TH_D75,
 }
 
 

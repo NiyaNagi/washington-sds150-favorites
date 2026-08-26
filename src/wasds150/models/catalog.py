@@ -104,6 +104,11 @@ class Channel:
     #: radius filter built on those coordinates must allow for it rather than
     #: treat a hard cutoff as authoritative.
     location_precision: str = ""
+    #: D-STAR routing fields used by DV-capable memory-list radios. They are
+    #: optional so scanner and analog-radio catalogs remain radio-neutral.
+    dv_urcall: str = ""
+    dv_rpt1: str = ""
+    dv_rpt2: str = ""
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)

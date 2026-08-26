@@ -34,10 +34,16 @@ def resolve_named_plan(ctx: AppContext, plan_id: str) -> Tuple[ChannelPlan, Reso
     does not contribute channels to a radio plan.  Disabling a list in the UI
     and re-exporting is therefore a supported way to slim a plan down.
     """
+    plan = get_plan(plan_id)
     profile = ctx.load_profile()
     generated = apply_profile(ctx.catalog, profile)
-    catalog = Catalog(favorites=generated.enabled_favorites)
-    plan = get_plan(plan_id)
+    favorites = list(generated.enabled_favorites)
+    if plan.radio_id == "th-d75":
+        from wasds150.catalog.puget_broadcast import favorite as puget_broadcast
+        from wasds150.catalog.thd75_local import favorite as thd75_local
+
+        favorites.extend((puget_broadcast(), thd75_local()))
+    catalog = Catalog(favorites=favorites)
     return plan, resolve_plan(plan, catalog)
 
 
@@ -75,6 +81,9 @@ def channel_row(channel) -> Dict[str, Any]:
         "rx_tone": channel.rx_tone.raw if channel.rx_tone else "",
         "tx_tone": channel.tx_tone.raw if channel.tx_tone else "",
         "comment": channel.comment,
+        "dv_urcall": channel.dv_urcall,
+        "dv_rpt1": channel.dv_rpt1,
+        "dv_rpt2": channel.dv_rpt2,
     }
 
 

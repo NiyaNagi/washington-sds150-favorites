@@ -65,6 +65,9 @@ class PlannedChannel:
     power: str = "5.0W"
     skip_scan: bool = False
     comment: str = ""
+    dv_urcall: str = ""
+    dv_rpt1: str = ""
+    dv_rpt2: str = ""
 
 
 @dataclass
@@ -349,6 +352,9 @@ def resolve_plan(
                 power=block.power,
                 skip_scan=block.skip_scan,
                 comment=channel.notes or "",
+                dv_urcall=getattr(channel, "dv_urcall", ""),
+                dv_rpt1=getattr(channel, "dv_rpt1", ""),
+                dv_rpt2=getattr(channel, "dv_rpt2", ""),
             )
             result.channels.append(planned)
             seen_frequencies[tuning_key] = planned

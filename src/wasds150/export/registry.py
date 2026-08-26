@@ -21,6 +21,7 @@ from typing import Callable, Dict, List
 
 from wasds150.export.chirp_csv import ChirpCsvResult, render_chirp_csv, write_chirp_csv
 from wasds150.export.ftx1_target import render_ftx1, write_ftx1
+from wasds150.export.thd75_target import render_thd75, write_thd75
 from wasds150.plan.resolve import ResolvedPlan
 
 
@@ -104,10 +105,25 @@ FTX1_FILE = ExportTarget(
     write=write_ftx1,
 )
 
+THD75_FILE = ExportTarget(
+    id="thd75-file",
+    radio_id="th-d75",
+    label="Kenwood MCP-D75 memory file",
+    extension=".d75",
+    description=(
+        "Native MCP-D75 file based on the newest private radio backup. Only "
+        "ordinary memories and group names are replaced; operator callsigns, "
+        "APRS, Bluetooth, GPS and menu settings are preserved."
+    ),
+    render=render_thd75,
+    write=write_thd75,
+)
+
 _REGISTRY: Dict[str, ExportTarget] = {
     CHIRP_CSV_TD_H9.id: CHIRP_CSV_TD_H9,
     RT_SYSTEMS_CSV_FTX1.id: RT_SYSTEMS_CSV_FTX1,
     FTX1_FILE.id: FTX1_FILE,
+    THD75_FILE.id: THD75_FILE,
 }
 
 
