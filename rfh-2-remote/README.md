@@ -15,7 +15,8 @@ to the schematic.
 
 | Path | Contents |
 |---|---|
-| `jlcpcb-upload/` | Three ready-to-upload archives. This is what you send to the fab. |
+| [`RFH-2-JLCPCB-all-boards.zip`](RFH-2-JLCPCB-all-boards.zip) | Everything needed to order boards, in one download. |
+| `jlcpcb-upload/` | The three archives individually. This is what actually goes to the fab. |
 | `gerbers/` | The same three board sets, unpacked, for inspection or diffing. |
 | `bom/` | Grouped BOM, per-designator BOM, hardware list, DigiKey cart. |
 | `upstream/` | PY2RAF's Eagle schematic and board, vendored so the BOM and the covers can be regenerated offline. |
@@ -23,6 +24,35 @@ to the schematic.
 | `images/` | Renders and the silkscreen overlay used during validation. |
 | `ASSEMBLY.md` | Build order, standoff sizing, wiring, test. |
 | `ORDERING.md` | Per-archive JLCPCB option tables. |
+
+## Ordering: one download, three orders
+
+Grab **[`RFH-2-JLCPCB-all-boards.zip`](RFH-2-JLCPCB-all-boards.zip)** (219 kB),
+or straight from GitHub:
+
+<https://github.com/NiyaNagi/washington-sds150-favorites/raw/main/rfh-2-remote/RFH-2-JLCPCB-all-boards.zip>
+
+**Do not upload that file to JLCPCB.** It is a carrier, not a board. JLCPCB
+accepts one board design per upload, so unpack it and upload the three inner
+archives as three separate orders:
+
+| Upload | Archive | Board |
+|---|---|---|
+| 1 | `JLCPCB-1-RFH-2-cover.zip` | Front cover / faceplate |
+| 2 | `JLCPCB-2-RFH-2-mainboard.zip` | Keypad PCB (PY2RAF rev C, unmodified) |
+| 3 | `JLCPCB-3-RFH-2-bottom.zip` | Back plate with operating reference |
+
+Options for all three: 2 layer, 1.6 mm FR4, 1 oz copper, HASL, any mask colour,
+white silkscreen, defaults otherwise. Per-board detail is in
+[`ORDERING.md`](ORDERING.md), which also travels inside the bundle.
+
+Boards only — components, screws and standoffs are not part of a PCB order.
+See [`bom/`](bom/README.md).
+
+The bundle is rebuilt from the tracked archives by
+[`scripts/make_upload_bundle.py`](scripts/make_upload_bundle.py),
+byte-for-byte reproducibly, so it cannot drift from the boards it claims to
+contain.
 
 ## The stack
 
@@ -49,8 +79,8 @@ wrong resistor is a wrong button, not a slightly-off button.
 1. Read [`ASSEMBLY.md`](ASSEMBLY.md) step 1 and settle the cover standoff
    height. It decides nothing about the gerbers and everything about whether
    the buttons reach.
-2. Upload the three archives in `jlcpcb-upload/` as three separate orders. See
-   [`ORDERING.md`](ORDERING.md).
+2. Download [`RFH-2-JLCPCB-all-boards.zip`](RFH-2-JLCPCB-all-boards.zip),
+   unpack it, and place three separate JLCPCB orders.
 3. Order parts from [`bom/RFH-2-bom.csv`](bom/RFH-2-bom.csv).
 4. Build per [`ASSEMBLY.md`](ASSEMBLY.md).
 
@@ -77,6 +107,7 @@ python rfh-2-remote\scripts\gen_cover.py       # front cover
 python rfh-2-remote\scripts\gen_bottom.py      # back plate + reference text
 python rfh-2-remote\scripts\validate_cover.py  # geometry assertions
 python rfh-2-remote\scripts\gen_bom.py         # BOM from the schematic
+python rfh-2-remote\scripts\make_upload_bundle.py   # rebuild the one-file bundle
 ```
 
 Output lands in `rfh-2-remote/build/`, which is not tracked. Set `RFH2_BRD` to
