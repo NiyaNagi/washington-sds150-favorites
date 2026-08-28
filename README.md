@@ -56,7 +56,7 @@ catalog is the source of truth. See
 |---|---|---:|---:|---|
 | Uniden SDS150 | Trunk-tracking scanner, receive only | unlimited | 141 Favorites Lists | Verified |
 | TIDRADIO TD-H9 | Analog handheld transceiver | 199 | 185 memories | Verified against hardware |
-| Kenwood TH-D75A | Tri-band analog/D-STAR and wideband receiver | 1,000 + 1,500 DR | 541 memories + 21 DR repeaters | Verified; current image tracked |
+| Kenwood TH-D75A | Tri-band analog/D-STAR and wideband receiver | 1,000 + 1,500 DR | 545 memories + 21 DR repeaters | Verified; current image tracked |
 | Yaesu FTX-1 | HF/VHF/UHF transceiver | 999 | 960 statewide **or** 351 local memories | Profile from documentation, **unverified** |
 
 The FTX-1 has two loadouts, chosen from the same dropdown. `ftx1-wa` is the

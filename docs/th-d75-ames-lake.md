@@ -25,7 +25,7 @@ SHA-256 is:
 `A3F7AA7DF0C0FAE5D44766D8AFB1561BAC9A05798B2EB60650D3D9A148F8351E`
 
 The operator subsequently added three memories and updated personal settings.
-The current 541-memory image, complete typed settings snapshot and exact
+The current 545-memory image, complete typed settings snapshot and exact
 changes are documented in [the current configuration](th-d75-current-configuration.md).
 
 ## What is loaded

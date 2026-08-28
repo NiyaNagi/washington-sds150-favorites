@@ -42,8 +42,9 @@ def resolve_named_plan(ctx: AppContext, plan_id: str) -> Tuple[ChannelPlan, Reso
         from wasds150.catalog.puget_broadcast import favorite as puget_broadcast
         from wasds150.catalog.thd75_local import favorite as thd75_local
         from wasds150.catalog.thd75_user import favorite as thd75_user
+        from wasds150.catalog.thd75_wwara_snapshot import favorite as thd75_wwara
 
-        favorites.extend((puget_broadcast(), thd75_local(), thd75_user()))
+        favorites.extend((puget_broadcast(), thd75_local(), thd75_user(), thd75_wwara()))
     catalog = Catalog(favorites=favorites)
     return plan, resolve_plan(plan, catalog)
 

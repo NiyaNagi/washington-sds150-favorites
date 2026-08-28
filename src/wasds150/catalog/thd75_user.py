@@ -10,7 +10,7 @@ from wasds150.models.catalog import Channel, Department, FavoritesList, System
 from wasds150.models.provenance import Provenance
 from wasds150.util.hashing import stable_id
 
-SOURCE_SHA256 = "25E7330FA52E7AE50E4CE5C0406E41955C06FC0C3A7639C29968B6AF1B85116A"
+SOURCE_SHA256 = "00BB14C49220BA9C2E32AE875567F14E7B4A4DA2C721AE9EC04C23A8A8E5D377"
 
 
 def _channel(label: str, rx: float, tx: float, notes: str) -> Channel:
@@ -31,20 +31,20 @@ def favorite() -> FavoritesList:
         _channel(
             "VAERPT",
             443.050,
-            443.650,
-            "Recovered from operator memory 538: +0.600 MHz, transmit CTCSS 103.5 Hz; independently unverified.",
+            448.050,
+            "Recovered from the latest operator image: +5.000 MHz, transmit CTCSS 103.5 Hz; independently unverified.",
         ),
         _channel(
             "N7QT Redmond",
             442.325,
-            442.925,
-            "Recovered from operator memory 539: FM, +0.600 MHz, transmit CTCSS 103.5 Hz. This conflicts with the current WWARA record describing N7QT on this output as DMR with a +5 MHz input; retained exactly as operator-programmed.",
+            447.325,
+            "Recovered from the latest operator image: FM, +5.000 MHz, transmit CTCSS 103.5 Hz. The offset agrees with WWARA, but the current coordination record describes this output as DMR rather than analog FM; retained exactly as operator-programmed.",
         ),
         _channel(
             "W7AUX",
             442.825,
-            442.825,
-            "Recovered from operator memory 540: FM simplex with transmit CTCSS 103.5 Hz. Current public coordination data list W7AUX on this output as P25; retained exactly as operator-programmed.",
+            447.825,
+            "Recovered from the latest operator image: FM, +5.000 MHz, transmit CTCSS 103.5 Hz. The offset agrees with WWARA, but the current coordination record lists this output as P25 rather than analog FM; retained exactly as operator-programmed.",
         ),
     ]
     return FavoritesList(

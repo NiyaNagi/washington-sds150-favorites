@@ -11,7 +11,7 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 - Added a verified Kenwood TH-D75A profile, native settings-preserving `.d75`
   exporter and `thd75-ames-lake` plan. The connected firmware-1.03 radio now
-  carries 541 ordinary memories across 21 groups plus 21 nearby entries in its
+  carries 545 ordinary memories across 21 groups plus 21 nearby entries in its
   native D-STAR repeater list: all compatible coordinated analog/D-STAR
   repeaters within 50 miles, amateur calling, satellites, NOAA, SAR, wildfire,
   marine, aviation, rail, personal/business radio, CB, local FCC AM/FM
@@ -20,6 +20,9 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   operator's later VAERPT, N7QT Redmond and W7AUX additions, scan lockouts,
   callsign/GPS/APRS/Bluetooth/display settings, and 16-bit power-on bitmap are
   now recovered into the database and an explicitly tracked current image.
+  A fresh WWARA audit added missing WW7MST repeaters on 146.900, 224.680,
+  443.550 and 443.675 MHz; all repeater memories are sorted by group,
+  frequency and name while every supplied non-repeater setting is preserved.
 - Added `ftx1-local`, a 351-channel FTX-1 loadout scoped to what is actually
   reachable from home. Repeaters are filtered to a 60-mile radius of 98053 and
   to current coordinations, which cuts 433 Washington entries to 163. The

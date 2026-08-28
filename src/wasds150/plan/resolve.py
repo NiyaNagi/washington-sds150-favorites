@@ -9,6 +9,7 @@ channels that look programmed.
 """
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from typing import Dict, Iterator, List, Optional, Tuple
 
@@ -352,7 +353,13 @@ def resolve_plan(
                 rx_tone=rx_tone,
                 tx_tone=tx_tone,
                 power=block.power,
-                skip_scan=block.skip_scan,
+                skip_scan=(
+                    block.skip_scan
+                    or bool(
+                        block.skip_label_pattern
+                        and re.search(block.skip_label_pattern, channel.label, re.IGNORECASE)
+                    )
+                ),
                 comment=channel.notes or "",
                 dv_urcall=getattr(channel, "dv_urcall", ""),
                 dv_rpt1=getattr(channel, "dv_rpt1", ""),

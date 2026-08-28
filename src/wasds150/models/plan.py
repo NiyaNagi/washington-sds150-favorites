@@ -152,6 +152,9 @@ class PlanBlock:
     limit: Optional[int] = None
     #: Programmed but excluded from the scan sweep.
     skip_scan: bool = False
+    #: Optional channel-label pattern for individual scan lockouts inside an
+    #: otherwise scannable block.
+    skip_label_pattern: str = ""
     notes: str = ""
     #: Optional radio bank/group name. Blocks remain distinct in reports and
     #: ordering while sharing a physical group when this names another block.
@@ -204,6 +207,7 @@ class ChannelPlan:
                     "sort": block.sort,
                     "limit": block.limit,
                     "skip_scan": block.skip_scan,
+                    "skip_label_pattern": block.skip_label_pattern,
                     "notes": block.notes,
                     "bank": block.bank,
                 }

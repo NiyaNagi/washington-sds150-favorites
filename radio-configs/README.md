@@ -11,8 +11,8 @@ can be picked up and loaded without running the toolchain first.
 | `ftx1-wa-report.md` | | Human-readable memory map |
 | `ftx1-local.FTX1` | Yaesu FTX-1 | 351 memories, native format |
 | `ftx1-local-report.md` | | Human-readable memory map |
-| `thd75-ames-lake-report.md` | Kenwood TH-D75A | 541 ordinary memories in 21 groups |
-| `thd75-current.d75` | Kenwood TH-D75A | Exact operator-requested 541-memory image with all settings |
+| `thd75-ames-lake-report.md` | Kenwood TH-D75A | 545 ordinary memories in 21 groups |
+| `thd75-current.d75` | Kenwood TH-D75A | Exact operator-requested 545-memory image with all settings |
 | `thd75-current-settings.json` | | All 400 typed MCP settings decoded for review |
 | `thd75-power-on-KM7HKM.bmp` | | 240x180 16-bit RGB565 power-on identification image |
 

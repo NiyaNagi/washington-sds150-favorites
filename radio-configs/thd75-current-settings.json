@@ -192,11 +192,11 @@
     },
     {
       "is_blob": false,
-      "label": "30",
+      "label": "Off",
       "menu": "radio",
       "name": "radio.AutoPowerOff",
       "offset": 4215,
-      "value": 2
+      "value": 0
     },
     {
       "is_blob": false,
@@ -396,7 +396,7 @@
       "menu": "radio",
       "name": "radio.KissModeInterface",
       "offset": 4240,
-      "value": 0
+      "value": 1
     },
     {
       "is_blob": false,
@@ -428,7 +428,7 @@
       "menu": "radio",
       "name": "radio.GroupLink0",
       "offset": 4256,
-      "value": 255
+      "value": 0
     },
     {
       "is_blob": false,
@@ -436,7 +436,7 @@
       "menu": "radio",
       "name": "radio.GroupLink1",
       "offset": 4257,
-      "value": 255
+      "value": 1
     },
     {
       "is_blob": false,
@@ -444,7 +444,7 @@
       "menu": "radio",
       "name": "radio.GroupLink2",
       "offset": 4258,
-      "value": 255
+      "value": 2
     },
     {
       "is_blob": false,
@@ -452,7 +452,7 @@
       "menu": "radio",
       "name": "radio.GroupLink3",
       "offset": 4259,
-      "value": 255
+      "value": 3
     },
     {
       "is_blob": false,
@@ -668,7 +668,7 @@
       "menu": "radio",
       "name": "radio.PowerOnMessage",
       "offset": 4288,
-      "value": "HELLO !!"
+      "value": ""
     },
     {
       "is_blob": false,
@@ -760,19 +760,19 @@
     },
     {
       "is_blob": false,
-      "label": "Time Operate",
+      "label": "Carrier Operate",
       "menu": "radio",
       "name": "radio.ScanResumeAnalog",
       "offset": 4108,
-      "value": 0
+      "value": 1
     },
     {
       "is_blob": false,
-      "label": "Seek",
+      "label": "Carrier Operate",
       "menu": "radio",
       "name": "radio.ScanResumeDigital",
       "offset": 4109,
-      "value": 2
+      "value": 1
     },
     {
       "is_blob": false,
@@ -804,7 +804,7 @@
       "menu": "radio",
       "name": "radio.ScanAutoBacklight",
       "offset": 4114,
-      "value": false
+      "value": true
     },
     {
       "is_blob": false,
@@ -916,7 +916,7 @@
       "menu": "radio",
       "name": "radio.QsoLog",
       "offset": 4135,
-      "value": false
+      "value": true
     },
     {
       "is_blob": false,
@@ -1008,19 +1008,19 @@
     },
     {
       "is_blob": false,
-      "label": "Date",
+      "label": "GPS (Altitude)",
       "menu": "radio",
       "name": "radio.SingleBandDisplay",
       "offset": 4195,
-      "value": 3
+      "value": 1
     },
     {
       "is_blob": false,
-      "label": "Type2",
+      "label": "Type1",
       "menu": "radio",
       "name": "radio.MeterType",
       "offset": 4196,
-      "value": 1
+      "value": 0
     },
     {
       "is_blob": false,
@@ -1576,11 +1576,11 @@
     },
     {
       "is_blob": false,
-      "label": "All",
+      "label": "Off",
       "menu": "aprs",
       "name": "aprs.RxBeepType",
       "offset": 6238,
-      "value": 0
+      "value": 4
     },
     {
       "is_blob": false,
@@ -1588,7 +1588,7 @@
       "menu": "aprs",
       "name": "aprs.TxBeepOnOff",
       "offset": 6239,
-      "value": true
+      "value": false
     },
     {
       "is_blob": false,
@@ -1600,19 +1600,19 @@
     },
     {
       "is_blob": false,
-      "label": "Entire Always",
+      "label": "One Line",
       "menu": "aprs",
       "name": "aprs.InterruptDisplayArea",
       "offset": 6249,
-      "value": 2
+      "value": 0
     },
     {
       "is_blob": false,
-      "label": "10",
+      "label": "3",
       "menu": "aprs",
       "name": "aprs.InterruptDisplayTime",
       "offset": 6250,
-      "value": 2
+      "value": 0
     },
     {
       "is_blob": false,
@@ -2152,11 +2152,11 @@
     },
     {
       "is_blob": false,
-      "label": "Off",
+      "label": "RX Only",
       "menu": "aprs",
       "name": "aprs.VoiceAlertOnOff",
       "offset": 4634,
-      "value": 0
+      "value": 2
     },
     {
       "is_blob": false,
@@ -3207,5 +3207,5 @@
       "value": ""
     }
   ],
-  "source_sha256": "25E7330FA52E7AE50E4CE5C0406E41955C06FC0C3A7639C29968B6AF1B85116A"
+  "source_sha256": "03BC9BA3ED4F94F9A3BE68D14ED9245CC1F5EB0C17C61637304F6EFBF4193F07"
 }

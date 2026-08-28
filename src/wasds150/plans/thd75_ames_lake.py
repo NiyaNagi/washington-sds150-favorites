@@ -9,7 +9,6 @@ are dropped by the verified TH-D75 profile rather than coerced to analog.
 from __future__ import annotations
 
 from wasds150.models.plan import (
-    SORT_CATALOG,
     SORT_FREQ,
     SORT_NATURAL,
     TX_NONE,
@@ -58,7 +57,10 @@ THD75_AMES_LAKE = ChannelPlan(
     blocks=(
         PlanBlock(
             label="2m Repeaters",
-            selectors=(_near("PSHAM01", dept=r"Analog 2 Meter|Linked Analog", ranges=((144.0, 148.0),)),),
+            selectors=(
+                _near("PSHAM01", dept=r"Analog 2 Meter|Linked Analog", ranges=((144.0, 148.0),)),
+                _near("THD75WWARA", dept=r"2 Meter", ranges=((144.0, 148.0),)),
+            ),
             tx_policy=TX_REPEATER,
             power="5.0W",
             sort=SORT_FREQ,
@@ -66,7 +68,10 @@ THD75_AMES_LAKE = ChannelPlan(
         ),
         PlanBlock(
             label="1.25m Repeaters",
-            selectors=(_near("PSHAM01", dept=r"Analog 1.25 Meter|Linked Analog", ranges=((222.0, 225.0),)),),
+            selectors=(
+                _near("PSHAM01", dept=r"Analog 1.25 Meter|Linked Analog", ranges=((222.0, 225.0),)),
+                _near("THD75WWARA", dept=r"1.25 Meter", ranges=((222.0, 225.0),)),
+            ),
             tx_policy=TX_REPEATER,
             power="5.0W",
             sort=SORT_FREQ,
@@ -74,11 +79,18 @@ THD75_AMES_LAKE = ChannelPlan(
         ),
         PlanBlock(
             label="70cm Repeaters",
-            selectors=(_near("PSHAM01", dept=r"Analog 70 Centimeter|Linked Analog", ranges=((430.0, 450.0),)),),
+            selectors=(
+                _near("PSHAM01", dept=r"Analog 70 Centimeter|Linked Analog", ranges=((430.0, 450.0),)),
+                _near("THD75WWARA", dept=r"70 Centimeter", ranges=((430.0, 450.0),)),
+                _sel("THD75USER"),
+            ),
             tx_policy=TX_REPEATER,
             power="5.0W",
             sort=SORT_FREQ,
             limit=180,
+            skip_label_pattern=(
+                r"^AA7MI - Nordland$|^K7NP - University Place$"
+            ),
         ),
         PlanBlock(
             label="D-STAR Local",
@@ -87,6 +99,7 @@ THD75_AMES_LAKE = ChannelPlan(
             power="5.0W",
             sort=SORT_FREQ,
             limit=40,
+            skip_label_pattern=r"^K7LWH\s+C Bellevue$",
             notes="Also loaded into the radio's native DR repeater list.",
         ),
         PlanBlock(
@@ -229,20 +242,6 @@ THD75_AMES_LAKE = ChannelPlan(
             sort=SORT_FREQ,
             limit=40,
             skip_scan=True,
-        ),
-        PlanBlock(
-            label="Operator Additions",
-            selectors=(_sel("THD75USER"),),
-            tx_policy=TX_REPEATER,
-            power="5.0W",
-            sort=SORT_CATALOG,
-            limit=20,
-            bank="70cm Repeaters",
-            notes=(
-                "Recovered from the operator's current radio image and kept "
-                "in the existing 70 cm memory group. Settings are preserved "
-                "exactly but are not independently verified."
-            ),
         ),
     ),
 )

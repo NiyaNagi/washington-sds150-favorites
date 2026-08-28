@@ -9,6 +9,7 @@ from wasds150.catalog.baseline import load_baseline
 from wasds150.catalog.puget_broadcast import favorite as puget_broadcast
 from wasds150.catalog.thd75_local import favorite as thd75_local
 from wasds150.catalog.thd75_user import favorite as thd75_user
+from wasds150.catalog.thd75_wwara_snapshot import favorite as thd75_wwara
 from wasds150.export.thd75_target import (
     FILE_SIZE,
     MODE_CODES,
@@ -44,14 +45,26 @@ def test_current_operator_artifacts_are_complete_and_consistent() -> None:
 
     image = image_path.read_bytes()
     digest = hashlib.sha256(image).hexdigest().upper()
-    assert digest == "25E7330FA52E7AE50E4CE5C0406E41955C06FC0C3A7639C29968B6AF1B85116A"
+    assert digest == "03BC9BA3ED4F94F9A3BE68D14ED9245CC1F5EB0C17C61637304F6EFBF4193F07"
     rows = inspect_thd75(image)
-    assert len(rows) == 541
-    assert [(row["slot"], row["name"]) for row in rows[-3:]] == [
-        (538, "VAERPT"),
-        (539, "N7QTREDMOND"),
-        (540, "W7AUX"),
-    ]
+    assert len(rows) == 545
+    by_memory_name = {row["name"]: row for row in rows}
+    assert by_memory_name["N7QTREDMOND"]["slot"] == 96
+    assert by_memory_name["W7AUX"]["slot"] == 102
+    assert by_memory_name["VAERPT"]["slot"] == 108
+    assert all(by_memory_name[name]["tx_value_mhz"] == 5.0 for name in (
+        "N7QTREDMOND", "W7AUX", "VAERPT"
+    ))
+    assert any(
+        row["name"] == "WW7MSTSEATTLE" and row["rx_mhz"] == 146.9
+        for row in rows
+    )
+    repeaters = [row for row in rows if row["group"] in (0, 1, 2, 3)]
+    assert all(
+        (left["group"], left["rx_mhz"], left["name"].upper())
+        <= (right["group"], right["rx_mhz"], right["name"].upper())
+        for left, right in zip(repeaters, repeaters[1:])
+    )
 
     settings = json.loads(settings_path.read_text(encoding="utf-8"))
     assert settings["source_sha256"] == digest
@@ -87,18 +100,28 @@ def test_thd75_profile_matches_verified_capabilities() -> None:
 
 def test_local_extensions_resolve_into_thd75_plan() -> None:
     catalog = load_baseline()
-    catalog.favorites.extend((puget_broadcast(), thd75_local(), thd75_user()))
+    catalog.favorites.extend((
+        puget_broadcast(), thd75_local(), thd75_user(), thd75_wwara()
+    ))
     resolved = resolve_plan(THD75_AMES_LAKE, catalog)
     assert resolved.block_counts["D-STAR Local"] == 21
     assert resolved.block_counts["FM Broadcast"] == 32
     assert resolved.block_counts["AM Broadcast"] == 29
-    assert resolved.block_counts["Operator Additions"] == 3
     additions = [
-        channel for channel in resolved.channels if channel.block == "Operator Additions"
+        channel for channel in resolved.channels
+        if channel.source.startswith("THD75USER/")
     ]
-    assert [channel.name for channel in additions] == ["VAERPT", "N7QTREDMOND", "W7AUX"]
+    assert [channel.name for channel in additions] == ["N7QTREDMOND", "W7AUX", "VAERPT"]
+    assert all(channel.block == "70cm Repeaters" for channel in additions)
     assert all(channel.bank == "70cm Repeaters" for channel in additions)
-    assert [channel.tx_freq_mhz for channel in additions] == [443.65, 442.925, 442.825]
+    assert [channel.tx_freq_mhz for channel in additions] == [447.325, 447.825, 448.05]
+    snapshot = [
+        channel for channel in resolved.channels
+        if channel.source.startswith("THD75WWARA/")
+    ]
+    assert {channel.rx_freq_mhz for channel in snapshot} == {
+        146.9, 224.68, 443.55, 443.675, 444.825
+    }
     assert any(channel.rx_freq_mhz == 223.5 for channel in resolved.channels)
     assert all(channel.mode != "P25" for channel in resolved.channels)
     assert all(channel.mode != "DMR" for channel in resolved.channels)
