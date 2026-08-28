@@ -60,31 +60,46 @@ BANDS = [
     ('1.25m','222.0-225.0',   '222.0-225.0'),
     ('70cm', '420-450',       '420-450'),
 ]
-QCODES = [
-    ('QRL', 'freq in use?'),   ('QRZ', 'who is calling'),
-    ('QRM', 'interference'),   ('QSB', 'signal fading'),
-    ('QRN', 'static noise'),   ('QSL', 'acknowledged'),
-    ('QRO', 'increase pwr'),   ('QSO', 'a contact'),
-    ('QRP', 'reduce power'),   ('QSY', 'change freq'),
-    ('QRS', 'send slower'),    ('QTH', 'my location'),
-    ('QRT', 'closing down'),   ('QRG', 'exact freq'),
-    ('QRV', 'ready to copy'),  ('QTR', 'correct time'),
-    ('QRX', 'stand by'),       ('QSK', 'break-in ok'),
-]
-SIMPLEX = [
-    '6m 52.525    2m 146.520    70cm 446.000',
-    'offset  2m +/-600k   70cm +/-5M   6m -500k',
-    'RST  R1-5 readable  S1-9 strength  T1-9 tone',
-    '73 regards  DE from  K over  SK end  CQ calling',
+
+# USB dial frequencies in MHz. These are conventions rather than allocations:
+# unlike the band edges above, they move by consensus.
+DIGITAL = [
+    ('160m', '1.840'), ('80m', '3.573'), ('60m', '5.357'), ('40m', '7.074'),
+    ('30m', '10.136'), ('20m', '14.074'), ('17m', '18.100'), ('15m', '21.074'),
+    ('12m', '24.915'), ('10m', '28.074'), ('6m', '50.313'), ('2m', '144.174'),
 ]
 
-H_TITLE, H_HEAD, H_BODY = 2.4, 1.7, 1.45
-P_BODY = 2.05
+QCODES = [
+    ('QRL', 'freq busy?'),   ('QRZ', 'who calls'),   ('QRM', 'interference'),
+    ('QSB', 'fading'),       ('QRN', 'static'),      ('QSL', 'acknowledged'),
+    ('QRO', 'incr power'),   ('QSO', 'a contact'),   ('QRP', 'redu power'),
+    ('QSY', 'change freq'),  ('QRS', 'send slower'), ('QTH', 'my location'),
+    ('QRT', 'closing down'), ('QRG', 'exact freq'),  ('QRV', 'ready'),
+    ('QTR', 'correct time'), ('QRX', 'stand by'),    ('QSK', 'break-in ok'),
+]
+
+SIGNAL = [
+    'RST  R 1-5 readable   S 1-9 strength   T 1-9 tone (CW only)',
+    'S9 = 50 uV/50 ohm   1 S-unit = 6 dB   +3 dB = 2x   +6 dB = 4x',
+    'DIPOLE 468/f(MHz) ft   VERT 234/f ft   WAVELEN 300/f(MHz) m',
+]
+
+OPERATING = [
+    'SIMPLEX  6m 52.525   2m 146.520   1.25m 223.500   70cm 446.000',
+    'OFFSET   6m -500k   2m +/-600k   1.25m -1.6M   70cm +/-5M',
+    'SSTV 14.230   PSK31 14.070   APRS 144.390   SAT call 145.990',
+    'EMERG  marine ch16 156.800   air 121.500   NOAA 162.400-.550',
+    'UTC = PST+8 = PDT+7    73 regards   88 love   DE from   K over',
+]
+
+H_TITLE, H_HEAD, H_BODY = 2.3, 1.5, 1.25
+P_BODY = 1.65
 
 x0, x1 = MARGIN, BW - MARGIN
-# start below the top mounting-hole keepouts, end above the bottom ones
+# Stay clear of the mounting-hole keepouts at both ends of the board, so every
+# line can run the full width instead of dodging holes at the bottom.
 y_top = min(h[1] for h in mount if h[1] > BH/2) - HOLE_KEEPOUT - 1.0
-y_bot = MARGIN
+y_bot = max(h[1] for h in mount if h[1] < BH/2) + HOLE_KEEPOUT + 0.2
 avail_w = x1 - x0
 
 lines = []
@@ -97,32 +112,51 @@ def nl(p):
     global y
     y -= p
 
-put(CALL, x0, H_TITLE); nl(H_TITLE + 1.0)
-put('RFH-2 REMOTE  -  OPERATING REFERENCE', x0, H_HEAD); nl(H_HEAD + 1.6)
+def head(txt):
+    """Section heading, with the space above it that separates sections."""
+    put(txt, x0, H_HEAD)
+    nl(H_HEAD + 0.7)
 
-put('US BANDS  GENERAL  CW/DATA | PHONE', x0, H_HEAD); nl(H_HEAD + 1.0)
-cw_x, ph_x = x0 + 11.0, x0 + 32.0
+def row(cells):
+    """One row of (text, x) cells at body size."""
+    for txt, x in cells:
+        lines.append((txt, x, y, H_BODY))
+    nl(P_BODY)
+
+put(CALL, x0, H_TITLE); nl(H_TITLE + 0.8)
+put('RFH-2 REMOTE  -  OPERATING REFERENCE', x0, H_HEAD); nl(H_HEAD + 1.3)
+
+head('US BANDS  GENERAL   CW/DATA | PHONE')
+cw_x, ph_x = x0 + 10.0, x0 + 30.0
 for b, cw, ph in BANDS:
-    lines.append((b, x0, y, H_BODY))
-    lines.append((cw, cw_x, y, H_BODY))
-    lines.append((ph, ph_x, y, H_BODY))
-    nl(P_BODY)
+    row([(b, x0), (cw, cw_x), (ph, ph_x)])
 
-nl(1.4)
-put('Q CODES', x0, H_HEAD); nl(H_HEAD + 1.0)
-col2 = x0 + 34.0
-for i in range(0, len(QCODES), 2):
-    a = QCODES[i]
-    lines.append((f'{a[0]} {a[1]}', x0, y, H_BODY))
-    if i + 1 < len(QCODES):
-        b = QCODES[i+1]
-        lines.append((f'{b[0]} {b[1]}', col2, y, H_BODY))
-    nl(P_BODY)
+nl(0.8)
+head('FT8 USB DIAL  MHz')
+# four bands per row; the table would otherwise cost twice the height
+dig_x = [x0, x0 + 7.5, x0 + 18.0, x0 + 25.5, x0 + 36.0, x0 + 43.0, x0 + 53.5, x0 + 60.5]
+for i in range(0, len(DIGITAL), 4):
+    cells = []
+    for j, (band, freq) in enumerate(DIGITAL[i:i + 4]):
+        cells += [(band, dig_x[j * 2]), (freq, dig_x[j * 2 + 1])]
+    row(cells)
 
-nl(1.4)
-put('CALLING / REPORTS', x0, H_HEAD); nl(H_HEAD + 1.0)
-for s in SIMPLEX:
-    put(s, x0, H_BODY); nl(P_BODY)
+nl(0.8)
+head('Q CODES')
+qcol = [x0, x0 + 23.5, x0 + 47.0]
+for i in range(0, len(QCODES), 3):
+    row([(f'{code} {meaning}', qcol[j])
+         for j, (code, meaning) in enumerate(QCODES[i:i + 3])])
+
+nl(0.8)
+head('SIGNAL REPORTS AND FORMULAS')
+for s in SIGNAL:
+    row([(s, x0)])
+
+nl(0.8)
+head('OPERATING')
+for s in OPERATING:
+    row([(s, x0)])
 
 errs = []
 bottom = min(l[2] for l in lines)
@@ -138,9 +172,26 @@ for txt, lx, ly, size in lines:
                     and lx < cx + HOLE_KEEPOUT and lx + w > cx - HOLE_KEEPOUT):
                 errs.append(f'hits mounting hole: {txt!r}')
 
+# Multi-column rows can collide with each other, which a right-margin check
+# alone will not catch. Compare every pair of cells sharing a baseline.
+COL_GAP = 0.8
+rows_by_y = {}
+for txt, lx, ly, size in lines:
+    rows_by_y.setdefault(round(ly, 3), []).append((lx, txt, size))
+for ly, cells in rows_by_y.items():
+    cells.sort()
+    for (ax, atxt, asize), (bx, btxt, bsize) in zip(cells, cells[1:]):
+        right = ax + width_of(atxt, asize)
+        if right + COL_GAP > bx:
+            errs.append(
+                f'columns collide at y={ly:.1f}: {atxt!r} ends {right:.1f}, '
+                f'{btxt!r} starts {bx:.1f}'
+            )
+
 print(f'usable area   : {avail_w:.1f} x {y_top-y_bot:.1f} mm')
 print(f'content height: {y_top-bottom:.1f} mm (bottom y={bottom:.1f}, margin {y_bot})')
-print(f'text objects  : {len(lines)}')
+print(f'vertical spare: {bottom-y_bot:.1f} mm')
+print(f'text objects  : {len(lines)}  rows {len(rows_by_y)}')
 wl = max(lines, key=lambda l: width_of(l[0], l[3]))
 print(f'widest line   : {width_of(wl[0], wl[3]):.1f} mm  {wl[0]!r}')
 if errs:
@@ -154,7 +205,8 @@ def hdr(n): return ['G04 RFH-2 bottom plate - generated from RFH-2.brd*',
                     'G75*', '%MOMM*%', '%FSLAX44Y44*%', '%LPD*%',
                     f'%IN{n}*%', '%IPPOS*%', 'G01*']
 def write(fn, body):
-    open(os.path.join(OUT, fn), 'w').write('\n'.join(body) + '\nM02*\n')
+    # newline='\n' so a Windows run produces the same bytes as a Linux one.
+    open(os.path.join(OUT, fn), 'w', newline='\n').write('\n'.join(body) + '\nM02*\n')
 def polyline(pts):
     o = [f'X{c(pts[0][0])}Y{c(pts[0][1])}D02*']
     for x, yy in pts[1:]: o.append(f'X{c(x)}Y{c(yy)}D01*')
@@ -180,7 +232,7 @@ for fn, nm in [('RFH-2-bottom.GTL','Copper Top'), ('RFH-2-bottom.GBL','Copper Bo
 drill = ['M48','METRIC,TZ','FMAT,2','T01C5.000','G90','G05','%','T01']
 drill += [f'X{hx:.3f}Y{hy:.3f}' for hx, hy, hd in mount]
 drill += ['T00','M30']
-open(os.path.join(OUT,'RFH-2-bottom.DRL'),'w').write('\n'.join(drill)+'\n')
+open(os.path.join(OUT,'RFH-2-bottom.DRL'),'w',newline='\n').write('\n'.join(drill)+'\n')
 
 json.dump({'board':[BW,BH], 'mount_holes':[list(h) for h in mount],
            'n_lines':len(lines), 'callsign':CALL},

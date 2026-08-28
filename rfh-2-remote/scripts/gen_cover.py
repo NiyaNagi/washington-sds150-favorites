@@ -149,10 +149,10 @@ SWITCH_CLEAR = 0.5     # beyond the 3.5 mm cutout radius
 HOLE_KEEPOUT = 3.6
 
 SECTIONS = [
-    ('CW NUMERALS AND PROSIGNS', [
-        '1 .----   2 ..---   3 ...--   4 ....-   5 .....',
-        '6 -....   7 --...   8 ---..   9 ----.   0 -----',
-        'AR OVER   BK BREAK-IN   KN NAMED STN ONLY   AS WAIT   BT PAUSE',
+    ('MORSE CODE', [
+        'A .-    B -...  C -.-.  D -..   E .     F ..-.  G --.   H ....  I ..',
+        'J .---  K -.-   L .-..  M --    N -.    O ---   P .--.  Q --.-  R .-.',
+        'S ...   T -     U ..-   V ...-  W .--   X -..-  Y -.--  Z --..',
     ]),
     ('ITU PHONETIC ALPHABET', [
         'A ALFA  B BRAVO  C CHARLIE  D DELTA  E ECHO  F FOXTROT  G GOLF',
@@ -160,10 +160,10 @@ SECTIONS = [
         'O OSCAR  P PAPA  Q QUEBEC  R ROMEO  S SIERRA  T TANGO  U UNIFORM',
         'V VICTOR  W WHISKEY  X XRAY  Y YANKEE  Z ZULU',
     ]),
-    ('ANTENNA, SIGNAL AND TIME', [
-        'HALF-WAVE DIPOLE 468/f(MHz) ft   QUARTER-WAVE VERT 234/f ft',
-        'WAVELENGTH 300/f(MHz) m   1 S-UNIT = 6 dB   S9 = 50 uV',
-        'DOUBLE POWER = +3 dB   UTC = PST + 8 h = PDT + 7 h',
+    ('NUMERALS AND PROSIGNS', [
+        '1 .----  2 ..---  3 ...--  4 ....-  5 .....   / -..-.',
+        '6 -....  7 --...  8 ---..  9 ----.  0 -----   ? ..--..',
+        'AR .-.-. END   SK ...-.- CLEAR   KN -.--. NAMED   BT -...- PAUSE',
     ]),
 ]
 

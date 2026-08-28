@@ -62,24 +62,35 @@ The two printed faces are deliberately split so neither repeats the other.
 
 | Section | Contents |
 |---|---|
-| CW numerals and prosigns | 0-9 in Morse, plus AR, BK, KN, AS, BT |
+| Morse code | All 26 letters |
 | ITU phonetic alphabet | All 26 letters |
-| Antenna, signal and time | Dipole 468/f, quarter-wave 234/f, wavelength 300/f, S-unit = 6 dB, S9 = 50 uV, +3 dB = double power, UTC offsets |
+| Numerals and prosigns | 0-9, `/`, `?`, plus AR, SK, KN, BT |
 
-**Back plate**, read when the unit is flipped over: US General-class band edges
-for 14 bands, 18 Q codes, simplex calling frequencies, repeater offsets, RST,
-and common CW abbreviations.
+**Back plate**, read when the unit is flipped over:
 
-Nothing on the cover is positioned by hand. `gen_cover.py` derives the free
+| Section | Contents |
+|---|---|
+| US bands, General | CW/data and phone edges for 14 bands |
+| FT8 USB dial | 12 bands, 160 m through 2 m |
+| Q codes | 18, in three columns |
+| Signal reports and formulas | RST, S-meter, dB/power, dipole and vertical lengths |
+| Operating | Simplex calling, repeater offsets, SSTV/PSK31/APRS/satellite, emergency frequencies, UTC offsets |
+
+The split is deliberate: the cover is a CW card, the back is everything else.
+Neither repeats the other.
+
+Nothing on either board is positioned by hand. `gen_cover.py` derives the free
 bands from the board's own obstacles — switch cutouts, mounting-hole keepouts,
 existing legends and arrows — then re-checks every rendered line against that
-same geometry. A line that would overlap a cutout or run past a margin fails
-the build rather than shipping quietly. Line pitch expands to fill whatever
-each band leaves spare, so sections breathe instead of bunching.
+same geometry. `gen_bottom.py` measures each line against the usable area, the
+mounting-hole keepouts, and, for multi-column rows, against the neighbouring
+column. A line that would collide or overrun fails the build rather than
+shipping quietly.
 
-The reference text is a memory aid. Band allocations change and the S-meter
-figures are a convention rather than a calibration; verify anything that
-matters before keying up.
+The reference text is a memory aid. Band allocations change, the FT8 dial
+frequencies are convention rather than regulation, and the S-meter figures are
+a convention rather than a calibration; verify anything that matters before
+keying up.
 
 ## The stack
 
@@ -133,7 +144,7 @@ pip install -r rfh-2-remote\requirements.txt
 python rfh-2-remote\scripts\gen_cover.py       # front cover
 python rfh-2-remote\scripts\gen_bottom.py      # back plate + reference text
 python rfh-2-remote\scripts\validate_cover.py  # geometry assertions
-python rfh-2-remote\scripts\pack_cover.py      # repack the cover archive
+python rfh-2-remote\scripts\pack_boards.py all # repack cover + back plate
 python rfh-2-remote\scripts\render_previews.py # refresh images/
 python rfh-2-remote\scripts\gen_bom.py         # BOM from the schematic
 python rfh-2-remote\scripts\gen_jlcpcb_assembly.py  # JLCPCB BOM + CPL
@@ -143,10 +154,12 @@ python rfh-2-remote\scripts\make_upload_bundle.py   # rebuild the one-file bundl
 Output lands in `rfh-2-remote/build/`, which is not tracked. Set `RFH2_BRD` to
 point the generators at a different board file.
 
-`pack_cover.py` renames the drill program from `.TXT` to `.DRL` on the way in,
-and **refuses to pack if any layer other than the silkscreen changed**. The
-cover's geometry comes from `RFH-2.brd`; if editing artwork moves a mounting
-hole, that is a bug, and the packer stops rather than shipping it.
+`pack_boards.py` renames the cover's drill program from `.TXT` to `.DRL` on the
+way in, and **refuses to pack if any layer other than the silkscreen changed**.
+Board geometry comes from `RFH-2.brd`; if editing artwork moves a mounting
+hole, that is a bug, and the packer stops rather than shipping it. It caught a
+real one: the back plate generator was writing CRLF on Windows, which would
+have rewritten all seven geometry layers.
 
 `gen_bottom.py` measures every line against the usable area and the
 mounting-hole keepouts, so content that would run off the board fails the build
