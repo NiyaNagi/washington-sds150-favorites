@@ -6,7 +6,7 @@ All geometry is derived from RFH-2.brd -- nothing is hand-typed.
 Written as plain text so that validation (gerbonara) is an independent parse.
 """
 import xml.etree.ElementTree as ET
-import os, math, json
+import os, math, json, sys
 from gerbonara.newstroke import Newstroke
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -68,7 +68,8 @@ def header(name):
             f'%IN{name}*%', '%IPPOS*%', 'G01*']
 
 def write(fn, body):
-    with open(os.path.join(OUT, fn), 'w') as f:
+    # newline='\n' so a Windows run produces the same bytes as a Linux one.
+    with open(os.path.join(OUT, fn), 'w', newline='\n') as f:
         f.write('\n'.join(body) + '\nM02*\n')
 
 def polyline(pts):
@@ -128,6 +129,148 @@ _cx, _cy = (BW - _w) / 2, 7.4
 for st in _cs:
     silk += polyline([(px + _cx, py + _cy) for px, py in st])
 print(f'callsign     : {CALLSIGN!r} {_w:.1f}mm wide at x={_cx:.1f} y={_cy}')
+
+# ---- 4b. operating reference in the gaps between switch rows -----------
+# Content is chosen to complement the back plate, not repeat it: the back
+# carries band edges, Q codes, RST and CW abbreviations, so the front carries
+# the phonetic alphabet, CW numerals and the bench formulas instead.
+#
+# Nothing here is positioned by hand. The free horizontal bands are derived
+# from the board's own obstacles, and every line is then re-checked against
+# that geometry, so a line that would collide fails the build.
+
+REF_MARGIN_L = 6.5     # clears the rotated credit text at x <= 5.0
+REF_MARGIN_R = 3.0
+H_HEAD, H_BODY = 1.45, 1.2
+GAP = 0.9
+PITCH_MIN, PITCH_MAX = 1.75, 2.4
+PAD_MIN = 0.3
+SWITCH_CLEAR = 0.5     # beyond the 3.5 mm cutout radius
+HOLE_KEEPOUT = 3.6
+
+SECTIONS = [
+    ('CW NUMERALS AND PROSIGNS', [
+        '1 .----   2 ..---   3 ...--   4 ....-   5 .....',
+        '6 -....   7 --...   8 ---..   9 ----.   0 -----',
+        'AR OVER   BK BREAK-IN   KN NAMED STN ONLY   AS WAIT   BT PAUSE',
+    ]),
+    ('ITU PHONETIC ALPHABET', [
+        'A ALFA  B BRAVO  C CHARLIE  D DELTA  E ECHO  F FOXTROT  G GOLF',
+        'H HOTEL  I INDIA  J JULIETT  K KILO  L LIMA  M MIKE  N NOVEMBER',
+        'O OSCAR  P PAPA  Q QUEBEC  R ROMEO  S SIERRA  T TANGO  U UNIFORM',
+        'V VICTOR  W WHISKEY  X XRAY  Y YANKEE  Z ZULU',
+    ]),
+    ('ANTENNA, SIGNAL AND TIME', [
+        'HALF-WAVE DIPOLE 468/f(MHz) ft   QUARTER-WAVE VERT 234/f ft',
+        'WAVELENGTH 300/f(MHz) m   1 S-UNIT = 6 dB   S9 = 50 uV',
+        'DOUBLE POWER = +3 dB   UTC = PST + 8 h = PDT + 7 h',
+    ]),
+]
+
+
+def width_of(s, size):
+    st = text_strokes(s, 0, 0, size)
+    return max(p[0] for k in st for p in k) if st else 0.0
+
+
+# obstacles the reference text must avoid: (cx, cy, r) and (x0, y0, x1, y1)
+circles = [(sx, sy, PLUNGER_HOLE_DIA / 2 + SWITCH_CLEAR)
+           for sx, sy in switches.values()]
+circles += [(hx, hy, HOLE_KEEPOUT) for hx, hy, _ in mount_holes]
+
+rects = []
+for txt, lx, ly, size in labels:
+    rects.append((lx, ly - 0.3, lx + width_of(txt, size), ly + size + 0.3))
+for poly in arrows:
+    axs = [p[0] for p in poly]
+    ays = [p[1] for p in poly]
+    rects.append((min(axs), min(ays), max(axs), max(ays)))
+rects.append((3.2, 30.0, 5.0, 49.5))                       # rotated credit
+rects.append((_cx, _cy - 0.3, _cx + _w, _cy + 2.6 + 0.3))  # callsign
+
+# free full-width horizontal bands = gaps between merged obstacle y-extents.
+# Only obstacles that actually intrude into the text column count; the rotated
+# credit sits left of it and must not block a band it never reaches.
+x_left = REF_MARGIN_L
+x_right = BW - REF_MARGIN_R
+
+spans = [(cy - r, cy + r) for cx, cy, r in circles
+         if cx - r < x_right and cx + r > x_left]
+spans += [(y0, y1) for x0, y0, x1, y1 in rects
+          if x0 < x_right and x1 > x_left]
+spans.sort()
+merged = []
+for lo, hi in spans:
+    if merged and lo <= merged[-1][1]:
+        merged[-1][1] = max(merged[-1][1], hi)
+    else:
+        merged.append([lo, hi])
+
+bands, prev = [], 0.0
+for lo, hi in merged:
+    if lo - prev > 1.0:
+        bands.append((prev, lo))
+    prev = max(prev, hi)
+if BH - prev > 1.0:
+    bands.append((prev, BH))
+
+# usable bands: tall enough for a section, and not the callsign strip
+usable = sorted([b for b in bands if b[1] - b[0] >= 7.5 and b[0] > 12.0],
+                key=lambda b: -b[1])
+print(f'free bands   : {[f"{a:.1f}-{b:.1f}" for a, b in bands]}')
+print(f'usable bands : {[f"{a:.1f}-{b:.1f}" for a, b in usable]}')
+
+if len(usable) < len(SECTIONS):
+    sys.exit(f'ERROR: {len(SECTIONS)} sections but only {len(usable)} usable bands')
+
+ref_lines = []
+DESC = 0.3 * H_BODY     # descender allowance, matching the collision check
+for (band_lo, band_hi), (head, rows) in zip(usable, SECTIONS):
+    # Let the line pitch grow into whatever the band leaves spare, so a short
+    # section breathes instead of bunching at the top of its gap.
+    fixed = H_HEAD + GAP + H_BODY + DESC
+    spare = (band_hi - band_lo) - 2 * PAD_MIN - fixed
+    pitch = max(PITCH_MIN, min(PITCH_MAX, spare / max(1, len(rows) - 1)))
+    total = fixed + (len(rows) - 1) * pitch
+    pad = (band_hi - band_lo - total) / 2
+    y_head = band_hi - pad - H_HEAD
+    print(f'  band {band_lo:5.1f}-{band_hi:5.1f}  pitch {pitch:.2f}  pad {pad:.2f}  {head}')
+    ref_lines.append((head, x_left, y_head, H_HEAD))
+    for i, row in enumerate(rows):
+        ref_lines.append((row, x_left, y_head - GAP - H_BODY - i * pitch, H_BODY))
+
+# ---- validate every line against the real geometry ---------------------
+errs = []
+for txt, lx, ly, size in ref_lines:
+    w = width_of(txt, size)
+    bx0, by0, bx1, by1 = lx, ly - 0.3 * size, lx + w, ly + size
+    if bx1 > x_right + 0.01:
+        errs.append(f'{txt[:34]!r} overruns right margin by {bx1 - x_right:.2f} mm')
+    if bx0 < 2.5 or by0 < 2.5 or by1 > BH - 2.5:
+        errs.append(f'{txt[:34]!r} outside board margin')
+    for cx, cy, r in circles:
+        nx, ny = max(bx0, min(cx, bx1)), max(by0, min(cy, by1))
+        if math.hypot(cx - nx, cy - ny) < r:
+            errs.append(f'{txt[:34]!r} hits cutout/hole at ({cx:.1f}, {cy:.1f})')
+    for rx0, ry0, rx1, ry1 in rects:
+        if bx0 < rx1 and bx1 > rx0 and by0 < ry1 and by1 > ry0:
+            errs.append(f'{txt[:34]!r} overlaps existing silk at y={ry0:.1f}')
+
+widest = max(ref_lines, key=lambda l: width_of(l[0], l[3]))
+print(f'reference    : {len(ref_lines)} lines, usable width {x_right - x_left:.1f} mm')
+print(f'widest line  : {width_of(widest[0], widest[3]):.1f} mm  {widest[0][:40]!r}')
+if errs:
+    print('\nLAYOUT ERRORS:')
+    for e in sorted(set(errs)):
+        print('  -', e)
+    sys.exit(1)
+print('reference layout fits')
+
+for txt, lx, ly, size in ref_lines:
+    for st in text_strokes(txt, lx, ly, size):
+        silk += polyline(st)
+        n_strokes += 1
+
 write('RFH-2-cover.GTO', silk)
 
 # outline: board rectangle + 12 routed plunger holes (>6.3mm -> not drillable)
@@ -158,7 +301,7 @@ for i, d in enumerate(tools, 1):
         if hd == d:
             drill.append(f'X{hx:.3f}Y{hy:.3f}')
 drill += ['T00', 'M30']
-with open(os.path.join(OUT, 'RFH-2-cover.TXT'), 'w') as f:
+with open(os.path.join(OUT, 'RFH-2-cover.TXT'), 'w', newline='\n') as f:
     f.write('\n'.join(drill) + '\n')
 
 # machine-readable record of intent, for the validator to check against

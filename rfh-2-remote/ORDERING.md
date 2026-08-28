@@ -11,6 +11,12 @@ mounting holes, verified identical to the micron across all three archives.
 The faceplate. Generated from `RFH-2.brd`, so its outline, mounting holes
 and plunger cutouts match the main board by construction.
 
+The silkscreen carries an operating reference in the three gaps between the
+switch rows: CW numerals and prosigns, the ITU phonetic alphabet, and antenna
+and signal formulas. Body text is 1.2 mm high with a 0.20 mm stroke, above
+JLCPCB's 0.15 mm silkscreen minimum, so it will print — but it is small, and
+white on a dark mask reads best.
+
 | Option | Value |
 |---|---|
 | Layers | 2 |

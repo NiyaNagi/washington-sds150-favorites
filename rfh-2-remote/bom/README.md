@@ -20,6 +20,38 @@ before it goes in the board.
 | `RFH-2-bom-flat.csv` | One row per reference designator, for stuffing and check-off. |
 | `RFH-2-hardware-bom.csv` | Screws, standoffs and cable — not on any PCB order. |
 | `digikey-cart.csv` | Bulk-add list for DigiKey, one spare per value. See caveat below. |
+| `JLCPCB-BOM.csv` | Assembly BOM in JLCPCB's column format. See the assembly caveat. |
+| `JLCPCB-CPL.csv` | Pick-and-place / centroid file, same. |
+
+## JLCPCB assembly: read this first
+
+`JLCPCB-BOM.csv` and `JLCPCB-CPL.csv` exist so the option can be **priced**,
+not because assembly is the recommended route.
+
+**Every part on this board is through-hole.** JLCPCB's assembly service is
+built around SMT; through-hole is quoted separately, is not always offered,
+and 10 mm lead-pitch axial resistors are unlikely to be in their parts library
+at all. Expect to be told no, or to be quoted more than the board costs.
+
+**The `LCSC Part #` column is deliberately empty.** Nothing is pre-filled,
+because an unverified part number on an assembly order is not a typo you catch
+in proofreading — it is a delivered board full of wrong resistors, and on this
+design a wrong resistor is a wrong button. Fill it in yourself from LCSC and
+check every line against the value table below.
+
+**`P/B` contains a slash.** That designator comes from upstream's schematic.
+Some fab-side parsers reject non-alphanumeric designators; if yours does,
+rename it in *both* files together or the placement will be orphaned.
+
+Placement coordinates are each element's origin, which this board's footprints
+put at the body centre. That is verified rather than assumed: two-pad parts
+must have their origin at the pad midpoint, and switch origins must sit on the
+plunger axis that the cover cutouts are drilled on. `gen_jlcpcb_assembly.py`
+fails rather than emitting an offset centroid.
+
+For the switch specifically, note that averaging its six pads would be *wrong*
+by 0.167 mm — the two 1.7 mm contacts sit at y=0 while the four support posts
+sit at +6.0 and −6.5, so the mean is dragged off the plunger axis.
 
 ## Electronics
 

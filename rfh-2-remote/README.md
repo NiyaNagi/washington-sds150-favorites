@@ -54,6 +54,33 @@ The bundle is rebuilt from the tracked archives by
 byte-for-byte reproducibly, so it cannot drift from the boards it claims to
 contain.
 
+## What is printed on the boards
+
+The two printed faces are deliberately split so neither repeats the other.
+
+**Front cover**, in the three gaps between the switch rows:
+
+| Section | Contents |
+|---|---|
+| CW numerals and prosigns | 0-9 in Morse, plus AR, BK, KN, AS, BT |
+| ITU phonetic alphabet | All 26 letters |
+| Antenna, signal and time | Dipole 468/f, quarter-wave 234/f, wavelength 300/f, S-unit = 6 dB, S9 = 50 uV, +3 dB = double power, UTC offsets |
+
+**Back plate**, read when the unit is flipped over: US General-class band edges
+for 14 bands, 18 Q codes, simplex calling frequencies, repeater offsets, RST,
+and common CW abbreviations.
+
+Nothing on the cover is positioned by hand. `gen_cover.py` derives the free
+bands from the board's own obstacles — switch cutouts, mounting-hole keepouts,
+existing legends and arrows — then re-checks every rendered line against that
+same geometry. A line that would overlap a cutout or run past a margin fails
+the build rather than shipping quietly. Line pitch expands to fill whatever
+each band leaves spare, so sections breathe instead of bunching.
+
+The reference text is a memory aid. Band allocations change and the S-meter
+figures are a convention rather than a calibration; verify anything that
+matters before keying up.
+
 ## The stack
 
 | Layer | Board | Notes |
@@ -106,16 +133,20 @@ pip install -r rfh-2-remote\requirements.txt
 python rfh-2-remote\scripts\gen_cover.py       # front cover
 python rfh-2-remote\scripts\gen_bottom.py      # back plate + reference text
 python rfh-2-remote\scripts\validate_cover.py  # geometry assertions
+python rfh-2-remote\scripts\pack_cover.py      # repack the cover archive
+python rfh-2-remote\scripts\render_previews.py # refresh images/
 python rfh-2-remote\scripts\gen_bom.py         # BOM from the schematic
+python rfh-2-remote\scripts\gen_jlcpcb_assembly.py  # JLCPCB BOM + CPL
 python rfh-2-remote\scripts\make_upload_bundle.py   # rebuild the one-file bundle
 ```
 
 Output lands in `rfh-2-remote/build/`, which is not tracked. Set `RFH2_BRD` to
 point the generators at a different board file.
 
-`gen_cover.py` writes its drill program as `RFH-2-cover.TXT`; the shipped
-archive renames it to `.DRL` so that the fab's parser is not left choosing
-between it and a `.txt` readme. Do the same if you repackage.
+`pack_cover.py` renames the drill program from `.TXT` to `.DRL` on the way in,
+and **refuses to pack if any layer other than the silkscreen changed**. The
+cover's geometry comes from `RFH-2.brd`; if editing artwork moves a mounting
+hole, that is a bug, and the packer stops rather than shipping it.
 
 `gen_bottom.py` measures every line against the usable area and the
 mounting-hole keepouts, so content that would run off the board fails the build
