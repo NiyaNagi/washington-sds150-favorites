@@ -1,0 +1,18 @@
+# CAM output must round-trip byte for byte. Git's autocrlf would rewrite line
+# endings on checkout and break the guarantee that gerbers/ matches the
+# archives in jlcpcb-upload/, which scripts/verify_uploads.py relies on.
+*.gbr   -text
+*.xln   -text
+*.DRL   -text
+*.GBL   -text
+*.GBO   -text
+*.GBS   -text
+*.GKO   -text
+*.GTL   -text
+*.GTO   -text
+*.GTS   -text
+
+# Upstream Eagle sources are the input to the BOM and cover generators; keep
+# them exactly as PY2RAF published them.
+upstream/*.brd  -text
+upstream/*.sch  -text
