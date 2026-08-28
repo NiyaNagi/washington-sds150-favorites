@@ -1,0 +1,7 @@
+Qty,Item,Specification,Notes
+4,Machine screw,"M4 x 25-30 mm, pan or button head","Length depends on the standoffs you choose. Measure the assembled stack first: 1.6 + upper gap + 1.6 + lower gap + 1.6 mm, plus thread engagement."
+8,Standoff,"M4 female-female, 4 standoffs at the cover height and 4 at 3-5 mm","Four above the main board set plunger protrusion, four below only need to clear clipped leads. See ASSEMBLY.md for the cover height test."
+4,Nut or thread,"M4 nut, or tapped standoffs","Not needed if using female-female standoffs with screws from both ends."
+1,Audio cable,"3.5 mm TRS plug to bare wire, 1-2 m","Wire tip and sleeve only. Leave the ring floating. Upstream README is explicit about this."
+1,Solder,"60/40 or lead-free, 0.6-0.8 mm",Through-hole assembly only.
+1,Rubber feet,"Self-adhesive, 4 pcs (optional)","Stops the back plate sliding on a desk."

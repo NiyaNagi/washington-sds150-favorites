@@ -11,6 +11,23 @@ cited here (byte offsets, field meanings, safety rules), independently
 re-derived rather than translated or adapted line-by-line from any
 reference implementation.
 
+## Scope exception: `rfh-2-remote/`
+
+The facts-only discipline described above covers `src/wasds150` and the radio
+programming tooling. It does **not** cover `rfh-2-remote/`, which is a
+deliberate, fully-attributed derivative work.
+
+That folder vendors PY2RAF's **GPL-3.0** RFH-2 keypad design
+(`github.com/rfrht/RFH-2`) — the Eagle schematic and board file, and the
+upstream gerber set — and adds a cover and back plate generated from
+`RFH-2.brd`. Copying is the point there, and it is done under the GPL rather
+than around it.
+
+`rfh-2-remote/` therefore carries its own `LICENSE` (GPL-3.0) and is licensed
+under those terms, not the MIT license that covers the rest of this
+repository. Nothing in `rfh-2-remote/` is imported by, or links to, anything
+in `src/`.
+
 ## Ground truth
 
 - Uniden **File Specification V1.03/V2.00** and **Remote Command

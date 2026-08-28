@@ -1,0 +1,127 @@
+# RFH-2 Remote — enclosure boards, BOM and build notes
+
+A three-board sandwich for the [RFH-2](https://github.com/rfrht/RFH-2), PY2RAF's
+open-source clone of the Yaesu FH-2 remote keypad. Compatible with the FT-991A,
+FT-991, FT-950, FTDX-9000/5000/3000/1200, FT-2000 and FT-1000MP.
+
+Upstream ships the keypad PCB only. This folder adds a front cover and a back
+plate, puts an operating reference on the back so the unit is useful when you
+flip it over, and carries the BOM and build documentation that upstream leaves
+to the schematic.
+
+![front and back](images/front-and-back.png)
+
+## What is in here
+
+| Path | Contents |
+|---|---|
+| `jlcpcb-upload/` | Three ready-to-upload archives. This is what you send to the fab. |
+| `gerbers/` | The same three board sets, unpacked, for inspection or diffing. |
+| `bom/` | Grouped BOM, per-designator BOM, hardware list, DigiKey cart. |
+| `upstream/` | PY2RAF's Eagle schematic and board, vendored so the BOM and the covers can be regenerated offline. |
+| `scripts/` | Generators for the cover and back plate, plus two independent verifiers. |
+| `images/` | Renders and the silkscreen overlay used during validation. |
+| `ASSEMBLY.md` | Build order, standoff sizing, wiring, test. |
+| `ORDERING.md` | Per-archive JLCPCB option tables. |
+
+## The stack
+
+| Layer | Board | Notes |
+|---|---|---|
+| Top | `gerbers/cover` | Faceplate. 12 plunger cutouts, legends, callsign. |
+| Middle | `gerbers/mainboard` | Upstream PY2RAF board, rev C, unmodified. |
+| Bottom | `gerbers/bottom` | Back plate. Operating reference on the outward face. |
+
+All three share a 76 × 90 mm outline and the same four 5.0 mm mounting holes.
+The cover and back plate geometry is derived programmatically from upstream's
+`RFH-2.brd`, so they cannot drift from the main board.
+
+## How it works
+
+There is no microcontroller. Each of the 12 buttons switches a different
+resistor into a divider, and the radio decides which key you pressed from the
+voltage on the tip of a 3.5 mm plug. That is the whole design, and it is why
+[`bom/README.md`](bom/README.md) is worth reading before you order parts: a
+wrong resistor is a wrong button, not a slightly-off button.
+
+## Quick start
+
+1. Read [`ASSEMBLY.md`](ASSEMBLY.md) step 1 and settle the cover standoff
+   height. It decides nothing about the gerbers and everything about whether
+   the buttons reach.
+2. Upload the three archives in `jlcpcb-upload/` as three separate orders. See
+   [`ORDERING.md`](ORDERING.md).
+3. Order parts from [`bom/RFH-2-bom.csv`](bom/RFH-2-bom.csv).
+4. Build per [`ASSEMBLY.md`](ASSEMBLY.md).
+
+## Verification
+
+```powershell
+.\.venv\Scripts\python.exe rfh-2-remote\scripts\verify_uploads.py
+```
+
+`verify_uploads.py` has no third-party dependencies. It opens each archive and
+checks the layer set, flat structure, drill count and diameters against
+JLCPCB's 0.3–6.3 mm plated window, the outline extent, and that the mounting
+holes agree across all three boards. Last run: **39 checks, all passing**, with
+the four mounting holes identical to the micron on every board.
+
+`scripts/accept_zips.py` does the same job through `gerbonara`, so a bug in one
+parser does not hide behind the same bug in the other.
+
+## Regenerating
+
+```powershell
+pip install -r rfh-2-remote\requirements.txt
+python rfh-2-remote\scripts\gen_cover.py       # front cover
+python rfh-2-remote\scripts\gen_bottom.py      # back plate + reference text
+python rfh-2-remote\scripts\validate_cover.py  # geometry assertions
+python rfh-2-remote\scripts\gen_bom.py         # BOM from the schematic
+```
+
+Output lands in `rfh-2-remote/build/`, which is not tracked. Set `RFH2_BRD` to
+point the generators at a different board file.
+
+`gen_cover.py` writes its drill program as `RFH-2-cover.TXT`; the shipped
+archive renames it to `.DRL` so that the fab's parser is not left choosing
+between it and a `.txt` readme. Do the same if you repackage.
+
+`gen_bottom.py` measures every line against the usable area and the
+mounting-hole keepouts, so content that would run off the board fails the build
+rather than shipping quietly. Callsigns are the `CALL` and `CALLSIGN` constants
+at the top of `gen_bottom.py` and `gen_cover.py`.
+
+## Two things to know before ordering
+
+**The cover has no copper.** Neither does the back plate. The copper and paste
+layers are intentionally empty. A blank copper layer in JLCPCB's DFM preview is
+correct.
+
+**Do not rename the mainboard drill file.** It is `drills.xln` because that is
+what upstream ships. Renaming it to `.DRL` caused a parser to find zero holes on
+a 122-hole board. The only changes made to upstream's set were flattening the
+`CAMOutputs/` folders and dropping the `.gbrjob`.
+
+## Back plate reference data
+
+US band edges are FCC §97.301 allocations as published in the ARRL band chart
+rev 1/16/2026, including the WRC-15 60 m segment effective 13 Feb 2026. The
+band table shows **General class** privileges. Frequencies are regulatory fact;
+nothing is copied from ARRL's chart layout.
+
+**Verify against current FCC rules before relying on silkscreen for anything
+on-air.** Allocations change and a board is a snapshot, not an authority.
+
+The silkscreen carries the callsigns `KM7HKM / WA7DAM`. `WA7DAM` was a vanity
+request that may not have been granted — check before fabricating a board with
+it on the front.
+
+## Licensing
+
+**This folder is GPL-3.0**, unlike the rest of this repository, which is MIT.
+It contains and derives from PY2RAF's GPL-3.0 work. See [`LICENSE`](LICENSE).
+
+- Keypad design, schematic, board, legends and arrow artwork: PY2RAF,
+  [`github.com/rfrht/RFH-2`](https://github.com/rfrht/RFH-2), GPL-3.0
+- Faceplate concept: Jim N5JGE, who built the first one
+- Cover, back plate, BOM tooling and documentation here: KM7HKM
