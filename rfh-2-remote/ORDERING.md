@@ -11,9 +11,9 @@ mounting holes, verified identical to the micron across all three archives.
 The faceplate. Generated from `RFH-2.brd`, so its outline, mounting holes
 and plunger cutouts match the main board by construction.
 
-The silkscreen carries a CW reference in the three gaps between the switch
-rows: the Morse alphabet, the ITU phonetic alphabet, and numerals with
-prosigns. Body text is 1.2 mm high with a 0.20 mm stroke, above JLCPCB's
+The silkscreen carries a CW reference in the top strip and three gaps between
+the switch rows: useful CW abbreviations, the Morse alphabet, the ITU phonetic
+alphabet, and numerals with prosigns. Body text is 1.2 mm high with a 0.20 mm stroke, above JLCPCB's
 0.15 mm silkscreen minimum, so it will print — but it is small, and white on a
 dark mask reads best.
 
@@ -60,8 +60,9 @@ Same fab options as the cover. Silkscreen is on the **bottom** side and
 mirrored, so it reads correctly when you turn the unit over. Copper layers
 are empty here too.
 
-The back plate is densely printed: band edges, FT8 dial frequencies, Q codes,
-signal formulas and operating frequencies, at 1.25 mm body height. It is the
+The back plate is densely printed: band edges, integrated FT8 dial frequencies
+and typical-use notes, Q codes, power/rule reminders, signal formulas and
+operating frequencies, at 1.25 mm body height. It is the
 most silkscreen-heavy board of the three, so if you are choosing a mask
 colour for legibility, choose it for this one.
 

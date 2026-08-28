@@ -44,29 +44,34 @@ def width_of(s, size):
     if not st: return 0.0
     return max(p[0] for k in st for p in k)
 
+# band, General CW/data, General phone, FT8 USB dial, typical character.
+#
+# The first three columns are FCC 97.301 allocations -- regulatory fact. The
+# last two are not: FT8 dial frequencies are convention and move by consensus,
+# and the character column is a rule of thumb for picking a band, not a
+# guarantee. They share a table because that is how you actually use them,
+# but they do not share an authority.
 BANDS = [
-    ('160m', '1.800-2.000',   '1.800-2.000'),
-    ('80m',  '3.525-3.600',   '3.800-4.000'),
-    ('60m',  '5 chan USB',    '9.15W WRC seg'),
-    ('40m',  '7.025-7.125',   '7.175-7.300'),
-    ('30m',  '10.100-10.150', 'no phone'),
-    ('20m',  '14.025-14.150', '14.225-14.350'),
-    ('17m',  '18.068-18.110', '18.110-18.168'),
-    ('15m',  '21.025-21.200', '21.275-21.450'),
-    ('12m',  '24.890-24.930', '24.930-24.990'),
-    ('10m',  '28.000-28.300', '28.300-29.700'),
-    ('6m',   '50.0-50.1',     '50.1-54.0'),
-    ('2m',   '144.0-144.1',   '144.1-148.0'),
-    ('1.25m','222.0-225.0',   '222.0-225.0'),
-    ('70cm', '420-450',       '420-450'),
+    ('160m', '1.800-2.000',   '1.800-2.000',   '1.840',   'night'),
+    ('80m',  '3.525-3.600',   '3.800-4.000',   '3.573',   'night'),
+    ('60m',  '5 chan USB',    '9.15W WRC seg', '5.357',   'chan night'),
+    ('40m',  '7.025-7.125',   '7.175-7.300',   '7.074',   'day+night'),
+    ('30m',  '10.100-10.150', 'no phone',      '10.136',  'WARC'),
+    ('20m',  '14.025-14.150', '14.225-14.350', '14.074',  'day DX'),
+    ('17m',  '18.068-18.110', '18.110-18.168', '18.100',  'WARC day'),
+    ('15m',  '21.025-21.200', '21.275-21.450', '21.074',  'day sun'),
+    ('12m',  '24.890-24.930', '24.930-24.990', '24.915',  'WARC sun'),
+    ('10m',  '28.000-28.300', '28.300-29.700', '28.074',  'Es sun'),
+    ('6m',   '50.0-50.1',     '50.1-54.0',     '50.313',  'Es magic'),
+    ('2m',   '144.0-144.1',   '144.1-148.0',   '144.174', 'local FM'),
+    ('1.25m','222.0-225.0',   '222.0-225.0',   '',        'local FM'),
+    ('70cm', '420-450',       '420-450',       '',        'local FM'),
 ]
 
-# USB dial frequencies in MHz. These are conventions rather than allocations:
-# unlike the band edges above, they move by consensus.
-DIGITAL = [
-    ('160m', '1.840'), ('80m', '3.573'), ('60m', '5.357'), ('40m', '7.074'),
-    ('30m', '10.136'), ('20m', '14.074'), ('17m', '18.100'), ('15m', '21.074'),
-    ('12m', '24.915'), ('10m', '28.074'), ('6m', '50.313'), ('2m', '144.174'),
+RULES = [
+    'POWER  1500 W PEP max   30m 200 W   60m 100 W EIRP',
+    'ID  every 10 min and at end of contact   phone/CW/RTTY all count',
+    'WARC 30/17/12m  no contests   60m  USB only, 2.8 kHz, ch 1-5',
 ]
 
 QCODES = [
@@ -126,20 +131,19 @@ def row(cells):
 put(CALL, x0, H_TITLE); nl(H_TITLE + 0.8)
 put('RFH-2 REMOTE  -  OPERATING REFERENCE', x0, H_HEAD); nl(H_HEAD + 1.3)
 
-head('US BANDS  GENERAL   CW/DATA | PHONE')
-cw_x, ph_x = x0 + 10.0, x0 + 30.0
-for b, cw, ph in BANDS:
-    row([(b, x0), (cw, cw_x), (ph, ph_x)])
+head('US BANDS  GENERAL    CW/DATA | PHONE | FT8 | TYPICAL')
+cw_x, ph_x, ft8_x, use_x = x0 + 10.0, x0 + 30.0, x0 + 48.0, x0 + 57.0
+for b, cw, ph, ft8, use in BANDS:
+    cells = [(b, x0), (cw, cw_x), (ph, ph_x)]
+    if ft8:
+        cells.append((ft8, ft8_x))
+    cells.append((use, use_x))
+    row(cells)
 
 nl(0.8)
-head('FT8 USB DIAL  MHz')
-# four bands per row; the table would otherwise cost twice the height
-dig_x = [x0, x0 + 7.5, x0 + 18.0, x0 + 25.5, x0 + 36.0, x0 + 43.0, x0 + 53.5, x0 + 60.5]
-for i in range(0, len(DIGITAL), 4):
-    cells = []
-    for j, (band, freq) in enumerate(DIGITAL[i:i + 4]):
-        cells += [(band, dig_x[j * 2]), (freq, dig_x[j * 2 + 1])]
-    row(cells)
+head('POWER AND RULES')
+for s in RULES:
+    row([(s, x0)])
 
 nl(0.8)
 head('Q CODES')

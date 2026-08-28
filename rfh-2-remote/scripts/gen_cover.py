@@ -132,8 +132,9 @@ print(f'callsign     : {CALLSIGN!r} {_w:.1f}mm wide at x={_cx:.1f} y={_cy}')
 
 # ---- 4b. operating reference in the gaps between switch rows -----------
 # Content is chosen to complement the back plate, not repeat it: the back
-# carries band edges, Q codes, RST and CW abbreviations, so the front carries
-# the phonetic alphabet, CW numerals and the bench formulas instead.
+# carries band edges, Q codes, signal reports and operating frequencies, so
+# the front is a CW card -- Morse, phonetics, numerals, prosigns and the
+# abbreviations you actually send.
 #
 # Nothing here is positioned by hand. The free horizontal bands are derived
 # from the board's own obstacles, and every line is then re-checked against
@@ -147,8 +148,15 @@ PITCH_MIN, PITCH_MAX = 1.75, 2.4
 PAD_MIN = 0.3
 SWITCH_CLEAR = 0.5     # beyond the 3.5 mm cutout radius
 HOLE_KEEPOUT = 3.6
+DESC = 0.3 * H_BODY    # descender allowance, matching the collision check
 
+# (heading or None, rows). A section with no heading is a single strip that
+# can drop into a gap too shallow for a titled block -- the one above the top
+# switch row is only 3.4 mm tall.
 SECTIONS = [
+    (None, [
+        'CW ABBR  TNX THANKS  HW HOW COPY  ES AND  UR YOUR  RIG STATION',
+    ]),
     ('MORSE CODE', [
         'A .-    B -...  C -.-.  D -..   E .     F ..-.  G --.   H ....  I ..',
         'J .---  K -.-   L .-..  M --    N -.    O ---   P .--.  Q --.-  R .-.',
@@ -166,6 +174,14 @@ SECTIONS = [
         'AR .-.-. END   SK ...-.- CLEAR   KN -.--. NAMED   BT -...- PAUSE',
     ]),
 ]
+
+
+def section_height(head, rows):
+    """Vertical space a section needs at the tightest legal line pitch."""
+    height = H_BODY + DESC + (len(rows) - 1) * PITCH_MIN
+    if head:
+        height += H_HEAD + GAP
+    return height
 
 
 def width_of(s, size):
@@ -214,30 +230,46 @@ for lo, hi in merged:
 if BH - prev > 1.0:
     bands.append((prev, BH))
 
-# usable bands: tall enough for a section, and not the callsign strip
-usable = sorted([b for b in bands if b[1] - b[0] >= 7.5 and b[0] > 12.0],
-                key=lambda b: -b[1])
+# Candidate bands, top-down, excluding the callsign strip along the bottom.
+candidates = sorted([b for b in bands if b[0] > 12.0], key=lambda b: -b[1])
 print(f'free bands   : {[f"{a:.1f}-{b:.1f}" for a, b in bands]}')
-print(f'usable bands : {[f"{a:.1f}-{b:.1f}" for a, b in usable]}')
+print(f'candidates   : {[f"{a:.1f}-{b:.1f}" for a, b in candidates]}')
 
-if len(usable) < len(SECTIONS):
-    sys.exit(f'ERROR: {len(SECTIONS)} sections but only {len(usable)} usable bands')
+# Give each section the topmost free band that can hold it. Sections are listed
+# in reading order, so this keeps them in that order down the board, and a
+# section with nowhere to go stops the build instead of being dropped.
+assigned, taken = [], set()
+for head, rows in SECTIONS:
+    need = section_height(head, rows)
+    for i, band in enumerate(candidates):
+        if i in taken or band[1] - band[0] < need:
+            continue
+        assigned.append((band, head, rows))
+        taken.add(i)
+        break
+    else:
+        label = head or rows[0][:28]
+        sys.exit(f'ERROR: no free band >= {need:.2f} mm for {label!r}')
 
 ref_lines = []
-DESC = 0.3 * H_BODY     # descender allowance, matching the collision check
-for (band_lo, band_hi), (head, rows) in zip(usable, SECTIONS):
+for (band_lo, band_hi), head, rows in assigned:
     # Let the line pitch grow into whatever the band leaves spare, so a short
     # section breathes instead of bunching at the top of its gap.
-    fixed = H_HEAD + GAP + H_BODY + DESC
+    fixed = H_BODY + DESC + ((H_HEAD + GAP) if head else 0.0)
     spare = (band_hi - band_lo) - 2 * PAD_MIN - fixed
     pitch = max(PITCH_MIN, min(PITCH_MAX, spare / max(1, len(rows) - 1)))
     total = fixed + (len(rows) - 1) * pitch
     pad = (band_hi - band_lo - total) / 2
-    y_head = band_hi - pad - H_HEAD
-    print(f'  band {band_lo:5.1f}-{band_hi:5.1f}  pitch {pitch:.2f}  pad {pad:.2f}  {head}')
-    ref_lines.append((head, x_left, y_head, H_HEAD))
+    y = band_hi - pad
+    print(f'  band {band_lo:5.1f}-{band_hi:5.1f}  pitch {pitch:.2f}  pad {pad:.2f}  '
+          f'{head or "(no heading)"}')
+    if head:
+        y -= H_HEAD
+        ref_lines.append((head, x_left, y, H_HEAD))
+        y -= GAP
+    y -= H_BODY
     for i, row in enumerate(rows):
-        ref_lines.append((row, x_left, y_head - GAP - H_BODY - i * pitch, H_BODY))
+        ref_lines.append((row, x_left, y - i * pitch, H_BODY))
 
 # ---- validate every line against the real geometry ---------------------
 errs = []

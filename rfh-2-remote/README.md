@@ -58,10 +58,11 @@ contain.
 
 The two printed faces are deliberately split so neither repeats the other.
 
-**Front cover**, in the three gaps between the switch rows:
+**Front cover**, in the narrow top strip and the three gaps between the switch rows:
 
 | Section | Contents |
 |---|---|
+| CW abbreviations | TNX, HW, ES, UR, and RIG |
 | Morse code | All 26 letters |
 | ITU phonetic alphabet | All 26 letters |
 | Numerals and prosigns | 0-9, `/`, `?`, plus AR, SK, KN, BT |
@@ -70,11 +71,12 @@ The two printed faces are deliberately split so neither repeats the other.
 
 | Section | Contents |
 |---|---|
-| US bands, General | CW/data and phone edges for 14 bands |
-| FT8 USB dial | 12 bands, 160 m through 2 m |
+| US bands, General | CW/data and phone edges for 14 bands, plus typical use |
+| FT8 USB dial | Integrated as a fourth band-table column, 12 bands, 160 m through 2 m |
 | Q codes | 18, in three columns |
-| Signal reports and formulas | RST, S-meter, dB/power, dipole and vertical lengths |
-| Operating | Simplex calling, repeater offsets, SSTV/PSK31/APRS/satellite, emergency frequencies, UTC offsets |
+| Power and rules | 1500 W PEP, 30 m/60 m limits, identification and WARC reminders |
+| Signal reports and formulas | RST, S-meter, dB/power and antenna-length formulas |
+| Operating | Simplex calling, repeater offsets, SSTV/PSK31/APRS/satellite, emergency frequencies and UTC offsets |
 
 The split is deliberate: the cover is a CW card, the back is everything else.
 Neither repeats the other.
