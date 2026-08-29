@@ -44,6 +44,15 @@ the method - it is a screw-lid cylinder built on models/thread_lib.scad:
                      and the floor's fall, probed on the exported mesh
  21. inspect       - watertight, single body, no thin walls
 
+Peak Design opposed-face radio standoff:
+ 22. load sizing   - variable-section stress and deflection at 1g/3g/5g
+ 23. SDS fit       - real shared stud dropped, seated and pulled outward
+ 24. clip fit      - measured Kenwood and conservative generic clip sweeps
+ 25. assembly      - both radio envelopes, each insertion path, 20mm clear
+ 26. PD interface - all three sockets, full 39mm bearing face and controls
+ 27. export        - three socket styles and six physical fit coupons
+ 28. inspect       - topology, minimum wall and classified printability
+
 Usage:
     .venv-cad/Scripts/python.exe scripts/cad/build_all.py
 """
@@ -77,6 +86,11 @@ ENCLOSURE_FILES = [
     "efhw_coupon_lid.stl",
     "efhw_enclosure_body.stl",
     "efhw_enclosure_lid.stl",
+]
+
+STANDOFF_DIR = ROOT / "models" / "peak design radio standoff"
+STANDOFF_FILES = [
+    f"peak_design_radio_standoff_{style}.stl" for style in PD_STYLES
 ]
 
 
@@ -285,6 +299,43 @@ def main() -> None:
         for line in summary:
             print(f"         {line}")
         all_clean &= result.returncode == 0
+
+    # ------------------------------------------------------------------
+    #  Peak Design opposed-face radio standoff
+    # ------------------------------------------------------------------
+    # Every analytical and fit check runs BEFORE export.  A broken model
+    # cannot overwrite the last known-good production meshes.
+
+    run("22. standoff load sizing", [str(HERE / "design_radio_standoff.py")])
+    run("23. standoff SDS fit", [str(HERE / "check_radio_standoff_fit.py")])
+    run("24. standoff clip fit", [str(HERE / "check_radio_standoff_clip.py")])
+    run("25. standoff dual-radio assembly",
+        [str(HERE / "check_radio_standoff_assembly.py")])
+    run("26. standoff Peak Design interface",
+        [str(HERE / "audit_radio_standoff.py")])
+    run("27. standoff export", [str(HERE / "export_radio_standoff.py")])
+
+    print(f"\n{'=' * 68}\n28. inspect standoff exports\n{'=' * 68}",
+          flush=True)
+    for name in STANDOFF_FILES:
+        path = STANDOFF_DIR / name
+        inspect = subprocess.run(
+            [str(PYTHON), "-W", "ignore", str(HERE / "inspect_stl.py"),
+             str(path)], capture_output=True, text=True, cwd=ROOT,
+        )
+        printable = subprocess.run(
+            [str(PYTHON), "-W", "ignore",
+             str(HERE / "check_pd_printable.py"), str(path)],
+            capture_output=True, text=True, cwd=ROOT,
+        )
+        clean = inspect.returncode == 0 and printable.returncode == 0
+        print(f"  [{'OK ' if clean else 'BAD'}] {name}")
+        for line in (inspect.stdout + printable.stdout).splitlines():
+            if any(key in line for key in
+                   ("min =", "bodies=", "PROBLEM", "no problems",
+                    "bridge", "ISLAND", "PASS", "FAIL")):
+                print(f"         {line.strip()}")
+        all_clean &= clean
 
     total = time.monotonic() - started
     print(f"\n{'=' * 68}")

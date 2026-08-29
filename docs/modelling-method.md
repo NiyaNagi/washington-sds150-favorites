@@ -300,6 +300,32 @@ a jam jar: 9 mm shorter, and the joint faces down.
 > nothing, and the body exported as **two separate solids**. A flat ledge
 > would have been a 3.5 mm unsupported overhang.
 
+### Opposed-face radio standoff
+
+The cup-holder standoff adds a different constraint: a 160 mm upright part
+has to look light without behaving like a spring. Seven rounded sections
+loft from the 39 mm Peak Design foot through a narrow waist and back into
+the radio head. A central lens removes material near the neutral axis while
+leaving two edge rails, where material contributes most to bending stiffness.
+
+`design_radio_standoff.py` reads every section through OpenSCAD `echo` and
+integrates a variable-section beam. With two conservative 400 g radios it
+reports 0.176 mm at 1g, 0.528 mm at 3g, and 0.880 mm at 5g. The 5g factor of
+safety is 4.8 using 25 MPa as an upright-printed PLA strength.
+
+Putting the radios on opposite faces was not only an interference solution.
+Their static eccentric moments partially cancel, reducing gravity stress to
+about 0.35 MPa while leaving both displays, antennas, and insertion paths
+clear.
+
+> The fit coupons found another OpenSCAD scope trap. Three wrappers changed
+> `preload` and `clr_slide`, and the echo changed, but all three meshes were
+> byte-for-byte equivalent. Modules imported from the nested shared-stud file
+> had closed over the values where they were defined. The standoff now shares
+> only the **physical lug measurements** and constructs its tunable fit voids
+> locally with explicit module parameters. The exporter asserts that all
+> three coupon volumes differ, so this cannot recur silently.
+
 ---
 
 ## 4. The helper scripts
@@ -384,6 +410,13 @@ lowers it down in steps, and screws the lid down on top of it.
 > as a volume, because a 0.2 mm squeeze on a 5 mm cable is about 1 mm³ —
 > asking "do they overlap enough?" answers nothing.
 
+**`check_radio_standoff_fit.py`**, **`check_radio_standoff_clip.py`**, and
+**`check_radio_standoff_assembly.py`** — independently sweep the real SDS
+stud, measured Kenwood clip, conservative generic clip, and both complete
+radio envelopes. They check every insertion path with the other radio seated.
+Controls enlarge the stud, shrink the clip gap, remove the clip taper, and
+translate one radio through the spine.
+
 ### Interference — does anything overlap anything else?
 
 **`audit_pd_bracket.py`** — probes the **exported STL**, not the model's
@@ -417,6 +450,10 @@ stroke widths, and whether the counters (the enclosed holes in A and D)
 close up. Last run: 12 outlines, 3 counters, narrowest stroke 3.72 mm,
 tightest counter 1.70 mm.
 
+**`audit_radio_standoff.py`** — renders all three 1/4"-20 socket styles and
+checks the exported meshes: one body, 39 × 39 mm bearing face, centered screw
+path, common external bounds, and a shifted screw-path control.
+
 ### Mesh quality and printability
 
 **`inspect_stl.py`** — watertight, body count, degenerate faces, and a
@@ -428,7 +465,8 @@ chamfers.
 
 ### Export and preview
 
-**`export_models.py`**, **`export_pd_bracket.py`**, **`export_enclosure.py`**
+**`export_models.py`**, **`export_pd_bracket.py`**, **`export_enclosure.py`**,
+**`export_radio_standoff.py`**
 — render every variant to STL/3MF and verify each is a single watertight
 solid.
 
@@ -441,7 +479,7 @@ solid.
 
 ### The pipeline
 
-**`build_all.py`** — 21 steps. Stops at the first hard failure.
+**`build_all.py`** — 28 steps. Stops at the first hard failure.
 
 ```powershell
 .venv-cad\Scripts\python.exe scripts\cad\build_all.py

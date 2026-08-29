@@ -17,6 +17,10 @@ And one unrelated part that happens to share the method:
 - **EFHW antenna enclosure** — a 128 mm screw-lid cylinder for an end-fed
   half-wave transformer, meant to hang in a tree and shed rain. See
   [docs/efhw-enclosure.md](../docs/efhw-enclosure.md).
+- **Peak Design radio standoff** — an organic 160 mm upright adapter with
+  an SDS150 gravity keyhole on one face and a universal belt-clip bridge on
+  the other. See
+  [docs/peak-design-radio-standoff.md](../docs/peak-design-radio-standoff.md).
 
 For the method behind these models — how they are structured, every helper
 script, the verification approach, and a full table of measured dimensions
@@ -68,6 +72,20 @@ if you are building a new part rather than adjusting an existing one.
 
 Full write-up, including how it seals without a gasket and why the thread
 is so coarse, is in [docs/efhw-enclosure.md](../docs/efhw-enclosure.md).
+
+### Peak Design opposed-face radio standoff
+
+| File | What it is |
+| --- | --- |
+| `peak design radio standoff/peak_design_radio_standoff.scad` | Parametric source and diagnostic radio envelopes. |
+| `peak_design_radio_standoff_{self_tap,insert,nut}.stl` / `.3mf` | Three production socket variants. |
+| `radio_standoff_coupon_sds_{easy,nominal,firm}.stl` / `.3mf` | Print first; select the SDS150 gravity fit. |
+| `radio_standoff_coupon_clip{_thin,,_thick}.stl` / `.3mf` | Actual universal bridge at 2.8/3.0/3.2 mm for physical clip tuning. |
+
+The [design guide](../docs/peak-design-radio-standoff.md),
+[implementation plan](../docs/peak-design-radio-standoff-plan.md), and
+[measurement registry](../docs/radio-hardware-measurements.md) record the
+architecture, load calculations, source measurements, and physical gates.
 
 ## How the original is reused
 
