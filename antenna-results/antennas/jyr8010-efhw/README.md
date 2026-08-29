@@ -6,6 +6,12 @@ The antenna is a 40-meter end-fed half-wave design sold as the
 JYR8010-150W with a nominal 1:49/1:64 impedance transformer
 ([Amazon ASIN B0DBDCNVZD](https://www.amazon.com/dp/B0DBDCNVZD)).
 
+The later [August 28 two-choke office-feed report](two-choke-office-feed/README.md)
+measures this antenna through the 75 ft + window ribbon + 25 ft office path,
+with two 11-turn Mix 31 chokes and a 16 ft transformer-terminal counterpoise.
+It includes two repeatable 0.5-54 MHz sweeps and a qualified comparison to this
+historical run.
+
 The separate [`manual-testing/`](../../manual-testing/) dataset contains the August
 15, 2026 broadband handheld-antenna sweeps, comparison report, charts, and
 Touchstone source files.

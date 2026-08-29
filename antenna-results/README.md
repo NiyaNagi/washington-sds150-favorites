@@ -27,7 +27,7 @@ See the [full comparison, coverage matrix, and gap table](comparison/README.md) 
 | [Uniden SDS150 stock](antennas/uniden-sds150-stock/README.md) | valid | reference antenna |
 | [Taurus triband vehicle](antennas/taurus-triband-vehicle/README.md) | valid / installed vehicle | fixed installation; VHF-high and partial 800/900 MHz |
 | [TIDRADIO H9 stock](antennas/tidradio-h9-stock/README.md) | invalid / inconclusive | preserved, excluded |
-| [JYR8010 EFHW](antennas/jyr8010-efhw/README.md) | preserved HF report | separate prior report |
+| [JYR8010 EFHW](antennas/jyr8010-efhw/README.md) | valid HF reports | historical baseline plus [two-choke office-feed installation](antennas/jyr8010-efhw/two-choke-office-feed/README.md) |
 | [GOWENIC-module 40m EFHW](antennas/gowenic-efhw/README.md) | valid HF reports | 62.5 ft sloper; 75 ft outdoor baseline plus [100 ft/window office-feed comparison](antennas/gowenic-efhw/installed-office-feed/README.md) |
 
 ## Method

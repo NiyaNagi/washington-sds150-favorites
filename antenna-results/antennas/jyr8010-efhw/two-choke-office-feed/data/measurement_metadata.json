@@ -1,0 +1,88 @@
+{
+  "report_generated_at": "2026-08-28T22:29:40.311458-07:00",
+  "antenna": {
+    "model": "JYR8010-150W",
+    "type": "end-fed half-wave",
+    "radiating_element_length_m": 40,
+    "nominal_transformer_ratio": "1:49 / 1:64",
+    "advertised_supported_bands": [
+      "80m",
+      "40m",
+      "30m",
+      "20m",
+      "17m",
+      "15m",
+      "12m",
+      "10m"
+    ],
+    "asin": "B0DBDCNVZD"
+  },
+  "installation": {
+    "feed_path": [
+      "25 ft LS400 inside office",
+      "3 ft RG8X window-entry choke",
+      "window flat-ribbon transition",
+      "75 ft LS400 outdoors",
+      "3 ft RG8X feedpoint choke"
+    ],
+    "total_coax_length_ft_excluding_window_transition": 106,
+    "chokes": [
+      {
+        "location": "window entry before 25 ft indoor LS400",
+        "coax": "RG8X",
+        "coax_length_ft": 3,
+        "turns": 11,
+        "core": "Mix 31 FT240-size toroid"
+      },
+      {
+        "location": "antenna feedpoint before transformer",
+        "coax": "RG8X",
+        "coax_length_ft": 3,
+        "turns": 11,
+        "core": "Mix 31 FT240-size toroid"
+      }
+    ],
+    "counterpoise": {
+      "length_ft": 16,
+      "connection": "dedicated JYR8010 transformer terminal",
+      "layout": "on ground, opposite antenna direction"
+    },
+    "office_environment": "substantial computer equipment",
+    "physical_antenna_geometry": "User reported everything else unchanged; exact support dimensions were not recorded in the historical JYR8010 report."
+  },
+  "instrument": {
+    "model": "NanoVNA-H",
+    "firmware": "1.2.50",
+    "measurement_bandwidth_hz": 1000,
+    "reference_impedance_ohm": 50
+  },
+  "calibration": {
+    "type": "software one-port ideal OSL",
+    "reference_plane": "office-side PL-259/SO-239 adapter on CH0",
+    "created_at": "2026-08-28T22:06:04.362381-07:00",
+    "open_short_median_raw_separation": 1.5382252686454203,
+    "load_verification": {
+      "median_swr": 1.0007535021898002,
+      "p95_swr": 1.0008701941153695,
+      "maximum_swr": 1.0010623169934088,
+      "median_resistance_ohm": 50.035745085839366,
+      "median_reactance_ohm": 0.011240891766802232
+    }
+  },
+  "sweep": {
+    "capture_1_at": "2026-08-28T22:26:16.148844-07:00",
+    "capture_2_at": "2026-08-28T22:29:40.311458-07:00",
+    "range_hz": [
+      500000,
+      54000000
+    ],
+    "points": 40001,
+    "nominal_step_hz": 1337.5
+  },
+  "capture_recovery": {
+    "issue": "First attempt timed out after segment 150 while restoring calibration state; no partial result was saved.",
+    "action": "Physically power-cycled NanoVNA without disturbing RF setup and restarted the complete sweep."
+  },
+  "comparison_limit": "Historical and current configurations differ in chokes, added RG8X/connectors, counterpoise, documented office feed path, date, calibration, and potentially undocumented geometry. Differences cannot be attributed to toroids alone.",
+  "open_path_comparison_limit": "The unchoked far-end-open baseline was captured August 23 under a separate OSL calibration; the choked path was captured August 28. The observed differences are cross-day and cross-calibration."
+}

@@ -215,6 +215,7 @@ def plot_swr_zooms(
     frequencies: np.ndarray,
     metrics: dict[str, np.ndarray],
     summaries: list[dict[str, object]],
+    subtitle: str = "Calibrated at the antenna-side adapter reference plane",
 ) -> None:
     fig, axes = plt.subplots(4, 2, figsize=(15, 18), constrained_layout=True)
     for axis, band, summary, color in zip(
@@ -258,7 +259,7 @@ def plot_swr_zooms(
         axis.grid(True, alpha=0.7)
     fig.suptitle(
         "JYR8010 supported-band SWR zooms\n"
-        "Calibrated at the antenna-side adapter reference plane",
+        f"{subtitle}",
         fontsize=17,
     )
     fig.savefig(output / "supported_band_swr_zooms.png", dpi=200)
@@ -269,6 +270,7 @@ def plot_impedance(
     output: Path,
     frequencies: np.ndarray,
     metrics: dict[str, np.ndarray],
+    title: str = "Feed-point impedance by supported band",
 ) -> None:
     fig, axes = plt.subplots(4, 2, figsize=(15, 18), constrained_layout=True)
     for axis, (name, lower, upper), color in zip(
@@ -298,7 +300,7 @@ def plot_impedance(
         axis.set_xlim(lower / 1e6, upper / 1e6)
         axis.grid(True, alpha=0.7)
         axis.legend(loc="best", fontsize=8)
-    fig.suptitle("Feed-point impedance by supported band", fontsize=17)
+    fig.suptitle(title, fontsize=17)
     fig.savefig(output / "supported_band_impedance.png", dpi=200)
     plt.close(fig)
 
@@ -738,6 +740,31 @@ def write_html(
     summaries: list[dict[str, object]],
     interactive: dict[str, dict[str, list[float]]],
     metadata: dict[str, object],
+    *,
+    page_title: str = "JYR8010 EFHW antenna results",
+    heading: str = "JYR8010 EFHW antenna",
+    subtitle: str = (
+        "Interactive supported-band analysis for 80m through 10m. "
+        "US amateur-band edges; 40,001-point source sweep."
+    ),
+    installation_note: str = (
+        "No dedicated ground or counterpoise was present. The feed line can "
+        "therefore become part of the EFHW return path, so routing, feed-line "
+        "length, nearby objects, and a future common-mode choke can change "
+        "these results."
+    ),
+    footer: str = (
+        "Captured 2026-08-16 12:50 PDT | NanoVNA-H firmware 1.2.50 | "
+        "1.8-148 MHz | 50-ohm reference | report generated offline"
+    ),
+    resolution_value: str = "3.655 kHz",
+    resolution_caption: str = "nominal point spacing",
+    context_note_label: str = "SDS150 note",
+    context_note: str = (
+        "The scanner starts at 25 MHz, so 10m is the only advertised antenna "
+        "band here that it can tune directly. Lower HF results apply to "
+        "connected HF receivers and amateur transceivers."
+    ),
 ) -> None:
     data = json.dumps(
         {"summaries": summaries, "bands": interactive, "metadata": metadata},
@@ -763,7 +790,7 @@ def write_html(
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>JYR8010 EFHW antenna results</title>
+<title>{page_title}</title>
 <link rel="icon" href="data:,">
 <script>
   (() => {{
@@ -905,15 +932,15 @@ a {{ color: var(--cp-link); }}
   <header>
     <div>
       <div class="eyebrow">Calibrated NanoVNA-H measurement</div>
-      <h1>JYR8010 EFHW antenna</h1>
-      <p>Interactive supported-band analysis for 80m through 10m. US amateur-band edges; 40,001-point source sweep.</p>
+      <h1>{heading}</h1>
+      <p>{subtitle}</p>
     </div>
     <button id="theme-toggle" type="button">Toggle theme</button>
   </header>
   <section class="cards" aria-label="Measurement highlights">
     <div class="card"><span class="label">Best match</span><strong>{best['minimum_swr']:.2f} SWR</strong><span>{best['band']} at {best['minimum_swr_frequency_mhz']:.6f} MHz</span></div>
     <div class="card"><span class="label">Full-band <=2:1</span><strong>{complete} / 8</strong><span>supported bands</span></div>
-    <div class="card"><span class="label">Resolution</span><strong>3.655 kHz</strong><span>nominal point spacing</span></div>
+    <div class="card"><span class="label">Resolution</span><strong>{resolution_value}</strong><span>{resolution_caption}</span></div>
     <div class="card"><span class="label">Reference plane</span><strong>Adapter output</strong><span>software ideal OSL</span></div>
   </section>
   <section class="panel">
@@ -938,9 +965,9 @@ a {{ color: var(--cp-link); }}
       </table>
     </div>
   </section>
-  <div class="note"><p><strong>SDS150 note:</strong> the scanner starts at 25 MHz, so 10m is the only advertised antenna band here that it can tune directly. Lower HF results apply to connected HF receivers and amateur transceivers.</p></div>
-  <div class="note"><p><strong>Installation note:</strong> no dedicated ground or counterpoise was present. The feed line can therefore become part of the EFHW return path, so routing, feed-line length, nearby objects, and a future common-mode choke can change these results.</p></div>
-  <footer>Captured 2026-08-16 12:50 PDT | NanoVNA-H firmware 1.2.50 | 1.8-148 MHz | 50-ohm reference | report generated offline</footer>
+  <div class="note"><p><strong>{context_note_label}:</strong> {context_note}</p></div>
+  <div class="note"><p><strong>Installation note:</strong> {installation_note}</p></div>
+  <footer>{footer}</footer>
 </div>
 <div id="tooltip" class="tooltip"></div>
 <script>

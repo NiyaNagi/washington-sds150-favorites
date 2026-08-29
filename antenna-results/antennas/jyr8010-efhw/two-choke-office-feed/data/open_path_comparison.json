@@ -1,0 +1,44 @@
+{
+  "unchoked_baseline": {
+    "captured_at": "2026-08-23T20:41:49.618104-07:00",
+    "calibration_created_at": "2026-08-23T20:32:58.778082-07:00"
+  },
+  "two_choke_path": {
+    "captured_at": "2026-08-28T22:16:20.231084-07:00",
+    "calibration_created_at": "2026-08-28T22:06:04.362381-07:00"
+  },
+  "method": "Far-end-open one-port comparison. Apparent one-way attenuation is -20*log10(|Gamma|)/2 and is valid as line loss only for an ideal open on a uniform, well-matched line.",
+  "interpretation_limit": "This is a cross-day, cross-calibration comparison. The window transition, connectors, and chokes introduce discontinuities and multiple reflections. This is a plausibility comparison, not measured insertion loss, common-mode impedance, or a controlled estimate of the components' added loss.",
+  "samples": {
+    "3.5_mhz": {
+      "unchoked_apparent_one_way_attenuation_db": 0.44374128719935574,
+      "choked_apparent_one_way_attenuation_db": 0.46208493335216916,
+      "observed_delta_db": 0.01834364615281342
+    },
+    "7_mhz": {
+      "unchoked_apparent_one_way_attenuation_db": 0.5353567825763292,
+      "choked_apparent_one_way_attenuation_db": 0.6083077940135813,
+      "observed_delta_db": 0.07295101143725202
+    },
+    "14_mhz": {
+      "unchoked_apparent_one_way_attenuation_db": 0.7371719972596312,
+      "choked_apparent_one_way_attenuation_db": 0.7261270845133329,
+      "observed_delta_db": -0.011044912746298374
+    },
+    "21_mhz": {
+      "unchoked_apparent_one_way_attenuation_db": 0.6900169672687239,
+      "choked_apparent_one_way_attenuation_db": 0.8308097367736582,
+      "observed_delta_db": 0.14079276950493436
+    },
+    "28_mhz": {
+      "unchoked_apparent_one_way_attenuation_db": 0.7770111855296096,
+      "choked_apparent_one_way_attenuation_db": 0.9929161057578295,
+      "observed_delta_db": 0.21590492022821994
+    },
+    "54_mhz": {
+      "unchoked_apparent_one_way_attenuation_db": 1.0004534462871408,
+      "choked_apparent_one_way_attenuation_db": 1.2731230713453154,
+      "observed_delta_db": 0.2726696250581746
+    }
+  }
+}

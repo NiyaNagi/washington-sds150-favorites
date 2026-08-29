@@ -43,6 +43,13 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   distance from a point rather than by county or label. Channels with no
   coordinates are dropped rather than passed through, so a source that omits
   position cannot silently turn the filter into a no-op.
+- Added a repeatable 0.5-54 MHz JYR8010 installed-system report for the
+  75 ft LS400 + window ribbon + 25 ft LS400 office path with two 3 ft RG8X,
+  11-turn Mix 31 chokes and a 16 ft transformer-terminal counterpoise. It
+  preserves calibration, load verification, open-path diagnostics, two antenna
+  sweeps, all legacy JYR8010 metrics and visuals, and a qualified historical
+  comparison that does not misattribute combined installation changes to the
+  toroids alone.
 - Added per-radio loadouts. Every supported radio now has an inspectable saved
   configuration reachable from one dropdown, each rendered in its own native
   shape: the SDS150 as Favorites Lists with systems, sites and departments;
