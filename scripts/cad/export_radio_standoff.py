@@ -1,9 +1,9 @@
 """Export the Peak Design radio standoff and its fit coupons.
 
-Production variants share one outside shape and differ only in the centered
-1/4"-20 socket.  Coupons are deliberately separate: print and select the SDS
-fit before committing to a 160mm-tall body, then verify the real belt clips on
-the cropped rear interface.
+The fixed stalk is exported in three 1/4"-20 socket variants.  One common
+adjustable head clamps into any stalk with an M6x30 bolt and captive M6 nut.
+Coupons are deliberately separate: select SDS and clip fits before committing
+to the full parts.
 
 Usage:
     .venv-cad/Scripts/python.exe scripts/cad/export_radio_standoff.py
@@ -24,9 +24,9 @@ TMP = ROOT / ".tmp-cad"
 OPENSCAD = Path(r"C:\Program Files\OpenSCAD\openscad.exe")
 
 PRODUCTION = [
-    ("self_tap", "peak_design_radio_standoff_self_tap"),
-    ("insert", "peak_design_radio_standoff_insert"),
-    ("nut", "peak_design_radio_standoff_nut"),
+    ("self_tap", "peak_design_radio_standoff_stalk_self_tap"),
+    ("insert", "peak_design_radio_standoff_stalk_insert"),
+    ("nut", "peak_design_radio_standoff_stalk_nut"),
 ]
 
 # Exact dimensions live in the SCAD coupon_fit branch.  Keeping only labels
@@ -78,11 +78,30 @@ def main() -> int:
     MODELS.mkdir(parents=True, exist_ok=True)
     TMP.mkdir(exist_ok=True)
 
+    # Remove the superseded one-piece exports.  Leaving them beside the
+    # adjustable parts would make it too easy to print the wrong design.
+    for legacy in (
+        "peak_design_radio_standoff_self_tap",
+        "peak_design_radio_standoff_insert",
+        "peak_design_radio_standoff_nut",
+    ):
+        for fmt in ("stl", "3mf"):
+            (MODELS / f"{legacy}.{fmt}").unlink(missing_ok=True)
+    for legacy_preview in (
+        "radio_standoff_preview_body.png",
+        "radio_standoff_preview_assembly.png",
+    ):
+        (MODELS / legacy_preview).unlink(missing_ok=True)
+
     print("Peak Design opposed-face radio standoff")
-    print("\nProduction parts")
+    print("\nPeak Design stalks")
     for style, name in PRODUCTION:
         for fmt in ("stl", "3mf"):
-            render(name, "body", fmt, thread_style=style)
+            render(name, "stalk", fmt, thread_style=style)
+
+    print("\nCommon M6 adjustable head")
+    for fmt in ("stl", "3mf"):
+        render("peak_design_radio_standoff_head", "head", fmt)
 
     print("\nSDS150 fit coupons")
     coupon_volumes: list[float] = []
@@ -115,21 +134,30 @@ def main() -> int:
             "thickness overrides did not reach the mesh")
     print("  coupon geometry control: all three bar thicknesses are distinct")
 
+    print("\nM6 adjustable-joint coupons")
+    for filename, mode in (
+        ("radio_standoff_coupon_joint_stalk", "joint_coupon_stalk"),
+        ("radio_standoff_coupon_joint_head", "joint_coupon_head"),
+    ):
+        for fmt in ("stl", "3mf"):
+            render(filename, mode, fmt)
+
     print("\nDiagnostic previews")
     preview_specs = [
-        ("radio_standoff_preview_body.png", "body",
-         "0,0,82,70,0,28,430"),
-        ("radio_standoff_preview_assembly.png", "assembly",
-         "0,0,82,70,0,28,430"),
+        (f"radio_standoff_preview_{angle}deg.png", "assembly",
+         "0,0,82,70,0,28,430", angle)
+        for angle in (0, 15, 30, 45)
+    ] + [
         ("radio_standoff_preview_section.png", "section",
-         "0,0,82,72,0,0,360"),
+         "0,0,82,72,0,0,360", 0),
     ]
-    for filename, mode, camera in preview_specs:
+    for filename, mode, camera, angle in preview_specs:
         out = MODELS / filename
         result = subprocess.run(
             [str(OPENSCAD), "-o", str(out), "--imgsize=1100,1100",
              f"--camera={camera}", "--projection=o", "--colorscheme=Tomorrow",
              "-D", f'variant_render_mode="{mode}"',
+             "-D", f"head_angle={angle}",
              str(MODELS / "peak_design_radio_standoff.scad")],
             capture_output=True, text=True, cwd=ROOT,
         )

@@ -40,7 +40,7 @@ def render(style: str) -> trimesh.Trimesh:
     wrapper.write_text(
         "include <peak_design_radio_standoff.scad>\n"
         f'thread_style = "{style}";\n'
-        'variant_render_mode = "body";\n',
+        'variant_render_mode = "stalk";\n',
         encoding="utf-8",
     )
     try:

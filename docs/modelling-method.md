@@ -302,21 +302,32 @@ a jam jar: 9 mm shorter, and the joint faces down.
 
 ### Opposed-face radio standoff
 
-The cup-holder standoff adds a different constraint: a 160 mm upright part
-has to look light without behaving like a spring. Seven rounded sections
-loft from the 39 mm Peak Design foot through a narrow waist and back into
-the radio head. A central lens removes material near the neutral axis while
-leaving two edge rails, where material contributes most to bending stiffness.
+The cup-holder standoff adds a different constraint: a tall stalk has to look
+light without behaving like a spring, while its radio head must adjust. Five
+rounded sections loft from the 39 mm Peak Design foot through a narrow waist
+into an M6 fork. A separate double-sided head rotates continuously through
+±45°. Its 11.8 mm tongue runs between two 6.6 mm ears at 0.20 mm side
+clearance. A central lens removes material near the neutral axis while leaving
+two edge rails, where material contributes most to bending stiffness.
 
 `design_radio_standoff.py` reads every section through OpenSCAD `echo` and
 integrates a variable-section beam. With two conservative 400 g radios it
-reports 0.176 mm at 1g, 0.528 mm at 3g, and 0.880 mm at 5g. The 5g factor of
-safety is 4.8 using 25 MPa as an upright-printed PLA strength.
+reports 0.218 mm at 1g, 0.655 mm at 3g, and 1.092 mm at 5g. The 5g factor of
+safety is 4.4 using 25 MPa as an upright-printed PLA strength.
 
 Putting the radios on opposite faces was not only an interference solution.
 Their static eccentric moments partially cancel, reducing gravity stress to
-about 0.35 MPa while leaving both displays, antennas, and insertion paths
+about 0.16 MPa at neutral tilt while leaving both insertion paths
 clear.
+
+The clip drawing's 30 mm was initially mistaken for a bridge height. The
+mesh was valid and every old fit test passed, but the long plate physically
+prevented the spring clip from closing against the radio. The replacement is
+a full-width 35 × 25 × 3 mm rounded plate moved upward on the adjustable head.
+The 25 mm height leaves 5 mm of the measured 30 mm section below it for the
+spring tip to close. Thirty-five is derived horizontally: 32 mm conservative
+clip envelope, 0.5 mm insertion clearance per side, and 1.0 mm printable
+overlap into each end support.
 
 > The fit coupons found another OpenSCAD scope trap. Three wrappers changed
 > `preload` and `clr_slide`, and the echo changed, but all three meshes were
@@ -410,12 +421,12 @@ lowers it down in steps, and screws the lid down on top of it.
 > as a volume, because a 0.2 mm squeeze on a 5 mm cable is about 1 mm³ —
 > asking "do they overlap enough?" answers nothing.
 
-**`check_radio_standoff_fit.py`**, **`check_radio_standoff_clip.py`**, and
-**`check_radio_standoff_assembly.py`** — independently sweep the real SDS
-stud, measured Kenwood clip, conservative generic clip, and both complete
-radio envelopes. They check every insertion path with the other radio seated.
-Controls enlarge the stud, shrink the clip gap, remove the clip taper, and
-translate one radio through the spine.
+**`check_radio_standoff_tilt.py`**, **`check_radio_standoff_fit.py`**,
+**`check_radio_standoff_clip.py`**, and **`check_radio_standoff_assembly.py`**
+— independently sweep the M6 head every 5° through ±45°, the real SDS stud,
+measured Kenwood clip, conservative generic clip, and both complete radio
+envelopes. Controls lower the head into the stalk, enlarge the stud, shrink the
+clip gap, oversize the clip, and translate one radio through the spine.
 
 ### Interference — does anything overlap anything else?
 
@@ -479,7 +490,7 @@ solid.
 
 ### The pipeline
 
-**`build_all.py`** — 28 steps. Stops at the first hard failure.
+**`build_all.py`** — 29 steps. Stops at the first hard failure.
 
 ```powershell
 .venv-cad\Scripts\python.exe scripts\cad\build_all.py

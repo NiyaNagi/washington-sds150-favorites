@@ -79,9 +79,9 @@ THD75A.png`, plus user-provided caliper measurements. Sketch labels marked
 | Body height | 121.9 | Measured sketch | Diagnostic radio envelope |
 | Body width | 56 | Measured sketch | Bump-pad keep-out |
 | Belt-clip length | 66.5 | Measured sketch | Vertical insertion envelope |
-| Clear clip section | 30 | Measured sketch/user clarification | Horizontal bridge location |
+| Clear clip section below belt contact | 30 | Measured sketch/user clarification | Must remain open so clip closes flush |
 | Under-clip gap | 4.5 | Measured/user confirmed | Maximum bridge thickness |
-| Flush clip-tip section | 6.5 | Measured/user confirmed | Lower keep-out |
+| Clip back offset from radio | 6.5 | Measured/user confirmed | Radio-to-clip envelope |
 | Maximum clip width at hinge | 21.3 | Measured/user caliper | Inner centering shoulders |
 | Clip width at lower tip | 17.6 | Measured/user caliper | Lead-in and taper model |
 
@@ -104,7 +104,7 @@ fit.
 | Feature | Value | Status | Design use |
 | --- | ---: | --- | --- |
 | Replacement-clip overall length | 68 | Published | Diagnostic envelope only |
-| Replacement-clip overall width | 32 | Published | Outer shoulder envelope |
+| Replacement-clip overall width | 32 | Published | Conservative outer envelope for 35 mm bar; jaw still unverified |
 | Replacement-clip overall depth | 15 | Published | Diagnostic envelope only |
 
 The published 68 × 32 × 15 listing describes the complete replacement clip,
@@ -125,6 +125,18 @@ envelope, not a centering fit.
 | Captive nut across flats | 11.15 | Repository/proven | Hardware reference |
 | Captive nut across corners | 12.876 | Derived | Pocket size driver |
 | Captive nut thickness | 5.60 | Repository/proven | Nut pocket depth |
+
+## Adjustable-head joint hardware
+
+| Feature | Value | Status | Design use |
+| --- | ---: | --- | --- |
+| Pivot bolt | M6 × 30 | User inventory/confirmed | Continuous −45°…+45° clamp joint |
+| Available alternate M6 lengths | 6, 12, 16, 20, 30, 40 | User inventory | 30 mm selected |
+| Standard M6 nut across flats | 10.0 | Standard | Captive hex pocket |
+| Standard M6 nut thickness | 5.2 | Standard/common | Ear thickness and pocket depth |
+| Printed tongue thickness | 11.8 | Design | Fits inside 12.2 mm fork gap |
+| Printed side clearance | 0.20 per face | Design | Free adjustment before clamping |
+| Friction-land radius | 13.0 | Design | Clamp moment capacity |
 
 ## Reference-image inventory
 

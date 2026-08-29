@@ -57,9 +57,15 @@ def shared(a: trimesh.Trimesh, b: trimesh.Trimesh) -> float:
     return abs(float(both.volume))
 
 
+def shared_structure(parts: list[trimesh.Trimesh], other: trimesh.Trimesh) -> float:
+    return sum(shared(part, other) for part in parts)
+
+
 def main() -> int:
     TMP.mkdir(exist_ok=True)
-    body = render("body", "body", TMP / "assembly_body.stl")
+    stalk = render("stalk", "stalk", TMP / "assembly_stalk.stl")
+    head = render("head", "head_neutral", TMP / "assembly_head.stl")
+    structure = [stalk, head]
     thd_seated = render("thd_0", "thd_reference", TMP / "assembly_thd_0.stl",
                         clip_check_dz=0.0)
     sds_seated = render("sds_0", "sds_reference", TMP / "assembly_sds_0.stl",
@@ -67,16 +73,16 @@ def main() -> int:
 
     failures: list[str] = []
     print("=== opposed-face radio assembly ===")
-    print(f"  standoff {body.bounds[1][2]:.1f}mm tall, body {body.volume/1000:.1f}cm^3")
+    print(f"  neutral height 160.0mm, stalk+head "
+          f"{(stalk.volume + head.volume)/1000:.1f}cm^3")
     print()
 
     print("  BOTH SEATED")
-    for label, a, b in (
-        ("SDS150 against standoff", body, sds_seated),
-        ("TH-D75A against standoff", body, thd_seated),
-        ("radio against radio", sds_seated, thd_seated),
+    for label, volume in (
+        ("SDS150 against standoff", shared_structure(structure, sds_seated)),
+        ("TH-D75A against standoff", shared_structure(structure, thd_seated)),
+        ("radio against radio", shared(sds_seated, thd_seated)),
     ):
-        volume = shared(a, b)
         print(f"    {label:28s}: {volume:9.2f} mm^3")
         if volume > TOUCH_TOL:
             failures.append(f"{label} overlaps by {volume:.1f}mm^3")
@@ -89,7 +95,7 @@ def main() -> int:
         sds = render(f"sds_{i}", "sds_reference",
                      TMP / f"assembly_sds_{i}.stl", check_pos=pos)
         volume = shared(sds, thd_seated)
-        body_v = shared(sds, body)
+        body_v = shared_structure(structure, sds)
         total = max(volume, body_v)
         if total > worst:
             worst, worst_pos = total, pos
@@ -106,7 +112,7 @@ def main() -> int:
         thd = render(f"thd_{i}", "thd_reference",
                      TMP / f"assembly_thd_{i}.stl", clip_check_dz=dz)
         volume = shared(thd, sds_seated)
-        body_v = shared(thd, body)
+        body_v = shared_structure(structure, thd)
         total = max(volume, body_v)
         if total > worst:
             worst, worst_dz = total, dz

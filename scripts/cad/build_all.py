@@ -46,12 +46,13 @@ the method - it is a screw-lid cylinder built on models/thread_lib.scad:
 
 Peak Design opposed-face radio standoff:
  22. load sizing   - variable-section stress and deflection at 1g/3g/5g
- 23. SDS fit       - real shared stud dropped, seated and pulled outward
- 24. clip fit      - measured Kenwood and conservative generic clip sweeps
- 25. assembly      - both radio envelopes, each insertion path, 20mm clear
- 26. PD interface - all three sockets, full 39mm bearing face and controls
- 27. export        - three socket styles and six physical fit coupons
- 28. inspect       - topology, minimum wall and classified printability
+ 23. tilt sweep    - M6 joint and active radio through -45..+45 degrees
+ 24. SDS fit       - real shared stud dropped, seated and pulled outward
+ 25. clip fit      - measured Kenwood and conservative generic clip sweeps
+ 26. assembly      - both radio envelopes, each insertion path, 20mm clear
+ 27. PD interface - all three sockets, full 39mm bearing face and controls
+ 28. export        - stalks, head, six radio-fit and two joint coupons
+ 29. inspect       - topology, minimum wall and classified printability
 
 Usage:
     .venv-cad/Scripts/python.exe scripts/cad/build_all.py
@@ -90,7 +91,8 @@ ENCLOSURE_FILES = [
 
 STANDOFF_DIR = ROOT / "models" / "peak design radio standoff"
 STANDOFF_FILES = [
-    f"peak_design_radio_standoff_{style}.stl" for style in PD_STYLES
+    *[f"peak_design_radio_standoff_stalk_{style}.stl" for style in PD_STYLES],
+    "peak_design_radio_standoff_head.stl",
 ]
 
 
@@ -307,15 +309,16 @@ def main() -> None:
     # cannot overwrite the last known-good production meshes.
 
     run("22. standoff load sizing", [str(HERE / "design_radio_standoff.py")])
-    run("23. standoff SDS fit", [str(HERE / "check_radio_standoff_fit.py")])
-    run("24. standoff clip fit", [str(HERE / "check_radio_standoff_clip.py")])
-    run("25. standoff dual-radio assembly",
+    run("23. standoff tilt sweep", [str(HERE / "check_radio_standoff_tilt.py")])
+    run("24. standoff SDS fit", [str(HERE / "check_radio_standoff_fit.py")])
+    run("25. standoff clip fit", [str(HERE / "check_radio_standoff_clip.py")])
+    run("26. standoff dual-radio assembly",
         [str(HERE / "check_radio_standoff_assembly.py")])
-    run("26. standoff Peak Design interface",
+    run("27. standoff Peak Design interface",
         [str(HERE / "audit_radio_standoff.py")])
-    run("27. standoff export", [str(HERE / "export_radio_standoff.py")])
+    run("28. standoff export", [str(HERE / "export_radio_standoff.py")])
 
-    print(f"\n{'=' * 68}\n28. inspect standoff exports\n{'=' * 68}",
+    print(f"\n{'=' * 68}\n29. inspect standoff exports\n{'=' * 68}",
           flush=True)
     for name in STANDOFF_FILES:
         path = STANDOFF_DIR / name

@@ -37,6 +37,8 @@ TARGET_FOS_3G = 3.0
 TARGET_FOS_5G = 1.5
 TARGET_DEFLECTION_1G = 0.50  # mm
 TARGET_DEFLECTION_3G = 1.50  # mm
+JOINT_MU = 0.18        # conservative dry PLA-on-PLA static friction
+M6_CLAMP_TARGET = 1500.0  # N, modest preload for an M6 fastener
 
 
 @dataclass
@@ -73,7 +75,8 @@ def number(text: str, name: str) -> float:
 def section_table(text: str) -> np.ndarray:
     rows = []
     for z, w, d in re.findall(
-            r"SECTION z=(-?[0-9.]+) w=(-?[0-9.]+) d=(-?[0-9.]+)", text):
+            r'ECHO: "  SECTION z=(-?[0-9.]+) w=(-?[0-9.]+) d=(-?[0-9.]+)',
+            text):
         rows.append((float(z), float(w), float(d)))
     if len(rows) < 2:
         raise SystemExit("model did not echo its spine sections")
@@ -198,6 +201,34 @@ def main() -> int:
     print("  OPPOSING-FACE GRAVITY MOMENT")
     print(f"    stress {gravity['stress']:.3f} MPa at z={gravity['z']:.1f} mm")
     print("    (the opposed faces cancel most of each other's eccentric moment)")
+
+    joint_r = number(text, "r")
+    hole_r = 6.6 / 2.0
+    effective_r = (2.0 / 3.0) * (
+        (joint_r**3 - hole_r**3) / (joint_r**2 - hole_r**2))
+    worst_radio_moment = max(
+        load.mass_kg * G * abs(load.y) for load in loads)  # N mm
+    required_clamp_3g = 3.0 * worst_radio_moment / (2 * JOINT_MU * effective_r)
+    joint_capacity = 2 * JOINT_MU * M6_CLAMP_TARGET * effective_r
+    ear_t = number(text, "ear_t")
+    ear_free = number(text, "ear_free")
+    side_clr = number(text, "side_clr")
+    ear_strain = 1.5 * side_clr * ear_t / ear_free**2
+    print()
+    print("  M6 FRICTION JOINT")
+    print(f"    effective friction radius : {effective_r:5.2f} mm")
+    print(f"    clamp needed at 3g        : {required_clamp_3g:5.0f} N")
+    print(f"    capacity at 1.5kN preload : {joint_capacity/1000:5.2f} N m")
+    print(f"    3g moment capacity factor : {joint_capacity/(3*worst_radio_moment):5.1f}")
+    print(f"    ear closing strain        : {100*ear_strain:5.2f}%")
+    if M6_CLAMP_TARGET < required_clamp_3g:
+        failures.append(
+            f"joint needs {required_clamp_3g:.0f}N clamp at 3g, above "
+            f"the {M6_CLAMP_TARGET:.0f}N target")
+    if ear_strain > 0.008:
+        failures.append(
+            f"fork ears need {100*ear_strain:.2f}% strain to close, above "
+            "the 0.8% daily-use PLA limit")
 
     socket_d = number(text, "depth")
     pilot_d = 5.40

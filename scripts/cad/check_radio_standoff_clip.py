@@ -6,8 +6,8 @@ published 32mm UV-5R replacement-clip envelope; that is an envelope check,
 not a claim that an unmeasured UV-5R jaw has been verified.
 
 Two injected controls prove the harness can see both independent faults:
-a clip whose gap is too small for the bar, and a constant-width 32mm plate
-that cannot pass the centering funnel.
+a clip whose gap is too small for the bar, and a 40mm plate wider than the
+crossbar's end supports.
 
 Usage:
     .venv-cad/Scripts/python.exe scripts/cad/check_radio_standoff_clip.py
@@ -113,19 +113,20 @@ def main() -> int:
     kenwood_tip = value(text, "kenwood_tip")
     gap = value(text, "kenwood_gap")
     generic_w = value(text, "generic_w")
-    lead_r = value(text, "lead_r")
     plate_t = value(text, "plate_t")
+    test_h = value(text, "test_h")
 
-    body = render("body", "body", TMP / "clip_fit_body.stl")
+    body = render("head", "head_neutral", TMP / "clip_fit_head.stl")
     failures: list[str] = []
 
     print("=== belt-clip bridge fit ===")
     print(f"  bridge thickness {bar_t:.2f} mm, measured Kenwood gap {gap:.2f} mm")
-    print("  two-stage lateral funnel: 33.0mm at top -> 22.3mm at bottom")
+    print(f"  measured closing length below bar: {test_h:.1f} mm, fully swept")
+    print("  full plate: 35mm wide x 25mm tall, 22.3mm rails, 33.0mm stops")
     print()
 
     print("  KENWOOD TH-D75A - PHYSICALLY MEASURED")
-    seated_top = bar_top + lead_r + plate_t + 0.2
+    seated_top = bar_top + plate_t + 0.2
     worst, z = sweep(body, "kenwood", kenwood_w, kenwood_tip, gap,
                      seated_top)
     print(f"    worst of 9 insertion poses : {worst:8.2f} mm^3 at top z={z:.2f}")
@@ -135,7 +136,7 @@ def main() -> int:
             f"descending; worst top z={z:.2f}")
 
     print()
-    print("  UV-5R PUBLISHED ENVELOPE - TAPERED CONSERVATIVE ARTICLE")
+    print("  UV-5R PUBLISHED 32MM ENVELOPE - TAPERED ARTICLE")
     worst, z = sweep(body, "generic", generic_w, kenwood_tip, gap,
                      seated_top)
     print(f"    worst of 9 insertion poses : {worst:8.2f} mm^3 at top z={z:.2f}")
@@ -157,16 +158,17 @@ def main() -> int:
         failures.append(
             f"the undersized-gap control only produced {tight_v:.1f}mm^3")
 
+    oversize = 40.0
     square = render(
-        "square_32", "clip_check", TMP / "clip_square_32.stl",
-        clip_check_w=generic_w, clip_check_tip_w=generic_w,
+        "square_40", "clip_check", TMP / "clip_square_40.stl",
+        clip_check_w=oversize, clip_check_tip_w=oversize,
         clip_check_gap=gap, clip_check_top_z=seated_top,
     )
     square_v = shared(body, square)
-    print(f"    non-tapered 32mm clip      : {square_v:8.2f} mm^3")
+    print(f"    oversized 40mm clip       : {square_v:8.2f} mm^3")
     if square_v < CONTROL_MIN:
         failures.append(
-            f"the non-tapered wide control only produced {square_v:.1f}mm^3")
+            f"the oversized-width control only produced {square_v:.1f}mm^3")
 
     print()
     if failures:
@@ -177,7 +179,7 @@ def main() -> int:
 
     print("=== PASS ===")
     print("  the measured Kenwood and tapered 32mm envelope descend freely;")
-    print("  too-small gaps and non-tapered wide clips are both rejected")
+    print("  too-small gaps and clips wider than the end stops are rejected")
     return 0
 
 

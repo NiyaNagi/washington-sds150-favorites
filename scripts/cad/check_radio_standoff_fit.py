@@ -97,10 +97,10 @@ def main() -> int:
     TMP.mkdir(exist_ok=True)
 
     travel, minimum = model_values()
-    body = render("body", "body", TMP / "standoff_fit_body.stl")
+    body = render("head", "head_neutral", TMP / "standoff_fit_head.stl")
 
     print("=== SDS150 gravity-keyhole fit ===")
-    print(f"  body: {body.volume/1000:.1f} cm^3, one watertight solid")
+    print(f"  head: {body.volume/1000:.1f} cm^3, one watertight solid")
     print(f"  travel: {travel:.2f} mm (mathematical minimum {minimum:.3f} mm)")
     print()
 

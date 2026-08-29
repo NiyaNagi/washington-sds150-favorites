@@ -78,9 +78,13 @@ is so coarse, is in [docs/efhw-enclosure.md](../docs/efhw-enclosure.md).
 | File | What it is |
 | --- | --- |
 | `peak design radio standoff/peak_design_radio_standoff.scad` | Parametric source and diagnostic radio envelopes. |
-| `peak_design_radio_standoff_{self_tap,insert,nut}.stl` / `.3mf` | Three production socket variants. |
+| `peak_design_radio_standoff_stalk_{self_tap,insert,nut}.stl` / `.3mf` | Three Peak Design stalk socket variants. |
+| `peak_design_radio_standoff_head.stl` / `.3mf` | Common ±45° adjustable head; one M6×30 bolt and captive M6 nut. |
 | `radio_standoff_coupon_sds_{easy,nominal,firm}.stl` / `.3mf` | Print first; select the SDS150 gravity fit. |
 | `radio_standoff_coupon_clip{_thin,,_thick}.stl` / `.3mf` | Actual universal bridge at 2.8/3.0/3.2 mm for physical clip tuning. |
+| `radio_standoff_coupon_joint_{stalk,head}.stl` / `.3mf` | Actual M6 fork/tongue pair for bolt, nut, clearance, and clamp testing. |
+| `peak design radio standoff/2021.11.21_-_Peak_Design_-_Screw.stl` | User-supplied Peak Design screw reference; not used as a dimensional source. |
+| `peak design radio standoff/2022.01.14_-_Peak_Design_-_Plate_v2.stl` | User-supplied Peak Design plate reference; 39 mm interface remains the confirmed design datum. |
 
 The [design guide](../docs/peak-design-radio-standoff.md),
 [implementation plan](../docs/peak-design-radio-standoff-plan.md), and
