@@ -490,7 +490,7 @@ solid.
 
 ### The pipeline
 
-**`build_all.py`** — 29 steps. Stops at the first hard failure.
+**`build_all.py`** — 30 steps. Stops at the first hard failure.
 
 ```powershell
 .venv-cad\Scripts\python.exe scripts\cad\build_all.py
@@ -544,6 +544,24 @@ assert and a mesh probe disagree, *the mesh is right*.
   while measuring the nut mesh, and reported a hex pocket as missing
   material.
 - Convex shapes need only their corners tested.
+
+### Lessons from the adjustable radio standoff
+
+- **A hex pocket alone does not make a captive nut.** The nut needs solid
+  material on both sides of the clamp load. Put the insertion tunnel through
+  a side wall, leave a floor beneath the nut, and leave a roof for the mating
+  plate to bear against.
+- **Key the fastener, not merely its silhouette.** A round cap head can spin
+  in a round knob cup. A printed male hex engaging the cap's Allen recess
+  transfers torque positively; matching-cap and solid-cap control meshes
+  prove that the key clears only where intended.
+- **Texture according to the desired motion.** Concentric rings add friction
+  while preserving continuous rotation. Radial teeth would create angular
+  indexing even when the requirement is continuously adjustable.
+- **Preserve the far datum when thinning a visible wall.** Reducing an SDS lug
+  ledge without deepening its hidden head channel moves the channel and causes
+  collision. Increase channel depth by the removed ledge thickness so total
+  lug depth, head clearance, and pull-out capture remain unchanged.
 
 ---
 

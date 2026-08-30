@@ -361,7 +361,7 @@ python -m venv .venv-cad
 .venv-cad/bin/python scripts/cad/build_all.py        # verify everything, then export
 ```
 
-`build_all.py` runs all 29 geometry checks in order and stops at the first
+`build_all.py` runs all 30 geometry checks in order and stops at the first
 hard failure, so a broken model cannot overwrite good STLs. It goes quiet
 for minutes at a time while CGAL works.
 

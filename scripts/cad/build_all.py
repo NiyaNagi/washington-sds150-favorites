@@ -47,12 +47,13 @@ the method - it is a screw-lid cylinder built on models/thread_lib.scad:
 Peak Design opposed-face radio standoff:
  22. load sizing   - variable-section stress and deflection at 1g/3g/5g
  23. tilt sweep    - M6 joint and active radio through -45..+45 degrees
- 24. SDS fit       - real shared stud dropped, seated and pulled outward
- 25. clip fit      - measured Kenwood and conservative generic clip sweeps
- 26. assembly      - both radio envelopes, each insertion path, 20mm clear
- 27. PD interface - all three sockets, full 39mm bearing face and controls
- 28. export        - stalks, head, six radio-fit and two joint coupons
- 29. inspect       - topology, minimum wall and classified printability
+ 24. knob fit      - 4mm/5mm Allen caps and solid-cap fault controls
+ 25. SDS fit       - real shared stud dropped, seated and pulled outward
+ 26. clip fit      - measured Kenwood and conservative generic clip sweeps
+ 27. assembly      - both radio envelopes, each insertion path, 20mm clear
+ 28. PD interface - M6/1/4 side nuts, full 39mm face and tunnel controls
+ 29. export        - stalks, head, knobs, radio/base/joint coupons
+ 30. inspect       - topology, minimum wall and classified printability
 
 Usage:
     .venv-cad/Scripts/python.exe scripts/cad/build_all.py
@@ -91,9 +92,19 @@ ENCLOSURE_FILES = [
 
 STANDOFF_DIR = ROOT / "models" / "peak design radio standoff"
 STANDOFF_FILES = [
-    *[f"peak_design_radio_standoff_stalk_{style}.stl" for style in PD_STYLES],
+    "peak_design_radio_standoff_stalk_m6_nut.stl",
+    "peak_design_radio_standoff_stalk_quarter_nut.stl",
     "peak_design_radio_standoff_head.stl",
+    "radio_standoff_knob_m6_button_4mm.stl",
+    "radio_standoff_knob_m6_socket_5mm.stl",
 ]
+
+# The stalk and head have intentional 0.42mm-class friction-face detail.
+# Their structural floor, nut roof, fork, tongue and SDS ledge are checked by
+# the dedicated mesh/assembly harnesses above; treating a shallow ring edge as
+# a 1.2mm structural wall would be a false failure.  The knobs have no such
+# texture and retain inspect_stl.py's default three-extrusion wall gate.
+STANDOFF_TEXTURED_FILES = set(STANDOFF_FILES[:3])
 
 
 def run(label: str, args: list[str], required: bool = True) -> bool:
@@ -310,21 +321,25 @@ def main() -> None:
 
     run("22. standoff load sizing", [str(HERE / "design_radio_standoff.py")])
     run("23. standoff tilt sweep", [str(HERE / "check_radio_standoff_tilt.py")])
-    run("24. standoff SDS fit", [str(HERE / "check_radio_standoff_fit.py")])
-    run("25. standoff clip fit", [str(HERE / "check_radio_standoff_clip.py")])
-    run("26. standoff dual-radio assembly",
+    run("24. standoff knob fit", [str(HERE / "check_radio_standoff_knob.py")])
+    run("25. standoff SDS fit", [str(HERE / "check_radio_standoff_fit.py")])
+    run("26. standoff clip fit", [str(HERE / "check_radio_standoff_clip.py")])
+    run("27. standoff dual-radio assembly",
         [str(HERE / "check_radio_standoff_assembly.py")])
-    run("27. standoff Peak Design interface",
+    run("28. standoff Peak Design interface",
         [str(HERE / "audit_radio_standoff.py")])
-    run("28. standoff export", [str(HERE / "export_radio_standoff.py")])
+    run("29. standoff export", [str(HERE / "export_radio_standoff.py")])
 
-    print(f"\n{'=' * 68}\n29. inspect standoff exports\n{'=' * 68}",
+    print(f"\n{'=' * 68}\n30. inspect standoff exports\n{'=' * 68}",
           flush=True)
     for name in STANDOFF_FILES:
         path = STANDOFF_DIR / name
+        inspect_args = [str(HERE / "inspect_stl.py"), str(path)]
+        if name in STANDOFF_TEXTURED_FILES:
+            inspect_args.append("0.42")
         inspect = subprocess.run(
-            [str(PYTHON), "-W", "ignore", str(HERE / "inspect_stl.py"),
-             str(path)], capture_output=True, text=True, cwd=ROOT,
+            [str(PYTHON), "-W", "ignore", *inspect_args],
+            capture_output=True, text=True, cwd=ROOT,
         )
         printable = subprocess.run(
             [str(PYTHON), "-W", "ignore",

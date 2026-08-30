@@ -31,7 +31,6 @@ OPENSCAD = Path(r"C:\Program Files\OpenSCAD\openscad.exe")
 
 E_PLA = 2400.0          # MPa, conservative layer-normal effective modulus
 PLA_STRENGTH = 25.0     # MPa, conservative upright printed PLA
-PLA_SHEAR = 18.0        # MPa, conservative printed thread shear
 G = 9.80665             # m/s^2
 TARGET_FOS_3G = 3.0
 TARGET_FOS_5G = 1.5
@@ -230,16 +229,18 @@ def main() -> int:
             f"fork ears need {100*ear_strain:.2f}% strain to close, above "
             "the 0.8% daily-use PLA limit")
 
-    socket_d = number(text, "depth")
-    pilot_d = 5.40
-    shear_area = math.pi * pilot_d * socket_d
-    strip_load = shear_area * PLA_SHEAR
-    total_weight = sum(load.mass_kg for load in loads) * G
-    socket_fos = strip_load / total_weight
+    nut_t = number(text, "depth")
+    nut_af = number(text, "nut_af")
+    thread_d = number(text, "thread_d")
+    nut_roof = number(text, "floor")
+    bearing_area = math.pi * ((nut_af / 2) ** 2 - (thread_d / 2) ** 2)
     print()
-    print("  SELF-TAP SOCKET")
-    print(f"    engagement {socket_d:.2f} mm, shear area {shear_area:.0f} mm^2")
-    print(f"    conservative strip load {strip_load/1000:.2f} kN, weight FoS {socket_fos:.0f}")
+    print("  SIDE-LOADING CAPTIVE BASE NUT")
+    print(f"    nut {nut_af:.2f}mm AF x {nut_t:.2f}mm, thread {thread_d:.2f}mm")
+    print(f"    solid roof above nut      : {nut_roof:.2f} mm")
+    print(f"    nominal metal bearing area: {bearing_area:.0f} mm^2")
+    if nut_roof < 2.4:
+        failures.append(f"base nut roof is only {nut_roof:.2f}mm")
 
     sample = beam_case(loads, 1, "Y", sections, cut_w, cut_z0, cut_z1)
     print()

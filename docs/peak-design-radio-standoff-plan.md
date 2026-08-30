@@ -35,16 +35,16 @@ downward. Both radios may still be installed together at 0°.
 
 ### Base and socket
 
-The base is no wider than 39 × 39 mm, with rounded corners that remain
-inside that square. The entire bottom face bears on the plate's rubber pad
-to resist rotation. A centered female socket is offered in three variants:
+The base is no wider than 39 × 39 mm, with rounded corners that remain inside
+that square. The lower face bears on the plate's rubber pad to resist rotation.
+Two variants use side-loading captive metal nuts:
 
-1. 5.40 mm pilot for a self-tapping 1/4"-20 screw;
-2. 7.60 mm × 6.00 mm heat-set insert pocket;
-3. captive nut pocket, 12.876 mm across corners × 5.60 mm deep.
+1. standard M6 nut for the user's M6 Peak Design hardware;
+2. standard 1/4"-20 nut for conventional tripod hardware.
 
-The heat-set insert is preferred for repeated use. All variants share one
-external envelope sized around the captive-nut option.
+The nut is trapped between a 1.2 mm floor and 2.9–3.3 mm solid roof. Only the
+screw passage interrupts the bearing face; a side tunnel allows nut replacement
+without leaving an open-bottom pocket.
 
 ### Structural stalk and adjustable head
 
@@ -53,6 +53,9 @@ ribs, and large tangent transitions into a two-ear clevis. A common radio
 head uses an 11.8 mm central tongue between 6.6 mm ears with 0.20 mm clearance
 per side. One M6×30 bolt and captive M6 nut clamp 13 mm-radius friction lands.
 The head is continuous-adjustable through ±45°, not four separate parts.
+Concentric rib/groove rings increase continuous friction without introducing
+indexed angle teeth. Large twelve-lobed knobs positively engage 4 mm or 5 mm
+Allen recesses so the round cap screw cannot spin inside a round printed cup.
 
 The section is sized analytically for single-radio, two-radio, 3g road-bump,
 and 5g shock cases. Conservative design load is 400 g per face until the
@@ -115,8 +118,8 @@ into each end support. Exact TD-H9 and UV-5R compatibility is still coupon-teste
 9. Audit the exported Peak Design bearing face and every socket variant.
 10. Run watertightness, body-count, thin-wall, bridge, overhang, and build-
     volume checks.
-11. Export self-tap, insert, and nut STL/3MF variants plus coupons and
-    diagnostic previews.
+11. Export M6-nut and 1/4"-nut stalks, common head, two Allen-drive knobs,
+  fit/base/joint coupons, and diagnostic previews.
 12. Add the standoff pipeline after all individual checks pass.
 13. Record physical coupon results before calling TD-H9 or UV-5R fit
     verified.

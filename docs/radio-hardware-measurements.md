@@ -46,6 +46,9 @@ Source of truth: `models/sds150_stud.scad`.
 | Minimum locking travel | 15.925 | Derived | Hard lower bound |
 | Standoff preload target | 0.05 | Design target | Easy gravity-assisted removal |
 | Standoff slide clearance, per side | 0.35 | Design target | Easy gravity-assisted removal |
+| Final standoff ledge thickness | 3.115 | User-requested design | 30% thinner than original 4.45 mm wall |
+| Intentional lug axial freedom | 1.385 | Derived | Extra clearance created by thinner ledge |
+| Compensated head-channel depth | original total depth preserved | Design | Maintains head clearance and capture |
 
 ### Radio envelope
 
@@ -118,13 +121,18 @@ envelope, not a centering fit.
 | Rubber-bearing footprint | 39 × 39 | Repository/user confirmed | Maximum standoff base |
 | Thread major diameter | 6.35 | Standard | Socket interface |
 | Thread pitch | 1.27 | Standard (20 TPI) | Socket interface |
-| Self-tap pilot | 5.40 | Repository/proven | Simplest socket variant |
-| Self-tap engagement | 8.25 | Repository/proven | Socket depth target |
-| Heat-set insert outside diameter | 7.60 | Repository/proven | Insert variant |
-| Heat-set insert depth | 6.00 | Repository/proven | Insert variant |
+| Self-tap pilot | 5.40 | Repository/proven | Superseded standoff variant; retained reference |
+| Self-tap engagement | 8.25 | Repository/proven | Superseded standoff variant; retained reference |
+| Heat-set insert outside diameter | 7.60 | Repository/proven | Superseded standoff variant; retained reference |
+| Heat-set insert depth | 6.00 | Repository/proven | Superseded standoff variant; retained reference |
 | Captive nut across flats | 11.15 | Repository/proven | Hardware reference |
 | Captive nut across corners | 12.876 | Derived | Pocket size driver |
 | Captive nut thickness | 5.60 | Repository/proven | Nut pocket depth |
+| Side-loading nut floor | 1.20 | Design | Solid reaction surface under nut |
+| 1/4" nut roof | 2.90 | Derived | Solid plate reaction above nut |
+| M6 base nut across flats | 10.0 | Standard/user requested | Alternate Peak Design base variant |
+| M6 base nut thickness | 5.2 | Standard/common | Side tunnel height |
+| M6 base nut roof | 3.30 | Derived | Solid plate reaction above nut |
 
 ## Adjustable-head joint hardware
 
@@ -137,6 +145,12 @@ envelope, not a centering fit.
 | Printed tongue thickness | 11.8 | Design | Fits inside 12.2 mm fork gap |
 | Printed side clearance | 0.20 per face | Design | Free adjustment before clamping |
 | Friction-land radius | 13.0 | Design | Clamp moment capacity |
+| Friction rings | radii 5.0, 7.1, 9.2, 11.2 | Design | Continuous anti-slip texture |
+| Ring rib / groove | 0.65 × 0.35 / 0.95 × 0.48 | Design | Positive surface keying without indexing |
+| Knob envelope | 43.2 × 25.9 × 15.0 | Design | High finger torque |
+| Knob lobes | 12 | Design | Wet/dry grip |
+| Button-cap Allen drive | 4.0 AF | User confirmed/common | Positive-drive knob variant |
+| Socket-cap Allen drive | 5.0 AF | User confirmed/common | Positive-drive knob variant |
 
 ## Reference-image inventory
 

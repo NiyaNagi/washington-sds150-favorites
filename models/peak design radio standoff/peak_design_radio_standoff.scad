@@ -31,6 +31,7 @@ standoff_preload    = 0.05;
 standoff_clr_slide  = 0.35;
 standoff_hole_comp  = 0.25;
 standoff_head_clr_z = 0.40; // upright channel; no wide horizontal roof
+standoff_ledge_scale = 0.70; // user-requested 30% thinner lug-slide wall
 
 sds_travel        = 19.0;
 
@@ -39,17 +40,17 @@ sds_travel        = 19.0;
 // =====================================================================
 
 pd_plate_size     = 39.0;
-thread_major      = 6.35;   // 1/4 inch
-thread_pitch      = 1.27;   // 20 TPI
-thread_style      = "self_tap"; // self_tap | insert | nut
+thread_style      = "m6_nut"; // m6_nut | quarter_nut
 
-self_tap_d        = 5.40;
-self_tap_depth    = 8.25;
-insert_d          = 7.60;
-insert_depth      = 6.00;
-nut_af            = 11.15;
-nut_t             = 5.60;
-socket_mouth_d    = 8.0;
+base_m6_thread_d  = 6.00;
+base_m6_nut_af    = 10.00;
+base_m6_nut_t     = 5.20;
+base_qtr_thread_d = 6.35;
+base_qtr_nut_af   = 11.15;
+base_qtr_nut_t    = 5.60;
+base_nut_clr      = 0.30;
+base_nut_z0       = 1.20;  // solid bearing floor under the nut
+base_slot_clr     = 0.35;
 
 sds_body_h        = 153.0;
 sds_body_w        = 69.9;   // conservative repo envelope; sketch says 57
@@ -157,14 +158,19 @@ coupon_fit         = "nominal"; // easy | nominal | firm
 //  4. DERIVED - computed, never edited
 // =====================================================================
 
-nut_across_corners = nut_af / cos(30);
-socket_depth = thread_style == "self_tap" ? self_tap_depth
-             : thread_style == "insert"   ? insert_depth
-             :                              nut_t;
-socket_floor = base_t - socket_depth;
+base_nut_af = thread_style == "m6_nut" ? base_m6_nut_af : base_qtr_nut_af;
+base_nut_t  = thread_style == "m6_nut" ? base_m6_nut_t  : base_qtr_nut_t;
+base_thread_d = thread_style == "m6_nut" ? base_m6_thread_d
+                                           : base_qtr_thread_d;
+base_nut_across_corners = (base_nut_af + base_nut_clr) / cos(30);
+socket_depth = base_nut_t;
+socket_floor = base_t - (base_nut_z0 + base_nut_t + base_nut_clr);
 
-sds_ledge_t   = (stud_neck_h - standoff_preload) * shrink_comp;
-sds_head_ch_h = (stud_head_t + standoff_head_clr_z) * shrink_comp;
+sds_ledge_t   = (stud_neck_h - standoff_preload) * shrink_comp
+                * standoff_ledge_scale;
+sds_original_depth = ((stud_neck_h - standoff_preload)
+                      + stud_head_t + standoff_head_clr_z) * shrink_comp;
+sds_head_ch_h = sds_original_depth - sds_ledge_t;
 sds_entry_d   = (stud_head_d + 2 * standoff_clr_slide
                  + standoff_hole_comp) * shrink_comp;
 sds_head_ch_w = (stud_head_d + 2 * standoff_clr_slide) * shrink_comp;
@@ -196,6 +202,38 @@ head_print_z0 = pivot_z - joint_flat;
 head_print_h  = head_top_z - head_print_z0;
 joint_ear_x   = joint_gap / 2 + joint_ear_t / 2;
 joint_nut_x0  = joint_outer_w / 2 - m6_nut_t;
+
+friction_radii     = [5.0, 7.1, 9.2, 11.2];
+friction_rib_w     = 0.65;
+friction_rib_h     = 0.35;
+friction_groove_w  = 0.95;
+friction_groove_d  = 0.48;
+
+// High-leverage finger knob.  It covers the round cap and drives the Allen
+// recess with a printed male hex, so a socket/button head cannot spin inside
+// a smooth round pocket.  Two exports cover the common 4mm and 5mm drives.
+knob_style          = "socket_5mm"; // socket_5mm | button_4mm
+knob_t              = 15.0;
+knob_vertical_r     = 20.0;
+knob_foreaft_r      = 12.0;
+knob_lobes          = 12;
+knob_lobe_depth     = 0.08;
+knob_edge_scale     = 0.94;
+knob_button_head_d  = 11.0;
+knob_button_head_h  = 3.5;
+knob_button_hex_af  = 4.0;
+knob_socket_head_d  = 10.2;
+knob_socket_head_h  = 6.2;
+knob_socket_hex_af  = 5.0;
+knob_cup_clr        = 0.35;
+knob_hex_clr        = 0.10;
+
+knob_head_d = knob_style == "button_4mm" ? knob_button_head_d
+                                           : knob_socket_head_d;
+knob_head_h = knob_style == "button_4mm" ? knob_button_head_h
+                                           : knob_socket_head_h;
+knob_hex_af = knob_style == "button_4mm" ? knob_button_hex_af
+                                           : knob_socket_hex_af;
 
 // =====================================================================
 //  5. ASSERTS - confirmations, not the primary design method
@@ -235,10 +273,14 @@ assert(joint_outer_w <= 26,
     str("M6x30 cannot span a ", joint_outer_w, "mm clevis with margin"));
 assert(joint_ear_t >= m6_nut_t + 1.0,
     "the captive M6 nut leaves less than 1mm at the inner friction face");
+assert(knob_style == "socket_5mm" || knob_style == "button_4mm",
+    str("unknown knob_style: ", knob_style));
+assert(knob_t > knob_head_h + 5.0,
+    "finger knob leaves too little solid material behind the screw cap");
 assert(clip_bar_w <= 40,
     "the belt bar overhangs the adjustable head");
-assert(thread_style == "self_tap" || thread_style == "insert"
-       || thread_style == "nut", str("unknown thread_style: ", thread_style));
+assert(thread_style == "m6_nut" || thread_style == "quarter_nut",
+    str("unknown thread_style: ", thread_style));
 
 // =====================================================================
 //  6. PRIMITIVES
@@ -302,6 +344,71 @@ module pivot_hole_x(length, diameter = joint_bolt_d) {
             cylinder(d = diameter, h = length, $fn = 48);
 }
 
+module friction_rings_2d(width) {
+    for (r = friction_radii)
+        difference() {
+            circle(r = r + width / 2, $fn = 96);
+            circle(r = r - width / 2, $fn = 96);
+        }
+}
+
+module friction_rings_x(x_face, direction, depth, width) {
+    translate([x_face, 0, pivot_z])
+        rotate([0, direction > 0 ? 90 : -90, 0])
+            linear_extrude(height = depth)
+                friction_rings_2d(width);
+}
+
+function knob_outline_points(scale_v = 1) = [
+    for (i = [0 : 95])
+        let(a = 360 * i / 96,
+            f = 1 + knob_lobe_depth * cos(knob_lobes * a))
+            [scale_v * knob_vertical_r * f * cos(a),
+             scale_v * knob_foreaft_r  * f * sin(a)]
+];
+
+module knob_outline_2d(scale_v = 1) {
+    polygon(knob_outline_points(scale_v));
+}
+
+module knob_outer() {
+    hull() {
+        linear_extrude(height = 0.8)
+            knob_outline_2d(knob_edge_scale);
+        translate([0, 0, 0.8])
+            linear_extrude(height = 0.8)
+                knob_outline_2d();
+        translate([0, 0, knob_t - 1.6])
+            linear_extrude(height = 0.8)
+                knob_outline_2d();
+        translate([0, 0, knob_t - 0.8])
+            linear_extrude(height = 0.8)
+                knob_outline_2d(knob_edge_scale);
+    }
+}
+
+module m6_turn_knob() {
+    cup_depth = knob_head_h + knob_cup_clr;
+    cup_z0 = knob_t - cup_depth;
+    post_h = min(3.0, knob_head_h - 0.5);
+    post_z0 = knob_t - knob_head_h - knob_cup_clr - 0.20;
+
+    union() {
+        difference() {
+            knob_outer();
+            translate([0, 0, cup_z0])
+                cylinder(d = knob_head_d + 2 * knob_cup_clr,
+                         h = cup_depth + 0.02, $fn = 64);
+        }
+
+        // Male Allen key inside the cap recess.  It keys the round socket
+        // or button head to the knob, so the screw cannot spin independently.
+        translate([0, 0, post_z0])
+            cylinder(d = (knob_hex_af - knob_hex_clr) / cos(30),
+                     h = post_h + 0.20, $fn = 6);
+    }
+}
+
 module base_outer() {
     // The complete 39mm lower face bears on Peak Design's rubber pad.
     // Only the TOP edge rolls inward; chamfering the bottom would throw
@@ -349,7 +456,8 @@ module sds_frame(z0 = sds_locked_z) {
 module standoff_keyhole_void(travel, above = 1.0,
                              fit_preload = standoff_preload,
                              fit_slide = standoff_clr_slide) {
-    ledge_v = (stud_neck_h - fit_preload) * shrink_comp;
+    ledge_v = (stud_neck_h - fit_preload) * shrink_comp
+              * standoff_ledge_scale;
     neck_v = (stud_neck_d + 2 * fit_slide) * shrink_comp;
     entry_v = (stud_head_d + 2 * fit_slide
                + standoff_hole_comp) * shrink_comp;
@@ -363,8 +471,11 @@ module standoff_keyhole_void(travel, above = 1.0,
 module standoff_head_channel(travel,
                              fit_preload = standoff_preload,
                              fit_slide = standoff_clr_slide) {
-    ledge_v = (stud_neck_h - fit_preload) * shrink_comp;
-    channel_h_v = (stud_head_t + standoff_head_clr_z) * shrink_comp;
+    ledge_v = (stud_neck_h - fit_preload) * shrink_comp
+              * standoff_ledge_scale;
+    original_depth_v = ((stud_neck_h - fit_preload)
+                        + stud_head_t + standoff_head_clr_z) * shrink_comp;
+    channel_h_v = original_depth_v - ledge_v;
     channel_w_v = (stud_head_d + 2 * fit_slide) * shrink_comp;
 
     translate([0, 0, -ledge_v - channel_h_v])
@@ -419,30 +530,29 @@ module clip_centering_rails() {
 }
 
 module tripod_socket_void() {
-    if (thread_style == "self_tap") {
-        translate([0, 0, -0.01])
-            cylinder(d = self_tap_d, h = self_tap_depth + 0.02);
-
-    } else if (thread_style == "insert") {
-        translate([0, 0, -0.01])
-            cylinder(d = insert_d, h = insert_depth + 0.02);
-        translate([0, 0, insert_depth - 0.01])
-            cylinder(d = self_tap_d,
-                     h = base_t - insert_depth - 1.0 + 0.02);
-
-    } else {
-        translate([0, 0, -0.01])
-            cylinder(d = nut_across_corners, h = nut_t + 0.02, $fn = 6);
-        translate([0, 0, nut_t - 0.01])
-            cylinder(d = thread_major + 0.6,
-                     h = base_t - nut_t - 1.0 + 0.02);
-    }
-
-    // Mouth chamfer prevents a raised first layer and lets the PD plate
-    // sit flat against the full bearing face.
+    // Screw enters through the Peak Design bearing face, but the nut does
+    // not: it slides in from +X and is trapped between a 1.2mm floor and a
+    // >2.8mm roof.  The hex pocket prevents rotation while the side tunnel
+    // makes replacement possible.
     translate([0, 0, -0.01])
-        cylinder(d1 = socket_mouth_d, d2 = thread_major,
-                 h = 0.81, $fn = 64);
+        cylinder(d = base_thread_d + 0.45,
+                 h = base_nut_z0 + 0.22, $fn = 48);
+
+    translate([0, 0, base_nut_z0])
+        cylinder(d = base_nut_across_corners,
+                 h = base_nut_t + base_nut_clr, $fn = 6);
+
+    translate([0, -(base_nut_af + base_slot_clr) / 2, base_nut_z0])
+        cube([pd_plate_size / 2 + 1,
+              base_nut_af + base_slot_clr,
+              base_nut_t + base_nut_clr]);
+
+    // Small entry chamfer; the rest of the 39x39 lower face remains the
+    // solid reaction surface missing from the first print.
+    translate([0, 0, -0.01])
+        cylinder(d1 = base_thread_d + 1.4,
+                 d2 = base_thread_d + 0.45,
+                 h = 0.61, $fn = 48);
 }
 
 // =====================================================================
@@ -463,6 +573,10 @@ module fork_outer() {
     union() {
         fork_ear(-1);
         fork_ear(1);
+        friction_rings_x(-joint_gap / 2,  1,
+                         friction_rib_h, friction_rib_w);
+        friction_rings_x( joint_gap / 2, -1,
+                         friction_rib_h, friction_rib_w);
     }
 }
 
@@ -510,6 +624,10 @@ module head_neutral(fit_preload = standoff_preload,
 
         sds_voids(fit_preload = fit_preload, fit_slide = fit_slide);
         pivot_hole_x(joint_tongue_t + 2.0);
+        friction_rings_x(-joint_tongue_t / 2 - 0.10,  1,
+                 friction_groove_d + 0.10, friction_groove_w);
+        friction_rings_x( joint_tongue_t / 2 + 0.10, -1,
+                 friction_groove_d + 0.10, friction_groove_w);
     }
 }
 
@@ -540,6 +658,13 @@ module joint_hardware_reference() {
         translate([joint_nut_x0, 0, pivot_z])
             rotate([0, 90, 0])
                 cylinder(d = m6_nut_ac, h = m6_nut_t, $fn = 6);
+}
+
+module knob_assembly_reference() {
+    color([0.10, 0.10, 0.12])
+        translate([-joint_outer_w / 2 - knob_t, 0, pivot_z])
+            rotate([0, 90, 0])
+                m6_turn_knob();
 }
 
 module stalk_head_intersection(angle = head_angle) {
@@ -640,8 +765,8 @@ module fit_coupon(fit_preload = standoff_preload,
     coupon_h = 42;
     coupon_entry_d = (stud_head_d + 2 * fit_slide
              + standoff_hole_comp) * shrink_comp;
-    coupon_depth = (stud_neck_h - fit_preload
-              + stud_head_t + standoff_head_clr_z) * shrink_comp;
+    coupon_depth = ((stud_neck_h - fit_preload)
+                    + stud_head_t + standoff_head_clr_z) * shrink_comp;
 
     assert(sds_travel >= (coupon_entry_d + stud_head_d) / 2,
         str("coupon travel is too short for fit ", coupon_fit));
@@ -701,6 +826,13 @@ module joint_coupon_head() {
         }
 }
 
+module base_nut_coupon() {
+    intersection() {
+        stalk_body();
+        translate([-20, -20, 0]) cube([40, 40, base_t]);
+    }
+}
+
 // =====================================================================
 //  8. REPORT AND ENTRY POINT
 // =====================================================================
@@ -716,6 +848,8 @@ echo(str("  SDS locked_z=", sds_locked_z,
          " min=", sds_min_travel));
 echo(str("  FIT preload=", standoff_preload,
          " slide=", standoff_clr_slide,
+         " ledge_t=", sds_ledge_t,
+         " neck_h=", stud_neck_h,
          " entry_d=", sds_entry_d,
          " neck_w=", sds_neck_w,
          " stud_depth=", sds_stud_depth));
@@ -736,7 +870,9 @@ echo(str("  CLIPCHECK bar_t=", clip_bar_t,
          " generic_w=", uv5r_clip_env_w));
 echo(str("  SOCKET depth=", socket_depth,
          " floor=", socket_floor,
-         " nut_ac=", nut_across_corners));
+         " nut_af=", base_nut_af,
+         " nut_ac=", base_nut_across_corners,
+         " thread_d=", base_thread_d));
 echo(str("  LOAD sds_mass_g=", sds_mass_g,
          " thd_mass_g=", thd_mass_g,
          " sds_com_z=", sds_bottom_z + sds_body_h / 2,
@@ -778,6 +914,7 @@ if (variant_render_mode == "stalk") {
     color([0.12, 0.12, 0.14]) stalk_body();
     color([0.18, 0.18, 0.21]) head_body(head_angle);
     joint_hardware_reference();
+    knob_assembly_reference();
     sds_reference(angle = head_angle);
     thd_reference(angle = head_angle);
 } else if (variant_render_mode == "assembly_parts") {
@@ -803,6 +940,10 @@ if (variant_render_mode == "stalk") {
     joint_coupon_stalk();
 } else if (variant_render_mode == "joint_coupon_head") {
     joint_coupon_head();
+} else if (variant_render_mode == "base_coupon") {
+    base_nut_coupon();
+} else if (variant_render_mode == "knob") {
+    m6_turn_knob();
 } else if (variant_render_mode == "sds_check") {
     sds_check_solid();
 } else if (variant_render_mode == "clip_check") {

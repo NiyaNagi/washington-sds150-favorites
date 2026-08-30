@@ -35,7 +35,7 @@ BLOCK_MIN = 120.0     # mm^3 means the ledge genuinely blocks pull-out
 CONTROL_MIN = 50.0    # deliberately oversized stud must be obvious
 
 
-def model_values() -> tuple[float, float]:
+def model_values() -> tuple[float, float, float, float]:
     result = subprocess.run(
         [str(OPENSCAD), "-o", str(TMP / "_fit_null.stl"),
          "-D", 'variant_render_mode="none"',
@@ -47,7 +47,12 @@ def model_values() -> tuple[float, float]:
                       r"bottom_z=[0-9.]+ travel=([0-9.]+) min=([0-9.]+)", text)
     if not match:
         raise SystemExit("the model did not echo SDS travel and minimum")
-    return float(match.group(1)), float(match.group(2))
+    ledge_match = re.search(r"FIT preload=[0-9.]+ slide=[0-9.]+ "
+                            r"ledge_t=([0-9.]+) neck_h=([0-9.]+)", text)
+    if not ledge_match:
+        raise SystemExit("the model did not echo SDS ledge thickness")
+    return (float(match.group(1)), float(match.group(2)),
+            float(ledge_match.group(1)), float(ledge_match.group(2)))
 
 
 def render(name: str, mode: str, out: Path, **values: float | str) -> trimesh.Trimesh:
@@ -96,12 +101,14 @@ def main() -> int:
         raise SystemExit(f"OpenSCAD not found at {OPENSCAD}")
     TMP.mkdir(exist_ok=True)
 
-    travel, minimum = model_values()
+    travel, minimum, ledge_t, neck_h = model_values()
+    axial_free = neck_h - ledge_t
     body = render("head", "head_neutral", TMP / "standoff_fit_head.stl")
 
     print("=== SDS150 gravity-keyhole fit ===")
     print(f"  head: {body.volume/1000:.1f} cm^3, one watertight solid")
     print(f"  travel: {travel:.2f} mm (mathematical minimum {minimum:.3f} mm)")
+    print(f"  ledge: {ledge_t:.3f} mm, intentional axial freedom {axial_free:.3f} mm")
     print()
 
     failures: list[str] = []
@@ -132,10 +139,11 @@ def main() -> int:
     if seated_v > TOUCH_TOL:
         failures.append(f"the seated stud intersects {seated_v:.1f}mm^3")
 
+    pull_distance = axial_free + 1.5
     pull = render("pull", "sds_check", TMP / "standoff_stud_pull.stl",
-                  check_pos=0.0, check_lift=1.5, check_extra=0.0)
+                  check_pos=0.0, check_lift=pull_distance, check_extra=0.0)
     pull_v = shared(body, pull)
-    print(f"    pulled 1.5mm outward      : {pull_v:8.2f} mm^3")
+    print(f"    pulled {pull_distance:.3f}mm outward  : {pull_v:8.2f} mm^3")
     if pull_v < BLOCK_MIN:
         failures.append(
             f"pull-out only meets {pull_v:.1f}mm^3 of ledge; the head is not "

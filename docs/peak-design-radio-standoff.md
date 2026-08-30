@@ -26,6 +26,8 @@ Do not start with the full stalk and head.
 | `radio_standoff_coupon_clip_thick.stl` | Actual rear interface with 3.2 mm bridge |
 | `radio_standoff_coupon_joint_stalk.stl` | Actual fork ears, bolt bore, and captive M6 nut pocket |
 | `radio_standoff_coupon_joint_head.stl` | Actual head tongue and friction faces |
+| `radio_standoff_coupon_base_m6_nut.stl` | Actual side-loading M6 base nut tunnel and bearing roof |
+| `radio_standoff_coupon_base_quarter_nut.stl` | Actual side-loading 1/4" base nut tunnel and bearing roof |
 
 The SDS150 head must pass through without force, slide fully down, remain
 stable under gravity, and lift back out deliberately. Select the loosest coupon
@@ -45,18 +47,23 @@ freely when loose, and lock without creeping when the bolt is snug.
 
 | File | Purpose |
 | --- | --- |
-| `peak_design_radio_standoff_stalk_self_tap.stl` / `.3mf` | Stalk with 5.40 mm pilot; a 1/4"-20 screw forms its thread |
-| `peak_design_radio_standoff_stalk_insert.stl` / `.3mf` | Stalk with 7.60 × 6.00 mm heat-set insert pocket |
-| `peak_design_radio_standoff_stalk_nut.stl` / `.3mf` | Stalk with captive 1/4" nut, 12.875 mm across corners |
+| `peak_design_radio_standoff_stalk_m6_nut.stl` / `.3mf` | Stalk with side-loading captive M6 nut |
+| `peak_design_radio_standoff_stalk_quarter_nut.stl` / `.3mf` | Stalk with side-loading captive 1/4"-20 nut |
 | `peak_design_radio_standoff_head.stl` / `.3mf` | Common adjustable radio head; print one |
+| `radio_standoff_knob_m6_button_4mm.stl` / `.3mf` | Large knob for an M6 button-cap screw with 4 mm Allen socket |
+| `radio_standoff_knob_m6_socket_5mm.stl` / `.3mf` | Large knob for an M6 socket-cap screw with 5 mm Allen socket |
 
-The heat-set insert version is preferred for repeated assembly. The self-tap
-version is simplest and has ample calculated capacity. All three stalks have
-exactly the same outside envelope and full 39 × 39 mm Peak Design bearing face.
+Both stalks retain the full 39 × 39 mm Peak Design bearing face. The nut slides
+in from the +X side and is trapped between a 1.2 mm floor and a solid roof:
+3.3 mm over M6, 2.9 mm over 1/4"-20. Only the screw passage interrupts the
+bottom bearing face, so the plate has solid material to clamp against.
 
 Join the head to the stalk with one M6×30 bolt and one standard M6 nut. The nut
-presses into the hex pocket in the right fork ear. Tighten the exposed bolt
-head until the head holds its angle; do not crush the printed friction faces.
+presses into the hex pocket in the right fork ear. Fit the matching large knob
+over the screw head: a printed 4 mm or 5 mm male hex engages the Allen recess,
+so the round cap cannot spin inside the knob. The 43.2 × 25.9 × 15 mm twelve-
+lobed knob provides substantially more finger leverage than a typical GoPro
+knob.
 
 ## How the SDS150 side works
 
@@ -68,8 +75,9 @@ head until the head holds its angle; do not crush the printed friction faces.
 
 There is deliberately no latch. Removal requires lifting the radio against
 gravity and then pulling the head through the upper opening. Independent fit
-checks report zero interference through 11 travel positions and 126.2 mm³ of
-ledge interception when the seated stud is pulled 1.5 mm outward.
+checks report zero interference through 11 travel positions and 130.5 mm³ of
+ledge interception after the intentional 1.385 mm freedom plus 1.5 mm of
+pull-out travel.
 
 The radio bottom is exactly 20 mm above the Peak Design bearing plane when
 fully seated. The mount derives the lug height from that requirement instead
@@ -77,6 +85,12 @@ of typing the overall standoff height independently.
 
 There are no side guides. The broad head face supports the SDS150 pedestal,
 while the lug ledge and gravity provide retention.
+
+The highlighted lug-slide wall is exactly **30% thinner** than the prior
+version: the nominal ledge changes from 4.45 mm to 3.115 mm. The head-channel
+depth grows by the removed 1.385 mm, preserving the original far-side datum.
+The wide lug disc therefore gets more axial freedom without changing its
+entry-hole clearance, side clearance, or captured depth.
 
 ## How the belt-clip side works
 
@@ -111,6 +125,11 @@ The common head has an 11.8 mm central tongue between 6.6 mm fork ears with
 rounded head language instead of looking like hardware bolted onto a slab.
 The lower chord is flat so both parts print upright without support.
 
+Four concentric 0.35 mm ribs on each fork face nest into 0.48 mm-deep,
+0.95 mm-wide grooves in the head. Because the pattern is concentric it adds
+surface keying and pressure without indexing the head—the angle remains fully
+continuous rather than snapping to fixed teeth.
+
 The shape is functional rather than decorative:
 
 - broad lower sections spread socket load into the Peak Design plate;
@@ -142,9 +161,9 @@ moment. A modest 1.5 kN M6 preload provides 4.92 N·m capacity, approximately
 fork ear approximately 0.69%, below the 0.8% daily-use PLA target. These
 figures assume clean, dry printed faces.
 
-The self-tap socket has approximately 140 mm² conservative shear area and a
-calculated strip load around 2.5 kN. Over-torque during assembly is a more
-credible risk than the 7.85 N combined radio weight.
+The base now reacts through captive metal nuts rather than printed/self-tapped
+threads. Over-tightening the Peak Design screw remains a more credible risk
+than the 7.85 N combined radio weight.
 
 These are analytical design values, not destructive physical-test results.
 
@@ -153,7 +172,7 @@ These are analytical design values, not destructive physical-test results.
 | Setting | Value |
 | --- | --- |
 | Material | PLA for room-temperature use; PETG/ASA for parked-car heat |
-| Orientation | Stalk upright on 39 × 39 mm base; head upright on its flat joint chord |
+| Orientation | Stalk on base; head on flat joint chord; knobs on broad flat back |
 | Layer height | 0.20 mm |
 | Nozzle | 0.4 mm |
 | Wall loops | 4 |
@@ -172,6 +191,7 @@ may reach 40 mm across, but the **Peak Design bearing face** remains exactly
 ```powershell
 .venv-cad\Scripts\python.exe scripts\cad\design_radio_standoff.py
 .venv-cad\Scripts\python.exe scripts\cad\check_radio_standoff_tilt.py
+.venv-cad\Scripts\python.exe scripts\cad\check_radio_standoff_knob.py
 .venv-cad\Scripts\python.exe scripts\cad\check_radio_standoff_fit.py
 .venv-cad\Scripts\python.exe scripts\cad\check_radio_standoff_clip.py
 .venv-cad\Scripts\python.exe scripts\cad\check_radio_standoff_assembly.py

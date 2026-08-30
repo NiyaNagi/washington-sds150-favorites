@@ -1,7 +1,8 @@
 """Export the Peak Design radio standoff and its fit coupons.
 
-The fixed stalk is exported in three 1/4"-20 socket variants.  One common
-adjustable head clamps into any stalk with an M6x30 bolt and captive M6 nut.
+The fixed stalk is exported with side-loading M6 and 1/4" captive nuts. One
+common adjustable head clamps into either stalk with an M6x30 bolt and captive
+M6 nut; large finger knobs positively engage 4mm or 5mm Allen recesses.
 Coupons are deliberately separate: select SDS and clip fits before committing
 to the full parts.
 
@@ -24,9 +25,8 @@ TMP = ROOT / ".tmp-cad"
 OPENSCAD = Path(r"C:\Program Files\OpenSCAD\openscad.exe")
 
 PRODUCTION = [
-    ("self_tap", "peak_design_radio_standoff_stalk_self_tap"),
-    ("insert", "peak_design_radio_standoff_stalk_insert"),
-    ("nut", "peak_design_radio_standoff_stalk_nut"),
+    ("m6_nut", "peak_design_radio_standoff_stalk_m6_nut"),
+    ("quarter_nut", "peak_design_radio_standoff_stalk_quarter_nut"),
 ]
 
 # Exact dimensions live in the SCAD coupon_fit branch.  Keeping only labels
@@ -84,6 +84,9 @@ def main() -> int:
         "peak_design_radio_standoff_self_tap",
         "peak_design_radio_standoff_insert",
         "peak_design_radio_standoff_nut",
+        "peak_design_radio_standoff_stalk_self_tap",
+        "peak_design_radio_standoff_stalk_insert",
+        "peak_design_radio_standoff_stalk_nut",
     ):
         for fmt in ("stl", "3mf"):
             (MODELS / f"{legacy}.{fmt}").unlink(missing_ok=True)
@@ -102,6 +105,14 @@ def main() -> int:
     print("\nCommon M6 adjustable head")
     for fmt in ("stl", "3mf"):
         render("peak_design_radio_standoff_head", "head", fmt)
+
+    print("\nHigh-grip M6 screw-head knobs")
+    for style, name in (
+        ("button_4mm", "radio_standoff_knob_m6_button_4mm"),
+        ("socket_5mm", "radio_standoff_knob_m6_socket_5mm"),
+    ):
+        for fmt in ("stl", "3mf"):
+            render(name, "knob", fmt, knob_style=style)
 
     print("\nSDS150 fit coupons")
     coupon_volumes: list[float] = []
@@ -141,6 +152,14 @@ def main() -> int:
     ):
         for fmt in ("stl", "3mf"):
             render(filename, mode, fmt)
+
+    print("\nSide-loading base-nut coupons")
+    for style, filename in (
+        ("m6_nut", "radio_standoff_coupon_base_m6_nut"),
+        ("quarter_nut", "radio_standoff_coupon_base_quarter_nut"),
+    ):
+        for fmt in ("stl", "3mf"):
+            render(filename, "base_coupon", fmt, thread_style=style)
 
     print("\nDiagnostic previews")
     preview_specs = [
