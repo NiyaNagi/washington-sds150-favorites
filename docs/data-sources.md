@@ -207,6 +207,13 @@ application may retain links or import a file that the user has lawfully
 exported for personal use in a future phase. Coordinator data such as WWARA
 is preferred where available.
 
+Any future RepeaterBook API implementation must follow the pre-implementation
+review plan in [`repeaterbook-api-compliance-design.md`](repeaterbook-api-compliance-design.md):
+exact `User-Agent`, app-bound local token loading, manual bounded refreshes,
+numeric rate and pagination caps, 429 backoff, 7-day/30-day/90-day cache rules,
+non-redistribution controls, and visible `Data courtesy of RepeaterBook.com`
+attribution with a link to `https://www.repeaterbook.com/`.
+
 ### King County municipal locations and local curation
 
 The 39 incorporated King County place centers use the U.S. Census Bureau
