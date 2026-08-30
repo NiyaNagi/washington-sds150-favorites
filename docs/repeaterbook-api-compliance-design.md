@@ -32,22 +32,7 @@ SignalWA/1.0 (KM7HKM personal radio programmer)
 ```
 ### Application Review Details
 ```text
-Signal is a private, noncommercial, single-user personal radio programming
-application maintained by KM7HKM. It runs locally on the operator's Windows PC
-and creates programming files only for the operator's personally owned radios:
-Kenwood TH-D75A, Uniden SDS150, TIDRADIO TD-H9, and Yaesu FTX-1.
-
-The RepeaterBook integration is planned but is not yet enabled. The repository
-contains a public, detailed pre-implementation compliance design and the source
-adapter remains disabled until these controls are implemented and tested:
-https://github.com/NiyaNagi/washington-sds150-favorites/blob/main/docs/repeaterbook-api-compliance-design.md
-
-Signal is not a public API proxy, directory, map, data mirror, bulk downloader,
-or secondary service. It will not publish, commit, sell, or redistribute raw
-RepeaterBook data. A manual refresh uses a bounded nearby-repeater query, saves
-the response only in the local private cache, presents proposed changes for
-review, and creates radio files only after approval. Normal radio-file export
-reads the reviewed local cache and never makes a RepeaterBook request.
+Signal is a private, noncommercial, single-user personal radio programming application maintained by KM7HKM. It runs locally on the operator's Windows PC and creates programming files only for the operator's personally owned radios: Kenwood TH-D75A, Uniden SDS150, TIDRADIO TD-H9, and Yaesu FTX-1. The RepeaterBook integration is planned but is not yet enabled. The repository contains a public, detailed pre-implementation compliance design and the source adapter remains disabled until these controls are implemented and tested: https://github.com/NiyaNagi/washington-sds150-favorites/blob/main/docs/repeaterbook-api-compliance-design.md Signal is not a public API proxy, directory, map, data mirror, bulk downloader, or secondary service. It will not publish, commit, sell, or redistribute raw RepeaterBook data. A manual refresh uses a bounded nearby-repeater query, saves the response only in the local private cache, presents proposed changes for review, and creates radio files only after approval. Normal radio-file export reads the reviewed local cache and never makes a RepeaterBook request.
 ```
 ### Primary RepeaterBook Use
 Select: **Personal radio programming**
@@ -59,82 +44,27 @@ Select: **Private, single user**
 ```
 ### API Workflow and Data Fields
 ```text
-An explicit manual refresh searches only for amateur repeaters relevant to the
-radio being configured. Each request is bounded by state and/or a user-selected
-travel or home location, radius, and band. The default search is Washington
-State within 60 miles; the maximum radius is 150 miles. The user reviews the
-locally cached results before selected records are written to a personal radio
-programming file.
-
-Fields used when available are: repeater callsign, output frequency, input
-frequency or offset, access tone/digital access value, operating mode, status,
-latitude, longitude, city, county, state, and distance from the requested search
-center. Signal filters each record for the target radio's capability; it does
-not invent missing frequency, tone, offset, location, callsign, or mode values.
-
-This is not a proxy, mirror, directory, map, bulk download, secondary API, or
-background synchronization service. Normal exports use only locally reviewed
-cached records and do not call the API.
+An explicit manual refresh searches only for amateur repeaters relevant to the radio being configured. Each request is bounded by state and/or a user-selected travel or home location, radius, and band. The default search is Washington State within 60 miles; the maximum radius is 150 miles. The user reviews the locally cached results before selected records are written to a personal radio programming file. Fields used when available are: repeater callsign, output frequency, input frequency or offset, access tone/digital access value, operating mode, status, latitude, longitude, city, county, state, and distance from the requested search center. Signal filters each record for the target radio's capability; it does not invent missing frequency, tone, offset, location, callsign, or mode values. This is not a proxy, mirror, directory, map, bulk download, secondary API, or background synchronization service. Normal exports use only locally reviewed cached records and do not call the API.
 ```
 ### Relationship to RepeaterBook
 ```text
-RepeaterBook is the source of current amateur-repeater listing data used for
-bounded local searches. Signal retains RepeaterBook source attribution and
-retrieval time with locally imported records. RepeaterBook is not affiliated
-with Signal, and Signal does not represent itself as endorsed by RepeaterBook.
+RepeaterBook is the source of current amateur-repeater listing data used for bounded local searches. Signal retains RepeaterBook source attribution and retrieval time with locally imported records. RepeaterBook is not affiliated with Signal, and Signal does not represent itself as endorsed by RepeaterBook.
 ```
 ### Credential Handling and Abuse Prevention
 ```text
-Signal is a distributed local application. It will not request, embed, ship,
-or use a shared app_ token. Each approved user must generate and use their own
-app-bound rbuapp_ token from the RepeaterBook dashboard. In the current private
-single-user deployment, the only user is KM7HKM.
-
-The user's rbuapp_ token is loaded only at runtime from an environment variable
-or a local configuration file on a BitLocker-encrypted removable drive. It is
-never hard-coded, committed to Git, included in generated radio files, printed,
-or logged. Signal exposes no public web service, browser client, proxy, or API
-endpoint. If a token is lost, copied, or compromised, its owner will revoke or
-rotate it from the RepeaterBook dashboard.
+Signal is a distributed local application. It will not request, embed, ship, or use a shared app_ token. Each approved user must generate and use their own app-bound rbuapp_ token from the RepeaterBook dashboard. In the current private single-user deployment, the only user is KM7HKM. The user's rbuapp_ token is loaded only at runtime from an environment variable or a local configuration file on a BitLocker-encrypted removable drive. It is never hard-coded, committed to Git, included in generated radio files, printed, or logged. Signal exposes no public web service, browser client, proxy, or API endpoint. If a token is lost, copied, or compromised, its owner will revoke or rotate it from the RepeaterBook dashboard.
 ```
 ### Rate and Abuse Controls
 ```text
-RepeaterBook requests occur only after an explicit manual refresh; never at
-startup, on a schedule, or from normal radio-file generation. Signal sends the
-exact User-Agent: SignalWA/1.0 (KM7HKM personal radio programmer).
-
-It permits no parallel requests, at most one request every 3 seconds, at most
-20 requests per manual refresh, and at most 200 requests per rolling 24-hour
-local window. Each query is bounded by state, geography/radius, and/or band;
-there is no national or all-state crawl. Pagination stops at the API's final
-page, an empty result, 10 pages, 2,000 accepted records, or the request cap.
-
-For HTTP 429, Signal honors Retry-After. If it is absent, it retries at most
-three times with waits of 30 seconds, 2 minutes, and 10 minutes, then stops the
-refresh. It also stops on unrecoverable authentication/authorization errors and
-never tries parallel or bypass requests.
+RepeaterBook requests occur only after an explicit manual refresh; never at startup, on a schedule, or from normal radio-file generation. Signal sends the exact User-Agent: SignalWA/1.0 (KM7HKM personal radio programmer). It permits no parallel requests, at most one request every 3 seconds, at most 20 requests per manual refresh, and at most 200 requests per rolling 24-hour local window. Each query is bounded by state, geography/radius, and/or band; there is no national or all-state crawl. Pagination stops at the API's final page, an empty result, 10 pages, 2,000 accepted records, or the request cap. For HTTP 429, Signal honors Retry-After. If it is absent, it retries at most three times with waits of 30 seconds, 2 minutes, and 10 minutes, then stops the refresh. It also stops on unrecoverable authentication/authorization errors and never tries parallel or bypass requests.
 ```
 ### Cache and Retention Policy
 ```text
-Raw API responses are cached only in the user's local SQLite-backed application
-cache, outside the repository. Freshness TTL is 7 days. Offline use of a stale
-response is allowed for up to 30 days. Raw response bodies are automatically
-purged after 90 days. Locally reviewed derived programming entries may remain
-in the private catalog until the user removes them, with RepeaterBook attribution
-and retrieval date retained.
-
-Cache files are not committed, included in release archives, included in
-generated radio files, published, sold, or shared. Normal exports use this
-reviewed local cache and never trigger a refresh.
+Raw API responses are cached only in the user's local SQLite-backed application cache, outside the repository. Freshness TTL is 7 days. Offline use of a stale response is allowed for up to 30 days. Raw response bodies are automatically purged after 90 days. Locally reviewed derived programming entries may remain in the private catalog until the user removes them, with RepeaterBook attribution and retrieval date retained. Cache files are not committed, included in release archives, included in generated radio files, published, sold, or shared. Normal exports use this reviewed local cache and never trigger a refresh.
 ```
 ### Attribution and Link-Back Plan
 ```text
-Signal will visibly display “Data courtesy of RepeaterBook.com” and link that
-text to https://www.repeaterbook.com/ wherever RepeaterBook-derived records are
-shown: local dashboard search results, record details, CLI previews, Markdown/
-HTML review reports, and companion radio-export audit reports. Native radio
-file formats that cannot contain an attribution field will have the attribution
-in their companion export/audit report.
+Signal will visibly display “Data courtesy of RepeaterBook.com” and link that text to https://www.repeaterbook.com/ wherever RepeaterBook-derived records are shown: local dashboard search results, record details, CLI previews, Markdown/HTML review reports, and companion radio-export audit reports. Native radio file formats that cannot contain an attribution field will have the attribution in their companion export/audit report.
 ```
 ### Commercial Status
 Select: **Non-commercial**
@@ -143,14 +73,7 @@ Select: **Planned**
 ### Source Availability
 Select: **Open source**
 ```text
-The source is publicly reviewable at:
-https://github.com/NiyaNagi/washington-sds150-favorites
-
-The RepeaterBook adapter is deliberately disabled while planned controls are
-implemented. The detailed compliance design, including token rules, numeric
-limits, cache duration, 429 handling, filtering, attribution, and
-non-redistribution controls, is publicly reviewable at:
-https://github.com/NiyaNagi/washington-sds150-favorites/blob/main/docs/repeaterbook-api-compliance-design.md
+The source is publicly reviewable at: https://github.com/NiyaNagi/washington-sds150-favorites The RepeaterBook adapter is deliberately disabled while planned controls are implemented. The detailed compliance design, including token rules, numeric limits, cache duration, 429 handling, filtering, attribution, and non-redistribution controls, is publicly reviewable at: https://github.com/NiyaNagi/washington-sds150-favorites/blob/main/docs/repeaterbook-api-compliance-design.md
 ```
 ### Required Confirmations
 Check all three confirmations:
