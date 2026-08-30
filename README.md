@@ -49,7 +49,7 @@ catalog is the source of truth. See
 - [Parametric modelling method](docs/modelling-method.md) - measurement-first workflow, tolerance and clearance conventions, and the automated geometry checks each model must pass.
 - [Peak Design capture bracket](docs/pd-capture-bracket.md) - the SDS150 bracket's dimensions, fastener options, and fit verification.
 - [EFHW antenna enclosure](docs/efhw-enclosure.md) - a 128mm screw-lid cylinder for an end-fed half-wave transformer: how it sheds rain without a gasket, the open-topped cable exits, and why the thread is deliberately coarse.
-- [Peak Design radio standoff](docs/peak-design-radio-standoff.md) - a cup-holder stalk with a continuously adjustable M6 head, SDS150 gravity keyhole, shortened full-width clip plate, coupons, and independent load/fit checks.
+- [Peak Design radio standoff](docs/peak-design-radio-standoff.md) - a cup-holder stalk with a continuously adjustable M6 head, captured-nut 1.40× GoPro-style knob, keyed TPU friction washers, SDS150 gravity keyhole, shortened full-width clip plate, coupons, and independent load/fit checks.
 - [Radio hardware measurements](docs/radio-hardware-measurements.md) - measured, derived, published, and conservative mounting dimensions kept separate for future designs.
 
 ## Radios and channel plans
@@ -361,7 +361,7 @@ python -m venv .venv-cad
 .venv-cad/bin/python scripts/cad/build_all.py        # verify everything, then export
 ```
 
-`build_all.py` runs all 30 geometry checks in order and stops at the first
+`build_all.py` runs all 31 geometry checks in order and stops at the first
 hard failure, so a broken model cannot overwrite good STLs. It goes quiet
 for minutes at a time while CGAL works.
 

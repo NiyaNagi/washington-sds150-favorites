@@ -31,7 +31,10 @@ TMP = ROOT / ".tmp-cad"
 OPENSCAD = Path(r"C:\Program Files\OpenSCAD\openscad.exe")
 
 TOUCH_TOL = 8.0       # mm^3 of tessellation noise on a large curved interface
-BLOCK_MIN = 120.0     # mm^3 means the ledge genuinely blocks pull-out
+# The full 15.5/8.3mm lug annulus penetrating 1.5mm is about 202mm^3 before
+# the keyhole opening is removed. Requiring roughly half of that proves broad
+# ledge capture without making an unrelated joint-radius tessellation decisive.
+BLOCK_MIN = 100.0
 CONTROL_MIN = 50.0    # deliberately oversized stud must be obvious
 
 

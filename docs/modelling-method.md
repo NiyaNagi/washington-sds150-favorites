@@ -306,9 +306,10 @@ The cup-holder standoff adds a different constraint: a tall stalk has to look
 light without behaving like a spring, while its radio head must adjust. Five
 rounded sections loft from the 39 mm Peak Design foot through a narrow waist
 into an M6 fork. A separate double-sided head rotates continuously through
-±45°. Its 11.8 mm tongue runs between two 6.6 mm ears at 0.20 mm side
-clearance. A central lens removes material near the neutral axis while leaving
-two edge rails, where material contributes most to bending stiffness.
+±45°. Its 11.8 mm tongue runs between two 6.0 mm ears; recessed 0.8 mm TPU
+washers leave 0.10 mm loose clearance per face. A central lens removes material
+near the neutral axis while leaving two edge rails, where material contributes
+most to bending stiffness.
 
 `design_radio_standoff.py` reads every section through OpenSCAD `echo` and
 integrates a variable-section beam. With two conservative 400 g radios it
@@ -461,9 +462,18 @@ stroke widths, and whether the counters (the enclosed holes in A and D)
 close up. Last run: 12 outlines, 3 counters, narrowest stroke 3.72 mm,
 tightest counter 1.70 mm.
 
-**`audit_radio_standoff.py`** — renders all three 1/4"-20 socket styles and
-checks the exported meshes: one body, 39 × 39 mm bearing face, centered screw
-path, common external bounds, and a shifted screw-path control.
+**`audit_radio_standoff.py`** — renders the M6 and 1/4"-20 side-loading base
+nut styles and checks the exported meshes: one body, 39 × 39 mm bearing face,
+centered screw path, solid nut roof, common bounds, and a shifted-tunnel control.
+
+**`check_radio_standoff_knob.py`** — proves a standard M6 nut traverses the
+GoPro-style knob's side tunnel, seats in its hex pocket, and collides when
+rotated 30°. It independently proves the matching M6 hex bolt head clears its
+fork pocket and a rotated head does not.
+
+**`check_radio_standoff_friction.py`** — assembles two keyed TPU washers as
+separate solids, checks loose clearance through ±45°, rotates the flats as an
+injected fault, and calculates clamp capacity from the actual washer annulus.
 
 ### Mesh quality and printability
 
@@ -490,7 +500,7 @@ solid.
 
 ### The pipeline
 
-**`build_all.py`** — 30 steps. Stops at the first hard failure.
+**`build_all.py`** — 31 steps. Stops at the first hard failure.
 
 ```powershell
 .venv-cad\Scripts\python.exe scripts\cad\build_all.py
@@ -551,13 +561,19 @@ assert and a mesh probe disagree, *the mesh is right*.
   material on both sides of the clamp load. Put the insertion tunnel through
   a side wall, leave a floor beneath the nut, and leave a roof for the mating
   plate to bear against.
-- **Key the fastener, not merely its silhouette.** A round cap head can spin
-  in a round knob cup. A printed male hex engaging the cap's Allen recess
-  transfers torque positively; matching-cap and solid-cap control meshes
-  prove that the key clears only where intended.
-- **Texture according to the desired motion.** Concentric rings add friction
-  while preserving continuous rotation. Radial teeth would create angular
-  indexing even when the requirement is continuously adjustable.
+- **Drive a metal nut; do not key a fragile printed post into an Allen socket.**
+  Capture the standard hex bolt head in one fork ear and side-load a standard
+  nut into the hand knob. The knob directly rotates the nut while the bolt is
+  mechanically unable to rotate.
+- **Rotational symmetry cannot key rotation.** Concentric rings centred on a
+  pivot occupy the same geometry after every angle change. They can alter
+  pressure distribution, but matching rings cannot provide positive torque
+  resistance. Radial teeth do resist torque, but turn a continuous joint into
+  an indexed one.
+- **Use a replaceable compliant friction interface for continuous positioning.**
+  Key TPU/rubber washers to one member with non-circular flats and clamp their
+  broad faces against the other. Mesh checks can prove fit and key engagement;
+  only the physical coupon can qualify the material-specific friction value.
 - **Preserve the far datum when thinning a visible wall.** Reducing an SDS lug
   ledge without deepening its hidden head channel moves the channel and causes
   collision. Increase channel depth by the removed ledge thickness so total

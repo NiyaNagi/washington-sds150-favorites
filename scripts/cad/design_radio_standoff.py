@@ -36,8 +36,9 @@ TARGET_FOS_3G = 3.0
 TARGET_FOS_5G = 1.5
 TARGET_DEFLECTION_1G = 0.50  # mm
 TARGET_DEFLECTION_3G = 1.50  # mm
-JOINT_MU = 0.18        # conservative dry PLA-on-PLA static friction
-M6_CLAMP_TARGET = 1500.0  # N, modest preload for an M6 fastener
+JOINT_MU = 0.30        # conservative TPU/rubber-on-PLA assumption; coupon-gated
+M6_CLAMP_TARGET = 500.0   # N, realistic finger-tight preload with 50.4mm knob
+M6_NUT_FACTOR = 0.20      # conventional dry torque-preload approximation
 
 
 @dataclass
@@ -201,25 +202,31 @@ def main() -> int:
     print(f"    stress {gravity['stress']:.3f} MPa at z={gravity['z']:.1f} mm")
     print("    (the opposed faces cancel most of each other's eccentric moment)")
 
-    joint_r = number(text, "r")
-    hole_r = 6.6 / 2.0
-    effective_r = (2.0 / 3.0) * (
-        (joint_r**3 - hole_r**3) / (joint_r**2 - hole_r**2))
+    joint_r = number(text, "washer_od") / 2.0
+    hole_r = number(text, "washer_id") / 2.0
+    # Conservative for the washer's two anti-rotation flats; using the exact
+    # full-annulus integral would slightly overstate the moment arm.
+    effective_r = (joint_r + hole_r) / 2.0
     worst_radio_moment = max(
         load.mass_kg * G * abs(load.y) for load in loads)  # N mm
     required_clamp_3g = 3.0 * worst_radio_moment / (2 * JOINT_MU * effective_r)
     joint_capacity = 2 * JOINT_MU * M6_CLAMP_TARGET * effective_r
+    knob_span = number(text, "tip_d")
+    target_torque = M6_NUT_FACTOR * M6_CLAMP_TARGET * 6.0 / 1000.0
+    hand_force = target_torque * 1000.0 / (knob_span / 2.0)
     ear_t = number(text, "ear_t")
     ear_free = number(text, "ear_free")
-    side_clr = number(text, "side_clr")
+    side_clr = number(text, "loose_clr")
     ear_strain = 1.5 * side_clr * ear_t / ear_free**2
     print()
-    print("  M6 FRICTION JOINT")
+    print("  M6 KEYED TPU-WASHER JOINT")
     print(f"    effective friction radius : {effective_r:5.2f} mm")
     print(f"    clamp needed at 3g        : {required_clamp_3g:5.0f} N")
-    print(f"    capacity at 1.5kN preload : {joint_capacity/1000:5.2f} N m")
+    print(f"    capacity at 0.5kN preload : {joint_capacity/1000:5.2f} N m")
     print(f"    3g moment capacity factor : {joint_capacity/(3*worst_radio_moment):5.1f}")
     print(f"    ear closing strain        : {100*ear_strain:5.2f}%")
+    print(f"    0.5kN knob torque / force : {target_torque:5.2f} N m / {hand_force:4.0f} N")
+    print("    friction assumption       : mu=0.30; physical coupon required")
     if M6_CLAMP_TARGET < required_clamp_3g:
         failures.append(
             f"joint needs {required_clamp_3g:.0f}N clamp at 3g, above "

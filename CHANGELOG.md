@@ -77,9 +77,10 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   the automated geometry checks each model must pass.
 - Added a continuously adjustable Peak Design radio standoff with opposed
   SDS150 and universal belt-clip faces, side-loading captive M6 or 1/4"-20
-  base nuts, concentric anti-slip joint texture, and large positive-drive M6
-  finger knobs. Print-ready STL/3MF parts, fit coupons, structural calculations,
-  motion/fit controls, and a 30%-thinner SDS lug ledge are included.
+  base nuts, keyed TPU friction washers, a captured hex bolt head, and a
+  three-wing M6 nut knob 40% larger than the GoPro-style reference. Print-ready
+  STL/3MF parts, fit coupons, structural calculations, motion/fit controls, and
+  a 30%-thinner SDS lug ledge are included.
 - Added a factory-reset FTX-1 baseline in `radio-templates/`, so the blank
   export template can be regenerated from a known state rather than from
   whatever happened to be on a radio.

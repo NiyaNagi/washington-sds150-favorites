@@ -50,12 +50,17 @@ without leaving an open-bottom pocket.
 
 The stalk prints upright. It uses a narrow visual waist, full-depth edge
 ribs, and large tangent transitions into a two-ear clevis. A common radio
-head uses an 11.8 mm central tongue between 6.6 mm ears with 0.20 mm clearance
-per side. One M6×30 bolt and captive M6 nut clamp 13 mm-radius friction lands.
+head uses an 11.8 mm central tongue between 6.0 mm ears. Two 0.80 mm keyed
+TPU washers seat 0.70 mm into the tongue, leaving 0.10 mm loose clearance per
+face. One M6×30 standard hex-head bolt is captured against rotation in the
+right ear; the 1.40× GoPro-style knob contains and drives a standard M6 nut.
 The head is continuous-adjustable through ±45°, not four separate parts.
-Concentric rib/groove rings increase continuous friction without introducing
-indexed angle teeth. Large twelve-lobed knobs positively engage 4 mm or 5 mm
-Allen recesses so the round cap screw cannot spin inside a round printed cup.
+
+Concentric rings were rejected because rotation around their common centre
+does not change their geometry and therefore cannot key torque. Hirth/rosette
+teeth were also rejected because their strength comes with discrete angular
+indexing. Replaceable keyed TPU/rubber washers provide broad conforming
+friction while preserving arbitrary angle selection.
 
 The section is sized analytically for single-radio, two-radio, 3g road-bump,
 and 5g shock cases. Conservative design load is 400 g per face until the
@@ -118,8 +123,8 @@ into each end support. Exact TD-H9 and UV-5R compatibility is still coupon-teste
 9. Audit the exported Peak Design bearing face and every socket variant.
 10. Run watertightness, body-count, thin-wall, bridge, overhang, and build-
     volume checks.
-11. Export M6-nut and 1/4"-nut stalks, common head, two Allen-drive knobs,
-  fit/base/joint coupons, and diagnostic previews.
+11. Export M6-nut and 1/4"-nut stalks, common head, one captured-nut knob,
+  keyed TPU washer, fit/base/joint coupons, and diagnostic previews.
 12. Add the standoff pipeline after all individual checks pass.
 13. Record physical coupon results before calling TD-H9 or UV-5R fit
     verified.
@@ -133,6 +138,12 @@ into each end support. Exact TD-H9 and UV-5R compatibility is still coupon-teste
 - Both radio insertion sweeps remain clear at 0°, and each active radio
   clears the stalk at 0°, 15°, 30°, and 45°.
 - The M6 head and stalk have zero solid interference throughout ±45°.
+- Washer flats prevent washer rotation, and both loose washer faces clear the
+  stalk through the full sweep.
+- The physical joint coupon holds 0.48 kg at a 100 mm arm without creep after
+  finger tightening.
+- Knob span is at least 50.4 mm, its M6 nut loads from the side, and the
+  opposite 10 mm AF M6 bolt head cannot rotate in the fork.
 - Static deflection is below 0.5 mm at 1g and 1.5 mm at 3g.
 - Structural safety factor is at least 3 at 3g and 1.5 at 5g.
 - Production exports are one watertight body with no unintended sub-nozzle

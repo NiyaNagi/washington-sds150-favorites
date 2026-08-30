@@ -2,9 +2,10 @@
 //  Peak Design opposed-face radio standoff
 // =====================================================================
 //
-//  Two upright, support-free printed parts joined by one M6x30 bolt:
-//    fixed stalk  Peak Design 1/4"-20 interface and M6 fork
+//  Two upright rigid parts, one nut knob, and two TPU washers, all support-free:
+//    fixed stalk  Peak Design M6 or 1/4"-20 interface and M6 fork
 //    moving head  continuously adjustable -45..+45 degrees
+//    hardware     one M6x30 hex bolt and one standard M6 nut
 //    +Y face  Uniden SDS150, gravity keyhole
 //    -Y face  Kenwood TH-D75A / generic belt-clip bridge
 //
@@ -107,14 +108,14 @@ waist_cut_y        = 20.0;
 waist_cut_z0       = 34.0;
 waist_cut_z1       = 84.0;
 
-// Continuous pitch joint.  One M6x30 bolt crosses a fork on the stalk and
-// the central tongue of the head.  The M6 nut is captive in the right ear;
-// the bolt head remains exposed so any normal hex/socket/button head works.
+// Continuous pitch joint. One M6x30 hex-head bolt crosses a fork on the stalk
+// and the central tongue of the head. The right ear captures the bolt head so
+// it cannot rotate; the large left knob contains the standard M6 nut.
 head_angle          = 0.0;  // -45..+45; + presents the SDS display upward
 pivot_z             = 108.0;
 joint_r             = 13.0;
 joint_flat          = 10.0; // lower chord: both parts print on a real flat
-joint_ear_t         = 6.6;
+joint_ear_t         = 6.0;
 joint_gap           = 12.2;
 joint_tongue_t      = 11.8;
 joint_clearance     = (joint_gap - joint_tongue_t) / 2;
@@ -122,6 +123,10 @@ joint_bolt_d        = 6.6;
 m6_nut_af           = 10.0;
 m6_nut_t            = 5.2;
 m6_nut_ac           = m6_nut_af / cos(30);
+m6_hex_head_af      = 10.0;
+m6_hex_head_h       = 4.0;
+m6_hex_head_clr     = 0.30;
+m6_hex_head_depth   = 4.30;
 joint_outer_w       = joint_gap + 2 * joint_ear_t;
 joint_root_z        = pivot_z - joint_flat;
 
@@ -201,39 +206,44 @@ thd_body_z0  = clip_bar_z1 + thd_clip_clear_h - thd_body_h;
 head_print_z0 = pivot_z - joint_flat;
 head_print_h  = head_top_z - head_print_z0;
 joint_ear_x   = joint_gap / 2 + joint_ear_t / 2;
-joint_nut_x0  = joint_outer_w / 2 - m6_nut_t;
+joint_bolt_head_x0 = joint_outer_w / 2 - m6_hex_head_depth;
 
-friction_radii     = [5.0, 7.1, 9.2, 11.2];
-friction_rib_w     = 0.65;
-friction_rib_h     = 0.35;
-friction_groove_w  = 0.95;
-friction_groove_d  = 0.48;
+// Replace the prior concentric rings. A circle rotated around its own centre
+// has identical geometry at every angle, so matched circular ribs cannot key
+// rotation. Two keyed, replaceable 95A-TPU/rubber washers instead conform to
+// layer texture and maintain broad high-friction contact at every angle.
+friction_washer_od       = 23.0;
+friction_washer_id       = 6.8;
+friction_washer_t        = 0.80;
+friction_recess_d        = 0.70;
+friction_flat_span       = 21.0;
+friction_fit_clr         = 0.15;
+friction_effective_w     = joint_tongue_t
+                           - 2 * friction_recess_d
+                           + 2 * friction_washer_t;
+friction_loose_clr       = (joint_gap - friction_effective_w) / 2;
 
-// High-leverage finger knob.  It covers the round cap and drives the Allen
-// recess with a printed male hex, so a socket/button head cannot spin inside
-// a smooth round pocket.  Two exports cover the common 4mm and 5mm drives.
-knob_style          = "socket_5mm"; // socket_5mm | button_4mm
-knob_t              = 15.0;
-knob_vertical_r     = 20.0;
-knob_foreaft_r      = 12.0;
-knob_lobes          = 12;
-knob_lobe_depth     = 0.08;
+// Three-wing GoPro-style nut knob. The 36x13mm reference envelope is scaled
+// exactly 1.40x. A standard M6 nut slides in radially and is trapped axially
+// between a 2mm bearing floor and the closed back of the knob.
+gopro_knob_ref_d    = 36.0;
+gopro_knob_ref_t    = 13.0;
+knob_scale          = 1.40;
+knob_tip_d          = gopro_knob_ref_d * knob_scale;
+knob_t              = gopro_knob_ref_t * knob_scale;
+knob_hub_r          = 9.5;
+knob_tip_r          = 6.3;
+knob_tip_center_r   = (knob_tip_d - 2 * knob_tip_r) / sqrt(3);
+knob_outer_r        = knob_tip_center_r + knob_tip_r;
+knob_wings          = 3;
 knob_edge_scale     = 0.94;
-knob_button_head_d  = 11.0;
-knob_button_head_h  = 3.5;
-knob_button_hex_af  = 4.0;
-knob_socket_head_d  = 10.2;
-knob_socket_head_h  = 6.2;
-knob_socket_hex_af  = 5.0;
-knob_cup_clr        = 0.35;
-knob_hex_clr        = 0.10;
-
-knob_head_d = knob_style == "button_4mm" ? knob_button_head_d
-                                           : knob_socket_head_d;
-knob_head_h = knob_style == "button_4mm" ? knob_button_head_h
-                                           : knob_socket_head_h;
-knob_hex_af = knob_style == "button_4mm" ? knob_button_hex_af
-                                           : knob_socket_hex_af;
+knob_nut_clr        = 0.30;
+knob_nut_h          = m6_nut_t + knob_nut_clr;
+knob_nut_floor      = 2.0;
+knob_nut_z0         = knob_t - knob_nut_floor - knob_nut_h;
+knob_slot_w         = m6_nut_ac + 0.35;
+knob_screw_bore_d   = 6.6;
+knob_back_wall      = 1.6;
 
 // =====================================================================
 //  5. ASSERTS - confirmations, not the primary design method
@@ -271,12 +281,15 @@ assert(joint_clearance >= 0.15 && joint_clearance <= 0.30,
         "mm; it must slide before the M6 clamp closes it"));
 assert(joint_outer_w <= 26,
     str("M6x30 cannot span a ", joint_outer_w, "mm clevis with margin"));
-assert(joint_ear_t >= m6_nut_t + 1.0,
-    "the captive M6 nut leaves less than 1mm at the inner friction face");
-assert(knob_style == "socket_5mm" || knob_style == "button_4mm",
-    str("unknown knob_style: ", knob_style));
-assert(knob_t > knob_head_h + 5.0,
-    "finger knob leaves too little solid material behind the screw cap");
+assert(joint_ear_t >= m6_hex_head_depth + 1.5,
+    "captured M6 bolt head leaves less than 1.5mm at the inner ear face");
+assert(friction_loose_clr >= 0.05,
+    str("TPU washers bind before clamping; loose clearance ",
+        friction_loose_clr));
+assert(knob_tip_d >= 1.4 * gopro_knob_ref_d,
+    "finger knob is not 40% larger than the GoPro reference");
+assert(knob_nut_z0 > knob_back_wall + 2.0,
+    "captured knob nut leaves too little blind screw clearance");
 assert(clip_bar_w <= 40,
     "the belt bar overhangs the adjustable head");
 assert(thread_style == "m6_nut" || thread_style == "quarter_nut",
@@ -344,31 +357,36 @@ module pivot_hole_x(length, diameter = joint_bolt_d) {
             cylinder(d = diameter, h = length, $fn = 48);
 }
 
-module friction_rings_2d(width) {
-    for (r = friction_radii)
-        difference() {
-            circle(r = r + width / 2, $fn = 96);
-            circle(r = r - width / 2, $fn = 96);
+module friction_washer_2d(clearance = 0) {
+    difference() {
+        intersection() {
+            circle(d = friction_washer_od + 2 * clearance, $fn = 96);
+            square([friction_washer_od + 2 * clearance,
+                    friction_flat_span + 2 * clearance], center = true);
         }
+        circle(d = friction_washer_id - 2 * clearance, $fn = 48);
+    }
 }
 
-module friction_rings_x(x_face, direction, depth, width) {
-    translate([x_face, 0, pivot_z])
+module friction_profile_x(x_start, direction, depth, clearance = 0) {
+    translate([x_start, 0, pivot_z])
         rotate([0, direction > 0 ? 90 : -90, 0])
             linear_extrude(height = depth)
-                friction_rings_2d(width);
+                friction_washer_2d(clearance);
 }
 
-function knob_outline_points(scale_v = 1) = [
-    for (i = [0 : 95])
-        let(a = 360 * i / 96,
-            f = 1 + knob_lobe_depth * cos(knob_lobes * a))
-            [scale_v * knob_vertical_r * f * cos(a),
-             scale_v * knob_foreaft_r  * f * sin(a)]
-];
-
 module knob_outline_2d(scale_v = 1) {
-    polygon(knob_outline_points(scale_v));
+    scale([scale_v, scale_v])
+        union() {
+            circle(r = knob_hub_r, $fn = 72);
+            for (i = [0 : knob_wings - 1])
+                hull() {
+                    circle(r = knob_hub_r * 0.72, $fn = 48);
+                    rotate(360 * i / knob_wings)
+                        translate([knob_tip_center_r, 0])
+                            circle(r = knob_tip_r, $fn = 48);
+                }
+        }
 }
 
 module knob_outer() {
@@ -387,26 +405,29 @@ module knob_outer() {
     }
 }
 
-module m6_turn_knob() {
-    cup_depth = knob_head_h + knob_cup_clr;
-    cup_z0 = knob_t - cup_depth;
-    post_h = min(3.0, knob_head_h - 0.5);
-    post_z0 = knob_t - knob_head_h - knob_cup_clr - 0.20;
+module m6_captured_nut_knob() {
+    difference() {
+        knob_outer();
 
-    union() {
-        difference() {
-            knob_outer();
-            translate([0, 0, cup_z0])
-                cylinder(d = knob_head_d + 2 * knob_cup_clr,
-                         h = cup_depth + 0.02, $fn = 64);
-        }
+        // Blind clearance for the end of the M6x30 bolt. The 1.6mm closed
+        // outer wall keeps dirt out and prevents a sharp screw end emerging.
+        translate([0, 0, knob_back_wall])
+            cylinder(d = knob_screw_bore_d,
+                     h = knob_t - knob_back_wall + 0.02, $fn = 48);
 
-        // Male Allen key inside the cap recess.  It keys the round socket
-        // or button head to the knob, so the screw cannot spin independently.
-        translate([0, 0, post_z0])
-            cylinder(d = (knob_hex_af - knob_hex_clr) / cos(30),
-                     h = post_h + 0.20, $fn = 6);
+        // Anti-rotation hex pocket. The nut enters through one wing from the
+        // side, then remains axially captured behind the 2mm clamp floor.
+        translate([0, 0, knob_nut_z0])
+            cylinder(d = (m6_nut_af + knob_nut_clr) / cos(30),
+                     h = knob_nut_h, $fn = 6);
+        translate([0, -knob_slot_w / 2, knob_nut_z0])
+            cube([knob_outer_r + 1.0, knob_slot_w, knob_nut_h]);
     }
+}
+
+module friction_washer() {
+    linear_extrude(height = friction_washer_t)
+        friction_washer_2d();
 }
 
 module base_outer() {
@@ -570,25 +591,19 @@ module fork_ear(sx) {
 }
 
 module fork_outer() {
-    union() {
-        fork_ear(-1);
-        fork_ear(1);
-        friction_rings_x(-joint_gap / 2,  1,
-                         friction_rib_h, friction_rib_w);
-        friction_rings_x( joint_gap / 2, -1,
-                         friction_rib_h, friction_rib_w);
-    }
+    fork_ear(-1);
+    fork_ear(1);
 }
 
 module fork_voids() {
     pivot_hole_x(joint_outer_w + 2.0);
 
-    // Captive ISO-style M6 nut, inserted from the right.  A 1.4mm inner
-    // wall remains as the friction face; the nut cannot spin when the
-    // exposed bolt head is tightened.
-    translate([joint_nut_x0, 0, pivot_z])
+    // Recess the standard M6 hex head into the right ear. Its six flats keep
+    // the bolt stationary while the captured nut knob turns on the left.
+    translate([joint_bolt_head_x0, 0, pivot_z])
         rotate([0, 90, 0])
-            cylinder(d = m6_nut_ac, h = m6_nut_t + 0.2, $fn = 6);
+            cylinder(d = (m6_hex_head_af + m6_hex_head_clr) / cos(30),
+                     h = m6_hex_head_depth + 0.2, $fn = 6);
 }
 
 module stalk_body() {
@@ -624,10 +639,12 @@ module head_neutral(fit_preload = standoff_preload,
 
         sds_voids(fit_preload = fit_preload, fit_slide = fit_slide);
         pivot_hole_x(joint_tongue_t + 2.0);
-        friction_rings_x(-joint_tongue_t / 2 - 0.10,  1,
-                 friction_groove_d + 0.10, friction_groove_w);
-        friction_rings_x( joint_tongue_t / 2 + 0.10, -1,
-                 friction_groove_d + 0.10, friction_groove_w);
+        friction_profile_x(-joint_tongue_t / 2 - 0.01, 1,
+                   friction_recess_d + 0.02,
+                   friction_fit_clr);
+        friction_profile_x( joint_tongue_t / 2 + 0.01, -1,
+                   friction_recess_d + 0.02,
+                   friction_fit_clr);
     }
 }
 
@@ -650,21 +667,48 @@ module articulated_assembly(angle = head_angle) {
     head_body(angle);
 }
 
+module head_friction_washers(angle = head_angle) {
+    head_transform(angle) {
+        // Each washer sits 0.70mm inside its keyed recess and projects
+        // 0.10mm into the loose side clearance.
+        color([0.12, 0.12, 0.12]) {
+            friction_profile_x(-joint_tongue_t / 2 + friction_recess_d,
+                               -1, friction_washer_t);
+            friction_profile_x( joint_tongue_t / 2 - friction_recess_d,
+                                1, friction_washer_t);
+        }
+    }
+}
+
 module joint_hardware_reference() {
-    // M6x30 bolt axis and captive nut, diagnostic only.
+    // M6x30 hex bolt: head is recessed in +X ear, threaded end reaches the
+    // nut inside the knob on -X. Diagnostic only.
     color([0.65, 0.67, 0.70])
-        pivot_hole_x(30.0, 6.0);
-    color([0.45, 0.46, 0.48])
-        translate([joint_nut_x0, 0, pivot_z])
+        translate([joint_bolt_head_x0 - 30.0, 0, pivot_z])
             rotate([0, 90, 0])
-                cylinder(d = m6_nut_ac, h = m6_nut_t, $fn = 6);
+                cylinder(d = 6.0, h = 30.0, $fn = 48);
+    color([0.45, 0.46, 0.48])
+        translate([joint_bolt_head_x0, 0, pivot_z])
+            rotate([0, 90, 0])
+                cylinder(d = m6_hex_head_af / cos(30),
+                         h = m6_hex_head_h, $fn = 6);
 }
 
 module knob_assembly_reference() {
     color([0.10, 0.10, 0.12])
         translate([-joint_outer_w / 2 - knob_t, 0, pivot_z])
             rotate([0, 90, 0])
-                m6_turn_knob();
+                m6_captured_nut_knob();
+
+    color([0.45, 0.46, 0.48])
+        translate([-joint_outer_w / 2 - knob_nut_floor - knob_nut_h,
+                   0, pivot_z])
+            rotate([0, 90, 0])
+                difference() {
+                    cylinder(d = m6_nut_ac, h = m6_nut_t, $fn = 6);
+                    translate([0, 0, -0.1])
+                        cylinder(d = 6.0, h = m6_nut_t + 0.2, $fn = 48);
+                }
 }
 
 module stalk_head_intersection(angle = head_angle) {
@@ -891,8 +935,25 @@ echo(str("  JOINT angle=", head_angle,
          " gap=", joint_gap,
          " side_clr=", joint_clearance,
          " bolt_d=", joint_bolt_d,
+         " bolt_head_af=", m6_hex_head_af,
+         " bolt_head_h=", m6_hex_head_h,
+         " bolt_head_x0=", joint_bolt_head_x0,
          " nut_af=", m6_nut_af,
          " nut_t=", m6_nut_t));
+echo(str("  FRICTION washer_od=", friction_washer_od,
+         " washer_id=", friction_washer_id,
+         " washer_t=", friction_washer_t,
+         " recess_d=", friction_recess_d,
+         " loose_clr=", friction_loose_clr));
+echo(str("  KNOB ref_d=", gopro_knob_ref_d,
+         " ref_t=", gopro_knob_ref_t,
+         " scale=", knob_scale,
+         " tip_d=", knob_tip_d,
+         " thickness=", knob_t,
+         " nut_z0=", knob_nut_z0,
+         " nut_h=", knob_nut_h,
+         " nut_floor=", knob_nut_floor,
+         " back_wall=", knob_back_wall));
 for (s = stalk_sections)
     echo(str("  SECTION z=", s[0], " w=", s[1], " d=", s[2]));
 for (s = head_sections)
@@ -913,6 +974,7 @@ if (variant_render_mode == "stalk") {
 } else if (variant_render_mode == "assembly") {
     color([0.12, 0.12, 0.14]) stalk_body();
     color([0.18, 0.18, 0.21]) head_body(head_angle);
+    head_friction_washers(head_angle);
     joint_hardware_reference();
     knob_assembly_reference();
     sds_reference(angle = head_angle);
@@ -943,7 +1005,11 @@ if (variant_render_mode == "stalk") {
 } else if (variant_render_mode == "base_coupon") {
     base_nut_coupon();
 } else if (variant_render_mode == "knob") {
-    m6_turn_knob();
+    m6_captured_nut_knob();
+} else if (variant_render_mode == "friction_washer") {
+    friction_washer();
+} else if (variant_render_mode == "friction_washers_positioned") {
+    head_friction_washers(head_angle);
 } else if (variant_render_mode == "sds_check") {
     sds_check_solid();
 } else if (variant_render_mode == "clip_check") {

@@ -143,14 +143,19 @@ envelope, not a centering fit.
 | Standard M6 nut across flats | 10.0 | Standard | Captive hex pocket |
 | Standard M6 nut thickness | 5.2 | Standard/common | Ear thickness and pocket depth |
 | Printed tongue thickness | 11.8 | Design | Fits inside 12.2 mm fork gap |
-| Printed side clearance | 0.20 per face | Design | Free adjustment before clamping |
-| Friction-land radius | 13.0 | Design | Clamp moment capacity |
-| Friction rings | radii 5.0, 7.1, 9.2, 11.2 | Design | Continuous anti-slip texture |
-| Ring rib / groove | 0.65 × 0.35 / 0.95 × 0.48 | Design | Positive surface keying without indexing |
-| Knob envelope | 43.2 × 25.9 × 15.0 | Design | High finger torque |
-| Knob lobes | 12 | Design | Wet/dry grip |
-| Button-cap Allen drive | 4.0 AF | User confirmed/common | Positive-drive knob variant |
-| Socket-cap Allen drive | 5.0 AF | User confirmed/common | Positive-drive knob variant |
+| Fork-ear thickness | 6.0 each | Design | Captured head plus structural inner wall |
+| Bare side clearance | 0.20 per face | Design | Washer installation space |
+| TPU washer | 23 OD × 6.8 ID × 0.80 | Design | Replaceable continuous friction face |
+| Washer recess | 0.70 | Design | Leaves washer 0.10 mm proud |
+| Installed loose clearance | 0.10 per face | Derived | Free adjustment before clamping |
+| Washer key flats | 21.0 span, opposed | Design | Prevent washer co-rotation |
+| GoPro-style reference | 36 diameter × 13 thick | Design reference | Explicit 1.40× scale datum |
+| Final knob envelope | 45.3 × 50.4 × 18.2 | Exported mesh | High finger torque |
+| Knob wings | 3 | Design | Familiar GoPro-style grip |
+| Knob captured nut | M6, 10 AF × 5.2 | Standard | Side-loaded rotating clamp element |
+| Knob nut floor / blind wall | 2.0 / 1.6 | Design | Clamp reaction / covered screw end |
+| Knob nut-tunnel clearance | 0.35 total at corners | Design | Printable side insertion |
+| Fixed bolt head | M6 hex, 10 AF × 4.0 | Standard | Captured in right fork ear |
 
 ## Reference-image inventory
 

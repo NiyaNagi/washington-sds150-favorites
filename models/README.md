@@ -79,8 +79,9 @@ is so coarse, is in [docs/efhw-enclosure.md](../docs/efhw-enclosure.md).
 | --- | --- |
 | `peak design radio standoff/peak_design_radio_standoff.scad` | Parametric source and diagnostic radio envelopes. |
 | `peak_design_radio_standoff_stalk_{m6_nut,quarter_nut}.stl` / `.3mf` | Side-loading captive M6 and 1/4"-20 base-nut variants. |
-| `peak_design_radio_standoff_head.stl` / `.3mf` | Common ±45° adjustable head; one M6×30 bolt and captive M6 nut. |
-| `radio_standoff_knob_m6_{button_4mm,socket_5mm}.stl` / `.3mf` | Large lobed knobs with positive Allen-recess drive. |
+| `peak_design_radio_standoff_head.stl` / `.3mf` | Common ±45° head with keyed washer recesses. |
+| `radio_standoff_knob_gopro_140pct_m6_nut.stl` / `.3mf` | Three-wing knob, 40% larger than the 36×13 mm GoPro-style reference, with side-loading captured M6 nut. |
+| `radio_standoff_friction_washer_tpu.stl` / `.3mf` | Print two in 95A TPU; keyed continuous-angle friction faces. |
 | `radio_standoff_coupon_sds_{easy,nominal,firm}.stl` / `.3mf` | Print first; select the SDS150 gravity fit. |
 | `radio_standoff_coupon_clip{_thin,,_thick}.stl` / `.3mf` | Actual universal bridge at 2.8/3.0/3.2 mm for physical clip tuning. |
 | `radio_standoff_coupon_joint_{stalk,head}.stl` / `.3mf` | Actual M6 fork/tongue pair for bolt, nut, clearance, and clamp testing. |

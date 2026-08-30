@@ -65,7 +65,7 @@ def main() -> int:
     failures: list[str] = []
 
     print("=== M6 adjustable-head sweep ===")
-    print("  one M6x30 bolt, captive M6 nut, continuous -45..+45 degrees")
+    print("  one fixed M6x30 hex bolt, captured-nut knob, continuous -45..+45 degrees")
     print()
     print("  HEAD AGAINST STALK")
     worst = 0.0
