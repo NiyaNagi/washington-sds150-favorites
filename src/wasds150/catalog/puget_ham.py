@@ -24,13 +24,19 @@ MIKE_KEY_NETS_URL = "https://mikeandkey.org/nets.php"
 MASON_NETS_URL = "https://mc-arc.org/nets/"
 ISLAND_REPEATER_URL = "https://www.w7avm.org/repeater-system"
 
-# Broad Puget Sound / eastern Olympic / western Cascade listening region.
-PUGET_BOUNDS = (46.75, 49.05, -123.55, -121.25)
+# Broad Puget Sound / eastern Olympic / Cascade-crest listening region.
+#
+# The east and south edges are drawn wide enough to contain a 75-mile radius
+# from the Redmond / Union Hill area, so the I-90 (Cle Elum), US-2
+# (Leavenworth) and Centralia corridors are inside the box rather than clipped
+# just outside it. The per-plan ``within_miles`` filter still does the real
+# circular cut; this box is only a cheap prefilter.
+PUGET_BOUNDS = (46.5, 49.1, -123.7, -120.3)
 _REGION_SPECS = {
     "North Sound & Islands": (48.45, -122.55, 80.0),
     "Olympic & Kitsap": (47.75, -122.95, 90.0),
-    "South Sound": (47.15, -122.65, 75.0),
-    "Eastside & Cascades": (47.55, -121.95, 70.0),
+    "South Sound": (47.15, -122.65, 90.0),
+    "Eastside & Cascades": (47.55, -121.95, 115.0),
     "Seattle Metro": (47.62, -122.33, 55.0),
 }
 
@@ -99,7 +105,7 @@ def favorite() -> FavoritesList:
         scenario="Amateur repeater coordination / linked systems / emergency and social nets",
         source_type="WWARA nightly coordination + operator-published net channels",
         system_or_category="All current Puget-region WWARA coordinated repeaters, grouped by region and mode",
-        sites_or_coverage="Puget bounding box 46.75-49.05 N, 123.55-121.25 W; broad location groups because WWARA coordinates may be fuzzed",
+        sites_or_coverage="Puget/Cascade bounding box 46.5-49.1 N, 123.7-120.3 W; broad location groups because WWARA coordinates may be fuzzed",
         departments_or_channels="Analog FM/NFM; linked analog; P25; DMR; unsupported D-Star/Fusion carriers avoided; official PSRG/Mike & Key/Mason/Island net channels",
         mode="FM/NFM + P25 + DMR; AUTO/avoided for unsupported D-Star/Fusion-only carriers",
         monitorability="Analog and P25 native; DMR requires paid upgrade; D-Star/Fusion voice unsupported",

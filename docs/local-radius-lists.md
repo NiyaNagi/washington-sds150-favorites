@@ -93,6 +93,38 @@ Only the three repeater blocks carry a radius. HF nets and calling frequencies
 have no meaningful position, so filtering them by distance would remove all of
 them — there is a test asserting no other block sets one.
 
+## The one-list variant: `ftx1-scan` and `thd75-scan`
+
+`ftx1-local` and `thd75-ames-lake` group their channels into service blocks —
+eighteen and twenty-one of them. That is easy to read and awkward to scan: the
+operator has to know which block or memory group holds what they want to sweep.
+
+`ftx1-scan` and `thd75-scan` resolve the same catalog into a **single
+frequency-ordered memory list** so a plain memory scan walks every band at
+once. The scannable content — repeater bands, simplex calling, HF voice nets,
+and weather / marine / air / GMRS / MURS listening — is emitted as a few
+blocks that butt together into one ascending run from roughly 1.8 MHz to
+470 MHz. Everything that carries a continuous signal — HF digital watering
+holes, NCDXF/IARU beacons, WWV, the always-on HF utility channels, and (on the
+TH-D75A) FM/AM broadcast, CB and satellite downlinks — goes into one trailing
+block marked `skip_scan`: programmed so it can be tuned by hand, invisible to
+the sweep so it never parks the scan.
+
+Both are centred on the same point (28523 NE 30th Ct) at a **75-mile** radius
+rather than 60 or 50.
+
+### The WWARA box was clipping machines inside the radius
+
+`PSHAM01` is built by filtering the WWARA extract through a bounding box, and
+the old box (`46.75–49.05 N, 123.55–121.25 W`) stopped short of a true
+75-mile circle from Redmond. Repeaters on the I-90 corridor (Cle Elum,
+Easton), US-2 (Leavenworth, east Stevens Pass) and around Centralia / Chehalis
+sit inside the radius but outside that box, so no plan could pick them up. The
+box is now `46.5–49.1 N, 123.7–120.3 W` — wide enough to contain the circle,
+with the per-plan `within_miles` filter still doing the real circular cut.
+This only takes effect after `sources update --only wwara --apply` rebuilds
+`PSHAM01` from a fresh extract; re-export afterwards.
+
 ## The HF content
 
 The second half of the request was HF frequencies worth tuning across 160 m to

@@ -11,15 +11,26 @@ can be picked up and loaded without running the toolchain first.
 | `ftx1-wa-report.md` | | Human-readable memory map |
 | `ftx1-local.FTX1` | Yaesu FTX-1 | 351 memories, native format |
 | `ftx1-local-report.md` | | Human-readable memory map |
+| `ftx1-scan.FTX1` | Yaesu FTX-1 | One frequency-ordered list, everything tunable within 75 mi; data/beacons scan-skipped |
+| `ftx1-scan-report.md` | | Human-readable memory map |
 | `thd75-ames-lake-report.md` | Kenwood TH-D75A | 545 ordinary memories in 21 groups |
+| `thd75-scan-report.md` | Kenwood TH-D75A | One frequency-ordered list, everything tunable within 75 mi; broadcast/data/CB scan-skipped |
 | `thd75-current.d75` | Kenwood TH-D75A | Exact operator-requested 545-memory image with all settings |
 | `thd75-current-settings.json` | | All 400 typed MCP settings decoded for review |
 | `thd75-power-on-KM7HKM.bmp` | | 240x180 16-bit RGB565 power-on identification image |
 
-The two FTX-1 files are alternatives, not additions - loading one replaces the
-radio's memories with the other's. `ftx1-wa` is the statewide inventory;
+The FTX-1 files are alternatives, not additions - loading one replaces the
+radio's memories with the next. `ftx1-wa` is the statewide inventory;
 `ftx1-local` keeps only repeaters within 60 miles of home and fills the rest
-with HF nets, beacons and utility stations.
+with HF nets, beacons and utility stations, split into eighteen service
+blocks. `ftx1-scan` is the same content at a 75-mile radius flattened into a
+single frequency-ordered list: every repeater band, calling channel and
+receive service runs 52 MHz to 470 MHz in one contiguous sweep, with the
+continuous-carrier channels (HF data, beacons, WWV, utility) programmed but
+locked out of scan. `thd75-scan` does the same for the TH-D75A.
+
+`thd75-scan.d75` is written by the export but git-ignored like every other
+native `.d75`; regenerate it locally with the command below.
 
 Everything here is **generated**. The catalog is the source of truth, so these
 files go stale the moment the catalog changes. Regenerate with:
@@ -28,7 +39,9 @@ files go stale the moment the catalog changes. Regenerate with:
 wasds150 --home .wasds150-home plan export h9-ozette --out radio-configs
 wasds150 --home .wasds150-home plan export ftx1-wa --target ftx1-file --out radio-configs
 wasds150 --home .wasds150-home plan export ftx1-local --target ftx1-file --out radio-configs
+wasds150 --home .wasds150-home plan export ftx1-scan --target ftx1-file --out radio-configs
 wasds150 --home .wasds150-home plan export thd75-ames-lake --target thd75-file --out radio-configs
+wasds150 --home .wasds150-home plan export thd75-scan --target thd75-file --out radio-configs
 ```
 
 > **Copy the file to wherever you actually load it from.** Exporting writes

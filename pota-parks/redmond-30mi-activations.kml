@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+<Document>
+  <name>POTA Parks within 30 mi of Redmond, WA</name>
+  <description>Parks on the Air references within 30 miles of 25823 NE 30th Ct, Redmond, WA. Marker color/size scale with activation count (shown as the label). Data: pota.app API, fetched 2026-09-04.</description>
+  <Style id="bin0">
+    <IconStyle>
+      <color>FFB2DFA9</color>
+      <scale>0.6</scale>
+      <Icon><href>https://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon>
+    </IconStyle>
+    <LabelStyle>
+      <color>ff222222</color>
+      <scale>0.7</scale>
+    </LabelStyle>
+  </Style>
+  <Style id="bin1">
+    <IconStyle>
+      <color>FF97C08A</color>
+      <scale>0.75</scale>
+      <Icon><href>https://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon>
+    </IconStyle>
+    <LabelStyle>
+      <color>ff222222</color>
+      <scale>0.8</scale>
+    </LabelStyle>
+  </Style>
+  <Style id="bin2">
+    <IconStyle>
+      <color>FF7BA16B</color>
+      <scale>0.95</scale>
+      <Icon><href>https://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon>
+    </IconStyle>
+    <LabelStyle>
+      <color>ff222222</color>
+      <scale>0.95</scale>
+    </LabelStyle>
+  </Style>
+  <Style id="bin3">
+    <IconStyle>
+      <color>FF60824B</color>
+      <scale>1.15</scale>
+      <Icon><href>https://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon>
+    </IconStyle>
+    <LabelStyle>
+      <color>ff222222</color>
+      <scale>1.1</scale>
+    </LabelStyle>
+  </Style>
+  <Style id="bin4">
+    <IconStyle>
+      <color>FF44632C</color>
+      <scale>1.4</scale>
+      <Icon><href>https://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon>
+    </IconStyle>
+    <LabelStyle>
+      <color>ff222222</color>
+      <scale>1.3</scale>
+    </LabelStyle>
+  </Style>
+  <Style id="bin5">
+    <IconStyle>
+      <color>FF29440D</color>
+      <scale>1.7</scale>
+      <Icon><href>https://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon>
+    </IconStyle>
+    <LabelStyle>
+      <color>ff222222</color>
+      <scale>1.55</scale>
+    </LabelStyle>
+  </Style>
+  <Style id="home">
+    <IconStyle>
+      <color>ff2f64b6</color>
+      <scale>1.3</scale>
+      <Icon><href>https://maps.google.com/mapfiles/kml/shapes/target.png</href></Icon>
+    </IconStyle>
+    <LabelStyle><scale>1.1</scale></LabelStyle>
+  </Style>
+  <Style id="ring">
+    <LineStyle><color>9988a88a</color><width>1.5</width></LineStyle>
+    <PolyStyle><fill>0</fill></PolyStyle>
+  </Style>
+  <Placemark><name>Home QTH</name><styleUrl>#home</styleUrl><description>25823 NE 30th Ct, Redmond, WA 98053 (grid CN97ap)</description><Point><coordinates>-121.995552316307,47.635053283849,0</coordinates></Point></Placemark>
+  <Placemark><name>10 mi radius</name><styleUrl>#ring</styleUrl><LineString><tessellate>1</tessellate><coordinates>-121.995552,47.779981,0 -121.976854,47.779429,0 -121.958298,47.777779,0 -121.940026,47.775043,0 -121.922176,47.771241,0 -121.904884,47.766402,0 -121.888283,47.760564,0 -121.872498,47.753771,0 -121.857649,47.746074,0 -121.84385,47.737533,0 -121.831206,47.728211,0 -121.819812,47.71818,0 -121.809756,47.707517,0 -121.801114,47.696302,0 -121.793952,47.684621,0 -121.788324,47.672563,0 -121.784273,47.66022,0 -121.78183,47.647685,0 -121.781013,47.635053,0 -121.78183,47.622422,0 -121.784273,47.609887,0 -121.788324,47.597543,0 -121.793952,47.585485,0 -121.801114,47.573804,0 -121.809756,47.56259,0 -121.819812,47.551926,0 -121.831206,47.541896,0 -121.84385,47.532574,0 -121.857649,47.524032,0 -121.872498,47.516336,0 -121.888283,47.509542,0 -121.904884,47.503704,0 -121.922176,47.498866,0 -121.940026,47.495064,0 -121.958298,47.492328,0 -121.976854,47.490677,0 -121.995552,47.490126,0 -122.014251,47.490677,0 -122.032807,47.492328,0 -122.051079,47.495064,0 -122.068929,47.498866,0 -122.08622,47.503704,0 -122.102822,47.509542,0 -122.118607,47.516336,0 -122.133455,47.524032,0 -122.147254,47.532574,0 -122.159899,47.541896,0 -122.171292,47.551926,0 -122.181348,47.56259,0 -122.189991,47.573804,0 -122.197153,47.585485,0 -122.202781,47.597543,0 -122.206832,47.609887,0 -122.209275,47.622422,0 -122.210091,47.635053,0 -122.209275,47.647685,0 -122.206832,47.66022,0 -122.202781,47.672563,0 -122.197153,47.684621,0 -122.189991,47.696302,0 -122.181348,47.707517,0 -122.171292,47.71818,0 -122.159899,47.728211,0 -122.147254,47.737533,0 -122.133455,47.746074,0 -122.118607,47.753771,0 -122.102822,47.760564,0 -122.08622,47.766402,0 -122.068929,47.771241,0 -122.051079,47.775043,0 -122.032807,47.777779,0 -122.014251,47.779429,0 -121.995552,47.779981,0</coordinates></LineString></Placemark>
+  <Placemark><name>20 mi radius</name><styleUrl>#ring</styleUrl><LineString><tessellate>1</tessellate><coordinates>-121.995552,47.924908,0 -121.958156,47.923805,0 -121.921044,47.920505,0 -121.884499,47.915032,0 -121.848799,47.907428,0 -121.814216,47.897751,0 -121.781013,47.886075,0 -121.749443,47.872489,0 -121.719746,47.857095,0 -121.692148,47.840012,0 -121.66686,47.821369,0 -121.644072,47.801307,0 -121.62396,47.779981,0 -121.606676,47.757551,0 -121.592351,47.73419,0 -121.581095,47.710073,0 -121.572993,47.685386,0 -121.568107,47.660316,0 -121.566474,47.635053,0 -121.568107,47.609791,0 -121.572993,47.58472,0 -121.581095,47.560033,0 -121.592351,47.535917,0 -121.606676,47.512555,0 -121.62396,47.490126,0 -121.644072,47.468799,0 -121.66686,47.448738,0 -121.692148,47.430095,0 -121.719746,47.413011,0 -121.749443,47.397618,0 -121.781013,47.384031,0 -121.814216,47.372355,0 -121.848799,47.362679,0 -121.884499,47.355075,0 -121.921044,47.349602,0 -121.958156,47.346301,0 -121.995552,47.345198,0 -122.032949,47.346301,0 -122.070061,47.349602,0 -122.106606,47.355075,0 -122.142306,47.362679,0 -122.176888,47.372355,0 -122.210091,47.384031,0 -122.241661,47.397618,0 -122.271358,47.413011,0 -122.298956,47.430095,0 -122.324245,47.448738,0 -122.347032,47.468799,0 -122.367145,47.490126,0 -122.384429,47.512555,0 -122.398754,47.535917,0 -122.41001,47.560033,0 -122.418112,47.58472,0 -122.422997,47.609791,0 -122.42463,47.635053,0 -122.422997,47.660316,0 -122.418112,47.685386,0 -122.41001,47.710073,0 -122.398754,47.73419,0 -122.384429,47.757551,0 -122.367145,47.779981,0 -122.347032,47.801307,0 -122.324245,47.821369,0 -122.298956,47.840012,0 -122.271358,47.857095,0 -122.241661,47.872489,0 -122.210091,47.886075,0 -122.176888,47.897751,0 -122.142306,47.907428,0 -122.106606,47.915032,0 -122.070061,47.920505,0 -122.032949,47.923805,0 -121.995552,47.924908,0</coordinates></LineString></Placemark>
+  <Placemark><name>30 mi radius</name><styleUrl>#ring</styleUrl><LineString><tessellate>1</tessellate><coordinates>-121.995552,48.069836,0 -121.939457,48.068181,0 -121.883789,48.063231,0 -121.828972,48.055021,0 -121.775422,48.043615,0 -121.723548,48.0291,0 -121.673744,48.011586,0 -121.626389,47.991206,0 -121.581843,47.968116,0 -121.540447,47.942491,0 -121.502513,47.914526,0 -121.468332,47.884434,0 -121.438164,47.852445,0 -121.412237,47.8188,0 -121.39075,47.783758,0 -121.373866,47.747583,0 -121.361713,47.710552,0 -121.354385,47.672947,0 -121.351936,47.635053,0 -121.354385,47.597159,0 -121.361713,47.559554,0 -121.373866,47.522523,0 -121.39075,47.486349,0 -121.412237,47.451306,0 -121.438164,47.417662,0 -121.468332,47.385672,0 -121.502513,47.35558,0 -121.540447,47.327616,0 -121.581843,47.30199,0 -121.626389,47.2789,0 -121.673744,47.25852,0 -121.723548,47.241006,0 -121.775422,47.226491,0 -121.828972,47.215086,0 -121.883789,47.206876,0 -121.939457,47.201925,0 -121.995552,47.200271,0 -122.051647,47.201925,0 -122.107315,47.206876,0 -122.162133,47.215086,0 -122.215682,47.226491,0 -122.267557,47.241006,0 -122.317361,47.25852,0 -122.364716,47.2789,0 -122.409261,47.30199,0 -122.450658,47.327616,0 -122.488591,47.35558,0 -122.522772,47.385672,0 -122.552941,47.417662,0 -122.578867,47.451306,0 -122.600354,47.486349,0 -122.617238,47.522523,0 -122.629391,47.559554,0 -122.63672,47.597159,0 -122.639169,47.635053,0 -122.63672,47.672947,0 -122.629391,47.710552,0 -122.617238,47.747583,0 -122.600354,47.783758,0 -122.578867,47.8188,0 -122.552941,47.852445,0 -122.522772,47.884434,0 -122.488591,47.914526,0 -122.450658,47.942491,0 -122.409261,47.968116,0 -122.364716,47.991206,0 -122.317361,48.011586,0 -122.267557,48.0291,0 -122.215682,48.043615,0 -122.162133,48.055021,0 -122.107315,48.063231,0 -122.051647,48.068181,0 -121.995552,48.069836,0</coordinates></LineString></Placemark>
+  <Folder><name>Parks (48)</name>
+    <Placemark><name>1</name><styleUrl>#bin0</styleUrl><description><![CDATA[Lake Geneva State Fishing Lake (US-13551)<br/>Distance: 27.4 mi<br/>Activations: 1<br/>Attempts: 1<br/>QSOs: 11<br/><a href="https://pota.app/#/park/US-13551">View on pota.app</a>]]></description><Point><coordinates>-122.285,47.2905,0</coordinates></Point></Placemark>
+    <Placemark><name>1</name><styleUrl>#bin0</styleUrl><description><![CDATA[Lake Killarney State Fishing Lake (US-13550)<br/>Distance: 27.4 mi<br/>Activations: 1<br/>Attempts: 1<br/>QSOs: 11<br/><a href="https://pota.app/#/park/US-13550">View on pota.app</a>]]></description><Point><coordinates>-122.287,47.2902,0</coordinates></Point></Placemark>
+    <Placemark><name>2</name><styleUrl>#bin0</styleUrl><description><![CDATA[Lake Alice State Fishing Lake (US-13436)<br/>Distance: 8.8 mi<br/>Activations: 2<br/>Attempts: 2<br/>QSOs: 28<br/><a href="https://pota.app/#/park/US-13436">View on pota.app</a>]]></description><Point><coordinates>-121.884,47.5325,0</coordinates></Point></Placemark>
+    <Placemark><name>2</name><styleUrl>#bin0</styleUrl><description><![CDATA[Fish Lake State Fishing Lake (US-13437)<br/>Distance: 25.4 mi<br/>Activations: 2<br/>Attempts: 4<br/>QSOs: 28<br/><a href="https://pota.app/#/park/US-13437">View on pota.app</a>]]></description><Point><coordinates>-121.955,47.2683,0</coordinates></Point></Placemark>
+    <Placemark><name>2</name><styleUrl>#bin0</styleUrl><description><![CDATA[Lake Stevens State Fishing Lake (US-13361)<br/>Distance: 26.3 mi<br/>Activations: 2<br/>Attempts: 3<br/>QSOs: 36<br/><a href="https://pota.app/#/park/US-13361">View on pota.app</a>]]></description><Point><coordinates>-122.066,48.0133,0</coordinates></Point></Placemark>
+    <Placemark><name>3</name><styleUrl>#bin0</styleUrl><description><![CDATA[Beaver Lake State Fishing Lake (US-13440)<br/>Distance: 3.3 mi<br/>Activations: 3<br/>Attempts: 3<br/>QSOs: 45<br/><a href="https://pota.app/#/park/US-13440">View on pota.app</a>]]></description><Point><coordinates>-122.0,47.5867,0</coordinates></Point></Placemark>
+    <Placemark><name>3</name><styleUrl>#bin0</styleUrl><description><![CDATA[Lake Desire State Fishing Lake (US-13441)<br/>Distance: 14 mi<br/>Activations: 3<br/>Attempts: 3<br/>QSOs: 46<br/><a href="https://pota.app/#/park/US-13441">View on pota.app</a>]]></description><Point><coordinates>-122.108,47.4465,0</coordinates></Point></Placemark>
+    <Placemark><name>3</name><styleUrl>#bin0</styleUrl><description><![CDATA[Spring Lake State Fishing Lake (US-13438)<br/>Distance: 14.4 mi<br/>Activations: 3<br/>Attempts: 4<br/>QSOs: 59<br/><a href="https://pota.app/#/park/US-13438">View on pota.app</a>]]></description><Point><coordinates>-122.092,47.4367,0</coordinates></Point></Placemark>
+    <Placemark><name>3</name><styleUrl>#bin0</styleUrl><description><![CDATA[Lake Number 12 State Fishing Lake (US-13444)<br/>Distance: 21.5 mi<br/>Activations: 3<br/>Attempts: 3<br/>QSOs: 39<br/><a href="https://pota.app/#/park/US-13444">View on pota.app</a>]]></description><Point><coordinates>-121.972,47.324,0</coordinates></Point></Placemark>
+    <Placemark><name>3</name><styleUrl>#bin0</styleUrl><description><![CDATA[Lake Morton State Fishing Lake (US-13443)<br/>Distance: 21.8 mi<br/>Activations: 3<br/>Attempts: 3<br/>QSOs: 48<br/><a href="https://pota.app/#/park/US-13443">View on pota.app</a>]]></description><Point><coordinates>-122.089,47.3255,0</coordinates></Point></Placemark>
+    <Placemark><name>3</name><styleUrl>#bin0</styleUrl><description><![CDATA[Bass Lake State Fishing Lake (US-13439)<br/>Distance: 26.4 mi<br/>Activations: 3<br/>Attempts: 3<br/>QSOs: 58<br/><a href="https://pota.app/#/park/US-13439">View on pota.app</a>]]></description><Point><coordinates>-121.992,47.2536,0</coordinates></Point></Placemark>
+    <Placemark><name>4</name><styleUrl>#bin0</styleUrl><description><![CDATA[Lake Margaret State Fishing Lake (US-13435)<br/>Distance: 10.1 mi<br/>Activations: 4<br/>Attempts: 4<br/>QSOs: 74<br/><a href="https://pota.app/#/park/US-13435">View on pota.app</a>]]></description><Point><coordinates>-121.903,47.7675,0</coordinates></Point></Placemark>
+    <Placemark><name>6</name><styleUrl>#bin1</styleUrl><description><![CDATA[Langlois State Fishing Lake (US-13382)<br/>Distance: 5.2 mi<br/>Activations: 6<br/>Attempts: 6<br/>QSOs: 81<br/><a href="https://pota.app/#/park/US-13382">View on pota.app</a>]]></description><Point><coordinates>-121.884,47.6349,0</coordinates></Point></Placemark>
+    <Placemark><name>6</name><styleUrl>#bin1</styleUrl><description><![CDATA[Jonker Water Access State Recreation Site (US-13384)<br/>Distance: 17.6 mi<br/>Activations: 6<br/>Attempts: 6<br/>QSOs: 91<br/><a href="https://pota.app/#/park/US-13384">View on pota.app</a>]]></description><Point><coordinates>-121.815,47.8584,0</coordinates></Point></Placemark>
+    <Placemark><name>7</name><styleUrl>#bin1</styleUrl><description><![CDATA[Wallace River State Fish Hatchery (US-12745)<br/>Distance: 20.6 mi<br/>Activations: 7<br/>Attempts: 7<br/>QSOs: 142<br/><a href="https://pota.app/#/park/US-12745">View on pota.app</a>]]></description><Point><coordinates>-121.718,47.8674,0</coordinates></Point></Placemark>
+    <Placemark><name>7</name><styleUrl>#bin1</styleUrl><description><![CDATA[Panther State Fishing Lake (US-13442)<br/>Distance: 21.8 mi<br/>Activations: 7<br/>Attempts: 7<br/>QSOs: 147<br/><a href="https://pota.app/#/park/US-13442">View on pota.app</a>]]></description><Point><coordinates>-122.008,47.9503,0</coordinates></Point></Placemark>
+    <Placemark><name>8</name><styleUrl>#bin1</styleUrl><description><![CDATA[Raging River State Forest (US-12296)<br/>Distance: 11.8 mi<br/>Activations: 8<br/>Attempts: 13<br/>QSOs: 153<br/><a href="https://pota.app/#/park/US-12296">View on pota.app</a>]]></description><Point><coordinates>-121.852,47.4948,0</coordinates></Point></Placemark>
+    <Placemark><name>9</name><styleUrl>#bin1</styleUrl><description><![CDATA[Rattlesnake Mountain Area Scenic Reserve (US-12295)<br/>Distance: 15.5 mi<br/>Activations: 9<br/>Attempts: 12<br/>QSOs: 213<br/><a href="https://pota.app/#/park/US-12295">View on pota.app</a>]]></description><Point><coordinates>-121.804,47.4512,0</coordinates></Point></Placemark>
+    <Placemark><name>9</name><styleUrl>#bin1</styleUrl><description><![CDATA[Lake Dollof State Fishing Lake (US-13445)<br/>Distance: 25.4 mi<br/>Activations: 9<br/>Attempts: 9<br/>QSOs: 123<br/><a href="https://pota.app/#/park/US-13445">View on pota.app</a>]]></description><Point><coordinates>-122.285,47.3236,0</coordinates></Point></Placemark>
+    <Placemark><name>9</name><styleUrl>#bin1</styleUrl><description><![CDATA[North Lake State Fishing Lake (US-13446)<br/>Distance: 26.4 mi<br/>Activations: 9<br/>Attempts: 9<br/>QSOs: 134<br/><a href="https://pota.app/#/park/US-13446">View on pota.app</a>]]></description><Point><coordinates>-122.289,47.3082,0</coordinates></Point></Placemark>
+    <Placemark><name>11</name><styleUrl>#bin1</styleUrl><description><![CDATA[Mount Si Natural Resources State Conservation Area (US-12294)<br/>Distance: 16.3 mi<br/>Activations: 11<br/>Attempts: 17<br/>QSOs: 279<br/><a href="https://pota.app/#/park/US-12294">View on pota.app</a>]]></description><Point><coordinates>-121.723,47.4868,0</coordinates></Point></Placemark>
+    <Placemark><name>11</name><styleUrl>#bin1</styleUrl><description><![CDATA[Middle Fork Snoqualmie Natural Resources State Conservation Area (US-12304)<br/>Distance: 19 mi<br/>Activations: 11<br/>Attempts: 13<br/>QSOs: 317<br/><a href="https://pota.app/#/park/US-12304">View on pota.app</a>]]></description><Point><coordinates>-121.674,47.4667,0</coordinates></Point></Placemark>
+    <Placemark><name>11</name><styleUrl>#bin1</styleUrl><description><![CDATA[Big Eddy Water Access State Recreation Site (US-13383)<br/>Distance: 20.9 mi<br/>Activations: 11<br/>Attempts: 39<br/>QSOs: 309<br/><a href="https://pota.app/#/park/US-13383">View on pota.app</a>]]></description><Point><coordinates>-121.658,47.8358,0</coordinates></Point></Placemark>
+    <Placemark><name>15</name><styleUrl>#bin1</styleUrl><description><![CDATA[Spencer Island State Wildlife Area (US-12341)<br/>Distance: 26.2 mi<br/>Activations: 15<br/>Attempts: 18<br/>QSOs: 326<br/><a href="https://pota.app/#/park/US-12341">View on pota.app</a>]]></description><Point><coordinates>-122.163,47.9967,0</coordinates></Point></Placemark>
+    <Placemark><name>16</name><styleUrl>#bin2</styleUrl><description><![CDATA[Blake Island Marine State Park (US-3161)<br/>Distance: 23.6 mi<br/>Activations: 16<br/>Attempts: 17<br/>QSOs: 725<br/><a href="https://pota.app/#/park/US-3161">View on pota.app</a>]]></description><Point><coordinates>-122.482,47.5412,0</coordinates></Point></Placemark>
+    <Placemark><name>17</name><styleUrl>#bin2</styleUrl><description><![CDATA[Lake Washington State Fishing Lake (US-13360)<br/>Distance: 13.2 mi<br/>Activations: 17<br/>Attempts: 21<br/>QSOs: 336<br/><a href="https://pota.app/#/park/US-13360">View on pota.app</a>]]></description><Point><coordinates>-122.275,47.6016,0</coordinates></Point></Placemark>
+    <Placemark><name>20</name><styleUrl>#bin2</styleUrl><description><![CDATA[Possession Point State Park (US-12282)<br/>Distance: 25.8 mi<br/>Activations: 20<br/>Attempts: 22<br/>QSOs: 601<br/><a href="https://pota.app/#/park/US-12282">View on pota.app</a>]]></description><Point><coordinates>-122.377,47.9072,0</coordinates></Point></Placemark>
+    <Placemark><name>29</name><styleUrl>#bin2</styleUrl><description><![CDATA[Wallace Falls State Park (US-3287)<br/>Distance: 23.6 mi<br/>Activations: 29<br/>Attempts: 31<br/>QSOs: 532<br/><a href="https://pota.app/#/park/US-3287">View on pota.app</a>]]></description><Point><coordinates>-121.672,47.8992,0</coordinates></Point></Placemark>
+    <Placemark><name>33</name><styleUrl>#bin2</styleUrl><description><![CDATA[Lake Cassidy State Fishing Lake (US-13359)<br/>Distance: 29 mi<br/>Activations: 33<br/>Attempts: 35<br/>QSOs: 1108<br/><a href="https://pota.app/#/park/US-13359">View on pota.app</a>]]></description><Point><coordinates>-122.099,48.0496,0</coordinates></Point></Placemark>
+    <Placemark><name>42</name><styleUrl>#bin3</styleUrl><description><![CDATA[Olallie State Park (US-3239)<br/>Distance: 21.1 mi<br/>Activations: 42<br/>Attempts: 51<br/>QSOs: 1103<br/><a href="https://pota.app/#/park/US-3239">View on pota.app</a>]]></description><Point><coordinates>-121.654,47.4358,0</coordinates></Point></Placemark>
+    <Placemark><name>53</name><styleUrl>#bin3</styleUrl><description><![CDATA[Kanaskat-Palmer State Park (US-3209)<br/>Distance: 22.4 mi<br/>Activations: 53<br/>Attempts: 65<br/>QSOs: 2444<br/><a href="https://pota.app/#/park/US-3209">View on pota.app</a>]]></description><Point><coordinates>-121.902,47.3177,0</coordinates></Point></Placemark>
+    <Placemark><name>66</name><styleUrl>#bin3</styleUrl><description><![CDATA[Manchester State Park (US-3227)<br/>Distance: 26.4 mi<br/>Activations: 66<br/>Attempts: 77<br/>QSOs: 1540<br/><a href="https://pota.app/#/park/US-3227">View on pota.app</a>]]></description><Point><coordinates>-122.555,47.5771,0</coordinates></Point></Placemark>
+    <Placemark><name>71</name><styleUrl>#bin3</styleUrl><description><![CDATA[Marckworth State Forest (US-10711)<br/>Distance: 8.2 mi<br/>Activations: 71<br/>Attempts: 84<br/>QSOs: 3036<br/><a href="https://pota.app/#/park/US-10711">View on pota.app</a>]]></description><Point><coordinates>-121.876,47.7216,0</coordinates></Point></Placemark>
+    <Placemark><name>85</name><styleUrl>#bin3</styleUrl><description><![CDATA[Ebey Island State Wildlife Area (US-12340)<br/>Distance: 24.9 mi<br/>Activations: 85<br/>Attempts: 98<br/>QSOs: 2161<br/><a href="https://pota.app/#/park/US-12340">View on pota.app</a>]]></description><Point><coordinates>-122.162,47.9775,0</coordinates></Point></Placemark>
+    <Placemark><name>88</name><styleUrl>#bin3</styleUrl><description><![CDATA[Palouse to Cascades State Park State Trail (US-3203)<br/>Distance: 17.6 mi<br/>Activations: 88<br/>Attempts: 99<br/>QSOs: 2417<br/><a href="https://pota.app/#/park/US-3203">View on pota.app</a>]]></description><Point><coordinates>-121.766,47.432,0</coordinates></Point></Placemark>
+    <Placemark><name>97</name><styleUrl>#bin3</styleUrl><description><![CDATA[Flaming Geyser State Park (US-3187)<br/>Distance: 24.6 mi<br/>Activations: 97<br/>Attempts: 117<br/>QSOs: 2040<br/><a href="https://pota.app/#/park/US-3187">View on pota.app</a>]]></description><Point><coordinates>-122.036,47.2802,0</coordinates></Point></Placemark>
+    <Placemark><name>100</name><styleUrl>#bin3</styleUrl><description><![CDATA[Tiger Mountain State Forest (US-5574)<br/>Distance: 7.3 mi<br/>Activations: 100<br/>Attempts: 119<br/>QSOs: 2173<br/><a href="https://pota.app/#/park/US-5574">View on pota.app</a>]]></description><Point><coordinates>-121.994,47.5291,0</coordinates></Point></Placemark>
+    <Placemark><name>111</name><styleUrl>#bin4</styleUrl><description><![CDATA[Cherry Valley State Wildlife Area (US-12338)<br/>Distance: 8.5 mi<br/>Activations: 111<br/>Attempts: 112<br/>QSOs: 2477<br/><a href="https://pota.app/#/park/US-12338">View on pota.app</a>]]></description><Point><coordinates>-121.973,47.7576,0</coordinates></Point></Placemark>
+    <Placemark><name>115</name><styleUrl>#bin4</styleUrl><description><![CDATA[Illahee State Park (US-3202)<br/>Distance: 28.1 mi<br/>Activations: 115<br/>Attempts: 127<br/>QSOs: 3419<br/><a href="https://pota.app/#/park/US-3202">View on pota.app</a>]]></description><Point><coordinates>-122.596,47.5997,0</coordinates></Point></Placemark>
+    <Placemark><name>126</name><styleUrl>#bin4</styleUrl><description><![CDATA[Nolte State Park (US-3236)<br/>Distance: 25.3 mi<br/>Activations: 126<br/>Attempts: 160<br/>QSOs: 2901<br/><a href="https://pota.app/#/park/US-3236">View on pota.app</a>]]></description><Point><coordinates>-121.938,47.2705,0</coordinates></Point></Placemark>
+    <Placemark><name>128</name><styleUrl>#bin4</styleUrl><description><![CDATA[Stillwater State Wildlife Area (US-12342)<br/>Distance: 4.5 mi<br/>Activations: 128<br/>Attempts: 130<br/>QSOs: 2587<br/><a href="https://pota.app/#/park/US-12342">View on pota.app</a>]]></description><Point><coordinates>-121.937,47.6873,0</coordinates></Point></Placemark>
+    <Placemark><name>139</name><styleUrl>#bin4</styleUrl><description><![CDATA[Dash Point State Park (US-3179)<br/>Distance: 29.1 mi<br/>Activations: 139<br/>Attempts: 176<br/>QSOs: 3312<br/><a href="https://pota.app/#/park/US-3179">View on pota.app</a>]]></description><Point><coordinates>-122.407,47.3182,0</coordinates></Point></Placemark>
+    <Placemark><name>145</name><styleUrl>#bin4</styleUrl><description><![CDATA[Bridle Trails State Park (US-3166)<br/>Distance: 8.4 mi<br/>Activations: 145<br/>Attempts: 171<br/>QSOs: 2963<br/><a href="https://pota.app/#/park/US-3166">View on pota.app</a>]]></description><Point><coordinates>-122.174,47.653,0</coordinates></Point></Placemark>
+    <Placemark><name>151</name><styleUrl>#bin4</styleUrl><description><![CDATA[Saltwater State Park (US-3262)<br/>Distance: 23.6 mi<br/>Activations: 151<br/>Attempts: 184<br/>QSOs: 2850<br/><a href="https://pota.app/#/park/US-3262">View on pota.app</a>]]></description><Point><coordinates>-122.322,47.3734,0</coordinates></Point></Placemark>
+    <Placemark><name>183</name><styleUrl>#bin4</styleUrl><description><![CDATA[Squak Mountain State Park (US-3272)<br/>Distance: 9.8 mi<br/>Activations: 183<br/>Attempts: 203<br/>QSOs: 5354<br/><a href="https://pota.app/#/park/US-3272">View on pota.app</a>]]></description><Point><coordinates>-122.038,47.4964,0</coordinates></Point></Placemark>
+    <Placemark><name>189</name><styleUrl>#bin4</styleUrl><description><![CDATA[Crescent Lake State Wildlife Area (US-12339)<br/>Distance: 12 mi<br/>Activations: 189<br/>Attempts: 194<br/>QSOs: 6386<br/><a href="https://pota.app/#/park/US-12339">View on pota.app</a>]]></description><Point><coordinates>-121.999,47.8084,0</coordinates></Point></Placemark>
+    <Placemark><name>348</name><styleUrl>#bin5</styleUrl><description><![CDATA[Saint Edward State Park (US-3261)<br/>Distance: 13.9 mi<br/>Activations: 348<br/>Attempts: 421<br/>QSOs: 10937<br/><a href="https://pota.app/#/park/US-3261">View on pota.app</a>]]></description><Point><coordinates>-122.257,47.7329,0</coordinates></Point></Placemark>
+    <Placemark><name>621</name><styleUrl>#bin5</styleUrl><description><![CDATA[Lake Sammamish State Park (US-3216)<br/>Distance: 6.4 mi<br/>Activations: 621<br/>Attempts: 673<br/>QSOs: 20279<br/><a href="https://pota.app/#/park/US-3216">View on pota.app</a>]]></description><Point><coordinates>-122.065,47.555,0</coordinates></Point></Placemark>
+  </Folder>
+</Document>
+</kml>

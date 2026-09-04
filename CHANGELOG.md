@@ -9,6 +9,20 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Added
 
+- Added `ftx1-scan` and `thd75-scan`: single-list scanning loadouts that
+  resolve the same catalog into one frequency-ordered memory list so a plain
+  memory scan sweeps every band without choosing a bank. Scannable content
+  (repeater bands, calling, HF voice nets, weather/marine/air/GMRS/MURS) runs
+  in one ascending block; continuous carriers (HF data, beacons, WWV, and on
+  the TH-D75A FM/AM broadcast, CB and satellite downlinks) are programmed but
+  `skip_scan`. Both centre on 28523 NE 30th Ct at a 75-mile radius. Committed
+  as `radio-configs/ftx1-scan.FTX1` and the two report files.
+- Widened the WWARA curation bounding box for `PSHAM01` from
+  `46.75–49.05 N, 123.55–121.25 W` to `46.5–49.1 N, 123.7–120.3 W` so a
+  75-mile radius from the Redmond area no longer clips coordinated repeaters
+  on the I-90 (Cle Elum), US-2 (Leavenworth) and Centralia corridors. Takes
+  effect on the next `sources update --only wwara --apply`.
+
 - Added a verified Kenwood TH-D75A profile, native settings-preserving `.d75`
   exporter and `thd75-ames-lake` plan. The connected firmware-1.03 radio now
   carries 545 ordinary memories across 21 groups plus 21 nearby entries in its

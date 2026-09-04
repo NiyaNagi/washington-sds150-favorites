@@ -61,12 +61,18 @@ catalog is the source of truth. See
 | Kenwood TH-D75A | Tri-band analog/D-STAR and wideband receiver | 1,000 + 1,500 DR | 545 memories + 21 DR repeaters | Verified; current image tracked |
 | Yaesu FTX-1 | HF/VHF/UHF transceiver | 999 | 960 statewide **or** 351 local memories | Profile from documentation, **unverified** |
 
-The FTX-1 has two loadouts, chosen from the same dropdown. `ftx1-wa` is the
+The FTX-1 has three loadouts, chosen from the same dropdown. `ftx1-wa` is the
 statewide inventory. `ftx1-local` is the working list: amateur repeaters within
 60 miles of home whose coordination is current — 163 of Washington's 433 — plus
-HF nets, calling frequencies, beacons and utility stations from 160 m to 6 m.
-The radius is applied to each repeater's own coordinates, so the list follows
-the home location rather than county lines.
+HF nets, calling frequencies, beacons and utility stations from 160 m to 6 m,
+split into eighteen service blocks. `ftx1-scan` is the same content at a
+75-mile radius flattened into one frequency-ordered list — every repeater band,
+calling channel and receive service in a single 52 MHz → 470 MHz sweep, with
+continuous-carrier channels programmed but locked out of scan — so a plain
+memory scan covers every band without picking a bank. The radius is applied to
+each repeater's own coordinates, so the list follows the home location rather
+than county lines. `thd75-scan` is the equivalent single-list loadout for the
+TH-D75A.
 
 Each radio's current configuration is inspectable in its **own shape**, because
 they genuinely differ. The SDS150's configuration is hierarchical - Favorites
@@ -139,7 +145,7 @@ Writing to a radio always backs it up first, always requires an explicit
 | Remaining local warnings | 2 |
 | Washington counties represented | 39 |
 | Registered radio profiles | 3 |
-| Registered channel plans | 3 |
+| Registered channel plans | 6 |
 
 Four of the 141 entries are transceiver-oriented and carry fully cited
 channel lists rather than scanner metadata: **OZ01** (Olympic Coast / Lake
