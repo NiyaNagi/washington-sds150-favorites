@@ -5,9 +5,10 @@
 
 Open it in Google Earth (Pro or web) or any KML viewer. It includes:
 
-- One pin per park, labeled with its activation count. Marker color and size both scale
-  with that count (pale/small = few activations, deep green/large = many), so
-  low-activation targets stand out at a glance.
+- One pin per park, labeled with its total activation count in high-contrast white
+  text (readable against the green terrain imagery). All pins are the same, larger
+  size; marker color still scales with activation count (pale green = few
+  activations, deep green = many), so low-activation targets stand out at a glance.
 - A **Home QTH** pin at the address above.
 - Dashed range rings at 10, 20, and 30 miles.
 - Click any park pin for its full name, reference code, distance, activation attempts,

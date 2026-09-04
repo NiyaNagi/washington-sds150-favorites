@@ -2,80 +2,80 @@
 <kml xmlns="http://www.opengis.net/kml/2.2">
 <Document>
   <name>POTA Parks within 30 mi of Redmond, WA</name>
-  <description>Parks on the Air references within 30 miles of 25823 NE 30th Ct, Redmond, WA. Marker color/size scale with activation count (shown as the label). Data: pota.app API, fetched 2026-09-04.</description>
+  <description>Parks on the Air references within 30 miles of 25823 NE 30th Ct, Redmond, WA. Marker color scales with activation count; the label is the total activation count. Data: pota.app API, fetched 2026-09-04.</description>
   <Style id="bin0">
     <IconStyle>
       <color>FFB2DFA9</color>
-      <scale>0.6</scale>
+      <scale>1.6</scale>
       <Icon><href>https://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon>
     </IconStyle>
     <LabelStyle>
-      <color>ff222222</color>
-      <scale>0.7</scale>
+      <color>ffffffff</color>
+      <scale>1.3</scale>
     </LabelStyle>
   </Style>
   <Style id="bin1">
     <IconStyle>
       <color>FF97C08A</color>
-      <scale>0.75</scale>
+      <scale>1.6</scale>
       <Icon><href>https://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon>
     </IconStyle>
     <LabelStyle>
-      <color>ff222222</color>
-      <scale>0.8</scale>
+      <color>ffffffff</color>
+      <scale>1.3</scale>
     </LabelStyle>
   </Style>
   <Style id="bin2">
     <IconStyle>
       <color>FF7BA16B</color>
-      <scale>0.95</scale>
+      <scale>1.6</scale>
       <Icon><href>https://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon>
     </IconStyle>
     <LabelStyle>
-      <color>ff222222</color>
-      <scale>0.95</scale>
+      <color>ffffffff</color>
+      <scale>1.3</scale>
     </LabelStyle>
   </Style>
   <Style id="bin3">
     <IconStyle>
       <color>FF60824B</color>
-      <scale>1.15</scale>
+      <scale>1.6</scale>
       <Icon><href>https://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon>
     </IconStyle>
     <LabelStyle>
-      <color>ff222222</color>
-      <scale>1.1</scale>
+      <color>ffffffff</color>
+      <scale>1.3</scale>
     </LabelStyle>
   </Style>
   <Style id="bin4">
     <IconStyle>
       <color>FF44632C</color>
-      <scale>1.4</scale>
+      <scale>1.6</scale>
       <Icon><href>https://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon>
     </IconStyle>
     <LabelStyle>
-      <color>ff222222</color>
+      <color>ffffffff</color>
       <scale>1.3</scale>
     </LabelStyle>
   </Style>
   <Style id="bin5">
     <IconStyle>
       <color>FF29440D</color>
-      <scale>1.7</scale>
+      <scale>1.6</scale>
       <Icon><href>https://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon>
     </IconStyle>
     <LabelStyle>
-      <color>ff222222</color>
-      <scale>1.55</scale>
+      <color>ffffffff</color>
+      <scale>1.3</scale>
     </LabelStyle>
   </Style>
   <Style id="home">
     <IconStyle>
       <color>ff2f64b6</color>
-      <scale>1.3</scale>
+      <scale>1.5</scale>
       <Icon><href>https://maps.google.com/mapfiles/kml/shapes/target.png</href></Icon>
     </IconStyle>
-    <LabelStyle><scale>1.1</scale></LabelStyle>
+    <LabelStyle><color>ffffffff</color><scale>1.2</scale></LabelStyle>
   </Style>
   <Style id="ring">
     <LineStyle><color>9988a88a</color><width>1.5</width></LineStyle>
