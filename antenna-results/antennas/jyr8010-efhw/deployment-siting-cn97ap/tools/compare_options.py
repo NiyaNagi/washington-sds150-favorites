@@ -115,30 +115,108 @@ TARGETS = [
 
 LAMBDA_20M = 21.19
 
+# 20 m current maxima along a 39.6 m EFHW, metres from the feed. These are the
+# points that actually radiate; their MEAN HEIGHT predicts low-angle
+# performance better than plain average wire height, and it is pure arithmetic.
+I_MAX_20M = [4.95, 14.85, 24.75, 34.65]
+
+# Stylized elevation response of a VERTICALLY polarised radiator over average
+# ground (sigma 5 mS/m, eps_r 13), in dB relative to the peak of the horizontal
+# reference used elsewhere. Bakes in roughly 4 dB of average-ground loss and the
+# pseudo-Brewster rolloff below about 12 deg.
+#
+# CONFIDENCE: LOW. Traced from standard published curves, NOT computed from soil
+# constants. It sets the whole T-class result, so treat T numbers as indicative
+# only. See METHOD.md section 9.
+VERT_RESPONSE_dB = [
+    (5, -8.0), (10, -4.5), (15, -3.5), (20, -3.3), (25, -3.6), (30, -4.3),
+    (40, -6.5), (50, -9.5), (60, -13.5), (75, -21.0), (90, -40.0),
+]
+
+
+def vertical_factor_dB(elev_deg):
+    pts = VERT_RESPONSE_dB
+    if elev_deg <= pts[0][0]:
+        return pts[0][1]
+    for i in range(len(pts) - 1):
+        a, b = pts[i], pts[i + 1]
+        if a[0] <= elev_deg <= b[0]:
+            f = (elev_deg - a[0]) / (b[0] - a[0])
+            return a[1] + f * (b[1] - a[1])
+    return pts[-1][1]
+
 
 # --------------------------------------------------------------------------
 
 class Option:
-    """A deployment. segments = [(wire_m, mean_height_m, bearing_deg), ...]"""
+    """A deployment. segments = [(wire_m, mean_height_m, bearing_deg), ...]
 
-    def __init__(self, key, label, segments, supports, note=""):
+    slope_deg > 0 marks a STEEP SLANT wire, which is modelled as a mix of
+    vertical and horizontal polarisation rather than as a horizontal wire over
+    ground. Above roughly 30 deg the horizontal-wire model stops applying.
+    """
+
+    def __init__(self, key, label, segments, supports, note="",
+                 slope_deg=0.0, feed_h=None, top_h=None):
         self.key, self.label, self.note = key, label, note
         self.segments, self.supports = segments, supports
+        self.slope_deg, self.feed_h, self.top_h = slope_deg, feed_h, top_h
         self.wire_total = sum(s[0] for s in segments)
         self.avg_h = sum(w * h for w, h, _ in segments) / self.wire_total
         self.legs = sorted({round(b, 1) for _, _, b in segments})
 
+    @property
+    def is_slant(self):
+        return self.slope_deg > 0.5
+
+    def height_at_wire(self, s):
+        """Height above ground at distance s along the wire from the feed."""
+        if self.is_slant:
+            return self.feed_h + s * math.sin(math.radians(self.slope_deg))
+        # Walk the segments, interpolating linearly within each.
+        run = 0.0
+        for i, (w, hmean, _) in enumerate(self.segments):
+            if s <= run + w or i == len(self.segments) - 1:
+                return hmean          # segment mean is adequate here
+            run += w
+        return self.avg_h
+
+    def mean_imax_height(self):
+        return sum(self.height_at_wire(s) for s in I_MAX_20M) / len(I_MAX_20M)
+
     def takeoff(self, lam):
+        if self.is_slant:
+            return None               # not a horizontal-wire lobe
         return takeoff_deg(self.avg_h, lam)
 
     def score(self, bearing, arrival_deg):
         """Return (pattern_dB, elev_dB, net_dB) on 20 m for one target."""
-        pat = max(pattern_dB(bearing, b, 4) for _, _, b in self.segments)
         horizon, slope = terrain_at(bearing)
-        real = max(arrival_deg, horizon)
-        eff = real + slope
-        elev = ground_factor_dB(eff, self.avg_h, LAMBDA_20M)
-        return pat, elev, pat + elev
+        eff = max(arrival_deg, horizon) + slope
+
+        if not self.is_slant:
+            pat = max(pattern_dB(bearing, b, 4) for _, _, b in self.segments)
+            elev = ground_factor_dB(eff, self.avg_h, LAMBDA_20M)
+            return pat, elev, pat + elev
+
+        # Slant wire: power-sum a vertical and a horizontal contribution,
+        # weighted sin^2 / cos^2 of the slope angle. The vertical part is
+        # omnidirectional in azimuth; the horizontal part keeps the long-wire
+        # pattern of the wire's ground projection.
+        th = math.radians(self.slope_deg)
+        fv, fh = math.sin(th) ** 2, math.cos(th) ** 2
+        b0 = self.segments[0][2]
+        proj = self.wire_total * math.cos(th)
+        n_eff = max(2.0 * proj / LAMBDA_20M, 0.5)
+        h_pat = 10 ** (pattern_dB(bearing, b0, n_eff) / 10)
+        h_elev = 10 ** (ground_factor_dB(eff, max(self.avg_h, 0.5),
+                                         LAMBDA_20M) / 10)
+        v_lin = 10 ** (vertical_factor_dB(eff) / 10)
+        total = fv * v_lin + fh * h_pat * h_elev
+        net = 10 * math.log10(max(total, 1e-12))
+        # Report the split for diagnostics; pattern/elev are not separable here.
+        return 10 * math.log10(max(fv * v_lin, 1e-12)), \
+            10 * math.log10(max(fh * h_pat * h_elev, 1e-12)), net
 
 
 def build_options():
@@ -247,6 +325,47 @@ def build_options():
             f"Support sits {run:.1f} m from the feed. Slope "
             f"{math.degrees(math.atan2(top - f, run)):.1f} deg - a 39.6 m wire "
             f"cannot form a steep sloper at these heights."))
+
+    # ---------------------------------------------------------------------
+    # T class: TALL slopers. Height unconstrained (150 ft trees available) and
+    # the parcel boundary is NOT enforced - out-of-parcel supports are reported
+    # instead. Above ~30 deg these stop behaving as horizontal wires and become
+    # slant/vertical radiators, so they use the slant model.
+    # ---------------------------------------------------------------------
+    f = 24 * FT
+    tall = [("T30", 30.0), ("T45", 45.0), ("T60", 60.0), ("T75", 75.0)]
+
+    # T-APEX: the slope you get for free from the EXISTING apex tree.
+    rise_apex = math.sqrt(max(WIRE_M**2 - run1**2, 0))
+    tall.append(("T-APEX", math.degrees(math.atan2(rise_apex, run1))))
+
+    for key, slope in tall:
+        th = math.radians(slope)
+        run = WIRE_M * math.cos(th)
+        top = f + WIRE_M * math.sin(th)
+        if key == "T-APEX":
+            brg, top_en = APEX_BRG, APEX_EN
+        else:
+            best = None
+            for b in range(0, 360):           # NO parcel constraint here
+                o = Option(key, key, [(WIRE_M, (f + top) / 2, float(b))], [],
+                           slope_deg=slope, feed_h=f, top_h=top)
+                a = aggregate(o)
+                rank = (a["n_workable"], a["mean_power_dB"])
+                if best is None or rank > best[0]:
+                    best = (rank, float(b))
+            brg = best[1]
+            top_en = offset((0, 0), brg, run)
+        where = "IN parcel" if inside_parcel(top_en) else "OUT OF PARCEL"
+        opts.append(Option(
+            key,
+            f"Tall sloper, {slope:.0f} deg slope, top {top/FT:.0f} ft"
+            + (" (existing apex tree)" if key == "T-APEX" else f", bearing {brg:.0f}T"),
+            [(WIRE_M, (f + top) / 2, brg)],
+            [("feed", 24, (0, 0)), ("tree top", int(round(top / FT)), top_en)],
+            f"Support {run:.1f} m ({run/FT:.0f} ft) from the feed, {where}. "
+            f"Slant model - see METHOD.md section 9.",
+            slope_deg=slope, feed_h=f, top_h=top))
     return opts
 
 
@@ -270,14 +389,16 @@ def aggregate(opt):
 # KML
 # --------------------------------------------------------------------------
 
+# KML colours are aabbggrr, not rrggbb.
 KML_STYLES = [
-    ("optA",  "ff00ff00", 5),   # bright green   - recommended
+    ("optT",  "ff0080ff", 6),   # bright orange  - TALL sloper (best scoring)
+    ("optA",  "ff00ff00", 5),   # bright green   - recommended flat-top
     ("optV",  "ffffff00", 4),   # cyan           - inverted-V
-    ("optS",  "ffff00ff", 4),   # magenta        - sloper
+    ("optS",  "ffff00ff", 4),   # magenta        - short sloper
     ("base",  "ff0000ff", 4),   # red            - baseline
     ("ref",   "ff00ffff", 3),   # yellow         - reference points
-    ("parcel", "ff00a5ff", 3),  # orange         - parcel line
-    ("ray",   "ffffffff", 2),   # white          - bearing rays
+    ("parcel", "ff909090", 3),  # grey           - parcel line
+    ("ray",   "ff606060", 2),   # dark grey      - bearing rays
 ]
 
 
@@ -291,8 +412,9 @@ def write_kml(opts, path):
          '<name>JYR8010 EFHW deployment options - CN97ap</name>',
          '<description>Every candidate deployment for the 39.6 m EFHW, plus '
          'reference points, parcel line and target bearing rays. '
-         'Green = recommended, cyan = inverted-V, magenta = sloper, '
-         'red = baseline.</description>']
+         'ORANGE = tall sloper (T class, best scoring), GREEN = recommended '
+         'flat-top, CYAN = inverted-V, MAGENTA = short sloper, RED = baseline, '
+         'YELLOW = operator reference points.</description>']
 
     for sid, colour, width in KML_STYLES:
         L.append(
@@ -340,7 +462,8 @@ def write_kml(opts, path):
     L.append('</Folder>')
 
     for o in opts:
-        st = ("optA" if o.key == "A" else "base" if o.key == "BASE"
+        st = ("optT" if o.key.startswith("T") else
+              "optA" if o.key == "A" else "base" if o.key == "BASE"
               else "optV" if o.key.startswith("V") else "optS")
         if not o.supports:
             continue
@@ -386,15 +509,18 @@ def main():
     print("=" * 100)
     print("DEPLOYMENT GEOMETRY")
     print("=" * 100)
-    print(f"{'key':5s} {'avg ht':>8s} {'20m TO':>7s} {'15m TO':>7s} {'10m TO':>7s}"
-          f" {'legs':>16s}  supports")
+    print(f"{'key':7s} {'avg ht':>8s} {'Imax ht':>8s} {'slope':>6s} {'20m TO':>7s}"
+          f" {'15m TO':>7s} {'legs':>10s}  supports")
     for o in opts:
-        t20, t15, t10 = (o.takeoff(x) for x in (21.19, 14.14, 10.52))
-        f = lambda v: f"{v:.1f}" if v else "zenith"
+        t20, t15 = o.takeoff(21.19), o.takeoff(14.14)
+        f = lambda v: f"{v:.1f}" if v else ("slant" if o.is_slant else "zenith")
         legs = "/".join(f"{b:.0f}" for b in o.legs)
         sup = ", ".join(f"{n} {h}ft" for n, h, _ in o.supports) or "-"
-        print(f"{o.key:5s} {o.avg_h/FT:7.1f}f {f(t20):>7s} {f(t15):>7s} "
-              f"{f(t10):>7s} {legs:>16s}  {sup}")
+        sl = f"{o.slope_deg:5.1f}" if o.is_slant else "    -"
+        print(f"{o.key:7s} {o.avg_h/FT:7.1f}f {o.mean_imax_height()/FT:7.1f}f "
+              f"{sl:>6s} {f(t20):>7s} {f(t15):>7s} {legs:>10s}  {sup}")
+    print("\nImax ht = mean height of the four 20 m current maxima. This is the")
+    print("quantity that actually sets low-angle performance, and it is arithmetic.")
 
     print("\n" + "=" * 100)
     print("SUPPORT POSITIONS")
@@ -456,15 +582,23 @@ def main():
         fh.write("# rewards concentrating power into a few bearings, so a spiky\n")
         fh.write("# straight wire can score near a broad one. Read it alongside\n")
         fh.write("# n_workable and n_holes, which capture spread.\n")
-        fh.write("key,avg_height_ft,takeoff_20m_deg,takeoff_15m_deg,legs_true_deg,"
+        fh.write("# takeoff 'slant' = slope > 30 deg, modelled as a slant/vertical\n")
+        fh.write("# radiator (METHOD.md s9, LOW confidence) - not a horizontal-wire lobe.\n")
+        fh.write("# 'zenith' = h < lambda/4, so no distinct lobe exists.\n")
+        fh.write("# mean_imax_height_ft = mean height of the four 20 m current maxima.\n")
+        fh.write("# That column is pure arithmetic and HIGH confidence; prefer it.\n")
+        fh.write("key,avg_height_ft,mean_imax_height_ft,slope_deg,takeoff_20m_deg,"
+                 "takeoff_15m_deg,legs_true_deg,"
                  "aggregate_dB,median_dB,worst_dB,n_workable,n_holes,delta_vs_A_dB,label\n")
         for o in opts:
             a = aggregate(o)
             t20, t15 = o.takeoff(21.19), o.takeoff(14.14)
-            s20 = f"{t20:.1f}" if t20 else "zenith"
-            s15 = f"{t15:.1f}" if t15 else "zenith"
+            miss = "slant" if o.is_slant else "zenith"
+            s20 = f"{t20:.1f}" if t20 else miss
+            s15 = f"{t15:.1f}" if t15 else miss
             legs = "/".join(f"{b:.0f}" for b in o.legs)
-            fh.write(f"{o.key},{o.avg_h/FT:.1f},{s20},{s15},{legs},"
+            fh.write(f"{o.key},{o.avg_h/FT:.1f},{o.mean_imax_height()/FT:.1f},"
+                     f"{o.slope_deg:.0f},{s20},{s15},{legs},"
                      f"{a['mean_power_dB']:.2f},{a['median_dB']:.1f},"
                      f"{a['worst_dB']:.1f},{a['n_workable']},{a['n_holes']},"
                      f"{a['mean_power_dB']-ref:+.1f},\"{o.label}\"\n")

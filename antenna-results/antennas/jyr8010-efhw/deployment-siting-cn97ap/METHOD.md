@@ -224,12 +224,68 @@ ground verified clear from imagery; the `ANY` sector only guarantees the parcel.
 S2 and S3 select bearings near due north, which crosses the driveway turnaround and enters
 dense forest — **unverified on the ground.**
 
-## 8. What would raise confidence
+## 9. Slant-wire model (T class) — the weakest link
+
+Above roughly 30° of slope a wire stops behaving as a horizontal radiator over ground and
+becomes a slant/vertical one. Sections 3 and 4 do not apply. `compare_options.py` switches
+to a separate model when `slope_deg > 0.5`:
+
+```
+fv = sin²(slope)        vertical power fraction
+fh = cos²(slope)        horizontal power fraction
+
+total = fv · V(elev) + fh · H_pattern(azimuth) · H_elev(elev, h_avg)
+```
+
+- **Vertical part** is omnidirectional in azimuth and uses `VERT_RESPONSE_dB`, a stylized
+  elevation curve for a vertical over average ground (σ 5 mS/m, ε_r 13).
+- **Horizontal part** keeps the long-wire pattern of the wire's *ground projection*
+  (`39.6 · cos θ`, with `n = 2·L_proj/λ`) and the section 4 ground-reflection response.
+
+At 66° slope, `fv = 0.83` — the antenna is overwhelmingly vertically polarised, hence
+omnidirectional, hence no nulls. That part is real physics.
+
+**Confidence: LOW — lower than anything else in this study.**
+
+`VERT_RESPONSE_dB` was traced from standard published curves, **not computed from soil
+constants.** It bakes in roughly 4 dB of average-ground loss and a pseudo-Brewster rolloff
+below ~12°. It sets the entire T-class result.
+
+Two effects the model ignores entirely, either of which could cost several dB:
+
+1. **Ground loss.** Vertical polarisation depends on soil under the radiator in a way a
+   horizontal wire does not. This is a forested hillside with no radial system. An EFHW is
+   a half-wave, so it does not *need* radials the way a quarter-wave vertical does — but if
+   real loss is 8 dB rather than the 4 dB assumed, most of the T-class advantage
+   disappears.
+2. **Tree absorption.** A near-vertical wire running 140 ft alongside a wet conifer couples
+   to a lossy dielectric along its whole length. The geometry helps — descending at 66° the
+   wire clears the trunk within a few metres — but the top attachment sits in the canopy.
+
+**Do not present T-class numbers as comparable in confidence to the horizontal options.**
+The geometry (slope angles, support distances, current-maxima heights) is exact arithmetic
+and can be trusted; the dB figures cannot.
+
+### Mean current-maximum height
+
+Reported for every option, and worth more than plain average height:
+
+```
+mean_imax_height = mean over {4.95, 14.85, 24.75, 34.65} m of height_at_wire(s)
+```
+
+Those are the 20 m current maxima on a 39.6 m EFHW. They are what actually radiates, so
+their mean height predicts low-angle performance better than averaging the whole wire —
+and it is pure arithmetic, **HIGH confidence**, independent of every model above. The
+flat-top reaches 41 ft; T-APEX reaches 83 ft.
+
+## 10. What would raise confidence
 
 In rough order of value:
 
-1. **Run NEC** (4nec2, EZNEC, xnec2c) on the actual bent geometry over real ground.
-   Replaces §3, §4 and §6 with a proper solution and would settle the null depths.
+1. **Run NEC** (4nec2, EZNEC, xnec2c) — most valuable on the **T class**, where §9 is
+   openly weak and the answer could move by several dB in either direction. Also replaces
+   §3, §4 and §6 for the horizontal options and would settle the null depths.
 2. **Sweep after installation** and compare against the predicted 1–2% resonance shift.
    This is the only real measurement available and it costs nothing.
 3. **Get canopy height data** to correct the bare-earth horizon.

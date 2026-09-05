@@ -57,6 +57,13 @@ within 0.5 dB of a broad one while covering six fewer regions and nulling Perth 
 Always read `n_workable` and `median_dB` beside it. An optimiser pointed at
 `aggregate_dB` alone will hand you a bad antenna — that already happened once here.
 
+**T-class dB figures are not comparable in confidence to the rest.** The slant model
+(METHOD.md §9) uses a stylized vertical-over-ground curve traced from published charts,
+not computed from soil constants, and ignores both ground loss on a forested hillside and
+tree absorption along a 140 ft near-vertical wire. The *geometry* — slope angles, support
+distances, current-maxima heights — is exact arithmetic and can be trusted. The dB cannot.
+Never quote a T number beside an A number without that caveat.
+
 **A support inside the parcel is not necessarily buildable.** `inside_parcel()` knows
 about property lines and nothing else — not trees, the driveway, or the septic field.
 Options S1/S2/S3 select bearings near due north that cross the driveway and enter forest.
@@ -73,8 +80,10 @@ The operator answered these explicitly. Re-proposing them wastes their time.
 | Move the feed / run new coax? | **No.** Truly fixed at the start point. |
 | Deploy from the front yard or driveway corner? | **No.** Nulls all of Asia. |
 | Build a PVC mast? | **No.** Scored in full: −3.0 to −7.5 dB, 3–12 of 25 regions. A 39.6 m wire on a 24 ft mast slopes 6.2° and averages 17–24 ft. |
-| Sloper off a mast? | **No.** See above — at these heights a 39.6 m "sloper" is a tilted flat-top. |
-| Inverted-V off one point? | **Viable.** V1 costs 1.1 dB and 2 regions vs the recommendation. Take it if two rope throws is one too many. |
+| Sloper off a *mast*? | **No.** At mast heights a 39.6 m "sloper" is a tilted flat-top. |
+| Sloper off a *150 ft tree*? | **Yes — scores highest.** See the T class. T-APEX uses the existing apex tree at 143 ft, 25/25 regions, zero holes. But read §9 first: those dB figures are LOW confidence. |
+| Inverted-V off one point? | **Viable.** V1 costs 1.1 dB and 2 regions vs the flat-top. Take it if two rope throws is one too many. |
+| Support height available? | **150 ft trees.** The 50 ft figure in option A is a conservative throw-line assumption, not a limit. |
 | Trade to option B for Florida/Caribbean? | **No.** Accepted as a hole; work them on 15/40 m. |
 | Support height available? | **50 ft+ at both**, by throw line. |
 | Inverted-V, sloper, or L? | **None.** Bent flat-top — reasons in `data/deployment-options.json`. |
