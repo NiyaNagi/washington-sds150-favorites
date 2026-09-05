@@ -133,6 +133,53 @@ gain and ~0.01 m on geometry. Divergences reconciled in-file rather than hidden.
 
 ---
 
+## Phase 6 — Topology comparison (same day, after documentation)
+
+**Operator asked:** where a PVC-mast sloper would go and how it compares; how an
+inverted-V off a single point compares; a per-region table with aggregate power; and a KML
+overlay of all options.
+
+`tools/compare_options.py` written to score ten topologies against 25 regions. Two bugs
+were caught by running it rather than trusting the first output:
+
+### ⚠️ ERROR 6 — optimiser had no geometric constraint
+
+The first bearing scan selected **178°** for every sloper. That support point is **17 m
+outside the parcel**. Fixed by adding `inside_parcel()`, which tests the south and east
+boundary edges with a 5 m margin.
+
+### ⚠️ ERROR 7 — optimising on aggregate power alone
+
+The scan maximised `aggregate_dB` (mean linear power), which rewards *concentrating*
+radiation rather than spreading it. It happily selected bearings that put −87 dB nulls on
+Perth. Fixed by ranking on `n_workable` first, `aggregate_dB` second, and by reporting
+median and hole-count alongside the aggregate everywhere.
+
+**This flaw survives in the numbers and must be read carefully:** sloper S3 scores −5.98 dB
+against the recommendation's −5.51, apparently within half a dB, while covering 14 regions
+instead of 20 with 8 holes instead of 2.
+
+### Results
+
+| Key | Config | Avg ht | Aggregate | Workable | vs A |
+|---|---|---|---|---|---|
+| A | Bent flat-top, 2 tree supports | 41.6 ft | −5.51 dB | 20/25 | — |
+| S3 | Sloper → 50 ft tree, due north | 37.0 ft | −5.98 dB | 14/25 | −0.5 |
+| V1 | Inverted-V, one tree support | 33.2 ft | −6.57 dB | 18/25 | −1.1 |
+| BASE | Original three-point plan | 22.5 ft | −9.04 dB | 12/25 | −3.5 |
+| S5 | Sloper → 24 ft PVC over the lawn | 24.0 ft | −9.69 dB | 10/25 | −4.2 |
+| V3 | Inverted-V on 24 ft PVC | 17.0 ft | −12.96 dB | 3/25 | −7.5 |
+
+Headline: **a 39.6 m wire cannot form a steep sloper at these heights** — 6.2° from a 24 ft
+mast, 11.6° from a 50 ft tree, versus the 65 ft of drop a real 30° sloper needs. Every
+"sloper" here is a tilted flat-top governed by average height, which is why PVC collapses.
+
+Also produced `data/deployment-options.kml`: 67 placemarks in 12 folders — all ten
+deployments, six operator reference points, and a 2 km great-circle ray per region.
+Validated as well-formed XML.
+
+Artifact updated with the comparison, the PVC verdict and the one-support verdict.
+
 ## Corrections summary
 
 | # | Error | Corrected in | Status |
@@ -142,6 +189,8 @@ gain and ~0.01 m on geometry. Divergences reconciled in-file rather than hidden.
 | 3 | Bend stated as ~30°, actually 60.9° | Phase 2 | ✅ operator confirmed coordinates |
 | 4 | First screenshot assumed north-up; it was rotated | Phase 2 | ✅ operator confirmed |
 | 5 | Leg 1 assumed to be 66% of the wire; it is 45% | Phase 2 | ✅ leg 2 dominates |
+| 6 | Bearing optimiser had no parcel constraint; picked a point 17 m off the lot | Phase 6 | ✅ `inside_parcel()` added |
+| 7 | Optimised on aggregate power alone, which rewards spiky patterns | Phase 6 | ✅ ranks on regions-workable first |
 
 **Anything in the conversation before each correction is stale.** The files in this
 directory reflect only post-correction values.

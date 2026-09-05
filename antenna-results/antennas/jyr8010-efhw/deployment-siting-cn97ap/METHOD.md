@@ -186,7 +186,45 @@ predicted signal strength.
 
 ---
 
-## 7. What would raise confidence
+## 7. Aggregate scoring across regions
+
+`tools/compare_options.py` reduces 25 per-region net figures to four numbers:
+
+```
+aggregate_dB = 10 · log10( mean over regions of 10^(net_dB/10) )
+median_dB    = median net_dB
+n_workable   = count of regions at or above −10 dB
+n_holes      = count of regions below −15 dB
+```
+
+**`aggregate_dB` alone is a trap.** Mean *linear* power rewards concentrating radiation
+into a few bearings rather than spreading it. Sloper S3 scores −5.98 dB against the
+recommendation's −5.51 — apparently within half a dB — while reaching 14 regions instead
+of 20, carrying 8 holes instead of 2, and putting an **−87 dB null on Perth**. Two strong
+lobes outweigh a dozen nulls in that average.
+
+This is not hypothetical: the first version of the bearing optimiser maximised
+`aggregate_dB` and selected 178° for every sloper — a bearing that is also **17 m outside
+the parcel**, because the scan had no geometric constraint either. Both faults were fixed:
+the scan now rejects out-of-parcel supports and ranks on `n_workable` first,
+`aggregate_dB` second.
+
+**Report all four together.** Aggregate answers "how much total power"; workable and
+median answer "how evenly spread".
+
+### Parcel constraint
+
+`inside_parcel()` tests the south and east boundary edges from
+`data/parcel-1117200390.json` with a 5 m margin. The west and north boundaries are 70 m
+and 100 m away and cannot bind for supports placed within 40 m east or south of the feed.
+
+**A support inside the parcel is not necessarily buildable.** The scan knows nothing about
+trees, the driveway, or the septic field. The `LAWN` sector (70–135°) restricts bearings to
+ground verified clear from imagery; the `ANY` sector only guarantees the parcel. Options S1,
+S2 and S3 select bearings near due north, which crosses the driveway turnaround and enters
+dense forest — **unverified on the ground.**
+
+## 8. What would raise confidence
 
 In rough order of value:
 

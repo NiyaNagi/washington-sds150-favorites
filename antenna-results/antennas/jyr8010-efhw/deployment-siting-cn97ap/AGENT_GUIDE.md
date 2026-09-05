@@ -14,14 +14,16 @@ deployment study.
 4. **`SESSION-LOG.md`** — five corrections were made mid-session. Know which conclusions
    are stale.
 
-Then run the generator, which needs no dependencies:
+Then run the two generators, which need no dependencies:
 
 ```bash
-python3 antenna-results/antennas/jyr8010-efhw/deployment-siting-cn97ap/tools/site_geometry.py
+D=antenna-results/antennas/jyr8010-efhw/deployment-siting-cn97ap
+python3 $D/tools/site_geometry.py     # geometry, bearings, terrain horizon
+python3 $D/tools/compare_options.py   # scores 10 topologies; writes CSVs + KML
 ```
 
-It recomputes every geometric result from raw inputs and is **authoritative** where it
-disagrees with a stored CSV.
+They recompute every result from raw inputs and are **authoritative** where they disagree
+with a stored CSV.
 
 ---
 
@@ -49,6 +51,17 @@ figures in the data files are arithmetic, not accuracy.
 **Confirm north-up before georeferencing any screenshot.** The first capture in this
 session was rotated ~90° and briefly produced a contradiction.
 
+**Never rank deployments on aggregate power alone.** It is mean *linear* power, so it
+rewards concentrating radiation into a few bearings. A spiky straight wire can score
+within 0.5 dB of a broad one while covering six fewer regions and nulling Perth by 87 dB.
+Always read `n_workable` and `median_dB` beside it. An optimiser pointed at
+`aggregate_dB` alone will hand you a bad antenna — that already happened once here.
+
+**A support inside the parcel is not necessarily buildable.** `inside_parcel()` knows
+about property lines and nothing else — not trees, the driveway, or the septic field.
+Options S1/S2/S3 select bearings near due north that cross the driveway and enter forest.
+Use the `LAWN` sector for anything you intend to actually build.
+
 ---
 
 ## Questions with settled answers — do not re-litigate
@@ -59,7 +72,9 @@ The operator answered these explicitly. Re-proposing them wastes their time.
 |---|---|
 | Move the feed / run new coax? | **No.** Truly fixed at the start point. |
 | Deploy from the front yard or driveway corner? | **No.** Nulls all of Asia. |
-| Build a PVC mast? | **No.** 24 ft under a 50 ft apex buys 0.2 dB. |
+| Build a PVC mast? | **No.** Scored in full: −3.0 to −7.5 dB, 3–12 of 25 regions. A 39.6 m wire on a 24 ft mast slopes 6.2° and averages 17–24 ft. |
+| Sloper off a mast? | **No.** See above — at these heights a 39.6 m "sloper" is a tilted flat-top. |
+| Inverted-V off one point? | **Viable.** V1 costs 1.1 dB and 2 regions vs the recommendation. Take it if two rope throws is one too many. |
 | Trade to option B for Florida/Caribbean? | **No.** Accepted as a hole; work them on 15/40 m. |
 | Support height available? | **50 ft+ at both**, by throw line. |
 | Inverted-V, sloper, or L? | **None.** Bent flat-top — reasons in `data/deployment-options.json`. |
