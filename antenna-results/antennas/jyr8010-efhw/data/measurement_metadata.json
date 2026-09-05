@@ -3,8 +3,9 @@
   "antenna": {
     "model": "JYR8010-150W",
     "type": "end-fed half-wave",
-    "radiating_element_length_m": 40,
-    "nominal_transformer_ratio": "1:49 / 1:64",
+    "radiating_element_length_m": 39.6,
+    "radiating_element_length_note": "39.6 m / 130 ft of 2.5 mm^2 stranded copper per vendor documentation. This is an 80m-band EFHW; the wire length is 40 meters, not the band. Earlier revisions recorded 40 and were misread as a 40m-band antenna.",
+    "nominal_transformer_ratio": "1:64",
     "advertised_supported_bands": [
       "80m",
       "40m",

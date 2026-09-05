@@ -1,0 +1,19 @@
+sample_id,purpose,bearing_from_feed_deg,range_m,longitude_deg,latitude_deg,elevation_m,elevation_ft,delta_vs_feed_m,horizon_angle_deg_vs_phase_centre,notes
+site_feed,site,,0,-121.9965917,47.6340583,97.240394592,319.0,0.000,,Ground elevation at the feed point
+site_apex,site,82.24,16,-121.9963806,47.6340778,96.815917969,317.6,-0.424,,Ground elevation at the apex tree
+site_se50,site,~110,50,-121.9961870,47.6337360,97.419097900,319.6,0.179,,"Ground SE of the feed; rasterId 66350, resolution 1 m"
+eu_200,radial,30,200,-121.9952606,47.6356161,112.446716309,368.9,15.206,1.53,Europe azimuth
+eu_500,radial,30,500,-121.9932638,47.6379528,156.635284424,513.9,59.395,5.66,Europe azimuth - HORIZON MAXIMUM
+eu_1000,radial,30,1000,-121.9899360,47.6418473,179.120346069,587.7,81.880,4.12,Europe azimuth
+eu_2000,radial,30,2000,-121.9832802,47.6496370,188.500778198,618.4,91.260,2.33,Europe azimuth - ridge crests
+za_500,radial,60,500,-121.9902362,47.6363069,136.904006958,449.2,39.664,3.41,South Africa azimuth - blocked
+us_e_500,radial,100,500,-121.9900373,47.6332776,77.674270630,254.8,-19.566,-3.37,US East azimuth - clear
+sa_500,radial,130,500,-121.9909018,47.6311675,108.406387329,355.7,11.166,0.15,South America azimuth - level
+us_se_500,radial,155,500,-121.9937789,47.6299822,91.890235901,301.5,-5.350,-1.74,US Southeast azimuth - clear
+nz_500,radial,210,500,-121.9999196,47.6301638,36.462936401,119.6,-60.777,-8.08,New Zealand azimuth - steep drop
+vk_200,radial,250,200,-121.9990929,47.6334431,79.521751404,260.9,-17.719,-7.90,Australia azimuth - steep drop
+vk_500,radial,250,500,-122.0028452,47.6325202,38.040618896,124.8,-59.200,-7.88,Australia azimuth - ravine floor
+vk_1000,radial,250,1000,-122.0091004,47.6309821,111.260238647,365.0,14.020,0.24,Australia azimuth - far side of ravine; sets the true horizon
+asia_500,radial,310,500,-122.0010982,47.6369491,64.763870239,212.5,-32.477,-4.85,East Asia azimuth - drops away
+nw_500,radial,326,500,-122.0003135,47.6377864,101.440841675,332.8,4.200,-0.65,Northwest azimuth - level
+ru9_500,radial,345,500,-121.9983225,47.6384025,115.908088684,380.3,18.668,1.01,Novosibirsk / India azimuth - slight rise

@@ -1,0 +1,28 @@
+target,dxcc_prefix,ref_latitude_deg,ref_longitude_deg,bearing_true_deg,bearing_mag_deg,path_km,typical_arrival_elev_deg,terrain_horizon_deg,terrain_verdict
+Moscow,UA,55.75,37.62,11.7,356.4,8400,10,5.7,blocked
+Kyiv,UR,50.45,30.52,17.4,2.1,8700,10,3.5,blocked
+Central Europe (Frankfurt),DL,50.11,8.68,30.5,15.2,8300,10,5.7,blocked
+United Kingdom (London),G,51.50,-0.13,34.5,19.2,7700,11,5.3,blocked
+Iberia (Madrid),EA,40.40,-3.70,43.6,28.3,8300,10,4.5,blocked
+South Africa (Johannesburg),ZS,-26.20,28.05,58.2,42.9,16500,5,3.4,blocked
+US Northeast (New York),W1/W2,40.71,-74.01,83.4,68.1,3900,15,-3.4,clear
+US Midwest (Chicago),W9,41.88,-87.63,90.6,75.3,2700,21,-3.4,clear
+Caribbean (Puerto Rico),KP4,18.22,-66.59,103.5,88.2,5700,11,-3.4,clear
+US Southeast (Miami),W4,25.76,-80.19,108.7,93.4,4300,15,-3.4,clear
+Denver,W0,39.74,-104.99,116.6,101.3,1600,25,-3.4,clear
+Dallas,W5,32.78,-96.80,118.9,103.6,2500,25,-3.4,clear
+South America (Buenos Aires),LU,-34.60,-58.38,131.5,116.2,11000,7,0.15,level
+SoCal (Los Angeles),W6,34.05,-118.24,166.9,151.6,1500,30,-1.7,clear
+New Zealand (Auckland),ZL,-36.85,174.76,226.8,211.5,11700,7,-8.0,open drop
+Hawaii (Honolulu),KH6,21.31,-157.86,240.2,224.9,4300,15,-7.9,open drop
+Australia east (Sydney),VK2,-33.87,151.21,243.7,228.4,12700,6,-7.9,open drop
+Australia east (Brisbane),VK4,-27.47,153.03,247.4,232.1,12300,6,-7.9,open drop
+Australia west (Perth),VK6,-31.95,115.86,268.2,252.9,14700,5,-7.0,open drop
+Japan (Tokyo),JA,35.68,139.77,300.8,285.5,7700,10,-4.8,open drop
+Hong Kong,VR2,22.32,114.17,309.6,294.3,11000,7,-4.8,open drop
+Shanghai,BY,31.23,121.47,309.5,294.2,9000,8,-4.8,open drop
+Vladivostok,UA0,43.12,131.89,311.0,295.7,7200,10,-4.8,open drop
+Beijing,BY,39.90,116.41,318.1,302.8,8900,9,-3.0,open drop
+Alaska (Anchorage),KL7,61.22,-149.90,320.8,305.5,2300,25,-2.0,open drop
+India (Delhi),VU,28.61,77.21,342.8,327.5,11600,6,1.0,level
+Novosibirsk,UA9,55.03,82.92,345.6,330.3,8300,10,1.0,level

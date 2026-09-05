@@ -1,0 +1,181 @@
+{
+  "_comment": "Every point the operator supplied during the 2026-09-05 siting session, plus the local ENU frame derived from them. Origin of the local frame is the feed point. All bearings are geodetic (True) unless the field name says magnetic.",
+  "session_date": "2026-09-05",
+  "operator_callsign_grid": "CN97ap",
+  "datum": "WGS84",
+
+  "local_frame": {
+    "origin": "feed",
+    "axes": "E = metres east, N = metres north",
+    "reference_latitude_deg": 47.6340583,
+    "metres_per_degree_latitude": 111183.2,
+    "metres_per_degree_longitude": 75151.5,
+    "metres_per_arcsecond_latitude": 30.8842,
+    "metres_per_arcsecond_longitude": 20.8754,
+    "note": "Scale factors evaluated at 47.634 deg N using the standard series expansions. Over the <60 m extent of this site the flat-earth ENU approximation is accurate to well under 0.01 m.",
+    "PRECISION_WARNING": "Operator coordinates were given to 0.01 arcsecond, which is about 0.3 m on the ground. Every ENU value in this study is therefore uncertain by roughly +/-0.3 m regardless of how many decimals are printed. The local_e_m / local_n_m fields below were computed by hand during the session and differ from tools/site_geometry.py by up to 0.01 m; that difference is 30x smaller than the input precision and is not meaningful. tools/site_geometry.py is authoritative."
+  },
+
+  "magnetic_declination": {
+    "value_deg_east": 15.3,
+    "epoch": "2026",
+    "usage": "magnetic = true - 15.3",
+    "source": "NOAA WMM regional value for the Seattle/Snoqualmie area; not queried live during the session."
+  },
+
+  "points": [
+    {
+      "id": "feed",
+      "aliases": ["start", "red pin"],
+      "role": "Antenna feed point / 1:64 transformer location. FIXED horizontally - operator confirmed the coax entry cannot move. Height is adjustable.",
+      "latitude_dms": "47°38'02.61\"N",
+      "longitude_dms": "121°59'47.73\"W",
+      "latitude_deg": 47.6340583,
+      "longitude_deg": -121.9965917,
+      "local_e_m": 0.0,
+      "local_n_m": 0.0,
+      "distance_from_feed_m": 0.0,
+      "bearing_from_feed_true_deg": null,
+      "height_agl_ft_original": 10,
+      "height_agl_ft_planned": 24,
+      "ground_elevation_m": 97.240394592,
+      "physical_location": "Northeast corner of the house, confirmed by georeferencing the north-up screenshot."
+    },
+    {
+      "id": "apex",
+      "aliases": ["apex tree"],
+      "role": "Primary high support. Existing tree.",
+      "latitude_dms": "47°38'02.68\"N",
+      "longitude_dms": "121°59'46.97\"W",
+      "latitude_deg": 47.6340778,
+      "longitude_deg": -121.9963806,
+      "local_e_m": 15.859,
+      "local_n_m": 2.161,
+      "distance_from_feed_m": 16.006,
+      "bearing_from_feed_true_deg": 82.24,
+      "bearing_from_feed_magnetic_deg": 66.9,
+      "height_agl_ft_original": 35,
+      "height_agl_ft_planned": 50,
+      "ground_elevation_m": 96.815917969,
+      "note": "Operator confirmed 35 ft was only 'as high as I could reach'; a throw line reaches 50 ft or more. The 50 ft figure drives the final design."
+    },
+    {
+      "id": "end_original",
+      "aliases": ["end"],
+      "role": "Operator's original far-end mark. SUPERSEDED - the 39.6 m wire does not fit in the path it implies.",
+      "latitude_dms": "47°38'02.41\"N",
+      "longitude_dms": "121°59'46.67\"W",
+      "latitude_deg": 47.6340028,
+      "longitude_deg": -121.9962972,
+      "local_e_m": 22.119,
+      "local_n_m": -6.178,
+      "distance_from_feed_m": 22.966,
+      "bearing_from_feed_true_deg": 105.6,
+      "bearing_from_apex_true_deg": 143.1,
+      "distance_from_apex_m": 10.427,
+      "height_agl_ft": null,
+      "note": "Operator described the bend as ~30 deg clockwise off the feed-apex line; the coordinates give 60.9 deg. Operator later confirmed the coordinates are authoritative."
+    },
+    {
+      "id": "front_yard_corner",
+      "role": "Candidate alternate deployment anchor offered by the operator. Evaluated and rejected - see deployment-options.json option C.",
+      "latitude_dms": "47°38'02.80\"N",
+      "longitude_dms": "121°59'47.92\"W",
+      "latitude_deg": 47.6341111,
+      "longitude_deg": -121.9966444,
+      "local_e_m": -3.962,
+      "local_n_m": 5.868,
+      "distance_from_feed_m": 7.08,
+      "bearing_from_feed_true_deg": 326.0,
+      "bearing_from_feed_magnetic_deg": 310.7,
+      "physical_location": "Driveway turnaround, north of the house."
+    },
+    {
+      "id": "backyard_corner",
+      "role": "Reference point. Confirmed by imagery to be the southeast corner of the house.",
+      "latitude_dms": "47°38'02.25\"N",
+      "longitude_dms": "121°59'47.48\"W",
+      "latitude_deg": 47.6339583,
+      "longitude_deg": -121.9965222,
+      "local_e_m": 5.217,
+      "local_n_m": -11.118,
+      "distance_from_feed_m": 12.281,
+      "bearing_from_feed_true_deg": 154.9,
+      "bearing_from_feed_magnetic_deg": 139.6
+    },
+    {
+      "id": "front_yard_driveway_corner",
+      "role": "Candidate alternate deployment anchor. Evaluated and rejected.",
+      "latitude_dms": "47°38'02.46\"N",
+      "longitude_dms": "121°59'48.61\"W",
+      "latitude_deg": 47.6340167,
+      "longitude_deg": -121.9968361,
+      "local_e_m": -18.364,
+      "local_n_m": -4.633,
+      "distance_from_feed_m": 18.939,
+      "bearing_from_feed_true_deg": 255.85,
+      "bearing_from_feed_magnetic_deg": 240.6,
+      "note": "Sits almost exactly down the terrain drop-off azimuth (250 deg). Interesting terrain-wise, but no usable corridor and it strands the Asia lobe. See METHOD.md."
+    }
+  ],
+
+  "designed_points": [
+    {
+      "id": "far_support",
+      "role": "NEW. Support 3 of the final design. Placed at 29.7 m of wire from the feed - the 40 m and 15 m current maximum.",
+      "latitude_dms": "47°38'02.43\"N",
+      "longitude_dms": "121°59'46.54\"W",
+      "latitude_deg": 47.6340083,
+      "longitude_deg": -121.9962611,
+      "local_e_m": 24.929,
+      "local_n_m": -5.450,
+      "distance_from_feed_m": 25.518,
+      "bearing_from_feed_true_deg": 102.3,
+      "bearing_from_feed_magnetic_deg": 87.0,
+      "distance_from_apex_m": 11.84,
+      "bearing_from_apex_true_deg": 130.0,
+      "bearing_from_apex_magnetic_deg": 114.7,
+      "height_agl_ft": 50,
+      "physical_location": "Southeast treeline at the edge of the lawn. NEEDS GROUND VERIFICATION - imagery places it right at the lawn/treeline boundary."
+    },
+    {
+      "id": "end_tieoff",
+      "role": "NEW. Support 4 of the final design. High-voltage node.",
+      "latitude_dms": "47°38'02.27\"N",
+      "longitude_dms": "121°59'46.25\"W",
+      "latitude_deg": 47.6339639,
+      "longitude_deg": -121.9961806,
+      "local_e_m": 30.904,
+      "local_n_m": -10.464,
+      "distance_from_feed_m": 32.628,
+      "bearing_from_feed_true_deg": 108.7,
+      "bearing_from_feed_magnetic_deg": 93.4,
+      "distance_from_far_support_m": 7.80,
+      "bearing_from_far_support_true_deg": 130.0,
+      "height_agl_ft": 30
+    }
+  ],
+
+  "hazards_and_unknowns": [
+    {
+      "id": "cylindrical_object",
+      "description": "Light-coloured cylinder visible in imagery just southeast of the house - possibly a propane tank. A large metal object will couple to the antenna and detune it.",
+      "estimated_local_e_m": 5.6,
+      "estimated_local_n_m": -7.1,
+      "estimated_distance_from_feed_m": 9.0,
+      "estimated_bearing_from_feed_true_deg": 142,
+      "lateral_distance_from_leg1_m": 7.79,
+      "status": "UNVERIFIED - identified from imagery only. Operator should confirm what it is and its exact position."
+    },
+    {
+      "id": "far_support_limb",
+      "description": "Whether the southeast treeline actually has a usable limb at 50 ft near the far_support coordinates.",
+      "status": "UNVERIFIED"
+    },
+    {
+      "id": "house_footprint",
+      "description": "House outline was traced from imagery, not from a building-footprint dataset. King County parcel data was retrieved but building footprints were not.",
+      "status": "APPROXIMATE"
+    }
+  ]
+}

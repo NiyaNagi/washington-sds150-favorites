@@ -1,0 +1,113 @@
+{
+  "_comment": "Every deployment option evaluated during the 2026-09-05 session, including the rejected ones and why. Recorded so a future agent does not re-derive or re-propose them.",
+
+  "baseline_for_gain_figures": {
+    "description": "Feed at 10 ft, single sloper or inverted-V to the 35 ft tree, far end at 10 ft",
+    "avg_height_ft": 22.5,
+    "20m_takeoff_deg": 50.5,
+    "gain_dB": 0.0
+  },
+
+  "configuration_topologies_considered": [
+    {
+      "topology": "inverted-V, apex at the tree",
+      "verdict": "REJECTED",
+      "reason": "Drops both ends to about 10 ft, putting BOTH 40 m current maxima (9.9 m and 29.7 m of wire) on the drooping sections. Average height 22.5 ft - throws away the tree entirely."
+    },
+    {
+      "topology": "straight sloper",
+      "verdict": "REJECTED",
+      "reason": "Same 22.5 ft average height, and a single straight axis re-creates the unsolvable 20 m null problem: Central Europe (30 deg) and Sydney (245 deg) are 145 deg apart, but a 2-lambda wire only offers lobe separations of 66, 114 or 180 deg. No straight wire covers both."
+    },
+    {
+      "topology": "inverted-L with a vertical section",
+      "verdict": "REJECTED",
+      "reason": "The L is correct for a BASE-FED VERTICAL, not an end-fed half-wave. On an EFHW the feed is the high-voltage, low-current node, so a vertical section there radiates poorly. The current maxima are at 9.9 and 29.7 m of wire, not at the feed."
+    },
+    {
+      "topology": "bent flat-top",
+      "verdict": "SELECTED",
+      "reason": "Highest average height for the supports available; keeps the antenna's electrical centre (19.8 m of wire, which lands essentially at the apex tree) on the tallest support; and the ~48 deg bend produces two overlapping lobe sets that fill each other's 20 m nulls. The bend is the only thing that lets Europe and Australia both work."
+    },
+    {
+      "topology": "three-leg / two-bend",
+      "verdict": "NOT PURSUED",
+      "reason": "Would add a third lobe set and fill the Florida/Caribbean hole, at a cost of 1-2 dB of peak gain everywhere plus another support. Operator chose to accept the hole instead. Still available if priorities change."
+    }
+  ],
+
+  "azimuth_options": [
+    {
+      "id": "A",
+      "label": "Feed at start, legs 82 deg + 130 deg",
+      "status": "SELECTED",
+      "feed_point": "start (fixed)",
+      "leg1_bearing_true": 82.24,
+      "leg2_bearing_true": 130.0,
+      "bend_deg_clockwise": 47.8,
+      "20m_lobes_leg1_true_deg": [25, 139, 205, 319],
+      "20m_lobes_leg2_true_deg": [73, 187, 253, 7],
+      "directions_worse_than_minus_13dB": 3,
+      "key_strengths": [
+        "Leg 1's 319 deg lobe covers the entire East Asia cluster: Beijing 318, Alaska 321, Vladivostok 311, Shanghai/HK 310 - and the terrain drops -4.8 deg that way.",
+        "Leg 2's 253 deg lobe lands on Australia 244-268 - and the terrain drops -7.9 deg that way.",
+        "Both legs together hold Central Europe at -0.4 dB despite the NE terrain block."
+      ],
+      "known_weaknesses": ["Florida 109 deg at -13 dB and Caribbean 104 deg at -13.7 dB on 20 m"]
+    },
+    {
+      "id": "B",
+      "label": "Feed at start, legs 82 deg + 155 deg",
+      "status": "REJECTED",
+      "leg2_bearing_true": 155.0,
+      "directions_worse_than_minus_13dB": 5,
+      "trade": "Buys Florida (-1.9) and Caribbean (-0.6), but costs eastern Australia (-26 dB) and Hawaii (-18 dB) and SoCal (-24 dB). Bad trade given the operator's stated goals."
+    },
+    {
+      "id": "C",
+      "label": "Feed at front yard or driveway corner, straight run ~320 deg down the driveway",
+      "status": "REJECTED",
+      "axis_true_deg": 320,
+      "corridor_length_m_estimated": 60,
+      "directions_worse_than_minus_13dB": 13,
+      "fatal_flaw": "Puts the entire Japan / China / Vladivostok / Beijing / Alaska cluster (300-321 deg) in the AXIAL NULL - between -22 and -60 dB. Also kills New Zealand, South America, Iberia and SoCal. It would trade all of Asia for a couple of dB on Kyiv.",
+      "secondary_issues": ["Requires a new coax run (operator confirmed the feed is truly fixed)", "Would cross the vehicle access driveway, needing 16+ ft clearance"]
+    },
+    {
+      "id": "front_yard_corner_as_support",
+      "label": "Front yard corner used as a support rather than a feed",
+      "status": "REJECTED",
+      "reason": "Sits 7.08 m from the feed at 326 deg - on the OPPOSITE side from the apex tree. Using it would force the wire to run northwest then hairpin back east, wasting wire on sharp bends near the feed that radiate poorly. Keep it in reserve as a guy anchor or counterpoise run."
+    }
+  ],
+
+  "support_height_ladder": {
+    "_comment": "Both tree supports at the stated height; feed fixed at 24 ft. This is the sensitivity analysis that killed the PVC mast idea.",
+    "rows": [
+      {"support_ft": 40, "avg_height_ft": 35.4, "takeoff_20m_deg": 29.4, "takeoff_15m_deg": 19.4, "gain_at_10deg_dB": 3.7},
+      {"support_ft": 45, "avg_height_ft": 38.6, "takeoff_20m_deg": 26.8, "takeoff_15m_deg": 17.6, "gain_at_10deg_dB": 4.3},
+      {"support_ft": 50, "avg_height_ft": 41.6, "takeoff_20m_deg": 24.7, "takeoff_15m_deg": 16.2, "gain_at_10deg_dB": 4.9, "selected": true},
+      {"support_ft": 55, "avg_height_ft": 44.6, "takeoff_20m_deg": 22.9, "takeoff_15m_deg": 15.0, "gain_at_10deg_dB": 5.4},
+      {"support_ft": 60, "avg_height_ft": 47.4, "takeoff_20m_deg": 21.5, "takeoff_15m_deg": 14.1, "gain_at_10deg_dB": 5.8}
+    ],
+    "rule_of_thumb": "Roughly +0.9 dB and -3 deg of take-off per additional 10 ft of support height."
+  },
+
+  "support_material_ladder": {
+    "_comment": "Evaluated against a 35 ft apex before the operator confirmed 50 ft was reachable. The key finding still stands.",
+    "rows": [
+      {"option": "no mast, raise feed to 24 ft only",        "avg_height_ft": 25.4, "gain_dB": 1.0, "verdict": "do this regardless - cheapest dB available"},
+      {"option": "add 24 ft guyed PVC mast",                 "avg_height_ft": 25.8, "gain_dB": 1.2, "verdict": "SKIP - the mast itself buys only 0.2 dB"},
+      {"option": "add 33 ft fibreglass push-up",             "avg_height_ft": 29.1, "gain_dB": 2.1, "verdict": "acceptable"},
+      {"option": "add 40 ft fibreglass push-up",             "avg_height_ft": 32.3, "gain_dB": 2.9, "verdict": "good"},
+      {"option": "rope into trees at 45-50 ft",              "avg_height_ft": 39.0, "gain_dB": 4.4, "verdict": "BEST - cheapest and highest"}
+    ],
+    "headline": "A support only starts paying when it is comparable to or taller than the apex. A 24 ft mast underneath a 35-50 ft apex holds the wire roughly where the catenary would put it anyway. Realistic guyed Schedule-40 PVC tops out near 20-24 ft, so PVC is the wrong material for this site."
+  },
+
+  "the_unsolvable_constraint": {
+    "statement": "A single 39.6 m wire cannot cover both Central Europe and eastern Australia on 20 m.",
+    "proof": "At 1.869 lambda the 20 m lobes sit at wire-axis +/-57 deg and +/-123 deg. The only lobe-to-lobe angular separations available are therefore 66, 114 and 180 deg. Europe (30 deg) and Sydney (245 deg) are 145 deg apart - none of those. The same arithmetic rules out covering Florida (109) and Sydney (245) together, which are 136 deg apart.",
+    "mitigation": "A BEND gives two overlapping lobe sets, which is why option A works at all. But it cannot fix every pair - Florida/Caribbean remain the accepted hole."
+  }
+}

@@ -2,13 +2,26 @@
 
 This folder contains a calibrated NanoVNA-H characterization of the antenna's
 advertised US amateur bands: **80m, 40m, 30m, 20m, 17m, 15m, 12m, and 10m**.
-The antenna is a 40-meter end-fed half-wave design sold as the
-JYR8010-150W with a nominal 1:49/1:64 impedance transformer
+The antenna is the JYR8010-150W: a **40-meter-long wire (39.6 m / 130 ft)**
+fed through a 1:64 impedance transformer
 ([Amazon ASIN B0DBDCNVZD](https://www.amazon.com/dp/B0DBDCNVZD)).
+
+> **Read the length carefully.** "40 meter" here is the *wire length*, not the
+> band. This is an **80m-band** end-fed half-wave; 40m, 20m, 15m and 10m are
+> harmonics of the 80m fundamental. Vendor documentation gives 39.6 m of
+> 2.5 mm^2 stranded copper and a 1:64 transformer. Confirmed by the measurement
+> below: the best match is 80m at 3.6056 MHz with Z = 49.8 + 4.3j, a resistive
+> fundamental, and a half-wave there times a 0.96 velocity factor is 39.9 m.
 
 The separate [`manual-testing/`](../../manual-testing/) dataset contains the August
 15, 2026 broadband handheld-antenna sweeps, comparison report, charts, and
 Touchstone source files.
+
+## Deployment siting
+
+A site-specific deployment design for this antenna at grid CN97ap - support
+coordinates, terrain horizon from LiDAR, and predicted DX coverage by bearing -
+is in [`deployment-siting-cn97ap/`](deployment-siting-cn97ap/README.md).
 
 ## Quick findings
 

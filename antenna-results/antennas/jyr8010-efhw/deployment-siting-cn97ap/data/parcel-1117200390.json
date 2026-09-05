@@ -1,0 +1,98 @@
+{
+  "_comment": "King County parcel polygon retrieved 2026-09-05. Used to verify that the whole antenna run and both new supports sit inside the property with margin. Ring coordinates are exactly as returned.",
+
+  "source": {
+    "service": "King County GIS - Property/KingCo_Parcels MapServer, layer 0",
+    "endpoint": "https://gismaps.kingcounty.gov/arcgis/rest/services/Property/KingCo_Parcels/MapServer/0/query",
+    "query": "geometry=-121.9965917,47.6340583&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&returnGeometry=true&outSR=4326&f=json",
+    "auth_required": false,
+    "api_key_required": false,
+    "note": "The server may not send CORS headers, so browser-side fetch can fail; server-side or tool-side fetch works.",
+    "caveat": "This is the PARCEL layer. Building footprints were NOT retrieved - the house outline used in the plan drawing was traced from imagery and is approximate."
+  },
+
+  "attributes": {
+    "PIN": "1117200390",
+    "MAJOR": "111720",
+    "MINOR": "0390",
+    "OBJECTID": 561768,
+    "Shape.STArea_sqft": 103387.97670378075,
+    "Shape.STLength_ft": 1608.5592172727258,
+    "area_acres": 2.373
+  },
+
+  "geometry": {
+    "type": "Polygon",
+    "spatialReference": {"wkid": 4326},
+    "rings": [[
+      [-121.99587928348613, 47.634950531891356],
+      [-121.99659588113518, 47.634610853944629],
+      [-121.99596696265067, 47.633770032130869],
+      [-121.99752149526508, 47.633997491096117],
+      [-121.99752087216346, 47.634420938571907],
+      [-121.99752077355123, 47.634465466782693],
+      [-121.99682198664637, 47.634937285448522],
+      [-121.99599178847151, 47.635011156146867],
+      [-121.99599116047818, 47.635010449225646],
+      [-121.99598683786766, 47.635005804971932],
+      [-121.99598227484377, 47.634001300802720],
+      [-121.99597743084684, 47.634996908346984],
+      [-121.99597234643652, 47.634992655975672],
+      [-121.99596702159280, 47.634988542789458],
+      [-121.99596141639934, 47.634984569195979],
+      [-121.99595561131206, 47.634980762259190],
+      [-121.99594956581144, 47.634977095406775],
+      [-121.99594332235064, 47.634973622177434],
+      [-121.99593688032655, 47.634970315591161],
+      [-121.99593023840848, 47.634967175661487],
+      [-121.99592343923435, 47.634964204651610],
+      [-121.99591643992115, 47.634961448875849],
+      [-121.99590927938017, 47.634958862959941],
+      [-121.99590201062828, 47.634956496736613],
+      [-121.99589457923760, 47.634954296789239],
+      [-121.99588703040250, 47.634952320226922],
+      [-121.99587936533280, 47.634950561639947],
+      [-121.99587928348613, 47.634950531891356]
+    ]],
+    "ring_note": "28 vertices. The long tail of closely-spaced points is a rounded corner. One value (-121.99598227484377, 47.634001300802720) was transcribed from a summarised tool response and looks anomalous against its neighbours - re-query the service if exact boundary geometry matters."
+  },
+
+  "principal_corners_local_enu_m": {
+    "_comment": "Converted to the site-points.json local frame (origin = feed). Approximate, sufficient for clearance checking.",
+    "NE":  {"e": 53.5,  "n": 99.2},
+    "N":   {"e": 45.1,  "n": 105.9},
+    "NW":  {"e": -17.3, "n": 97.7},
+    "W":   {"e": -69.8, "n": 45.3},
+    "W2":  {"e": -69.8, "n": 40.3},
+    "SW":  {"e": -69.9, "n": -6.8},
+    "SE":  {"e": 46.9,  "n": -32.0},
+    "mid": {"e": -0.3,  "n": 61.4}
+  },
+
+  "extent_from_feed_m": {
+    "east": 47,
+    "west": 70,
+    "south": 29,
+    "north": 100
+  },
+
+  "clearance_verification": {
+    "_comment": "Final design's furthest point checked against the two nearest boundary edges.",
+    "checked_point": "end_tieoff at local E +30.904, N -10.464",
+    "south_boundary": {
+      "edge": "from SE (46.9, -32.0) to SW (-69.9, -6.8)",
+      "boundary_n_at_that_easting_m": -28.5,
+      "clearance_m": 18.0,
+      "clearance_ft": 59,
+      "verdict": "PASS"
+    },
+    "east_boundary": {
+      "edge": "from SE (46.9, -32.0) toward NE (53.5, 99.2)",
+      "boundary_e_at_that_northing_m": 48.0,
+      "clearance_m": 17.1,
+      "clearance_ft": 56,
+      "verdict": "PASS"
+    },
+    "headroom": "Leg 2 could be extended roughly 15 m further southeast before the boundary becomes a constraint."
+  }
+}

@@ -1,0 +1,9 @@
+id,source,role,latitude_dms,longitude_dms,latitude_deg,longitude_deg,local_e_m,local_n_m,dist_from_feed_m,bearing_true_deg,bearing_mag_deg,height_ft_original,height_ft_planned,ground_elev_m
+feed,operator,feed point / transformer (fixed horizontally),47°38'02.61"N,121°59'47.73"W,47.6340583,-121.9965917,0.000,0.000,0.000,,,10,24,97.240394592
+apex,operator,primary high support (tree),47°38'02.68"N,121°59'46.97"W,47.6340778,-121.9963806,15.859,2.161,16.006,82.24,66.9,35,50,96.815917969
+end_original,operator,original far-end mark (superseded),47°38'02.41"N,121°59'46.67"W,47.6340028,-121.9962972,22.119,-6.178,22.966,105.60,90.3,,,
+front_yard_corner,operator,candidate anchor (rejected),47°38'02.80"N,121°59'47.92"W,47.6341111,-121.9966444,-3.962,5.868,7.080,326.00,310.7,,,
+backyard_corner,operator,reference / SE corner of house,47°38'02.25"N,121°59'47.48"W,47.6339583,-121.9965222,5.217,-11.118,12.281,154.90,139.6,,,
+front_yard_driveway_corner,operator,candidate anchor (rejected),47°38'02.46"N,121°59'48.61"W,47.6340167,-121.9968361,-18.364,-4.633,18.939,255.85,240.6,,,
+far_support,designed,support 3 - at the 40m/15m current maximum,47°38'02.43"N,121°59'46.54"W,47.6340083,-121.9962611,24.929,-5.450,25.518,102.30,87.0,,50,
+end_tieoff,designed,support 4 - high-voltage node,47°38'02.27"N,121°59'46.25"W,47.6339639,-121.9961806,30.904,-10.464,32.628,108.70,93.4,,30,

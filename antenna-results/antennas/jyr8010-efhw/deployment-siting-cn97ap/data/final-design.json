@@ -1,0 +1,86 @@
+{
+  "_comment": "The build-ready specification produced by the 2026-09-05 session. NOT YET BUILT as of that date - no post-installation sweep exists.",
+
+  "design_id": "cn97ap-bent-flattop-rev1",
+  "date": "2026-09-05",
+  "status": "DESIGNED - not yet installed, not yet verified",
+  "topology": "bent flat-top, end-fed, 4 supports",
+  "antenna": "JYR8010-150W, 39.6 m / 130 ft",
+
+  "supports": [
+    {
+      "index": 1, "id": "feed", "name": "Feed + transformer + choke",
+      "height_ft": 24, "height_m": 7.32,
+      "latitude_dms": "47°38'02.61\"N", "longitude_dms": "121°59'47.73\"W",
+      "from_feed": {"distance_ft": 0, "distance_m": 0, "bearing_true": null, "bearing_mag": null},
+      "note": "Horizontally fixed. Raised from the original 10 ft; that alone is worth about +1.0 dB."
+    },
+    {
+      "index": 2, "id": "apex", "name": "Apex tree - throw line + counterweight",
+      "height_ft": 50, "height_m": 15.24,
+      "latitude_dms": "47°38'02.68\"N", "longitude_dms": "121°59'46.97\"W",
+      "from_feed": {"distance_ft": 52.5, "distance_ft_in": "52 ft 6 in", "distance_m": 16.01, "bearing_true": 82, "bearing_mag": 67},
+      "note": "Sits at 17.86 m of wire - beside the 19.8 m voltage maximum on 40 m and 20 m. Needs the best insulator on the antenna."
+    },
+    {
+      "index": 3, "id": "far_support", "name": "Far support - SE treeline",
+      "height_ft": 50, "height_m": 15.24,
+      "latitude_dms": "47°38'02.43\"N", "longitude_dms": "121°59'46.54\"W",
+      "from_feed": {"distance_ft_in": "83 ft 9 in", "distance_m": 25.52, "bearing_true": 102, "bearing_mag": 87},
+      "from_apex": {"distance_ft_in": "38 ft 10 in", "distance_m": 11.84, "bearing_true": 130, "bearing_mag": 115},
+      "note": "Deliberately at 29.7 m of wire - the 40 m AND 15 m current maximum. Placement verified to cost nothing in average height versus a free optimum."
+    },
+    {
+      "index": 4, "id": "end_tieoff", "name": "End tie-off",
+      "height_ft": 30, "height_m": 9.14,
+      "latitude_dms": "47°38'02.27\"N", "longitude_dms": "121°59'46.25\"W",
+      "from_feed": {"distance_ft_in": "107 ft 1 in", "distance_m": 32.63, "bearing_true": 109, "bearing_mag": 93},
+      "from_far_support": {"distance_ft_in": "25 ft 7 in", "distance_m": 7.80, "bearing_true": 130, "bearing_mag": 115},
+      "note": "High-voltage node. Keep 6-8 ft clear of trunk and foliage and out of reach - kilovolts at 150 W."
+    }
+  ],
+
+  "wire_budget": {
+    "total_m": 39.6, "total_ft": 130,
+    "spans": [
+      {"span": "feed -> apex",        "wire_m": 17.86, "wire_ft_in": "58 ft 7 in",  "ground_run_m": 16.01, "bearing_true": 82,  "bearing_mag": 67,  "slope_deg": 26.3, "slope_dir": "up"},
+      {"span": "apex -> far support", "wire_m": 11.84, "wire_ft_in": "38 ft 10 in", "ground_run_m": 11.84, "bearing_true": 130, "bearing_mag": 115, "slope_deg": 0,    "slope_dir": "level"},
+      {"span": "far support -> end",  "wire_m": 9.90,  "wire_ft_in": "32 ft 6 in",  "ground_run_m": 7.80,  "bearing_true": 130, "bearing_mag": 115, "slope_deg": 38,   "slope_dir": "down"}
+    ],
+    "slack_note": "Lengths are straight-line. Add 2-3% slack; expect 8-12 in of mid-span sag at 6-9 lbf tension. Effective average height lands about 1 ft below the calculated figure once sag is included."
+  },
+
+  "predicted_performance": {
+    "avg_height_m": 12.69, "avg_height_ft": 41.6,
+    "takeoff_flat_ground_deg": {"20m": 24.7, "15m": 16.2, "10m": 12.0},
+    "takeoff_toward_australia_250deg": {"20m": 17, "15m": 8, "10m": 4},
+    "takeoff_toward_asia_310deg": {"20m": 20, "15m": 11, "10m": 7},
+    "gain_vs_low_baseline_dB": {"20m_at_10deg": 4.9, "40m_at_15deg": 5.1},
+    "40m_80m_note": "At 0.30 lambda and 0.15 lambda the lobe points essentially straight up and the azimuth pattern collapses to near-omnidirectional. Ideal for continental US with no skip zone; orientation is irrelevant below 20 m."
+  },
+
+  "mechanical": {
+    "rope": "3/16 or 1/4 in Dacron / polyester, UV-stable. NOT nylon (4-8% water uptake, stretches). NOT cheap polypropylene (UV-dead in a season).",
+    "insulators": "12-24 in glazed ceramic or UHMW at every rope-to-wire junction",
+    "counterweights_lb": "5-10, on the free rope end or via a pulley to a ground anchor",
+    "clearance": "wire 3+ ft clear of limbs and trunk; 6-8 ft at the end tie-off",
+    "tension_lbf_estimated": "6-9",
+    "principle": "The wire NEVER touches the tree. Rope does. Wet bark is not the failure mode - wet rope is, and material choice plus a ceramic link solves it."
+  },
+
+  "electrical": {
+    "choke": "10 turns RG-8X on an FT240-31 at the transformer, plus a second at the shack entry",
+    "counterpoise_m": "5-8, bonded to the transformer ground, run away from the wire's direction",
+    "choke_evidence": "The GOWENIC test in this repo moved resonance 2.6 kHz just from re-routing 12 ft of unchoked coax.",
+    "counterpoise_evidence": "On the GOWENIC build a 96-inch counterpoise took 15 m from SWR 4.59 to 1.89 and 10 m from 1.81 to 1.68."
+  },
+
+  "open_items": [
+    "Verify the cylindrical object (propane tank?) about 9 m from the feed at bearing 142 deg, 26 ft laterally from leg 1",
+    "Verify a usable 50 ft limb exists at the far_support coordinates on the SE treeline",
+    "Sweep after installation and file the result under ../measurements/",
+    "Consider going higher than 50 ft - each 10 ft is worth about 0.9 dB"
+  ],
+
+  "artifact_url": "https://claude.ai/code/artifact/1128955c-5f0e-44c7-82a9-a08a9f9d2fa9"
+}

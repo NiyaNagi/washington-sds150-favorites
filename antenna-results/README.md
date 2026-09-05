@@ -27,7 +27,7 @@ See the [full comparison, coverage matrix, and gap table](comparison/README.md) 
 | [Uniden SDS150 stock](antennas/uniden-sds150-stock/README.md) | valid | reference antenna |
 | [Taurus triband vehicle](antennas/taurus-triband-vehicle/README.md) | valid / installed vehicle | fixed installation; VHF-high and partial 800/900 MHz |
 | [TIDRADIO H9 stock](antennas/tidradio-h9-stock/README.md) | invalid / inconclusive | preserved, excluded |
-| [JYR8010 EFHW](antennas/jyr8010-efhw/README.md) | preserved HF report | separate prior report |
+| [JYR8010 EFHW](antennas/jyr8010-efhw/README.md) | preserved HF report | 39.6 m / 130 ft **80m-band** EFHW; plus a [CN97ap deployment siting study](antennas/jyr8010-efhw/deployment-siting-cn97ap/README.md) |
 | [GOWENIC-module 40m EFHW](antennas/gowenic-efhw/README.md) | valid HF reports | 62.5 ft sloper; 75 ft outdoor baseline plus [100 ft/window office-feed comparison](antennas/gowenic-efhw/installed-office-feed/README.md) |
 
 ## Method
@@ -55,6 +55,7 @@ Handheld measurements used fixed upright geometry with no added counterpoise; th
 
 - `antennas/*/measurements/`: preserved S1P, raw NPZ, JSON, and authoritative zoom artifacts.
 - `antennas/*/charts/` and family READMEs: generated analysis.
+- `antennas/jyr8010-efhw/deployment-siting-cn97ap/`: site-specific deployment design - GIS parcel data, USGS 3DEP terrain horizon, great-circle bearings, and predicted DX coverage. **Analysis and prediction, not measurement**; see its `METHOD.md` for per-model confidence.
 - `comparison/`: CSV/JSON scorecards, charts, recommendations, and offline report.
 - `calibration-baselines/`: immutable OSL and verification captures.
 - [`manual-testing/`](manual-testing/): immutable historical coarse reconnaissance; not used for current rankings.

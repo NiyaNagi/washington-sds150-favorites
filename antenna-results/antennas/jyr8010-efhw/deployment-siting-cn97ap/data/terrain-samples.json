@@ -1,0 +1,92 @@
+{
+  "_comment": "Complete record of every elevation query made during the 2026-09-05 siting session, including the one that failed. Raw values are exactly as returned by the service - not rounded.",
+
+  "source": {
+    "service": "USGS 3DEP Elevation Point Query Service",
+    "endpoint": "https://epqs.nationalmap.gov/v1/json",
+    "query_template": "https://epqs.nationalmap.gov/v1/json?x={lon}&y={lat}&units=Meters&wkid=4326&includeDate=false",
+    "dataset": "3DEP bare-earth DEM, 1 metre resolution (rasterId 66350 observed)",
+    "vertical_datum": "NAVD88, metres",
+    "units_caveat": "The JSON response does not declare units. Meters was requested via the units parameter and the returned magnitudes are consistent with metres AMSL for this location.",
+    "important_limitation": "BARE EARTH. Conifer canopy sits on top of these figures and is NOT modelled. Real horizon obstruction toward any forested bearing will be higher than computed here.",
+    "queried_at": "2026-09-05",
+    "auth_required": false
+  },
+
+  "phase_centre_reference": {
+    "value_m": 107.1,
+    "derivation": "Feed ground elevation 97.24 m + approximately 9.9 m mean antenna height. Used as the apex of the horizon angle triangle for every radial sample.",
+    "note": "The final design raises mean height to 12.69 m (phase centre ~109.9 m), which lowers every computed horizon angle by roughly 0.2-0.3 deg. The 107.1 m reference was kept for consistency across the session and is the conservative choice."
+  },
+
+  "site_samples": [
+    {"id": "site_feed", "lon": -121.9965917, "lat": 47.6340583, "elevation_m": 97.240394592},
+    {"id": "site_apex", "lon": -121.9963806, "lat": 47.6340778, "elevation_m": 96.815917969},
+    {"id": "site_se50", "lon": -121.9961870, "lat": 47.6337360, "elevation_m": 97.419097900, "rasterId": 66350, "resolution_m": 1}
+  ],
+  "site_relief_m": 0.603,
+  "site_relief_finding": "The build site is flat to within 0.6 m across the entire 33 m run. No terrain correction is needed for the antenna geometry itself.",
+
+  "radial_samples": [
+    {"bearing_deg": 30,  "range_m": 200,  "lon": -121.9952606, "lat": 47.6356161, "elevation_m": 112.446716309, "horizon_angle_deg": 1.53},
+    {"bearing_deg": 30,  "range_m": 500,  "lon": -121.9932638, "lat": 47.6379528, "elevation_m": 156.635284424, "horizon_angle_deg": 5.66},
+    {"bearing_deg": 30,  "range_m": 1000, "lon": -121.9899360, "lat": 47.6418473, "elevation_m": 179.120346069, "horizon_angle_deg": 4.12},
+    {"bearing_deg": 30,  "range_m": 2000, "lon": -121.9832802, "lat": 47.6496370, "elevation_m": 188.500778198, "horizon_angle_deg": 2.33},
+    {"bearing_deg": 60,  "range_m": 500,  "lon": -121.9902362, "lat": 47.6363069, "elevation_m": 136.904006958, "horizon_angle_deg": 3.41},
+    {"bearing_deg": 100, "range_m": 500,  "lon": -121.9900373, "lat": 47.6332776, "elevation_m": 77.674270630,  "horizon_angle_deg": -3.37},
+    {"bearing_deg": 130, "range_m": 500,  "lon": -121.9909018, "lat": 47.6311675, "elevation_m": 108.406387329, "horizon_angle_deg": 0.15},
+    {"bearing_deg": 155, "range_m": 500,  "lon": -121.9937789, "lat": 47.6299822, "elevation_m": 91.890235901,  "horizon_angle_deg": -1.74},
+    {"bearing_deg": 210, "range_m": 500,  "lon": -121.9999196, "lat": 47.6301638, "elevation_m": 36.462936401,  "horizon_angle_deg": -8.08},
+    {"bearing_deg": 250, "range_m": 200,  "lon": -121.9990929, "lat": 47.6334431, "elevation_m": 79.521751404,  "horizon_angle_deg": -7.90},
+    {"bearing_deg": 250, "range_m": 500,  "lon": -122.0028452, "lat": 47.6325202, "elevation_m": 38.040618896,  "horizon_angle_deg": -7.88},
+    {"bearing_deg": 250, "range_m": 1000, "lon": -122.0091004, "lat": 47.6309821, "elevation_m": 111.260238647, "horizon_angle_deg": 0.24},
+    {"bearing_deg": 310, "range_m": 500,  "lon": -122.0010982, "lat": 47.6369491, "elevation_m": 64.763870239,  "horizon_angle_deg": -4.85},
+    {"bearing_deg": 326, "range_m": 500,  "lon": -122.0003135, "lat": 47.6377864, "elevation_m": 101.440841675, "horizon_angle_deg": -0.65},
+    {"bearing_deg": 345, "range_m": 500,  "lon": -121.9983225, "lat": 47.6384025, "elevation_m": 115.908088684, "horizon_angle_deg": 1.01}
+  ],
+
+  "horizon_by_bearing": {
+    "_comment": "Controlling horizon angle per bearing = the maximum obstruction angle over all ranges sampled on that bearing. Positive blocks, negative is open.",
+    "30":  {"angle_deg": 5.7,  "controlled_at_range_m": 500,  "verdict": "BLOCKED"},
+    "60":  {"angle_deg": 3.4,  "controlled_at_range_m": 500,  "verdict": "BLOCKED"},
+    "100": {"angle_deg": -3.4, "controlled_at_range_m": 500,  "verdict": "clear"},
+    "130": {"angle_deg": 0.15, "controlled_at_range_m": 500,  "verdict": "level"},
+    "155": {"angle_deg": -1.7, "controlled_at_range_m": 500,  "verdict": "clear"},
+    "210": {"angle_deg": -8.0, "controlled_at_range_m": 500,  "verdict": "OPEN - steep drop"},
+    "250": {"angle_deg": 0.2,  "controlled_at_range_m": 1000, "verdict": "OPEN - drops 59 m then recovers; far side sets the horizon at essentially 0"},
+    "310": {"angle_deg": -4.8, "controlled_at_range_m": 500,  "verdict": "OPEN - drops away"},
+    "326": {"angle_deg": -0.65,"controlled_at_range_m": 500,  "verdict": "level"},
+    "345": {"angle_deg": 1.0,  "controlled_at_range_m": 500,  "verdict": "level / slight rise"}
+  },
+
+  "quadrant_summary": {
+    "NE_0_to_70":    "Rising hillside. Europe blocked to 5.7 deg, South Africa to 3.4 deg. WORST quadrant.",
+    "E_SE_90_to_160":"Clear to slightly falling. Americas unobstructed.",
+    "SW_200_to_270": "Steep drop-off, -8 deg for 500 m into a ravine. BEST quadrant. Contains NZ (227), Hawaii (240), VK2/3/4 (244-247), VK6 (268).",
+    "NW_300_to_330": "Falling, -4.8 deg at 310. VERY GOOD. Contains Japan (301), China (310), Vladivostok (311), Beijing (318), Alaska (321).",
+    "N_340_to_360":  "Approximately level."
+  },
+
+  "slope_gain_model": {
+    "_comment": "How the foreground slope was converted into an effective take-off angle reduction.",
+    "rule": "A downward foreground slope of angle s moves the ground reflection point downhill and far away, effectively raising the antenna many wavelengths above the reflecting plane. Take-off angle is reduced by approximately s.",
+    "applied_reductions_deg": {"toward_250": 8, "toward_310": 5, "toward_210": 8},
+    "confidence": "MODERATE. This is a first-order rule of thumb, not a NEC model. It predicts direction and rough magnitude reliably; treat the exact degrees as indicative."
+  },
+
+  "failed_queries": [
+    {
+      "purpose": "LiDAR-derived canopy height at the apex tree, to verify the 35/50 ft support height and find taller trees.",
+      "endpoint": "https://apps.fs.usda.gov/fsgisx03/rest/services/r06/R06_lidar_R_CanopyHeight/ImageServer/identify",
+      "params": "geometry={\"x\":-121.9963806,\"y\":47.6340778,\"spatialReference\":{\"wkid\":4326}}&geometryType=esriGeometryPoint&returnGeometry=false&f=json",
+      "result": "HTTP 200 with body {\"error\":{\"code\":500,\"message\":\"Error performing identify operation\",\"details\":[]}}",
+      "status": "FAILED - do not retry blindly",
+      "alternatives_not_yet_tried": [
+        "Washington DNR LiDAR Portal at https://lidarportal.dnr.wa.gov/ (bulk download, not a point API)",
+        "King County LiDAR DSM via https://kingcounty.gov/en/legacy-en/services/gis/gisdata/metadata/elevation (DSM minus DGM gives canopy height, but distribution is zipped ArcInfo Grid, not a REST query)",
+        "NOAA Coast 2016-2017 PSLC Lidar DEM bulk tiles at https://coast.noaa.gov/htdata/raster2/elevation/WA_King_DEM_2016_8589/"
+      ],
+      "workaround_used": "Operator confirmed by direct observation that a throw line reaches 50 ft or more in both support trees."
+    }
+  ]
+}
