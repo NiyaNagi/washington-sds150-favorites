@@ -11,15 +11,16 @@ deployment study.
    repeating the session's biggest error.
 2. **`README.md`** — findings and the final design.
 3. **`METHOD.md`** — what each number is worth. Several are LOW confidence and labelled.
-4. **`SESSION-LOG.md`** — five corrections were made mid-session. Know which conclusions
-   are stale.
+4. **`SESSION-LOG.md`** — **eleven** corrections were made across the session. Know which
+   conclusions are stale. Corrections 10 and 11 are the most recent and the most
+   consequential: they reversed the T class.
 
 Then run the two generators, which need no dependencies:
 
 ```bash
 D=antenna-results/antennas/jyr8010-efhw/deployment-siting-cn97ap
 python3 $D/tools/site_geometry.py     # geometry, bearings, terrain horizon
-python3 $D/tools/compare_options.py   # scores 10 topologies; writes CSVs + KML
+python3 $D/tools/compare_options.py   # 15 topologies x 5 bands; 4 CSVs + KML
 ```
 
 They recompute every result from raw inputs and are **authoritative** where they disagree
@@ -58,11 +59,33 @@ Always read `n_workable` and `median_dB` beside it. An optimiser pointed at
 `aggregate_dB` alone will hand you a bad antenna — that already happened once here.
 
 **T-class dB figures are not comparable in confidence to the rest.** The slant model
-(METHOD.md §9) uses a stylized vertical-over-ground curve traced from published charts,
-not computed from soil constants, and ignores both ground loss on a forested hillside and
-tree absorption along a 140 ft near-vertical wire. The *geometry* — slope angles, support
-distances, current-maxima heights — is exact arithmetic and can be trusted. The dB cannot.
-Never quote a T number beside an A number without that caveat.
+(METHOD.md §9) still relies on a stylized average-ground loss curve and ignores both ground
+loss on a forested hillside without radials and tree absorption along a 140 ft near-vertical
+wire. The *geometry* — slope angles, support distances, current-maxima heights — is exact
+arithmetic and can be trusted. The dB cannot. Never quote a T number beside an A number
+without that caveat.
+
+**Any T-class dB figure from before 2026-09-05 is stale.** The slant model was rewritten
+(correction 10) and the result reversed: T-APEX went from leading every option at −4.57 dB
+on 20 m to −10.19 dB and 8th of 15. The old model treated a 66° wire as omnidirectional
+with a band-independent elevation curve; it is neither. If you find "83% vertically
+polarised — omnidirectional, hence no nulls" anywhere, that framing is superseded.
+
+**There are exactly five bands: 80/40/20/15/10 m.** 30 m, 17 m and 12 m are not harmonics
+of a 39.6 m wire — the odd harmonics land near 10.65, 17.75 and 24.85 MHz, outside all
+three allocations. If asked to score 17 m, say why it cannot be scored rather than
+inventing a number. See METHOD.md §8.
+
+**Two dB scales, and mixing them is an error.** `net_dB` is normalised to each wire's own
+peak lobe — valid *within* a band only. `net_dBi` adds the band's peak directivity and is
+the only scale that may be compared *across* bands. A 4 λ wire has ~5 dB more peak gain
+than a half-wave one, so comparing raw `net_dB` across bands under-credits the high bands
+by exactly that much. `option-comparison.csv` and `aggregate_dB` are the normalised scale;
+everything with `dBi` in the name is absolute.
+
+**Antenna gain is not band availability.** Nothing in this study knows whether a band is
+open. 10 m scores best for the flat-top and is also the band most often shut. Do not let a
+table of dBi become a prediction of what the operator will work.
 
 **A support inside the parcel is not necessarily buildable.** `inside_parcel()` knows
 about property lines and nothing else — not trees, the driveway, or the septic field.
@@ -81,7 +104,9 @@ The operator answered these explicitly. Re-proposing them wastes their time.
 | Deploy from the front yard or driveway corner? | **No.** Nulls all of Asia. |
 | Build a PVC mast? | **No.** Scored in full: −3.0 to −7.5 dB, 3–12 of 25 regions. A 39.6 m wire on a 24 ft mast slopes 6.2° and averages 17–24 ft. |
 | Sloper off a *mast*? | **No.** At mast heights a 39.6 m "sloper" is a tilted flat-top. |
-| Sloper off a *150 ft tree*? | **Yes — scores highest.** See the T class. T-APEX uses the existing apex tree at 143 ft, 25/25 regions, zero holes. But read §9 first: those dB figures are LOW confidence. |
+| Sloper off a *150 ft tree*? | **Only for 80 m.** T-APEX is the best 80 m option in the study (−5.10 dBi, 14/25 vs the flat-top's 3/25) and 8th of 15 on the 40/20/15 m aggregate. The earlier "scores highest" answer came from the broken slant model. |
+| Which bands does it have? | **80/40/20/15/10 only.** Not 30/17/12 — see the trap above. |
+| Best band for the recommended flat-top? | **15 m and 10 m** (+2.1 / +2.3 dBi, 20–21 of 25 regions), then 20 m. 80 m is regional-only at 41 ft. |
 | Inverted-V off one point? | **Viable.** V1 costs 1.1 dB and 2 regions vs the flat-top. Take it if two rope throws is one too many. |
 | Support height available? | **150 ft trees.** The 50 ft figure in option A is a conservative throw-line assumption, not a limit. |
 | Trade to option B for Florida/Caribbean? | **No.** Accepted as a hole; work them on 15/40 m. |
@@ -100,7 +125,9 @@ The operator answered these explicitly. Re-proposing them wastes their time.
    cylindrical object near leg 1, and whether a usable 50 ft limb exists at the far
    support.
 3. **Run NEC** on the actual bent geometry over real ground. Would replace the three
-   weakest models at once and settle the null depths.
+   weakest models at once and settle the null depths. **Highest value on the T class**,
+   where §9 has now been wrong once already and the answer moved by 6 dB when it was fixed.
+   A model that has flipped its own conclusion is not one to build from.
 4. **Save the source screenshots** — see `imagery/README.md`. They were chat attachments
    and could not be written to disk.
 5. **Canopy height.** The USDA ImageServer returned HTTP 500; alternatives are listed in

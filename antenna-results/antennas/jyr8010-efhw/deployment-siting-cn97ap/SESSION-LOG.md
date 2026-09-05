@@ -1,8 +1,9 @@
 # Session log — 2026-09-05
 
 Chronological record of the siting session, including every operator input, every
-external query, and every correction. Kept because two substantive errors were made and
-retracted mid-session; a future agent needs to know which conclusions are stale.
+external query, and every correction. Kept because **eleven** corrections were made and
+retracted across the session — two of them reversed a headline conclusion outright — and a
+future agent needs to know which conclusions are stale.
 
 ---
 
@@ -241,6 +242,74 @@ primary pick), and placement — **two eggs in series at the apex**, because it 
 
 KML regenerated: 82 placemarks in 17 folders, T class in bright orange.
 
+## Phase 8 — all bands, and the T class reverses
+
+The operator asked to extend every option across every band the antenna supports, aggregate
+40 m + 20 m + the next most popular band, and rank on linear power to regions.
+
+**Five bands, not "80–10 continuous".** A 39.6 m EFHW is resonant only where the wire is an
+integer number of half-waves: 80/40/20/15/10. The odd harmonics land near 10.65, 17.75 and
+24.85 MHz, so **30 m, 17 m and 12 m do not exist on this antenna** without a tuner. That
+settles which band joins 40 and 20 in the aggregate: 17 m would be the natural third DX
+band by popularity, and it is unavailable, so **15 m** it is. Recorded in METHOD.md §8.
+
+**A second dB scale was needed.** `pattern_dB()` normalises each wire to its own peak lobe,
+which quietly discards the ~5 dB more peak directivity a 4 λ wire has over a half-wave one.
+Fine within a band, invalid across bands. Added `net_dBi = net_dB + band peak directivity`
+and computed every cross-band figure on it, leaving the normalised columns untouched so
+every previously published 20 m and 15 m number still reproduces.
+
+**Then the slant model had to be rewritten, and it reversed its own conclusion.** Extending
+the T class across bands exposed that the section 9 model could not vary with frequency in
+the way the physics demands. See corrections 10 and 11.
+
+**Result.** The recommended flat-top (A) leads the three-band ranking at 49/75 workable
+cells and −0.16 dBi, with the best worst-case of anything near it (−25.4 dBi against T30's
+−45.4). The flat-top turns out to be a **15 m and 10 m antenna first** (+2.06 / +2.26 dBi),
+a competent 20 m one, and regional-only on 80 m, where at 41 ft it is 0.15 λ up and has no
+lobe at all. Florida and the Caribbean — the accepted 20 m hole — return on 15 m and 10 m.
+
+New outputs: `option-comparison-multiband.csv` (5 bands × 25 regions × 15 options),
+`option-band-aggregate.csv` (75 rows), `mb3_*` columns on `option-aggregate.csv`, and a KML
+whose folders are ordered by three-band rank and carry a per-band table each.
+
+### ⚠️ ERROR 10 — the slant model was wrong, and it had been driving the headline
+
+The Phase 7 T-class result rested on a polarisation decomposition: `sin²θ` of the power
+went to a **band-independent, omnidirectional** vertical curve, `cos²θ` to the long-wire
+pattern of the wire's ground projection. Two failures:
+
+1. **The azimuth pattern was evaluated at an azimuth difference, not at the true 3-D angle
+   from the wire axis.** For a wire tilted 66° those are barely related. This is what made
+   the T class look omnidirectional with no nulls — the most-quoted claim of Phase 7.
+2. **It could not vary with frequency in the way that matters.** At 66° a 39.6 m wire has a
+   **1.7 λ vertical extent on 20 m and 3.4 λ on 10 m.** A radiator that long in the vertical
+   plane breaks into lobes and loses low-angle response — the same effect that makes a
+   vertical longer than ~0.64 λ a poor DX antenna. A band-independent curve cannot express
+   it, so the old model gave the T class credit on the high bands that it does not have.
+
+Rewritten to use the exact free-space long-wire pattern at the true 3-D axis angle, the
+band's own current-maxima height, and separate reflection phases for the two polarisations
+(horizontal inverts, vertical does not). Ground loss is now loss only.
+
+**This reversed the Phase 7 headline.** T-APEX went from **−4.57 dB and first place** to
+**−10.19 dB on 20 m and 8th of 15** on the three-band ranking. The T class is now strongest
+on 80 m and 40 m, where the wire is short in wavelengths and height dominates, and weakest
+on 15 m and 10 m. T-APEX is the study's **best 80 m option** (−5.10 dBi, 14/25 regions
+against the flat-top's 3/25) and not the right answer for anything else.
+
+The direction of that reversal is physically sound. The magnitude is not — §9 remains the
+lowest-confidence model here, and it has now been wrong once. **Every T-class dB figure
+published before 2026-09-05 is stale.**
+
+### ⚠️ ERROR 11 — the new ranking repeated error 7 on a new axis
+
+The first three-band ranking sorted on `n_regions_covered` first. That put T45 above the
+recommended flat-top on the strength of one extra marginal region, while A beat it on mean
+power, workable cells, holes and worst case simultaneously. Exactly the trap METHOD.md §7
+already documents, re-introduced on a different metric. Re-sorted on workable band×region
+cells first, regions second, mean power last.
+
 ## Corrections summary
 
 | # | Error | Corrected in | Status |
@@ -254,6 +323,8 @@ KML regenerated: 82 placemarks in 17 folders, T class in bright orange.
 | 7 | Optimised on aggregate power alone, which rewards spiky patterns | Phase 6 | ✅ ranks on regions-workable first |
 | 8 | End voltage quoted as 2–4 kV; actually ~1 kV RMS / 1.4 kV peak | Phase 7 | ✅ corrected in INSULATORS.md |
 | 9 | Support height assumed capped at 50 ft; operator has 150 ft trees | Phase 7 | ✅ T class added |
+| 10 | **Slant model treated a steep wire as omnidirectional, band-independently** | Phase 8 | ✅ METHOD.md §9 rewritten; **T-class conclusion reversed** |
+| 11 | Three-band ranking first led with regions-covered, repeating error 7 on a new axis | Phase 8 | ✅ ranks on workable cells first |
 
 **Anything in the conversation before each correction is stale.** The files in this
 directory reflect only post-correction values.
@@ -262,7 +333,11 @@ directory reflect only post-correction values.
 
 ## Not done
 
-- No NEC model
+- No NEC model — **most needed on the T class**, where §9 has already been wrong once and
+  the answer moved 6 dB when it was fixed
+- No propagation model. The band figures say where the antenna puts power, never whether
+  a band is open. 10 m scores best for the flat-top and is also the band most often shut.
+- 30 m / 17 m / 12 m unmodelled — not harmonics of a 39.6 m wire; would need tuner data
 - No post-installation sweep — **the antenna was not built as of 2026-09-05**
 - No canopy-height correction to the bare-earth horizon
 - No live magnetic declination query (15.3°E from general knowledge)

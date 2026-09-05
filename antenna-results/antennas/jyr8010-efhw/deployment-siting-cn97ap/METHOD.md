@@ -224,43 +224,159 @@ ground verified clear from imagery; the `ANY` sector only guarantees the parcel.
 S2 and S3 select bearings near due north, which crosses the driveway turnaround and enters
 dense forest — **unverified on the ground.**
 
+## 8. Bands, harmonics, and cross-band comparison
+
+### Which bands exist at all
+
+A 39.6 m EFHW is resonant only where the wire is an integer number of half-waves. That
+gives **five bands**, not the "80–10 m continuous" a listing might imply:
+
+| Band | f used | λ | L/λ | n half-waves | Main lobe from axis | Peak directivity |
+|---|---|---|---|---|---|---|
+| 80m | 3.550 MHz | 84.45 m | 0.469 | 1 | 90° (broadside) | 2.15 dBi |
+| 40m | 7.100 MHz | 42.22 m | 0.938 | 2 | 90° | 3.80 dBi |
+| 20m | 14.150 MHz | 21.19 m | 1.869 | 4 | 57.5° | 5.30 dBi |
+| 15m | 21.200 MHz | 14.14 m | 2.800 | 6 | 48.2° | 6.40 dBi |
+| 10m | 28.500 MHz | 10.52 m | 3.764 | 8 | ~40° | 7.10 dBi |
+
+**30 m, 17 m and 12 m are absent, and that is arithmetic, not an omission.** The odd
+harmonics of a 39.6 m wire land near 10.65, 17.75 and 24.85 MHz. The 30 m allocation
+starts at 10.10 and 17 m at 18.068, so both miss; 24.85 is just below 12 m's 24.89. All
+three need a tuner and none is modelled here. If an agent is asked about 17 m — the band
+that would otherwise be the obvious third choice for DX — **this is why it is not in the
+three-band aggregate.**
+
+The frequencies above are the exact λ values used in every earlier revision of this study,
+kept deliberately so that all previously published 20 m and 15 m figures reproduce
+unchanged. The predicted post-installation resonances (§10 item 2) are 1–2% lower.
+
+### Two dB scales, and why both exist
+
+`pattern_dB()` normalises every wire to **its own peak lobe**. That is the right thing for
+comparing options *within* one band, and it is the convention every figure in this study
+used before the multi-band extension. But it silently discards the fact that a 4 λ wire has
+about 5 dB more peak directivity than a half-wave one — so those numbers must **never** be
+compared across bands.
+
+```
+net_dB   = pattern (own-peak normalised) + elevation response      # within a band
+net_dBi  = net_dB + band peak directivity                          # across bands
+```
+
+Every cross-band table, and the whole three-band ranking, is computed in `net_dBi`.
+`option-comparison.csv` and the `aggregate_dB` column of `option-aggregate.csv` stay on the
+old normalised scale for continuity.
+
+**Confidence: MODERATE** for the directivity column — textbook values for a thin resonant
+wire in free space, not computed for this installation. It shifts whole bands relative to
+one another, so an error here tilts the band ranking uniformly rather than scrambling it.
+
+### Arrival angles by band
+
+The per-target arrival angles in §6 are 20 m values. Other bands scale them by a single
+multiplier: **80 m ×1.90, 40 m ×1.45, 20 m ×1.00, 15 m ×0.88, 10 m ×0.80**, clamped to
+3–60°.
+
+**Confidence: LOW.** A rule of thumb. It has the direction right — lower bands support
+shorter hops and arrive higher — and roughly the right size, but it knows nothing about hop
+count, season or solar flux. Treat cross-band differences of a couple of dB as noise.
+
+### What the band model deliberately does not do
+
+It says **nothing about whether a band is open.** 10 m to Perth at high solar flux and 10 m
+to Perth at solar minimum score identically here, because this is an antenna model. The
+three-band aggregate answers "where does this antenna put power", not "what will you work".
+
+### The three-band aggregate
+
+The operator asked for 40 m + 20 m + "the next most popular band". That is 15 m — 17 m sees
+comparable on-air traffic but, per above, this antenna is not resonant on it.
+
+```
+mb3_aggregate_dBi = 10·log10( mean over 3 bands × 25 regions of 10^(net_dBi/10) )
+mb3_workable      = count of the 75 band×region cells at or above −5.0 dBi
+mb3_regions_covered = regions reachable on AT LEAST ONE of the three bands
+```
+
+**Ranked on `mb3_workable` first, `mb3_regions_covered` second, `mb3_aggregate_dBi` last** —
+for the reason §7 gives. An earlier draft of this ranking led with `regions_covered` and put
+a tall sloper above the flat-top on the strength of one extra marginal region while it lost
+on every other measure. Same trap, new axis.
+
+The −5.0 dBi threshold is −10.3 dB relative on 20 m, i.e. effectively the −10 dB used
+before; it moved option S1's scanned bearing from 359° to 358° and changed nothing else.
+
+---
+
 ## 9. Slant-wire model (T class) — the weakest link
 
-Above roughly 30° of slope a wire stops behaving as a horizontal radiator over ground and
-becomes a slant/vertical one. Sections 3 and 4 do not apply. `compare_options.py` switches
-to a separate model when `slope_deg > 0.5`:
+**Rewritten 2026-09-05.** The previous version of this section described a
+polarisation-decomposition model with a band-independent stylized vertical curve. It was
+wrong in a way that mattered, and it is documented as correction 10 in `SESSION-LOG.md`.
+**Any T-class dB figure quoted from before that date is stale.**
+
+Above roughly 30° of slope a wire stops behaving as a horizontal radiator over ground.
+Sections 3 and 4 do not apply. `compare_options.py` switches models when `slope_deg > 0.5`:
 
 ```
-fv = sin²(slope)        vertical power fraction
-fh = cos²(slope)        horizontal power fraction
+psi   = true 3-D angle between the wire axis and the ray to the target
+pat   = ( longwire_field(psi, n) / longwire_peak(n) )²        # free-space, exact
 
-total = fv · V(elev) + fh · H_pattern(azimuth) · H_elev(elev, h_avg)
+h_eff = mean height of that band's current maxima
+ph    = 2π · (h_eff/λ) · sin(elev)
+
+gh    = sin²(ph)                                  # horizontal image inverts
+gv    = cos²(ph) · ground_loss(elev)              # vertical image does not
+
+total = sin²(slope)·pat·gv  +  cos²(slope)·pat·gh
 ```
 
-- **Vertical part** is omnidirectional in azimuth and uses `VERT_RESPONSE_dB`, a stylized
-  elevation curve for a vertical over average ground (σ 5 mS/m, ε_r 13).
-- **Horizontal part** keeps the long-wire pattern of the wire's *ground projection*
-  (`39.6 · cos θ`, with `n = 2·L_proj/λ`) and the section 4 ground-reflection response.
+Three things changed from the old version, and each mattered:
 
-At 66° slope, `fv = 0.83` — the antenna is overwhelmingly vertically polarised, hence
-omnidirectional, hence no nulls. That part is real physics.
+1. **The pattern is evaluated at the true 3-D angle from the wire axis**, not at an azimuth
+   difference. For a wire tilted 66° the azimuth difference barely resembles the angle that
+   actually drives the pattern, and the old model's azimuth-only treatment made the T class
+   look omnidirectional when it is not.
+2. **The pattern is band-dependent.** A 39.6 m wire at 66° has a **1.7 λ vertical extent on
+   20 m and 3.4 λ on 10 m.** A radiator that long in the vertical plane breaks into lobes
+   and loses its low-angle response — the same well-known effect that makes a vertical
+   longer than about 0.64 λ a poor DX antenna. The old band-independent curve could not
+   express this at all.
+3. **The two polarisations reflect differently.** Horizontal inverts at the ground (sin),
+   vertical does not (cos). That is the real reason a steep wire keeps low-angle response
+   where a low horizontal wire cannot, and it is now modelled rather than asserted.
 
-**Confidence: LOW — lower than anything else in this study.**
+`ground_loss()` is now **loss only** — a flat ≈3 dB of average-ground loss plus the
+pseudo-Brewster rolloff below ~15°. The elevation *shape* comes from the geometry above.
 
-`VERT_RESPONSE_dB` was traced from standard published curves, **not computed from soil
-constants.** It bakes in roughly 4 dB of average-ground loss and a pseudo-Brewster rolloff
-below ~12°. It sets the entire T-class result.
+### What this did to the answer
 
-Two effects the model ignores entirely, either of which could cost several dB:
+It reversed the T class's headline result. Under the old model T-APEX scored −4.57 dB on
+20 m and led every option. It now scores **−10.19 dB on 20 m and −4.05 on 15 m**, and ranks
+8th of 15 on the three-band metric. The T class is now **strongest on 80 m and 40 m**, where
+the wire is short in wavelengths and height dominates, and **weakest on 15 m and 10 m**,
+where its vertical extent is several wavelengths.
+
+That reversal is physically sensible and the direction is trustworthy. The magnitude is not.
+
+**Confidence: LOW — still lower than anything else in this study**, though for narrower
+reasons than before. The free-space pattern term is now exact; the ground treatment is not.
+Two effects remain unmodelled, either of which could cost several dB:
 
 1. **Ground loss.** Vertical polarisation depends on soil under the radiator in a way a
-   horizontal wire does not. This is a forested hillside with no radial system. An EFHW is
-   a half-wave, so it does not *need* radials the way a quarter-wave vertical does — but if
-   real loss is 8 dB rather than the 4 dB assumed, most of the T-class advantage
-   disappears.
+   horizontal wire does not. Forested hillside, no radial system. An EFHW is a half-wave, so
+   it does not *need* radials the way a quarter-wave vertical does — but if real loss is
+   8 dB rather than the 3 dB assumed, the T class loses on every band.
 2. **Tree absorption.** A near-vertical wire running 140 ft alongside a wet conifer couples
-   to a lossy dielectric along its whole length. The geometry helps — descending at 66° the
-   wire clears the trunk within a few metres — but the top attachment sits in the canopy.
+   to a lossy dielectric along its whole length. Descending at 66° the wire clears the trunk
+   within a few metres, but the top attachment sits in the canopy.
+
+The erratic `peak_elev` column for the T options — 14°, 24°, 56°, 60°, 67° across adjacent
+slopes and bands — is not noise in the code. It is the genuine multi-lobed elevation pattern
+of a long slant wire, and it is the clearest signal in the study that **T-class performance
+is unstable against small changes in geometry.** A flat-top's take-off angle moves smoothly
+with height; a tall sloper's jumps between lobes. That alone is an argument against building
+one on the strength of a model.
 
 **Do not present T-class numbers as comparable in confidence to the horizontal options.**
 The geometry (slope angles, support distances, current-maxima heights) is exact arithmetic
@@ -278,6 +394,12 @@ Those are the 20 m current maxima on a 39.6 m EFHW. They are what actually radia
 their mean height predicts low-angle performance better than averaging the whole wire —
 and it is pure arithmetic, **HIGH confidence**, independent of every model above. The
 flat-top reaches 41 ft; T-APEX reaches 83 ft.
+
+The positions are **band-specific**: a wire carrying n half-waves has maxima at
+`(2k+1)·L/(2n)`. On 80 m there is one, at the midpoint; on 10 m there are eight. For a
+sloper this changes the mean height materially between bands; for a flat-top it barely
+moves. `imax_positions(n)` computes them and `option-band-aggregate.csv` reports the mean
+per option per band.
 
 ## 10. What would raise confidence
 

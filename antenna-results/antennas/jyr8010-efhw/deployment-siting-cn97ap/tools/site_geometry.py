@@ -146,8 +146,15 @@ def longwire_field(theta_deg, n_half_waves):
     return abs((math.cos(k * math.cos(t)) - math.cos(k)) / math.sin(t))
 
 
+_PEAK_CACHE = {}
+
+
 def longwire_peak(n):
-    return max(longwire_field(t / 10, n) for t in range(1, 900))
+    """Peak of the long-wire pattern for n half-waves. Cached - the bearing
+    scans in compare_options.py call this hundreds of thousands of times."""
+    if n not in _PEAK_CACHE:
+        _PEAK_CACHE[n] = max(longwire_field(t / 10, n) for t in range(1, 900))
+    return _PEAK_CACHE[n]
 
 
 def pattern_dB(target_bearing, wire_bearing, n):

@@ -22,6 +22,7 @@ from site_geometry import (  # noqa: E402
     to_enu, polar, offset, to_latlon, dms, mag,
     great_circle_bearing, great_circle_km,
     pattern_dB, ground_factor_dB, takeoff_deg,
+    longwire_field, longwire_peak,
 )
 
 FT = 0.3048
@@ -115,35 +116,128 @@ TARGETS = [
 
 LAMBDA_20M = 21.19
 
+# --------------------------------------------------------------------------
+# Bands. The JYR8010 is an 80 m EFHW; a 1:64 transformer feeds a 39.6 m wire
+# that is resonant on the HARMONIC bands only. n = number of half-waves the
+# wire carries = round(2 * 39.6 / lambda).
+#
+# 30 m, 17 m and 12 m are NOT here. The odd harmonics land at roughly 10.65,
+# 17.75 and 24.85 MHz, which miss the 30 m (10.10) and 17 m (18.07) allocations
+# entirely; 24.85 grazes the bottom of 12 m (24.89) but is out of band. Those
+# three need a tuner and are outside this model.
+#
+# Wavelengths are the exact values already used elsewhere in this study so that
+# every previously published 20 m and 15 m number reproduces bit for bit.
+#
+# peak_dBi is the free-space peak directivity of a resonant wire of n
+# half-waves (standard long-wire directivity table). It is needed ONLY for
+# cross-band comparison: pattern_dB() from site_geometry normalises each wire to
+# its OWN peak, which silently throws away the fact that a 4-lambda wire has
+# ~5 dB more peak gain than a half-wave one. Per-band net_dB keeps the old
+# normalised convention; net_dBi adds this back.
+#   CONFIDENCE: MODERATE. Textbook values for a thin resonant wire in free
+#   space, not computed for this installation.
+# --------------------------------------------------------------------------
+BANDS = [
+    # key   f_MHz  lambda_m  n   peak_dBi  arrival_scale  in_multiband
+    ("80m",  3.550,   84.45,  1,   2.15,     1.90,        False),
+    ("40m",  7.100,   42.22,  2,   3.80,     1.45,        True),
+    ("20m", 14.150,   21.19,  4,   5.30,     1.00,        True),
+    ("15m", 21.200,   14.14,  6,   6.40,     0.88,        True),
+    ("10m", 28.500,   10.52,  8,   7.10,     0.80,        False),
+]
+BAND_KEYS = [b[0] for b in BANDS]
+BAND = {b[0]: dict(zip(
+    ("key", "f", "lam", "n", "peak_dBi", "arr_scale", "mb"), b)) for b in BANDS}
+
+# The three bands aggregated together, per the operator's request: 40 m and
+# 20 m (the two they named) plus 15 m. 15 m is the next most-used band that
+# this antenna is actually RESONANT on - 17 m sees comparable on-air traffic
+# but is not a harmonic of a 39.6 m wire, so it cannot be scored here.
+MULTIBAND = [k for k in BAND_KEYS if BAND[k]["mb"]]
+
+# Workability thresholds on the absolute (dBi) scale. -5.0 dBi on 20 m is
+# -10.3 dB relative to that wire's own peak, i.e. essentially the -10 dB
+# threshold used in every earlier revision, so the 20 m counts are unchanged.
+WORKABLE_dBi = -5.0
+HOLE_dBi = -10.0
+
+
+def imax_positions(n):
+    """Current-maxima positions along the wire, metres from the feed.
+
+    A wire carrying n half-waves has current maxima at the centre of each
+    half-wave: (2k+1) * L / (2n). For n = 4 this returns the familiar
+    4.95 / 14.85 / 24.75 / 34.65 m used throughout this study.
+    """
+    return [(2 * k + 1) * WIRE_M / (2 * n) for k in range(n)]
+
+
 # 20 m current maxima along a 39.6 m EFHW, metres from the feed. These are the
 # points that actually radiate; their MEAN HEIGHT predicts low-angle
 # performance better than plain average wire height, and it is pure arithmetic.
-I_MAX_20M = [4.95, 14.85, 24.75, 34.65]
+I_MAX_20M = imax_positions(4)
 
-# Stylized elevation response of a VERTICALLY polarised radiator over average
-# ground (sigma 5 mS/m, eps_r 13), in dB relative to the peak of the horizontal
-# reference used elsewhere. Bakes in roughly 4 dB of average-ground loss and the
-# pseudo-Brewster rolloff below about 12 deg.
+
+def arrival_for_band(arr20_deg, band):
+    """Scale a 20 m arrival angle to another band.
+
+    Lower bands support shorter hops and arrive higher; higher bands arrive
+    lower. A single multiplier per band, clamped to a plausible range.
+
+    CONFIDENCE: LOW. This is a rule of thumb, not a propagation model. It
+    encodes the right DIRECTION of the effect and roughly the right size. It
+    does not know about hop count, season, or solar flux, and it deliberately
+    says nothing about whether a band is OPEN to a given path - see the
+    band-availability notes in README.md. Treat cross-band deltas of a couple
+    of dB as noise.
+    """
+    return min(60.0, max(3.0, arr20_deg * BAND[band]["arr_scale"]))
+
+# Ground LOSS for the vertically polarised part of a slant wire, over average
+# ground (sigma 5 mS/m, eps_r 13). This is loss ONLY - the elevation SHAPE now
+# comes from the 3-D wire pattern and the reflection phase, not from here. A
+# flat ~3 dB of average-ground loss plus the pseudo-Brewster rolloff below ~15
+# deg.
 #
 # CONFIDENCE: LOW. Traced from standard published curves, NOT computed from soil
-# constants. It sets the whole T-class result, so treat T numbers as indicative
-# only. See METHOD.md section 9.
-VERT_RESPONSE_dB = [
-    (5, -8.0), (10, -4.5), (15, -3.5), (20, -3.3), (25, -3.6), (30, -4.3),
-    (40, -6.5), (50, -9.5), (60, -13.5), (75, -21.0), (90, -40.0),
+# constants. See METHOD.md section 9.
+VERT_GROUND_LOSS_dB = [
+    (3, -9.0), (5, -7.0), (10, -4.5), (15, -3.5), (20, -3.3),
+    (30, -3.0), (45, -3.0), (60, -3.0), (90, -3.0),
 ]
 
 
-def vertical_factor_dB(elev_deg):
-    pts = VERT_RESPONSE_dB
-    if elev_deg <= pts[0][0]:
+def _interp(pts, x):
+    if x <= pts[0][0]:
         return pts[0][1]
     for i in range(len(pts) - 1):
         a, b = pts[i], pts[i + 1]
-        if a[0] <= elev_deg <= b[0]:
-            f = (elev_deg - a[0]) / (b[0] - a[0])
+        if a[0] <= x <= b[0]:
+            f = (x - a[0]) / (b[0] - a[0])
             return a[1] + f * (b[1] - a[1])
     return pts[-1][1]
+
+
+def vert_ground_loss_dB(elev_deg):
+    return _interp(VERT_GROUND_LOSS_dB, elev_deg)
+
+
+def slant_axis_angle(target_bearing, elev_deg, wire_bearing, slope_deg):
+    """True 3-D angle between the wire axis and the ray to the target, degrees.
+
+    The azimuth-only pattern used for the flat options is a 2-D shortcut that is
+    fine for a wire lying within a few degrees of horizontal. A wire tilted 66
+    deg needs the real thing: the long-wire pattern is a function of the angle
+    from the WIRE AXIS in three dimensions, and for a steep wire that angle
+    barely resembles the azimuth difference.
+    """
+    b, s = math.radians(wire_bearing), math.radians(slope_deg)
+    u = (math.sin(b) * math.cos(s), math.cos(b) * math.cos(s), math.sin(s))
+    t, a = math.radians(target_bearing), math.radians(elev_deg)
+    d = (math.sin(t) * math.cos(a), math.cos(t) * math.cos(a), math.sin(a))
+    dot = max(-1.0, min(1.0, sum(x * y for x, y in zip(u, d))))
+    return math.degrees(math.acos(dot))
 
 
 # --------------------------------------------------------------------------
@@ -181,42 +275,78 @@ class Option:
             run += w
         return self.avg_h
 
-    def mean_imax_height(self):
-        return sum(self.height_at_wire(s) for s in I_MAX_20M) / len(I_MAX_20M)
+    def mean_imax_height(self, band="20m"):
+        pos = imax_positions(BAND[band]["n"])
+        return sum(self.height_at_wire(s) for s in pos) / len(pos)
 
     def takeoff(self, lam):
         if self.is_slant:
             return None               # not a horizontal-wire lobe
         return takeoff_deg(self.avg_h, lam)
 
-    def score(self, bearing, arrival_deg):
-        """Return (pattern_dB, elev_dB, net_dB) on 20 m for one target."""
-        horizon, slope = terrain_at(bearing)
-        eff = max(arrival_deg, horizon) + slope
+    def peak_elev(self, band):
+        """Elevation of the pattern's global peak, degrees.
+
+        For flat options this is the closed-form ground-reflection lobe. For
+        slant options there is none, so scan elevation against the BEST
+        azimuth at each elevation. Scanning a single azimuth is wrong for a
+        sloper: looking along the wire's own bearing at low elevation puts you
+        close to the wire axis, which is a null, and the scan then reports an
+        almost-vertical "take-off" that the antenna does not actually have.
+        """
+        if not self.is_slant:
+            return self.takeoff(BAND[band]["lam"])
+        return max(range(1, 90), key=lambda a: max(
+            self.score(float(b), a, band, raw_elev=True)[2]
+            for b in range(0, 360, 10)))
+
+    def score(self, bearing, arrival_deg, band="20m", raw_elev=False):
+        """Return (pattern_dB, elev_dB, net_dB) on one band for one target.
+
+        net_dB is relative to an ideal horizontal wire's own peak, the same
+        normalisation every earlier revision used. Add BAND[band]["peak_dBi"]
+        to get the absolute scale used for cross-band comparison.
+        """
+        bd = BAND[band]
+        lam, n = bd["lam"], bd["n"]
+        if raw_elev:
+            eff = arrival_deg
+        else:
+            horizon, slope = terrain_at(bearing)
+            eff = max(arrival_for_band(arrival_deg, band), horizon) + slope
 
         if not self.is_slant:
-            pat = max(pattern_dB(bearing, b, 4) for _, _, b in self.segments)
-            elev = ground_factor_dB(eff, self.avg_h, LAMBDA_20M)
+            pat = max(pattern_dB(bearing, b, n) for _, _, b in self.segments)
+            elev = ground_factor_dB(eff, self.avg_h, lam)
             return pat, elev, pat + elev
 
-        # Slant wire: power-sum a vertical and a horizontal contribution,
-        # weighted sin^2 / cos^2 of the slope angle. The vertical part is
-        # omnidirectional in azimuth; the horizontal part keeps the long-wire
-        # pattern of the wire's ground projection.
+        # -------------------------------------------------------------
+        # Slant wire. See METHOD.md section 9 (rewritten 2026-09-05).
+        #
+        # Direct ray: the exact free-space long-wire pattern, evaluated at the
+        # TRUE 3-D angle from the wire axis. Ground: an image at the mean
+        # height of that band's current maxima, with the two polarisations
+        # reflecting differently - horizontal inverts (sin), vertical does not
+        # (cos), which is why a steep wire keeps low-angle response where a low
+        # horizontal wire cannot. Polarisation split is sin^2 / cos^2 of slope.
+        # -------------------------------------------------------------
         th = math.radians(self.slope_deg)
         fv, fh = math.sin(th) ** 2, math.cos(th) ** 2
         b0 = self.segments[0][2]
-        proj = self.wire_total * math.cos(th)
-        n_eff = max(2.0 * proj / LAMBDA_20M, 0.5)
-        h_pat = 10 ** (pattern_dB(bearing, b0, n_eff) / 10)
-        h_elev = 10 ** (ground_factor_dB(eff, max(self.avg_h, 0.5),
-                                         LAMBDA_20M) / 10)
-        v_lin = 10 ** (vertical_factor_dB(eff) / 10)
-        total = fv * v_lin + fh * h_pat * h_elev
-        net = 10 * math.log10(max(total, 1e-12))
+        psi = slant_axis_angle(bearing, eff, b0, self.slope_deg)
+        pat_lin = (longwire_field(psi, n) / longwire_peak(n)) ** 2
+
+        h_eff = max(self.mean_imax_height(band), 0.5)
+        ph = 2 * math.pi * (h_eff / lam) * math.sin(math.radians(eff))
+        gh = math.sin(ph) ** 2                       # horizontal image, ref 1.0
+        gv = math.cos(ph) ** 2 * 10 ** (vert_ground_loss_dB(eff) / 10)
+
+        vlin = fv * pat_lin * gv
+        hlin = fh * pat_lin * gh
+        net = 10 * math.log10(max(vlin + hlin, 1e-12))
         # Report the split for diagnostics; pattern/elev are not separable here.
-        return 10 * math.log10(max(fv * v_lin, 1e-12)), \
-            10 * math.log10(max(fh * h_pat * h_elev, 1e-12)), net
+        return (10 * math.log10(max(vlin, 1e-12)),
+                10 * math.log10(max(hlin, 1e-12)), net)
 
 
 def build_options():
@@ -343,19 +473,30 @@ def build_options():
         th = math.radians(slope)
         run = WIRE_M * math.cos(th)
         top = f + WIRE_M * math.sin(th)
+        extra = ""
         if key == "T-APEX":
             brg, top_en = APEX_BRG, APEX_EN
         else:
-            best = None
+            # Scanned on the THREE-BAND metric now, not 20 m alone. The 20 m
+            # optimum is computed too and reported, so the cost of the change
+            # is visible rather than silent.
+            best = {}
             for b in range(0, 360):           # NO parcel constraint here
                 o = Option(key, key, [(WIRE_M, (f + top) / 2, float(b))], [],
                            slope_deg=slope, feed_h=f, top_h=top)
-                a = aggregate(o)
-                rank = (a["n_workable"], a["mean_power_dB"])
-                if best is None or rank > best[0]:
-                    best = (rank, float(b))
-            brg = best[1]
+                m = aggregate_multiband(o)
+                a20 = aggregate(o, "20m")
+                for tag, rank in (
+                    ("mb", (m["n_workable"], m["n_regions_covered"],
+                            m["mean_power_dBi"])),
+                    ("20", (a20["n_workable"], a20["mean_power_dB"]))):
+                    if tag not in best or rank > best[tag][0]:
+                        best[tag] = (rank, float(b))
+            brg, brg20 = best["mb"][1], best["20"][1]
             top_en = offset((0, 0), brg, run)
+            if abs((brg - brg20 + 180) % 360 - 180) >= 3:
+                extra = (f" 20 m-only optimum was {brg20:.0f}T; the 3-band "
+                         f"scan moved it to {brg:.0f}T.")
         where = "IN parcel" if inside_parcel(top_en) else "OUT OF PARCEL"
         opts.append(Option(
             key,
@@ -364,24 +505,81 @@ def build_options():
             [(WIRE_M, (f + top) / 2, brg)],
             [("feed", 24, (0, 0)), ("tree top", int(round(top / FT)), top_en)],
             f"Support {run:.1f} m ({run/FT:.0f} ft) from the feed, {where}. "
-            f"Slant model - see METHOD.md section 9.",
+            f"Slant model - see METHOD.md section 9.{extra}",
             slope_deg=slope, feed_h=f, top_h=top))
     return opts
 
 
-def aggregate(opt):
-    nets = []
-    for name, lat, lon, arr in TARGETS:
-        b = great_circle_bearing(FEED[0], FEED[1], lat, lon)
-        nets.append(opt.score(b, arr)[2])
+TARGET_BEARINGS = {t[0]: great_circle_bearing(FEED[0], FEED[1], t[1], t[2])
+                   for t in TARGETS}
+
+
+def band_nets(opt, band):
+    """Per-region net dB on one band, in the normalised (own-peak) convention."""
+    return [opt.score(TARGET_BEARINGS[name], arr, band)[2]
+            for name, lat, lon, arr in TARGETS]
+
+
+def aggregate(opt, band="20m"):
+    """Single-band aggregate.
+
+    mean_power_dB keeps the historical normalised convention so every 20 m
+    figure published earlier still reproduces. mean_power_dBi adds that band's
+    peak directivity and is the ONLY one of the two that may be compared
+    across bands.
+    """
+    bd = BAND[band]
+    nets = band_nets(opt, band)
     lin = [10 ** (n / 10) for n in nets]
-    nets_sorted = sorted(nets)
+    s = sorted(nets)
+    dbi = [n + bd["peak_dBi"] for n in nets]
     return {
+        "band": band,
         "mean_power_dB": 10 * math.log10(sum(lin) / len(lin)),
-        "median_dB": nets_sorted[len(nets_sorted) // 2],
-        "worst_dB": nets_sorted[0],
-        "n_workable": sum(1 for n in nets if n >= -10),
-        "n_holes": sum(1 for n in nets if n < -15),
+        "mean_power_dBi": 10 * math.log10(sum(lin) / len(lin)) + bd["peak_dBi"],
+        "median_dB": s[len(s) // 2],
+        "worst_dB": s[0],
+        "n_workable": sum(1 for v in dbi if v >= WORKABLE_dBi),
+        "n_holes": sum(1 for v in dbi if v < HOLE_dBi),
+    }
+
+
+def aggregate_multiband(opt, bands=None):
+    """Aggregate linear power over every (band, region) pair.
+
+    Equal weight per band. This is the ranking metric the operator asked for:
+    'aggregate across 40 m and 20 m and the next most popular band ... based on
+    linear power to regions'. It is computed on the ABSOLUTE (dBi) scale,
+    because the normalised per-band figures deliberately discard the peak-gain
+    difference between a 1-lambda and a 3-lambda wire.
+
+    The same trap as the single-band metric applies, only more so: mean linear
+    power rewards concentration. Read n_workable (out of bands x regions)
+    beside it. See METHOD.md section 7.
+    """
+    bands = bands or MULTIBAND
+    lin, dbi = [], []
+    for band in bands:
+        g = BAND[band]["peak_dBi"]
+        for n in band_nets(opt, band):
+            lin.append(10 ** ((n + g) / 10))
+            dbi.append(n + g)
+    s = sorted(dbi)
+    return {
+        "bands": list(bands),
+        "n_cells": len(dbi),
+        "mean_power_dBi": 10 * math.log10(sum(lin) / len(lin)),
+        "median_dBi": s[len(s) // 2],
+        "worst_dBi": s[0],
+        "n_workable": sum(1 for v in dbi if v >= WORKABLE_dBi),
+        "n_holes": sum(1 for v in dbi if v < HOLE_dBi),
+        # A region counts as covered only if at least one of the three bands
+        # gets there. This is the number that matters operationally: you can
+        # change band, you cannot change antenna.
+        "n_regions_covered": sum(
+            1 for i in range(len(TARGETS))
+            if max(dbi[j * len(TARGETS) + i] for j in range(len(bands)))
+            >= WORKABLE_dBi),
     }
 
 
@@ -406,7 +604,7 @@ def kml_escape(s):
     return (s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
 
 
-def write_kml(opts, path):
+def write_kml(opts, path, ranked=None):
     L = ['<?xml version="1.0" encoding="UTF-8"?>',
          '<kml xmlns="http://www.opengis.net/kml/2.2"><Document>',
          '<name>JYR8010 EFHW deployment options - CN97ap</name>',
@@ -461,20 +659,37 @@ def write_kml(opts, path):
         L.append(pt(nm, to_enu(p), note, "ref"))
     L.append('</Folder>')
 
-    for o in opts:
+    ranked = ranked or opts
+    for o in ranked:
         st = ("optT" if o.key.startswith("T") else
               "optA" if o.key == "A" else "base" if o.key == "BASE"
               else "optV" if o.key.startswith("V") else "optS")
         if not o.supports:
             continue
-        agg = aggregate(o)
+        m = aggregate_multiband(o)
+        rank = ranked.index(o) + 1
         t20 = o.takeoff(LAMBDA_20M)
         t20s = f"{t20:.1f}&#176;" if t20 else "no lobe (peaks at zenith)"
-        hdr = (f"{o.label}<br/>Average height {o.avg_h/FT:.1f} ft<br/>"
-               f"20 m take-off {t20s}<br/>"
-               f"Aggregate {agg['mean_power_dB']:+.1f} dB, "
-               f"{agg['n_workable']}/{len(TARGETS)} regions workable")
-        L.append(f'<Folder><name>{o.key} - {kml_escape(o.label)}</name>'
+        rows = "".join(
+            "<tr><td>%s</td><td align=right>%+.2f dBi</td>"
+            "<td align=right>%d/%d</td><td align=right>%.0f ft</td>"
+            "<td align=right>%s</td></tr>" % (
+                b, aggregate(o, b)["mean_power_dBi"],
+                aggregate(o, b)["n_workable"], len(TARGETS),
+                o.mean_imax_height(b) / FT,
+                (f"{o.peak_elev(b):.0f}&#176;" if o.peak_elev(b) else "zenith"))
+            for b in BAND_KEYS)
+        hdr = (f"<b>#{rank} of {len(ranked)}</b> on the 3-band ranking<br/>"
+               f"{o.label}<br/>Average height {o.avg_h/FT:.1f} ft<br/>"
+               f"20 m take-off {t20s}<br/><br/>"
+               f"<b>3-band (40/20/15 m): {m['mean_power_dBi']:+.2f} dBi, "
+               f"{m['n_workable']}/{m['n_cells']} cells, "
+               f"{m['n_regions_covered']}/{len(TARGETS)} regions reachable on at "
+               f"least one band</b><br/><br/>"
+               f"<table border=1 cellpadding=3><tr><th>band</th><th>agg dBi</th>"
+               f"<th>regions</th><th>Imax ht</th><th>peak elev</th></tr>"
+               f"{rows}</table>")
+        L.append(f'<Folder><name>#{rank} {o.key} - {kml_escape(o.label)}</name>'
                  f'<description><![CDATA[{hdr}]]></description>')
         for nm, h, en in o.supports:
             L.append(pt(f"{o.key} {nm}", en, hdr + "<br/><br/>", st, h))
@@ -512,13 +727,18 @@ def main():
     print(f"{'key':7s} {'avg ht':>8s} {'Imax ht':>8s} {'slope':>6s} {'20m TO':>7s}"
           f" {'15m TO':>7s} {'legs':>10s}  supports")
     for o in opts:
-        t20, t15 = o.takeoff(21.19), o.takeoff(14.14)
-        f = lambda v: f"{v:.1f}" if v else ("slant" if o.is_slant else "zenith")
+        # For slant options takeoff() has no closed form; peak_elev() scans the
+        # pattern instead. Marked with a leading "~" to keep the two apart.
+        def f(band, o=o):
+            if o.is_slant:
+                return f"~{o.peak_elev(band):.0f}"
+            v = o.takeoff(BAND[band]["lam"])
+            return f"{v:.1f}" if v else "zenith"
         legs = "/".join(f"{b:.0f}" for b in o.legs)
         sup = ", ".join(f"{n} {h}ft" for n, h, _ in o.supports) or "-"
         sl = f"{o.slope_deg:5.1f}" if o.is_slant else "    -"
         print(f"{o.key:7s} {o.avg_h/FT:7.1f}f {o.mean_imax_height()/FT:7.1f}f "
-              f"{sl:>6s} {f(t20):>7s} {f(t15):>7s} {legs:>10s}  {sup}")
+              f"{sl:>6s} {f('20m'):>7s} {f('15m'):>7s} {legs:>10s}  {sup}")
     print("\nImax ht = mean height of the four 20 m current maxima. This is the")
     print("quantity that actually sets low-angle performance, and it is arithmetic.")
 
@@ -539,28 +759,83 @@ def main():
                       f"  {'IN' if inside_parcel(en) else 'OUT OF'} parcel")
 
     print("\n" + "=" * 100)
-    print("PER-REGION NET dB ON 20 m (pattern + terrain + elevation response)")
+    print("BANDS THIS ANTENNA IS RESONANT ON")
     print("=" * 100)
-    keys = [o.key for o in opts]
-    print(f"{'region':18s} {'brg':>5s} " + " ".join(f"{k:>7s}" for k in keys))
-    for name, lat, lon, arr in TARGETS:
-        b = great_circle_bearing(FEED[0], FEED[1], lat, lon)
-        row = [o.score(b, arr)[2] for o in opts]
-        print(f"{name:18s} {b:5.0f} " + " ".join(f"{v:7.1f}" for v in row))
+    print(f"{'band':6s} {'MHz':>7s} {'lambda':>8s} {'L/lambda':>9s} {'n':>3s} "
+          f"{'lobe from axis':>15s} {'peak dBi':>9s}  in 3-band aggregate")
+    for k in BAND_KEYS:
+        bd = BAND[k]
+        n = bd["n"]
+        lobe = min(range(1, 90),
+                   key=lambda t: -longwire_field(t, n)) if n > 1 else 90
+        print(f"{k:6s} {bd['f']:7.3f} {bd['lam']:7.2f}m {WIRE_M/bd['lam']:9.3f} "
+              f"{n:3d} {lobe:14d}d {bd['peak_dBi']:9.2f}  "
+              f"{'YES' if bd['mb'] else 'no'}")
+    print("\n30m / 17m / 12m are absent because the odd harmonics of a 39.6 m")
+    print("wire land at ~10.65 / 17.75 / 24.85 MHz - outside those allocations.")
+    print("They need a tuner and are not modelled here.")
 
     print("\n" + "=" * 100)
-    print("AGGREGATE ACROSS ALL %d REGIONS" % len(TARGETS))
+    print("PER-REGION NET dB, ALL BANDS (relative to each wire's own peak)")
     print("=" * 100)
-    print(f"{'key':5s} {'aggregate':>10s} {'median':>8s} {'worst':>8s} "
-          f"{'workable':>9s} {'holes':>6s}  {'vs A':>6s}  label")
+    keys = [o.key for o in opts]
+    for band in BAND_KEYS:
+        print(f"\n--- {band} (lambda {BAND[band]['lam']:.2f} m, n={BAND[band]['n']}, "
+              f"peak {BAND[band]['peak_dBi']:+.2f} dBi, arrival x{BAND[band]['arr_scale']}) ---")
+        print(f"{'region':18s} {'brg':>5s} {'arr':>5s} "
+              + " ".join(f"{k:>7s}" for k in keys))
+        for name, lat, lon, arr in TARGETS:
+            b = TARGET_BEARINGS[name]
+            row = [o.score(b, arr, band)[2] for o in opts]
+            print(f"{name:18s} {b:5.0f} {arrival_for_band(arr, band):5.1f} "
+                  + " ".join(f"{v:7.1f}" for v in row))
+
+    print("\n" + "=" * 100)
+    print("PER-BAND AGGREGATE ACROSS ALL %d REGIONS" % len(TARGETS))
+    print("=" * 100)
+    for band in BAND_KEYS:
+        print(f"\n--- {band} ---")
+        print(f"{'key':7s} {'agg dB':>8s} {'agg dBi':>8s} {'median':>8s} "
+              f"{'worst':>8s} {'workable':>9s} {'holes':>6s} {'Imax ht':>8s} "
+              f"{'peak el':>8s}")
+        for o in opts:
+            a = aggregate(o, band)
+            pe = o.peak_elev(band)
+            pes = f"{pe:.0f}d" if pe else "zenith"
+            print(f"{o.key:7s} {a['mean_power_dB']:8.2f} {a['mean_power_dBi']:8.2f} "
+                  f"{a['median_dB']:8.1f} {a['worst_dB']:8.1f} "
+                  f"{a['n_workable']:6d}/{len(TARGETS)} {a['n_holes']:6d} "
+                  f"{o.mean_imax_height(band)/FT:7.1f}f {pes:>8s}")
+
+    print("\n" + "=" * 100)
+    print("THREE-BAND AGGREGATE (%s) - THE RANKING" % ", ".join(MULTIBAND))
+    print("=" * 100)
     ref = aggregate([o for o in opts if o.key == "A"][0])["mean_power_dB"]
-    for o in opts:
-        a = aggregate(o)
-        print(f"{o.key:5s} {a['mean_power_dB']:9.2f}d {a['median_dB']:8.1f} "
-              f"{a['worst_dB']:8.1f} {a['n_workable']:6d}/{len(TARGETS)} "
-              f"{a['n_holes']:6d}  {a['mean_power_dB']-ref:+6.1f}  {o.label}")
-    print("\naggregate = 10*log10(mean linear power across all regions)")
-    print("workable  = regions at or above -10 dB;  holes = below -15 dB")
+    # Sort on SPREAD first, exactly as METHOD.md s7 requires: the count of
+    # band x region cells that actually work. Then the number of regions
+    # reachable on at least one band, then mean linear power last. Leading
+    # with regions-covered would have ranked a sloper above the flat-top on
+    # one extra marginal region while it lost on every other measure - the
+    # same metric trap that section already documents.
+    ranked = sorted(opts, key=lambda o: (
+        -aggregate_multiband(o)["n_workable"],
+        -aggregate_multiband(o)["n_regions_covered"],
+        -aggregate_multiband(o)["mean_power_dBi"]))
+    print(f"{'#':>2s} {'key':7s} {'agg dBi':>8s} {'median':>8s} {'worst':>8s} "
+          f"{'cells ok':>9s} {'holes':>6s} {'regions':>8s}  label")
+    for i, o in enumerate(ranked, 1):
+        m = aggregate_multiband(o)
+        print(f"{i:2d} {o.key:7s} {m['mean_power_dBi']:8.2f} "
+              f"{m['median_dBi']:8.1f} {m['worst_dBi']:8.1f} "
+              f"{m['n_workable']:5d}/{m['n_cells']:<3d} {m['n_holes']:6d} "
+              f"{m['n_regions_covered']:5d}/{len(TARGETS)}  {o.label}")
+    print("\nagg dBi   = 10*log10(mean linear power over %d band x region cells)"
+          % (len(MULTIBAND) * len(TARGETS)))
+    print("cells ok  = band/region pairs at or above %.1f dBi. PRIMARY SORT KEY."
+          % WORKABLE_dBi)
+    print("regions   = regions reachable on AT LEAST ONE of the three bands.")
+    print("            Second key. You can change band; you cannot change antenna.")
+    print("agg dBi is the LAST key, not the first - see METHOD.md section 7.")
 
     data = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data")
 
@@ -569,43 +844,113 @@ def main():
         fh.write("# Per-region net dB on 20 m. Generated by tools/compare_options.py.\n")
         fh.write("# net = long-wire pattern (best leg) + ground-reflection response at\n")
         fh.write("# the terrain-adjusted arrival angle. See METHOD.md for confidence.\n")
+        fh.write("# 20 m ONLY, kept for continuity. For every band see\n")
+        fh.write("# option-comparison-multiband.csv.\n")
         fh.write("region,bearing_true_deg," + ",".join(keys) + "\n")
         for name, lat, lon, arr in TARGETS:
-            b = great_circle_bearing(FEED[0], FEED[1], lat, lon)
+            b = TARGET_BEARINGS[name]
             fh.write(f"{name},{b:.1f}," +
-                     ",".join(f"{o.score(b, arr)[2]:.1f}" for o in opts) + "\n")
+                     ",".join(f"{o.score(b, arr, '20m')[2]:.1f}" for o in opts) + "\n")
+
+    with open(os.path.join(data, "option-comparison-multiband.csv"), "w",
+              encoding="utf-8", newline="") as fh:
+        fh.write("# Per-region net dB for EVERY resonant band. Long format.\n")
+        fh.write("# net_dB  = relative to that wire's own peak lobe (historical\n")
+        fh.write("#           convention; comparable ACROSS OPTIONS on one band).\n")
+        fh.write("# To compare ACROSS BANDS add the band's peak_dBi:\n")
+        fh.write("#   " + "  ".join(f"{k}={BAND[k]['peak_dBi']:+.2f}"
+                                    for k in BAND_KEYS) + "\n")
+        fh.write("# arrival_deg is the 20 m arrival angle scaled by the band's\n")
+        fh.write("# arrival multiplier - a rule of thumb, LOW confidence.\n")
+        fh.write("# 30m/17m/12m are not harmonics of a 39.6 m wire and are absent.\n")
+        fh.write("band,freq_MHz,n_half_waves,region,bearing_true_deg,arrival_deg,"
+                 + ",".join(keys) + "\n")
+        for band in BAND_KEYS:
+            bd = BAND[band]
+            for name, lat, lon, arr in TARGETS:
+                b = TARGET_BEARINGS[name]
+                fh.write(f"{band},{bd['f']:.3f},{bd['n']},{name},{b:.1f},"
+                         f"{arrival_for_band(arr, band):.1f}," +
+                         ",".join(f"{o.score(b, arr, band)[2]:.1f}" for o in opts)
+                         + "\n")
+
+    with open(os.path.join(data, "option-band-aggregate.csv"), "w",
+              encoding="utf-8", newline="") as fh:
+        fh.write("# Aggregate per option per band, across all 25 regions.\n")
+        fh.write("# aggregate_dB  = normalised to the wire's own peak (compare options\n")
+        fh.write("#                 within one band only).\n")
+        fh.write("# aggregate_dBi = aggregate_dB + band peak directivity. THIS is the\n")
+        fh.write("#                 one to compare across bands.\n")
+        fh.write("# n_workable counts regions at or above %.1f dBi; holes below %.1f.\n"
+                 % (WORKABLE_dBi, HOLE_dBi))
+        fh.write("# mean_imax_height_ft is band-specific: the current maxima move with\n")
+        fh.write("# the harmonic number. Pure arithmetic, HIGH confidence.\n")
+        fh.write("# peak_elev_deg: ground-reflection lobe for flat options; for slant\n")
+        fh.write("# options a numeric scan of the slant model (METHOD.md s9, LOW).\n")
+        fh.write("key,band,freq_MHz,n_half_waves,aggregate_dB,aggregate_dBi,"
+                 "median_dB,worst_dB,n_workable,n_holes,mean_imax_height_ft,"
+                 "peak_elev_deg,label\n")
+        for o in opts:
+            for band in BAND_KEYS:
+                a = aggregate(o, band)
+                pe = o.peak_elev(band)
+                pes = f"{pe:.0f}" if pe else "zenith"
+                fh.write(f"{o.key},{band},{BAND[band]['f']:.3f},{BAND[band]['n']},"
+                         f"{a['mean_power_dB']:.2f},{a['mean_power_dBi']:.2f},"
+                         f"{a['median_dB']:.1f},{a['worst_dB']:.1f},"
+                         f"{a['n_workable']},{a['n_holes']},"
+                         f"{o.mean_imax_height(band)/FT:.1f},{pes},"
+                         f"\"{o.label}\"\n")
 
     with open(os.path.join(data, "option-aggregate.csv"), "w",
               encoding="utf-8", newline="") as fh:
-        fh.write("# Aggregate scores across all 25 regions on 20 m.\n")
+        fh.write("# Headline table. 20 m single-band columns plus the three-band\n")
+        fh.write("# aggregate the ranking is built on.\n")
         fh.write("# aggregate_dB = 10*log10(mean linear power). NOTE: this metric\n")
         fh.write("# rewards concentrating power into a few bearings, so a spiky\n")
         fh.write("# straight wire can score near a broad one. Read it alongside\n")
         fh.write("# n_workable and n_holes, which capture spread.\n")
-        fh.write("# takeoff 'slant' = slope > 30 deg, modelled as a slant/vertical\n")
-        fh.write("# radiator (METHOD.md s9, LOW confidence) - not a horizontal-wire lobe.\n")
+        fh.write("# mb3_* columns aggregate 40m + 20m + 15m on the ABSOLUTE (dBi)\n")
+        fh.write("# scale over 75 band x region cells. mb3_regions_covered counts\n")
+        fh.write("# regions reachable on at least ONE of the three - that is the\n")
+        fh.write("# primary sort key, then mb3_workable, then mb3_aggregate_dBi.\n")
+        fh.write("# takeoff 'slant' = slope > 30 deg, modelled as a slant radiator\n")
+        fh.write("# (METHOD.md s9, LOW confidence) - not a horizontal-wire lobe.\n")
         fh.write("# 'zenith' = h < lambda/4, so no distinct lobe exists.\n")
         fh.write("# mean_imax_height_ft = mean height of the four 20 m current maxima.\n")
         fh.write("# That column is pure arithmetic and HIGH confidence; prefer it.\n")
-        fh.write("key,avg_height_ft,mean_imax_height_ft,slope_deg,takeoff_20m_deg,"
-                 "takeoff_15m_deg,legs_true_deg,"
-                 "aggregate_dB,median_dB,worst_dB,n_workable,n_holes,delta_vs_A_dB,label\n")
+        fh.write("mb3_rank,key,avg_height_ft,mean_imax_height_ft,slope_deg,"
+                 "takeoff_20m_deg,takeoff_15m_deg,legs_true_deg,"
+                 "aggregate_dB,median_dB,worst_dB,n_workable,n_holes,delta_vs_A_dB,"
+                 "mb3_aggregate_dBi,mb3_median_dBi,mb3_worst_dBi,mb3_workable_of_75,"
+                 "mb3_holes,mb3_regions_covered,label\n")
         for o in opts:
             a = aggregate(o)
+            m = aggregate_multiband(o)
             t20, t15 = o.takeoff(21.19), o.takeoff(14.14)
-            miss = "slant" if o.is_slant else "zenith"
-            s20 = f"{t20:.1f}" if t20 else miss
-            s15 = f"{t15:.1f}" if t15 else miss
+            if o.is_slant:
+                # "~NN" = scanned peak of the slant model, not a closed-form
+                # ground-reflection lobe. Different quantity, marked as such.
+                s20 = f"~{o.peak_elev('20m'):.0f}"
+                s15 = f"~{o.peak_elev('15m'):.0f}"
+            else:
+                s20 = f"{t20:.1f}" if t20 else "zenith"
+                s15 = f"{t15:.1f}" if t15 else "zenith"
             legs = "/".join(f"{b:.0f}" for b in o.legs)
-            fh.write(f"{o.key},{o.avg_h/FT:.1f},{o.mean_imax_height()/FT:.1f},"
+            fh.write(f"{ranked.index(o)+1},{o.key},{o.avg_h/FT:.1f},"
+                     f"{o.mean_imax_height()/FT:.1f},"
                      f"{o.slope_deg:.0f},{s20},{s15},{legs},"
                      f"{a['mean_power_dB']:.2f},{a['median_dB']:.1f},"
                      f"{a['worst_dB']:.1f},{a['n_workable']},{a['n_holes']},"
-                     f"{a['mean_power_dB']-ref:+.1f},\"{o.label}\"\n")
+                     f"{a['mean_power_dB']-ref:+.1f},"
+                     f"{m['mean_power_dBi']:.2f},{m['median_dBi']:.1f},"
+                     f"{m['worst_dBi']:.1f},{m['n_workable']},{m['n_holes']},"
+                     f"{m['n_regions_covered']},\"{o.label}\"\n")
 
     out = os.path.join(data, "deployment-options.kml")
-    print("\nWrote option-comparison.csv, option-aggregate.csv")
-    print("KML written to", os.path.normpath(write_kml(opts, out)))
+    print("\nWrote option-comparison.csv, option-comparison-multiband.csv,")
+    print("      option-band-aggregate.csv, option-aggregate.csv")
+    print("KML written to", os.path.normpath(write_kml(opts, out, ranked)))
 
 
 if __name__ == "__main__":
