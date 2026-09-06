@@ -653,7 +653,11 @@ def build_redbox_class():
     apex_h = 50.0 * FT
     leg1 = math.hypot(APEX_DIST, apex_h - f)
     rest = WIRE_M - leg1
-    grid = red_box_points()
+    # 0.5 m grid for the single-post scans - coarser than this and the reported
+    # post position moves by a metre or two between runs, which is enough to
+    # make the documented figures disagree with the tool.
+    grid = red_box_points(0.5)
+    coarse = red_box_points(1.0)          # the two-post scan is O(n^2)
     out = []
 
     def score_of(o):
@@ -661,33 +665,48 @@ def build_redbox_class():
         return (m["n_workable"], m["n_regions_covered"], m["mean_power_dBi"])
 
     # -- RB-1TREE: feed -> apex tree -> ONE post. One throw, one post. ------
-    best = None
-    for post_ft in POST_HEIGHTS_FT:
-        ph = post_ft * FT
-        for pe, pn in grid:
-            run = math.hypot(pe - APEX_EN[0], pn - APEX_EN[1])
-            need = math.hypot(run, apex_h - ph)
-            if abs(need - rest) > 0.45:        # wire must actually reach
-                continue
-            brg = polar(pe - APEX_EN[0], pn - APEX_EN[1])[1]
-            o = Option("RB-1TREE", "x",
-                       [(leg1, (f + apex_h) / 2, APEX_BRG),
-                        (rest, (apex_h + ph) / 2, brg)], [])
-            r = score_of(o)
-            if best is None or r > best[0]:
-                best = (r, post_ft, (pe, pn), brg, run)
-    if best:
-        _, post_ft, pen, brg, run = best
+    #
+    # Two keys. RB-1TREE is the optimiser's best over all post heights, which
+    # always picks the tallest allowed. RB-POST20 fixes the post at 20 ft
+    # because that is the height actually recommended: the whole 10-36 ft range
+    # spans 0.83 dB, 20 ft already matches F10-A's cell count and beats its
+    # worst case, and a taller mast on a garden stake is a windstorm problem
+    # rather than a dB problem. The two are kept separate so the recommendation
+    # and the scored geometry can never drift apart.
+    def best_post(fixed_ft=None):
+        b_ = None
+        for post_ft in ([fixed_ft] if fixed_ft else POST_HEIGHTS_FT):
+            ph = post_ft * FT
+            for pe, pn in grid:
+                run = math.hypot(pe - APEX_EN[0], pn - APEX_EN[1])
+                if abs(math.hypot(run, apex_h - ph) - rest) > 0.45:
+                    continue                   # wire must actually reach
+                brg = polar(pe - APEX_EN[0], pn - APEX_EN[1])[1]
+                o = Option("x", "x", [(leg1, (f + apex_h) / 2, APEX_BRG),
+                                      (rest, (apex_h + ph) / 2, brg)], [])
+                r = score_of(o)
+                if b_ is None or r > b_[0]:
+                    b_ = (r, post_ft, (pe, pn), brg, run)
+        return b_
+
+    for key, fixed, note in (
+        ("RB-POST20", 20.0, "RECOMMENDED BUILD. "),
+        ("RB-1TREE", None, ""),
+    ):
+        b_ = best_post(fixed)
+        if not b_:
+            continue
+        _, post_ft, pen, brg, run = b_
         d, b = polar(*pen)
         out.append(Option(
-            "RB-1TREE",
+            key,
             f"Apex tree at 50 ft, then ONE post at {post_ft:.0f} ft in the "
-            f"staked strip",
+            f"staked strip" + (" (recommended)" if fixed else " (best found)"),
             [(leg1, (f + apex_h) / 2, APEX_BRG),
              (rest, (apex_h + post_ft * FT) / 2, brg)],
             [("feed", 10, (0.0, 0.0)), ("apex tree", 50, APEX_EN),
              ("post", int(post_ft), pen)],
-            f"Post {d:.1f} m ({d/FT:.0f} ft) from the feed at {b:.0f}T / "
+            f"{note}Post {d:.1f} m ({d/FT:.0f} ft) from the feed at {b:.0f}T / "
             f"{mag(b):.0f}M, {run:.1f} m from the apex. ONE rope throw and one "
             f"post you can walk to."))
 
@@ -700,12 +719,12 @@ def build_redbox_class():
         for h4 in POST_HEIGHTS_FT:
             if h4 > h3:
                 continue
-            for p3 in grid:
+            for p3 in coarse:
                 run3 = math.hypot(p3[0] - APEX_EN[0], p3[1] - APEX_EN[1])
                 if abs(math.hypot(run3, apex_h - h3 * FT) - into) > 0.45:
                     continue
                 b3 = polar(p3[0] - APEX_EN[0], p3[1] - APEX_EN[1])[1]
-                for p4 in grid:
+                for p4 in coarse:
                     run4 = math.hypot(p4[0] - p3[0], p4[1] - p3[1])
                     if abs(math.hypot(run4, (h3 - h4) * FT) - tail) > 0.45:
                         continue

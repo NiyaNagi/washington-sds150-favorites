@@ -33,7 +33,13 @@ CORRIDOR = ("kc2025_corridor.jpg", 55.0, (14.6, -4.5))
 WIDE = ("kc2025_close.jpg", 90.0, (0.0, 0.0))
 
 OPTS = {o.key: o for o in C.build_options()}
-PLAN = OPTS["F10-A"]
+
+# Two buildable deployments, drawn side by side throughout. RB-POST20 leads:
+# it beats F10-A on aggregate and worst case while needing one fewer rope
+# throw, and its one new support is a post you walk to rather than a limb you
+# have to hit with a weight.
+PRIMARY = OPTS["RB-POST20"]
+SECOND = OPTS["F10-A"]
 PLAN24 = OPTS["A"]
 
 
@@ -42,15 +48,17 @@ def sup3d(opt):
     return [(nm, en[0], en[1], float(h)) for nm, h, en in opt.supports]
 
 
-PTS = sup3d(PLAN)
+PTS = sup3d(PRIMARY)
+PTS_B = sup3d(SECOND)
 PTS24 = sup3d(PLAN24)
 
 
-def wire_len_to(i):
+def wire_len_to(i, pts=None):
     """Wire length consumed up to support i, metres."""
+    pts = pts or PTS
     s = 0.0
     for k in range(i):
-        a, b = PTS[k], PTS[k + 1]
+        a, b = pts[k], pts[k + 1]
         s += math.sqrt((b[1] - a[1]) ** 2 + (b[2] - a[2]) ** 2
                        + ((b[3] - a[3]) * FT) ** 2)
     return s
@@ -90,10 +98,22 @@ def plan_svg(capture, size=1400, show24=False):
          'flood-opacity=".95"/></filter></defs>']
 
     if show24:
-        pts24 = " ".join(f"{P(p[1], p[2])[0]:.1f},{P(p[1], p[2])[1]:.1f}"
-                         for p in PTS24)
-        o.append(f'<polyline points="{pts24}" fill="none" stroke="#7de2ff" '
-                 f'stroke-width="4" stroke-dasharray="12 9" opacity=".85"/>')
+        # The operator's staked strip, in which the post stands.
+        rb = " ".join(f"{P(e, n)[0]:.1f},{P(e, n)[1]:.1f}" for e, n in C.RED_BOX)
+        o.append(f'<polygon points="{rb}" fill="#ff2f2f" fill-opacity=".16" '
+                 f'stroke="#ff2f2f" stroke-width="4"/>')
+        # Alternative deployment, dashed.
+        ptsb = " ".join(f"{P(p[1], p[2])[0]:.1f},{P(p[1], p[2])[1]:.1f}"
+                        for p in PTS_B)
+        o.append(f'<polyline points="{ptsb}" fill="none" stroke="#000" '
+                 f'stroke-width="9" opacity=".45"/>')
+        o.append(f'<polyline points="{ptsb}" fill="none" stroke="#7de2ff" '
+                 f'stroke-width="5" stroke-dasharray="14 10" '
+                 f'stroke-linejoin="round"/>')
+        for p in PTS_B[2:]:
+            x, y = P(p[1], p[2])
+            o.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="8" fill="none" '
+                     f'stroke="#7de2ff" stroke-width="4"/>')
 
     pts = " ".join(f"{P(p[1], p[2])[0]:.1f},{P(p[1], p[2])[1]:.1f}"
                    for p in PTS)
@@ -241,7 +261,7 @@ def profile_svg(w=1120, h=340):
     for s in C.imax_positions(4):
         if s > wire_len_to(len(PTS) - 1):
             continue
-        u = PLAN.height_at_wire(s) / FT
+        u = PRIMARY.height_at_wire(s) / FT
         x, y = P(s, u)
         o.append(f'<line x1="{x:.1f}" y1="{y:.1f}" x2="{x:.1f}" '
                  f'y2="{P(0,0)[1]:.1f}" stroke="var(--accent)" '
@@ -347,16 +367,23 @@ def main():
         "plan": plan, "wide": wide, "iso": iso_svg(),
         "profile": profile_svg(),
     }
+    # Standpoints follow the PRIMARY deployment, so the last two are computed
+    # from the post rather than hard-coded to F10-A's end tie-off.
+    post = PTS[-1]
+    apex = PTS[1]
+    brg_apex_post = polar(post[1] - apex[1], post[2] - apex[2])[1]
+    brg_post_feed = polar(-post[1], -post[2])[1]
     views = []
     for nm, en, brg, cap in (
         ("From the feed, looking out along leg 1", (0.0, 0.0), 82.2,
          "Stand at the transformer with your back to the house."),
         ("From the lawn, looking back at the whole run", (8.0, -12.0), 55.0,
          "Stand in the middle of the lawn, southeast of the feed."),
-        ("Under the apex, looking down leg 2", (15.87, 2.16), 130.0,
-         "Stand at the base of the apex tree."),
-        ("From the end, looking back up the wire", (29.16, -9.03), 287.0,
-         "Stand at the end tie-off, looking back toward the house."),
+        ("Under the apex, looking down to the post", (apex[1], apex[2]),
+         brg_apex_post, "Stand at the base of the apex tree."),
+        ("From the post, looking back up the wire", (post[1], post[2]),
+         brg_post_feed,
+         "Stand at the post in your staked strip, looking back at the house."),
     ):
         views.append((nm, cap, en, brg, eye_svg(en, brg, nm)))
     return out, views
@@ -459,20 +486,21 @@ footer{margin-top:70px;padding-top:20px;border-top:1px solid var(--rule);
 """
 
 
-def schedule_rows():
+def schedule_rows(pts=None, hi_rows=(1, 2)):
+    pts = pts or PTS
     r = []
-    for i, (nm, e, n, u) in enumerate(PTS):
+    for i, (nm, e, n, u) in enumerate(pts):
         d, b = polar(e, n)
         la, lo = to_latlon(e, n)
         sa, so = dms(la, lo)
         dist = "—" if d < 0.01 else f"{d/FT:.1f} ft"
         brg = "—" if d < 0.01 else f"{b:.0f}° / <b>{mag(b):.0f}°</b>"
-        hi = ' class="hi"' if i in (1, 2) else ""
+        hi = ' class="hi"' if i in hi_rows else ""
         r.append(
             f"<tr{hi}><td class='n'>{i+1}</td><td>{nm}</td>"
             f"<td class='n'>{u:.0f} ft</td><td class='n'>{dist}</td>"
             f"<td class='n'>{brg}</td>"
-            f"<td class='n'>{wire_len_to(i)/FT:.1f} ft</td>"
+            f"<td class='n'>{wire_len_to(i, pts)/FT:.1f} ft</td>"
             f"<td class='n' style='font-size:12.5px'>{sa}<br>{so}</td></tr>")
     return "\n".join(r)
 
@@ -489,26 +517,72 @@ def build_html(parts, views):
             f"Numbers mark the supports.</figcaption></figure>")
 
     total_ft = wire_len_to(len(PTS) - 1) / FT
+    total_b = wire_len_to(len(PTS_B) - 1, PTS_B) / FT
+    post = PTS[-1]
+    pd, pb = polar(post[1], post[2])
+    pla, plo = to_latlon(post[1], post[2])
+    psa, pso = dms(pla, plo)
     return f"""<title>Threading 130 Feet Into the Woods</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>{CSS}</style>
 <div class="wrap">
 
 <header class="mast">
-  <div class="eyebrow">Deployment guide · F10-A · JYR8010 EFHW · CN97ap</div>
+  <div class="eyebrow">Deployment guide · RB-POST20 and F10-A · JYR8010 EFHW · CN97ap</div>
   <h1>Threading 130 feet<br>into the woods</h1>
-  <p class="lede">The bent flat-top, feed at 10 ft. Every position below is
+  <p class="lede">Two buildable deployments, both with the feed at 10 ft, both
   computed from the survey and checked against the 2025 King County aerial —
   which shows something none of the earlier analysis could: <b>this is a forest
-  installation, not a lawn installation.</b></p>
+  installation, not a lawn installation.</b> The one to build uses your staked
+  garden post and needs a single rope throw.</p>
   <div class="meta">
     <span>Wire used <b>{total_ft:.0f} ft</b> of 130</span>
-    <span>Supports <b>4</b></span>
-    <span>Highest throw <b>50 ft</b></span>
+    <span>Rope throws <b>1</b></span>
+    <span>Highest attachment <b>50 ft</b></span>
     <span>Declination <b>+15.3°E</b></span>
     <span>Imagery <b>King County 2025, 3–6 in/px</b></span>
   </div>
 </header>
+
+<section>
+  <div class="sec-head">
+    <div class="eyebrow">Pick one</div>
+    <h2>The post option, or the three-tree option</h2>
+  </div>
+  <p>Both start identically: transformer at 10 ft, one line over a 50 ft limb in
+  the apex tree. They differ only in what happens after that.</p>
+  <div class="tbl"><table>
+    <caption>Both deployments, feed at 10 ft</caption>
+    <thead><tr><th></th><th>RB-POST20 · build this</th><th>F10-A · the fallback</th></tr></thead>
+    <tbody>
+      <tr class="hi"><td>After the apex tree</td>
+        <td><b>one 20 ft post</b> in your staked strip</td>
+        <td>two more tree attachments, 50 ft and 30 ft</td></tr>
+      <tr><td>Rope throws</td><td class="n"><b>1</b></td><td class="n">1, plus two more attachments</td></tr>
+      <tr><td>3-band aggregate</td><td class="n">−0.75 dBi</td><td class="n">−0.46 dBi</td></tr>
+      <tr><td>Cells workable</td><td class="n">46 / 75</td><td class="n">47 / 75</td></tr>
+      <tr><td>Regions</td><td class="n">23 / 25</td><td class="n">24 / 25</td></tr>
+      <tr class="hi"><td><b>Worst region</b></td><td class="n"><b>−23.1 dBi</b></td><td class="n">−26.2 dBi</td></tr>
+      <tr><td>15 m</td><td class="n">+1.88 dBi</td><td class="n">+1.93 dBi</td></tr>
+      <tr><td>Wire used</td><td class="n">{total_ft:.0f} ft</td><td class="n">{total_b:.0f} ft</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note">
+    <b>They are within a third of a dB of each other, and the post option has the
+    better worst case.</b> That is the whole argument: you are not trading
+    performance for convenience here, you are trading a marginal region for a
+    rope throw you do not have to make and an attachment you can reach with a
+    stepladder. Build RB-POST20. Keep F10-A for the day you want the last
+    region back, or if the post turns out not to stand.
+  </div>
+  <div class="note">
+    <b>And if you can get 30 ft of post up instead of 20:</b> the same design
+    scores −0.40 dBi and 48 / 75, with the post moving out to 95.4 ft at
+    <b>102° magnetic</b>. That is 0.35 dB for 10 more feet of PVC. Worth it if
+    the post takes it safely; not worth a structure that will not survive a
+    windstorm on a garden stake.
+  </div>
+</section>
 
 <section>
   <div class="sec-head">
@@ -535,16 +609,6 @@ def build_html(parts, views):
     </tbody>
   </table></div>
   <div class="note alarm">
-    <b>Before you build this, read the garden-post option.</b> After this guide was
-    written you marked a strip of pre-staked posts on the plan. Running the apex
-    tree straight to a <b>20 ft post</b> in that strip — <b>91 ft from the feed at
-    101° magnetic</b> — matches this design's workable-cell count, improves its
-    worst region from −26.2 to −23.1 dBi, and needs <b>one rope throw instead of
-    two</b>. Steps 1–7 below still apply; you simply drop support 3 and finish on
-    the post. The field plan has the full comparison.
-  </div>
-
-  <div class="note alarm">
     <b>And there is no way to avoid canopy.</b> The mown lawn measures roughly
     <b>12 × 19 m (40 × 62 ft)</b>, a 74 ft diagonal. The wire needs
     <b>110 ft of ground path</b>. It does not fit in the open, at any bearing.
@@ -564,10 +628,12 @@ def build_html(parts, views):
     <div class="eyebrow">Overhead</div>
     <h2>Where every point lands</h2>
   </div>
-  <figure>{parts['plan']}<figcaption><b>Solid orange</b> is F10-A with the
-  feed at 10 ft. <b>Dashed blue</b> is the same design with the feed at 24 ft —
-  only support 3 moves, and only by 6 ft 7 in. Bearings are given true first,
-  <b>magnetic second in bold</b>; set your compass to the bold number.
+  <figure>{parts['plan']}<figcaption><b>Solid orange</b> is RB-POST20 — apex
+  tree, then the post. <b>Dashed blue</b> is F10-A, which carries on into the
+  trees to two more attachments. The <b>red outline</b> is your staked strip,
+  georeferenced from the annotation you drew with a 6 cm worst residual.
+  Bearings are true first, <b>magnetic second in bold</b>; set your compass to
+  the bold number.
   Aerial: King County GIS 2025 orthomosaic (EagleView), 3–6 in/px, requested in
   EPSG:3857 about a computed centre, so the overlay is georeferenced by
   construction rather than fitted to control points.</figcaption></figure>
@@ -582,16 +648,93 @@ def build_html(parts, views):
     <h2>Support schedule</h2>
   </div>
   <div class="tbl"><table>
-    <caption>F10-A · feed fixed at 10 ft · bearings true / <b>magnetic</b></caption>
+    <caption>RB-POST20 · build this · feed fixed at 10 ft · bearings true / <b>magnetic</b></caption>
     <thead><tr><th>#</th><th>Point</th><th>Height</th><th>From feed</th>
       <th>Bearing T / <b>M</b></th><th>Wire used</th><th>Coordinates</th></tr>
     </thead>
-    <tbody>{schedule_rows()}</tbody>
+    <tbody>{schedule_rows(PTS, (1, 2))}</tbody>
   </table></div>
-  <p>Highlighted rows are the two that carry the design. <b>Support 3 sits at
-  97.4 ft of wire</b> — that is deliberately the 40 m and 15 m current maximum,
-  and it is why the end tie-off barely matters. Add <b>2–3% slack</b> beyond
-  the tabulated wire lengths and expect 8–12 in of sag mid-span.</p>
+  <p><b>The post goes at {pd/FT:.1f} ft from the transformer on a bearing of
+  {mag(pb):.0f}° magnetic</b> — {psa} {pso}. That is inside the strip you
+  marked. Add <b>2–3% slack</b> beyond the tabulated wire lengths and expect
+  8–12 in of sag mid-span.</p>
+
+  <div class="tbl"><table>
+    <caption>F10-A · the fallback · same feed, two more tree attachments</caption>
+    <thead><tr><th>#</th><th>Point</th><th>Height</th><th>From feed</th>
+      <th>Bearing T / <b>M</b></th><th>Wire used</th><th>Coordinates</th></tr>
+    </thead>
+    <tbody>{schedule_rows(PTS_B, (1, 2))}</tbody>
+  </table></div>
+  <p>In F10-A, <b>support 3 sits at 97.4 ft of wire</b> — deliberately the 40 m
+  and 15 m current maximum, which is why its end tie-off barely matters. The
+  post option does not have that support at all; it runs the whole remaining
+  {(total_ft - wire_len_to(1)/FT):.0f} ft in one span from the apex to the
+  post.</p>
+</section>
+
+<section>
+  <div class="sec-head">
+    <div class="eyebrow">The one thing you have to build</div>
+    <h2>A 20 ft post that survives a windstorm</h2>
+  </div>
+  <p>Everything else in this plan is rope and wire. This is the only structure,
+  and it is holding roughly half the tension of a 130 ft antenna at
+  {pd/FT:.0f} ft from the house.</p>
+  <ul class="tight">
+    <li><b>Schedule 40 PVC, not thin-wall.</b> 2 in at the base stepped to
+      1½ in and 1¼ in above. Thin-wall at 20 ft with a wire on top folds.</li>
+    <li><b>Guy it at two-thirds height</b> — about 13 ft — with three lines at
+      120°. On a garden stake this is not optional; the antenna pulls sideways
+      on one bearing and nothing resists that but guys.</li>
+    <li><b>Take the wire tension into the guys, not the post.</b> Terminate the
+      antenna on a short halyard through a pulley or thimble at the top so the
+      post carries compression, and let a guy anchor take the pull.</li>
+    <li><b>An insulator at the top.</b> The wire arrives near a current maximum
+      here rather than a voltage one, so this is less critical than the apex —
+      but PVC gets conductive when it is filthy and wet, so use one anyway.</li>
+    <li><b>Leave it lowerable.</b> A sleeve joint at the bottom section means
+      you can drop the whole thing to re-tension after the first month of
+      settling, which you will want to do.</li>
+  </ul>
+  <h3 style="margin-top:8px">Which stake — and pick the stake first</h3>
+  <p>The wire length pins how far the post can be from the apex tree, so only a
+  narrow band of your strip is usable: about <b>7 ft of its 59 ft length</b>, at
+  the north-west end nearest the house. <b>Raising the post moves that band
+  further along the strip</b>, which is the useful degree of freedom if your
+  stakes are already in fixed places.</p>
+
+  <div class="tbl"><table>
+    <caption>Reachable band, by post height · apex tree at 50 ft, feed at 10 ft</caption>
+    <thead><tr><th>Post height</th><th>Reachable band from the feed</th>
+      <th>Best point</th><th>3-band</th><th>Cells</th></tr></thead>
+    <tbody>
+      <tr><td class="n">16 ft</td><td class="n">88.4 – 95.5 ft</td>
+        <td class="n">88.7 ft @ 101°M</td><td class="n">−0.85</td><td class="n">46 / 75</td></tr>
+      <tr class="hi"><td class="n"><b>20 ft</b></td><td class="n"><b>90.6 – 97.6 ft</b></td>
+        <td class="n"><b>90.9 ft @ 101°M</b></td><td class="n"><b>−0.71</b></td><td class="n"><b>47 / 75</b></td></tr>
+      <tr><td class="n">24 ft</td><td class="n">92.8 – 99.0 ft</td>
+        <td class="n">93.5 ft @ 102°M</td><td class="n">−0.58</td><td class="n">47 / 75</td></tr>
+      <tr><td class="n">30 ft</td><td class="n">94.6 – 101.1 ft</td>
+        <td class="n">94.6 ft @ 102°M</td><td class="n">−0.40</td><td class="n">48 / 75</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="note">
+    <b>So: measure to your stakes, then choose the post height that reaches
+    the one you like.</b> Roughly <b>2 ft of extra post buys 2 ft further out</b>
+    along the strip. Within each band the near end always scores better — the
+    numbers fall by about 0.2 dB and 5 cells across the 7 ft — so if two stakes
+    both work, take the one closer to the house.
+  </div>
+
+  <div class="note">
+    <b>Height is the least important variable here.</b> The whole 10 → 36 ft
+    range spans <b>0.83 dB</b> — about 0.32 dB per 10 ft — and the post's
+    position shifts by only 10 ft across it. Build the height that stands up
+    safely and stop. There is no version of this where an extra 6 ft of PVC is
+    worth a mast that comes down in a gale.
+  </div>
 </section>
 
 <section>
@@ -630,30 +773,32 @@ def build_html(parts, views):
   </div>
   <ol class="steps">
     <li><h3>Mark the ground first, before any rope goes up</h3>
-      <p>Work from the transformer. Put a stake at each of these, measured with
-      a tape and a compass set to <b>magnetic</b>:</p>
+      <p>Work from the transformer with a tape and a compass set to
+      <b>magnetic</b>. For the post option you need two marks:</p>
       <ul class="tight">
         <li><b>52 ft 6 in at 67°M</b> — under the apex tree</li>
-        <li><b>77 ft 2 in at 85°M</b> — under the far support</li>
-        <li><b>100 ft 2 in at 92°M</b> — under the end tie-off</li>
+        <li><b>{pd/FT:.0f} ft at {mag(pb):.0f}°M</b> — the post, in your staked
+          strip</li>
       </ul>
-      <p style="margin-top:7px">If a stake lands where no usable trunk stands,
-      stop here — that is the whole plan's assumption and it is cheaper to find
-      out now. Support 3 in particular has never been ground-verified; it is a
-      computed position, not an observed tree.</p></li>
+      <p style="margin-top:7px">For F10-A instead, the two further marks are
+      <b>77 ft 2 in at 85°M</b> and <b>100 ft 2 in at 92°M</b>. Neither has ever
+      been ground-verified — they are computed positions, not observed trees,
+      and that uncertainty is a large part of why the post option is the better
+      build.</p></li>
 
-    <li><h3>Pick the limbs and confirm they clear 50 ft</h3>
-      <p>Both the apex and the far support want <b>50 ft</b>. Sight up from
-      each stake and find a limb you can actually get a line over at that
-      height. Ten feet low on either one costs about 0.9 dB — not fatal, but
-      keep them even with each other so the middle span stays level.</p></li>
+    <li><h3>Confirm the apex limb clears 50 ft</h3>
+      <p>Sight up from the apex stake and find a limb you can actually get a
+      line over at <b>50 ft</b>. Ten feet low costs about 0.9 dB — not fatal,
+      but this is the one attachment both plans depend on, so establish it
+      before you commit to either. If there is no usable limb here, stop and
+      tell me; the whole study is built on this tree.</p></li>
 
-    <li><h3>Throw both lines before attaching any wire</h3>
-      <p>Two throws, both at 50 ft, both routine with a slingshot and a
-      12 oz weight. Get both up and cleated off before the antenna comes out of
-      the bag. Wrestling 130 ft of wire while you are still fighting a throw
-      line is how wire gets kinked and insulators get dropped in the
-      undergrowth.</p></li>
+    <li><h3>Get the line up, and stand the post</h3>
+      <p>One throw at 50 ft — routine with a slingshot and a 12 oz weight.
+      Cleat it off before the antenna comes out of the bag. Then stand and guy
+      the post at its stake. Do both before any wire is handled: wrestling
+      130 ft of wire while you are still fighting a throw line is how wire gets
+      kinked and insulators get dropped in the undergrowth.</p></li>
 
     <li><h3>Lay the wire out on the ground along the marked path</h3>
       <p>Flake it out from the feed stake toward the end, following your stakes.
@@ -662,14 +807,17 @@ def build_html(parts, views):
       understory rather than pulling a straight line. Keep the transformer end
       at the house and do not let the wire cross itself.</p></li>
 
-    <li><h3>Hang the apex, then the far support, then the end</h3>
-      <p>In that order. Raise the apex to 50 ft first and let the wire hang;
-      then take up leg 2 to the far support at 50 ft; then tension the tail to
-      the end tie-off at 30 ft. <b>Two ceramic eggs in series at the apex.</b>
-      With the feed at 10 ft the apex lands at <b>66.0 ft of wire</b> and the
-      voltage maximum is at 65.0 ft — they are essentially on top of each other,
-      closer than in the 24 ft version. Electrically the apex is an end, however
-      much it looks like a mid-span support.</p></li>
+    <li><h3>Hang the apex first, then take up the span to the post</h3>
+      <p>Raise the apex to 50 ft and let the rest of the wire hang. Then walk
+      the far end to the post and take up the single
+      {(total_ft - wire_len_to(1)/FT):.0f} ft span. <b>Two ceramic eggs in
+      series at the apex.</b> With the feed at 10 ft the apex lands at
+      <b>66.0 ft of wire</b> and the voltage maximum is at 65.0 ft — essentially
+      on top of each other, closer than in the 24 ft version. Electrically the
+      apex is an end, however much it looks like a mid-span support.</p>
+      <p style="margin-top:7px">For F10-A: apex first, then leg 2 to the far
+      support at 50 ft, then tension the tail to the end tie-off at 30 ft, in
+      that order.</p></li>
 
     <li><h3>Set the sag, then choke the coax</h3>
       <p>2–3% slack per span, 8–12 in of sag. Trees move; a wire tensioned like
@@ -739,7 +887,7 @@ def build_html(parts, views):
 
 if __name__ == "__main__":
     parts, views = main()
-    print("\nSupport schedule (F10-A):")
+    print(f"\nSupport schedule ({PRIMARY.key}):")
     for i, (nm, e, n, u) in enumerate(PTS):
         d, b = polar(e, n)
         la, lo = to_latlon(e, n)

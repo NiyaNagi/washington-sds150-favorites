@@ -272,6 +272,28 @@ the best anywhere here.
 throw. Going to 30 ft buys 0.31 dB more; going to 36 ft matches option A at a 24 ft feed.
 Build what stands up safely on a garden stake and stop there.
 
+Two scored options exist so the recommendation and the geometry cannot drift apart:
+**`RB-POST20`** is the recommended 20 ft build, **`RB-1TREE`** is the optimiser's best over
+all heights (which always picks the tallest allowed, 30 ft).
+
+### Which stake — pick the stake first, then the height
+
+The wire length pins the post's distance from the apex tree, so **only about 7 ft of the
+strip's 59 ft length is usable at any one post height**, at the north-west end nearest the
+house. Raising the post walks that band further along the strip — which is the useful
+freedom when the stakes are already in the ground.
+
+| Post height | Reachable band from the feed | Best point | 3-band | Cells |
+|---|---|---|---|---|
+| 16 ft | 88.4 – 95.5 ft | 88.7 ft @ **101°M** | −0.85 | 46/75 |
+| **20 ft** | **90.6 – 97.6 ft** | **90.9 ft @ 101°M** | **−0.71** | **47/75** |
+| 24 ft | 92.8 – 99.0 ft | 93.5 ft @ **102°M** | −0.58 | 47/75 |
+| 30 ft | 94.6 – 101.1 ft | 94.6 ft @ **102°M** | −0.40 | 48/75 |
+
+Roughly **2 ft of extra post buys 2 ft further out**. Within each band the near end always
+scores better — about 0.2 dB and 5 cells across the 7 ft — so where two stakes both work,
+take the one closer to the house.
+
 ### RB‑NOTREE — the zero-rope-throw floor
 
 A single span from the feed to a 30 ft post at the strip's far corner, 127.6 ft at
