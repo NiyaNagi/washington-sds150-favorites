@@ -1,0 +1,44 @@
+## Written by Dylan Hawkins - 10/20/2024 ##
+
+To set up a Windows virtual machine (VM) on your MacBook and enable USB pass-through to a radio for upgrading its firmware, follow these steps
+### 1. **Choose Virtualization Software**
+- **Parallels Desktop**: This is a popular option for running Windows on a Mac, especially for ease of use and performance. It provides easy USB pass-through.
+- **VMware Fusion**: Another robust option for virtualization on macOS, also supporting USB pass-through.
+- **VirtualBox** (Free): This is an open-source virtualization software that also supports USB pass-through, though it may require additional configuration compared to Parallels or VMware.
+### 2. **Install Virtualization Software**
+- Download and install your chosen virtualization software.
+- **Parallels Desktop**: [Download here](https://www.parallels.com/products/desktop/).
+- **VMware Fusion**: [Download here](https://www.vmware.com/products/fusion.html).
+- **VirtualBox**: [Download here](https://www.virtualbox.org/).
+### 3. **Create a Windows Virtual Machine**
+- After installation, create a new VM by following the steps in your virtualization software.
+- If using **Parallels Desktop**, you can easily download and install a trial version of Windows directly through the Parallels interface.
+- For **VMware Fusion** and **VirtualBox**, you'll need a Windows ISO image. You can download it from the [Microsoft website](https://www.microsoft.com/software-download/windows10).
+- Install the Windows operating system by following the guided installation process.
+### 4. **Enable USB Pass-Through**
+Each virtualization software has its own method for setting up USB pass-through:
+#### Parallels Desktop
+1. Launch the Windows VM.
+2. Connect your radio via USB to your MacBook.
+3. A dialog will appear asking whether you want to connect the USB device to macOS or the Windows VM. Select **Windows VM**.
+4. If the dialog doesn’t appear, go to **Devices > External Devices**, and select your USB device from the list.
+#### VMware Fusion
+1. Launch the Windows VM.
+2. Connect the radio via USB to your MacBook.
+3. Click **Virtual Machine** in the menu bar, then choose **USB & Bluetooth**.
+4. Select the USB device you want to connect to the VM.
+#### VirtualBox
+1. Before starting the Windows VM, enable USB pass-through in VirtualBox:
+1. Select your Windows VM, then go to **Settings > USB**.
+2. Enable **USB Controller** and choose either **USB 2.0** or **USB 3.0** (depending on your MacBook’s and the radio's USB ports).
+3. Add a USB filter for your radio by clicking the **+** icon and selecting your device from the list.
+2. Start the Windows VM.
+3. Connect the radio, and VirtualBox should automatically pass the USB device through to Windows.
+### 5. **Install Windows Drivers (If Necessary)**
+- Once the radio is connected, Windows may prompt you to install drivers for the device. Follow the prompts to install them, or download the drivers from the radio manufacturer’s website.
+### 6. **Perform the Firmware Upgrade**
+- Run the firmware upgrade software on your Windows VM.
+- Ensure the USB device (your radio) is properly recognized in Windows before proceeding with the upgrade process.
+### Additional Considerations:
+- **USB 3.0 Pass-Through**: Make sure your VM is configured to support USB 3.0 if your radio and MacBook use that standard for optimal performance.
+- **Install VM Tools**: Ensure you have installed VM tools (such as Parallels Tools, VMware Tools, or VirtualBox Guest Additions) inside the Windows VM. These enhance compatibility, performance, and USB support.

@@ -1,0 +1,35 @@
+This document outline what needs to be done to get a Kernel Virtual Machine to connect to the Kenwood TH-D75A/E.
+
+My KVM setup:
+KVM software installed using QEMU as the KVM manager running Fedora 41
+
+You must have the following:
+
+A running Windows 10/11 guest OS
+    1. 2 CPUs
+    2. 8 GB RAM
+    3. 40 GB (8 GB free)
+
+Download the following software from Kenwood’s website
+Driver for the USB - USB_CDC_Driver_TH-D75_V100
+Memory software for the Kenwood TH-D75A/E -  MCP-D75_V100
+
+Install the the USB driver (USB_CDC_Driver_TH-D75_V100)
+Install the MC software (MCP-D75_V100)
+Reboot the Windows guest OS
+
+Attach the radio to the USB port.   Run lsusb to confirm the radio is connected.   Once the you see the radio.   Go over to the Windows/guest OS and click on “View” at the top menu of the KVM select “Redirect USB device”.   Select the Kenwood and allow it to pass through to the guest OS.
+
+You may want to also download the ARFC-D75_V100 software (if you intend to run your radio from the computer).   At the time of this writing I have not installed this software.
+
+On the Windows/guest OS
+    1. Bring up the Device Manager (from the search bar)
+    2. Extend Device “Port” and you should see the Kenwood connected to a COM port (remember the COM port number – the MCP software will ask you which port to use.
+    3. Start up the MCP software and select the COM port for the TH-D75.
+    4. Download the information from the Kenwood and that will get you started.
+    5. Once you are done, reverse the process and upload your changes into the radio (I do not select the time/date update because I let the GPS take care of that).
+
+Tip:  You may want select more fields to display.   I don’t think the “Tone” field is shown by default.
+
+
+
