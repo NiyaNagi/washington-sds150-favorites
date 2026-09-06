@@ -45,6 +45,7 @@ radio-backups/
 
 # Scratch files from interactive debugging sessions.
 .tmp-*
+.local/
 
 # Editor/manual backups of CAD sources; the .scad file is the original.
 *.scad.bak
