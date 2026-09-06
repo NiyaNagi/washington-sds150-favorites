@@ -47,6 +47,23 @@ deliberately.
 **Terrain data is bare earth.** The site is surrounded by mature conifer that is not
 modelled. Every horizon angle is optimistic toward forested bearings.
 
+**62% of the wire flies over tree canopy, and there is no way around it.** Measured from
+the 2025 King County ortho by `tools/canopy_from_ortho.py` — 46% / 69% / 84% by span. The
+mown lawn is about 12 × 19 m against a 110 ft ground path, so **no open-ground route exists
+at any bearing.** No model in this study has a tree-absorption term, so every dB figure here
+is an optimistic ceiling for most of the wire's length. Say so whenever you quote one.
+
+**Imagery exists now — `imagery/kc2025_*.jpg`, georeferenced by construction.** Earlier
+revisions said no imagery could be saved. That is stale. The bboxes were requested in
+EPSG:3857 around a computed centre, so pixel↔ground is defined, not fitted; there is no
+registration residual to quote. Remember Web Mercator units are metres only at the equator —
+at this latitude 1 real metre = 1.48397 map units.
+
+**Tree POSITIONS are known; tree HEIGHTS are not.** Every height in this study is
+operator-supplied (50 ft usable at the apex, 150 ft at the yard corners) and none is
+measured. Four canopy-height sources were tried and all failed — see `imagery/README.md`.
+Do not present a tree height as if it were surveyed.
+
 **Coordinates are precise to ±0.3 m.** They were given to 0.01 arcsecond. Millimetre
 figures in the data files are arithmetic, not accuracy.
 

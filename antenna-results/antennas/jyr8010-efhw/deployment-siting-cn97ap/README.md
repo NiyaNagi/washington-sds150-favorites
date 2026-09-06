@@ -12,6 +12,30 @@ Europe, the continental US, Australia, Japan, China and Russia.
 **Agents: start with [`AGENT_GUIDE.md`](AGENT_GUIDE.md).**
 
 Published field plan: <https://claude.ai/code/artifact/1128955c-5f0e-44c7-82a9-a08a9f9d2fa9>
+Published deployment guide: <https://claude.ai/code/artifact/0a8562b0-04ee-473f-9732-3a079305d96b>
+
+---
+
+## The aerial photograph changed the picture
+
+Retrieved 2026-09-05 from King County GIS (2025 EagleView orthomosaic, 6 in/px here) and
+committed to [`imagery/`](imagery/README.md). It is the first hard evidence in this study of
+what the wire actually flies over.
+
+**62% of the antenna's ground path is over tree canopy** — 46%, 69% and 84% by span. The far
+support and end tie-off are both inside the woods.
+
+**And no open-ground route exists.** The mown lawn measures roughly 12 × 19 m (40 × 62 ft),
+a 74 ft diagonal, against a 110 ft ground path. A radial scan from the feed finds the longest
+clear run at about 24 ft. It does not fit in the open at any bearing, for any topology.
+
+> **No model in this study contains a tree-absorption term.** METHOD.md could only say the
+> site was forested; this measures how much of the wire that omission applies to, and the
+> answer is *most of it*. **Treat every dB figure here as an optimistic ceiling.** The
+> post-installation NanoVNA sweep is the first real measurement and it costs nothing.
+
+Tree *positions* are now known from the photograph. Tree *heights* still are not — four
+canopy-height sources were tried and all failed; every height here remains operator-supplied.
 
 ---
 
