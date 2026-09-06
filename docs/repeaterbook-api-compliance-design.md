@@ -196,10 +196,10 @@ wasds150 plan export thd75-ames-lake --target thd75-file --out radio-configs
 Planned UI shape:
 
 1. The operator opens the local dashboard on their own Windows machine.
-2. The operator chooses a saved location profile or enters a travel location.
+2. The operator chooses one center point within Washington State.
 3. The operator chooses bands and a maximum radius.
 4. The operator clicks an explicit `Refresh RepeaterBook` action.
-5. The application fetches bounded pages with conservative spacing.
+5. The application sends exactly one Washington Export API request.
 6. The application normalizes records into an internal review table.
 7. The operator reviews additions and changes before applying them.
 8. Radio export uses the reviewed local catalog, not a live API call.
