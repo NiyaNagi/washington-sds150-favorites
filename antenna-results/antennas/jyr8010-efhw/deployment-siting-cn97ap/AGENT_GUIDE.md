@@ -52,6 +52,15 @@ figures in the data files are arithmetic, not accuracy.
 **Confirm north-up before georeferencing any screenshot.** The first capture in this
 session was rotated ~90° and briefly produced a contradiction.
 
+**Filter azimuth recommendations by bend angle before you quote them.** METHOD.md §3
+scores a bent wire as the *union* of two lobe sets — it ignores relative phase between the
+legs and overstates how cleanly they add, and that gets worse as the bend sharpens. The
+first run of `endpoint_study.py` ranked leg 2 at 215°T first; that is a **133° bend**, two
+near-antiparallel legs whose cancellation the model cannot see. Anything past ~110° is
+reported as NOT VALID rather than ranked. Note also that the pattern is front/back
+symmetric, so the scan cannot distinguish a bearing from its reciprocal — 35°T and 215°T
+score identically and are completely different physical wires.
+
 **Never rank deployments on aggregate power alone.** It is mean *linear* power, so it
 rewards concentrating radiation into a few bearings. A spiky straight wire can score
 within 0.5 dB of a broad one while covering six fewer regions and nulling Perth by 87 dB.
@@ -105,6 +114,10 @@ The operator answered these explicitly. Re-proposing them wastes their time.
 | Build a PVC mast? | **No.** Scored in full: −3.0 to −7.5 dB, 3–12 of 25 regions. A 39.6 m wire on a 24 ft mast slopes 6.2° and averages 17–24 ft. |
 | Sloper off a *mast*? | **No.** At mast heights a 39.6 m "sloper" is a tilted flat-top. |
 | Sloper off a *150 ft tree*? | **Only for 80 m.** T-APEX is the best 80 m option in the study (−5.10 dBi, 14/25 vs the flat-top's 3/25) and 8th of 15 on the 40/20/15 m aggregate. The earlier "scores highest" answer came from the broken slant model. |
+| Raise the far END for more height? | **No — 0.35 dB from 10 ft to 60 ft.** The end is a voltage maximum, i.e. a current null, and the far support already sits at the 29.7 m current maximum so the tail carries almost nothing. Run `tools/endpoint_study.py`. |
+| Re-aim leg 2 / move the end elsewhere? | **No.** The best gently-bent azimuth (35°T) is worth +0.5 dB and 6 of 75 cells, and pays for it with Hawaii −7.8, South Africa −6.2, VK2 −2.9 — the 210–270° sector that holds the site's only −7.9° downslope. What it buys (Florida, Caribbean, Denver) returns on 15/10 m for free. |
+| Use the house ROOF as the high support? | **No — 2.6 to 4.1 dB worse.** The ridge is ~24 ft from the feed against the tree's 52.5 ft, and 20–30 ft up against 50 ft. Average height collapses 41.6 → 16–27 ft. Even a 40 ft ridge loses 1.0 dB. |
+| Anchor the END on the roof? | **No, and do not score it.** It needs a near-antiparallel hairpin that METHOD.md §3 cannot model, and the end is the ~1 kV RMS voltage maximum — see `INSULATORS.md`. Wrong on both counts. |
 | Which bands does it have? | **80/40/20/15/10 only.** Not 30/17/12 — see the trap above. |
 | Best band for the recommended flat-top? | **15 m and 10 m** (+2.1 / +2.3 dBi, 20–21 of 25 regions), then 20 m. 80 m is regional-only at 41 ft. |
 | Inverted-V off one point? | **Viable.** V1 costs 1.1 dB and 2 regions vs the flat-top. Take it if two rope throws is one too many. |

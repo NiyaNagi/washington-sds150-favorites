@@ -237,6 +237,69 @@ distinct lobe forms and the pattern peaks straight up, which is exactly what hap
 > also the band most often shut. Read the table as "where the antenna puts power", not
 > "what you will work".
 
+### Moving the far end — height, azimuth, or onto the roof
+
+Scored separately by [`tools/endpoint_study.py`](tools/endpoint_study.py), because they are
+three different questions with three different answers. **All three are no.**
+
+**Raising the end is worth 0.35 dB across 50 ft of height.**
+
+| End tie-off | 10 ft | 20 ft | 30 ft | 40 ft | 50 ft | 60 ft |
+|---|---|---|---|---|---|---|
+| 3-band | −0.32 | −0.23 | **−0.16** | −0.09 | −0.03 | +0.03 |
+
+Both ends of an EFHW are voltage maxima — **current nulls**. Only current maxima radiate,
+and the tail (29.7–39.6 m of wire) holds 0 of 1 on 80 m, 1 of 2 on 40 m, 1 of 4 on 20 m,
+2 of 6 on 15 m, 2 of 8 on 10 m. Support 3 was deliberately placed *at* the 29.7 m current
+maximum so that the end would not have to matter. It doesn't.
+
+**Re-aiming leg 2 is worth at most +0.5 dB, and it is the wrong trade.** The best azimuth
+with a bend the model can honestly score is 35°T (+0.37 dBi, 55/75 cells against 130°T's
+−0.16 and 49/75). What it buys and what it costs, in 3-band mean dBi:
+
+| Gains | | Losses | |
+|---|---|---|---|
+| US Southeast | +5.0 | Hawaii | **−7.8** |
+| Caribbean | +4.7 | South Africa | −6.2 |
+| India | +3.3 | Australia VK2 | −2.9 |
+| Denver / Dallas | +2.9 / +2.4 | Moscow | −2.1 |
+
+Every loser sits in or near the **210–270° sector — the only bearing with a −7.9°
+foreground downslope**, and the reason this site can work VK at all. Every winner
+**already returns on 15 m and 10 m** without moving anything. Half a dB is not worth
+spending the site's one real advantage.
+
+> Two scan traps worth knowing. The raw top-ranked azimuth was 215°T — a **133° bend**,
+> two near-antiparallel legs whose cancellation §3 cannot model. And the pattern is
+> front/back symmetric, so 35°T and 215°T score identically while being entirely different
+> physical wires. Filter on bend angle before quoting a bearing.
+
+**The roof is 2.6–4.1 dB worse than the tree, and it is not close.**
+
+| High support | Distance from feed | Height | Avg wire height | 3-band | Cells |
+|---|---|---|---|---|---|
+| **Apex tree (current)** | **52.5 ft** | **50 ft** | **41.6 ft** | **−0.16** | **49/75** |
+| House ridge | 24 ft | 20 ft | 16 ft | −4.24 | 31/75 |
+| House ridge | 24 ft | 25 ft | 19 ft | −3.25 | 35/75 |
+| House ridge | 24 ft | 30 ft | 21 ft | −2.72 | 38/75 |
+| House ridge | 24 ft | 40 ft | 27 ft | −1.17 | 44/75 |
+
+The ridge is only ~24 ft from the feed, so barely 19% of the wire is in the first leg and
+the other 81% slopes away from a low point. Height in wavelengths sets low-angle gain, and
+the roof is both too close and too low to supply it. Even a fictional 40 ft ridge loses.
+
+*(Ridge position is estimated from the operator's own corner marks — feed = NE corner,
+backyard corner 12.28 m at 155°T, front yard corner 7.08 m at 326°T — giving a long axis of
+155/335°T and a ridge ~7.3 m from the feed. The half-width is assumed. The conclusion is
+insensitive to it: the ridge would have to move 30 ft away **and** gain 25 ft to compete.)*
+
+**Anchoring the end on the roof is not scored, deliberately.** Feed→apex is 17.9 m, leaving
+21.7 m to fold back to a point ~7 m from the feed — a hairpin whose legs are near
+antiparallel, which §3 cannot model, so no number here would be honest. It is also wrong on
+its own terms: the end is the **voltage maximum, ~1 kV RMS at 150 W**
+([`INSULATORS.md`](INSULATORS.md)), and that does not belong on a roof beside gutters,
+flashing and house wiring.
+
 ### Horizontal classes, 20 m only (unchanged, for continuity)
 
 | Key | Configuration | Avg ht | 20m TO | Aggregate | Workable | Holes | vs A |
@@ -284,6 +347,7 @@ the bend and its null-filling — drops support 3, and costs 1.1 dB and two regi
 | [`INSULATORS.md`](INSULATORS.md) | Insulator selection, end-voltage working, specific products |
 | [`tools/site_geometry.py`](tools/site_geometry.py) | Recomputes everything; stdlib only; **authoritative** |
 | [`tools/compare_options.py`](tools/compare_options.py) | Scores 15 topologies × 5 bands; writes the four CSVs below and the KML |
+| [`tools/endpoint_study.py`](tools/endpoint_study.py) | End height, end azimuth, and roof-support sensitivity — why the end stays where it is |
 | [`data/deployment-options.kml`](data/deployment-options.kml) | **Google Earth overlay** — every option with its per-band table, ordered by 3-band rank; reference points, parcel line, bearing rays |
 | [`data/option-comparison-multiband.csv`](data/option-comparison-multiband.csv) | **Per-region net dB for every band**, long format (generated) |
 | [`data/option-band-aggregate.csv`](data/option-band-aggregate.csv) | **Per option per band**: aggregate dB and dBi, regions, I-max height, peak elevation (generated) |
