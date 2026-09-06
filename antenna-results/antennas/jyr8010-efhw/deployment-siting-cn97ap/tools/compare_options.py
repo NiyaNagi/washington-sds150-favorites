@@ -590,7 +590,178 @@ def build_options():
 
     opts.extend(build_sloper_classes())
     opts.extend(build_feed10_class())
+    opts.extend(build_redbox_class())
     return opts
+
+
+# --------------------------------------------------------------------------
+# RB class: supports on the operator's pre-staked garden posts.
+#
+# The operator marked a strip on the plan view where posts already stand and
+# PVC or similar can be attached. Georeferenced from that annotation against
+# the four support markers (similarity fit, worst residual 6 cm on the ground):
+# a strip 3.3-4.1 m wide and 17-18 m long, long axis 139T, centroid 30.4 m
+# (100 ft) from the feed at 115T / 100M. Entirely inside the parcel.
+#
+# This class matters for a reason no dB figure captures: a post you can walk to
+# is not a 50 ft rope throw into a conifer. Every other support in this study
+# is a tree.
+#
+# Feed is held at 10 ft throughout - the operator's current constraint.
+# --------------------------------------------------------------------------
+RED_BOX = [(23.07, -5.62), (20.30, -7.39), (31.99, -20.88), (34.73, -17.85)]
+POST_HEIGHTS_FT = (12.0, 16.0, 20.0, 25.0, 30.0)
+
+
+def in_red_box(en):
+    """Point in the operator's staked strip (convex quad, winding test)."""
+    e, n = en
+    sign = 0
+    for i in range(4):
+        ax, ay = RED_BOX[i]
+        bx, by = RED_BOX[(i + 1) % 4]
+        cross = (bx - ax) * (n - ay) - (by - ay) * (e - ax)
+        s = (cross > 0) - (cross < 0)
+        if s == 0:
+            continue
+        if sign == 0:
+            sign = s
+        elif s != sign:
+            return False
+    return True
+
+
+def red_box_points(step=0.75):
+    """Candidate post positions on a grid inside the strip."""
+    es = [p[0] for p in RED_BOX]
+    ns = [p[1] for p in RED_BOX]
+    out = []
+    e = min(es)
+    while e <= max(es):
+        n = min(ns)
+        while n <= max(ns):
+            if in_red_box((e, n)):
+                out.append((e, n))
+            n += step
+        e += step
+    return out
+
+
+def build_redbox_class():
+    FEED_FT = 10.0
+    f = FEED_FT * FT
+    apex_h = 50.0 * FT
+    leg1 = math.hypot(APEX_DIST, apex_h - f)
+    rest = WIRE_M - leg1
+    grid = red_box_points()
+    out = []
+
+    def score_of(o):
+        m = aggregate_multiband(o)
+        return (m["n_workable"], m["n_regions_covered"], m["mean_power_dBi"])
+
+    # -- RB-1TREE: feed -> apex tree -> ONE post. One throw, one post. ------
+    best = None
+    for post_ft in POST_HEIGHTS_FT:
+        ph = post_ft * FT
+        for pe, pn in grid:
+            run = math.hypot(pe - APEX_EN[0], pn - APEX_EN[1])
+            need = math.hypot(run, apex_h - ph)
+            if abs(need - rest) > 0.45:        # wire must actually reach
+                continue
+            brg = polar(pe - APEX_EN[0], pn - APEX_EN[1])[1]
+            o = Option("RB-1TREE", "x",
+                       [(leg1, (f + apex_h) / 2, APEX_BRG),
+                        (rest, (apex_h + ph) / 2, brg)], [])
+            r = score_of(o)
+            if best is None or r > best[0]:
+                best = (r, post_ft, (pe, pn), brg, run)
+    if best:
+        _, post_ft, pen, brg, run = best
+        d, b = polar(*pen)
+        out.append(Option(
+            "RB-1TREE",
+            f"Apex tree at 50 ft, then ONE post at {post_ft:.0f} ft in the "
+            f"staked strip",
+            [(leg1, (f + apex_h) / 2, APEX_BRG),
+             (rest, (apex_h + post_ft * FT) / 2, brg)],
+            [("feed", 10, (0.0, 0.0)), ("apex tree", 50, APEX_EN),
+             ("post", int(post_ft), pen)],
+            f"Post {d:.1f} m ({d/FT:.0f} ft) from the feed at {b:.0f}T / "
+            f"{mag(b):.0f}M, {run:.1f} m from the apex. ONE rope throw and one "
+            f"post you can walk to."))
+
+    # -- RB-2POST: apex tree, then two posts, support 3 at the 29.7 m -------
+    #    current maximum exactly as option A places it.
+    best = None
+    into = 29.7 - leg1
+    tail = rest - into
+    for h3 in POST_HEIGHTS_FT:
+        for h4 in POST_HEIGHTS_FT:
+            if h4 > h3:
+                continue
+            for p3 in grid:
+                run3 = math.hypot(p3[0] - APEX_EN[0], p3[1] - APEX_EN[1])
+                if abs(math.hypot(run3, apex_h - h3 * FT) - into) > 0.45:
+                    continue
+                b3 = polar(p3[0] - APEX_EN[0], p3[1] - APEX_EN[1])[1]
+                for p4 in grid:
+                    run4 = math.hypot(p4[0] - p3[0], p4[1] - p3[1])
+                    if abs(math.hypot(run4, (h3 - h4) * FT) - tail) > 0.45:
+                        continue
+                    b4 = polar(p4[0] - p3[0], p4[1] - p3[1])[1]
+                    o = Option("RB-2POST", "x",
+                               [(leg1, (f + apex_h) / 2, APEX_BRG),
+                                (into, (apex_h + h3 * FT) / 2, b3),
+                                (tail, ((h3 + h4) / 2) * FT, b4)], [])
+                    r = score_of(o)
+                    if best is None or r > best[0]:
+                        best = (r, h3, h4, p3, p4, b3, b4)
+    if best:
+        _, h3, h4, p3, p4, b3, b4 = best
+        d3 = polar(*p3)[0]
+        out.append(Option(
+            "RB-2POST",
+            f"Apex tree at 50 ft, then TWO posts ({h3:.0f} / {h4:.0f} ft) in "
+            f"the staked strip",
+            [(leg1, (f + apex_h) / 2, APEX_BRG),
+             (into, (apex_h + h3 * FT) / 2, b3),
+             (tail, ((h3 + h4) / 2) * FT, b4)],
+            [("feed", 10, (0.0, 0.0)), ("apex tree", 50, APEX_EN),
+             ("post 3", int(h3), p3), ("post 4", int(h4), p4)],
+            f"Support 3 stays at 29.7 m of wire - the 40 m and 15 m current "
+            f"maximum - but on a post {d3/FT:.0f} ft out instead of a tree limb. "
+            f"One rope throw."))
+
+    # -- RB-NOTREE: feed straight to a post. NO rope throw at all. ---------
+    best = None
+    for post_ft in POST_HEIGHTS_FT:
+        ph = post_ft * FT
+        for pe, pn in grid:
+            run = math.hypot(pe, pn)
+            if abs(math.hypot(run, ph - f) - WIRE_M) > 0.45:
+                continue
+            brg = polar(pe, pn)[1]
+            slope = math.degrees(math.atan2(ph - f, run))
+            o = Option("RB-NOTREE", "x", [(WIRE_M, (f + ph) / 2, brg)], [],
+                       slope_deg=slope, feed_h=f, top_h=ph)
+            r = score_of(o)
+            if best is None or r > best[0]:
+                best = (r, post_ft, (pe, pn), brg, run, slope)
+    if best:
+        _, post_ft, pen, brg, run, slope = best
+        d, b = polar(*pen)
+        out.append(Option(
+            "RB-NOTREE",
+            f"NO trees at all - single span, feed 10 ft to a {post_ft:.0f} ft "
+            f"post",
+            [(WIRE_M, (f + post_ft * FT) / 2, brg)],
+            [("feed", 10, (0.0, 0.0)), ("post", int(post_ft), pen)],
+            f"Post {d:.1f} m ({d/FT:.0f} ft) from the feed at {b:.0f}T / "
+            f"{mag(b):.0f}M. Slope {slope:.1f} deg. ZERO rope throws - the "
+            f"whole antenna is reachable from the ground.",
+            slope_deg=slope, feed_h=f, top_h=post_ft * FT))
+    return out
 
 
 # --------------------------------------------------------------------------
@@ -886,6 +1057,7 @@ def aggregate_multiband(opt, bands=None):
 
 # KML colours are aabbggrr, not rrggbb.
 KML_STYLES = [
+    ("optR",  "ff2020ff", 7),   # red            - GARDEN-POST options
     ("optF",  "ff40ff80", 6),   # spring green   - 10 FT FEED family
     ("optG",  "ffffffff", 6),   # white          - ONE-SUPPORT slopers, K/C/G/RF
     ("optT",  "ff0080ff", 6),   # bright orange  - TALL sloper
@@ -901,6 +1073,8 @@ KML_STYLES = [
 
 def kml_style_for(key):
     """Style id for an option key. Checked most-specific first."""
+    if key.startswith("RB-"):
+        return "optR"
     if key.startswith("F10-"):
         return "optF"
     if key.startswith(("K-", "C-", "G-", "RF-")):

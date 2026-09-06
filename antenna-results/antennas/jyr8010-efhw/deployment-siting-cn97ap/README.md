@@ -224,6 +224,63 @@ what every single-wire option pays for its height.
 
 ---
 
+## The garden posts change the answer
+
+The operator marked a strip on the plan view where posts are already staked and PVC can be
+attached. Georeferenced from that annotation against the four support markers — a similarity
+fit with a **6 cm worst residual on the ground**:
+
+| Corner | ENU (m) | From feed | Bearing T / **M** |
+|---|---|---|---|
+| 1 | (23.07, −5.62) | 77.9 ft | 104° / **88°** |
+| 2 | (20.30, −7.39) | 70.9 ft | 110° / **95°** |
+| 3 | (31.99, −20.88) | 125.3 ft | 123° / **108°** |
+| 4 | (34.73, −17.85) | 128.1 ft | 117° / **102°** |
+
+A strip **11–13 ft wide and 55–59 ft long**, long axis 139°T, centroid 100 ft from the feed
+at **100° magnetic**. Entirely inside the parcel.
+
+### RB‑1TREE — one rope throw instead of two, and a better worst case
+
+| | RB‑1TREE (30 ft post) | F10‑A | A (24 ft feed) |
+|---|---|---|---|
+| 3-band | **−0.40 dBi** | −0.46 | −0.16 |
+| Cells | **48/75** | 47/75 | 49/75 |
+| Regions | 23/25 | 24/25 | 24/25 |
+| **Worst region** | **−22.5** | −26.2 | −25.4 |
+| **Anchors** | **2** — one is a post | 3 | 3 |
+| 15 m | **+2.12 dBi, 22/25** | +1.93, 20/25 | +2.06, 20/25 |
+
+**Apex tree at 50 ft, then straight to a post in the strip.** It beats F10‑A on aggregate,
+on workable cells and on worst case — which is **the best worst-case figure of any option in
+the study** — while needing one fewer rope throw. It gives up one region. Its 15 m figure is
+the best anywhere here.
+
+### Post height matters gently — 20 ft is the sweet spot
+
+| Post | 3-band | Cells | Worst | 15 m | Post position |
+|---|---|---|---|---|---|
+| 10 ft | −1.09 | 44/75 | −23.8 | +1.56 | 86.6 ft @ **100°M** |
+| 16 ft | −0.85 | 46/75 | −23.3 | +1.76 | 88.7 ft @ **101°M** |
+| **20 ft** | **−0.71** | **47/75** | **−23.1** | +1.88 | **90.9 ft @ 101°M** |
+| 24 ft | −0.58 | 47/75 | −22.8 | +1.98 | 93.1 ft @ 102°M |
+| 30 ft | −0.40 | 48/75 | −22.5 | +2.11 | 95.4 ft @ 102°M |
+| 36 ft | −0.26 | 49/75 | −22.1 | +2.20 | 96.8 ft @ 102°M |
+
+**0.83 dB across 26 ft of post** — about 0.32 dB per 10 ft, and the position barely moves.
+**A 20 ft post already matches F10‑A's 47 cells and beats its worst case**, with one fewer
+throw. Going to 30 ft buys 0.31 dB more; going to 36 ft matches option A at a 24 ft feed.
+Build what stands up safely on a garden stake and stop there.
+
+### RB‑NOTREE — the zero-rope-throw floor
+
+A single span from the feed to a 30 ft post at the strip's far corner, 127.6 ft at
+**102°M**: **−6.05 dBi, 11/75 cells, 8 of 25 regions.** That is poor, and it is the entire
+antenna reachable from the ground with no line in any tree. Worth knowing the floor exists;
+not worth choosing while the apex tree is available.
+
+---
+
 ## The 10 ft feed category
 
 The operator has to leave the transformer at 10 ft for now. Every other class here assumes

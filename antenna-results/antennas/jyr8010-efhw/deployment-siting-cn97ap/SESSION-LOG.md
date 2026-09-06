@@ -476,6 +476,67 @@ feed drops, so the 29.7 m current maximum arrives sooner along leg 2: support 3 
 
 KML: 133 placemarks in 33 folders, the F10 family in spring green.
 
+## Phase 12 — chasing tree heights, and the garden posts
+
+**Operator asked:** try both remaining tree-height routes, and score deployments using PVC
+on the pre-staked garden posts inside a strip they marked on the plan view.
+
+### Tree heights: both routes closed
+
+**Point clouds — closed by tooling.** `king_county_east_2021` covers the site in the WA DNR
+LiDAR portal, but the portal's download endpoint returns 403 without its API contract, and
+this environment has **numpy but no `laspy` and no `pdal`**, so LAZ cannot be decoded anyway.
+
+**Shadow photogrammetry — closed by the scene.** New `tools/shadow_heights.py` measures the
+solar azimuth by cross-correlating a sunlit-roof mask against a deep-shadow mask, then
+brackets the elevation from the leaf-on flight window using
+`sin(dec) = sin(lat)sin(h) + cos(lat)cos(h)cos(az)`.
+
+It does not converge here, and **the tool says so rather than producing a number.** First run
+reported a sun azimuth of 341° — impossible at 47.6°N, caught because the elevation solver
+returned no solution. Constraining the search to the physically possible arc (55–305°) only
+made it pin to the boundary: it is locking onto dark tree canopy, not roof shadow.
+
+The direction is settleable by elimination: the driveway north-east of the reference house is
+lit while the strip north-west of it is dark, so **shadows fall north-west and the sun is in
+the south-east — a morning capture.** But that throws the house's shadow onto dark asphalt and
+into the treeline. The lawn, the one good projection screen on the property, is on the sunlit
+side. There is nothing for a length measurement to bite on.
+
+**What would fix it, cheapest first:** measure one height on the ground and pair it with its
+shadow; or skip photogrammetry entirely and use a phone clinometer, which is more accurate
+than anything derivable from this image and also answers the question that matters — whether
+a usable limb exists at 50 ft — which no overhead view can show.
+
+**The 62% canopy finding does not depend on any of this.**
+
+### The garden posts
+
+The operator's marked strip, georeferenced against the four support markers by similarity
+fit — **6 cm worst residual on the ground**: 11–13 ft wide, 55–59 ft long, long axis 139°T,
+centroid 100 ft from the feed at 100°M, entirely inside the parcel.
+
+New `RB-*` class in `build_redbox_class()`, feed held at 10 ft throughout.
+
+**RB‑1TREE is the best buildable option in the study.** Apex tree at 50 ft, then one post:
+−0.40 dBi, 48/75 cells, and **worst region −22.5, the best worst case anywhere here.** It
+beats F10‑A on aggregate, cells and worst case while needing **one fewer rope throw** — two
+anchors, one of which you walk to. Costs one region (23 vs 24). Its 15 m figure, +2.12 dBi
+across 22 of 25 regions, is the best 15 m number in the study.
+
+Post height matters gently: **0.83 dB across 10→36 ft**, about 0.32 dB per 10 ft, and the
+position moves only 10 ft. **A 20 ft post already matches F10‑A's 47 cells and beats its
+worst case.** Recommended rather than the optimiser's 30 ft, because the difference is
+0.31 dB and the build difficulty is not.
+
+**RB‑NOTREE** — single span to a 30 ft post at the strip's far corner, zero rope throws —
+scores −6.05 dBi, 11/75, 8 of 25 regions. Recorded as the floor.
+
+RB‑2POST found no solution: two posts both inside a 3.5 m-wide strip cannot satisfy the exact
+wire-length constraints. Not a failure worth chasing; RB‑1TREE dominates it anyway.
+
+KML: 140 placemarks in 35 folders, garden-post options in red.
+
 ## Corrections summary
 
 | # | Error | Corrected in | Status |

@@ -535,7 +535,17 @@ def build_html(parts, views):
     </tbody>
   </table></div>
   <div class="note alarm">
-    <b>And there is no way to avoid it.</b> The mown lawn measures roughly
+    <b>Before you build this, read the garden-post option.</b> After this guide was
+    written you marked a strip of pre-staked posts on the plan. Running the apex
+    tree straight to a <b>20 ft post</b> in that strip — <b>91 ft from the feed at
+    101° magnetic</b> — matches this design's workable-cell count, improves its
+    worst region from −26.2 to −23.1 dBi, and needs <b>one rope throw instead of
+    two</b>. Steps 1–7 below still apply; you simply drop support 3 and finish on
+    the post. The field plan has the full comparison.
+  </div>
+
+  <div class="note alarm">
+    <b>And there is no way to avoid canopy.</b> The mown lawn measures roughly
     <b>12 × 19 m (40 × 62 ft)</b>, a 74 ft diagonal. The wire needs
     <b>110 ft of ground path</b>. It does not fit in the open, at any bearing.
     A radial scan of open ground from the feed confirms it: the longest clear
