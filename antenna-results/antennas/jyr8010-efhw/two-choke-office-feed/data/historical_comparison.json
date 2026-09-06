@@ -1,0 +1,785 @@
+{
+  "comparison_is_controlled_choke_ab": false,
+  "historical": [
+    {
+      "band": "80m",
+      "wavelength_m": 80,
+      "lower_hz": 3500000,
+      "upper_hz": 4000000,
+      "lower_mhz": 3.5,
+      "upper_mhz": 4.0,
+      "bandwidth_khz": 500.0,
+      "points": 136,
+      "minimum_swr": 1.0900453702077104,
+      "minimum_swr_frequency_hz": 3605570,
+      "minimum_swr_frequency_mhz": 3.60557,
+      "maximum_swr": 2.301208722048576,
+      "median_swr": 1.7718645319434267,
+      "return_loss_at_minimum_db": 27.313886516487873,
+      "resistance_at_minimum_ohm": 49.821955173358745,
+      "reactance_at_minimum_ohm": 4.300933034139791,
+      "coverage_percent": {
+        "1.5": 36.76470588235294,
+        "2.0": 59.55882352941176,
+        "3.0": 100.0
+      },
+      "longest_contiguous_range": {
+        "1.5": "3.5179-3.6969 MHz",
+        "2.0": "3.5032-3.7956 MHz",
+        "3.0": "3.5032-3.9967 MHz"
+      },
+      "threshold_intervals": {
+        "1.5": [
+          {
+            "start_hz": 3517850,
+            "stop_hz": 3696945,
+            "width_khz": 179.095
+          }
+        ],
+        "2.0": [
+          {
+            "start_hz": 3503230,
+            "stop_hz": 3795630,
+            "width_khz": 292.4
+          }
+        ],
+        "3.0": [
+          {
+            "start_hz": 3503230,
+            "stop_hz": 3996655,
+            "width_khz": 493.425
+          }
+        ]
+      },
+      "rating": "usable full-band"
+    },
+    {
+      "band": "40m",
+      "wavelength_m": 40,
+      "lower_hz": 7000000,
+      "upper_hz": 7300000,
+      "lower_mhz": 7.0,
+      "upper_mhz": 7.3,
+      "bandwidth_khz": 300.0,
+      "points": 82,
+      "minimum_swr": 1.4421893698372363,
+      "minimum_swr_frequency_hz": 7198435,
+      "minimum_swr_frequency_mhz": 7.198435,
+      "maximum_swr": 2.0818634569243417,
+      "median_swr": 1.5546112499806268,
+      "return_loss_at_minimum_db": 14.84342077102516,
+      "resistance_at_minimum_ohm": 61.877242385907245,
+      "reactance_at_minimum_ohm": 16.685192865031745,
+      "coverage_percent": {
+        "1.5": 34.146341463414636,
+        "2.0": 93.90243902439023,
+        "3.0": 100.0
+      },
+      "longest_contiguous_range": {
+        "1.5": "7.1473-7.2459 MHz",
+        "2.0": "7.0193-7.2971 MHz",
+        "3.0": "7.0011-7.2971 MHz"
+      },
+      "threshold_intervals": {
+        "1.5": [
+          {
+            "start_hz": 7147265,
+            "stop_hz": 7245950,
+            "width_khz": 98.685
+          }
+        ],
+        "2.0": [
+          {
+            "start_hz": 7019340,
+            "stop_hz": 7297120,
+            "width_khz": 277.78
+          }
+        ],
+        "3.0": [
+          {
+            "start_hz": 7001065,
+            "stop_hz": 7297120,
+            "width_khz": 296.055
+          }
+        ]
+      },
+      "rating": "usable full-band"
+    },
+    {
+      "band": "30m",
+      "wavelength_m": 30,
+      "lower_hz": 10100000,
+      "upper_hz": 10150000,
+      "lower_mhz": 10.1,
+      "upper_mhz": 10.15,
+      "bandwidth_khz": 50.0,
+      "points": 14,
+      "minimum_swr": 1.597097627378534,
+      "minimum_swr_frequency_hz": 10100505,
+      "minimum_swr_frequency_mhz": 10.100505,
+      "maximum_swr": 1.6299949385329038,
+      "median_swr": 1.612081410644739,
+      "return_loss_at_minimum_db": 12.768858600069086,
+      "resistance_at_minimum_ohm": 32.43826239093696,
+      "reactance_at_minimum_ohm": -7.32465672445072,
+      "coverage_percent": {
+        "1.5": 0.0,
+        "2.0": 100.0,
+        "3.0": 100.0
+      },
+      "longest_contiguous_range": {
+        "1.5": "none",
+        "2.0": "10.1005-10.1480 MHz",
+        "3.0": "10.1005-10.1480 MHz"
+      },
+      "threshold_intervals": {
+        "1.5": [],
+        "2.0": [
+          {
+            "start_hz": 10100505,
+            "stop_hz": 10148020,
+            "width_khz": 47.515
+          }
+        ],
+        "3.0": [
+          {
+            "start_hz": 10100505,
+            "stop_hz": 10148020,
+            "width_khz": 47.515
+          }
+        ]
+      },
+      "rating": "very good full-band"
+    },
+    {
+      "band": "20m",
+      "wavelength_m": 20,
+      "lower_hz": 14000000,
+      "upper_hz": 14350000,
+      "lower_mhz": 14.0,
+      "upper_mhz": 14.35,
+      "bandwidth_khz": 350.0,
+      "points": 96,
+      "minimum_swr": 1.1931235137961629,
+      "minimum_swr_frequency_hz": 14245275,
+      "minimum_swr_frequency_mhz": 14.245275,
+      "maximum_swr": 1.701240236907722,
+      "median_swr": 1.2857457810980688,
+      "return_loss_at_minimum_db": 21.104558732675528,
+      "resistance_at_minimum_ohm": 51.33239983870695,
+      "reactance_at_minimum_ohm": -8.85756737861661,
+      "coverage_percent": {
+        "1.5": 80.20833333333334,
+        "2.0": 100.0,
+        "3.0": 100.0
+      },
+      "longest_contiguous_range": {
+        "1.5": "14.0698-14.3476 MHz",
+        "2.0": "14.0004-14.3476 MHz",
+        "3.0": "14.0004-14.3476 MHz"
+      },
+      "threshold_intervals": {
+        "1.5": [
+          {
+            "start_hz": 14069835,
+            "stop_hz": 14347615,
+            "width_khz": 277.78
+          }
+        ],
+        "2.0": [
+          {
+            "start_hz": 14000390,
+            "stop_hz": 14347615,
+            "width_khz": 347.225
+          }
+        ],
+        "3.0": [
+          {
+            "start_hz": 14000390,
+            "stop_hz": 14347615,
+            "width_khz": 347.225
+          }
+        ]
+      },
+      "rating": "very good full-band"
+    },
+    {
+      "band": "17m",
+      "wavelength_m": 17,
+      "lower_hz": 18068000,
+      "upper_hz": 18168000,
+      "lower_mhz": 18.068,
+      "upper_mhz": 18.168,
+      "bandwidth_khz": 100.0,
+      "points": 28,
+      "minimum_swr": 1.8291117564746138,
+      "minimum_swr_frequency_hz": 18068405,
+      "minimum_swr_frequency_mhz": 18.068405,
+      "maximum_swr": 2.0692231482373113,
+      "median_swr": 1.9490516309937516,
+      "return_loss_at_minimum_db": 10.660740602468874,
+      "resistance_at_minimum_ohm": 54.7578349897686,
+      "reactance_at_minimum_ohm": 31.722732228424753,
+      "coverage_percent": {
+        "1.5": 0.0,
+        "2.0": 71.42857142857143,
+        "3.0": 100.0
+      },
+      "longest_contiguous_range": {
+        "1.5": "none",
+        "2.0": "18.0684-18.1379 MHz",
+        "3.0": "18.0684-18.1671 MHz"
+      },
+      "threshold_intervals": {
+        "1.5": [],
+        "2.0": [
+          {
+            "start_hz": 18068405,
+            "stop_hz": 18137850,
+            "width_khz": 69.445
+          }
+        ],
+        "3.0": [
+          {
+            "start_hz": 18068405,
+            "stop_hz": 18167090,
+            "width_khz": 98.685
+          }
+        ]
+      },
+      "rating": "usable full-band"
+    },
+    {
+      "band": "15m",
+      "wavelength_m": 15,
+      "lower_hz": 21000000,
+      "upper_hz": 21450000,
+      "lower_mhz": 21.0,
+      "upper_mhz": 21.45,
+      "bandwidth_khz": 450.0,
+      "points": 123,
+      "minimum_swr": 1.5235041474669269,
+      "minimum_swr_frequency_hz": 21007025,
+      "minimum_swr_frequency_mhz": 21.007025,
+      "maximum_swr": 1.9261472064368939,
+      "median_swr": 1.6781941324566598,
+      "return_loss_at_minimum_db": 13.66167792234914,
+      "resistance_at_minimum_ohm": 33.07685808359077,
+      "reactance_at_minimum_ohm": -3.3331572231729174,
+      "coverage_percent": {
+        "1.5": 0.0,
+        "2.0": 100.0,
+        "3.0": 100.0
+      },
+      "longest_contiguous_range": {
+        "1.5": "none",
+        "2.0": "21.0034-21.4493 MHz",
+        "3.0": "21.0034-21.4493 MHz"
+      },
+      "threshold_intervals": {
+        "1.5": [],
+        "2.0": [
+          {
+            "start_hz": 21003370,
+            "stop_hz": 21449280,
+            "width_khz": 445.91
+          }
+        ],
+        "3.0": [
+          {
+            "start_hz": 21003370,
+            "stop_hz": 21449280,
+            "width_khz": 445.91
+          }
+        ]
+      },
+      "rating": "very good full-band"
+    },
+    {
+      "band": "12m",
+      "wavelength_m": 12,
+      "lower_hz": 24890000,
+      "upper_hz": 24990000,
+      "lower_mhz": 24.89,
+      "upper_mhz": 24.99,
+      "bandwidth_khz": 100.0,
+      "points": 27,
+      "minimum_swr": 1.6333233409648371,
+      "minimum_swr_frequency_hz": 24892290,
+      "minimum_swr_frequency_mhz": 24.89229,
+      "maximum_swr": 1.7468237584618638,
+      "median_swr": 1.6861549908568205,
+      "return_loss_at_minimum_db": 12.37757388951495,
+      "resistance_at_minimum_ohm": 41.30214635645419,
+      "reactance_at_minimum_ohm": -20.772092920290277,
+      "coverage_percent": {
+        "1.5": 0.0,
+        "2.0": 100.0,
+        "3.0": 100.0
+      },
+      "longest_contiguous_range": {
+        "1.5": "none",
+        "2.0": "24.8923-24.9873 MHz",
+        "3.0": "24.8923-24.9873 MHz"
+      },
+      "threshold_intervals": {
+        "1.5": [],
+        "2.0": [
+          {
+            "start_hz": 24892290,
+            "stop_hz": 24987320,
+            "width_khz": 95.03
+          }
+        ],
+        "3.0": [
+          {
+            "start_hz": 24892290,
+            "stop_hz": 24987320,
+            "width_khz": 95.03
+          }
+        ]
+      },
+      "rating": "very good full-band"
+    },
+    {
+      "band": "10m",
+      "wavelength_m": 10,
+      "lower_hz": 28000000,
+      "upper_hz": 29700000,
+      "lower_mhz": 28.0,
+      "upper_mhz": 29.7,
+      "bandwidth_khz": 1700.0,
+      "points": 465,
+      "minimum_swr": 1.775407352760529,
+      "minimum_swr_frequency_hz": 28466880,
+      "minimum_swr_frequency_mhz": 28.46688,
+      "maximum_swr": 4.234135826647817,
+      "median_swr": 2.370275980896995,
+      "return_loss_at_minimum_db": 11.075936392919745,
+      "resistance_at_minimum_ohm": 77.1421136109633,
+      "reactance_at_minimum_ohm": -23.865179591758423,
+      "coverage_percent": {
+        "1.5": 0.0,
+        "2.0": 27.956989247311824,
+        "3.0": 66.02150537634408
+      },
+      "longest_contiguous_range": {
+        "1.5": "none",
+        "2.0": "28.2366-28.7081 MHz",
+        "3.0": "28.0027-29.1211 MHz"
+      },
+      "threshold_intervals": {
+        "1.5": [],
+        "2.0": [
+          {
+            "start_hz": 28236615,
+            "stop_hz": 28708110,
+            "width_khz": 471.495
+          }
+        ],
+        "3.0": [
+          {
+            "start_hz": 28002695,
+            "stop_hz": 29121125,
+            "width_khz": 1118.43
+          }
+        ]
+      },
+      "rating": "best in a subrange"
+    }
+  ],
+  "current_two_chokes_and_counterpoise": [
+    {
+      "band": "80m",
+      "wavelength_m": 80,
+      "lower_hz": 3500000,
+      "upper_hz": 4000000,
+      "lower_mhz": 3.5,
+      "upper_mhz": 4.0,
+      "bandwidth_khz": 500.0,
+      "points": 374,
+      "minimum_swr": 1.1577375868820754,
+      "minimum_swr_frequency_hz": 3564213,
+      "minimum_swr_frequency_mhz": 3.564213,
+      "maximum_swr": 4.117725833425225,
+      "median_swr": 2.12783030719119,
+      "return_loss_at_minimum_db": 22.721268685839583,
+      "resistance_at_minimum_ohm": 55.8639711771517,
+      "reactance_at_minimum_ohm": 5.063889186552268,
+      "coverage_percent": {
+        "1.5": 30.74866310160428,
+        "2.0": 46.25668449197861,
+        "3.0": 72.72727272727273
+      },
+      "longest_contiguous_range": {
+        "1.5": "3.5000-3.6525 MHz",
+        "2.0": "3.5000-3.7301 MHz",
+        "3.0": "3.5000-3.8625 MHz"
+      },
+      "threshold_intervals": {
+        "1.5": [
+          {
+            "start_hz": 3500013,
+            "stop_hz": 3652488,
+            "width_khz": 152.475
+          }
+        ],
+        "2.0": [
+          {
+            "start_hz": 3500013,
+            "stop_hz": 3730063,
+            "width_khz": 230.05
+          }
+        ],
+        "3.0": [
+          {
+            "start_hz": 3500013,
+            "stop_hz": 3862475,
+            "width_khz": 362.462
+          }
+        ]
+      },
+      "rating": "best in a subrange"
+    },
+    {
+      "band": "40m",
+      "wavelength_m": 40,
+      "lower_hz": 7000000,
+      "upper_hz": 7300000,
+      "lower_mhz": 7.0,
+      "upper_mhz": 7.3,
+      "bandwidth_khz": 300.0,
+      "points": 225,
+      "minimum_swr": 1.4383227220041757,
+      "minimum_swr_frequency_hz": 7192850,
+      "minimum_swr_frequency_mhz": 7.19285,
+      "maximum_swr": 2.0431072117535862,
+      "median_swr": 1.5466743326154215,
+      "return_loss_at_minimum_db": 14.905944026346226,
+      "resistance_at_minimum_ohm": 37.885476856710945,
+      "reactance_at_minimum_ohm": -10.308720210777912,
+      "coverage_percent": {
+        "1.5": 36.888888888888886,
+        "2.0": 96.88888888888889,
+        "3.0": 100.0
+      },
+      "longest_contiguous_range": {
+        "1.5": "7.1394-7.2490 MHz",
+        "2.0": "7.0096-7.2999 MHz",
+        "3.0": "7.0003-7.2999 MHz"
+      },
+      "threshold_intervals": {
+        "1.5": [
+          {
+            "start_hz": 7139350,
+            "stop_hz": 7249025,
+            "width_khz": 109.675
+          }
+        ],
+        "2.0": [
+          {
+            "start_hz": 7009613,
+            "stop_hz": 7299850,
+            "width_khz": 290.237
+          }
+        ],
+        "3.0": [
+          {
+            "start_hz": 7000250,
+            "stop_hz": 7299850,
+            "width_khz": 299.6
+          }
+        ]
+      },
+      "rating": "usable full-band"
+    },
+    {
+      "band": "30m",
+      "wavelength_m": 30,
+      "lower_hz": 10100000,
+      "upper_hz": 10150000,
+      "lower_mhz": 10.1,
+      "upper_mhz": 10.15,
+      "bandwidth_khz": 50.0,
+      "points": 37,
+      "minimum_swr": 2.863004206998586,
+      "minimum_swr_frequency_hz": 10148725,
+      "minimum_swr_frequency_mhz": 10.148725,
+      "maximum_swr": 3.0383347666064884,
+      "median_swr": 2.9505219993173832,
+      "return_loss_at_minimum_db": 6.334226910007773,
+      "resistance_at_minimum_ohm": 33.745612560544366,
+      "reactance_at_minimum_ohm": -42.20502785221702,
+      "coverage_percent": {
+        "1.5": 0.0,
+        "2.0": 0.0,
+        "3.0": 78.37837837837837
+      },
+      "longest_contiguous_range": {
+        "1.5": "none",
+        "2.0": "none",
+        "3.0": "10.1113-10.1487 MHz"
+      },
+      "threshold_intervals": {
+        "1.5": [],
+        "2.0": [],
+        "3.0": [
+          {
+            "start_hz": 10111275,
+            "stop_hz": 10148725,
+            "width_khz": 37.45
+          }
+        ]
+      },
+      "rating": "tuner recommended"
+    },
+    {
+      "band": "20m",
+      "wavelength_m": 20,
+      "lower_hz": 14000000,
+      "upper_hz": 14350000,
+      "lower_mhz": 14.0,
+      "upper_mhz": 14.35,
+      "bandwidth_khz": 350.0,
+      "points": 262,
+      "minimum_swr": 1.089466977133633,
+      "minimum_swr_frequency_hz": 14265550,
+      "minimum_swr_frequency_mhz": 14.26555,
+      "maximum_swr": 1.5685485664884065,
+      "median_swr": 1.1976227535100858,
+      "return_loss_at_minimum_db": 27.367454957768267,
+      "resistance_at_minimum_ohm": 50.089336313827594,
+      "reactance_at_minimum_ohm": -4.2886357684427745,
+      "coverage_percent": {
+        "1.5": 91.22137404580153,
+        "2.0": 100.0,
+        "3.0": 100.0
+      },
+      "longest_contiguous_range": {
+        "1.5": "14.0315-14.3498 MHz",
+        "2.0": "14.0007-14.3498 MHz",
+        "3.0": "14.0007-14.3498 MHz"
+      },
+      "threshold_intervals": {
+        "1.5": [
+          {
+            "start_hz": 14031488,
+            "stop_hz": 14349813,
+            "width_khz": 318.325
+          }
+        ],
+        "2.0": [
+          {
+            "start_hz": 14000725,
+            "stop_hz": 14349813,
+            "width_khz": 349.088
+          }
+        ],
+        "3.0": [
+          {
+            "start_hz": 14000725,
+            "stop_hz": 14349813,
+            "width_khz": 349.088
+          }
+        ]
+      },
+      "rating": "very good full-band"
+    },
+    {
+      "band": "17m",
+      "wavelength_m": 17,
+      "lower_hz": 18068000,
+      "upper_hz": 18168000,
+      "lower_mhz": 18.068,
+      "upper_mhz": 18.168,
+      "bandwidth_khz": 100.0,
+      "points": 75,
+      "minimum_swr": 1.4519007800156862,
+      "minimum_swr_frequency_hz": 18068063,
+      "minimum_swr_frequency_mhz": 18.068063,
+      "maximum_swr": 1.5470976650765553,
+      "median_swr": 1.5004577851214915,
+      "return_loss_at_minimum_db": 14.6891960168311,
+      "resistance_at_minimum_ohm": 72.34184896299134,
+      "reactance_at_minimum_ohm": 3.097898391429372,
+      "coverage_percent": {
+        "1.5": 49.333333333333336,
+        "2.0": 100.0,
+        "3.0": 100.0
+      },
+      "longest_contiguous_range": {
+        "1.5": "18.0681-18.1162 MHz",
+        "2.0": "18.0681-18.1670 MHz",
+        "3.0": "18.0681-18.1670 MHz"
+      },
+      "threshold_intervals": {
+        "1.5": [
+          {
+            "start_hz": 18068063,
+            "stop_hz": 18116213,
+            "width_khz": 48.15
+          }
+        ],
+        "2.0": [
+          {
+            "start_hz": 18068063,
+            "stop_hz": 18167038,
+            "width_khz": 98.975
+          }
+        ],
+        "3.0": [
+          {
+            "start_hz": 18068063,
+            "stop_hz": 18167038,
+            "width_khz": 98.975
+          }
+        ]
+      },
+      "rating": "very good full-band"
+    },
+    {
+      "band": "15m",
+      "wavelength_m": 15,
+      "lower_hz": 21000000,
+      "upper_hz": 21450000,
+      "lower_mhz": 21.0,
+      "upper_mhz": 21.45,
+      "bandwidth_khz": 450.0,
+      "points": 336,
+      "minimum_swr": 1.3736749694752954,
+      "minimum_swr_frequency_hz": 21001200,
+      "minimum_swr_frequency_mhz": 21.0012,
+      "maximum_swr": 1.7051241407656317,
+      "median_swr": 1.509009376298142,
+      "return_loss_at_minimum_db": 16.058544848850826,
+      "resistance_at_minimum_ohm": 59.038218507990564,
+      "reactance_at_minimum_ohm": 14.777348733557313,
+      "coverage_percent": {
+        "1.5": 47.32142857142857,
+        "2.0": 100.0,
+        "3.0": 100.0
+      },
+      "longest_contiguous_range": {
+        "1.5": "21.0012-21.2125 MHz",
+        "2.0": "21.0012-21.4493 MHz",
+        "3.0": "21.0012-21.4493 MHz"
+      },
+      "threshold_intervals": {
+        "1.5": [
+          {
+            "start_hz": 21001200,
+            "stop_hz": 21212525,
+            "width_khz": 211.325
+          }
+        ],
+        "2.0": [
+          {
+            "start_hz": 21001200,
+            "stop_hz": 21449263,
+            "width_khz": 448.063
+          }
+        ],
+        "3.0": [
+          {
+            "start_hz": 21001200,
+            "stop_hz": 21449263,
+            "width_khz": 448.063
+          }
+        ]
+      },
+      "rating": "very good full-band"
+    },
+    {
+      "band": "12m",
+      "wavelength_m": 12,
+      "lower_hz": 24890000,
+      "upper_hz": 24990000,
+      "lower_mhz": 24.89,
+      "upper_mhz": 24.99,
+      "bandwidth_khz": 100.0,
+      "points": 75,
+      "minimum_swr": 1.5292922875658177,
+      "minimum_swr_frequency_hz": 24890650,
+      "minimum_swr_frequency_mhz": 24.89065,
+      "maximum_swr": 1.6406727855073984,
+      "median_swr": 1.5823943960205014,
+      "return_loss_at_minimum_db": 13.586069078308473,
+      "resistance_at_minimum_ohm": 70.58469475289934,
+      "reactance_at_minimum_ohm": 14.9261238222992,
+      "coverage_percent": {
+        "1.5": 0.0,
+        "2.0": 100.0,
+        "3.0": 100.0
+      },
+      "longest_contiguous_range": {
+        "1.5": "none",
+        "2.0": "24.8907-24.9896 MHz",
+        "3.0": "24.8907-24.9896 MHz"
+      },
+      "threshold_intervals": {
+        "1.5": [],
+        "2.0": [
+          {
+            "start_hz": 24890650,
+            "stop_hz": 24989625,
+            "width_khz": 98.975
+          }
+        ],
+        "3.0": [
+          {
+            "start_hz": 24890650,
+            "stop_hz": 24989625,
+            "width_khz": 98.975
+          }
+        ]
+      },
+      "rating": "very good full-band"
+    },
+    {
+      "band": "10m",
+      "wavelength_m": 10,
+      "lower_hz": 28000000,
+      "upper_hz": 29700000,
+      "lower_mhz": 28.0,
+      "upper_mhz": 29.7,
+      "bandwidth_khz": 1700.0,
+      "points": 1271,
+      "minimum_swr": 1.595432487751008,
+      "minimum_swr_frequency_hz": 28505913,
+      "minimum_swr_frequency_mhz": 28.505913,
+      "maximum_swr": 3.016026142680322,
+      "median_swr": 2.007742341325443,
+      "return_loss_at_minimum_db": 12.787544195140537,
+      "resistance_at_minimum_ohm": 77.03435500146495,
+      "reactance_at_minimum_ohm": -11.18388235576855,
+      "coverage_percent": {
+        "1.5": 0.0,
+        "2.0": 49.409913453973246,
+        "3.0": 98.97718332022029
+      },
+      "longest_contiguous_range": {
+        "1.5": "none",
+        "2.0": "28.0833-28.9219 MHz",
+        "3.0": "28.0003-29.6816 MHz"
+      },
+      "threshold_intervals": {
+        "1.5": [],
+        "2.0": [
+          {
+            "start_hz": 28083263,
+            "stop_hz": 28921875,
+            "width_khz": 838.612
+          }
+        ],
+        "3.0": [
+          {
+            "start_hz": 28000338,
+            "stop_hz": 29681575,
+            "width_khz": 1681.237
+          }
+        ]
+      },
+      "rating": "best in a subrange"
+    }
+  ]
+}

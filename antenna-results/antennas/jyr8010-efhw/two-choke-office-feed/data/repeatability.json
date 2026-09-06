@@ -1,0 +1,8 @@
+{
+  "median_complex_s11_delta": 0.0003614318229106279,
+  "p95_complex_s11_delta": 0.0007474243111669467,
+  "maximum_complex_s11_delta": 0.01595394975992768,
+  "median_swr_delta": 0.0008502522243263311,
+  "p95_swr_delta": 0.005756209400831214,
+  "maximum_swr_delta": 0.2589864023664923
+}
