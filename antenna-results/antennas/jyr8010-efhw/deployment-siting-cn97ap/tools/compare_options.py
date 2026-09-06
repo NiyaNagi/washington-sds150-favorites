@@ -589,7 +589,89 @@ def build_options():
             slope_deg=slope, feed_h=f, top_h=top))
 
     opts.extend(build_sloper_classes())
+    opts.extend(build_feed10_class())
     return opts
+
+
+# --------------------------------------------------------------------------
+# F10 class: everything re-scored with the feed held at 10 ft.
+#
+# The operator has to leave the transformer at 10 ft for now. That is a
+# different constraint from every other class here, which assumes the feed can
+# be lifted to 24 ft, so it gets its own family rather than being mixed in.
+#
+# Expect the penalty to be modest and unevenly distributed. The feed is a
+# voltage maximum - a current null - so its own height matters little (see
+# tools/endpoint_study.py). What actually costs is that lowering the feed drags
+# the first part of the wire down with it, and on a flat-top that is where two
+# of the four 20 m current maxima live.
+# --------------------------------------------------------------------------
+
+def build_feed10_class():
+    F10 = 10.0
+    out = []
+    run1 = APEX_DIST
+
+    # -- F10-A: the recommended flat-top, feed dropped to 10 ft --------------
+    f, a, fs, e = F10 * FT, 50 * FT, 50 * FT, 30 * FT
+    leg1 = math.hypot(run1, a - f)
+    leg2 = WIRE_M - leg1
+    into = 29.7 - leg1
+    run_far = math.sqrt(max(into ** 2 - (a - fs) ** 2, 0))
+    tail = leg2 - into
+    run_tail = math.sqrt(max(tail ** 2 - (fs - e) ** 2, 0))
+    far_en = offset(APEX_EN, 130.0, run_far)
+    out.append(Option(
+        "F10-A", "Bent flat-top (option A geometry) with the feed at 10 ft",
+        [(leg1, (f + a) / 2, APEX_BRG), (into, (a + fs) / 2, 130.0),
+         (tail, (fs + e) / 2, 130.0)],
+        [("feed", 10, (0, 0)), ("apex tree", 50, APEX_EN),
+         ("far support", 50, far_en),
+         ("end", 30, offset(far_en, 130.0, run_tail))],
+        "Same four points as option A, feed lowered 24 -> 10 ft."))
+
+    # -- F10-V: inverted-V off the apex tree. This is exactly option V2, ----
+    # kept under an F10 key so the 10 ft family is complete on its own.
+    leg2 = WIRE_M - leg1
+    run2 = math.sqrt(max(leg2 ** 2 - (a - F10 * FT) ** 2, 0))
+    out.append(Option(
+        "F10-V", "Inverted-V, one 50 ft support, feed 10 ft (same as V2)",
+        [(leg1, (f + a) / 2, APEX_BRG), (leg2, (a + f) / 2, 130.0)],
+        [("feed", 10, (0, 0)), ("apex tree", 50, APEX_EN),
+         ("end", 10, offset(APEX_EN, 130.0, run2))],
+        "Identical to V2; duplicated here so the 10 ft family stands alone."))
+
+    # -- F10 slopers to the three trees that are known to exist -------------
+    for key, label, top_en in (
+        ("F10-APEX", "Sloper to the APEX tree, feed 10 ft", APEX_EN),
+        ("F10-BACK", "Sloper to the BACKYARD-corner tree, feed 10 ft", BACK_EN),
+        ("F10-FRONT", "Sloper to the FRONT-YARD-corner tree, feed 10 ft",
+         FRONT_EN),
+    ):
+        o = _sloper(key, label, (0.0, 0.0), F10, top_en,
+                    "Support already exists.")
+        if o:
+            out.append(o)
+
+    # -- F10 rotation locked to a corner bearing ----------------------------
+    for key, label, brg in (
+        ("F10-CB", "Sloper, feed 10 ft, locked to the BACKYARD bearing",
+         BACK_BRG),
+        ("F10-CF", "Sloper, feed 10 ft, locked to the FRONT-YARD bearing",
+         FRONT_BRG),
+    ):
+        o = _best_sloper(key, f"{label} ({brg:.0f}T)", (0.0, 0.0), F10, [brg])
+        if o:
+            out.append(o)
+
+    # -- F10-G: the best buildable sloper at 10 ft. The answer to "what is --
+    # the best thing I can do right now".
+    g = _best_sloper("F10-G", "BEST single-support sloper with a 10 ft feed",
+                     (0.0, 0.0), F10, range(0, 360, 5),
+                     "Azimuth and distance both optimised.")
+    if g:
+        out.append(g)
+    return out
 
 
 # --------------------------------------------------------------------------
@@ -804,6 +886,7 @@ def aggregate_multiband(opt, bands=None):
 
 # KML colours are aabbggrr, not rrggbb.
 KML_STYLES = [
+    ("optF",  "ff40ff80", 6),   # spring green   - 10 FT FEED family
     ("optG",  "ffffffff", 6),   # white          - ONE-SUPPORT slopers, K/C/G/RF
     ("optT",  "ff0080ff", 6),   # bright orange  - TALL sloper
     ("optA",  "ff00ff00", 5),   # bright green   - recommended flat-top
@@ -818,6 +901,8 @@ KML_STYLES = [
 
 def kml_style_for(key):
     """Style id for an option key. Checked most-specific first."""
+    if key.startswith("F10-"):
+        return "optF"
     if key.startswith(("K-", "C-", "G-", "RF-")):
         return "optG"
     if key.startswith("T"):
@@ -1119,6 +1204,47 @@ def main():
     print("Rows between dashed lines are TIED on the primary key. The")
     print("tiebreaks below it cannot separate them at this model's precision -")
     print("read the whole row, not the rank number.")
+
+    # ------------------------------------------------------------------
+    print("\n" + "=" * 100)
+    print("10 FT FEED CATEGORY - what is available while the feed stays low")
+    print("=" * 100)
+    f10 = [o for o in opts if o.key.startswith("F10-")]
+    a24 = [o for o in opts if o.key == "A"][0]
+    ma = aggregate_multiband(a24)
+    print(f"{'key':11s} {'agg dBi':>8s} {'cells':>7s} {'regs':>6s} {'worst':>8s}"
+          f" {'anch':>5s} {'highest':>8s} {'vs A':>7s}  label")
+    for o in sorted(f10, key=lambda o: (-aggregate_multiband(o)["n_workable"],
+                                        -aggregate_multiband(o)["mean_power_dBi"])):
+        m = aggregate_multiband(o)
+        print(f"{o.key:11s} {m['mean_power_dBi']:8.2f} {m['n_workable']:4d}/75 "
+              f"{m['n_regions_covered']:4d}/25 {m['worst_dBi']:8.1f} "
+              f"{o.n_anchors:5d} {o.max_anchor_ft:6d}ft "
+              f"{m['mean_power_dBi']-ma['mean_power_dBi']:+7.2f}  {o.label}")
+    print(f"{'A (24 ft)':11s} {ma['mean_power_dBi']:8.2f} {ma['n_workable']:4d}/75 "
+          f"{ma['n_regions_covered']:4d}/25 {ma['worst_dBi']:8.1f} "
+          f"{a24.n_anchors:5d} {a24.max_anchor_ft:6d}ft {0.0:+7.2f}  "
+          f"<-- the 24 ft benchmark")
+
+    best10 = max(f10, key=lambda o: (aggregate_multiband(o)["n_workable"],
+                                     aggregate_multiband(o)["mean_power_dBi"]))
+    mb = aggregate_multiband(best10)
+    print(f"\nBEST WITH A 10 FT FEED: {best10.key} - {best10.label}")
+    print(f"  {mb['mean_power_dBi']:+.2f} dBi, {mb['n_workable']}/75 cells, "
+          f"{mb['n_regions_covered']}/25 regions, worst {mb['worst_dBi']:.1f}")
+    print(f"  Cost of the 10 ft feed versus option A at 24 ft: "
+          f"{mb['mean_power_dBi']-ma['mean_power_dBi']:+.2f} dB, "
+          f"{mb['n_workable']-ma['n_workable']:+d} cells")
+    print("  Per band, dBi:")
+    for b in BAND_KEYS:
+        x, y = aggregate(best10, b), aggregate(a24, b)
+        print(f"    {b:4s} {x['mean_power_dBi']:+6.2f} ({x['n_workable']:2d}/25)"
+              f"   vs A {y['mean_power_dBi']:+6.2f} ({y['n_workable']:2d}/25)"
+              f"   {x['mean_power_dBi']-y['mean_power_dBi']:+6.2f}")
+    print("\nThe feed is a voltage maximum - a current NULL - so its own height")
+    print("costs little directly. What costs is that it drags the first part of")
+    print("the wire down with it, and on a flat-top that is where two of the")
+    print("four 20 m current maxima live.")
 
     data = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data")
 

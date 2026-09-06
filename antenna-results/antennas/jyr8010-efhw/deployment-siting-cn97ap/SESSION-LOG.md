@@ -436,6 +436,46 @@ cannot separate them at this model's precision. Rather than change the sort a th
 explicitly that ordering within a band is not meaningful. KML: 106 placemarks in 25 folders,
 one-support slopers in white.
 
+## Phase 11 — the 10 ft feed category
+
+**Operator asked:** the transformer has to stay at 10 ft for now; score that as its own
+category across all the options and give the best one.
+
+New `F10-*` family, eight options, in `build_feed10_class()`. Kept separate rather than
+mixed in, because every other class assumes the feed can be lifted to 24 ft.
+
+**The 10 ft feed costs option A 0.30 dB and 2 cells.** That is the whole penalty. The feed
+is a voltage maximum — a current null — so its own height barely matters; what costs is
+that it drags the first part of the wire down with it, and on a flat-top that is where two
+of the four 20 m current maxima live.
+
+| Key | 3-band dBi | Cells | Worst | anch | highest | vs A |
+|---|---|---|---|---|---|---|
+| F10‑G | −3.05 | **49/75** | −44.9 | 1 | 105 ft | −2.89 |
+| **F10‑A** | **−0.46** | 47/75 | **−26.2** | 3 | **50 ft** | **−0.30** |
+| F10‑CF | −3.24 | 42/75 | −48.7 | 1 | 106 ft | −3.08 |
+| F10‑V | −1.31 | 40/75 | −27.9 | 1 | 50 ft | −1.15 |
+| F10‑CB | −4.51 | 39/75 | −56.8 | 1 | 122 ft | −4.35 |
+| F10‑APEX | −4.49 | 37/75 | −59.5 | 1 | 129 ft | −4.34 |
+| F10‑BACK | −5.67 | 27/75 | −89.3 | 1 | 134 ft | −5.51 |
+| F10‑FRONT | −7.63 | 14/75 | −73.0 | 1 | 138 ft | −7.47 |
+
+**Recommendation: F10‑A**, not F10‑G. F10‑G edges the primary key 49 to 47 and loses on
+everything else — 2.6 dB of aggregate, an 18 dB worse worst-case, and a 105 ft rope throw
+against 50 ft. Two cells do not buy that. The tie-band rule from Phase 10 applies: read the
+whole row.
+
+Per band, F10‑A against A at 24 ft: 80 m −0.85, 40 m −0.67, 20 m −0.46, 15 m −0.13, 10 m
+**+0.21**. The higher the band the less feed height matters, and on 10 m dropping the feed
+is marginally *better* because the lower average height puts the ground-reflection lobe
+closer to the angles that band wants.
+
+**Only one support moves** versus the 24 ft plan. Leg 1 lengthens 17.86 → 20.12 m as the
+feed drops, so the 29.7 m current maximum arrives sooner along leg 2: support 3 goes from
+83 ft 9 in at 102°T to **77 ft 2 in at 100°T**. Apex and end tie-off are unchanged.
+
+KML: 133 placemarks in 33 folders, the F10 family in spring green.
+
 ## Corrections summary
 
 | # | Error | Corrected in | Status |

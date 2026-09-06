@@ -200,6 +200,64 @@ what every single-wire option pays for its height.
 
 ---
 
+## The 10 ft feed category
+
+The operator has to leave the transformer at 10 ft for now. Every other class here assumes
+it can be lifted to 24 ft, so the 10 ft cases get their own family (`F10-*`) rather than
+being mixed in.
+
+| Key | Configuration | 3-band dBi | Cells | Regions | Worst | anch | highest | vs A |
+|---|---|---|---|---|---|---|---|---|
+| F10‑G | Best 1-support sloper, 47.2°, 25°T | −3.05 | **49/75** | **25/25** | −44.9 | 1 | 105 ft | −2.89 |
+| **F10‑A** | **Option A geometry, feed at 10 ft** | **−0.46** | 47/75 | 24/25 | **−26.2** | 3 | **50 ft** | **−0.30** |
+| F10‑CF | Locked to front-yard bearing 326°T | −3.24 | 42/75 | 24/25 | −48.7 | 1 | 106 ft | −3.08 |
+| F10‑V | Inverted-V, one 50 ft support (= V2) | −1.31 | 40/75 | 23/25 | −27.9 | 1 | 50 ft | −1.15 |
+| F10‑CB | Locked to backyard bearing 155°T | −4.51 | 39/75 | 25/25 | −56.8 | 1 | 122 ft | −4.35 |
+| F10‑APEX | Sloper to the apex tree, 66.2° | −4.49 | 37/75 | 24/25 | −59.5 | 1 | 129 ft | −4.34 |
+| F10‑BACK | Sloper to the backyard-corner tree | −5.67 | 27/75 | 22/25 | −89.3 | 1 | 134 ft | −5.51 |
+| F10‑FRONT | Sloper to the front-yard-corner tree | −7.63 | 14/75 | 13/25 | −73.0 | 1 | 138 ft | −7.47 |
+| *A (24 ft)* | *the benchmark* | *−0.16* | *49/75* | *24/25* | *−25.4* | *3* | *50 ft* | *—* |
+
+### The answer: F10‑A, and the 10 ft feed costs almost nothing
+
+**Lowering the feed from 24 ft to 10 ft costs option A just 0.30 dB and 2 cells.** That is
+the whole penalty. The feed is a voltage maximum — a **current null** — so its own height
+barely matters; what costs is that it drags the first part of the wire down with it.
+
+F10‑G edges F10‑A on the primary key, 49 cells to 47, and **loses on everything else**:
+
+| | F10‑A | F10‑G |
+|---|---|---|
+| 3-band aggregate | **−0.46 dBi** | −3.05 dBi |
+| Worst region | **−26.2** | −44.9 |
+| Highest anchor | **50 ft** — easy throw | 105 ft — very hard |
+| 15 m / 10 m | **+1.93 / +2.47 dBi** | −2.79 / −1.15 dBi |
+
+Two extra cells do not buy 2.6 dB, an 18 dB worse null, and a 105 ft rope throw. **F10‑A is
+the recommendation while the feed stays at 10 ft.**
+
+### What changes on the ground versus the 24 ft plan
+
+Only support 3 moves. Leg 1 gets longer as the feed drops (17.86 → 20.12 m of wire), so the
+29.7 m current maximum arrives sooner along leg 2:
+
+| Support | Option A (24 ft feed) | F10‑A (10 ft feed) |
+|---|---|---|
+| Feed | 24 ft | **10 ft** |
+| Apex tree | 50 ft, 52 ft 6 in @ 082°T | unchanged |
+| **Far support** | 50 ft, **83 ft 9 in @ 102°T** | 50 ft, **77 ft 2 in @ 100°T** |
+| End tie-off | 30 ft @ 109°T | 30 ft, same bearing |
+
+Average height falls 41.6 → 37.3 ft; mean 20 m current-maximum height 41.0 → 37.5 ft.
+
+Per band, F10‑A against A at 24 ft: 80 m **−0.85**, 40 m −0.67, 20 m −0.46, 15 m −0.13,
+10 m **+0.21**. **The higher the band, the less the feed height matters** — and on 10 m
+lowering the feed is very slightly *better*, because at 37 ft rather than 42 ft average the
+wire's ground-reflection lobe sits closer to the low angles that band wants. Regions
+workable are unchanged on 80 m, 15 m and 10 m, and drop by one each on 40 m and 20 m.
+
+---
+
 ## Is option A actually harder to deploy? No — it is the easiest thing that works
 
 The operator's premise was that a sloper would be easier to put up than the four-support

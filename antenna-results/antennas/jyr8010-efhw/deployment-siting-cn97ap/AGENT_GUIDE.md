@@ -135,6 +135,8 @@ The operator answered these explicitly. Re-proposing them wastes their time.
 | Deploy from the front yard or driveway corner? | **No.** Nulls all of Asia. |
 | Build a PVC mast? | **No.** Scored in full: −3.0 to −7.5 dB, 3–12 of 25 regions. A 39.6 m wire on a 24 ft mast slopes 6.2° and averages 17–24 ft. |
 | Sloper off a *mast*? | **No.** At mast heights a 39.6 m "sloper" is a tilted flat-top. |
+| Feed must stay at 10 ft — what then? | **F10‑A**, which is option A's geometry with the feed lowered. Costs **0.30 dB and 2 cells** against A at 24 ft. The feed is a current null, so its own height barely matters. Only support 3 moves: 83 ft 9 in → **77 ft 2 in**, 102°T → 100°T, because leg 1 lengthens as the feed drops. |
+| Best *sloper* with a 10 ft feed? | F10‑G, 47.2° at 25°T, 105 ft anchor. Wins the primary key 49 vs 47 cells and loses everything else: 2.6 dB, an 18 dB worse null, and a 105 ft throw against 50 ft. **Do not recommend it over F10‑A on the cell count alone.** |
 | Is option A hard to deploy? | **No — it is the easiest thing that works.** Three attachments but the highest is **50 ft**, a routine throw. Every one-support sloper that matches it needs **116–120 ft**. The bend is what buys height in the middle of the wire, where the current maxima are, without any one support being high. |
 | Want fewer ropes than A? | **V1, not a sloper.** One 50 ft support, costs 5 cells and 0.72 dB. Every sloper that beats V1 needs an anchor more than twice as high. |
 | Best one-support sloper? | **G‑FEED** — 47.8° at 50°T, support 87 ft out, 120 ft attachment, 49/75 cells, on the lot. Ties A's cell count; loses 2.3 dB and has a −67 dBi worst case against A's −25. |
