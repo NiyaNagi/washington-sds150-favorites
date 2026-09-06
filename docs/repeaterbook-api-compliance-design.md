@@ -4,6 +4,31 @@ This document is the implementation and operating plan for using the
 RepeaterBook API in Signal - KM7HKM Personal Radio Programmer. It is written
 to answer RepeaterBook's review questions before the API adapter is enabled.
 
+**Canonical public review URL:**
+https://github.com/NiyaNagi/washington-sds150-favorites/blob/main/docs/repeaterbook-api-compliance-design.md
+
+**[Data courtesy of RepeaterBook.com](https://www.repeaterbook.com/).**
+
+## September 2026 Rejection Response
+
+RepeaterBook's second admin note said the request was incomplete because the
+public design URL and final controls were not supplied in the submitted review
+packet. This revision responds to each item explicitly:
+
+| Admin feedback | Final design response |
+|---|---|
+| No review URL supplied | The direct public design URL appears above and is the value in **Project Website or Review Link** below. |
+| Visible attribution/link-back omitted | Every RepeaterBook-backed UI view and report displays **Data courtesy of RepeaterBook.com** linked to `https://www.repeaterbook.com/`; record details link to the relevant RepeaterBook detail page when available. |
+| Geographic and result bounds omitted | Version 1 permits only Washington State (`country=United States`, `state_id=53`), requires one center point and a radius from 1 through 60 miles, filters locally by great-circle distance, and accepts no more than 250 candidates. |
+| Numeric request/rate controls omitted | One HTTP request per manual refresh, no pagination, no parallel requests, no more than one refresh per 60 minutes and four per rolling 24 hours per user token. |
+| HTTP 429 controls omitted | A 429 stops the refresh immediately. There is no same-action retry. The next attempt is blocked until the later of `Retry-After` or 60 minutes. |
+| Cache TTL/retention/deletion omitted | Raw responses are fresh for 7 days and deleted by day 30; normalized/applied RepeaterBook records expire and are deleted by day 90 unless manually refreshed and reviewed again; an explicit delete action removes all RepeaterBook data immediately. |
+| Local personal workflow required | The adapter runs only from an explicit local user action to program personally owned radios. There is no startup refresh, scheduler, server, proxy, public search, map, directory, feed, or API. |
+| Per-user app-bound token required | Signal never accepts a shared `app_` token. Each user supplies only their own dashboard-issued `rbuapp_` token in the preferred `X-RB-App-Token` header. |
+
+These are hard application limits, not estimates. If RepeaterBook imposes a
+stricter approved scope or limit, the stricter value wins.
+
 ## Copy-Paste RepeaterBook Distributed-App Request
 Select the **I develop or maintain a distributed app** access model. This is the
 correct model because Signal is a locally run desktop application whose users
@@ -24,15 +49,20 @@ Signal - KM7HKM Personal Radio Programmer
 ```
 ### Project Website or Review Link
 ```text
-https://github.com/NiyaNagi/washington-sds150-favorites
+https://github.com/NiyaNagi/washington-sds150-favorites/blob/main/docs/repeaterbook-api-compliance-design.md
 ```
 ### Application User-Agent
 ```text
-SignalWA/1.0 (KM7HKM personal radio programmer)
+SignalWA/1.0 (+https://github.com/NiyaNagi/washington-sds150-favorites; <VALID_CONTACT_EMAIL>)
 ```
+Replace `<VALID_CONTACT_EMAIL>` with the same reachable address entered in the
+Contact Email field before submitting. The approved value, including that
+address, will be used byte-for-byte in every request. Do not use a GitHub
+no-reply address.
+
 ### Application Review Details
 ```text
-Signal is a private, noncommercial, single-user personal radio programming application maintained by KM7HKM. It runs locally on the operator's Windows PC and creates programming files only for the operator's personally owned radios: Kenwood TH-D75A, Uniden SDS150, TIDRADIO TD-H9, and Yaesu FTX-1. The RepeaterBook integration is planned but is not yet enabled. The repository contains a public, detailed pre-implementation compliance design and the source adapter remains disabled until these controls are implemented and tested: https://github.com/NiyaNagi/washington-sds150-favorites/blob/main/docs/repeaterbook-api-compliance-design.md Signal is not a public API proxy, directory, map, data mirror, bulk downloader, or secondary service. It will not publish, commit, sell, or redistribute raw RepeaterBook data. A manual refresh uses a bounded nearby-repeater query, saves the response only in the local private cache, presents proposed changes for review, and creates radio files only after approval. Normal radio-file export reads the reviewed local cache and never makes a RepeaterBook request.
+Signal is a local, noncommercial, user-triggered personal radio programmer for KM7HKM's personally owned Kenwood TH-D75A, Uniden SDS150, TIDRADIO TD-H9, and Yaesu FTX-1. Public implementation design: https://github.com/NiyaNagi/washington-sds150-favorites/blob/main/docs/repeaterbook-api-compliance-design.md Version 1 is Washington-only: one manual request for country=United States and state_id=53, followed by local filtering around one user-selected center from 1 through 60 miles and target-radio bands; no more than 250 candidates may enter review. There is no pagination, parallelism, startup/scheduled refresh, server, proxy, public search, map, directory, feed, or secondary API. Each user supplies only their own dashboard-issued app-bound rbuapp_ token; Signal never accepts or embeds a shared app_ token. Hard client limits are one request per manual refresh, one refresh per 60 minutes, and four per rolling 24 hours. HTTP 429 stops immediately with no same-action retry; the next attempt is blocked until the later of Retry-After or 60 minutes. Raw cache is fresh for 7 days and deleted by day 30; derived records are deleted by day 90 unless manually refreshed and reviewed again; the user can immediately delete all RepeaterBook data. Every RepeaterBook-backed UI view and report visibly displays “Data courtesy of RepeaterBook.com” linked to https://www.repeaterbook.com/. Raw/cache data is never committed, published, sold, re-served, bulk-exported, or redistributed. The adapter remains disabled until these controls and tests are implemented and approval is granted.
 ```
 ### Primary RepeaterBook Use
 Select: **Personal radio programming**
@@ -44,7 +74,7 @@ Select: **Private, single user**
 ```
 ### API Workflow and Data Fields
 ```text
-An explicit manual refresh searches only for amateur repeaters relevant to the radio being configured. Each request is bounded by state and/or a user-selected travel or home location, radius, and band. The default search is Washington State within 60 miles; the maximum radius is 150 miles. The user reviews the locally cached results before selected records are written to a personal radio programming file. Fields used when available are: repeater callsign, output frequency, input frequency or offset, access tone/digital access value, operating mode, status, latitude, longitude, city, county, state, and distance from the requested search center. Signal filters each record for the target radio's capability; it does not invent missing frequency, tone, offset, location, callsign, or mode values. This is not a proxy, mirror, directory, map, bulk download, secondary API, or background synchronization service. Normal exports use only locally reviewed cached records and do not call the API.
+Version 1 is limited to Washington State. The user selects one center point, a whole-number radius from 1 through 60 miles, target-radio bands, and a target radio, then explicitly clicks Refresh RepeaterBook. Signal sends one Export API request with country=United States and state_id=53, performs no pagination, computes great-circle distance locally, rejects records without usable coordinates, excludes records outside the selected radius or target-radio bands/capabilities, and admits at most 250 candidates to the private review screen. If more than 250 match, nothing is imported and the user must reduce radius or bands. Fields used are repeater/state IDs, callsign, output/input frequency or offset, uplink/downlink tone or digital access value, operating mode, operational status, latitude/longitude, city, county, state, last update, and computed distance. Only user-selected records are normalized into the private programming catalog. Normal radio export never calls RepeaterBook. There is no general browser, map, directory, proxy, feed, bulk export, public API, or background synchronization.
 ```
 ### Relationship to RepeaterBook
 ```text
@@ -56,11 +86,11 @@ Signal is a distributed local application. It will not request, embed, ship, or 
 ```
 ### Rate and Abuse Controls
 ```text
-RepeaterBook requests occur only after an explicit manual refresh; never at startup, on a schedule, or from normal radio-file generation. Signal sends the exact User-Agent: SignalWA/1.0 (KM7HKM personal radio programmer). It permits no parallel requests, at most one request every 3 seconds, at most 20 requests per manual refresh, and at most 200 requests per rolling 24-hour local window. Each query is bounded by state, geography/radius, and/or band; there is no national or all-state crawl. Pagination stops at the API's final page, an empty result, 10 pages, 2,000 accepted records, or the request cap. For HTTP 429, Signal honors Retry-After. If it is absent, it retries at most three times with waits of 30 seconds, 2 minutes, and 10 minutes, then stops the refresh. It also stops on unrecoverable authentication/authorization errors and never tries parallel or bypass requests.
+Requests occur only after an explicit local user refresh. Signal sends the exact approved User-Agent and the user's own rbuapp_ token in X-RB-App-Token. Hard limits are one HTTP request per manual refresh, zero pagination requests, zero parallel requests, no more than one refresh per 60 minutes, and no more than four refreshes per rolling 24 hours per token. HTTP 429 stops immediately with no same-action retry; the next attempt is blocked until the later of Retry-After or 60 minutes. Authentication, scope, and User-Agent errors are never retried. There is no startup refresh, scheduler, crawl, burst, bypass, or request from normal radio generation. Any stricter RepeaterBook-approved limit overrides these local maxima.
 ```
 ### Cache and Retention Policy
 ```text
-Raw API responses are cached only in the user's local SQLite-backed application cache, outside the repository. Freshness TTL is 7 days. Offline use of a stale response is allowed for up to 30 days. Raw response bodies are automatically purged after 90 days. Locally reviewed derived programming entries may remain in the private catalog until the user removes them, with RepeaterBook attribution and retrieval date retained. Cache files are not committed, included in release archives, included in generated radio files, published, sold, or shared. Normal exports use this reviewed local cache and never trigger a refresh.
+Raw API responses and normalized staging rows are stored only in the user's local SQLite application data outside the repository. Raw data is fresh for 7 days, may be viewed offline as visibly stale through day 30, and is automatically deleted no later than day 30. User-reviewed derived RepeaterBook records retain source ID, attribution, and retrieval date and are automatically deleted no later than day 90 unless the user manually refreshes and reviews them again. Purges run at startup and before and after every refresh. A Delete All RepeaterBook Data action immediately removes raw responses, staging rows, derived records, request history, and generated audit reports; token deletion is a separate explicit action. Cache and derived data are never committed, backed up by Signal, included in releases, published, sold, shared, re-served, or redistributed. Normal exports never refresh the cache.
 ```
 ### Attribution and Link-Back Plan
 ```text
@@ -105,12 +135,14 @@ https://github.com/NiyaNagi/washington-sds150-favorites
 Application User-Agent:
 
 ```text
-SignalWA/1.0 (KM7HKM personal radio programmer)
+SignalWA/1.0 (+https://github.com/NiyaNagi/washington-sds150-favorites; <VALID_CONTACT_EMAIL>)
 ```
 
-Every RepeaterBook API request must send that exact `User-Agent`. The adapter
-must reject execution if it would otherwise fall back to the default Python,
-requests, urllib, browser, or HTTP-library user agent.
+Before application submission, `<VALID_CONTACT_EMAIL>` will be replaced with
+the reachable address in the request. Every RepeaterBook API request must send
+the resulting approved `User-Agent` byte-for-byte. The adapter must reject
+execution if it would otherwise use a default Python, requests, urllib, browser,
+or HTTP-library user agent.
 
 Operator:
 
@@ -127,9 +159,9 @@ programming files for personally owned radios. Current radios include:
 - TIDRADIO TD-H9
 - Yaesu FTX-1
 
-RepeaterBook will be used only to find currently listed amateur repeaters near
-the operator's home and travel destinations, primarily in Washington State. The
-application needs these fields when available:
+Version 1 will use RepeaterBook only to select currently listed Washington State
+amateur repeaters for programming the operator's radios. The application needs
+these fields when available:
 
 - Repeater callsign
 - Output frequency
@@ -155,7 +187,7 @@ Planned CLI shape:
 
 ```powershell
 wasds150 sources configure --repeaterbook-token-env REPEATERBOOK_API_TOKEN
-wasds150 sources fetch repeaterbook --state WA --center 47.633,-121.966 --radius-mi 60 --bands 2m,70cm
+wasds150 sources fetch repeaterbook --state WA --center 47.633,-121.966 --radius-mi 60 --bands 2m,70cm --radio thd75
 wasds150 sources update --only repeaterbook --preview
 wasds150 sources update --only repeaterbook --apply
 wasds150 plan export thd75-ames-lake --target thd75-file --out radio-configs
@@ -174,6 +206,29 @@ Planned UI shape:
 
 No scheduled job, background crawler, or automatic startup refresh will call
 RepeaterBook.
+
+### Planned implementation locations
+
+- `src/wasds150/sources/repeaterbook.py`: validate the Washington-only request,
+  attach the approved headers, issue exactly one request, validate response
+  shape, calculate distance, enforce the 250-candidate fail-closed cap, and
+  normalize only reviewed fields.
+- `src/wasds150/sources/config.py`: store only the environment-variable name or
+  external credential-file path; reject `app_` tokens and accept only
+  `rbuapp_` tokens.
+- `src/wasds150/cache/http.py` and `src/wasds150/cache/store.py`: enforce the
+  7-day freshness TTL, day-30 raw deletion, day-90 derived deletion, request
+  ledger, and immediate purge operation.
+- `src/wasds150/cli.py` and the local web UI: expose only explicit refresh,
+  preview, apply, status, and delete actions; display attribution and source
+  links anywhere RepeaterBook data appears.
+- `src/wasds150/export/report.py`: put linked attribution in companion HTML or
+  Markdown audit output whenever selected radio channels came from RepeaterBook.
+- `tests/test_repeaterbook_source.py`: use synthetic responses to prove token
+  rejection/redaction, exact headers, one-request behavior, geographic and
+  result caps, no pagination/parallelism, 429 lockout, expiry/deletion, output
+  filtering, and attribution. Tests will never contain a live token or copied
+  RepeaterBook response.
 
 ## Token Handling
 
@@ -199,6 +254,10 @@ The token must never be:
 - Exposed through a website, browser client, API endpoint, shared service, or
   public build artifact
 
+The adapter validates the `rbuapp_` prefix before network access and sends the
+token only as `X-RB-App-Token`. A value beginning with `app_` is rejected as an
+invalid credential for this distributed application.
+
 The local config file path must stay outside the repository. If a path is stored
 in project configuration, only the path is stored, not the token value. The
 adapter will redact the token from exceptions and structured logs using the
@@ -212,39 +271,37 @@ configuration remain encrypted and are never stored in this source repository.
 
 The adapter will enforce local numeric limits even if the API would allow more.
 
-Default limits:
+Hard limits:
 
-- Maximum one RepeaterBook request every 3 seconds.
-- Maximum 20 RepeaterBook requests per manual refresh operation.
-- Maximum 200 RepeaterBook requests per rolling 24-hour local window.
-- Maximum 2,000 accepted repeater records per manual refresh operation.
+- Exactly one RepeaterBook HTTP request per successful manual refresh.
+- No more than one manual refresh per 60 minutes per user token.
+- No more than four manual refreshes per rolling 24 hours per user token.
+- Maximum 250 candidate records admitted to review; if 251 or more match, the
+  import fails closed and asks the user to reduce radius or bands.
 - No parallel RepeaterBook requests.
-- No national or all-state crawl loop.
+- No pagination requests.
+- No multi-state, national, or all-state crawl loop.
 - No refresh on application startup.
 
 Allowed query bounds:
 
-- A query must be bounded by state, geographic center plus radius, band, or an
-  equivalent API-supported narrow filter.
-- Default radius is 60 miles.
-- Maximum radius is 150 miles per manual refresh.
-- Default state is `WA` when a state is needed.
-- The operator may request travel destinations manually, but each destination is
-  an explicit bounded query.
+- Version 1 sends only `country=United States` and `state_id=53` (Washington).
+- Every refresh requires exactly one geographic center.
+- Radius must be a whole number from 1 through 60 miles; default is 60 miles.
+- At least one target-radio-supported amateur band must be selected.
+- Great-circle distance and band/radio-capability filtering happen locally
+  before a record can enter review.
+- Records without usable coordinates are rejected.
 
 Pagination rules:
 
-- Page size must use the RepeaterBook API default unless the API documentation
-  recommends a smaller value.
-- Maximum pages per query: 10.
-- Maximum records consumed per page: 200.
-- Stop immediately when the API reports the final page, returns no records, or
-  reaches the local page or record limit.
-- Persist the last request timestamp before the next page is requested.
+- Version 1 does not paginate.
+- If RepeaterBook later requires pagination, the adapter remains disabled until
+  a revised, approved policy and tested numeric page cap are documented.
 
 The first implementation must include tests that prove the rate limiter,
-pagination stop conditions, and max-request cap are enforced without requiring
-live API access.
+geographic/result bounds, one-request behavior, and no-pagination rule without
+requiring live API access.
 
 ## HTTP Error and 429 Handling
 
@@ -259,18 +316,18 @@ Rules:
 - `400` or `404`: stop the current query and report the bad filter or endpoint.
 - `401` or `403`: stop all RepeaterBook requests, redact the token from the
   error, and require operator action.
-- `408`, `425`, `429`, `500`, `502`, `503`, `504`: retry only within the limits
-  below.
+- `408`, `425`, `429`, `500`, `502`, `503`, `504`: stop the refresh without an
+  automatic same-action retry.
 
 Backoff rules:
 
-- Honor `Retry-After` if RepeaterBook returns it.
-- If no `Retry-After` is present, use exponential backoff of 30 seconds,
-  2 minutes, then 10 minutes.
-- Maximum retries per request: 3.
-- Maximum retry wait budget per manual refresh: 15 minutes.
-- On `429`, stop all pagination for that refresh after the final retry fails.
-- Never open additional parallel requests while waiting.
+- On `429`, stop immediately and make no retry in the same user action.
+- Honor `Retry-After` when present.
+- If `Retry-After` is absent, block the next refresh for 60 minutes.
+- If `Retry-After` is shorter than 60 minutes, the 60-minute local interval
+  still applies; if longer, the server value applies.
+- Authentication, scope, and User-Agent errors require correction and are never
+  retried automatically.
 
 ## Filtering and Radio Compatibility
 
@@ -314,18 +371,22 @@ Cache storage:
 Freshness rules:
 
 - Fresh cache TTL: 7 days.
-- Stale-but-usable offline window: 30 days.
-- Hard retention limit for raw RepeaterBook API response bodies: 90 days.
-- Derived reviewed catalog entries may remain in the operator's local private
-  catalog until manually removed, but retain RepeaterBook attribution and
-  retrieval date.
+- Stale raw data may be viewed offline, visibly marked stale, only through day
+  30; it cannot be newly applied after the 7-day freshness TTL.
+- Raw responses and normalized staging rows are deleted no later than day 30.
+- Derived reviewed records are deleted no later than day 90 unless manually
+  refreshed and reviewed again; they retain source ID, attribution, and
+  retrieval date while present.
 
 Operational rules:
 
 - A normal export uses cached/reviewed local records only.
 - A refresh requires explicit operator action.
 - Offline mode never calls RepeaterBook.
-- Cached raw responses older than 90 days are purged before or after refresh.
+- Purges run at startup and before and after every refresh.
+- `Delete All RepeaterBook Data` immediately deletes raw responses, staging
+  rows, derived records, request history, and generated audit reports.
+- Deleting the locally stored token is a separate explicit action.
 - The local status command will show last refresh time and whether cached data
   is fresh, stale, or expired.
 
@@ -353,6 +414,10 @@ Attribution placement:
 - Markdown/HTML review reports: visible in the source/provenance section.
 - Generated radio programming audit reports: visible when any exported channel
   came from RepeaterBook.
+
+When a stable RepeaterBook record ID permits a detail URL, the record view links
+to that relevant RepeaterBook page. Other online attribution links to
+`https://www.repeaterbook.com/`.
 
 Attribution is not required inside binary/native radio programming files when
 the radio format has no suitable attribution field. In that case, the companion
@@ -386,22 +451,25 @@ Repository rules:
 
 The RepeaterBook adapter must not be enabled until all of these are true:
 
-1. Every live request sends `User-Agent: SignalWA/1.0 (KM7HKM personal radio programmer)`.
+1. Every live request sends the exact approved `SignalWA/1.0` User-Agent with
+  public project URL and reachable contact email.
 2. Token loading supports only a user-owned `rbuapp_` token from an environment
   variable or external encrypted-drive config, with no shared `app_` token and
   no repo-stored token path required.
 3. Token redaction is covered by tests.
 4. No live request can run without an explicit manual refresh action.
 5. No parallel RepeaterBook requests are possible.
-6. Rate limit of at most one request per 3 seconds is enforced.
-7. Per-refresh cap of 20 requests is enforced.
-8. Rolling 24-hour cap of 200 requests is enforced.
-9. Pagination stops at 10 pages, 2,000 accepted records, final page, or empty
-   response.
-10. `429` handling honors `Retry-After` and otherwise uses bounded exponential
-    backoff.
-11. Fresh cache TTL is 7 days, stale offline window is 30 days, and raw response
-    retention is no more than 90 days.
+6. Exactly one request per refresh, one refresh per 60 minutes, and four per
+   rolling 24 hours are enforced per token.
+7. Version 1 accepts only Washington (`state_id=53`), one center, radius 1-60
+   miles, and at least one target-radio-supported band.
+8. At most 250 candidates enter review; 251 or more fails closed.
+9. Version 1 sends no pagination or parallel requests.
+10. `429` stops immediately with no same-action retry and locks refresh until
+  the later of `Retry-After` or 60 minutes.
+11. Raw data is fresh for 7 days and deleted by day 30; derived records are
+  deleted by day 90 unless manually refreshed and reviewed again; immediate
+  deletion is available and tested.
 12. Generated radio files contain only selected programming fields and never raw
     API bodies or credentials.
 13. Any user-visible RepeaterBook-derived report or UI includes visible
@@ -413,10 +481,11 @@ The RepeaterBook adapter must not be enabled until all of these are true:
 ## Copy-Ready Reapplication Summary
 
 Signal is a private, noncommercial, single-user personal radio programmer for
-KM7HKM. It will query RepeaterBook only after an explicit manual refresh for a
-bounded state/radius/band/radio-capability workflow, primarily Washington State
-and travel destinations. It will use the exact user agent
-`SignalWA/1.0 (KM7HKM personal radio programmer)` on every API request.
+KM7HKM. Version 1 queries RepeaterBook only after an explicit manual refresh for
+Washington State (`state_id=53`), then locally filters around one center by a
+1-60 mile radius, selected bands, and radio capability. At most 250 candidates
+may enter review. It will use the exact approved `SignalWA/1.0` User-Agent with
+the public project URL and reachable contact email on every request.
 
 Signal will never use a shared `app_` token. Each user supplies their own
 RepeaterBook dashboard-issued, app-bound `rbuapp_` token at runtime through
@@ -424,18 +493,18 @@ RepeaterBook dashboard-issued, app-bound `rbuapp_` token at runtime through
 removable drive. It will never be hard-coded, committed, logged, included in
 generated radio files, or exposed through a website/API/proxy/shared service.
 
-The implementation will make no parallel RepeaterBook requests. It will enforce
-one request every 3 seconds, no more than 20 requests per manual refresh, no
-more than 200 requests per rolling 24 hours, no more than 10 pages per query,
-and no more than 2,000 accepted records per refresh. On HTTP 429 it will honor
-`Retry-After` or back off for 30 seconds, 2 minutes, then 10 minutes, with at
-most 3 retries and a 15-minute retry budget.
+The implementation makes exactly one request per manual refresh, no pagination
+or parallel requests, no more than one refresh per 60 minutes, and no more than
+four refreshes per rolling 24 hours per token. HTTP 429 stops immediately with
+no same-action retry; the next refresh is blocked until the later of
+`Retry-After` or 60 minutes.
 
-Responses will be cached locally only under the user's config home. Fresh cache
-TTL is 7 days, stale offline use is allowed for 30 days, and raw response bodies
-are purged after 90 days. Normal radio exports use the reviewed local cache and
-do not call the API. Raw RepeaterBook data, cache files, tokens, and database
-snapshots will not be committed, published, sold, or redistributed.
+Responses are cached locally only under the user's config home. Raw data is
+fresh for 7 days and deleted by day 30. Derived records are deleted by day 90
+unless manually refreshed and reviewed again. An explicit delete action removes
+all RepeaterBook data immediately. Normal radio exports use only reviewed local
+records and do not call the API. Raw RepeaterBook data, cache files, tokens, and
+database snapshots will not be committed, published, sold, or redistributed.
 
 Every UI screen, CLI report, Markdown/HTML report, or generated audit report
 that displays RepeaterBook-derived records will visibly show
