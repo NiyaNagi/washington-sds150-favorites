@@ -17,7 +17,7 @@ packet. This revision responds to each item explicitly:
 
 | Admin feedback | Final design response |
 |---|---|
-| No review URL supplied | The direct public design URL appears above and is the value in **Project Website or Review Link** below. |
+| No review URL supplied | The direct public design URL appears above and will be supplied in the application form's **Project Website or Review Link** field. |
 | Visible attribution/link-back omitted | Every RepeaterBook-backed UI view and report displays **Data courtesy of RepeaterBook.com** linked to `https://www.repeaterbook.com/`; record details link to the relevant RepeaterBook detail page when available. |
 | Geographic and result bounds omitted | Version 1 permits only Washington State (`country=United States`, `state_id=53`), requires one center point and a radius from 1 through 60 miles, filters locally by great-circle distance, and accepts no more than 250 candidates. |
 | Numeric request/rate controls omitted | One HTTP request per manual refresh, no pagination, no parallel requests, no more than one refresh per 60 minutes and four per rolling 24 hours per user token. |
@@ -28,92 +28,6 @@ packet. This revision responds to each item explicitly:
 
 These are hard application limits, not estimates. If RepeaterBook imposes a
 stricter approved scope or limit, the stricter value wins.
-
-## Copy-Paste RepeaterBook Distributed-App Request
-Select the **I develop or maintain a distributed app** access model. This is the
-correct model because Signal is a locally run desktop application whose users
-control their own configuration; it cannot safely embed or protect a shared
-credential.
-
-### Contact Name / Call Sign
-```text
-KM7HKM
-```
-### Contact Email
-```text
-<enter the email address associated with KM7HKM's RepeaterBook account>
-```
-### Project / Application Name
-```text
-Signal - KM7HKM Personal Radio Programmer
-```
-### Project Website or Review Link
-```text
-https://github.com/NiyaNagi/washington-sds150-favorites/blob/main/docs/repeaterbook-api-compliance-design.md
-```
-### Application User-Agent
-```text
-SignalWA/1.0 (+https://github.com/NiyaNagi/washington-sds150-favorites; <VALID_CONTACT_EMAIL>)
-```
-Replace `<VALID_CONTACT_EMAIL>` with the same reachable address entered in the
-Contact Email field before submitting. The approved value, including that
-address, will be used byte-for-byte in every request. Do not use a GitHub
-no-reply address.
-
-### Application Review Details
-```text
-Signal is a local, noncommercial, user-triggered personal radio programmer for KM7HKM's personally owned Kenwood TH-D75A, Uniden SDS150, TIDRADIO TD-H9, and Yaesu FTX-1. Public implementation design: https://github.com/NiyaNagi/washington-sds150-favorites/blob/main/docs/repeaterbook-api-compliance-design.md Version 1 is Washington-only: one manual request for country=United States and state_id=53, followed by local filtering around one user-selected center from 1 through 60 miles and target-radio bands; no more than 250 candidates may enter review. There is no pagination, parallelism, startup/scheduled refresh, server, proxy, public search, map, directory, feed, or secondary API. Each user supplies only their own dashboard-issued app-bound rbuapp_ token; Signal never accepts or embeds a shared app_ token. Hard client limits are one request per manual refresh, one refresh per 60 minutes, and four per rolling 24 hours. HTTP 429 stops immediately with no same-action retry; the next attempt is blocked until the later of Retry-After or 60 minutes. Raw cache is fresh for 7 days and deleted by day 30; derived records are deleted by day 90 unless manually refreshed and reviewed again; the user can immediately delete all RepeaterBook data. Every RepeaterBook-backed UI view and report visibly displays “Data courtesy of RepeaterBook.com” linked to https://www.repeaterbook.com/. Raw/cache data is never committed, published, sold, re-served, bulk-exported, or redistributed. The adapter remains disabled until these controls and tests are implemented and approval is granted.
-```
-### Primary RepeaterBook Use
-Select: **Personal radio programming**
-### Who Can Use It?
-Select: **Private, single user**
-### Estimated Users
-```text
-1
-```
-### API Workflow and Data Fields
-```text
-Version 1 is limited to Washington State. The user selects one center point, a whole-number radius from 1 through 60 miles, target-radio bands, and a target radio, then explicitly clicks Refresh RepeaterBook. Signal sends one Export API request with country=United States and state_id=53, performs no pagination, computes great-circle distance locally, rejects records without usable coordinates, excludes records outside the selected radius or target-radio bands/capabilities, and admits at most 250 candidates to the private review screen. If more than 250 match, nothing is imported and the user must reduce radius or bands. Fields used are repeater/state IDs, callsign, output/input frequency or offset, uplink/downlink tone or digital access value, operating mode, operational status, latitude/longitude, city, county, state, last update, and computed distance. Only user-selected records are normalized into the private programming catalog. Normal radio export never calls RepeaterBook. There is no general browser, map, directory, proxy, feed, bulk export, public API, or background synchronization.
-```
-### Relationship to RepeaterBook
-```text
-RepeaterBook is the source of current amateur-repeater listing data used for bounded local searches. Signal retains RepeaterBook source attribution and retrieval time with locally imported records. RepeaterBook is not affiliated with Signal, and Signal does not represent itself as endorsed by RepeaterBook.
-```
-### Credential Handling and Abuse Prevention
-```text
-Signal is a distributed local application. It will not request, embed, ship, or use a shared app_ token. Each approved user must generate and use their own app-bound rbuapp_ token from the RepeaterBook dashboard. In the current private single-user deployment, the only user is KM7HKM. The user's rbuapp_ token is loaded only at runtime from an environment variable or a local configuration file on a BitLocker-encrypted removable drive. It is never hard-coded, committed to Git, included in generated radio files, printed, or logged. Signal exposes no public web service, browser client, proxy, or API endpoint. If a token is lost, copied, or compromised, its owner will revoke or rotate it from the RepeaterBook dashboard.
-```
-### Rate and Abuse Controls
-```text
-Requests occur only after an explicit local user refresh. Signal sends the exact approved User-Agent and the user's own rbuapp_ token in X-RB-App-Token. Hard limits are one HTTP request per manual refresh, zero pagination requests, zero parallel requests, no more than one refresh per 60 minutes, and no more than four refreshes per rolling 24 hours per token. HTTP 429 stops immediately with no same-action retry; the next attempt is blocked until the later of Retry-After or 60 minutes. Authentication, scope, and User-Agent errors are never retried. There is no startup refresh, scheduler, crawl, burst, bypass, or request from normal radio generation. Any stricter RepeaterBook-approved limit overrides these local maxima.
-```
-### Cache and Retention Policy
-```text
-Raw API responses and normalized staging rows are stored only in the user's local SQLite application data outside the repository. Raw data is fresh for 7 days, may be viewed offline as visibly stale through day 30, and is automatically deleted no later than day 30. User-reviewed derived RepeaterBook records retain source ID, attribution, and retrieval date and are automatically deleted no later than day 90 unless the user manually refreshes and reviews them again. Purges run at startup and before and after every refresh. A Delete All RepeaterBook Data action immediately removes raw responses, staging rows, derived records, request history, and generated audit reports; token deletion is a separate explicit action. Cache and derived data are never committed, backed up by Signal, included in releases, published, sold, shared, re-served, or redistributed. Normal exports never refresh the cache.
-```
-### Attribution and Link-Back Plan
-```text
-Signal will visibly display “Data courtesy of RepeaterBook.com” and link that text to https://www.repeaterbook.com/ wherever RepeaterBook-derived records are shown: local dashboard search results, record details, CLI previews, Markdown/HTML review reports, and companion radio-export audit reports. Native radio file formats that cannot contain an attribution field will have the attribution in their companion export/audit report.
-```
-### Commercial Status
-Select: **Non-commercial**
-### Implementation Status
-Select: **Planned**
-### Source Availability
-Select: **Open source**
-```text
-The source is publicly reviewable at: https://github.com/NiyaNagi/washington-sds150-favorites The RepeaterBook adapter is deliberately disabled while planned controls are implemented. The detailed compliance design, including token rules, numeric limits, cache duration, 429 handling, filtering, attribution, and non-redistribution controls, is publicly reviewable at: https://github.com/NiyaNagi/washington-sds150-favorites/blob/main/docs/repeaterbook-api-compliance-design.md
-```
-### Required Confirmations
-Check all three confirmations:
-- I will display “Data courtesy of RepeaterBook.com.” and link back to
-  RepeaterBook where practical.
-- I will not mirror, redistribute, bulk-export, re-serve, or use the data to
-  build another directory, dataset, service, or API without written permission.
-- I have read, understand, and agree to the API terms and site terms of service.
-### Project Categories
-Select: **Private/Internal**, **Open-Source**, **Hobby/Personal**
 
 Current implementation status: the checked-in
 `wasds150.sources.repeaterbook` adapter is intentionally unavailable and raises
@@ -478,37 +392,3 @@ The RepeaterBook adapter must not be enabled until all of these are true:
 14. Documentation and tests confirm raw RepeaterBook data is not committed,
     republished, sold, or redistributed.
 
-## Copy-Ready Reapplication Summary
-
-Signal is a private, noncommercial, single-user personal radio programmer for
-KM7HKM. Version 1 queries RepeaterBook only after an explicit manual refresh for
-Washington State (`state_id=53`), then locally filters around one center by a
-1-60 mile radius, selected bands, and radio capability. At most 250 candidates
-may enter review. It will use the exact approved `SignalWA/1.0` User-Agent with
-the public project URL and reachable contact email on every request.
-
-Signal will never use a shared `app_` token. Each user supplies their own
-RepeaterBook dashboard-issued, app-bound `rbuapp_` token at runtime through
-`REPEATERBOOK_API_TOKEN` or a local config file on a BitLocker-encrypted
-removable drive. It will never be hard-coded, committed, logged, included in
-generated radio files, or exposed through a website/API/proxy/shared service.
-
-The implementation makes exactly one request per manual refresh, no pagination
-or parallel requests, no more than one refresh per 60 minutes, and no more than
-four refreshes per rolling 24 hours per token. HTTP 429 stops immediately with
-no same-action retry; the next refresh is blocked until the later of
-`Retry-After` or 60 minutes.
-
-Responses are cached locally only under the user's config home. Raw data is
-fresh for 7 days and deleted by day 30. Derived records are deleted by day 90
-unless manually refreshed and reviewed again. An explicit delete action removes
-all RepeaterBook data immediately. Normal radio exports use only reviewed local
-records and do not call the API. Raw RepeaterBook data, cache files, tokens, and
-database snapshots will not be committed, published, sold, or redistributed.
-
-Every UI screen, CLI report, Markdown/HTML report, or generated audit report
-that displays RepeaterBook-derived records will visibly show
-`Data courtesy of RepeaterBook.com` with a link to
-`https://www.repeaterbook.com/`. Native radio files that cannot carry
-attribution will have a companion export/audit report containing the visible
-attribution.
