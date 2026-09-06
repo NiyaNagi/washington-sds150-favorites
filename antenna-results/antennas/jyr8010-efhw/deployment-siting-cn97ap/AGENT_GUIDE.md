@@ -11,7 +11,7 @@ deployment study.
    repeating the session's biggest error.
 2. **`README.md`** — findings and the final design.
 3. **`METHOD.md`** — what each number is worth. Several are LOW confidence and labelled.
-4. **`SESSION-LOG.md`** — **thirteen** corrections were made across the session. Know which
+4. **`SESSION-LOG.md`** — **fourteen** corrections were made across the session. Know which
    conclusions are stale. Correction 10 reversed the T class outright; correction 12 put
    T30's support 39 ft off the lot.
 
@@ -20,7 +20,8 @@ Then run the two generators, which need no dependencies:
 ```bash
 D=antenna-results/antennas/jyr8010-efhw/deployment-siting-cn97ap
 python3 $D/tools/site_geometry.py     # geometry, bearings, terrain horizon
-python3 $D/tools/compare_options.py   # 15 topologies x 5 bands; 4 CSVs + KML
+python3 $D/tools/compare_options.py   # 23 topologies x 5 bands; 4 CSVs + KML
+python3 $D/tools/endpoint_study.py    # end height / azimuth / roof sensitivity
 ```
 
 They recompute every result from raw inputs and are **authoritative** where they disagree
@@ -51,6 +52,19 @@ figures in the data files are arithmetic, not accuracy.
 
 **Confirm north-up before georeferencing any screenshot.** The first capture in this
 session was rotated ~90° and briefly produced a contradiction.
+
+**A straight sloper has no free parameters, and that is the key structural fact.** Once the
+support distance is chosen the wire length fixes everything: `rise = √(39.6² − run²)`. So
+slope, attachment height and performance all move together on one curve, and "make it
+shallower" always means "put the anchor further away", never "lower the anchor". This is
+why every good sloper here needs a 110–120 ft attachment and why the corner trees (23 and
+40 ft out) cannot work.
+
+**Score deployment effort, not just dB.** `Option.n_anchors` / `.max_anchor_ft` /
+`.throw_class` exist because an earlier revision compared a 3-anchor flat-top against
+1-anchor slopers on gain alone and let the operator believe the flat-top was the harder
+build. It is the easier one: three 50 ft throws beat one 120 ft throw. **Fewer anchors is
+not less work.**
 
 **Filter azimuth recommendations by bend angle before you quote them.** METHOD.md §3
 scores a bent wire as the *union* of two lobe sets — it ignores relative phase between the
@@ -117,10 +131,16 @@ The operator answered these explicitly. Re-proposing them wastes their time.
 
 | Question | Answer |
 |---|---|
-| Move the feed / run new coax? | **No.** Truly fixed at the start point. |
+| Move the feed / run new coax? | **Superseded.** Was "truly fixed"; on 2026-09-05 the operator asked for the roof ridge to be scored as a real candidate. It is (G‑ROOF, RF‑APEX) and it is a **0.04 dB** wash, so the answer is unchanged in practice. The front-yard and driveway corners remain rejected outright. |
 | Deploy from the front yard or driveway corner? | **No.** Nulls all of Asia. |
 | Build a PVC mast? | **No.** Scored in full: −3.0 to −7.5 dB, 3–12 of 25 regions. A 39.6 m wire on a 24 ft mast slopes 6.2° and averages 17–24 ft. |
 | Sloper off a *mast*? | **No.** At mast heights a 39.6 m "sloper" is a tilted flat-top. |
+| Is option A hard to deploy? | **No — it is the easiest thing that works.** Three attachments but the highest is **50 ft**, a routine throw. Every one-support sloper that matches it needs **116–120 ft**. The bend is what buys height in the middle of the wire, where the current maxima are, without any one support being high. |
+| Want fewer ropes than A? | **V1, not a sloper.** One 50 ft support, costs 5 cells and 0.72 dB. Every sloper that beats V1 needs an anchor more than twice as high. |
+| Best one-support sloper? | **G‑FEED** — 47.8° at 50°T, support 87 ft out, 120 ft attachment, 49/75 cells, on the lot. Ties A's cell count; loses 2.3 dB and has a −67 dBi worst case against A's −25. |
+| Sloper to a corner tree? | **No.** The corner trees are 23 ft (front) and 40 ft (back) from the feed, forcing 79.7° and 71.9°. K‑FRONT needs a **152 ft** attachment and scores 11/75 — second worst in the study. A good sloper wants its support **85–95 ft out**. |
+| Sloper rotated onto a corner bearing? | **Front yard yes, backyard no.** C‑FRONT (326°T) reaches 88.9 ft inside the lot, 44/75. C‑BACK (155°T) is boundary-limited to 66.9 ft → 59° → 39/75; letting it run **8 ft past the south line** gets 48/75 and +2.5 dB. |
+| Roof feed as a real candidate? | **Scored, and it is a wash.** G‑ROOF −2.41 vs G‑FEED −2.45 with azimuth and distance re-optimised. 0.04 dB for relocating the transformer. |
 | Sloper off a *150 ft tree*? | **Only for 80 m.** T-APEX is the best 80 m option in the study (−5.10 dBi, 14/25 vs the flat-top's 3/25) and 8th of 15 on the 40/20/15 m aggregate. The earlier "scores highest" answer came from the broken slant model. |
 | Raise the far END for more height? | **No — 0.35 dB from 10 ft to 60 ft.** The end is a voltage maximum, i.e. a current null, and the far support already sits at the 29.7 m current maximum so the tail carries almost nothing. Run `tools/endpoint_study.py`. |
 | Re-aim leg 2 / move the end elsewhere? | **No.** The best gently-bent azimuth (35°T) is worth +0.5 dB and 6 of 75 cells, and pays for it with Hawaii −7.8, South Africa −6.2, VK2 −2.9 — the 210–270° sector that holds the site's only −7.9° downslope. What it buys (Florida, Caribbean, Denver) returns on 15/10 m for free. |

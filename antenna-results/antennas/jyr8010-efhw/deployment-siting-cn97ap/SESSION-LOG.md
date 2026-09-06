@@ -1,7 +1,7 @@
 # Session log — 2026-09-05
 
 Chronological record of the siting session, including every operator input, every
-external query, and every correction. Kept because **thirteen** corrections were made and
+external query, and every correction. Kept because **fourteen** corrections were made and
 retracted across the session — two of them reversed a headline conclusion outright — and a
 future agent needs to know which conclusions are stale.
 
@@ -370,6 +370,72 @@ T‑APEX is literally "feed 24 ft, up 66.2° to the apex tree at 143 ft". With a
 wire `rise = √(39.6² − run²)`, so support distance chooses the slope and there is no third
 variable.
 
+## Phase 10 — one-support slopers, and the deployment premise inverted
+
+**Operator asked:** add the roof-feed variants to the main table; show sloper variants
+constrained by the front and back yard corners; "figure out how to mathematically discover
+the best options to compare with option A **because option A will be much harder to
+deploy**."
+
+**Clarifications given:** the anchor stays the current start pin, only rotation is
+constrained; **150 ft trees exist at both yard corners**; score the roof feed as a real
+candidate, not a side-question.
+
+Eight new options in three sub-classes — K (supports known to exist), C (rotation locked to
+a corner bearing), G (best found by unconstrained search, parcel and 150 ft cap enforced) —
+plus RF‑APEX. Total is now 23.
+
+### The premise was backwards
+
+Nothing in the scoring knew about deployment effort, so `Option.n_anchors`,
+`.max_anchor_ft` and `.throw_class` were added. They invert the operator's assumption.
+
+A straight sloper has **no free parameters**: `rise = √(39.6² − run²)`. Choosing the support
+distance chooses everything else, so slope, attachment height and performance ride one
+curve — and "shallower" always means "further away", never "lower".
+
+| Run | Slope | Attachment | Throw | Cells |
+|---|---|---|---|---|
+| 23 ft (front-yard tree) | 79.7° | 152 ft | climb | 11/75 |
+| 40 ft (backyard tree) | 71.9° | 148 ft | climb | 26/75 |
+| 52 ft (apex tree) | 66.2° | 143 ft | climb | 37/75 |
+| 87 ft (G‑FEED) | 47.8° | 120 ft | very hard | 49/75 |
+| 127 ft | 11.6° | 50 ft | easy | 38/75 |
+
+**Every one-support sloper that matches option A needs a 116–120 ft anchor.** Option A needs
+three attachments but its highest is **50 ft** — a routine throw. The bend is what buys
+height in the middle of the wire, where the current maxima are, without any single support
+being high. Option A is the *easiest* option that performs, not the hardest.
+
+The honest low-effort alternative is **V1** — one 50 ft support, −0.72 dB and 5 cells behind
+A. Every sloper that beats V1 needs an anchor more than twice as high.
+
+### Corner constraints
+
+- **K‑BACK / K‑FRONT** (support *at* the corner trees): 40.3 ft and 23.2 ft from the feed
+  force 71.9° and 79.7°. K‑FRONT needs a **152 ft** attachment, over the cap, and scores
+  11/75 — second worst in the study. **The corner trees are too close to be useful.**
+- **C‑FRONT** (326°T, distance free): reaches 88.9 ft inside the lot, 46.8°, 44/75.
+- **C‑BACK** (155°T): boundary-limited to 66.9 ft → 59° → 39/75. Lifting the parcel
+  constraint (**C‑BACK‑X**) moves the support to 97.8 ft, **8 ft past the south line**, and
+  gives 48/75 with +2.5 dB. Eight feet of boundary is worth nine cells on that heading.
+- T30 rotated onto the backyard bearing would land ~20 ft past the line.
+
+### Roof feed, scored properly
+
+**G‑ROOF −2.41 dBi / 49-75 against G‑FEED −2.45 / 49-75.** With azimuth *and* distance
+re-optimised around the new feed position it is still a **0.04 dB** wash, consistent with
+the 0.02 dB found at matched slope in Phase 9. Scored as a real candidate as instructed;
+the answer did not change.
+
+### Ranking presentation
+
+The top tie band now holds five options at 49/75, and the tiebreaks below the primary key
+cannot separate them at this model's precision. Rather than change the sort a third time
+(see corrections 7 and 11), the ranking now **prints a rule between tie bands** and says
+explicitly that ordering within a band is not meaningful. KML: 106 placemarks in 25 folders,
+one-support slopers in white.
+
 ## Corrections summary
 
 | # | Error | Corrected in | Status |
@@ -387,6 +453,7 @@ variable.
 | 11 | Three-band ranking first led with regions-covered, repeating error 7 on a new axis | Phase 8 | ✅ ranks on workable cells first |
 | 12 | "None of the T options leave the parcel" survived the bearing change that made it false | Phase 9 | ✅ T30 is 39 ft off the lot; dedicated parcel block now printed |
 | 13 | Scored the roof as the HIGH support when the operator meant the roof as the FEED | Phase 9 | ✅ both scored, kept separate |
+| 14 | Compared a 3-anchor flat-top against 1-anchor slopers on gain alone, leaving the operator to believe A was the harder build | Phase 10 | ✅ throw effort scored; A is the *easiest* option that performs |
 
 **Anything in the conversation before each correction is stale.** The files in this
 directory reflect only post-correction values.

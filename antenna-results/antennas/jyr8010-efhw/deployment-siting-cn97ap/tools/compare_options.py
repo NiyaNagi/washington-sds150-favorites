@@ -18,7 +18,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from site_geometry import (  # noqa: E402
-    FEED, APEX, LAT_M, LON_M, WIRE_M, DECLINATION_E,
+    FEED, APEX, BACKYARD, FRONT_YARD, LAT_M, LON_M, WIRE_M, DECLINATION_E,
     to_enu, polar, offset, to_latlon, dms, mag,
     great_circle_bearing, great_circle_km,
     pattern_dB, ground_factor_dB, takeoff_deg,
@@ -28,6 +28,48 @@ from site_geometry import (  # noqa: E402
 FT = 0.3048
 APEX_EN = to_enu(APEX)
 APEX_DIST, APEX_BRG = polar(*APEX_EN)
+
+# --------------------------------------------------------------------------
+# Support points the operator has confirmed (2026-09-05): 150 ft trees exist at
+# BOTH yard corners as well as at the apex. Those two coordinates were
+# originally recorded as house corners in data/site-points.json; they are
+# treated here as tree positions on the operator's statement.
+#
+# The roof ridge is now a REAL candidate feed position on the operator's
+# instruction, not just a side-question. Derived in tools/endpoint_study.py
+# from the house corner marks: long axis 154.9/334.9T, ridge offset 4 m onto
+# the centreline. The 4 m half-width is ASSUMED.
+# --------------------------------------------------------------------------
+BACK_EN = to_enu(BACKYARD)
+FRONT_EN = to_enu(FRONT_YARD)
+BACK_DIST, BACK_BRG = polar(*BACK_EN)
+FRONT_DIST, FRONT_BRG = polar(*FRONT_EN)
+
+ROOF_EN = offset(offset((0, 0), 154.9, 6.1), 244.9, 4.0)
+ROOF_DIST, ROOF_BRG = polar(*ROOF_EN)
+ROOF_FEED_FT = 25.0
+
+# Tallest attachment a throw line can reach in the available conifer.
+TREE_MAX_FT = 150.0
+
+
+def sloper_geometry(feed_en, feed_ft, top_en):
+    """A straight sloper is fully determined by where its support stands.
+
+    With the wire length fixed there is no free parameter: the run sets the
+    rise, which sets the slope and the attachment height.
+
+        rise = sqrt(WIRE^2 - run^2)
+
+    Returns (run_m, bearing_deg, rise_m, top_ft, slope_deg), or None if the
+    support is further away than the wire is long.
+    """
+    run, brg = polar(top_en[0] - feed_en[0], top_en[1] - feed_en[1])
+    if run >= WIRE_M:
+        return None
+    rise = math.sqrt(WIRE_M ** 2 - run ** 2)
+    return (run, brg, rise, feed_ft + rise / FT,
+            math.degrees(math.atan2(rise, run)))
 
 # --------------------------------------------------------------------------
 # Terrain, per bearing. Two DIFFERENT quantities - see METHOD.md section 5.
@@ -262,6 +304,44 @@ class Option:
     @property
     def is_slant(self):
         return self.slope_deg > 0.5
+
+    # ----------------------------------------------------------------------
+    # Deployment effort. The operator's point is that option A "will be much
+    # harder to deploy" than a sloper, and nothing in the scoring knew that.
+    # Two numbers, both arithmetic:
+    #
+    #   n_anchors     elevated attachments other than the feed - each one is a
+    #                 separate line over a separate limb.
+    #   max_anchor_ft the highest of them. This is the one that actually
+    #                 decides difficulty: a 50 ft throw is a routine afternoon
+    #                 with a slingshot and a weight; 120 ft is a different
+    #                 activity, and 150 ft is a climbing job.
+    #
+    # A sloper needs ONE anchor, which is why it looks easy - but a straight
+    # 39.6 m sloper puts that one anchor very high, because the rise is forced
+    # by the run. Fewer anchors does not automatically mean less work.
+    # ----------------------------------------------------------------------
+    @property
+    def n_anchors(self):
+        return sum(1 for _, h, _ in self.supports[1:] if h > 15)
+
+    @property
+    def max_anchor_ft(self):
+        hs = [h for _, h, _ in self.supports[1:]]
+        return max(hs) if hs else 0
+
+    @property
+    def throw_class(self):
+        h = self.max_anchor_ft
+        if h == 0:
+            return "-"
+        if h <= 55:
+            return "easy"          # slingshot and a weight
+        if h <= 90:
+            return "hard"          # big slingshot, good line, some luck
+        if h <= 130:
+            return "very hard"     # arborist launcher territory
+        return "climb"             # not a throw any more
 
     def height_at_wire(self, s):
         """Height above ground at distance s along the wire from the feed."""
@@ -507,7 +587,142 @@ def build_options():
             f"Support {run:.1f} m ({run/FT:.0f} ft) from the feed, {where}. "
             f"Slant model - see METHOD.md section 9.{extra}",
             slope_deg=slope, feed_h=f, top_h=top))
+
+    opts.extend(build_sloper_classes())
     return opts
+
+
+# --------------------------------------------------------------------------
+# Single-support sloper classes.
+#
+# The operator's point: option A needs FOUR supports and two rope throws, and
+# is much harder to deploy than a sloper, which needs one. So the question that
+# matters is not "what is the best antenna" but "what is the best antenna with
+# ONE support" - and then how much option A is really worth over it.
+#
+# Three sub-classes, deliberately separated:
+#   K-*  supports that are KNOWN to exist (the three 150 ft trees). Geometry is
+#        forced - no free parameter at all.
+#   C-*  azimuth locked to a yard-corner bearing, support distance free. This
+#        is the "constrain the rotation" question.
+#   G-*  best buildable sloper found by unconstrained search, subject to the
+#        parcel and a 150 ft attachment cap. The benchmark the others are
+#        measured against.
+# --------------------------------------------------------------------------
+
+def _sloper(key, label, feed_en, feed_ft, top_en, note=""):
+    g = sloper_geometry(feed_en, feed_ft, top_en)
+    if g is None:
+        return None
+    run, brg, rise, top_ft, slope = g
+    over = "" if top_ft <= TREE_MAX_FT else \
+        f" NEEDS {top_ft:.0f} ft - EXCEEDS the {TREE_MAX_FT:.0f} ft tree cap."
+    where = "IN parcel" if inside_parcel(top_en) else "OUT OF PARCEL"
+    feed_pt = ("feed", int(round(feed_ft)), feed_en)
+    return Option(
+        key, label,
+        [(WIRE_M, (feed_ft * FT + top_ft * FT) / 2, brg)],
+        [feed_pt, ("tree top", int(round(top_ft)), top_en)],
+        f"Support {run:.1f} m ({run/FT:.0f} ft) from the feed at {brg:.0f}T, "
+        f"{where}. Slope {slope:.1f} deg, attach at {top_ft:.0f} ft.{over} "
+        f"{note} Slant model - see METHOD.md section 9.",
+        slope_deg=slope, feed_h=feed_ft * FT, top_h=top_ft * FT)
+
+
+def _best_sloper(key, label, feed_en, feed_ft, bearings, note="",
+                 enforce_parcel=True, cap_height=True):
+    """Scan support distance (and azimuth, where free) on the 3-band metric.
+
+    Coarse pass then a fine pass around the winner. Ranked the way METHOD.md
+    section 7 requires: workable cells first, regions second, power last.
+    """
+    def evaluate(brg, run):
+        top_en = offset(feed_en, brg, run)
+        if enforce_parcel and not inside_parcel(top_en):
+            return None
+        rise = math.sqrt(max(WIRE_M ** 2 - run ** 2, 0))
+        top_ft = feed_ft + rise / FT
+        if cap_height and top_ft > TREE_MAX_FT:
+            return None
+        o = Option(key, label, [(WIRE_M, (feed_ft * FT + top_ft * FT) / 2, brg)],
+                   [], slope_deg=math.degrees(math.atan2(rise, run)),
+                   feed_h=feed_ft * FT, top_h=top_ft * FT)
+        m = aggregate_multiband(o)
+        return ((m["n_workable"], m["n_regions_covered"], m["mean_power_dBi"]),
+                brg, run)
+
+    best = None
+    for brg in bearings:
+        for run10 in range(100, int(WIRE_M * 10), 10):     # 10.0 .. 39.5 m
+            r = evaluate(float(brg), run10 / 10.0)
+            if r and (best is None or r[0] > best[0]):
+                best = r
+    if best is None:
+        return None
+    for run10 in range(max(100, int(best[2] * 10) - 10),
+                       min(int(WIRE_M * 10), int(best[2] * 10) + 11)):
+        r = evaluate(best[1], run10 / 10.0)
+        if r and r[0] > best[0]:
+            best = r
+    return _sloper(key, label, feed_en, feed_ft,
+                   offset(feed_en, best[1], best[2]), note)
+
+
+def build_sloper_classes():
+    out = []
+
+    # -- K: the three trees that are known to exist. Geometry is forced. -----
+    for key, label, top_en, note in (
+        ("K-BACK", "Sloper to the BACKYARD-corner tree", BACK_EN,
+         "Support already exists - no new anchor needed."),
+        ("K-FRONT", "Sloper to the FRONT-YARD-corner tree", FRONT_EN,
+         "Support already exists - no new anchor needed."),
+    ):
+        o = _sloper(key, label, (0.0, 0.0), 24.0, top_en, note)
+        if o:
+            out.append(o)
+
+    # -- C: rotation locked to a yard-corner bearing, distance free. --------
+    for key, label, brg, corner in (
+        ("C-BACK", "Sloper, rotation locked to the BACKYARD-corner bearing",
+         BACK_BRG, "backyard"),
+        ("C-FRONT", "Sloper, rotation locked to the FRONT-YARD-corner bearing",
+         FRONT_BRG, "front yard"),
+    ):
+        o = _best_sloper(key, f"{label} ({brg:.0f}T)", (0.0, 0.0), 24.0,
+                         [brg], f"Runs over the {corner}.")
+        if o:
+            out.append(o)
+        # The same bearing with the parcel constraint lifted, to show what the
+        # boundary is actually costing on that heading.
+        ou = _best_sloper(key + "-X", f"{label} ({brg:.0f}T), parcel IGNORED",
+                          (0.0, 0.0), 24.0, [brg],
+                          "Shows what the boundary costs on this heading.",
+                          enforce_parcel=False)
+        if ou and abs(ou.supports[1][2][0] - o.supports[1][2][0]) > 1.0:
+            out.append(ou)
+
+    # -- G: best buildable sloper, azimuth free. The benchmark. -------------
+    every = range(0, 360, 5)
+    g1 = _best_sloper("G-FEED", "BEST single-support sloper, existing feed",
+                      (0.0, 0.0), 24.0, every,
+                      "Azimuth and distance both optimised.")
+    if g1:
+        out.append(g1)
+    g2 = _best_sloper("G-ROOF", "BEST single-support sloper, ROOF feed",
+                      ROOF_EN, ROOF_FEED_FT, every,
+                      "Requires relocating the transformer to the roof ridge "
+                      "and re-routing coax.")
+    if g2:
+        out.append(g2)
+
+    # -- Roof feed to the tree that already exists. -------------------------
+    rf = _sloper("RF-APEX", "Sloper to the APEX tree from a ROOF feed",
+                 ROOF_EN, ROOF_FEED_FT, APEX_EN,
+                 "Requires relocating the transformer to the roof ridge.")
+    if rf:
+        out.append(rf)
+    return out
 
 
 TARGET_BEARINGS = {t[0]: great_circle_bearing(FEED[0], FEED[1], t[1], t[2])
@@ -589,7 +804,8 @@ def aggregate_multiband(opt, bands=None):
 
 # KML colours are aabbggrr, not rrggbb.
 KML_STYLES = [
-    ("optT",  "ff0080ff", 6),   # bright orange  - TALL sloper (best scoring)
+    ("optG",  "ffffffff", 6),   # white          - ONE-SUPPORT slopers, K/C/G/RF
+    ("optT",  "ff0080ff", 6),   # bright orange  - TALL sloper
     ("optA",  "ff00ff00", 5),   # bright green   - recommended flat-top
     ("optV",  "ffffff00", 4),   # cyan           - inverted-V
     ("optS",  "ffff00ff", 4),   # magenta        - short sloper
@@ -598,6 +814,21 @@ KML_STYLES = [
     ("parcel", "ff909090", 3),  # grey           - parcel line
     ("ray",   "ff606060", 2),   # dark grey      - bearing rays
 ]
+
+
+def kml_style_for(key):
+    """Style id for an option key. Checked most-specific first."""
+    if key.startswith(("K-", "C-", "G-", "RF-")):
+        return "optG"
+    if key.startswith("T"):
+        return "optT"
+    if key == "A":
+        return "optA"
+    if key == "BASE":
+        return "base"
+    if key.startswith("V"):
+        return "optV"
+    return "optS"
 
 
 def kml_escape(s):
@@ -610,8 +841,11 @@ def write_kml(opts, path, ranked=None):
          '<name>JYR8010 EFHW deployment options - CN97ap</name>',
          '<description>Every candidate deployment for the 39.6 m EFHW, plus '
          'reference points, parcel line and target bearing rays. '
-         'ORANGE = tall sloper (T class, best scoring), GREEN = recommended '
-         'flat-top, CYAN = inverted-V, MAGENTA = short sloper, RED = baseline, '
+         'Folders are numbered by three-band rank. '
+         'WHITE = ONE-SUPPORT sloper (K = known tree, C = rotation locked to a '
+         'yard corner, G = best found by search, RF = roof feed), '
+         'ORANGE = tall sloper (T class), GREEN = recommended flat-top, '
+         'CYAN = inverted-V, MAGENTA = short sloper, RED = baseline, '
          'YELLOW = operator reference points.</description>']
 
     for sid, colour, width in KML_STYLES:
@@ -661,9 +895,7 @@ def write_kml(opts, path, ranked=None):
 
     ranked = ranked or opts
     for o in ranked:
-        st = ("optT" if o.key.startswith("T") else
-              "optA" if o.key == "A" else "base" if o.key == "BASE"
-              else "optV" if o.key.startswith("V") else "optS")
+        st = kml_style_for(o.key)
         if not o.supports:
             continue
         m = aggregate_multiband(o)
@@ -679,8 +911,12 @@ def write_kml(opts, path, ranked=None):
                 o.mean_imax_height(b) / FT,
                 (f"{o.peak_elev(b):.0f}&#176;" if o.peak_elev(b) else "zenith"))
             for b in BAND_KEYS)
+        deploy = (f"<b>Deployment:</b> {o.n_anchors} elevated anchor"
+                  f"{'s' if o.n_anchors != 1 else ''}, highest "
+                  f"{o.max_anchor_ft} ft ({o.throw_class} throw)")
         hdr = (f"<b>#{rank} of {len(ranked)}</b> on the 3-band ranking<br/>"
-               f"{o.label}<br/>Average height {o.avg_h/FT:.1f} ft<br/>"
+               f"{o.label}<br/>{deploy}<br/>"
+               f"Average height {o.avg_h/FT:.1f} ft<br/>"
                f"20 m take-off {t20s}<br/><br/>"
                f"<b>3-band (40/20/15 m): {m['mean_power_dBi']:+.2f} dBi, "
                f"{m['n_workable']}/{m['n_cells']} cells, "
@@ -846,14 +1082,24 @@ def main():
         -aggregate_multiband(o)["n_workable"],
         -aggregate_multiband(o)["n_regions_covered"],
         -aggregate_multiband(o)["mean_power_dBi"]))
-    print(f"{'#':>2s} {'key':7s} {'agg dBi':>8s} {'median':>8s} {'worst':>8s} "
-          f"{'cells ok':>9s} {'holes':>6s} {'regions':>8s}  label")
+    print(f"{'#':>2s} {'key':8s} {'agg dBi':>8s} {'median':>8s} {'worst':>8s} "
+          f"{'cells ok':>9s} {'holes':>6s} {'regions':>8s} {'anch':>5s} "
+          f"{'highest':>8s} {'throw':>10s}  label")
+    prev = None
     for i, o in enumerate(ranked, 1):
         m = aggregate_multiband(o)
-        print(f"{i:2d} {o.key:7s} {m['mean_power_dBi']:8.2f} "
+        # Mark where the primary key changes. Everything inside one band is
+        # tied on the metric the ranking is built on, and the tiebreaks below
+        # it are not precise enough to separate them - say so rather than let
+        # the row number imply an ordering the model cannot support.
+        if prev is not None and m["n_workable"] != prev:
+            print(f"   {'-' * 108}")
+        prev = m["n_workable"]
+        print(f"{i:2d} {o.key:8s} {m['mean_power_dBi']:8.2f} "
               f"{m['median_dBi']:8.1f} {m['worst_dBi']:8.1f} "
               f"{m['n_workable']:5d}/{m['n_cells']:<3d} {m['n_holes']:6d} "
-              f"{m['n_regions_covered']:5d}/{len(TARGETS)}  {o.label}")
+              f"{m['n_regions_covered']:5d}/{len(TARGETS)} {o.n_anchors:5d} "
+              f"{o.max_anchor_ft:6d}ft {o.throw_class:>10s}  {o.label}")
     print("\nagg dBi   = 10*log10(mean linear power over %d band x region cells)"
           % (len(MULTIBAND) * len(TARGETS)))
     print("cells ok  = band/region pairs at or above %.1f dBi. PRIMARY SORT KEY."
@@ -861,6 +1107,18 @@ def main():
     print("regions   = regions reachable on AT LEAST ONE of the three bands.")
     print("            Second key. You can change band; you cannot change antenna.")
     print("agg dBi is the LAST key, not the first - see METHOD.md section 7.")
+    print()
+    print("anch      = elevated attachments other than the feed. Each is a")
+    print("            separate line over a separate limb.")
+    print("highest   = the tallest of them, which is what really sets effort:")
+    print("            easy <=55 ft, hard <=90, very hard <=130, climb above.")
+    print("            A sloper needs ONE anchor but puts it very high, because")
+    print("            a straight 39.6 m wire has rise = sqrt(39.6^2 - run^2).")
+    print("            Fewer anchors is NOT automatically less work.")
+    print()
+    print("Rows between dashed lines are TIED on the primary key. The")
+    print("tiebreaks below it cannot separate them at this model's precision -")
+    print("read the whole row, not the rank number.")
 
     data = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data")
 
@@ -944,8 +1202,14 @@ def main():
         fh.write("# 'zenith' = h < lambda/4, so no distinct lobe exists.\n")
         fh.write("# mean_imax_height_ft = mean height of the four 20 m current maxima.\n")
         fh.write("# That column is pure arithmetic and HIGH confidence; prefer it.\n")
+        fh.write("# n_anchors / max_anchor_ft / throw_class describe DEPLOYMENT\n")
+        fh.write("# effort, not performance. A sloper needs one anchor but puts\n")
+        fh.write("# it very high; fewer anchors is not automatically less work.\n")
+        fh.write("# in_parcel is false when any support falls outside the lot or\n")
+        fh.write("# inside the 5 m setback - see the parcel block in stdout.\n")
         fh.write("mb3_rank,key,avg_height_ft,mean_imax_height_ft,slope_deg,"
                  "takeoff_20m_deg,takeoff_15m_deg,legs_true_deg,"
+                 "n_anchors,max_anchor_ft,throw_class,in_parcel,"
                  "aggregate_dB,median_dB,worst_dB,n_workable,n_holes,delta_vs_A_dB,"
                  "mb3_aggregate_dBi,mb3_median_dBi,mb3_worst_dBi,mb3_workable_of_75,"
                  "mb3_holes,mb3_regions_covered,label\n")
@@ -962,9 +1226,13 @@ def main():
                 s20 = f"{t20:.1f}" if t20 else "zenith"
                 s15 = f"{t15:.1f}" if t15 else "zenith"
             legs = "/".join(f"{b:.0f}" for b in o.legs)
+            ok = all(inside_parcel(en) for _, _, en in o.supports) \
+                if o.supports else True
             fh.write(f"{ranked.index(o)+1},{o.key},{o.avg_h/FT:.1f},"
                      f"{o.mean_imax_height()/FT:.1f},"
                      f"{o.slope_deg:.0f},{s20},{s15},{legs},"
+                     f"{o.n_anchors},{o.max_anchor_ft},{o.throw_class},"
+                     f"{'yes' if ok else 'no'},"
                      f"{a['mean_power_dB']:.2f},{a['median_dB']:.1f},"
                      f"{a['worst_dB']:.1f},{a['n_workable']},{a['n_holes']},"
                      f"{a['mean_power_dB']-ref:+.1f},"
