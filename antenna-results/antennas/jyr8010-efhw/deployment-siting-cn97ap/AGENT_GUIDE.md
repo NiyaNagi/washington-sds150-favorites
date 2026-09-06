@@ -11,9 +11,9 @@ deployment study.
    repeating the session's biggest error.
 2. **`README.md`** — findings and the final design.
 3. **`METHOD.md`** — what each number is worth. Several are LOW confidence and labelled.
-4. **`SESSION-LOG.md`** — **eleven** corrections were made across the session. Know which
-   conclusions are stale. Corrections 10 and 11 are the most recent and the most
-   consequential: they reversed the T class.
+4. **`SESSION-LOG.md`** — **thirteen** corrections were made across the session. Know which
+   conclusions are stale. Correction 10 reversed the T class outright; correction 12 put
+   T30's support 39 ft off the lot.
 
 Then run the two generators, which need no dependencies:
 
@@ -96,6 +96,14 @@ everything with `dBi` in the name is absolute.
 open. 10 m scores best for the flat-top and is also the band most often shut. Do not let a
 table of dBi become a prediction of what the operator will work.
 
+**Re-check parcel status after ANY bearing change, and do not trust prose about it.**
+The three-band re-scan moved T30 to 176°T and T45 to 143°T, which put **T30's support 39 ft
+off the lot** and T45's inside the 5 m setback — while a sentence saying "none of the T
+options leave the parcel", true of the previous bearings, survived into the same commit.
+`compare_options.py` now prints a dedicated **SUPPORTS THAT ARE NOT ON THE PARCEL** block
+that distinguishes "off the lot" from "on the lot but inside the setback". Read that block,
+not the README, when it matters.
+
 **A support inside the parcel is not necessarily buildable.** `inside_parcel()` knows
 about property lines and nothing else — not trees, the driveway, or the septic field.
 Options S1/S2/S3 select bearings near due north that cross the driveway and enter forest.
@@ -116,7 +124,8 @@ The operator answered these explicitly. Re-proposing them wastes their time.
 | Sloper off a *150 ft tree*? | **Only for 80 m.** T-APEX is the best 80 m option in the study (−5.10 dBi, 14/25 vs the flat-top's 3/25) and 8th of 15 on the 40/20/15 m aggregate. The earlier "scores highest" answer came from the broken slant model. |
 | Raise the far END for more height? | **No — 0.35 dB from 10 ft to 60 ft.** The end is a voltage maximum, i.e. a current null, and the far support already sits at the 29.7 m current maximum so the tail carries almost nothing. Run `tools/endpoint_study.py`. |
 | Re-aim leg 2 / move the end elsewhere? | **No.** The best gently-bent azimuth (35°T) is worth +0.5 dB and 6 of 75 cells, and pays for it with Hawaii −7.8, South Africa −6.2, VK2 −2.9 — the 210–270° sector that holds the site's only −7.9° downslope. What it buys (Florida, Caribbean, Denver) returns on 15/10 m for free. |
-| Use the house ROOF as the high support? | **No — 2.6 to 4.1 dB worse.** The ridge is ~24 ft from the feed against the tree's 52.5 ft, and 20–30 ft up against 50 ft. Average height collapses 41.6 → 16–27 ft. Even a 40 ft ridge loses 1.0 dB. |
+| Use the house ROOF as the high support (wire sloping DOWN)? | **No — 2.6 to 4.1 dB worse.** The ridge is ~24 ft from the feed against the tree's 52.5 ft, and 20–30 ft up against 50 ft. Average height collapses 41.6 → 16–27 ft. Even a 40 ft ridge loses 1.0 dB. |
+| Put the FEED on the roof, sloping UP to a tree? | **No — 0.02 dB at matched slope.** Different question from the row above, and scored separately in §4 of `endpoint_study.py`. The feed is the *other* voltage maximum, so its height buys as little as the end's. Note this geometry already exists as the **T class** — T‑APEX is "feed 24 ft, up 66.2° to the apex tree at 143 ft". |
 | Anchor the END on the roof? | **No, and do not score it.** It needs a near-antiparallel hairpin that METHOD.md §3 cannot model, and the end is the ~1 kV RMS voltage maximum — see `INSULATORS.md`. Wrong on both counts. |
 | Which bands does it have? | **80/40/20/15/10 only.** Not 30/17/12 — see the trap above. |
 | Best band for the recommended flat-top? | **15 m and 10 m** (+2.1 / +2.3 dBi, 20–21 of 25 regions), then 20 m. 80 m is regional-only at 41 ft. |

@@ -159,8 +159,8 @@ second, mean power **last** — for the reason in [`METHOD.md`](METHOD.md) §7.
 | # | Key | Configuration | 3-band dBi | Cells | Regions | Worst |
 |---|---|---|---|---|---|---|
 | **1** | **A** | **Bent flat-top, 2 tree supports** | **−0.16** | **49/75** | 24/25 | **−25.4** |
-| 2 | T30 | Tall sloper 30°, top 89 ft, 176°T | −0.63 | 49/75 | 24/25 | −45.4 |
-| 3 | T45 | Tall sloper 45°, top 116 ft, 143°T | −2.62 | 49/75 | 24/25 | −60.9 |
+| 2 | T30 | Tall sloper 30°, top 89 ft, 176°T — **support is off the lot** | −0.63 | 49/75 | 24/25 | −45.4 |
+| 3 | T45 | Tall sloper 45°, top 116 ft, 143°T — support ~10 ft from the line | −2.62 | 49/75 | 24/25 | −60.9 |
 | 4 | T60 | Tall sloper 60°, top 137 ft, 337°T | −4.15 | 44/75 | **25/25** | −67.6 |
 | 5 | V1 | Inverted-V, **one** tree support, feed 24 ft | −0.88 | 44/75 | 23/25 | −27.1 |
 | 6 | V2 | Inverted-V, one tree support, feed 10 ft | −1.31 | 40/75 | 23/25 | −27.9 |
@@ -203,11 +203,26 @@ antenna. The tall sloper wins where the wire is short in wavelengths and height 
 3/25 — a genuine 2.7 dB and eleven regions. If 80 m DX ever becomes the goal, it is the
 answer. For 40/20/15 m it is not.
 
-**None of the T options leave the parcel.** Height and footprint trade against each other,
-so at 75° the support sits 34 ft from the feed. Only the short slopers, needing a ~130 ft
-ground run, ever threatened the boundary. **T‑APEX still needs no new support**: the existing
-apex tree is 52 ft 6 in away and √(39.6² − 16.01²) = 36.2 m of rise gives 66.2°
-automatically at a 143 ft attachment.
+**Two of the T options now leave the parcel** — and this changed when the three-band scan
+moved their bearings. An earlier revision of this file said none of them did; that was true
+of the 20 m-optimised bearings and is **no longer true**:
+
+| Key | Bearing | Support distance | Parcel |
+|---|---|---|---|
+| T30 | 176°T | 112.5 ft | **OUT — about 38 ft past the south line** |
+| T45 | 143°T | 91.9 ft | on the lot, but only ~10 ft from the south line |
+| T60 | 337°T | 65.0 ft | in |
+| T75 | 105°T | 33.6 ft | in |
+| T‑APEX | 082°T | 52.5 ft | in |
+
+That matters, because **T30 is the second-ranked option** and it is not buildable on your
+land. `tools/compare_options.py` prints the status per support and has always had it right;
+the prose here was stale. Height and footprint still trade against each other — at 75° the
+support is 34 ft from the feed — but the shallow slopers need a long ground run and the
+three-band scan happens to point them south, at the nearest boundary.
+
+**T‑APEX still needs no new support**: the existing apex tree is 52 ft 6 in away and
+√(39.6² − 16.01²) = 36.2 m of rise gives 66.2° automatically at a 143 ft attachment.
 
 > **T-class numbers remain the least trustworthy here** — see [`METHOD.md`](METHOD.md) §9.
 > The free-space pattern term is now exact, but ground loss on a forested hillside with no
@@ -292,6 +307,29 @@ the roof is both too close and too low to supply it. Even a fictional 40 ft ridg
 backyard corner 12.28 m at 155°T, front yard corner 7.08 m at 326°T — giving a long axis of
 155/335°T and a ridge ~7.3 m from the feed. The half-width is assumed. The conclusion is
 insensitive to it: the ridge would have to move 30 ft away **and** gain 25 ft to compete.)*
+
+**Putting the FEED on the roof and sloping up to a tree is worth 0.02 dB.** This is the
+inverse of the case above and a different antenna, so it is scored separately.
+
+| Feed | Slope | Top | 3-band | Cells |
+|---|---|---|---|---|
+| Current feed, 24 ft | 30° | 89 ft | −0.62 | 48/75 |
+| Roof ridge, 25 ft | 30° | 90 ft | −0.60 | 48/75 |
+| Current feed, 24 ft | 45° | 116 ft | −2.20 | 48/75 |
+| Roof ridge, 25 ft | 45° | 117 ft | −2.21 | 48/75 |
+| Current feed, 24 ft | 60° | 137 ft | −4.16 | 44/75 |
+| Roof ridge, 25 ft | 60° | 138 ft | −4.15 | 44/75 |
+
+**Both ends of an EFHW are current nulls, so neither end's height is where the gain lives.**
+Raising the roof feed 20 → 30 ft moves the 3-band figure by 0.06 dB, and slightly the wrong
+way. The one real effect of the move is that the apex tree goes from 16.0 m to 19.3 m away,
+which softens the forced slope from 66.2° to 60.8° and is worth +0.67 dB — and a further
+support buys far more of that for nothing.
+
+Note what this geometry already is: **an upward sloper off the fixed feed is the T class.**
+T‑APEX is literally "feed 24 ft, slope up 66.2° to the apex tree at 143 ft". With a fixed
+39.6 m wire the rise is forced by the run, `rise = √(39.6² − run²)`, so choosing the support
+distance chooses the slope — and there is no third variable to tune.
 
 **Anchoring the end on the roof is not scored, deliberately.** Feed→apex is 17.9 m, leaving
 21.7 m to fold back to a point ~7 m from the feed — a hairpin whose legs are near

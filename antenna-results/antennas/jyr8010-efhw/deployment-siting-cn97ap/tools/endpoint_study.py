@@ -11,7 +11,9 @@ with three different answers, so they are scored separately here:
   2. END BEARING  - hold heights, swing leg 2 through every azimuth. This is
                     the pattern question, and it has to be filtered by bend
                     angle (see below).
-  3. ROOF SUPPORT - use the house ridge as the high point instead of the tree.
+  3. ROOF SUPPORT - use the house ridge as the high point, wire sloping DOWN.
+  4. ROOF FEED    - the inverse, and what the operator actually meant:
+                    transformer ON the roof, wire sloping UP to a tree.
 
 **The bend-angle filter matters.** METHOD.md section 3 scores a bent wire as
 the UNION of two lobe sets: it ignores relative phase between the legs and so
@@ -77,12 +79,13 @@ def trust(leg2):
     return "OK" if b <= 70 else "OVERSTATED" if b <= 110 else "NOT VALID"
 
 
-def line(o, label):
+def line(o, label, extra=""):
     m = C.aggregate_multiband(o)
     per = "  ".join(f"{b}:{C.aggregate(o, b)['mean_power_dBi']:+6.2f}"
                     for b in C.BAND_KEYS)
     print(f"{label:42s} {m['mean_power_dBi']:+6.2f} dBi  {m['n_workable']:2d}/75"
-          f"  {m['n_regions_covered']:2d}/25  worst {m['worst_dBi']:7.1f}   {per}")
+          f"  {m['n_regions_covered']:2d}/25  worst {m['worst_dBi']:7.1f}   "
+          f"{per} {extra}")
 
 
 def region_3band(o):
@@ -216,17 +219,94 @@ def q3_roof():
     print("   belong on a roof next to gutters, flashing and house wiring.")
 
 
+def q4_roof_feed():
+    """The operator's actual proposal: transformer ON the roof, wire rising.
+
+    Section 3 above is the INVERSE of this - roof high, wire sloping down. Both
+    are worth scoring and they are different antennas, so they are kept apart.
+    """
+    print("\n" + "=" * 124)
+    print("4. FEED ON THE ROOF, WIRE SLOPING UP TO A TREE")
+    print("=" * 124)
+    d, b = polar(*RIDGE_EN)
+    run_apex, brg_apex = polar(C.APEX_EN[0] - RIDGE_EN[0],
+                               C.APEX_EN[1] - RIDGE_EN[1])
+    print("   With a fixed 39.6 m wire the rise is FORCED by the run:")
+    print("       rise = sqrt(39.6^2 - run^2)")
+    for lbl, run, fh in (("current feed -> apex tree", C.APEX_DIST, 24.0),
+                         ("roof ridge   -> apex tree", run_apex, 25.0)):
+        rise = math.sqrt(WIRE_M ** 2 - run ** 2)
+        print(f"       {lbl}: run {run:5.2f} m, rise {rise:5.2f} m "
+              f"({rise/FT:5.1f} ft), slope "
+              f"{math.degrees(math.atan2(rise, run)):4.1f} deg, attach at "
+              f"{fh + rise/FT:3.0f} ft")
+    print("   Moving the feed 24 ft SSW only lengthens the run to the tree by")
+    print("   3.3 m. That softens the slope; it does not add height.\n")
+
+    def sloper(feed_en, feed_ft, top_en, top_ft):
+        run, brg = polar(top_en[0] - feed_en[0], top_en[1] - feed_en[1])
+        f, t = feed_ft * FT, top_ft * FT
+        sl = math.degrees(math.atan2(t - f, run))
+        return C.Option("U", "u", [(WIRE_M, (f + t) / 2, brg)], [],
+                        slope_deg=max(sl, 0.0), feed_h=f, top_h=t), sl
+
+    print(f"{'':42s} {'3-band':>10s}  {'cells':>5s}  {'regs':>5s}")
+    for nm, en, hs in (("current feed", (0.0, 0.0), (24.0,)),
+                       ("ROOF ridge", RIDGE_EN, (20.0, 25.0, 30.0))):
+        run = polar(C.APEX_EN[0] - en[0], C.APEX_EN[1] - en[1])[0]
+        rise_ft = math.sqrt(WIRE_M ** 2 - run ** 2) / FT
+        for fh in hs:
+            o, sl = sloper(en, fh, C.APEX_EN, fh + rise_ft)
+            line(o, f"   {nm} {fh:.0f} ft -> tree {fh+rise_ft:3.0f} ft "
+                    f"({sl:4.1f} deg)")
+
+    print("\n   Held at a MATCHED slope, so the run is the same either way:")
+    for sl in (30.0, 45.0, 60.0):
+        run = WIRE_M * math.cos(math.radians(sl))
+        for nm, en, fh in (("current feed", (0.0, 0.0), 24.0),
+                           ("ROOF ridge  ", RIDGE_EN, 25.0)):
+            top_ft = fh + WIRE_M * math.sin(math.radians(sl)) / FT
+            best = None
+            for b2 in range(0, 360, 5):
+                o, _ = sloper(en, fh, offset(en, float(b2), run), top_ft)
+                m = C.aggregate_multiband(o)
+                if best is None or (m["n_workable"], m["mean_power_dBi"]) > best[0]:
+                    best = ((m["n_workable"], m["mean_power_dBi"]), b2, o,
+                            offset(en, float(b2), run))
+            line(best[2], f"   {nm} {fh:.0f} ft, {sl:.0f} deg up to "
+                          f"{top_ft:3.0f} ft at {best[1]:03d}T",
+                 "in parcel" if C.inside_parcel(best[3]) else "OUT OF PARCEL")
+
+    print("\n   VERDICT: 0.02 dB at matched slope. The feed is the OTHER voltage")
+    print("   maximum - the other current null - so its height buys as little as")
+    print("   the end's did: 20 -> 30 ft on the ridge moves the 3-band figure by")
+    print("   0.06 dB, and in the wrong direction. The only real effect of the")
+    print("   move is 3.3 m more run to the apex tree, worth +0.67 dB by")
+    print("   softening 66.2 deg to 60.8 deg - and you can buy far more of that")
+    print("   for free by picking a support further away. That is what T45 and")
+    print("   T30 already are.")
+    print("\n   Note also what this geometry IS: an upward sloper off the fixed")
+    print("   feed is exactly the T class in compare_options.py. T-APEX is")
+    print("   literally 'feed 24 ft, slope up 66 deg to the apex tree at")
+    print("   143 ft'. It is scored, and METHOD.md section 9 applies with all")
+    print("   its LOW-confidence caveats.")
+
+
 def main():
     q1_end_height()
     q2_end_bearing()
     q3_roof()
+    q4_roof_feed()
     print("\n" + "=" * 124)
     print("VERDICT: keep the end where it is.")
     print("  - Raising it 10 -> 60 ft is worth 0.35 dB. It is a current null.")
     print("  - Re-aiming it is worth at most +0.5 dB and costs the southwest")
     print("    terrain window, which is the site's one real advantage.")
-    print("  - The roof is 2.6-4.1 dB WORSE than the tree, and the wire's end")
-    print("    is the last thing that should be attached to a house.")
+    print("  - The roof as the HIGH point is 2.6-4.1 dB worse than the tree,")
+    print("    and the wire's end is the last thing to attach to a house.")
+    print("  - The roof as the FEED, sloping up, is worth 0.02 dB at matched")
+    print("    slope. Both ends of an EFHW are current nulls; neither one's")
+    print("    height is where the gain lives.")
     print("=" * 124)
 
 

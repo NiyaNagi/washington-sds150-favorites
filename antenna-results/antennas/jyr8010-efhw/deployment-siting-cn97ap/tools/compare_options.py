@@ -758,6 +758,31 @@ def main():
                       f"{b:5.1f}T / {mag(b):5.1f}M  {sa} {so}"
                       f"  {'IN' if inside_parcel(en) else 'OUT OF'} parcel")
 
+    out = [(o, nm, en) for o in opts for nm, h, en in o.supports
+           if not inside_parcel(en)]
+    print("\n" + "=" * 100)
+    print("SUPPORTS THAT ARE NOT ON THE PARCEL  (%d)" % len(out))
+    print("=" * 100)
+    if not out:
+        print("  none")
+    for o, nm, en in out:
+        d, b = polar(*en)
+        # inside_parcel() enforces a 5 m setback. Separate "past the actual
+        # boundary" from "on the lot but inside the setback" - they are very
+        # different conversations with a neighbour.
+        hard = not inside_parcel(en, margin_m=0.0)
+        e, n = en
+        t = (e - 46.9) / -116.8
+        gap = n - (-32.0 + t * 25.2)          # +ve = north of the south line
+        where = (f"OFF THE LOT by {-gap:.1f} m ({-gap/FT:.0f} ft)" if hard
+                 else f"on the lot, {gap:.1f} m ({gap/FT:.0f} ft) inside the "
+                      f"south line - fails the 5 m setback")
+        print(f"  {o.key:7s} {nm:12s} {d:6.1f} m ({d/FT:5.1f} ft) at {b:5.1f}T"
+              f"   {where}")
+    print("\nThe T class is scored WITHOUT a parcel constraint by design, so this")
+    print("list is expected to be non-empty. It is printed here because a stale")
+    print("'none of them leave the parcel' claim survived a bearing change once.")
+
     print("\n" + "=" * 100)
     print("BANDS THIS ANTENNA IS RESONANT ON")
     print("=" * 100)

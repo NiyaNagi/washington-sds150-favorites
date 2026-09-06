@@ -1,7 +1,7 @@
 # Session log — 2026-09-05
 
 Chronological record of the siting session, including every operator input, every
-external query, and every correction. Kept because **eleven** corrections were made and
+external query, and every correction. Kept because **thirteen** corrections were made and
 retracted across the session — two of them reversed a headline conclusion outright — and a
 future agent needs to know which conclusions are stale.
 
@@ -310,6 +310,66 @@ power, workable cells, holes and worst case simultaneously. Exactly the trap MET
 already documents, re-introduced on a different metric. Re-sorted on workable band×region
 cells first, regions second, mean power last.
 
+## Phase 9 — the end-point question, and two corrections
+
+**Operator asked:** would re-siting the far end help — for example off the house roof as a
+sloper? New `tools/endpoint_study.py` splits that into four separately-scored questions.
+
+**End height: 0.35 dB across 50 ft.** Both ends of an EFHW are voltage maxima, i.e. current
+nulls, and support 3 already sits at the 29.7 m current maximum precisely so the end would
+not have to matter. Nearly model-independent.
+
+**End azimuth: at most +0.5 dB, and the wrong trade.** Best honestly-scorable azimuth (35°T)
+buys US Southeast +5.0, Caribbean +4.7, Denver +2.9 and pays Hawaii −7.8, South Africa −6.2,
+VK2 −2.9. Every loser is in the 210–270° sector — the only bearing with a −7.9° foreground
+downslope. Every winner already returns on 15 m and 10 m for free.
+
+**Roof as the high support: 2.6–4.1 dB worse.** The ridge is ~24 ft from the feed against
+the tree's 52.5 ft, so 81% of the wire slopes away from a low point and average height
+collapses from 41.6 ft to 16–27 ft.
+
+**Roof as the FEED, sloping up: 0.02 dB at matched slope.** See correction 13.
+
+A scan trap was recorded: the raw top-ranked azimuth was 215°T, a **133° bend**. §3 scores a
+bent wire as the union of two lobe sets and ignores relative phase, so it overstates sharp
+bends where near-antiparallel legs cancel. `endpoint_study.py` marks anything past ~110° as
+NOT VALID. The pattern is also front/back symmetric, so 35°T and 215°T score identically
+while being completely different physical wires.
+
+### ⚠️ ERROR 12 — a parcel claim outlived the bearings it was true of
+
+Phase 8 re-scanned the T-class bearings on the three-band metric. T30 moved to 176°T and T45
+to 143°T. The sentence "**None of the T options leave the parcel**", written in Phase 7 and
+true of the old bearings, was carried into the same commit unchanged — and is now false:
+
+| Key | Bearing | Support | Status |
+|---|---|---|---|
+| T30 | 176°T | 112.5 ft | **39 ft off the lot** |
+| T45 | 143°T | 91.9 ft | on the lot, 10 ft inside the south line, fails the 5 m setback |
+
+`compare_options.py` had it right in its per-support output the whole time; only the prose
+was stale. It now prints a dedicated **SUPPORTS THAT ARE NOT ON THE PARCEL** block that
+separates "off the lot" from "inside the setback". This matters: **T30 is the second-ranked
+option** and it cannot be built where the scan puts it.
+
+### ⚠️ ERROR 13 — scored the roof upside down
+
+`endpoint_study.py` §3 put the roof at the **high** end with the wire sloping down. The
+operator meant the opposite: transformer **on** the roof, wire sloping **up** to a tree.
+Both are worth scoring and they are different antennas, so §4 was added rather than
+replacing §3.
+
+The answer to the question actually asked is **0.02 dB at matched slope**. The feed is the
+other voltage maximum, so its height buys as little as the end's — raising the roof feed
+20 → 30 ft moves the 3-band figure by 0.06 dB, slightly the wrong way. The only real effect
+of the move is that the apex tree goes from 16.0 m to 19.3 m away, softening the forced
+slope from 66.2° to 60.8° for +0.67 dB, which a further support buys for nothing.
+
+Worth recording for future agents: **an upward sloper off the fixed feed is the T class.**
+T‑APEX is literally "feed 24 ft, up 66.2° to the apex tree at 143 ft". With a fixed 39.6 m
+wire `rise = √(39.6² − run²)`, so support distance chooses the slope and there is no third
+variable.
+
 ## Corrections summary
 
 | # | Error | Corrected in | Status |
@@ -325,6 +385,8 @@ cells first, regions second, mean power last.
 | 9 | Support height assumed capped at 50 ft; operator has 150 ft trees | Phase 7 | ✅ T class added |
 | 10 | **Slant model treated a steep wire as omnidirectional, band-independently** | Phase 8 | ✅ METHOD.md §9 rewritten; **T-class conclusion reversed** |
 | 11 | Three-band ranking first led with regions-covered, repeating error 7 on a new axis | Phase 8 | ✅ ranks on workable cells first |
+| 12 | "None of the T options leave the parcel" survived the bearing change that made it false | Phase 9 | ✅ T30 is 39 ft off the lot; dedicated parcel block now printed |
+| 13 | Scored the roof as the HIGH support when the operator meant the roof as the FEED | Phase 9 | ✅ both scored, kept separate |
 
 **Anything in the conversation before each correction is stale.** The files in this
 directory reflect only post-correction values.
