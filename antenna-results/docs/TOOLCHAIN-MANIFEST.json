@@ -44,12 +44,12 @@
     },
     {
       "path": "antenna-results/antennas/jyr8010-efhw/generate_report.py",
-      "sha256": "f072c0abe6dd629cdd39fa7d544e5e2533ac86c681508dde3b71360aff724ce5",
+      "sha256": "c6de9f8b1702cce1d90e6a45d5c3d3dc81016aa10e68054574158f5fdae667bd",
       "role": "Original JYR8010 supported-band report and shared renderer"
     },
     {
       "path": "antenna-results/antennas/jyr8010-efhw/two-choke-office-feed/generate_report.py",
-      "sha256": "a778de6a6803f1b7acab89c0918db36294f19186447ab798ab13dff1bc209c5d",
+      "sha256": "fefbf22d0e74c8b9f6b5f03b8ec1b0776c9016ea73023bd185e118345f79e2c4",
       "role": "JYR8010 two-choke and counterpoise installed-system report"
     },
     {

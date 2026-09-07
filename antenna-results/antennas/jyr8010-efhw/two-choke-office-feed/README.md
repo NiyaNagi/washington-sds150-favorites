@@ -5,7 +5,8 @@ report to a new installed-system measurement from 0.5 through 54 MHz.
 
 ## Current configuration
 
-- JYR8010-150W, 40 m radiating element, nominal 1:49/1:64 transformer.
+- JYR8010-150W, 39.6 m / 130 ft radiating element for the 80m fundamental,
+  with a 1:64 transformer.
 - 75 ft LS400 outdoors, window flat-ribbon transition, and 25 ft LS400 inside
   the office.
 - Two common-mode chokes, each **3 ft RG8X wound 11 turns through one Mix 31

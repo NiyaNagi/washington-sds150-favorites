@@ -318,6 +318,9 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Changed
 
+- Corrected the JYR8010 two-choke report to match the verified vendor identity:
+  39.6 m / 130 ft of wire for the 80m fundamental with a 1:64 transformer,
+  rather than describing the physical 40 m wire label as a 40m-band radiator.
 - Corrected the August 18 final GOWENIC EFHW feed-line description from 12 ft
   coax to 75 ft LS400 outdoors; earlier tuning-history runs that actually used
   12 ft remain unchanged.

@@ -30,8 +30,8 @@ Artifact:
 Recorded configuration:
 
 - JYR8010-150W;
-- 40 m radiator;
-- nominal 1:49/1:64 transformer;
+- 39.6 m / 130 ft radiator for the 80m fundamental;
+- 1:64 transformer;
 - no dedicated ground;
 - no dedicated counterpoise;
 - feed-line length and antenna support geometry were not recorded.
@@ -328,7 +328,7 @@ VNA/radio at office-side PL-259/SO-239 adapter
   -> JYR8010 transformer
        16 ft counterpoise on dedicated terminal,
        on ground opposite radiator
-  -> 40 m radiator
+  -> 39.6 m / 130 ft radiator (80m fundamental)
 ```
 
 Total coax: about 106 ft plus the window transition.

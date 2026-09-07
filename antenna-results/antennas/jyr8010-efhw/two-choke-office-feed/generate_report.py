@@ -343,7 +343,7 @@ def plot_installation(output: Path) -> None:
         "75 ft LS400\noutdoors",
         "Choke 2 at feedpoint\n3 ft RG8X\n11 turns, Mix 31",
         "JYR8010 transformer",
-        "40 m radiator",
+        "39.6 m / 130 ft radiator\n(80m fundamental)",
     ]
     axis.plot(x, [0] * len(x), color=COLORS["muted"], linewidth=3)
     for index, (position, label) in enumerate(zip(x, labels)):
@@ -429,7 +429,8 @@ report to a new installed-system measurement from 0.5 through 54 MHz.
 
 ## Current configuration
 
-- JYR8010-150W, 40 m radiating element, nominal 1:49/1:64 transformer.
+- JYR8010-150W, 39.6 m / 130 ft radiating element for the 80m fundamental,
+  with a 1:64 transformer.
 - 75 ft LS400 outdoors, window flat-ribbon transition, and 25 ft LS400 inside
   the office.
 - Two common-mode chokes, each **3 ft RG8X wound 11 turns through one Mix 31
@@ -799,8 +800,12 @@ def main() -> None:
         "antenna": {
             "model": "JYR8010-150W",
             "type": "end-fed half-wave",
-            "radiating_element_length_m": 40,
-            "nominal_transformer_ratio": "1:49 / 1:64",
+            "radiating_element_length_m": 39.6,
+            "radiating_element_length_note": (
+                "39.6 m / 130 ft of wire. The vendor's 40 m label is physical "
+                "length; this is an 80m-band EFHW."
+            ),
+            "nominal_transformer_ratio": "1:64",
             "advertised_supported_bands": [item[0] for item in base.BANDS],
             "asin": "B0DBDCNVZD",
         },
