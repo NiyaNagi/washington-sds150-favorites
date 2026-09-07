@@ -4,6 +4,23 @@ Reproducible reports built from calibrated complex S11 measurements. The scanner
 
 > **SWR is impedance match only.** It cannot establish receive gain, scanner sensitivity, radiation pattern, or decode performance.
 
+## Reproduce an antenna deployment
+
+- [Complete calibrated NanoVNA methodology](docs/NANOVNA-DEPLOYMENT-METHODOLOGY.md)
+  defines hardware setup, reference planes, 40,001-point segmented capture,
+  software OSL math, standard/load/open-path quality gates, repeatability,
+  analysis, visualization, interpretation limits, evidence preservation, and
+  publication.
+- [August 2026 EFHW session record](docs/2026-08-EFHW-SESSION-RECORD.md)
+  preserves the chronological GOWENIC and JYR8010 configurations, commands,
+  results, failures, corrections, reviews, and commits.
+- [Reusable LLM deployment prompt](prompts/REPEAT-ANTENNA-DEPLOYMENT.md) is a
+  copy-paste contract for repeating the same process on another antenna.
+- [NanoVNA acquisition and validation tools](tools/README.md) include the exact
+  capture engine, pinned dependencies, and fail-closed evidence validator.
+- [Toolchain manifest](docs/TOOLCHAIN-MANIFEST.json) records exact runtime
+  versions and SHA-256 identities for the acquisition and report scripts.
+
 ## Headline recommendations
 
 - **Best one for typical SDS150 modern public safety:** Remtronix 920.

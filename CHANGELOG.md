@@ -23,6 +23,15 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   on the I-90 (Cle Elum), US-2 (Leavenworth) and Centralia corridors. Takes
   effect on the next `sources update --only wwara --apply`.
 
+- Added the complete calibrated NanoVNA deployment methodology and August 2026
+  EFHW session audit trail, including exact OSL equations and commands,
+  reference-plane discipline, invalid-standard detection, load/open-path
+  diagnostics, repeatability, causal limits, report publication, every
+  GOWENIC/JYR8010 configuration and result, and all process learnings.
+- Added the exact high-resolution NanoVNA capture/calibration engine used for
+  the antenna sessions, pinned runtime dependencies, a reusable fail-closed
+  evidence validator, and a comprehensive copy-paste prompt for another LLM to
+  repeat an antenna deployment end to end.
 - Added a verified Kenwood TH-D75A profile, native settings-preserving `.d75`
   exporter and `thd75-ames-lake` plan. The connected firmware-1.03 radio now
   carries 545 ordinary memories across 21 groups plus 21 nearby entries in its

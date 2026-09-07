@@ -1,0 +1,83 @@
+{
+  "manifest_purpose": "Exact August 2026 NanoVNA antenna acquisition, validation, and report toolchain",
+  "runtime": {
+    "python": "3.9.6",
+    "numpy": "2.0.2",
+    "matplotlib": "3.9.4",
+    "pyserial": "3.5",
+    "nanovna_model": "NanoVNA-H",
+    "nanovna_firmware": "1.2.50",
+    "nanovna_bandwidth_hz": 1000,
+    "default_serial_port": "/dev/cu.usbmodem4001",
+    "serial_baud": 115200
+  },
+  "files": [
+    {
+      "path": "antenna-results/tools/nanovna_swr.py",
+      "sha256": "f6bdb8e12206480c0bc1fee4f142ae4cc6cb5f9fe10a5732ce897d3a84401f8c",
+      "role": "Operational hardened entry point that rejects nonfinite raw, calibration, and corrected data"
+    },
+    {
+      "path": "antenna-results/tools/nanovna_swr_session_2026_08.py",
+      "sha256": "7cc2b4c999a7aa269e5d57cafa2f94d0f2292277af9f805bc2368db6abfa7431",
+      "role": "Byte-exact high-resolution segmented capture and software OSL engine used during the August 2026 sessions"
+    },
+    {
+      "path": "antenna-results/tools/validate_nanovna_run.py",
+      "sha256": "d1369e3f2047ad0f4d5e1c2e09f3324b101f4220231e12e19d3a87e16f150ff6",
+      "role": "Codified fail-closed form of the inline validation checks used during the sessions"
+    },
+    {
+      "path": "antenna-results/tools/test_nanovna_tools.py",
+      "sha256": "7ca88b050f06a7eb278b764994d0fed19bf4f04d2a8759e7db233bd9a63174e1",
+      "role": "Standalone targeted tests for solver behavior, corruption rejection, exact grids, finite thresholds, and raw-to-derived evidence binding"
+    },
+    {
+      "path": "antenna-results/antennas/gowenic-efhw/generate_report.py",
+      "sha256": "b2d352c9df21863f67d2938c45ae4bedfaf8915b3581c0d31f3b17103eb80cd7",
+      "role": "GOWENIC tuning history and final outdoor report"
+    },
+    {
+      "path": "antenna-results/antennas/gowenic-efhw/installed-office-feed/generate_report.py",
+      "sha256": "8d8531cb1ebccdde2cc110fdebe5641652ed3227344afdebf14d34ca4a0cee5a",
+      "role": "GOWENIC installed office-feed comparison report"
+    },
+    {
+      "path": "antenna-results/antennas/jyr8010-efhw/generate_report.py",
+      "sha256": "f072c0abe6dd629cdd39fa7d544e5e2533ac86c681508dde3b71360aff724ce5",
+      "role": "Original JYR8010 supported-band report and shared renderer"
+    },
+    {
+      "path": "antenna-results/antennas/jyr8010-efhw/two-choke-office-feed/generate_report.py",
+      "sha256": "a778de6a6803f1b7acab89c0918db36294f19186447ab798ab13dff1bc209c5d",
+      "role": "JYR8010 two-choke and counterpoise installed-system report"
+    },
+    {
+      "path": "antenna-results/tools/generate_scanner_antenna_report.py",
+      "sha256": "38840230fdaf659e475d796d8654cc6ae2a2ba2718c5067f8c8606b276d49213",
+      "role": "Scanner-service antenna report generator used by the broader antenna-results corpus"
+    },
+    {
+      "path": "antenna-results/tools/session-helpers/capture_scanner_zooms.py",
+      "sha256": "603d9855950f4cbcf7ee0ee480739c32555fdbf653eed478660cbdcc824329d6",
+      "role": "Byte-exact archived helper for averaged scanner-service zoom captures"
+    },
+    {
+      "path": "antenna-results/tools/session-helpers/retest_bands.py",
+      "sha256": "dd040f01d3af1147abe094d79844814be73a19b2fb9840b16be6d2d2a1a6fb82",
+      "role": "Byte-exact archived hard-coded focused 160m/60m retest helper"
+    },
+    {
+      "path": "antenna-results/tools/session-helpers/verify_load.py",
+      "sha256": "66b4555a13ec326b2568f20434231717556e5c55babb170dbf21a50f253c5370",
+      "role": "Byte-exact archived hard-coded focused load-verification helper"
+    }
+  ],
+  "notes": [
+    "nanovna_swr_session_2026_08.py exactly matches the local .nanovna-tools acquisition script used during hardware capture.",
+    "nanovna_swr.py wraps that exact engine and adds fail-closed finite-data and passive-|Gamma| checks for future captures.",
+    "The three files under tools/session-helpers exactly match their surviving local August 2026 counterparts and are archived for audit, not recommended for new runs.",
+    "Report-generator hashes identify the versions present when this manifest was written.",
+    "Recompute hashes after any intentional tool change and update this manifest in the same commit."
+  ]
+}
