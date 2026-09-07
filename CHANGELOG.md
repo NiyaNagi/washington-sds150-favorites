@@ -9,6 +9,21 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Added
 
+- Added `docs/radio-transcriber/`: the complete research record and functional
+  specification for an offline radio transcriber Android app. Three research
+  documents (SBC hardware feasibility, phone platform feasibility, and ASR
+  accuracy/lexicon/speaker-identity), a functional spec with numbered
+  requirements and acceptance criteria, and an open-decisions register. The
+  core thesis is that callsign accuracy is set by the lexicon layer rather than
+  the model, and that matching the lexicon against the *audio* — decode-time
+  contextual biasing plus acoustic spotting of the ~36 phonetic alphabet units,
+  parsed against the ITU callsign grammar — beats matching against transcribed
+  text. Uses this repo's WWARA repeater list, SDS150 favorites and POTA park
+  data as offline ranking priors. `thd75a programming details/TH_D75_Commands.pdf`
+  already establishes that the TH-D75A speaks two-letter ASCII CAT over a CDC
+  device and reports squelch state via `BY`, which de-risks the radio interface
+  and the segmentation design.
+
 - Added `ftx1-scan` and `thd75-scan`: single-list scanning loadouts that
   resolve the same catalog into one frequency-ordered memory list so a plain
   memory scan sweeps every band without choosing a bank. Scannable content
