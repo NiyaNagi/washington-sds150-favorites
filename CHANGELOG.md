@@ -23,6 +23,21 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   already establishes that the TH-D75A speaks two-letter ASCII CAT over a CDC
   device and reports squelch state via `BY`, which de-risks the radio interface
   and the segmentation design.
+- Reworked the radio transcriber spec to draft 2 around a flagship-first
+  ceiling, after establishing that "must run on anything" was acting as a
+  design cap rather than a floor. Capability tiers are now defined *downward*
+  from a reference experience, accuracy targets are per-tier, and cross-tier
+  reprocessing makes a record captured on a weak device provisional rather
+  than permanently degraded — possible because every pass is a pure function
+  of retained audio. Added `research/04-flagship-capability.md`: domain
+  fine-tuning is the largest lever in the project (ATC 55.2% -> 6.8% WER, and
+  a 54.8% relative reduction from 55 hand-transcribed clips) and lifts every
+  tier because a fine-tuned model is just a file; Qualcomm publishes
+  large-v3-turbo on the NPU at ~22x real time, which reverses the earlier
+  "NPU is irrelevant" finding once the ceiling is uncapped. Speech
+  enhancement is specified as evidence-gated and off by default, because the
+  literature is genuinely split on whether denoising helps or hurts zero-shot
+  Whisper.
 
 - Added `ftx1-scan` and `thd75-scan`: single-list scanning loadouts that
   resolve the same catalog into one frequency-ordered memory list so a plain
