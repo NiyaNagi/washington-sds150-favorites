@@ -45,7 +45,7 @@ def _append_local_area_extension(catalog: Catalog) -> None:
     catalog rather than the packaged baseline. Restoring by id repairs an
     already-damaged catalog and is a no-op on a healthy one.
     """
-    from wasds150.recipes.systems import rebuilds_systems_from_facts
+    from wasds150.recipes.systems import rebuilds_systems_from_facts, systems_defined_in_code
 
     existing = {favorite.slug for favorite in catalog.favorites}
     if len(existing) < 75 or "fl75" not in existing:
@@ -56,7 +56,15 @@ def _append_local_area_extension(catalog: Catalog) -> None:
         if current is not None:
             for field_name in CSV_FIELDS:
                 setattr(current, field_name, getattr(favorite, field_name))
-            if rebuilds_systems_from_facts(current):
+            if systems_defined_in_code(current):
+                # The code is the source of truth for these systems: replace
+                # each persisted copy by id, keep anything enrichment added.
+                fresh = {system.id: system for system in favorite.systems}
+                current.systems = [
+                    copy.deepcopy(fresh.pop(system.id)) if system.id in fresh else system
+                    for system in current.systems
+                ] + [copy.deepcopy(system) for system in fresh.values()]
+            elif rebuilds_systems_from_facts(current):
                 present = {system.id for system in current.systems}
                 for system in favorite.systems:
                     if system.id not in present:

@@ -175,6 +175,13 @@ def _channel_from_parsed(fl: FavoritesList, index: int, parsed: ParsedChannel) -
     )
 
 
+def static_system_id(fl: FavoritesList) -> str:
+    """The id Tier C gives a row's text-derived system. Stable across edits
+    of the row's prose, so a persisted copy can be found and replaced -- or
+    removed, once the prose no longer names any frequency."""
+    return stable_id(f"{fl.slug}:static-text-channels", kind="system")
+
+
 def static_systems_for(fl: FavoritesList) -> List[System]:
     """Tier C. Returns ``[]`` if neither the free-text parser nor a seed
     table produces anything for this row (e.g. a purely trunked row whose
@@ -216,7 +223,7 @@ def static_systems_for(fl: FavoritesList) -> List[System]:
         return []
     department = Department(id=stable_id(f"{fl.slug}:static-text-channels", kind="department"), label="Channels", channels=channels)
     system = System(
-        id=stable_id(f"{fl.slug}:static-text-channels", kind="system"),
+        id=static_system_id(fl),
         label=fl.favorite_name,
         departments=[department],
     )
@@ -358,6 +365,17 @@ def rebuilds_systems_from_facts(fl: FavoritesList) -> bool:
     a corrected tone or a repeater input.
     """
     return fl.favorite_key == "PSHAM01"
+
+
+def systems_defined_in_code(fl: FavoritesList) -> bool:
+    """True when a row's systems are hand-authored, individually cited channel
+    tables in :mod:`wasds150.catalog` rather than anything a source enriches.
+
+    ``OZ01`` is built wholly in :mod:`wasds150.catalog.olympic_coast`. A
+    persisted catalog keeps systems by id, so without this a corrected tone or
+    a withdrawn channel would never reach a catalog saved before the fix.
+    """
+    return fl.favorite_key == "OZ01"
 
 
 def systems_from_matched_facts(fl: FavoritesList, matched_facts: List[NormalizedFact]) -> List[System]:

@@ -16,17 +16,17 @@
 | 31-35 | MURS | 5 | simplex |
 | 36-38 | Ham Calling | 3 | simplex |
 | 39-44 | Ham Simplex | 6 | simplex |
-| 45-55 | Ham West Peninsula | 11 | repeater |
-| 56-57 | NOAA Weather | 2 | receive only |
-| 58-70 | SAR and Interop | 13 | receive only |
-| 71-79 | Park and Forest | 9 | receive only |
-| 80-90 | DNR Olympic | 11 | receive only |
-| 91-100 | Clallam County | 10 | receive only |
-| 101-103 | Tribal | 3 | receive only |
-| 104-120 | Marine | 17 | receive only |
-| 121-137 | Aviation | 17 | receive only |
-| 138-141 | Ferry and Utility | 4 | receive only |
-| 142-185 | Ham Puget Sound | 44 | repeater |
+| 45-51 | Ham West Peninsula | 7 | repeater |
+| 52-53 | NOAA Weather | 2 | receive only |
+| 54-66 | SAR and Interop | 13 | receive only |
+| 67-75 | Park and Forest | 9 | receive only |
+| 76-86 | DNR Olympic | 11 | receive only |
+| 87-96 | Clallam County | 10 | receive only |
+| 97-99 | Tribal | 3 | receive only |
+| 100-116 | Marine | 17 | receive only |
+| 117-133 | Aviation | 17 | receive only |
+| 134-137 | Ferry and Utility | 4 | receive only |
+| 138-185 | Ham Puget Sound | 48 | repeater |
 
 ## Channels
 
@@ -76,147 +76,147 @@
 | 42 | JYCSMPLX | 147.5400 | simplex | FM | - | OZ01/Amateur West Peninsula |
 | 43 | NCSTUHFS | 439.5500 | simplex | FM | - | OZ01/Amateur West Peninsula |
 | 44 | WUHFSMPL | 439.6000 | simplex | FM | - | OZ01/Amateur West Peninsula |
-| 45 | PRTWF7W | 145.1300 | 144.5300 | FM | TONE=C100 | OZ01/Amateur West Peninsula |
-| 46 | GNDW7FEL | 145.2100 | 144.6100 | FM | TONE=C100 | OZ01/Amateur West Peninsula |
-| 47 | CRLW7FEL | 146.7600 | 146.1600 | FM | TONE=C77 | OZ01/Amateur West Peninsula |
-| 48 | STRW7FEL | 146.7600 | 146.1600 | FM | TONE=C100 | OZ01/Amateur West Peninsula |
-| 49 | ELLW7FEL | 147.0600 | 147.6600 | FM | TONE=C100 | OZ01/Amateur West Peninsula |
-| 50 | MTK7PP | 147.2800 | 147.8800 | FM | TONE=C123 | OZ01/Amateur West Peninsula |
-| 51 | 220W6MPD | 224.0600 | 222.4600 | FM | TONE=C107.2 | OZ01/Amateur West Peninsula |
-| 52 | SQMW7FEL | 441.1250 | 446.1250 | FM | TONE=C100 | OZ01/Amateur West Peninsula |
-| 53 | SQMKO6I | 442.0500 | 447.0500 | FM | TONE=C103.5 | OZ01/Amateur West Peninsula |
-| 54 | QLCNW2ZT | 442.5000 | 447.5000 | FM | TONE=C123 | OZ01/Amateur West Peninsula |
-| 55 | SQMN7NFY | 442.8000 | 447.8000 | FM | TONE=C123 | OZ01/Amateur West Peninsula |
-| 56 | NOAKXI27 | 162.4250 | RX only | FM | - | OZ01/NOAA Weather |
-| 57 | NOAKIH36 | 162.5500 | RX only | FM | - | OZ01/NOAA Weather |
-| 58 | USCGAX3 | 143.4750 | RX only | NFM | - | OZ01/SAR and Interop |
-| 59 | USCGAXWA | 150.7000 | RX only | NFM | - | OZ01/SAR and Interop |
-| 60 | REDNET | 153.8300 | RX only | NFM | - | OZ01/SAR and Interop |
-| 61 | WAVSAR16 | 155.1600 | RX only | NFM | - | OZ01/SAR and Interop |
-| 62 | LERN | 155.3700 | RX only | NFM | - | OZ01/SAR and Interop |
-| 63 | OSCCR | 156.1350 | RX only | NFM | - | OZ01/SAR and Interop |
-| 64 | FDIPL1 | 167.0875 | RX only | NFM | - | OZ01/SAR and Interop |
-| 65 | FDIPNC1 | 169.5375 | RX only | NFM | - | OZ01/SAR and Interop |
-| 66 | FDIPIR1 | 170.0125 | RX only | NFM | - | OZ01/SAR and Interop |
-| 67 | FDIPIR2 | 170.4125 | RX only | NFM | - | OZ01/SAR and Interop |
-| 68 | FDIPIR3 | 170.6875 | RX only | NFM | - | OZ01/SAR and Interop |
-| 69 | FDSRINCD | 410.8375 | RX only | NFM | - | OZ01/SAR and Interop |
-| 70 | WHRSMDCL | 463.0000 | RX only | NFM | - | OZ01/SAR and Interop |
-| 71 | OLYNPARG | 166.9625 | RX only | NFM | - | OZ01/Olympic NP and Forest |
-| 72 | DOIARGRN | 167.0750 | RX only | NFM | - | OZ01/Olympic NP and Forest |
-| 73 | USFSARR6 | 167.4750 | RX only | NFM | - | OZ01/Olympic NP and Forest |
-| 74 | USFSLWEN | 168.0250 | RX only | NFM | - | OZ01/Olympic NP and Forest |
-| 75 | OLYNPPRI | 168.5250 | RX only | NFM | - | OZ01/Olympic NP and Forest |
-| 76 | USFSINCD | 168.5500 | RX only | NFM | - | OZ01/Olympic NP and Forest |
-| 77 | USFSARGR | 168.6250 | RX only | NFM | - | OZ01/Olympic NP and Forest |
-| 78 | ONFHDCNL | 171.4750 | RX only | NFM | - | OZ01/Olympic NP and Forest |
-| 79 | ONFPCFCR | 171.5500 | RX only | NFM | - | OZ01/Olympic NP and Forest |
-| 80 | DNRTAC1 | 151.3100 | RX only | NFM | - | OZ01/WA DNR Olympic Region |
-| 81 | DNRTAC2 | 151.3400 | RX only | NFM | - | OZ01/WA DNR Olympic Region |
-| 82 | DNRFLGHT | 151.3475 | RX only | NFM | - | OZ01/WA DNR Olympic Region |
-| 83 | DNRCOM | 151.4150 | RX only | NFM | - | OZ01/WA DNR Olympic Region |
-| 84 | DNRHOH | 159.2025 | RX only | NFM | - | OZ01/WA DNR Olympic Region |
-| 85 | DNROZTT | 159.2550 | RX only | NFM | - | OZ01/WA DNR Olympic Region |
-| 86 | DNRAR1 | 159.2700 | RX only | NFM | - | OZ01/WA DNR Olympic Region |
-| 87 | DNRSTRTS | 159.3000 | RX only | NFM | - | OZ01/WA DNR Olympic Region |
-| 88 | DNRCANAL | 159.3450 | RX only | NFM | - | OZ01/WA DNR Olympic Region |
-| 89 | DNRNET | 159.4200 | RX only | NFM | - | OZ01/WA DNR Olympic Region |
-| 90 | DNRQNLT | 159.4575 | RX only | NFM | - | OZ01/WA DNR Olympic Region |
-| 91 | JYCFRTC | 154.4450 | RX only | NFM | - | OZ01/Clallam County |
-| 92 | JYCFRDSP | 155.7225 | RX only | NFM | - | OZ01/Clallam County |
-| 93 | SQMFRDSP | 155.7825 | RX only | NFM | - | OZ01/Clallam County |
-| 94 | CLLLMFRD | 155.8200 | RX only | NFM | - | OZ01/Clallam County |
-| 95 | CLLLMPBL | 155.9250 | RX only | NFM | - | OZ01/Clallam County |
-| 96 | CLLLMPB2 | 158.8350 | RX only | NFM | - | OZ01/Clallam County |
-| 97 | CLLLMETC | 453.2750 | RX only | NFM | - | OZ01/Clallam County |
-| 98 | CLLLMWDS | 453.3750 | RX only | NFM | - | OZ01/Clallam County |
-| 99 | FRKSCTY | 453.9750 | RX only | NFM | - | OZ01/Clallam County |
-| 100 | PRTANGLS | 460.1000 | RX only | NFM | - | OZ01/Clallam County |
-| 101 | MKHTRBPD | 155.0700 | RX only | NFM | - | OZ01/Tribal Neah Bay and La Push |
-| 102 | MKHTRBCN | 453.7000 | RX only | NFM | - | OZ01/Tribal Neah Bay and La Push |
-| 103 | QLTFR | 460.2125 | RX only | NFM | - | OZ01/Tribal Neah Bay and La Push |
-| 104 | MRN06SFT | 156.3000 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
-| 105 | MRN09CLL | 156.4500 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
-| 106 | MRN13BRD | 156.6500 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
-| 107 | MRN16DST | 156.8000 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
-| 108 | MRN21AUS | 157.0500 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
-| 109 | MRN22AUS | 157.1000 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
-| 110 | MRN23AUS | 157.1500 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
-| 111 | MARINE68 | 156.4250 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
-| 112 | MARINE69 | 156.4750 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
-| 113 | MARINE71 | 156.5750 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
-| 114 | MARINE72 | 156.6250 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
-| 115 | MRN83AUS | 157.1750 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
-| 116 | MRN88 | 157.4250 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
-| 117 | PRNC74 | 156.7250 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
-| 118 | STTL5A | 156.2500 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
-| 119 | STTL14 | 156.7000 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
-| 120 | VCTR11 | 156.5500 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
-| 121 | WHDBYAPP | 118.2000 | RX only | AM | - | OZ01/Aviation |
-| 122 | EDZHKAWS | 118.3250 | RX only | AM | - | OZ01/Aviation |
-| 123 | ZSSCTR01 | 120.3000 | RX only | AM | - | OZ01/Aviation |
-| 124 | GRD1215 | 121.5000 | RX only | AM | - | OZ01/Aviation |
-| 125 | STTLPARC | 122.6000 | RX only | AM | - | OZ01/Aviation |
-| 126 | CTFQLLYT | 122.9000 | RX only | AM | - | OZ01/Aviation |
-| 127 | PRTANGL2 | 122.9750 | RX only | AM | - | OZ01/Aviation |
-| 128 | ZSSCTR03 | 125.1000 | RX only | AM | - | OZ01/Aviation |
-| 129 | CGOPSPRT | 127.7000 | RX only | AM | - | OZ01/Aviation |
-| 130 | WHDBYTWR | 127.9000 | RX only | AM | - | OZ01/Aviation |
-| 131 | ZSSCTR02 | 128.3000 | RX only | AM | - | OZ01/Aviation |
-| 132 | WHDBYATS | 134.1500 | RX only | AM | - | OZ01/Aviation |
-| 133 | ZSSCTR12 | 134.9500 | RX only | AM | - | OZ01/Aviation |
-| 134 | PRTANGL3 | 135.1750 | RX only | AM | - | OZ01/Aviation |
-| 135 | ASSQLLYT | 135.2250 | RX only | AM | - | OZ01/Aviation |
-| 136 | CGARGRND | 379.0500 | RX only | AM | - | OZ01/Aviation |
-| 137 | CGSPAVFR | 381.8000 | RX only | AM | - | OZ01/Aviation |
-| 138 | WAFRRSDC | 151.0400 | RX only | NFM | - | OZ01/Ferry Transport Utility |
-| 139 | BNNVLLPW | 172.5250 | RX only | NFM | - | OZ01/Ferry Transport Utility |
-| 140 | MVCHLDNG | 461.1875 | RX only | NFM | - | OZ01/Ferry Transport Utility |
-| 141 | MVCHBRDG | 467.7750 | RX only | NFM | - | OZ01/Ferry Transport Utility |
-| 142 | W7JCRPRT | 145.1500 | 144.5500 | FM | TONE=C114.8 | PSHAM01/North Sound & Islands - Analog 2 Meter |
-| 143 | W7PSEOLY | 145.1500 | 144.5500 | FM | TONE=C103.5 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
-| 144 | NM7BLFR | 145.1700 | 144.5700 | FM | TONE=C103.5 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
-| 145 | N7GDELYM | 145.1900 | 144.5900 | FM | TONE=C127.3 | PSHAM01/North Sound & Islands - Analog 2 Meter |
-| 146 | W7DKTCM | 145.2100 | 144.6100 | FM | TONE=C141.3 | PSHAM01/South Sound - Analog 2 Meter |
-| 147 | N3KPGRHM | 145.2300 | 144.6300 | FM | TONE=C146.2 | PSHAM01/South Sound - Analog 2 Meter |
-| 148 | W7BPDKND | 145.2300 | 144.6300 | FM | TONE=C103.5 | PSHAM01/North Sound & Islands - Analog 2 Meter |
-| 149 | K7DNRASH | 145.2500 | 144.6500 | FM | TONE=C151.4 | PSHAM01/South Sound - Analog 2 Meter |
-| 150 | KK7DFLOL | 145.2750 | 144.6750 | NFM | TONE=C100 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
-| 151 | KC7IYERD | 145.3100 | 144.7100 | FM | TONE=C103.5 | PSHAM01/Eastside & Cascades - Analog 2 Meter |
-| 152 | K7NWSTGR | 145.3300 | 144.7300 | FM | TONE=C179.9 | PSHAM01/Eastside & Cascades - Analog 2 Meter |
-| 153 | W7ENMCLW | 145.3700 | 144.7700 | FM | TONE=C136.5 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
-| 154 | N7IGPRTO | 145.3900 | 144.7900 | FM | TONE=C88.5 | PSHAM01/Seattle Metro - Analog 2 Meter |
-| 155 | WB7DOBCR | 145.4100 | 144.8100 | FM | TONE=C162.2 | PSHAM01/South Sound - Analog 2 Meter |
-| 156 | KD7WDGSL | 145.4250 | 144.8250 | NFM | TONE=C88.5 | PSHAM01/Seattle Metro - Analog 2 Meter |
-| 157 | KB7CNNAL | 145.4500 | 144.8500 | FM | TONE=C110.9 | PSHAM01/South Sound - Analog 2 Meter |
-| 158 | K7CPROLY | 145.4700 | 144.8700 | FM | TONE=C100 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
-| 159 | K7LWHKRK | 145.4900 | 144.8900 | FM | TONE=C103.5 | PSHAM01/Seattle Metro - Analog 2 Meter |
-| 160 | WB7DVNEL | 146.4500 | 147.4500 | NFM | D245 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
-| 161 | KC7ZGLDM | 146.6200 | 146.0200 | FM | TONE=C103.5 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
-| 162 | W7EDGWD | 146.6400 | 146.0400 | FM | TONE=C103.5 | PSHAM01/South Sound - Analog 2 Meter |
-| 163 | NC7GSTC | 146.6600 | 146.0600 | FM | TONE=C103.5 | PSHAM01/Seattle Metro - Analog 2 Meter |
-| 164 | A7THVSHN | 146.6875 | 146.0875 | NFM | TONE=C131.8 | PSHAM01/Seattle Metro - Analog 2 Meter |
-| 165 | N7JNFRDY | 146.7000 | 146.1000 | FM | TONE=C131.8 | PSHAM01/North Sound & Islands - Analog 2 Meter |
-| 166 | W7EATETN | 146.7000 | 146.1000 | FM | TONE=C103.5 | PSHAM01/South Sound - Analog 2 Meter |
-| 167 | N7SKSHLT | 146.7200 | 146.1200 | FM | TONE=C103.5 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
-| 168 | K7SKWLKT | 146.7400 | 146.1400 | FM | TONE=C127.3 | PSHAM01/North Sound & Islands - Analog 2 Meter |
-| 169 | W7FWFDWY | 146.7600 | 146.1600 | FM | TONE=C103.5 | PSHAM01/South Sound - Analog 2 Meter |
-| 170 | WA7DEMLY | 146.7750 | 146.1750 | NFM | TONE=C156.7 | PSHAM01/Seattle Metro - Analog 2 Meter |
-| 171 | WW7CHASH | 146.7800 | 146.1800 | FM | TONE=C103.5 | PSHAM01/South Sound - Analog 2 Meter |
-| 172 | KC7CKLCY | 146.7875 | 146.1875 | NFM | TONE=C110.9 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
-| 173 | KC7CKOCR | 146.8000 | 146.2000 | FM | TONE=C110.9 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
-| 174 | W7UFILYN | 146.8000 | 146.2000 | FM | TONE=C136.5 | PSHAM01/Seattle Metro - Analog 2 Meter |
-| 175 | K7LEDTGR | 146.8200 | 146.2200 | FM | TONE=C103.5 | PSHAM01/Eastside & Cascades - Analog 2 Meter |
-| 176 | WW7MSTST | 146.9000 | 146.3000 | FM | TONE=C103.5 | PSHAM01/Seattle Metro - Analog 2 Meter |
-| 177 | WA7DEMGR | 146.9250 | 146.3250 | NFM | TONE=C156.7 | PSHAM01/North Sound & Islands - Analog 2 Meter |
-| 178 | K7HWUNVR | 146.9375 | 146.3375 | NFM | TONE=C103.5 | PSHAM01/South Sound - Analog 2 Meter |
-| 179 | WW7PSRST | 146.9600 | 146.3600 | FM | TONE=C103.5 | PSHAM01/Seattle Metro - Analog 2 Meter |
-| 180 | K7MMIBLD | 146.9800 | 146.3800 | FM | TONE=C131.8 | PSHAM01/South Sound - Analog 2 Meter |
-| 181 | W7DXRDMN | 147.0000 | 146.4000 | FM | TONE=C103.5 | PSHAM01/Eastside & Cascades - Analog 2 Meter |
-| 182 | W7FWFDW2 | 147.0400 | 147.6400 | FM | TONE=C103.5 | PSHAM01/South Sound - Analog 2 Meter |
-| 183 | WW7STRCG | 147.0800 | 147.6800 | FM | TONE=C103.5 | PSHAM01/Eastside & Cascades - Analog 2 Meter |
-| 184 | WW7STRTG | 147.0800 | 147.6800 | FM | TONE=C110.9 | PSHAM01/Eastside & Cascades - Analog 2 Meter |
-| 185 | KC7RASCG | 147.1000 | 147.7000 | NFM | TONE=C123 | PSHAM01/Eastside & Cascades - Analog 2 Meter |
+| 45 | GNDW7FEL | 145.2100 | 144.6100 | FM | TONE=C100 | OZ01/Amateur West Peninsula |
+| 46 | CRLW7FEL | 146.7600 | 146.1600 | FM | TONE=C77 | OZ01/Amateur West Peninsula |
+| 47 | STRW7FEL | 146.7600 | 146.1600 | FM | TONE=C100 | OZ01/Amateur West Peninsula |
+| 48 | ELLW7FEL | 147.0600 | 147.6600 | FM | TONE=C100 | OZ01/Amateur West Peninsula |
+| 49 | MTK7PP | 147.2800 | 147.8800 | FM | TONE=C123 | OZ01/Amateur West Peninsula |
+| 50 | 220W6MPD | 224.0600 | 222.4600 | FM | TONE=C107.2 | OZ01/Amateur West Peninsula |
+| 51 | SQMK6 | 442.0500 | 447.0500 | NFM | TONE=C103.5 | OZ01/Amateur West Peninsula |
+| 52 | NOAKXI27 | 162.4250 | RX only | FM | - | OZ01/NOAA Weather |
+| 53 | NOAKIH36 | 162.5500 | RX only | FM | - | OZ01/NOAA Weather |
+| 54 | USCGAX3 | 143.4750 | RX only | NFM | - | OZ01/SAR and Interop |
+| 55 | USCGAXWA | 150.7000 | RX only | NFM | - | OZ01/SAR and Interop |
+| 56 | REDNET | 153.8300 | RX only | NFM | - | OZ01/SAR and Interop |
+| 57 | WAVSAR16 | 155.1600 | RX only | NFM | - | OZ01/SAR and Interop |
+| 58 | LERN | 155.3700 | RX only | NFM | - | OZ01/SAR and Interop |
+| 59 | OSCCR | 156.1350 | RX only | NFM | - | OZ01/SAR and Interop |
+| 60 | FDIPL1 | 167.0875 | RX only | NFM | - | OZ01/SAR and Interop |
+| 61 | FDIPNC1 | 169.5375 | RX only | NFM | - | OZ01/SAR and Interop |
+| 62 | FDIPIR1 | 170.0125 | RX only | NFM | - | OZ01/SAR and Interop |
+| 63 | FDIPIR2 | 170.4125 | RX only | NFM | - | OZ01/SAR and Interop |
+| 64 | FDIPIR3 | 170.6875 | RX only | NFM | - | OZ01/SAR and Interop |
+| 65 | FDSRINCD | 410.8375 | RX only | NFM | - | OZ01/SAR and Interop |
+| 66 | WHRSMDCL | 463.0000 | RX only | NFM | - | OZ01/SAR and Interop |
+| 67 | OLYNPARG | 166.9625 | RX only | NFM | - | OZ01/Olympic NP and Forest |
+| 68 | DOIARGRN | 167.0750 | RX only | NFM | - | OZ01/Olympic NP and Forest |
+| 69 | USFSARR6 | 167.4750 | RX only | NFM | - | OZ01/Olympic NP and Forest |
+| 70 | USFSLWEN | 168.0250 | RX only | NFM | - | OZ01/Olympic NP and Forest |
+| 71 | OLYNPPRI | 168.5250 | RX only | NFM | - | OZ01/Olympic NP and Forest |
+| 72 | USFSINCD | 168.5500 | RX only | NFM | - | OZ01/Olympic NP and Forest |
+| 73 | USFSARGR | 168.6250 | RX only | NFM | - | OZ01/Olympic NP and Forest |
+| 74 | ONFHDCNL | 171.4750 | RX only | NFM | - | OZ01/Olympic NP and Forest |
+| 75 | ONFPCFCR | 171.5500 | RX only | NFM | - | OZ01/Olympic NP and Forest |
+| 76 | DNRTAC1 | 151.3100 | RX only | NFM | - | OZ01/WA DNR Olympic Region |
+| 77 | DNRTAC2 | 151.3400 | RX only | NFM | - | OZ01/WA DNR Olympic Region |
+| 78 | DNRFLGHT | 151.3475 | RX only | NFM | - | OZ01/WA DNR Olympic Region |
+| 79 | DNRCOM | 151.4150 | RX only | NFM | - | OZ01/WA DNR Olympic Region |
+| 80 | DNRHOH | 159.2025 | RX only | NFM | - | OZ01/WA DNR Olympic Region |
+| 81 | DNROZTT | 159.2550 | RX only | NFM | - | OZ01/WA DNR Olympic Region |
+| 82 | DNRAR1 | 159.2700 | RX only | NFM | - | OZ01/WA DNR Olympic Region |
+| 83 | DNRSTRTS | 159.3000 | RX only | NFM | - | OZ01/WA DNR Olympic Region |
+| 84 | DNRCANAL | 159.3450 | RX only | NFM | - | OZ01/WA DNR Olympic Region |
+| 85 | DNRNET | 159.4200 | RX only | NFM | - | OZ01/WA DNR Olympic Region |
+| 86 | DNRQNLT | 159.4575 | RX only | NFM | - | OZ01/WA DNR Olympic Region |
+| 87 | JYCFRTC | 154.4450 | RX only | NFM | - | OZ01/Clallam County |
+| 88 | JYCFRDSP | 155.7225 | RX only | NFM | - | OZ01/Clallam County |
+| 89 | SQMFRDSP | 155.7825 | RX only | NFM | - | OZ01/Clallam County |
+| 90 | CLLLMFRD | 155.8200 | RX only | NFM | - | OZ01/Clallam County |
+| 91 | CLLLMPBL | 155.9250 | RX only | NFM | - | OZ01/Clallam County |
+| 92 | CLLLMPB2 | 158.8350 | RX only | NFM | - | OZ01/Clallam County |
+| 93 | CLLLMETC | 453.2750 | RX only | NFM | - | OZ01/Clallam County |
+| 94 | CLLLMWDS | 453.3750 | RX only | NFM | - | OZ01/Clallam County |
+| 95 | FRKSCTY | 453.9750 | RX only | NFM | - | OZ01/Clallam County |
+| 96 | PRTANGLS | 460.1000 | RX only | NFM | - | OZ01/Clallam County |
+| 97 | MKHTRBPD | 155.0700 | RX only | NFM | - | OZ01/Tribal Neah Bay and La Push |
+| 98 | MKHTRBCN | 453.7000 | RX only | NFM | - | OZ01/Tribal Neah Bay and La Push |
+| 99 | QLTFR | 460.2125 | RX only | NFM | - | OZ01/Tribal Neah Bay and La Push |
+| 100 | MRN06SFT | 156.3000 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
+| 101 | MRN09CLL | 156.4500 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
+| 102 | MRN13BRD | 156.6500 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
+| 103 | MRN16DST | 156.8000 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
+| 104 | MRN21AUS | 157.0500 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
+| 105 | MRN22AUS | 157.1000 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
+| 106 | MRN23AUS | 157.1500 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
+| 107 | MARINE68 | 156.4250 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
+| 108 | MARINE69 | 156.4750 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
+| 109 | MARINE71 | 156.5750 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
+| 110 | MARINE72 | 156.6250 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
+| 111 | MRN83AUS | 157.1750 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
+| 112 | MRN88 | 157.4250 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
+| 113 | PRNC74 | 156.7250 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
+| 114 | STTL5A | 156.2500 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
+| 115 | STTL14 | 156.7000 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
+| 116 | VCTR11 | 156.5500 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
+| 117 | WHDBYAPP | 118.2000 | RX only | AM | - | OZ01/Aviation |
+| 118 | EDZHKAWS | 118.3250 | RX only | AM | - | OZ01/Aviation |
+| 119 | ZSSCTR01 | 120.3000 | RX only | AM | - | OZ01/Aviation |
+| 120 | GRD1215 | 121.5000 | RX only | AM | - | OZ01/Aviation |
+| 121 | STTLPARC | 122.6000 | RX only | AM | - | OZ01/Aviation |
+| 122 | CTFQLLYT | 122.9000 | RX only | AM | - | OZ01/Aviation |
+| 123 | PRTANGL2 | 122.9750 | RX only | AM | - | OZ01/Aviation |
+| 124 | ZSSCTR03 | 125.1000 | RX only | AM | - | OZ01/Aviation |
+| 125 | CGOPSPRT | 127.7000 | RX only | AM | - | OZ01/Aviation |
+| 126 | WHDBYTWR | 127.9000 | RX only | AM | - | OZ01/Aviation |
+| 127 | ZSSCTR02 | 128.3000 | RX only | AM | - | OZ01/Aviation |
+| 128 | WHDBYATS | 134.1500 | RX only | AM | - | OZ01/Aviation |
+| 129 | ZSSCTR12 | 134.9500 | RX only | AM | - | OZ01/Aviation |
+| 130 | PRTANGL3 | 135.1750 | RX only | AM | - | OZ01/Aviation |
+| 131 | ASSQLLYT | 135.2250 | RX only | AM | - | OZ01/Aviation |
+| 132 | CGARGRND | 379.0500 | RX only | AM | - | OZ01/Aviation |
+| 133 | CGSPAVFR | 381.8000 | RX only | AM | - | OZ01/Aviation |
+| 134 | WAFRRSDC | 151.0400 | RX only | NFM | - | OZ01/Ferry Transport Utility |
+| 135 | BNNVLLPW | 172.5250 | RX only | NFM | - | OZ01/Ferry Transport Utility |
+| 136 | MVCHLDNG | 461.1875 | RX only | NFM | - | OZ01/Ferry Transport Utility |
+| 137 | MVCHBRDG | 467.7750 | RX only | NFM | - | OZ01/Ferry Transport Utility |
+| 138 | W7JCRPRT | 145.1500 | 144.5500 | FM | TONE=C114.8 | PSHAM01/North Sound & Islands - Analog 2 Meter |
+| 139 | W7PSEOLY | 145.1500 | 144.5500 | FM | TONE=C103.5 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
+| 140 | NM7BLFR | 145.1700 | 144.5700 | FM | TONE=C103.5 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
+| 141 | N7GDELYM | 145.1900 | 144.5900 | FM | TONE=C127.3 | PSHAM01/North Sound & Islands - Analog 2 Meter |
+| 142 | W7DKTCM | 145.2100 | 144.6100 | FM | TONE=C141.3 | PSHAM01/South Sound - Analog 2 Meter |
+| 143 | W7BPDKND | 145.2300 | 144.6300 | FM | TONE=C103.5 | PSHAM01/North Sound & Islands - Analog 2 Meter |
+| 144 | K7DNRASH | 145.2500 | 144.6500 | FM | TONE=C151.4 | PSHAM01/South Sound - Analog 2 Meter |
+| 145 | KK7DFLOL | 145.2750 | 144.6750 | NFM | TONE=C100 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
+| 146 | KC7IYERD | 145.3100 | 144.7100 | FM | TONE=C103.5 | PSHAM01/Eastside & Cascades - Analog 2 Meter |
+| 147 | K7NWSTGR | 145.3300 | 144.7300 | FM | TONE=C179.9 | PSHAM01/Eastside & Cascades - Analog 2 Meter |
+| 148 | W7ENMCLW | 145.3700 | 144.7700 | FM | TONE=C136.5 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
+| 149 | N7IGPRTO | 145.3900 | 144.7900 | FM | TONE=C88.5 | PSHAM01/Seattle Metro - Analog 2 Meter |
+| 150 | WB7DOBCR | 145.4100 | 144.8100 | FM | TONE=C162.2 | PSHAM01/South Sound - Analog 2 Meter |
+| 151 | KD7WDGSL | 145.4250 | 144.8250 | NFM | TONE=C88.5 | PSHAM01/Seattle Metro - Analog 2 Meter |
+| 152 | KB7CNNAL | 145.4500 | 144.8500 | FM | TONE=C110.9 | PSHAM01/South Sound - Analog 2 Meter |
+| 153 | K7CPROLY | 145.4700 | 144.8700 | FM | TONE=C100 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
+| 154 | K7LWHKRK | 145.4900 | 144.8900 | FM | TONE=C103.5 | PSHAM01/Seattle Metro - Analog 2 Meter |
+| 155 | WB7DVNEL | 146.4500 | 147.4500 | NFM | D245 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
+| 156 | KC7ZGLDM | 146.6200 | 146.0200 | FM | TONE=C103.5 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
+| 157 | W7EDGWD | 146.6400 | 146.0400 | FM | TONE=C103.5 | PSHAM01/South Sound - Analog 2 Meter |
+| 158 | NC7GSTC | 146.6600 | 146.0600 | FM | TONE=C103.5 | PSHAM01/Seattle Metro - Analog 2 Meter |
+| 159 | A7THVSHN | 146.6875 | 146.0875 | NFM | TONE=C131.8 | PSHAM01/Seattle Metro - Analog 2 Meter |
+| 160 | N7JNFRDY | 146.7000 | 146.1000 | FM | TONE=C131.8 | PSHAM01/North Sound & Islands - Analog 2 Meter |
+| 161 | W7EATETN | 146.7000 | 146.1000 | FM | TONE=C103.5 | PSHAM01/South Sound - Analog 2 Meter |
+| 162 | N7SKSHLT | 146.7200 | 146.1200 | FM | TONE=C103.5 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
+| 163 | W7FWFDWY | 146.7600 | 146.1600 | FM | TONE=C103.5 | PSHAM01/South Sound - Analog 2 Meter |
+| 164 | WA7DEMLY | 146.7750 | 146.1750 | NFM | TONE=C156.7 | PSHAM01/Seattle Metro - Analog 2 Meter |
+| 165 | WW7CHASH | 146.7800 | 146.1800 | FM | TONE=C103.5 | PSHAM01/South Sound - Analog 2 Meter |
+| 166 | KC7CKLCY | 146.7875 | 146.1875 | NFM | TONE=C110.9 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
+| 167 | KC7CKOCR | 146.8000 | 146.2000 | FM | TONE=C110.9 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
+| 168 | K7LEDTGR | 146.8200 | 146.2200 | FM | TONE=C103.5 | PSHAM01/Eastside & Cascades - Analog 2 Meter |
+| 169 | WW7MSTST | 146.9000 | 146.3000 | FM | TONE=C103.5 | PSHAM01/Seattle Metro - Analog 2 Meter |
+| 170 | WA7DEMGR | 146.9250 | 146.3250 | NFM | TONE=C156.7 | PSHAM01/North Sound & Islands - Analog 2 Meter |
+| 171 | K7HWUNVR | 146.9375 | 146.3375 | NFM | TONE=C103.5 | PSHAM01/South Sound - Analog 2 Meter |
+| 172 | WW7PSRST | 146.9600 | 146.3600 | FM | TONE=C103.5 | PSHAM01/Seattle Metro - Analog 2 Meter |
+| 173 | W7DXRDMN | 147.0000 | 146.4000 | FM | TONE=C103.5 | PSHAM01/Eastside & Cascades - Analog 2 Meter |
+| 174 | W7FWFDW2 | 147.0400 | 147.6400 | FM | TONE=C103.5 | PSHAM01/South Sound - Analog 2 Meter |
+| 175 | WW7STRCG | 147.0800 | 147.6800 | FM | TONE=C103.5 | PSHAM01/Eastside & Cascades - Analog 2 Meter |
+| 176 | WW7STRTG | 147.0800 | 147.6800 | FM | TONE=C110.9 | PSHAM01/Eastside & Cascades - Analog 2 Meter |
+| 177 | KC7RASCG | 147.1000 | 147.7000 | NFM | TONE=C123 | PSHAM01/Eastside & Cascades - Analog 2 Meter |
+| 178 | KH6VMEVR | 147.1200 | 147.7200 | FM | TONE=C103.5 | PSHAM01/Seattle Metro - Analog 2 Meter |
+| 179 | N7IQZSHL | 147.1200 | 147.7200 | NFM | TONE=C173.8 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
+| 180 | WB7DOBBL | 147.1400 | 147.7400 | FM | TONE=C123 | PSHAM01/South Sound - Analog 2 Meter |
+| 181 | K7SKWKNG | 147.1600 | 147.7600 | FM | TONE=C103.5 | PSHAM01/North Sound & Islands - Analog 2 Meter |
+| 182 | W7MIRMRC | 147.1600 | 147.7600 | NFM | TONE=C146.2 | PSHAM01/Seattle Metro - Analog 2 Meter |
+| 183 | WA7LAWEV | 147.1800 | 147.7800 | FM | TONE=C103.5 | PSHAM01/Seattle Metro - Analog 2 Meter |
+| 184 | W7NSHLTN | 147.2000 | 147.8000 | FM | TONE=C97.4 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
+| 185 | W7AVMCLN | 147.2200 | 147.8200 | FM | TONE=C127.3 | PSHAM01/Seattle Metro - Analog 2 Meter |
 
 ## Warnings
 
@@ -226,19 +226,18 @@
 
 Every catalog channel this plan matched but could not program, and why.
 
-### capacity (197) - the radio ran out of memory slots
+### capacity (166) - the radio ran out of memory slots
 
-- KH6VM - Everett [147.1200]
-- N7IQZ - Shelton [147.1200]
-- WB7DOB - Baldi Mtn [147.1400]
-- K7SKW - King Mtn [147.1600]
-- W7MIR - Mercer Island [147.1600]
-- WA7LAW - Everett [147.1800]
-- W7NEE - Shelton [147.2000]
-- W7AVM - Clinton [147.2200]
-- ... and 189 more
+- K7SYE - Auburn [147.2400]
+- KF7NPL - Maple Valley [147.2600]
+- W7DK - Tacoma [147.2800]
+- WB7DOB - Three Sisters [147.3000]
+- N7RHE - Kent [147.3200]
+- K6RFK - Woodinville [147.3400]
+- K6RFK - Woodinville [147.3500]
+- NT7H - Olympia [147.3600]
+- ... and 158 more
 
-### duplicate (2) - the frequency is already programmed
+### duplicate (1) - the frequency (or talkgroup on it) is already programmed
 
-- W6MPD - Port Angeles [224.0600]
 - KO6I - Sequim [442.0500]

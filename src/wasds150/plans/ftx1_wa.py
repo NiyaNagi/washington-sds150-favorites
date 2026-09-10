@@ -223,7 +223,6 @@ FTX1_WA = ChannelPlan(
         PlanBlock(
             label="Linked and Intertie",
             selectors=(
-                _sel("FL60", labels=r"Seattle|Olympia|Chelan|Chinook"),
                 _sel("FL61", labels=r"WIN|Chinook|Evergreen"),
             ),
             tx_policy=TX_REPEATER,
