@@ -27,6 +27,23 @@ def test_ensure_dirs_creates_all_directories(wasds_home):
     assert config.log_dir.is_dir()
 
 
+def test_fleet_and_update_paths_live_under_state(wasds_home):
+    config = AppConfig.default()
+    state = wasds_home / "state"
+    assert config.updates_dir == state / "updates"
+    assert config.fleet_state_path == state / "fleet.json"
+    assert config.fleet_settings_path == state / "fleet-settings.json"
+    assert config.jobs_dir == state / "jobs"
+    assert config.contacts_dir == state / "contacts"
+
+
+def test_ensure_dirs_creates_fleet_directories(wasds_home):
+    config = AppConfig.default()
+    config.ensure_dirs()
+    for directory in (config.updates_dir, config.jobs_dir, config.contacts_dir):
+        assert directory.is_dir()
+
+
 def test_appconfig_explicit_home_overrides_env(wasds_home, tmp_path):
     explicit = tmp_path / "explicit-home"
     config = AppConfig(home=explicit)

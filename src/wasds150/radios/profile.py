@@ -42,6 +42,32 @@ def _in_bands(freq_mhz: float, bands: BandRanges) -> bool:
 
 
 @dataclass(frozen=True)
+class ContactCapability:
+    """A digital contact directory the radio can hold (DMR/NXDN users).
+
+    Separate from channels: a contact list is who might be heard, not what
+    to tune, and it is sized in hundreds of thousands rather than thousands.
+    """
+
+    protocols: FrozenSet[str]
+    max_contacts: int
+    #: Call type written on every contact row. A directory of individual
+    #: operators is private calls by definition; group calls are talkgroups
+    #: and live with the channels.
+    call_type: str = "Private Call"
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "protocols", frozenset(p.upper() for p in self.protocols))
+        if not self.protocols:
+            raise ValueError("contact capability needs at least one protocol")
+        if self.max_contacts <= 0:
+            raise ValueError("max_contacts must be positive")
+
+    def supports(self, protocol: str) -> bool:
+        return protocol.upper() in self.protocols
+
+
+@dataclass(frozen=True)
 class RadioProfile:
     """Capabilities of a single radio model.
 
@@ -84,6 +110,8 @@ class RadioProfile:
     zone_max: Optional[int] = None
     zone_member_max: Optional[int] = None
     scan_list_member_max: Optional[int] = None
+    #: Digital contact directory, when the radio keeps one; ``None`` otherwise.
+    contacts: Optional[ContactCapability] = None
     notes: str = ""
     #: False when the profile is derived from documentation that has not been
     #: confirmed against hardware.  Consumers may warn rather than fail.

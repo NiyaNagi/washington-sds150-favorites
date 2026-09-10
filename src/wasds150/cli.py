@@ -1003,7 +1003,7 @@ def cmd_merge_apply(args: argparse.Namespace) -> int:
         return 1
 
     new_profile = apply_merge(profile, result)
-    ctx.save_catalog(result.merged_catalog)
+    ctx.save_catalog(result.merged_catalog, reason="merge apply")
     ctx.save_profile(new_profile)
 
     if args.json:
@@ -1021,46 +1021,6 @@ def cmd_merge_apply(args: argparse.Namespace) -> int:
 
 
 # -------------------------------------------------------------- sources ----
-def _build_http_client(config: AppConfig, offline: bool):
-    from wasds150.cache.http import CachedHttpClient
-    from wasds150.cache.store import HttpCacheStore
-
-    return CachedHttpClient(HttpCacheStore(config.cache_dir), offline=offline)
-
-
-def _instantiate_source(name: str, sources_config) -> Optional[Any]:
-    """Build a ready-to-run adapter instance for ``sources fetch``/``update``,
-    or ``None`` if ``name`` is a legacy/local adapter with nothing
-    configured to run against (e.g. ``sentinel_local`` with no path set)."""
-    from wasds150.sources.base import OnlineSourceAdapter
-    from wasds150.sources.radioreference_premium import RadioReferenceCredentials, RadioReferencePremiumSource
-    from wasds150.sources.registry import get_source_class
-    from wasds150.sources.sentinel_local import SentinelLocalSource
-
-    cls = get_source_class(name)
-    if not issubclass(cls, OnlineSourceAdapter):
-        return None  # static_pack / legacy placeholders: not part of the update pipeline
-
-    if name == "sentinel_local":
-        if sources_config.sentinel_local_mount:
-            return SentinelLocalSource(mount_point=Path(sources_config.sentinel_local_mount))
-        if sources_config.sentinel_local_hpdb_cfg:
-            return SentinelLocalSource(hpdb_cfg_path=Path(sources_config.sentinel_local_hpdb_cfg))
-        return None
-    if name == "radioreference_premium":
-        if sources_config.radioreference_export_path:
-            return RadioReferencePremiumSource(export_path=Path(sources_config.radioreference_export_path))
-        if sources_config.radioreference_username and sources_config.radioreference_app_key:
-            return RadioReferencePremiumSource(
-                credentials=RadioReferenceCredentials(
-                    username=sources_config.radioreference_username,
-                    app_key=sources_config.radioreference_app_key,
-                )
-            )
-        return None
-    return cls()
-
-
 def cmd_sources_list(args: argparse.Namespace) -> int:
     from wasds150.sources.base import OnlineSourceAdapter
     from wasds150.sources.registry import list_sources
@@ -1159,17 +1119,18 @@ def cmd_sources_configure(args: argparse.Namespace) -> int:
 
 def cmd_sources_fetch(args: argparse.Namespace) -> int:
     from wasds150.sources.config import SourcesConfig
+    from wasds150.sources.factory import build_http_client, instantiate_source
     from wasds150.update.pipeline import run_sources
 
     config = _build_config(args)
     configure_logging(config.log_file)
     sources_config = SourcesConfig.load(config.sources_config_path)
-    source = _instantiate_source(args.name, sources_config)
+    source = instantiate_source(args.name, sources_config)
     if source is None:
         print(f"Source {args.name!r} is not configured/runnable (see 'wasds150 sources configure').", file=sys.stderr)
         return 1
 
-    http_client = _build_http_client(config, sources_config.offline) if source.kind != "local" else None
+    http_client = build_http_client(config, sources_config.offline) if source.kind != "local" else None
     run = run_sources([source], http_client=http_client)
     outcome = run.outcomes[0]
     if args.json:
@@ -1184,9 +1145,8 @@ def cmd_sources_fetch(args: argparse.Namespace) -> int:
 
 
 def cmd_sources_update(args: argparse.Namespace) -> int:
-    from wasds150.sources.base import OnlineSourceAdapter
     from wasds150.sources.config import SourcesConfig
-    from wasds150.sources.registry import list_sources
+    from wasds150.sources.factory import build_http_client, instantiate_all
     from wasds150.update.pipeline import build_and_merge, run_sources
 
     ctx = _build_ctx(args)
@@ -1194,23 +1154,16 @@ def cmd_sources_update(args: argparse.Namespace) -> int:
     offline = sources_config.offline or args.offline
 
     only = set(args.only.split(",")) if args.only else None
-    instances = []
-    for name, cls in list_sources().items():
-        if not issubclass(cls, OnlineSourceAdapter) or not cls.available:
-            continue
-        if only is not None and name not in only:
-            continue
-        instance = _instantiate_source(name, sources_config)
-        if instance is not None:
-            instances.append(instance)
+    instances = instantiate_all(sources_config, only=only)
 
-    http_client = _build_http_client(ctx.config, offline)
+    http_client = build_http_client(ctx.config, offline)
     run = run_sources(instances, http_client=http_client)
     profile = ctx.load_profile()
     built = build_and_merge(ctx.catalog, profile, run.facts)
     merge_result = built["merge"]
     coverage = built["coverage"]
 
+    delta = None
     if args.apply:
         if merge_result.conflicts and not args.force:
             print(
@@ -1219,7 +1172,10 @@ def cmd_sources_update(args: argparse.Namespace) -> int:
             )
             return 1
         new_profile = apply_merge(profile, merge_result)
-        ctx.save_catalog(merge_result.merged_catalog)
+        delta = ctx.save_catalog(
+            merge_result.merged_catalog,
+            reason="sources update: " + ", ".join(o.source_id for o in run.outcomes if o.ok),
+        )
         ctx.save_profile(new_profile)
 
     if args.json:
@@ -1229,9 +1185,13 @@ def cmd_sources_update(args: argparse.Namespace) -> int:
                 "coverage": [c.to_dict() for c in coverage],
                 "merge": merge_result.to_dict(),
                 "applied": bool(args.apply),
+                "update_id": (delta.id or None) if delta is not None else None,
             }
         )
         return 0
+    if delta is not None:
+        record = f" (recorded as update {delta.id})" if delta.id else ""
+        print(f"Catalog: {delta.summary()}{record}")
 
     print(f"Ran {len(instances)} source(s):")
     for outcome in run.outcomes:

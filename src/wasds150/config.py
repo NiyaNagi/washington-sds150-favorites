@@ -69,6 +69,43 @@ class AppConfig:
     def log_file(self) -> Path:
         return self.log_dir / "wasds150.log"
 
+    @property
+    def updates_dir(self) -> Path:
+        """Numbered records of applied catalog changes (see
+        :mod:`wasds150.catalog.delta`), one per ``save_catalog`` that moved
+        anything a radio is programmed from."""
+        return self.state_dir / "updates"
+
+    @property
+    def fleet_state_path(self) -> Path:
+        """When each radio was last programmed, and from which catalog."""
+        return self.state_dir / "fleet.json"
+
+    @property
+    def fleet_settings_path(self) -> Path:
+        """Per-radio inputs for the fleet wizard (COM port, vendor app path,
+        copy-to folder). No secrets are ever stored here."""
+        return self.state_dir / "fleet-settings.json"
+
+    @property
+    def jobs_dir(self) -> Path:
+        """Event logs and status documents of background jobs."""
+        return self.state_dir / "jobs"
+
+    @property
+    def contacts_dir(self) -> Path:
+        """Downloaded DMR/NXDN contact tables (radioid.net), never committed."""
+        return self.state_dir / "contacts"
+
     def ensure_dirs(self) -> None:
-        for d in (self.home, self.state_dir, self.history_dir, self.log_dir, self.backup_dir):
+        for d in (
+            self.home,
+            self.state_dir,
+            self.history_dir,
+            self.log_dir,
+            self.backup_dir,
+            self.updates_dir,
+            self.jobs_dir,
+            self.contacts_dir,
+        ):
             d.mkdir(parents=True, exist_ok=True)

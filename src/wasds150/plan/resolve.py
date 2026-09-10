@@ -182,7 +182,7 @@ def _select_for_block(
     picked: List[Tuple[FavoritesList, Department, Channel]] = []
     for favorite, _system, department, channel in candidates:
         for selector in block.selectors:
-            if selector.matches(favorite.favorite_key, department.label, channel):
+            if selector.matches(favorite.favorite_key, department.label, channel, department):
                 picked.append((favorite, department, channel))
                 break
 

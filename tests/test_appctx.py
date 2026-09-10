@@ -64,6 +64,72 @@ def test_save_catalog_is_preferred_over_baseline_on_next_build_context(wasds_hom
     assert len(reloaded_ctx.catalog.favorites) == 1
 
 
+def test_save_catalog_returns_and_records_a_structural_delta(wasds_home, sample_csv_path):
+    import copy
+    import json
+
+    from wasds150.models.catalog import Channel, Department, System
+
+    config = AppConfig.default()
+    ctx = build_context(config, csv_override=sample_csv_path)
+    changed = copy.deepcopy(ctx.catalog)
+    changed.favorites[0].systems = [
+        System(
+            id="s",
+            label="S",
+            departments=[Department(id="d", label="D", channels=[Channel(id="c", label="Ch", freq_mhz=155.0)])],
+        )
+    ]
+
+    delta = ctx.save_catalog(changed, reason="test refresh")
+
+    assert delta.id == "0001"
+    # The change is invisible to content_hash, which is exactly why the
+    # structure hash and the update record exist.
+    assert delta.content_before == delta.content_after
+    assert delta.structure_before != delta.structure_after
+    record = json.loads((config.updates_dir / "0001.json").read_text(encoding="utf-8"))
+    assert record["reason"] == "test refresh"
+    assert record["per_slug"][0]["slug"] == "fl01"
+    assert record["per_slug"][0]["channels_added"] == 1
+
+
+def test_save_catalog_without_changes_writes_no_update_record(wasds_home, sample_csv_path):
+    import copy
+
+    config = AppConfig.default()
+    ctx = build_context(config, csv_override=sample_csv_path)
+    delta = ctx.save_catalog(copy.deepcopy(ctx.catalog))
+    assert delta.is_empty
+    assert delta.id == ""
+    assert not list(config.updates_dir.glob("*.json"))
+
+
+def test_save_catalog_normalises_like_the_next_load(wasds_home):
+    """Hashes taken in-process after a save must match a fresh process."""
+    from wasds150.catalog import baseline
+    from wasds150.catalog.delta import structure_hash
+
+    config = AppConfig.default()
+    ctx = build_context(config)
+    stale = baseline.load_baseline()
+    stale.by_slug("fl02").favorite_name = "Obsolete ICALL catalog row"
+
+    ctx.save_catalog(stale)
+
+    assert ctx.catalog.by_slug("fl02").favorite_name == "Nationwide Interop + WA STATEOPS"
+    reloaded = build_context(config)
+    assert reloaded.catalog.content_hash() == ctx.catalog.content_hash()
+    assert structure_hash(reloaded.catalog) == structure_hash(ctx.catalog)
+
+
+def test_context_carries_a_reentrant_lock(wasds_home, sample_csv_path):
+    ctx = build_context(AppConfig.default(), csv_override=sample_csv_path)
+    with ctx.lock:
+        with ctx.lock:
+            pass
+
+
 def test_legacy_statewide_merged_catalog_gets_local_area_extension(wasds_home):
     from wasds150.catalog import baseline, loader
 

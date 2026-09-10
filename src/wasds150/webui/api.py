@@ -658,39 +658,9 @@ def post_sources_configure(ctx: AppContext, req: RequestContext) -> Response:
     )
 
 
-def _instantiate_source_for_ui(name: str, sources_config):
-    from wasds150.sources.base import OnlineSourceAdapter
-    from wasds150.sources.radioreference_premium import RadioReferenceCredentials, RadioReferencePremiumSource
-    from wasds150.sources.registry import get_source_class
-    from wasds150.sources.sentinel_local import SentinelLocalSource
-
-    cls = get_source_class(name)
-    if not issubclass(cls, OnlineSourceAdapter):
-        return None
-    if name == "sentinel_local":
-        if sources_config.sentinel_local_mount:
-            return SentinelLocalSource(mount_point=Path(sources_config.sentinel_local_mount))
-        if sources_config.sentinel_local_hpdb_cfg:
-            return SentinelLocalSource(hpdb_cfg_path=Path(sources_config.sentinel_local_hpdb_cfg))
-        return None
-    if name == "radioreference_premium":
-        if sources_config.radioreference_export_path:
-            return RadioReferencePremiumSource(export_path=Path(sources_config.radioreference_export_path))
-        if sources_config.radioreference_username and sources_config.radioreference_app_key:
-            return RadioReferencePremiumSource(
-                credentials=RadioReferenceCredentials(
-                    username=sources_config.radioreference_username,
-                    app_key=sources_config.radioreference_app_key,
-                )
-            )
-        return None
-    return cls()
-
-
 def post_sources_fetch(ctx: AppContext, req: RequestContext) -> Response:
-    from wasds150.cache.http import CachedHttpClient
-    from wasds150.cache.store import HttpCacheStore
     from wasds150.sources.config import SourcesConfig
+    from wasds150.sources.factory import build_http_client, instantiate_source
     from wasds150.update.pipeline import run_sources
 
     body = req.json_body() or {}
@@ -699,28 +669,21 @@ def post_sources_fetch(ctx: AppContext, req: RequestContext) -> Response:
         return _error(400, "'name' is required")
     sources_config = SourcesConfig.load(ctx.config.sources_config_path)
     try:
-        source = _instantiate_source_for_ui(name, sources_config)
+        source = instantiate_source(name, sources_config)
     except KeyError as exc:
         return _error(404, str(exc))
     if source is None:
         return _error(400, f"source {name!r} is not configured/runnable (see Sources -> Configure)")
 
-    http_client = (
-        CachedHttpClient(HttpCacheStore(ctx.config.cache_dir), offline=sources_config.offline)
-        if source.kind != "local"
-        else None
-    )
+    http_client = build_http_client(ctx.config, sources_config.offline) if source.kind != "local" else None
     run = run_sources([source], http_client=http_client)
     outcome = run.outcomes[0]
     return Response.json(200 if outcome.ok else 502, {"outcome": outcome.to_dict()})
 
 
 def post_sources_update(ctx: AppContext, req: RequestContext) -> Response:
-    from wasds150.cache.http import CachedHttpClient
-    from wasds150.cache.store import HttpCacheStore
-    from wasds150.sources.base import OnlineSourceAdapter
     from wasds150.sources.config import SourcesConfig
-    from wasds150.sources.registry import list_sources
+    from wasds150.sources.factory import build_http_client, instantiate_all
     from wasds150.update.pipeline import build_and_merge, run_sources
 
     body = req.json_body() or {}
@@ -728,17 +691,9 @@ def post_sources_update(ctx: AppContext, req: RequestContext) -> Response:
     offline = sources_config.offline or bool(body.get("offline", False))
     only = set(body["only"]) if body.get("only") else None
 
-    instances = []
-    for name, cls in list_sources().items():
-        if not issubclass(cls, OnlineSourceAdapter) or not cls.available:
-            continue
-        if only is not None and name not in only:
-            continue
-        instance = _instantiate_source_for_ui(name, sources_config)
-        if instance is not None:
-            instances.append(instance)
+    instances = instantiate_all(sources_config, only=only)
 
-    http_client = CachedHttpClient(HttpCacheStore(ctx.config.cache_dir), offline=offline)
+    http_client = build_http_client(ctx.config, offline)
     run = run_sources(instances, http_client=http_client)
     profile = ctx.load_profile()
     built = build_and_merge(ctx.catalog, profile, run.facts)
@@ -759,7 +714,10 @@ def post_sources_update(ctx: AppContext, req: RequestContext) -> Response:
                 },
             )
         new_profile = apply_merge(profile, merge_result)
-        ctx.save_catalog(merge_result.merged_catalog)
+        ctx.save_catalog(
+            merge_result.merged_catalog,
+            reason="sources update: " + ", ".join(o.source_id for o in run.outcomes if o.ok),
+        )
         ctx.save_profile(new_profile)
         applied = True
 
@@ -1046,7 +1004,7 @@ def post_merge_apply(ctx: AppContext, req: RequestContext) -> Response:
             },
         )
     new_profile = apply_merge(profile, result)
-    ctx.save_catalog(result.merged_catalog)
+    ctx.save_catalog(result.merged_catalog, reason="merge apply")
     ctx.save_profile(new_profile)
     return Response.json(
         200,

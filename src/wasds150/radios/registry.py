@@ -9,7 +9,7 @@ from __future__ import annotations
 import string
 from typing import Dict, List
 
-from wasds150.radios.profile import RadioProfile
+from wasds150.radios.profile import ContactCapability, RadioProfile
 
 #: Characters the TIDRADIO TD-H8/H3/H9 family accepts in a channel name,
 #: per the ``TDH8_CHARSET`` constant in CHIRP's ``tdh8.py`` driver.
@@ -230,6 +230,10 @@ AT_D890UV = RadioProfile(
     zone_max=250,
     zone_member_max=160,
     scan_list_member_max=100,
+    # The 500,000 ceiling comes from the planning notes, not from a CPS
+    # capture; the exporter chunks at it and warns, and the first real CPS
+    # import is what confirms it.
+    contacts=ContactCapability(protocols=frozenset({"DMR", "NXDN"}), max_contacts=500_000),
     notes=(
         "Dual-band DMR/NXDN/analog handheld with AM air-band and FM broadcast "
         "receive. Channels live in named zones; scanning uses explicit scan "

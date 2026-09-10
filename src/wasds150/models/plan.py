@@ -37,6 +37,32 @@ SORT_ORDERS = (SORT_CATALOG, SORT_FREQ, SORT_LABEL, SORT_NATURAL)
 
 _DIGITS = re.compile(r"(\d+)")
 
+#: How a radius filter treats a channel's department geo-fence.
+#:
+#: ``"channel"`` uses the channel's own position only and drops unlocated
+#: channels (the original, strict rule). ``"department"`` falls back to the
+#: department geo-fence for channels with no position of their own - the
+#: shape of RadioReference county lists, where every channel inherits the
+#: county centre and radius. ``"either"`` also admits a located channel whose
+#: department fence overlaps the circle, for catch-all blocks that would
+#: rather keep a borderline list than lose it.
+GEO_CHANNEL = "channel"
+GEO_DEPARTMENT = "department"
+GEO_EITHER = "either"
+GEO_FALLBACKS = (GEO_CHANNEL, GEO_DEPARTMENT, GEO_EITHER)
+
+
+def _fence_overlaps(department: Any, lat: float, lon: float, miles: float) -> bool:
+    """True when ``department``'s geo-fence circle overlaps the radius circle."""
+    if department is None:
+        return False
+    fence_lat = getattr(department, "lat", None)
+    fence_lon = getattr(department, "lon", None)
+    if fence_lat is None or fence_lon is None:
+        return False
+    reach = miles + float(getattr(department, "range_miles", None) or 0.0)
+    return haversine_miles(lat, lon, fence_lat, fence_lon) <= reach
+
 
 def natural_key(text: str) -> Tuple:
     """Sort key treating runs of digits as numbers.
@@ -78,11 +104,25 @@ class ChannelSelector:
     within_miles: Optional[Tuple[float, float, float]] = None
     #: Channels the catalog marks as avoided are excluded unless asked for.
     include_avoided: bool = False
+    #: Regular expression over the favorite key, for a naming family rather
+    #: than a fixed list of keys (``^RRC-`` is every RadioReference county).
+    favorite_key_pattern: str = ""
+    #: Departments to leave out, such as far-away counties in a statewide list.
+    exclude_department_pattern: str = ""
+    #: See :data:`GEO_FALLBACKS`; consulted only when ``within_miles`` is set.
+    geo_fallback: str = GEO_CHANNEL
+
+    def __post_init__(self) -> None:
+        if self.geo_fallback not in GEO_FALLBACKS:
+            raise ValueError(f"geo_fallback must be one of {GEO_FALLBACKS}")
 
     def is_empty(self) -> bool:
+        # Exclusions never make a selector non-empty: an exclude-only
+        # selector would otherwise match the whole catalog.
         return not any(
             (
                 self.favorite_keys,
+                self.favorite_key_pattern,
                 self.department_pattern,
                 self.label_pattern,
                 self.freq_ranges,
@@ -92,15 +132,29 @@ class ChannelSelector:
             )
         )
 
-    def matches(self, favorite_key: str, department_label: str, channel: Any) -> bool:
+    def matches(
+        self,
+        favorite_key: str,
+        department_label: str,
+        channel: Any,
+        department: Any = None,
+    ) -> bool:
         if self.is_empty():
             return False
         if self.favorite_keys and favorite_key.upper() not in {
             key.upper() for key in self.favorite_keys
         }:
             return False
+        if self.favorite_key_pattern and not re.search(
+            self.favorite_key_pattern, favorite_key, re.IGNORECASE
+        ):
+            return False
         if self.department_pattern and not re.search(
             self.department_pattern, department_label, re.IGNORECASE
+        ):
+            return False
+        if self.exclude_department_pattern and re.search(
+            self.exclude_department_pattern, department_label, re.IGNORECASE
         ):
             return False
         if self.label_pattern and not re.search(
@@ -123,17 +177,24 @@ class ChannelSelector:
                 return False
         if self.service_types and channel.service_type not in self.service_types:
             return False
-        if self.within_miles is not None:
-            lat, lon, miles = self.within_miles
-            channel_lat = getattr(channel, "lat", None)
-            channel_lon = getattr(channel, "lon", None)
-            if channel_lat is None or channel_lon is None:
-                return False
-            if haversine_miles(lat, lon, channel_lat, channel_lon) > miles:
-                return False
+        if self.within_miles is not None and not self._in_radius(channel, department):
+            return False
         if channel.avoid and not self.include_avoided:
             return False
         return True
+
+    def _in_radius(self, channel: Any, department: Any) -> bool:
+        lat, lon, miles = self.within_miles
+        channel_lat = getattr(channel, "lat", None)
+        channel_lon = getattr(channel, "lon", None)
+        located = channel_lat is not None and channel_lon is not None
+        if located and haversine_miles(lat, lon, channel_lat, channel_lon) <= miles:
+            return True
+        if self.geo_fallback == GEO_CHANNEL:
+            return False
+        if located and self.geo_fallback == GEO_DEPARTMENT:
+            return False
+        return _fence_overlaps(department, lat, lon, miles)
 
 
 @dataclass(frozen=True)
