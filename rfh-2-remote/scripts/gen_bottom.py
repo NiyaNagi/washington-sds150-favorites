@@ -20,7 +20,7 @@ BRD = os.environ.get('RFH2_BRD', os.path.join(PROJ, 'upstream', 'RFH-2.brd'))
 OUT = os.environ.get('RFH2_BOTTOM_OUT', os.path.join(PROJ, 'build', 'bottom_gerbers'))
 os.makedirs(OUT, exist_ok=True)
 
-CALL = 'KM7HKM / WA7DAM'
+CALL = 'WA7DAM'
 SILK_W, OUTLINE_W = 0.16, 0.10
 MARGIN, HOLE_KEEPOUT = 3.5, 3.6
 

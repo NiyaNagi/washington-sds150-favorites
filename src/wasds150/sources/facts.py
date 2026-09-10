@@ -47,6 +47,16 @@ class NormalizedFact:
     source_updated: Optional[str] = None
     retrieved_at: str = ""
     raw: Dict[str, Any] = field(default_factory=dict)
+    #: Repeater input, when the source publishes one explicitly (as opposed
+    #: to ``offset_mhz``, which some coordinators publish instead).
+    tx_freq_mhz: Optional[float] = None
+    #: Digital-voice identity, when the source states it (RadioReference
+    #: publishes colour code / talkgroup / slot for conventional DMR and RAN
+    #: for NXDN). All optional; analog facts leave them unset.
+    dmr_color_code: Optional[int] = None
+    dmr_timeslot: Optional[int] = None
+    dmr_talkgroup: Optional[int] = None
+    nxdn_ran: Optional[int] = None
 
     def __post_init__(self) -> None:
         if self.fact_type not in FACT_TYPES:

@@ -17,9 +17,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, Dict, List
+from typing import Any, Callable, Dict, List
 
-from wasds150.export.chirp_csv import ChirpCsvResult, render_chirp_csv, write_chirp_csv
+from wasds150.export.atd890_cps import render_atd890, write_atd890
+from wasds150.export.chirp_csv import render_chirp_csv, write_chirp_csv
 from wasds150.export.ftx1_target import render_ftx1, write_ftx1
 from wasds150.export.thd75_target import render_thd75, write_thd75
 from wasds150.plan.resolve import ResolvedPlan
@@ -30,11 +31,17 @@ class ExportTarget:
     id: str
     radio_id: str
     label: str
+    #: File suffix for single-file targets; empty for a directory bundle.
     extension: str
     description: str
-    render: Callable[[ResolvedPlan], ChirpCsvResult]
-    write: Callable[[ResolvedPlan, Path], ChirpCsvResult]
+    #: Both callables return a result exposing ``.rows`` and ``.warnings``;
+    #: directory targets also expose ``.files`` (every path written).
+    render: Callable[[ResolvedPlan], Any]
+    write: Callable[[ResolvedPlan, Path], Any]
     available: bool = True
+    #: ``"file"`` writes one file at the given path; ``"directory"`` writes a
+    #: set of files into a directory of that name (vendor CPS import bundles).
+    kind: str = "file"
 
     def check_radio(self, resolved: ResolvedPlan) -> None:
         if resolved.profile.id != self.radio_id:
@@ -119,11 +126,30 @@ THD75_FILE = ExportTarget(
     write=write_thd75,
 )
 
+#: Anytone CPS import bundle: a directory of CSV tables plus the ``.LST``
+#: manifest the CPS's "Import All" reads. Radio ID is a placeholder until the
+#: operator registers a DMR ID.
+ATD890_CPS = ExportTarget(
+    id="atd890-cps",
+    radio_id="at-d890uv",
+    label="Anytone D890UV CPS bundle",
+    extension="",
+    kind="directory",
+    description=(
+        "Directory of Anytone CPS 1.05 CSV tables (channels, zones, scan "
+        "lists, talkgroups, receive groups, AM air and FM lists) plus a .LST "
+        "manifest. In the CPS: Tool > Import > choose the .LST > Import All."
+    ),
+    render=render_atd890,
+    write=write_atd890,
+)
+
 _REGISTRY: Dict[str, ExportTarget] = {
     CHIRP_CSV_TD_H9.id: CHIRP_CSV_TD_H9,
     RT_SYSTEMS_CSV_FTX1.id: RT_SYSTEMS_CSV_FTX1,
     FTX1_FILE.id: FTX1_FILE,
     THD75_FILE.id: THD75_FILE,
+    ATD890_CPS.id: ATD890_CPS,
 }
 
 

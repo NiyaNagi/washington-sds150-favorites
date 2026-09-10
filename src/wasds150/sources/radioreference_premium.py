@@ -1,83 +1,130 @@
-"""RadioReference Premium — safe, user-supplied-export-only integration.
+"""RadioReference Premium — import of exports the user downloaded themselves.
 
-**No scraping, no redistribution, no unverified SOAP calls.** This project
-does not bulk-scrape RadioReference's public pages and does not implement
-RadioReference's SOAP "Premium/API" programming-data service, because that
-service's exact request/response contract has **not been independently
-verified against real traffic in this project** (it requires an active
-Premium subscription + an app key issued to a registered client
-application — neither of which this session has). Rather than guess at a
-SOAP client against unverified documentation and risk silently producing
-wrong data (or violating RR's API terms), this adapter supports exactly
-one thing today:
+A logged-in Premium subscriber can download a county or a whole state as
+CSV from radioreference.com (``ctid_<id>_<stamp>.csv`` and
+``stid_<id><stamp>.csv``). This adapter reads those files from a path the
+user configured (``wasds150 sources configure --rr-export-path``), which may
+be one file or a directory of them, and turns every row into a
+:class:`~wasds150.sources.facts.NormalizedFact`. It never touches the
+network, never redistributes anything, and the data it produces stays in
+the user's local catalog (see ``docs/data-sources.md``).
 
-**Importing a file the user has already lawfully exported from their own
-RadioReference Premium account** (RR's site lets a logged-in Premium
-subscriber download a county/agency's data as CSV, and RR's Uniden-specific
-tools can export DAT/XML for SDS-series radios). The user obtains the file
-themselves, in their own browser, under their own subscription's terms;
-this adapter only ever reads a local file the user points it at — never
-touches the network.
+**Verified layout** (RadioReference county and state CSV exports, September
+2026)::
 
-Because the *exact* column/element names of a Premium export are not
-independently byte-verified in this project (no fixture was legally
-obtainable without an active subscription), the CSV/XML parsing below is
-deliberately **tolerant and best-effort**: it reads whatever header/tag
-names are present, maps the small set of names publicly documented as
-stable (``County``, ``Agency``/``System``, ``Site``, ``Description``,
-``Tag``/``Alpha Tag``, ``Frequency``/``Freq``, ``Tone``, ``Category``) when
-found, and otherwise preserves every column verbatim in ``raw`` rather than
-dropping it — the same "generic lossless" philosophy used by
-:mod:`wasds150.hpe.record` for the on-card binary formats. A warning is
-always emitted reminding the caller to review the mapped output before
-trusting it in a generated bundle.
+    "Frequency Output","Frequency Input","FCC Callsign",Agency/Category,
+    [County,]Description,"Alpha Tag","PL Output Tone","PL Input Tone",Mode,
+    "Class Station Code",Tag
 
-**Credentials / SOAP hook**: :class:`RadioReferenceCredentials` exists so a
-future, *verified* SOAP client can be added later without changing this
-adapter's public shape. Calling :meth:`RadioReferencePremiumSource.fetch`
-with credentials configured but no ``export_path`` raises
-:class:`RadioReferenceSoapNotImplemented` with a precise, actionable
-message — it never pretends to make a live API call it hasn't verified.
-Credentials are never logged (see ``__repr__``/``__str__`` overrides
-below) and are never written into any generated bundle or provenance
-record — only ``source_id="radioreference_premium"`` plus the *local*
-export filename are recorded.
+* ``County`` is present only in the state-wide export; a county export
+  carries the county in its filename (``ctid_2974``) rather than a column.
+* ``Frequency Input`` is ``0.00000`` when there is no input.
+* Tones are written ``103.5 PL``, ``023 DPL``, ``CSQ``, ``293 NAC``,
+  ``37 RAN`` or ``CC 1|TG 9|SL 1`` (``*`` for an unspecified talkgroup or
+  slot); ``n/a`` and blank mean none.
+* ``Mode`` is one of ``FM``, ``FMN``, ``AM``, ``DMR``, ``NXDN``, ``NXDN48``,
+  ``NXDN48E``, ``P25``, ``P25E``, ``Project 25``, ``D-STAR``, ``Motorola``,
+  ``MPT-1327``, ``LTR``, ``EDACS``, ``iDEN``, ``Telm``.
+* ``Tag == "TRS"`` rows are trunked-system site frequencies (control and
+  voice channels of a system listed elsewhere with talkgroups); they are
+  imported as ``fact_type="site"`` so nothing programs them as a
+  conventional voice channel.
+
+Older exports with different headers are still read through a tolerant
+alias table, but a summary warning is always emitted so the caller can see
+which layout was recognised.
+
+**Credentials / SOAP hook**: :class:`RadioReferenceCredentials` is kept so
+the live SOAP client (:mod:`wasds150.sources.radioreference_api`) and this
+file importer share one configuration shape. Passing credentials here
+without an export path raises :class:`RadioReferenceSoapNotImplemented`
+pointing at that adapter; this module itself never makes a network call.
 """
 from __future__ import annotations
 
 import csv
 import datetime
 import io
+import re
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 
+from wasds150.catalog.wa_counties import RADIOREFERENCE_CTIDS, WA_COUNTIES
 from wasds150.sources.base import OnlineSourceAdapter, RawDoc
 from wasds150.sources.facts import NormalizedFact, NormalizeResult
 
-#: Publicly documented (RadioReference help pages / long-standing Premium
-#: CSV export column names) but NOT independently byte-verified against a
-#: real export file in this project -- kept as a best-effort alias table,
-#: matched case-insensitively, never assumed complete.
+SOURCE_ID = "radioreference_premium"
+RADIOREFERENCE_STATE_URL = "https://www.radioreference.com/db/browse/stid/53"
+
+#: The verified export header, normalised to lower case.
+_VERIFIED_COLUMNS = {
+    "frequency output": "freq_out",
+    "frequency input": "freq_in",
+    "fcc callsign": "callsign",
+    "agency/category": "category",
+    "county": "county",
+    "description": "description",
+    "alpha tag": "alpha",
+    "pl output tone": "tone_out",
+    "pl input tone": "tone_in",
+    "mode": "mode",
+    "class station code": "station_class",
+    "tag": "tag",
+}
+
+#: Tolerant fallback for exports with other headers (older layouts, agency
+#: exports). Matched case-insensitively; anything unrecognised stays in
+#: ``raw`` verbatim.
 _CSV_COLUMN_ALIASES = {
     "county": ("county",),
     "system": ("system", "agency", "system/agency"),
     "site": ("site", "site description", "site name"),
-    "name": ("description", "alpha tag", "tag", "name"),
-    "freq_mhz": ("frequency output", "frequency", "freq", "output freq"),
-    "tone": ("tone", "ctcss/dcs", "input tone"),
-    "category": ("category", "service type", "mode"),
+    "description": ("description", "name"),
+    "alpha": ("alpha tag", "tag"),
+    "freq_out": ("frequency", "freq", "output freq", "output"),
+    "freq_in": ("input", "input freq"),
+    "tone_out": ("tone", "ctcss/dcs", "pl"),
+    "tone_in": ("input tone",),
+    "category": ("category", "service type"),
+    "mode": ("mode",),
 }
+
+#: RadioReference mode labels -> the catalog's scanner vocabulary. D-STAR,
+#: Fusion and the trunking control formats become ``AUTO`` (a carrier the
+#: scanner can detect but not decode), matching what the WWARA adapter does.
+_MODE_MAP = {
+    "FM": "FM",
+    "FMN": "NFM",
+    "AM": "AM",
+    "DMR": "DMR",
+    "NXDN": "NXDN",
+    "NXDN48": "NXDN",
+    "NXDN96": "NXDN",
+    "NXDN48E": "NXDN",
+    "NXDN96E": "NXDN",
+    "P25": "P25",
+    "P25E": "P25",
+    "PROJECT 25": "P25",
+}
+
+_PL_RE = re.compile(r"^(\d{2,3}(?:\.\d)?)\s*PL$", re.IGNORECASE)
+_DPL_RE = re.compile(r"^(\d{3})\s*DPL$", re.IGNORECASE)
+_NAC_RE = re.compile(r"^([0-9A-Fa-f]{1,3})\s*NAC$", re.IGNORECASE)
+_RAN_RE = re.compile(r"^(\d{1,2})\s*RAN$", re.IGNORECASE)
+_DMR_RE = re.compile(r"^CC\s*(\d{1,2})\|TG\s*([0-9*]+)\|SL\s*([12*])$", re.IGNORECASE)
+_BARE_CTCSS_RE = re.compile(r"^\d{2,3}\.\d$")
+_CTID_RE = re.compile(r"ctid[_-]?(\d+)", re.IGNORECASE)
 
 
 class RadioReferenceSoapNotImplemented(NotImplementedError):
-    """Raised instead of attempting an unverified live SOAP call."""
+    """Raised when credentials are handed to the file importer."""
 
 
 @dataclass
 class RadioReferenceCredentials:
-    """Config hook for a *future* verified SOAP client. Never logged --
+    """Shared credential shape for the SOAP client. Never logged --
     ``__repr__`` intentionally redacts every field."""
 
     username: str = ""
@@ -93,55 +140,190 @@ class RadioReferenceCredentials:
         return bool(self.username and self.password and self.app_key)
 
 
+@dataclass(frozen=True)
+class RrTone:
+    """A RadioReference tone cell, decoded."""
+
+    tone: str = ""  # catalog notation: TONE=C103.5 / D023 / NAC=293 / ColorCode=1
+    color_code: Optional[int] = None
+    talkgroup: Optional[int] = None
+    slot: Optional[int] = None
+    ran: Optional[int] = None
+    raw: str = ""
+
+
+def parse_rr_tone(text: Optional[str]) -> RrTone:
+    value = (text or "").strip()
+    if not value or value.lower() in ("n/a", "csq", "none"):
+        return RrTone(raw=value)
+    match = _PL_RE.match(value)
+    if match:
+        return RrTone(tone=f"TONE=C{float(match.group(1)):g}", raw=value)
+    match = _DPL_RE.match(value)
+    if match:
+        return RrTone(tone=f"D{match.group(1)}", raw=value)
+    match = _NAC_RE.match(value)
+    if match:
+        return RrTone(tone=f"NAC={match.group(1).upper()}", raw=value)
+    match = _RAN_RE.match(value)
+    if match:
+        return RrTone(ran=int(match.group(1)), raw=value)
+    match = _DMR_RE.match(value)
+    if match:
+        talkgroup = int(match.group(2)) if match.group(2) != "*" else None
+        slot = int(match.group(3)) if match.group(3) != "*" else None
+        color = int(match.group(1))
+        return RrTone(tone=f"ColorCode={color}", color_code=color, talkgroup=talkgroup, slot=slot, raw=value)
+    if _BARE_CTCSS_RE.match(value):
+        return RrTone(tone=f"TONE=C{float(value):g}", raw=value)
+    return RrTone(raw=value)
+
+
+def normalize_mode(text: Optional[str]) -> str:
+    key = (text or "").strip().upper()
+    if not key:
+        return "AUTO"
+    return _MODE_MAP.get(key, "AUTO")
+
+
+def _parse_freq(text: Optional[str]) -> Optional[float]:
+    value = (text or "").strip()
+    if not value:
+        return None
+    try:
+        freq = float(value)
+    except ValueError:
+        return None
+    return freq if freq > 0 else None
+
+
+def county_from_filename(name: str) -> Optional[str]:
+    """Recover the county a county export describes from its filename."""
+    lowered = name.lower()
+    for county in WA_COUNTIES:
+        if county.lower().replace(" ", "-") in lowered.replace("_", "-") or county.lower() in lowered:
+            return county
+    match = _CTID_RE.search(name)
+    if match:
+        return RADIOREFERENCE_CTIDS.get(int(match.group(1)))
+    if "stid" in lowered or "statewide" in lowered:
+        return "Statewide"
+    return None
+
+
 def _match_alias(header: str) -> Optional[str]:
     lowered = header.strip().lower()
+    if lowered in _VERIFIED_COLUMNS:
+        return _VERIFIED_COLUMNS[lowered]
     for canonical, aliases in _CSV_COLUMN_ALIASES.items():
         if lowered in aliases:
             return canonical
     return None
 
 
-def _parse_csv_export(text: str, *, retrieved_at: str) -> NormalizeResult:
+def _fact_from_mapped(
+    mapped: Dict[str, str],
+    row: Dict[str, Any],
+    *,
+    index: int,
+    default_county: Optional[str],
+    filename: str,
+    retrieved_at: str,
+) -> Optional[NormalizedFact]:
+    freq = _parse_freq(mapped.get("freq_out"))
+    if freq is None:
+        return None
+    tx_freq = _parse_freq(mapped.get("freq_in"))
+    tone_out = parse_rr_tone(mapped.get("tone_out"))
+    tone_in = parse_rr_tone(mapped.get("tone_in"))
+    mode = normalize_mode(mapped.get("mode"))
+    county = (mapped.get("county") or "").strip() or default_county or None
+    tag = (mapped.get("tag") or "").strip()
+    category = (mapped.get("category") or mapped.get("system") or "").strip()
+    description = (mapped.get("description") or "").strip()
+    alpha = (mapped.get("alpha") or "").strip()
+    name = description or alpha or category or f"row-{index}"
+    is_trunked_site = tag.upper() == "TRS"
+
+    raw: Dict[str, Any] = dict(row)
+    raw.update(
+        {
+            "rr_category": category,
+            "rr_description": description,
+            "rr_alpha": alpha,
+            "rr_tag": tag,
+            "rr_mode": (mapped.get("mode") or "").strip(),
+            "rr_callsign": (mapped.get("callsign") or "").strip(),
+            "rr_station_class": (mapped.get("station_class") or "").strip(),
+            "rr_tone_out": tone_out.raw,
+            "rr_tone_in": tone_in.raw,
+            "tx_tone": tone_in.tone,
+            "rr_file": filename,
+        }
+    )
+    entity_key = (
+        f"rr_premium:{(county or 'unknown').lower()}:{category.lower()}:"
+        f"{freq:.5f}:{(tx_freq or 0):.5f}:{mode}:{name.lower()}"
+    )
+    return NormalizedFact(
+        entity_key=entity_key,
+        fact_type="site" if is_trunked_site else "frequency",
+        name=name,
+        freq_mhz=freq,
+        offset_mhz=(tx_freq - freq) if tx_freq is not None else None,
+        tone=tone_out.tone or None,
+        mode=mode,
+        county=county,
+        location_precision="unknown",
+        source_id=SOURCE_ID,
+        source_url=RADIOREFERENCE_STATE_URL,
+        retrieved_at=retrieved_at,
+        raw=raw,
+        tx_freq_mhz=tx_freq,
+        dmr_color_code=tone_out.color_code,
+        dmr_timeslot=tone_out.slot,
+        dmr_talkgroup=tone_out.talkgroup,
+        nxdn_ran=tone_out.ran,
+    )
+
+
+def _parse_csv_export(text: str, *, retrieved_at: str, filename: str = "") -> NormalizeResult:
     reader = csv.DictReader(io.StringIO(text))
     facts: List[NormalizedFact] = []
-    warnings: List[str] = [
-        "radioreference_premium CSV column mapping is best-effort/unverified; "
-        "review mapped facts before trusting them in a generated bundle"
-    ]
+    warnings: List[str] = []
     if not reader.fieldnames:
-        warnings.append("export file has no header row; nothing imported")
+        warnings.append(f"{filename or 'export'}: no header row; nothing imported")
         return NormalizeResult(facts=facts, warnings=warnings)
 
     alias_by_header = {h: _match_alias(h) for h in reader.fieldnames}
-    for i, row in enumerate(reader):
-        mapped: Dict[str, Any] = {}
+    verified = all(h.strip().lower() in _VERIFIED_COLUMNS for h in reader.fieldnames)
+    default_county = county_from_filename(filename) if filename else None
+    skipped = 0
+    sites = 0
+    for index, row in enumerate(reader):
+        mapped: Dict[str, str] = {}
         for header, value in row.items():
             canonical = alias_by_header.get(header)
-            if canonical:
+            if canonical and value is not None:
                 mapped[canonical] = value
-        freq_mhz = None
-        if mapped.get("freq_mhz"):
-            try:
-                freq_mhz = float(str(mapped["freq_mhz"]).strip())
-            except ValueError:
-                pass
-        name = mapped.get("name") or mapped.get("system") or f"row-{i}"
-        entity_key = f"rr_premium:{mapped.get('system', '')}:{mapped.get('site', '')}:{i}"
-        facts.append(
-            NormalizedFact(
-                entity_key=entity_key,
-                fact_type="frequency" if freq_mhz is not None else "system",
-                name=str(name),
-                freq_mhz=freq_mhz,
-                tone=mapped.get("tone") or None,
-                county=mapped.get("county") or None,
-                location_precision="unknown",
-                source_id="radioreference_premium",
-                source_url="",
-                retrieved_at=retrieved_at,
-                raw=dict(row),
-            )
+        fact = _fact_from_mapped(
+            mapped, row, index=index, default_county=default_county,
+            filename=filename, retrieved_at=retrieved_at,
         )
+        if fact is None:
+            skipped += 1
+            continue
+        if fact.fact_type == "site":
+            sites += 1
+        facts.append(fact)
+
+    layout = "verified RadioReference export layout" if verified else "tolerant alias mapping (unverified header)"
+    warnings.append(
+        f"{filename or 'export'}: {len(facts)} rows imported via {layout}; "
+        f"{sites} trunked-site rows kept as site facts; {skipped} rows without a frequency skipped"
+        + (f"; county {default_county!r} from filename" if default_county and "county" not in [
+            alias_by_header.get(h) for h in reader.fieldnames] else "")
+    )
     return NormalizeResult(facts=facts, warnings=warnings)
 
 
@@ -150,10 +332,9 @@ def _local_tag(elem: ET.Element) -> str:
     return tag.split("}", 1)[1] if "}" in tag else tag
 
 
-def _parse_xml_export(text: str, *, retrieved_at: str) -> NormalizeResult:
+def _parse_xml_export(text: str, *, retrieved_at: str, filename: str = "") -> NormalizeResult:
     warnings: List[str] = [
-        "radioreference_premium XML element mapping is best-effort/unverified; "
-        "review mapped facts before trusting them in a generated bundle"
+        f"{filename or 'export'}: XML element mapping is best-effort; review mapped facts before trusting them"
     ]
     try:
         root = ET.fromstring(text)
@@ -161,56 +342,49 @@ def _parse_xml_export(text: str, *, retrieved_at: str) -> NormalizeResult:
         return NormalizeResult(facts=[], warnings=warnings + [f"could not parse XML export: {exc}"])
 
     facts: List[NormalizedFact] = []
-    # Best-effort: treat any leaf-bearing element with a recognizable child
-    # (by local-name alias) as one record; preserve every child verbatim.
-    for i, elem in enumerate(root.iter()):
+    default_county = county_from_filename(filename) if filename else None
+    for index, elem in enumerate(root.iter()):
         children = list(elem)
         if not children:
             continue
         record: Dict[str, str] = {}
         for child in children:
-            if list(child):  # skip further-nested containers
+            if list(child):
                 continue
             record[_local_tag(child)] = (child.text or "").strip()
         if not record:
             continue
-        mapped: Dict[str, Any] = {}
+        mapped: Dict[str, str] = {}
         for key, value in record.items():
             canonical = _match_alias(key)
             if canonical:
                 mapped[canonical] = value
         if not mapped:
             continue
-        freq_mhz = None
-        if mapped.get("freq_mhz"):
-            try:
-                freq_mhz = float(str(mapped["freq_mhz"]).strip())
-            except ValueError:
-                pass
-        name = mapped.get("name") or mapped.get("system") or f"{_local_tag(elem)}-{i}"
-        entity_key = f"rr_premium:{_local_tag(elem)}:{i}"
-        facts.append(
-            NormalizedFact(
-                entity_key=entity_key,
-                fact_type="frequency" if freq_mhz is not None else "system",
-                name=str(name),
-                freq_mhz=freq_mhz,
-                tone=mapped.get("tone") or None,
-                county=mapped.get("county") or None,
-                location_precision="unknown",
-                source_id="radioreference_premium",
-                source_url="",
-                retrieved_at=retrieved_at,
-                raw=record,
-            )
+        fact = _fact_from_mapped(
+            mapped, record, index=index, default_county=default_county,
+            filename=filename, retrieved_at=retrieved_at,
         )
+        if fact is not None:
+            facts.append(fact)
     if not facts:
         warnings.append("no recognizable records found in XML export")
     return NormalizeResult(facts=facts, warnings=warnings)
 
 
+def _export_files(path: Path) -> List[Path]:
+    if path.is_dir():
+        files = sorted(p for p in path.iterdir() if p.suffix.lower() in (".csv", ".xml") and p.is_file())
+        if not files:
+            raise FileNotFoundError(f"radioreference_premium: no .csv/.xml exports in {path}")
+        return files
+    if not path.is_file():
+        raise FileNotFoundError(f"radioreference_premium export file not found: {path}")
+    return [path]
+
+
 class RadioReferencePremiumSource(OnlineSourceAdapter):
-    name = "radioreference_premium"
+    name = SOURCE_ID
     available = True
     kind = "local"
 
@@ -224,31 +398,27 @@ class RadioReferencePremiumSource(OnlineSourceAdapter):
 
     def fetch(self, http_client: Optional[Any] = None) -> RawDoc:
         # kind == "local": never uses http_client, even if one is passed.
+        fetched_at = datetime.datetime.now(datetime.timezone.utc).isoformat()
         if self.export_path is not None:
-            if not self.export_path.is_file():
-                raise FileNotFoundError(f"radioreference_premium export file not found: {self.export_path}")
-            text = self.export_path.read_bytes().decode("utf-8-sig", errors="replace")
-            fmt = "xml" if self.export_path.suffix.lower() == ".xml" else "csv"
-            return RawDoc(
-                source_adapter=self.name,
-                payload={"format": fmt, "text": text, "filename": self.export_path.name},
-                fetched_at=datetime.datetime.now(datetime.timezone.utc).isoformat(),
-            )
+            files = []
+            for file in _export_files(self.export_path):
+                files.append(
+                    {
+                        "format": "xml" if file.suffix.lower() == ".xml" else "csv",
+                        "text": file.read_bytes().decode("utf-8-sig", errors="replace"),
+                        "filename": file.name,
+                    }
+                )
+            return RawDoc(source_adapter=self.name, payload={"files": files}, fetched_at=fetched_at)
         if self.credentials is not None and self.credentials.is_configured():
             raise RadioReferenceSoapNotImplemented(
-                "radioreference_premium: a live SOAP 'Premium/API' call was requested, but this "
-                "project has not independently verified RadioReference's SOAP request/response "
-                "contract against real traffic, so no live call is attempted (to avoid silently "
-                "producing wrong data or violating RR's API terms). Instead, export your data from "
-                "your own radioreference.com Premium account (county/agency CSV, or a Uniden "
-                "DAT/XML export) and pass it as export_path= to this source. See docs/data-sources.md "
-                "for the current supported workflow."
+                "radioreference_premium reads exported files only; for the live SOAP "
+                "service use the 'radioreference_api' source (needs a RadioReference "
+                "application key plus your Premium login), or export your county/state "
+                "data from radioreference.com and pass it as export_path= to this source. "
+                "See docs/data-sources.md."
             )
-        return RawDoc(
-            source_adapter=self.name,
-            payload=None,
-            fetched_at=datetime.datetime.now(datetime.timezone.utc).isoformat(),
-        )
+        return RawDoc(source_adapter=self.name, payload=None, fetched_at=fetched_at)
 
     def normalize(self, raw: RawDoc) -> NormalizeResult:
         if raw.payload is None:
@@ -256,8 +426,23 @@ class RadioReferencePremiumSource(OnlineSourceAdapter):
                 facts=[],
                 warnings=["no radioreference_premium export_path configured; no facts produced"],
             )
-        fmt = raw.payload["format"]
-        text = raw.payload["text"]
-        if fmt == "xml":
-            return _parse_xml_export(text, retrieved_at=raw.fetched_at)
-        return _parse_csv_export(text, retrieved_at=raw.fetched_at)
+        result = NormalizeResult()
+        seen: set = set()
+        for entry in raw.payload["files"]:
+            if entry["format"] == "xml":
+                part = _parse_xml_export(entry["text"], retrieved_at=raw.fetched_at, filename=entry["filename"])
+            else:
+                part = _parse_csv_export(entry["text"], retrieved_at=raw.fetched_at, filename=entry["filename"])
+            duplicates = 0
+            for fact in part.facts:
+                if fact.entity_key in seen:
+                    duplicates += 1
+                    continue
+                seen.add(fact.entity_key)
+                result.facts.append(fact)
+            result.warnings.extend(part.warnings)
+            if duplicates:
+                result.warnings.append(
+                    f"{entry['filename']}: {duplicates} rows already imported from another export (state and county files overlap)"
+                )
+        return result

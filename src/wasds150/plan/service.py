@@ -11,13 +11,13 @@ callable from a test with nothing but an :class:`AppContext`.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 from wasds150.appctx import AppContext
 from wasds150.generate.pipeline import apply_profile
-from wasds150.models.catalog import Catalog
+from wasds150.models.catalog import Catalog, FavoritesList
 from wasds150.models.plan import ChannelPlan
 from wasds150.plan.resolve import ResolvedPlan, resolve_plan
 from wasds150.plans import get_plan, list_plans
@@ -27,24 +27,52 @@ from wasds150.plans import get_plan, list_plans
 DEFAULT_OUT_DIR = "wasds150-output/radios"
 
 
-def resolve_named_plan(ctx: AppContext, plan_id: str) -> Tuple[ChannelPlan, ResolvedPlan]:
-    """Resolve ``plan_id`` against the catalog with the user profile applied.
+def _extra_favorites(radio_id: str) -> List[FavoritesList]:
+    """Radio-native catalog modules that are not part of the scanner catalog.
 
-    The profile is applied first so that a Favorites List the user disabled
-    does not contribute channels to a radio plan.  Disabling a list in the UI
-    and re-exporting is therefore a supported way to slim a plan down.
+    These are checked-in, cited Favorites Lists (D-STAR repeater tables, DMR
+    network talkgroup layouts, broadcast stations) that only a particular
+    transceiver can use, so they are added at plan-resolution time rather
+    than being merged into the shared catalog every scanner build reads.
     """
-    plan = get_plan(plan_id)
-    profile = ctx.load_profile()
-    generated = apply_profile(ctx.catalog, profile)
-    favorites = list(generated.enabled_favorites)
-    if plan.radio_id == "th-d75":
+    if radio_id == "th-d75":
         from wasds150.catalog.puget_broadcast import favorite as puget_broadcast
         from wasds150.catalog.thd75_local import favorite as thd75_local
         from wasds150.catalog.thd75_user import favorite as thd75_user
         from wasds150.catalog.thd75_wwara_snapshot import favorite as thd75_wwara
 
-        favorites.extend((puget_broadcast(), thd75_local(), thd75_user(), thd75_wwara()))
+        return [puget_broadcast(), thd75_local(), thd75_user(), thd75_wwara()]
+    if radio_id == "at-d890uv":
+        from wasds150.catalog.atd890_dmr import favorites as atd890_dmr
+        from wasds150.catalog.atd890_local import favorite as atd890_local
+        from wasds150.catalog.puget_broadcast import favorite as puget_broadcast
+        from wasds150.catalog.thd75_wwara_snapshot import favorite as thd75_wwara
+
+        return [puget_broadcast(), thd75_wwara(), atd890_local(), *atd890_dmr()]
+    return []
+
+
+def resolve_named_plan(
+    ctx: AppContext, plan_id: str, *, include_licensed: bool = True
+) -> Tuple[ChannelPlan, ResolvedPlan]:
+    """Resolve ``plan_id`` against the catalog with the user profile applied.
+
+    The profile is applied first so that a Favorites List the user disabled
+    does not contribute channels to a radio plan.  Disabling a list in the UI
+    and re-exporting is therefore a supported way to slim a plan down.
+
+    ``include_licensed=False`` leaves out lists built from a licensed
+    database (RadioReference), which is how a redistributable copy of a
+    programming file is produced for the repository.
+    """
+    plan = get_plan(plan_id)
+    profile = ctx.load_profile()
+    generated = apply_profile(ctx.catalog, profile)
+    favorites = [fl for fl in generated.enabled_favorites if include_licensed or not fl.licensed]
+    # A checked-in snapshot list steps aside when the catalog already holds
+    # a refreshed copy under the same key (``wasds150 sources update``).
+    present = {fl.favorite_key.upper() for fl in favorites}
+    favorites.extend(fl for fl in _extra_favorites(plan.radio_id) if fl.favorite_key.upper() not in present)
     catalog = Catalog(favorites=favorites)
     return plan, resolve_plan(plan, catalog)
 
@@ -87,6 +115,7 @@ def channel_row(channel) -> Dict[str, Any]:
         "dv_urcall": channel.dv_urcall,
         "dv_rpt1": channel.dv_rpt1,
         "dv_rpt2": channel.dv_rpt2,
+        "digital": asdict(channel.digital) if channel.digital is not None else None,
     }
 
 
@@ -131,11 +160,14 @@ class PlanExport:
     plan_id: str
     target_id: str
     rows: int
+    #: The programming file, or the bundle directory for directory targets.
     csv_path: Path
     report_path: Path
     warnings: List[str]
     #: Extra locations the programming file was copied to, if any.
     copies: List[Path] = field(default_factory=list)
+    #: Individual files inside a directory bundle (empty for file targets).
+    files: List[Path] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -144,7 +176,7 @@ class PlanExport:
             "rows": self.rows,
             "csv_path": str(self.csv_path),
             "report_path": str(self.report_path),
-            "files": [str(self.csv_path), str(self.report_path)],
+            "files": [str(self.csv_path), str(self.report_path)] + [str(path) for path in self.files],
             "copies": [str(path) for path in self.copies],
             "warnings": list(self.warnings),
         }
@@ -157,6 +189,7 @@ def export_plan(
     target_id: str = "chirp-csv",
     out_dir: Optional[Path] = None,
     copy_to: Optional[Path] = None,
+    include_licensed: bool = True,
 ) -> PlanExport:
     """Resolve and write a plan, returning the paths written.
 
@@ -176,7 +209,7 @@ def export_plan(
     from wasds150.export.registry import get_target
     from wasds150.export.report import render_plan_report
 
-    plan, resolved = resolve_named_plan(ctx, plan_id)
+    plan, resolved = resolve_named_plan(ctx, plan_id, include_licensed=include_licensed)
     target = get_target(target_id)
     target.check_radio(resolved)
 
@@ -185,6 +218,7 @@ def export_plan(
 
     csv_path = directory / f"{plan.id}{target.extension}"
     result = target.write(resolved, csv_path)
+    files = [Path(p) for p in getattr(result, "files", [])]
     report_path = directory / f"{plan.id}-report.md"
     report_path.write_text(render_plan_report(resolved), encoding="utf-8")
 
@@ -196,8 +230,12 @@ def export_plan(
             target_path = destination / source.name
             if target_path.resolve() == source.resolve():
                 continue
-            shutil.copy2(source, target_path)
-            copies.append(target_path)
+            if source.is_dir():
+                shutil.copytree(source, target_path, dirs_exist_ok=True)
+                copies.extend(sorted(target_path.iterdir()))
+            else:
+                shutil.copy2(source, target_path)
+                copies.append(target_path)
 
     return PlanExport(
         plan_id=plan.id,
@@ -206,5 +244,6 @@ def export_plan(
         csv_path=csv_path,
         report_path=report_path,
         copies=copies,
+        files=files,
         warnings=list(resolved.warnings) + list(result.warnings),
     )

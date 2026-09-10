@@ -3,7 +3,8 @@
 A curated statewide radio programming catalog and generator. One unified,
 source-cited database drives every radio: a Uniden SDS150 scanner (organized
 for Sentinel, location control, GPS and quick keys), a TIDRADIO TD-H9
-handheld, a Kenwood TH-D75A, and a Yaesu FTX-1.
+handheld, a Kenwood TH-D75A, a Yaesu FTX-1, and an Anytone AT-D890UV
+DMR/NXDN handheld.
 
 The catalog covers all 39 Washington counties and includes:
 
@@ -43,6 +44,8 @@ catalog is the source of truth. See
 - [TD-H9 programming guide](docs/td-h9-programming.md) - complete hardware procedure, verified radio facts, cable troubleshooting, and the two failure modes that produce a silently wrong radio.
 - [TH-D75A Ames Lake loadout](docs/th-d75-ames-lake.md) - verified capabilities, 50-mile analog/D-STAR and wideband-receive plan, native-image safety, installed software, hashes, hardware write, and read-back results.
 - [TH-D75A current operator configuration](docs/th-d75-current-configuration.md) - exact tracked MCP image, all 400 decoded settings, power-on bitmap, three recovered manual memories, source conflicts, and regeneration safety.
+- [AT-D890UV programming guide](docs/at-d890uv-programming.md) - firmware 1.05 plus the NXDN overlay, CPS install and Import All, the zone/scan-list layout, dual-watch air band, transmit policy, and read-back verification.
+- [RadioReference API application](docs/radioreference-api-application.md) - ready-to-paste text for the Database Web Service key request, and what happens after approval.
 - [Agent runbook](docs/agent-runbook.md) - copy-paste procedures for automating this repository, environment layout, API reference, and project invariants.
 - [Lake Ozette profile](docs/ozette-lake.md) - Olympic Peninsula coastal trip profile: Clallam County, SAR/interop, tribal, marine, aviation, and amateur coverage.
 - [Printable mounts and brackets](models/README.md) - parametric OpenSCAD visor mounts, Peak Design Capture bracket, and EFHW antenna enclosure, with print-ready 3MF/STL and the latch/fit reasoning behind each variant.
@@ -60,6 +63,7 @@ catalog is the source of truth. See
 | TIDRADIO TD-H9 | Analog handheld transceiver | 199 | 185 memories | Verified against hardware |
 | Kenwood TH-D75A | Tri-band analog/D-STAR and wideband receiver | 1,000 + 1,500 DR | 545 memories + 21 DR repeaters | Verified; current image tracked |
 | Yaesu FTX-1 | HF/VHF/UHF transceiver | 999 | 960 statewide **or** 351 local memories | Profile from documentation, **unverified** |
+| Anytone AT-D890UV | DMR/NXDN/analog handheld, AM air-band and FM receive | 4,000 + 256 air + 100 FM | ~1,400 channels in 23 zones, 57 scan lists (with RadioReference data) | Profile from CPS 1.05 and a real export, **unverified on hardware** |
 
 The FTX-1 has three loadouts, chosen from the same dropdown. `ftx1-wa` is the
 statewide inventory. `ftx1-local` is the working list: amateur repeaters within
@@ -73,6 +77,18 @@ memory scan covers every band without picking a bank. The radius is applied to
 each repeater's own coordinates, so the list follows the home location rather
 than county lines. `thd75-scan` is the equivalent single-list loadout for the
 TH-D75A.
+
+`atd890-scan` builds the Anytone as a scanner that can also transmit: one zone
+per service in scan-priority order (analog and DMR amateur repeaters with
+transmit, then simplex, air band, SAR, wildfire, marine, rail, personal radio,
+business, public safety and commercial DMR/NXDN receive-only), composite scan
+lists such as `Ham All` and `Everything`, the air band routed to the radio's
+own AM receiver for dual watch, and NOAA/FM broadcast programmed but never
+scanned. DMR channels carry the PNWDigital and SeattleDMR talkgroup layout,
+one channel per repeater and talkgroup. With the user's own RadioReference
+export imported (`wasds150 sources update`), every conventional channel the
+county lists joins the same zones; the committed copy under `radio-configs/`
+is built without that licensed data.
 
 Each radio's current configuration is inspectable in its **own shape**, because
 they genuinely differ. The SDS150's configuration is hierarchical - Favorites
@@ -95,6 +111,7 @@ wasds150 plan show h9-ozette       # resolved memory map, drops, warnings
 wasds150 plan show thd75-ames-lake # 50-mile + wideband memory map
 wasds150 plan export ftx1-wa --target ftx1-file --out radio-configs
 wasds150 plan export ftx1-local --target ftx1-file --out radio-configs
+wasds150 plan export atd890-scan --target atd890-cps --out wasds150-output/radios   # Anytone CPS bundle
 wasds150 plan export thd75-ames-lake --target thd75-file --out radio-configs
 ```
 

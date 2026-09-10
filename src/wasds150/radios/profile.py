@@ -63,6 +63,11 @@ class RadioProfile:
     #: Characters the radio can store in a channel name.  ``None`` means the
     #: profile does not constrain the character set beyond printable ASCII.
     name_charset: Optional[str] = None
+    #: ``"compact"`` squeezes labels the way a small segment display needs
+    #: (upper case, no spaces: ``OLYNPDISP``); ``"readable"`` keeps a label's
+    #: case and spacing whenever it already fits, and only squeezes when it
+    #: must - what a 16-character colour display wants.
+    name_style: str = "compact"
     supports_trunking: bool = False
     supports_talkgroups: bool = False
     #: Named groups/zones/banks that the operator can select on the radio.
@@ -72,6 +77,13 @@ class RadioProfile:
     supports_per_channel_mode: bool = True
     #: Some radios store a tuning step globally rather than per memory.
     supports_per_channel_step: bool = True
+    #: Structural limits of radios that organise memories into named zones
+    #: and explicit scan lists (DMR handhelds, mostly). ``None`` means the
+    #: radio has no such structure or no ceiling this project must enforce;
+    #: exporters for radios that lack zones ignore all three.
+    zone_max: Optional[int] = None
+    zone_member_max: Optional[int] = None
+    scan_list_member_max: Optional[int] = None
     notes: str = ""
     #: False when the profile is derived from documentation that has not been
     #: confirmed against hardware.  Consumers may warn rather than fail.
@@ -85,6 +97,12 @@ class RadioProfile:
             raise ValueError(f"{self.id}: max_channels must be positive")
         if self.name_max_len is not None and self.name_max_len <= 0:
             raise ValueError(f"{self.id}: name_max_len must be positive")
+        for name in ("zone_max", "zone_member_max", "scan_list_member_max"):
+            value = getattr(self, name)
+            if value is not None and value <= 0:
+                raise ValueError(f"{self.id}: {name} must be positive")
+        if self.name_style not in ("compact", "readable"):
+            raise ValueError(f"{self.id}: name_style must be 'compact' or 'readable'")
 
     @property
     def label(self) -> str:

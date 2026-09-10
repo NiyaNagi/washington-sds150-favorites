@@ -32,6 +32,7 @@ those choices.
 | WWARA | `wwara` | Western Washington repeater coordination database | Nightly | Coordinated amateur repeaters (frequency, tone, sponsor) |
 | IACC | `iacc` | Inland Amateur Communications Council repeater table (WA + N. Idaho, filtered to WA) | On change | Coordinated amateur repeaters east of the Cascades |
 | AMSAT/ARISS | `amsat` | Satellite and ISS operating status catalog | Volatile | Active amateur satellite modes |
+| SeattleDMR Config Builder files | `seattledmr` | PNWDigital and SeattleDMR repeater-by-talkgroup matrix, talkgroup ids and the Seattle ACS analog plan (`seattledmr.com/ConfigBuilder/`) | On change | DMR repeaters with colour code, talkgroup and timeslot; ACS repeaters with access tones. Builds the `DMRNET` and `SEAACS` lists; a Washington subset is committed as `catalog/atd890_dmr.py` |
 | NWAC/SPART | `nwac` | Backcountry radio channel graphic (change detection only) | Seasonal | Flags when the published backcountry channel graphic changes, for manual re-review |
 
 Government records (FCC, FAA, NOAA, USCG, WA state agencies, NIFC) are
@@ -179,25 +180,38 @@ Sentinel remains the easiest way to obtain a complete current database:
 ### RadioReference
 
 Public RadioReference pages may be opened for manual verification and cited
-by URL. The project does not bulk-scrape or mirror them, and does not call
-RadioReference's SOAP "Premium/API" service without independently verifying
-its request/response contract (not done in this project to date — see
-`wasds150.sources.radioreference_premium`'s module docstring). Attempting to
-configure that live API today raises a precise, actionable error rather
-than guessing at an unverified contract.
+by URL. The project does not bulk-scrape or mirror them.
 
-What *is* supported: importing a CSV or XML export the user has already
-lawfully downloaded from their own RadioReference Premium account, via
-`wasds150 sources configure --rr-export-path <file>`. Column/element names
-are matched by a best-effort alias table (not independently byte-verified
-against a real export, since none was legally obtainable without an active
-subscription) — every recognized fact is flagged for review before trusting
-it in a generated bundle. Non-secret identifiers (username, app key) may
-also be recorded via `--rr-username`/`--rr-app-key` for a future verified
-SOAP client; a password is deliberately never persisted to disk by this
-project. Credentials are never logged (see `wasds150.logging_setup`'s
-redaction filter) and downloaded/imported data stays local, excluded from
-any generated public/shareable artifact.
+**County and state CSV exports (verified).** A logged-in Premium subscriber
+downloads a county (`ctid_<id>_<stamp>.csv`) or the whole state
+(`stid_<id><stamp>.csv`) from radioreference.com; drop the files in one
+directory and point the adapter at it:
+
+```powershell
+wasds150 sources configure --rr-export-path .wasds150-home\rr-exports
+wasds150 sources update --only radioreference_premium --apply
+```
+
+The layout (`Frequency Output`, `Frequency Input`, `FCC Callsign`,
+`Agency/Category`, `County` in the state file, `Description`, `Alpha Tag`,
+`PL Output Tone`, `PL Input Tone`, `Mode`, `Class Station Code`, `Tag`) was
+verified against September 2026 exports; tone spellings (`103.5 PL`,
+`023 DPL`, `293 NAC`, `37 RAN`, `CC 1|TG 9|SL 1`) and mode labels are decoded
+into the catalog's notation, and DMR colour code / talkgroup / timeslot and
+NXDN RAN become structured channel fields. Rows tagged `TRS` are trunked-system
+site frequencies and are kept as site facts, never as voice channels. Every
+county becomes its own `licensed=True` list (`RRC-KING`, ...; `RRWA` for the
+statewide categories), enabled by default only within 60 miles of home. Those
+lists live in the local catalog only: `plan export --exclude-licensed`
+produces the copy that can be committed or shared.
+
+**SOAP web service.** RadioReference's Database Web Service needs an
+application key in addition to the Premium login; the application text is in
+`docs/radioreference-api-application.md`. The live adapter is a follow-up once
+a key is issued. Non-secret identifiers (username, app key) may be recorded via
+`--rr-username`/`--rr-app-key`; a password is deliberately never persisted to
+disk (`WASDS150_RR_PASSWORD` at run time only). Credentials are never logged
+(see `wasds150.logging_setup`'s redaction filter).
 
 ### RepeaterBook
 

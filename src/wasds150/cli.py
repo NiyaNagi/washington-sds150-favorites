@@ -482,6 +482,7 @@ def cmd_plans_export(args: argparse.Namespace) -> int:
             target_id=args.target,
             out_dir=Path(args.out),
             copy_to=Path(args.copy_to) if args.copy_to else None,
+            include_licensed=not args.exclude_licensed,
         )
     except (KeyError, NotImplementedError, ValueError, OSError) as exc:
         print(f"error: {exc}", file=sys.stderr)
@@ -1611,6 +1612,12 @@ def build_parser() -> argparse.ArgumentParser:
         "--copy-to",
         help="Also copy the programming file here, e.g. the folder the vendor "
         "programmer loads from",
+    )
+    p_plan_export.add_argument(
+        "--exclude-licensed",
+        action="store_true",
+        help="Leave out lists built from licensed data (RadioReference), for a "
+        "copy that can be committed or shared",
     )
     p_plan_export.add_argument("--json", action="store_true")
     p_plan_export.set_defaults(func=cmd_plans_export)

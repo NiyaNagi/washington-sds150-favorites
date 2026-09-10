@@ -177,11 +177,78 @@ TH_D75 = RadioProfile(
     verified=True,
 )
 
+#: Characters the Anytone CPS accepts in a channel, zone or scan-list name.
+#: ``|`` and ``,`` are excluded because the CPS CSV bundle uses them as the
+#: member-list and column separators, and ``"`` because every field is
+#: double-quoted and the CPS does not unescape embedded quotes reliably.
+_ATD890_CHARSET = string.ascii_letters + string.digits + " -_./+()#&'!?:"
+
+#: Anytone AT-D890UV, US band mode, firmware/CPS 1.05 (2026-05-20).
+#:
+#: Sources: the AT-D890UV user manual (technical specifications: 136-174 /
+#: 400-480 MHz US variant, 4,000 channels, 250 zones of up to 160 channels,
+#: 250 scan lists), the v1.05 firmware change log ("scan groups 50 channels
+#: limit to 100 channels limit"), KD0PNQ's AT-D890UV Programming Guide (rev
+#: 2026-04-07: AM air band 108-137 MHz and FM broadcast 87.6-108 MHz receive
+#: live in their own CPS lists, separate from the 4,000 channels), and a real
+#: CPS "Export All" bundle (16-character names, CSV column set).
+#:
+#: ``rx_bands`` includes the broadcast and air bands because the radio does
+#: receive them; the exporter routes those rows to the AM-air and FM lists
+#: instead of the main channel table. ``tx_bands`` describes the US amateur
+#: band mode the radio ships in; 220 MHz needs band mode 14 and is not
+#: assumed. DMR is Tier I/II conventional only (no Tier III, no Capacity
+#: Plus), NXDN is conventional only and needs the NX_DMR firmware overlay,
+#: and the radio runs one digital protocol at a time. P25 is deliberately
+#: absent: the SCT3288 baseband cannot decode it, so P25 rows are dropped
+#: rather than coerced.
+AT_D890UV = RadioProfile(
+    id="at-d890uv",
+    vendor="Anytone",
+    model="AT-D890UV",
+    rx_bands=(
+        (87.6, 108.0),
+        (108.0, 137.0),
+        (136.0, 174.0),
+        (400.0, 480.0),
+    ),
+    modes=frozenset({"AM", "FM", "NFM", "WFM", "FMB", "DMR", "NXDN"}),
+    tx_bands=(
+        (144.0, 148.0),
+        (420.0, 450.0),
+    ),
+    max_channels=4000,
+    name_max_len=16,
+    name_charset=_ATD890_CHARSET,
+    name_style="readable",
+    supports_trunking=False,
+    supports_talkgroups=False,
+    supports_banks=True,
+    supports_per_channel_tone=True,
+    supports_per_channel_mode=True,
+    supports_per_channel_step=False,
+    zone_max=250,
+    zone_member_max=160,
+    scan_list_member_max=100,
+    notes=(
+        "Dual-band DMR/NXDN/analog handheld with AM air-band and FM broadcast "
+        "receive. Channels live in named zones; scanning uses explicit scan "
+        "lists of up to 100 members (firmware 1.05). AM air channels (108-137 "
+        "MHz) and FM broadcast stations are separate CPS lists with their own "
+        "zones and scan. DMR Tier I/II conventional only; NXDN conventional "
+        "only via the NX_DMR firmware overlay; DMR and NXDN cannot be active "
+        "at the same time. No P25. Programmed with the Anytone D890UV CPS by "
+        "importing a CSV bundle (Tool > Import > .LST)."
+    ),
+    verified=False,
+)
+
 _REGISTRY: Dict[str, RadioProfile] = {
     SDS150.id: SDS150,
     TD_H9.id: TD_H9,
     FTX1.id: FTX1,
     TH_D75.id: TH_D75,
+    AT_D890UV.id: AT_D890UV,
 }
 
 

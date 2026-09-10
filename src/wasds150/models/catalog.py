@@ -109,6 +109,23 @@ class Channel:
     dv_urcall: str = ""
     dv_rpt1: str = ""
     dv_rpt2: str = ""
+    #: DMR / NXDN identity for digital-voice transceivers. All optional so
+    #: scanner and analog catalogs stay radio-neutral. ``dmr_color_code``
+    #: duplicates the scanner-facing ``tone="ColorCode=N"`` notation; the
+    #: tone string remains what the SDS150 writer reads. ``dmr_talkgroup``
+    #: is a conventional-repeater contact, deliberately distinct from
+    #: ``tgid`` (which marks a trunked entry with no tunable frequency).
+    dmr_color_code: Optional[int] = None
+    dmr_timeslot: Optional[int] = None
+    dmr_talkgroup: Optional[int] = None
+    dmr_talkgroup_name: str = ""
+    #: "group" | "private" | "all"; empty means group.
+    dmr_call_type: str = ""
+    nxdn_ran: Optional[int] = None
+    nxdn_group_id: Optional[int] = None
+    #: Network the repeater is linked to ("PNWDigital", "Brandmeister", ...),
+    #: used to build receive-group lists on radios that have them.
+    network: str = ""
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -288,6 +305,12 @@ class FavoritesList:
     #: the target's capability is a data error and stays fatal.
     #: Excluded from ``content_hash`` because it is presentation, not fact.
     reference_only: bool = False
+    #: True for lists built from a licensed database the user holds a
+    #: personal subscription to (RadioReference Premium). They live only in
+    #: the user's local catalog: never written to the repository CSV, never
+    #: placed in a shareable bundle. Excluded from ``content_hash`` like
+    #: ``reference_only``.
+    licensed: bool = False
     systems: List[System] = field(default_factory=list)
     provenance: List[Provenance] = field(default_factory=list)
 

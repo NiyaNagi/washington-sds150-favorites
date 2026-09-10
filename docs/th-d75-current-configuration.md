@@ -93,7 +93,10 @@ K7LWH C Bellevue. These individual preferences are represented in the plan.
 - Meter display set to Type 1.
 - GPS position source changed to stored position 0.
 - Stored position 0 named `Home`, with altitude and coordinates populated.
-- APRS callsign changed from `NOCALL` to `KM7HKM`.
+- APRS callsign changed from `NOCALL` to `KM7HKM`. **The operator's call is
+  now `WA7DAM`**; the tracked image and its decoded settings still hold the
+  earlier call because they are an exact read of the radio. Enter `WA7DAM` in
+  MCP-D75 (APRS My Callsign and Menu 610) on the next write and re-read.
 - APRS QSY-in-status enabled.
 - APRS icon symbol changed from raw value 91 to 62.
 - D-STAR GPS data-in-frame transmission enabled.
@@ -105,7 +108,7 @@ K7LWH C Bellevue. These individual preferences are represented in the plan.
   display selected, and Voice Alert set to RX Only.
 
 The six D-STAR `My Callsign` slots under Menu 610 remain empty in this image.
-`KM7HKM` is currently configured for APRS only; normal D-STAR DV/DR
+The callsign is currently configured for APRS only; normal D-STAR DV/DR
 transmission remains unavailable until the callsign is also entered in Menu
 610.
 

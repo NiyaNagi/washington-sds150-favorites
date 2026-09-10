@@ -9,12 +9,13 @@ from __future__ import annotations
 from typing import List
 
 from wasds150.plan.resolve import ResolvedPlan
+from wasds150.radios.digital import describe as describe_digital
 
 _REASON_EXPLANATIONS = {
     "no-rx-coverage": "outside the radio's receive coverage",
     "unsupported-mode": "the radio cannot demodulate this mode",
     "not-conventional": "trunked talkgroup with no tunable frequency",
-    "duplicate": "the frequency is already programmed",
+    "duplicate": "the frequency (or talkgroup on it) is already programmed",
     "capacity": "the radio ran out of memory slots",
     "block-limit": "the plan capped this block",
 }
@@ -72,6 +73,8 @@ def render_plan_report(resolved: ResolvedPlan, *, max_drops_per_reason: int = 8)
         else:
             tx = f"{channel.tx_freq_mhz:.4f}"
         tone = channel.tx_tone.raw if channel.tx_tone.raw else "-"
+        if channel.digital is not None:
+            tone = describe_digital(channel.digital) or channel.digital.protocol
         lines.append(
             f"| {channel.slot} | {channel.name} | {channel.rx_freq_mhz:.4f} | {tx} "
             f"| {channel.mode} | {tone} | {channel.source} |"

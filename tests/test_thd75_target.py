@@ -70,6 +70,9 @@ def test_current_operator_artifacts_are_complete_and_consistent() -> None:
     assert settings["source_sha256"] == digest
     assert settings["setting_count"] == 400
     by_name = {entry["name"]: entry["value"] for entry in settings["settings"]}
+    # The tracked image still carries the earlier call; the operator's current
+    # call is WA7DAM and is entered in MCP-D75 on the next write (see
+    # docs/th-d75-current-configuration.md).
     assert by_name["aprs.MyCallsign"] == "KM7HKM"
     assert by_name["radio.BluetoothOnOff"] is True
     assert by_name["gps.MyPositionList[0].Name"] == "Home"

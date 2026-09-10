@@ -172,6 +172,28 @@ class PlanBlock:
 
 
 @dataclass(frozen=True)
+class ScanGroup:
+    """A named scan list composed from several blocks.
+
+    Radios with explicit scan lists (Anytone, Kenwood group link) get one
+    list per block automatically; a scan group is the operator's own
+    combination - "everything amateur", "public service" - built from the
+    non-``skip_scan`` channels of the named blocks in plan order. A target
+    with a per-list member ceiling splits the group into numbered lists.
+    """
+
+    name: str
+    blocks: Tuple[str, ...]
+    notes: str = ""
+
+    def __post_init__(self) -> None:
+        if not self.name.strip():
+            raise ValueError("scan group needs a name")
+        if not self.blocks:
+            raise ValueError(f"scan group {self.name!r} names no blocks")
+
+
+@dataclass(frozen=True)
 class ChannelPlan:
     """An ordered set of blocks targeting one radio."""
 
@@ -182,6 +204,8 @@ class ChannelPlan:
     blocks: Tuple[PlanBlock, ...] = ()
     #: Slots held back at the end of memory for field discoveries.
     reserve_slots: int = 0
+    #: Composite scan lists; ignored by targets whose radio has no scan lists.
+    scan_groups: Tuple[ScanGroup, ...] = ()
 
     def __post_init__(self) -> None:
         if self.reserve_slots < 0:
@@ -191,6 +215,16 @@ class ChannelPlan:
             if block.label in seen:
                 raise ValueError(f"duplicate block label {block.label!r}")
             seen.add(block.label)
+        group_names = set()
+        for group in self.scan_groups:
+            if group.name in group_names:
+                raise ValueError(f"duplicate scan group {group.name!r}")
+            group_names.add(group.name)
+            missing = [label for label in group.blocks if label not in seen]
+            if missing:
+                raise ValueError(
+                    f"scan group {group.name!r} names unknown blocks: {', '.join(missing)}"
+                )
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -199,6 +233,10 @@ class ChannelPlan:
             "label": self.label,
             "description": self.description,
             "reserve_slots": self.reserve_slots,
+            "scan_groups": [
+                {"name": group.name, "blocks": list(group.blocks), "notes": group.notes}
+                for group in self.scan_groups
+            ],
             "blocks": [
                 {
                     "label": block.label,

@@ -254,7 +254,7 @@ knurl_count      = 40;
 knurl_d          =  4.00;  // scallop diameter, mm
 knurl_depth      =  1.00;  // how far it bites into the skirt, mm
 
-text_line1       = "KM7HKM";
+text_line1       = "WA7DAM";
 text_line2       = "WA7DAM";
 text_size        = 18.0;   // mm cap height
 text_depth       =  1.00;  // mm cut into the 3mm disc, leaving 2mm

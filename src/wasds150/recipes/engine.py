@@ -37,6 +37,17 @@ from wasds150.sources.facts import NormalizedFact
 #:   missing; "none" — nothing matched at all.
 COVERAGE_LEVELS = ("full", "partial", "none")
 
+#: Sources whose facts come from a database the user is licensed to use
+#: personally. They match baseline rows only by exact system identity, and
+#: their conventional rows are collected into separate ``licensed`` lists
+#: (see :mod:`wasds150.recipes.rr_county`) rather than folded into the
+#: public catalog.
+LICENSED_SOURCE_IDS = ("sentinel_local", "radioreference_premium", "radioreference_api")
+
+#: County lists built from RadioReference start enabled only near home;
+#: the rest of the state is imported but switched off until the user asks.
+RR_ENABLE_RADIUS_MILES = 60.0
+
 
 @dataclass
 class RecipeCoverage:
@@ -77,7 +88,7 @@ def _fact_matches(recipe: Recipe, fact: NormalizedFact) -> bool:
         # substring matching would make SID 8217 collide with 18217.
         key_match = re.search(r"(?:^|:)(?:TrunkId|SysId):(\d+)$", fact.entity_key)
         return bool(key_match and int(key_match.group(1)) in configured_sids)
-    if fact.source_id in ("sentinel_local", "radioreference_premium"):
+    if fact.source_id in LICENSED_SOURCE_IDS:
         # Licensed database systems require an exact stable identity.
         # County and display-name fallbacks can absorb dozens of unrelated
         # systems and are reserved for public conventional-source facts.
@@ -117,7 +128,7 @@ def evaluate_recipe(recipe: Recipe, facts: List[NormalizedFact]) -> RecipeCovera
     matched = [f for f in facts if _fact_matches(recipe, f)]
     warnings: List[str] = []
 
-    local_matched = any(f.source_id in ("sentinel_local", "radioreference_premium") for f in matched)
+    local_matched = any(f.source_id in LICENSED_SOURCE_IDS for f in matched)
     if recipe.requires_local_hpdb:
         status = "full" if local_matched else ("partial" if matched else "none")
         if not local_matched:
@@ -138,7 +149,7 @@ def evaluate_recipe(recipe: Recipe, facts: List[NormalizedFact]) -> RecipeCovera
 
 
 def _provenance_for(fact: NormalizedFact) -> Provenance:
-    confidence = "verified" if fact.source_id in ("sentinel_local", "radioreference_premium") else "community"
+    confidence = "verified" if fact.source_id in LICENSED_SOURCE_IDS else "community"
     return Provenance(
         source_adapter=fact.source_id,
         source_url=fact.source_url or None,
@@ -193,6 +204,32 @@ def enrich_catalog(
                 else:
                     new_fl.systems = systems_mod.dedupe_systems(new_fl.systems + new_systems)
         new_favorites.append(new_fl)
+
+    # RadioReference conventional rows become their own licensed per-county
+    # lists. They are rebuilt from scratch whenever the source ran, so a
+    # refreshed export replaces the previous run's copy instead of merging
+    # into it; when the source did not run, the previous copies survive.
+    from wasds150.catalog.ames_lake import AMES_LAKE_LAT, AMES_LAKE_LON
+    from wasds150.recipes.rr_county import build_rr_favorites
+
+    rr_lists = build_rr_favorites(
+        facts, home=(AMES_LAKE_LAT, AMES_LAKE_LON), enable_within_miles=RR_ENABLE_RADIUS_MILES
+    )
+    # The regional DMR network layout (PNWDigital / SeattleDMR) is rebuilt
+    # the same way from the Config Builder facts, with repeater positions
+    # joined from the coordinator rows the catalog already holds.
+    from wasds150.recipes.dmr_networks import build_network_favorites, coordinate_lookup_from_catalog
+
+    network_lists = build_network_favorites(facts, coords=coordinate_lookup_from_catalog(base_catalog))
+    rebuilt = rr_lists + network_lists
+    if rebuilt:
+        replaced = {fl.slug for fl in rebuilt}
+        previous_enabled = {fl.slug: fl.enabled for fl in base_catalog.favorites if fl.origin == "local"}
+        new_favorites = [fl for fl in new_favorites if fl.slug not in replaced]
+        for fl in rebuilt:
+            if fl.slug in previous_enabled:
+                fl.enabled = previous_enabled[fl.slug]
+            new_favorites.append(fl)
 
     enriched_catalog = Catalog(favorites=new_favorites)
     populated_rollups = systems_mod.populate_rollups(enriched_catalog)

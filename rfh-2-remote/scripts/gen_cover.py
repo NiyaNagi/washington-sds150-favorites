@@ -122,7 +122,7 @@ for st in text_strokes(credit, 0, 0, 1.8):
     silk += polyline(rot)
 
 # callsign, centred along the bottom edge below the last row of switches
-CALLSIGN = 'KM7HKM / WA7DAM'
+CALLSIGN = 'WA7DAM'
 _cs = text_strokes(CALLSIGN, 0, 0, 2.6)
 _w = max(px for st in _cs for px, py in st)
 _cx, _cy = (BW - _w) / 2, 7.4

@@ -17,7 +17,9 @@ can be picked up and loaded without running the toolchain first.
 | `thd75-scan-report.md` | Kenwood TH-D75A | One frequency-ordered list, everything tunable within 75 mi; broadcast/data/CB scan-skipped |
 | `thd75-current.d75` | Kenwood TH-D75A | Exact operator-requested 545-memory image with all settings |
 | `thd75-current-settings.json` | | All 400 typed MCP settings decoded for review |
-| `thd75-power-on-KM7HKM.bmp` | | 240x180 16-bit RGB565 power-on identification image |
+| `thd75-power-on-KM7HKM.bmp` | | 240x180 16-bit RGB565 power-on identification image (earlier callsign; the operator is now WA7DAM) |
+| `atd890-scan/` | Anytone AT-D890UV | CPS 1.05 import bundle: `Channel.CSV`, zones, scan lists, talkgroups, receive groups, AM air and FM lists, `.LST` manifest - built **without** RadioReference rows |
+| `atd890-scan-report.md` | | Human-readable zone map, drops and warnings for that public copy |
 
 The FTX-1 files are alternatives, not additions - loading one replaces the
 radio's memories with the next. `ftx1-wa` is the statewide inventory;
@@ -42,6 +44,14 @@ wasds150 --home .wasds150-home plan export ftx1-local --target ftx1-file --out r
 wasds150 --home .wasds150-home plan export ftx1-scan --target ftx1-file --out radio-configs
 wasds150 --home .wasds150-home plan export thd75-ames-lake --target thd75-file --out radio-configs
 wasds150 --home .wasds150-home plan export thd75-scan --target thd75-file --out radio-configs
+wasds150 --home .wasds150-home plan export atd890-scan --target atd890-cps --out radio-configs --exclude-licensed
+```
+
+The Anytone bundle you actually load should include your own RadioReference
+export, so build that one into the git-ignored output directory instead:
+
+```bash
+wasds150 --home .wasds150-home plan export atd890-scan --target atd890-cps --out wasds150-output/radios
 ```
 
 > **Copy the file to wherever you actually load it from.** Exporting writes
@@ -71,6 +81,10 @@ per-channel text from the RT Systems programmer is present. See
   `scripts/radios/program_tdh9.py`. See
   [the programming guide](../docs/td-h9-programming.md).
 - **FTX-1** - open the `.FTX1` directly in the RT Systems programmer.
+- **AT-D890UV** - in the Anytone CPS: File > New, Tool > Import > select
+  `atd890-scan/atd890-scan.LST` > Import All, fix the Radio ID, set the
+  Optional Settings listed in [the AT-D890UV guide](../docs/at-d890uv-programming.md),
+  write.
 - **TH-D75A** - open the private `.d75` in Kenwood MCP-D75, import the filtered
   native D-STAR list, finalize settings preservation, write, and read back as
   documented in [the TH-D75 guide](../docs/th-d75-ames-lake.md). Native `.d75`

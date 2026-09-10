@@ -203,8 +203,34 @@ These wasted real time:
 2. **Channel plan** → `src/wasds150/plans/`, then register it in
    `src/wasds150/plans/__init__.py`.
 3. **Export target** → `src/wasds150/export/registry.py`, declaring
-   `radio_id` so a plan can never reach the wrong writer.
+   `radio_id` so a plan can never reach the wrong writer. A vendor CPS that
+   imports a *set* of files declares `kind="directory"` and its writer
+   returns a result with `.files`; `export_plan` then treats `csv_path` as
+   the bundle directory (see `export/atd890_cps.py`).
 4. **Tests** → extend `tests/test_radios.py` and `tests/test_plan.py`.
+
+Radios with zones and explicit scan lists (Anytone, Kenwood group link) read
+`PlanBlock.bank` as the zone and `ChannelPlan.scan_groups` as composite scan
+lists; `RadioProfile.zone_max` / `zone_member_max` / `scan_list_member_max`
+carry the ceilings. DMR/NXDN identity lives on `Channel.dmr_*` / `nxdn_ran`
+and reaches exporters as `PlannedChannel.digital`
+(`wasds150.radios.digital.DigitalSpec`); the resolver treats two talkgroups on
+one repeater as two memories.
+
+### Refreshing the licensed and community sources
+
+```powershell
+# RadioReference Premium county/state CSV exports dropped in .wasds150-home\rr-exports\
+.\.venv\Scripts\wasds150.exe --home .wasds150-home sources configure --rr-export-path .wasds150-home\rr-exports
+.\.venv\Scripts\wasds150.exe --home .wasds150-home sources update --only radioreference_premium --apply
+# PNWDigital / SeattleDMR Config Builder files (public)
+.\.venv\Scripts\wasds150.exe --home .wasds150-home sources update --only seattledmr --apply
+.\.venv\Scripts\python.exe scripts\radios\build_atd890_dmr_snapshot.py   # refresh the committed snapshot
+```
+
+RadioReference rows become `licensed=True` lists (`RRC-KING`, `RRWA`, ...)
+that stay in the local catalog; `plan export --exclude-licensed` builds the
+copy that may be committed.
 
 The CLI and the Radios tab both pick all three up automatically via
 `src/wasds150/plan/service.py`. No front-end change is needed.

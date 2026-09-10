@@ -157,20 +157,74 @@ def _filter_charset(text: str, charset: Optional[str]) -> str:
     return "".join(ch for ch in text if ch in allowed)
 
 
+#: Word separators for the readable style. A hyphen only separates when it
+#: is surrounded by spaces (``W7JCR - Port Townsend``); inside a token it is
+#: part of the name (``I-5``, ``TAC 310-2``).
+_SEPARATOR = re.compile(r"\s*[/:,;|()]+\s*|\s+-\s+|\s+")
+
+
+def _readable_candidates(label: str) -> Iterable[str]:
+    """Space-separated, case-preserving forms of ``label``, tightest last.
+
+    ``"W7JCR - Port Townsend"`` yields ``"W7JCR Port Townsend"``, then the
+    same without filler words, then with the conventional abbreviations
+    applied, then with interior vowels dropped from the long words and
+    finally from every word (``"W7JCR Prt Twnsnd"``), then with trailing
+    words dropped. Digits and callsigns are never touched.
+    """
+    words = [w for w in _SEPARATOR.split(label.strip()) if w]
+    words = [w for w in (re.sub(r"[^A-Za-z0-9.+#&'-]", "", w).strip("-") for w in words) if w]
+    if not words:
+        return
+    yield " ".join(words)
+    meaningful = [w for w in words if w.upper() not in _FILLER] or words
+    yield " ".join(meaningful)
+    abbreviated = [_ABBREVIATIONS.get(w.upper(), w) for w in meaningful]
+    yield " ".join(abbreviated)
+    yield " ".join(w if _has_digit(w) or len(w) <= 4 else _devowel_keep_case(w) for w in abbreviated)
+    squeezed = [w if _has_digit(w) or len(w) <= 2 else _devowel_keep_case(w) for w in abbreviated]
+    yield " ".join(squeezed)
+    # Drop trailing words that carry no digits, one at a time.
+    remaining = list(squeezed)
+    while len(remaining) > 1:
+        droppable = [i for i, w in enumerate(remaining) if not _has_digit(w)]
+        if not droppable:
+            break
+        del remaining[droppable[-1]]
+        yield " ".join(remaining)
+
+
+def _devowel_keep_case(word: str) -> str:
+    head, tail = word[0], word[1:]
+    stripped = "".join(ch for ch in tail if ch.upper() not in "AEIOU")
+    return head + (stripped or tail)
+
+
 def shorten_name(
     label: str,
     max_len: int,
     *,
     charset: Optional[str] = None,
     fallback: str = "CH",
+    readable: bool = False,
 ) -> str:
     """Shorten ``label`` to at most ``max_len`` characters.
+
+    With ``readable=True`` the label keeps its case and spacing whenever a
+    space-separated form fits; the compact (upper case, no spaces) forms are
+    only used when none does.
 
     This does not attempt to make the result unique; use :class:`NameAllocator`
     when several channels share a display.
     """
     if max_len <= 0:
         raise ValueError("max_len must be positive")
+
+    if readable:
+        for candidate in _readable_candidates(label):
+            candidate = _filter_charset(candidate, charset).strip()
+            if candidate and len(candidate) <= max_len:
+                return candidate
 
     best = ""
     for candidate in _candidates(label, max_len):
@@ -197,9 +251,10 @@ class NameAllocator:
     long as the plan's ordering is stable.
     """
 
-    def __init__(self, max_len: int, *, charset: Optional[str] = None) -> None:
+    def __init__(self, max_len: int, *, charset: Optional[str] = None, readable: bool = False) -> None:
         self.max_len = max_len
         self.charset = charset
+        self.readable = readable
         self._taken: Set[str] = set()
         self._assigned: Dict[str, str] = {}
 
@@ -207,7 +262,7 @@ class NameAllocator:
         if key is not None and key in self._assigned:
             return self._assigned[key]
 
-        stem = shorten_name(label, self.max_len, charset=self.charset)
+        stem = shorten_name(label, self.max_len, charset=self.charset, readable=self.readable)
         name = stem
         suffix = 1
         while name in self._taken:

@@ -1,7 +1,7 @@
 # RepeaterBook API Compliance Design
 
 This document is the implementation and operating plan for using the
-RepeaterBook API in Signal - KM7HKM Personal Radio Programmer. It is written
+RepeaterBook API in Signal - WA7DAM Personal Radio Programmer. It is written
 to answer RepeaterBook's review questions before the API adapter is enabled.
 
 **Canonical public review URL:**
@@ -40,7 +40,7 @@ before that adapter can be enabled.
 
 Application name:
 
-Signal - KM7HKM Personal Radio Programmer
+Signal - WA7DAM Personal Radio Programmer
 
 Repository:
 
@@ -60,7 +60,7 @@ or HTTP-library user agent.
 
 Operator:
 
-KM7HKM, a newly licensed amateur radio operator using the application for their
+WA7DAM, a General-class amateur radio operator using the application for their
 own radios only.
 
 ## Purpose and Scope
@@ -72,6 +72,7 @@ programming files for personally owned radios. Current radios include:
 - Uniden SDS150
 - TIDRADIO TD-H9
 - Yaesu FTX-1
+- Anytone AT-D890UV
 
 Version 1 will use RepeaterBook only to select currently listed Washington State
 amateur repeaters for programming the operator's radios. The application needs
@@ -149,7 +150,7 @@ RepeaterBook.
 Signal is a distributed application and will never use a shared `app_` token.
 Every user must generate and use their own RepeaterBook dashboard-issued,
 app-bound `rbuapp_` token. In the present private deployment, the only user is
-KM7HKM.
+WA7DAM.
 
 The token will be provided at runtime from one of these locations only:
 

@@ -22,6 +22,7 @@ from wasds150.sources.base import OnlineSourceAdapter, SourceAdapter
 from wasds150.sources.faa_nasr import FaaNasrSource
 from wasds150.sources.fcc_uls import FccUlsSource
 from wasds150.sources.iacc import IaccSource
+from wasds150.sources.k7abd import SeattleDmrSource
 from wasds150.sources.nifc import NifcSource
 from wasds150.sources.noaa_wx import NoaaNwrSource
 from wasds150.sources.nwac import NwacSource
@@ -53,6 +54,7 @@ _REGISTRY: Dict[str, AnySourceClass] = {
     IaccSource.name: IaccSource,
     FaaNasrSource.name: FaaNasrSource,
     FccUlsSource.name: FccUlsSource,
+    SeattleDmrSource.name: SeattleDmrSource,
     # Online change-detection-only sources (PDF/image landing pages).
     NwacSource.name: NwacSource,
     WaEmdSource.name: WaEmdSource,

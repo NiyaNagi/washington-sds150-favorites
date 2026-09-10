@@ -10,6 +10,7 @@ from __future__ import annotations
 from typing import Dict, List
 
 from wasds150.models.plan import ChannelPlan
+from wasds150.plans.atd890_scan import ATD890_SCAN
 from wasds150.plans.ftx1_local import FTX1_LOCAL
 from wasds150.plans.ftx1_scan import FTX1_SCAN
 from wasds150.plans.ftx1_wa import FTX1_WA
@@ -24,6 +25,7 @@ _REGISTRY: Dict[str, ChannelPlan] = {
     FTX1_SCAN.id: FTX1_SCAN,
     THD75_AMES_LAKE.id: THD75_AMES_LAKE,
     THD75_SCAN.id: THD75_SCAN,
+    ATD890_SCAN.id: ATD890_SCAN,
 }
 
 
@@ -46,6 +48,7 @@ def get_plan(plan_id: str) -> ChannelPlan:
 
 
 __all__ = [
+    "ATD890_SCAN",
     "FTX1_LOCAL",
     "FTX1_SCAN",
     "FTX1_WA",

@@ -43,6 +43,13 @@ radio-backups/
 # Third-party USB serial drivers fetched for programming cables.
 .drivers/
 
+# Vendor programming software and firmware packages (downloaded by
+# radio-tools/anytone-d890uv/download.ps1); only the script is tracked.
+radio-tools/**
+!radio-tools/**/
+!radio-tools/**/*.ps1
+!radio-tools/**/*.md
+
 # Scratch files from interactive debugging sessions.
 .tmp-*
 .local/

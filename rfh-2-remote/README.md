@@ -189,9 +189,9 @@ nothing is copied from ARRL's chart layout.
 **Verify against current FCC rules before relying on silkscreen for anything
 on-air.** Allocations change and a board is a snapshot, not an authority.
 
-The silkscreen carries the callsigns `KM7HKM / WA7DAM`. `WA7DAM` was a vanity
-request that may not have been granted — check before fabricating a board with
-it on the front.
+The silkscreen carries the callsign `WA7DAM` (the vanity call granted in place
+of the original `KM7HKM`). Re-run the generator scripts before fabricating so
+the artwork matches.
 
 ## Licensing
 
@@ -201,4 +201,4 @@ It contains and derives from PY2RAF's GPL-3.0 work. See [`LICENSE`](LICENSE).
 - Keypad design, schematic, board, legends and arrow artwork: PY2RAF,
   [`github.com/rfrht/RFH-2`](https://github.com/rfrht/RFH-2), GPL-3.0
 - Faceplate concept: Jim N5JGE, who built the first one
-- Cover, back plate, BOM tooling and documentation here: KM7HKM
+- Cover, back plate, BOM tooling and documentation here: WA7DAM

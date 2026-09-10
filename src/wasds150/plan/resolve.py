@@ -26,6 +26,7 @@ from wasds150.models.plan import (
     natural_key,
 )
 from wasds150.plan.naming import NameAllocator
+from wasds150.radios.digital import DIGITAL_MODES, DigitalSpec, digital_identity, digital_spec
 from wasds150.radios.profile import RadioProfile
 from wasds150.radios.registry import get_profile
 from wasds150.radios.tones import NO_TONE, ToneSpec, parse_tone
@@ -70,6 +71,13 @@ class PlannedChannel:
     dv_urcall: str = ""
     dv_rpt1: str = ""
     dv_rpt2: str = ""
+    #: DMR/NXDN identity for digital-capable targets; ``None`` for analog.
+    digital: Optional[DigitalSpec] = None
+    #: The repeater input the source publishes, kept even on receive-only
+    #: memories (``tx_freq_mhz`` is only set when transmit is allowed). A DMR
+    #: radio still wants it so a monitored repeater is programmed in repeater
+    #: mode rather than as a simplex frequency.
+    input_freq_mhz: Optional[float] = None
 
 
 @dataclass
@@ -188,7 +196,7 @@ def _select_for_block(
 
 
 def _resolve_tones(
-    channel: Channel, transmit: bool
+    channel: Channel, transmit: bool, mode: str = ""
 ) -> Tuple[ToneSpec, ToneSpec, List[str]]:
     """Decide receive and transmit tones.
 
@@ -196,8 +204,14 @@ def _resolve_tones(
     receive tone makes the radio ignore every transmission that does not carry
     it, which is the opposite of what you want when the reason the channel is
     programmed at all is to hear what is happening.
+
+    Digital modes carry their access identity (colour code, RAN, NAC) in
+    :class:`~wasds150.radios.digital.DigitalSpec` instead, so no analog tone
+    is programmed and no warning is raised about the tone string.
     """
     notes: List[str] = []
+    if (mode or "").upper() in DIGITAL_MODES:
+        return NO_TONE, NO_TONE, notes
     output_tone = parse_tone(channel.tone)
     input_tone = parse_tone(channel.tx_tone) if channel.tx_tone else output_tone
 
@@ -231,10 +245,17 @@ def resolve_plan(
 
     candidates = list(iter_catalog_channels(catalog))
     allocator = NameAllocator(
-        profile.name_max_len or 64, charset=profile.name_charset
+        profile.name_max_len or 64,
+        charset=profile.name_charset,
+        readable=(profile.name_style == "readable"),
     )
     capacity = result.capacity
-    seen_frequencies: Dict[Tuple[float, Optional[float], bool, str], PlannedChannel] = {}
+    seen_frequencies: Dict[Tuple, PlannedChannel] = {}
+    #: Digital memories that carry a contact identity, keyed by
+    #: ``(frequency, mode)``. A bare digital row (colour code only, as the
+    #: coordinator publishes it) adds nothing once a talkgroup channel for the
+    #: same repeater is programmed, so it is dropped as covered.
+    seen_digital_identity: Dict[Tuple[float, str], PlannedChannel] = {}
     slot = 0
 
     for block in plan.blocks:
@@ -304,7 +325,21 @@ def resolve_plan(
                     "programmed receive-only"
                 )
 
-            rx_tone, tx_tone, tone_notes = _resolve_tones(channel, transmit)
+            spec = digital_spec(channel, mode)
+            if transmit and mode == "DMR" and (spec is None or not spec.has_contact):
+                transmit = False
+                tx_freq = None
+                result.warnings.append(
+                    f"{channel.label}: DMR channel has no talkgroup; programmed receive-only"
+                )
+            if transmit and mode == "NXDN":
+                transmit = False
+                tx_freq = None
+                result.warnings.append(
+                    f"{channel.label}: NXDN channels are receive-only in this project"
+                )
+
+            rx_tone, tx_tone, tone_notes = _resolve_tones(channel, transmit, mode)
             result.warnings.extend(tone_notes)
 
             # Two memories are the same only if they tune identically. A GMRS
@@ -312,11 +347,15 @@ def resolve_plan(
             # channel of the same number but transmits five megahertz up, and
             # two repeaters can share a pair while answering to different
             # access tones, so the receive frequency alone is not an identity.
+            # Two talkgroups on one DMR repeater are likewise two memories.
+            identity = digital_identity(spec)
             tuning_key = (
                 freq,
                 tx_freq if transmit else None,
                 transmit,
                 tx_tone.raw if transmit else "",
+                mode if spec is not None else "",
+                identity,
             )
             existing = seen_frequencies.get(tuning_key)
             if existing is not None:
@@ -327,6 +366,17 @@ def resolve_plan(
                     )
                 )
                 continue
+            if spec is not None and not spec.has_contact:
+                covering = seen_digital_identity.get((freq, mode))
+                if covering is not None:
+                    result.dropped.append(
+                        DroppedChannel(
+                            channel.label, freq, block.label, "duplicate",
+                            f"covered by talkgroup channel in slot {covering.slot} "
+                            f"as {covering.label!r}",
+                        )
+                    )
+                    continue
 
             if capacity is not None and slot >= capacity:
                 result.dropped.append(
@@ -364,9 +414,15 @@ def resolve_plan(
                 dv_urcall=getattr(channel, "dv_urcall", ""),
                 dv_rpt1=getattr(channel, "dv_rpt1", ""),
                 dv_rpt2=getattr(channel, "dv_rpt2", ""),
+                digital=spec,
+                input_freq_mhz=(
+                    round(float(channel.tx_freq_mhz), 6) if channel.tx_freq_mhz is not None else None
+                ),
             )
             result.channels.append(planned)
             seen_frequencies[tuning_key] = planned
+            if spec is not None and spec.has_contact:
+                seen_digital_identity.setdefault((freq, mode), planned)
 
         result.block_counts[block.label] = taken
 
