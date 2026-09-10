@@ -134,6 +134,74 @@ envelope, not a centering fit.
 | M6 base nut thickness | 5.2 | Standard/common | Side tunnel height |
 | M6 base nut roof | 3.30 | Derived | Solid plate reaction above nut |
 
+## Brodit / ProClip vehicle mount interface
+
+Used by `models/proclip mounts/proclip_radio_mount.scad`. The two target
+mounts are ProClip **805284** (left mount) and **855100** (angle mount),
+both for the Volvo XC90 2015–20xx. Neither is owned yet, so **nothing in
+this section is Measured.**
+
+| Feature | Value | Status | Design use |
+| --- | ---: | --- | --- |
+| AMPS hole pattern, long side | 38.05 | Published standard | Screw pattern |
+| AMPS hole pattern, short side | 30.17 | Published standard | Screw pattern |
+| AMPS diagonal | 48.41 | Derived | Cross-check against 2-hole bases |
+| AMPS maximum screw diameter | 5.2 | Published standard | M4 chosen |
+| ProClip plate outline | Unknown | Unverified | Not used |
+| ProClip plate thickness | 5.0 | **Estimate** | Screw length only, never geometry |
+| ProClip plate hole diameter | Unknown | Unverified | Gauge pin ladder resolves it |
+| Brodit "two sets of double-holes" | Unknown | Unverified | Not used |
+| Plate material | ABS | Published | Why machine screws beat self-tappers |
+
+Brodit describe the mounting plate's pattern as "one set of AMPS-holes as
+well as two sets of double-holes placed in different height". The AMPS
+set is a documented industry standard and is the only part this design
+relies on. The double-hole pairs have no published spacing, so they are
+deliberately unused rather than guessed at.
+
+`proclip_gauge_horizontal.stl` and `proclip_gauge_vertical.stl` exist to
+turn the first four rows from Published into Measured. Each carries the
+AMPS holes in one orientation, a 3.0/3.5/4.0/4.5/5.0 mm pin ladder for
+the ProClip's own hole diameter, and a central window through which the
+undocumented double-holes can be seen and measured while the AMPS holes
+hold the gauge registered.
+
+Which physical mount takes which orientation is **not established**. The
+exporter's `horizontal`/`vertical` filenames are labels, not findings.
+
+### M4 fastener
+
+| Feature | Value | Status | Design use |
+| --- | ---: | --- | --- |
+| Clearance hole | 4.50 | Design | Through-hole in the plate |
+| Countersunk head diameter | 8.00 | Standard (ISO 10642 / DIN 7991) | Head recess |
+| Countersink included angle | 90 | Standard | Cone geometry |
+| Countersink depth | 1.75 | Derived | Head finishes flush |
+| Plate left under the head | 3.25 | Derived | Bearing material |
+| Nyloc nut height | 5.00 | Standard (DIN 985) | Screw length |
+| Minimum screw length | 15.0 | Derived on the ESTIMATED plate | Buy 16 mm |
+
+Countersunk rather than pan head because the SDS150's pedestal slides
+directly across this face; a proud head would foul it.
+
+### Ball-and-socket sizing, for reference
+
+Researched but not implemented — the six plates are rigid. Recorded so
+the size question does not have to be re-answered later.
+
+| Feature | Value | Status | Note |
+| --- | ---: | --- | --- |
+| ProClip / Garmin ball | 17 | Published | ProClip's own phone and GPS mounts |
+| RAM B size ball | 25.4 | Published | 2 lb standard / 1 lb heavy-duty use |
+| RAM C size ball | 38.1 | Published | Larger tablets |
+| AMPS-to-25 mm ball adapters | — | Published | e.g. Arkon APAMPS25MM |
+| RAM-B-238U 2-hole spacing | 48.56 | Published | The AMPS diagonal |
+
+A loaded SDS150 at 400 g (0.88 lb) exceeds what a 17 mm ball class is
+intended for, which is why ProClip's own ball accessory is not the right
+starting point for this radio. The 1" B-size ball is, and it bolts to the
+same AMPS pattern.
+
 ## Adjustable-head joint hardware
 
 | Feature | Value | Status | Design use |

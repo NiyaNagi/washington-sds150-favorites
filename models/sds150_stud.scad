@@ -168,3 +168,67 @@ module stud_solid(pos = 0, extra = 0, lift = 0) {
             cylinder(d = stud_head_d + extra, h = stud_head_t + 0.01);
     }
 }
+
+
+// =====================================================================
+//  GRAVITY KEYHOLE - the same geometry with the fit passed in
+// =====================================================================
+//
+//  Everything above closes over THIS file's fit variables, which suit the
+//  visor mount: latched, preloaded, deliberately snug.  Two things want
+//  otherwise.
+//
+//    * A gravity mount has no latch.  The radio is retained by its own
+//      weight, so it can afford - and wants - an easier fit.
+//    * A fit COUPON has to emit several fits from one model.  Overriding
+//      the variables above cannot do that, because the modules capture
+//      them once at include time.  The Peak Design standoff hit exactly
+//      this and got three identical coupons out of three settings.
+//
+//  So these take the fit as arguments instead.  The geometry is the same
+//  keyhole; only where the numbers come from has changed.  Physical stud
+//  dimensions still come from the top of this file, which is the point:
+//  a mount can choose its own clearances but cannot invent its own radio.
+//
+//  ledge_scale thins the lug-slide wall.  1.0 is the full neck height; the
+//  standoff runs 0.70 to trade axial freedom for easier removal.
+
+function gravity_ledge_t(fit_preload, ledge_scale) =
+    (stud_neck_h - fit_preload) * shrink_comp * ledge_scale;
+
+function gravity_total_depth(fit_preload, head_clr_z) =
+    ((stud_neck_h - fit_preload) + stud_head_t + head_clr_z) * shrink_comp;
+
+function gravity_entry_d(fit_slide, comp) =
+    (stud_head_d + 2 * fit_slide + comp) * shrink_comp;
+
+function gravity_neck_w(fit_slide) =
+    (stud_neck_d + 2 * fit_slide) * shrink_comp;
+
+function gravity_head_w(fit_slide) =
+    (stud_head_d + 2 * fit_slide) * shrink_comp;
+
+// Shortest slot that actually locks, for a given entry hole.
+function gravity_min_travel(fit_slide, comp) =
+    (gravity_entry_d(fit_slide, comp) + stud_head_d) / 2;
+
+// Neck slot and round entry, in the frame keyhole_void() uses: bearing
+// face at z = 0, locked stud at the origin, entry `travel` along +X.
+module gravity_keyhole_void(travel, above, fit_preload, fit_slide,
+                            ledge_scale, comp) {
+    ledge_v = gravity_ledge_t(fit_preload, ledge_scale);
+    translate([0, 0, -ledge_v - 0.01])
+        capsule(travel, gravity_neck_w(fit_slide), ledge_v + above + 0.02);
+    translate([travel, 0, -ledge_v - 0.01])
+        cylinder(d = gravity_entry_d(fit_slide, comp),
+                 h = ledge_v + above + 0.02, $fn = 64);
+}
+
+// The hidden channel the head runs in, beneath the ledge.
+module gravity_head_channel(travel, fit_preload, fit_slide, ledge_scale,
+                            head_clr_z) {
+    ledge_v = gravity_ledge_t(fit_preload, ledge_scale);
+    depth_v = gravity_total_depth(fit_preload, head_clr_z);
+    translate([0, 0, -depth_v])
+        capsule(travel, gravity_head_w(fit_slide), depth_v - ledge_v);
+}

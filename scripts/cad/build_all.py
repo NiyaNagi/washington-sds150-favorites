@@ -108,6 +108,18 @@ STANDOFF_WALL_LIMITS = {
     "radio_standoff_friction_washer_tpu.stl": "0.70",
 }
 
+PROCLIP_DIR = ROOT / "models" / "proclip mounts"
+PROCLIP_FILES = [
+    "proclip_gauge_horizontal.stl",
+    "proclip_gauge_vertical.stl",
+    "proclip_sds_horizontal.stl",
+    "proclip_sds_vertical.stl",
+    "proclip_clip_horizontal.stl",
+    "proclip_clip_vertical.stl",
+    "proclip_combined_horizontal.stl",
+    "proclip_combined_vertical.stl",
+]
+
 
 def run(label: str, args: list[str], required: bool = True) -> bool:
     """Run one step, streaming a short summary of its output."""
@@ -356,6 +368,38 @@ def main() -> None:
             if any(key in line for key in
                    ("min =", "bodies=", "PROBLEM", "no problems",
                     "bridge", "ISLAND", "PASS", "FAIL")):
+                print(f"         {line.strip()}")
+        all_clean &= clean
+
+    # ------------------------------------------------------------------
+    #  ProClip radio mounting plates
+    # ------------------------------------------------------------------
+    # Same order for the same reason: everything analytical runs before
+    # anything is written.  Note that passing these proves the plates are
+    # self-consistent, NOT that the ProClip's own pattern is AMPS - that
+    # is what the printed gauge is for.
+
+    run("32. proclip load sizing", [str(HERE / "design_proclip_mount.py")])
+    run("33. proclip AMPS interface",
+        [str(HERE / "check_proclip_interface.py")])
+    run("34. proclip SDS fit", [str(HERE / "check_proclip_fit.py")])
+    run("35. proclip clip fit", [str(HERE / "check_proclip_clip.py")])
+    run("36. proclip export", [str(HERE / "export_proclip_mounts.py")])
+
+    print(f"\n{'=' * 68}\n37. inspect proclip exports\n{'=' * 68}",
+          flush=True)
+    for name in PROCLIP_FILES:
+        path = PROCLIP_DIR / name
+        inspect = subprocess.run(
+            [str(PYTHON), "-W", "ignore",
+             str(HERE / "inspect_stl.py"), str(path)],
+            capture_output=True, text=True, cwd=ROOT,
+        )
+        clean = inspect.returncode == 0
+        print(f"  [{'OK ' if clean else 'BAD'}] {name}")
+        for line in inspect.stdout.splitlines():
+            if any(key in line for key in
+                   ("min =", "bodies=", "PROBLEM", "no problems")):
                 print(f"         {line.strip()}")
         all_clean &= clean
 

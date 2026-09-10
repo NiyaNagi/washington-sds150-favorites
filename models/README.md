@@ -21,6 +21,11 @@ And one unrelated part that happens to share the method:
   an SDS150 gravity keyhole on one face and a universal belt-clip bridge on
   the other. See
   [docs/peak-design-radio-standoff.md](../docs/peak-design-radio-standoff.md).
+- **ProClip radio mounting plates** — six rigid plates that bolt to a
+  Brodit/ProClip vehicle mount through its AMPS hole pattern, carrying the
+  SDS150, a belt-clip radio, or both. **Print the gauge first: the ProClip
+  interface is a published standard, not a measured one.** See
+  [docs/proclip-radio-mounts.md](../docs/proclip-radio-mounts.md).
 
 For the method behind these models — how they are structured, every helper
 script, the verification approach, and a full table of measured dimensions
@@ -33,7 +38,7 @@ if you are building a new part rather than adjusting an existing one.
 
 | File | What it is |
 | --- | --- |
-| `sds150_stud.scad` | The stud, its clearances, and the keyhole. Edit fit here — it applies to both mounts. |
+| `sds150_stud.scad` | The stud, its clearances, and the keyhole. Edit fit here — it applies to both mounts. It also carries `gravity_keyhole_void()` / `gravity_head_channel()`, which take the fit as arguments so a gravity mount and its fit coupons can vary it. |
 
 ### Visor mount
 
@@ -93,6 +98,28 @@ The [design guide](../docs/peak-design-radio-standoff.md),
 [implementation plan](../docs/peak-design-radio-standoff-plan.md), and
 [measurement registry](../docs/radio-hardware-measurements.md) record the
 architecture, load calculations, source measurements, and physical gates.
+
+### ProClip radio mounting plates
+
+| File | What it is |
+| --- | --- |
+| `proclip mounts/proclip_radio_mount.scad` | Parametric source for all six plates, the gauges, and the coupons. |
+| `proclip_gauge_{horizontal,vertical}.stl` / `.3mf` | **Print these first.** AMPS holes in one orientation, a 3.0–5.0 mm pin ladder for the ProClip's own hole size, and a window onto Brodit's undocumented double-holes. |
+| `proclip_coupon_sds_{easy,nominal,firm}.stl` / `.3mf` | The real pad, channel and keyhole at three fits. Pick one before printing a plate. |
+| `proclip_coupon_clip.stl` / `.3mf` | The real belt-clip bridge, cropped. |
+| `proclip_sds_{horizontal,vertical}.stl` / `.3mf` | SDS150 gravity keyhole on a flat pedestal pad. |
+| `proclip_clip_{horizontal,vertical}.stl` / `.3mf` | Universal belt-clip bridge, above the screw pattern. |
+| `proclip_combined_{horizontal,vertical}.stl` / `.3mf` | Both radios side by side on one plate. |
+
+Fasteners are **M4 × 16 mm countersunk machine screws with M4 nyloc nuts**
+and a washer under each nut; buy a few M4 × 20 mm too, because the length
+rests on an estimated ProClip plate thickness. `horizontal` and `vertical`
+name the two hole orientations and are **labels, not measurements** —
+which physical mount is which is what the gauge settles.
+
+The [design guide](../docs/proclip-radio-mounts.md) records the AMPS
+interface and what about it is unverified, the fastener choice, the load
+calculations, and the two bugs the harness caught.
 
 ## How the original is reused
 
