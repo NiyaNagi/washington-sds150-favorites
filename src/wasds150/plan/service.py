@@ -34,22 +34,13 @@ def _extra_favorites(radio_id: str) -> List[FavoritesList]:
     network talkgroup layouts, broadcast stations) that only a particular
     transceiver can use, so they are added at plan-resolution time rather
     than being merged into the shared catalog every scanner build reads.
+    Which radio gets which module follows its capabilities; see
+    :mod:`wasds150.catalog.extras`.
     """
-    if radio_id == "th-d75":
-        from wasds150.catalog.puget_broadcast import favorite as puget_broadcast
-        from wasds150.catalog.thd75_local import favorite as thd75_local
-        from wasds150.catalog.thd75_user import favorite as thd75_user
-        from wasds150.catalog.thd75_wwara_snapshot import favorite as thd75_wwara
+    from wasds150.catalog.extras import extras_for
+    from wasds150.radios.registry import get_profile
 
-        return [puget_broadcast(), thd75_local(), thd75_user(), thd75_wwara()]
-    if radio_id == "at-d890uv":
-        from wasds150.catalog.atd890_dmr import favorites as atd890_dmr
-        from wasds150.catalog.atd890_local import favorite as atd890_local
-        from wasds150.catalog.puget_broadcast import favorite as puget_broadcast
-        from wasds150.catalog.thd75_wwara_snapshot import favorite as thd75_wwara
-
-        return [puget_broadcast(), thd75_wwara(), atd890_local(), *atd890_dmr()]
-    return []
+    return extras_for(get_profile(radio_id))
 
 
 def resolve_named_plan(

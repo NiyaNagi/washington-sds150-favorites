@@ -183,4 +183,4 @@ def test_both_ftx1_plans_are_registered():
     from wasds150.plans import list_plans
 
     ftx1 = [p for p in list_plans().values() if p.radio_id == "ftx1"]
-    assert {p.id for p in ftx1} == {"ftx1-wa", "ftx1-local", "ftx1-scan"}
+    assert {p.id for p in ftx1} >= {"ftx1-wa", "ftx1-local", "ftx1-scan"}

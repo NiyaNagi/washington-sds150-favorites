@@ -16,6 +16,7 @@ from wasds150.plans.ftx1_scan import FTX1_SCAN
 from wasds150.plans.ftx1_wa import FTX1_WA
 from wasds150.plans.h9_ozette import H9_OZETTE
 from wasds150.plans.thd75_ames_lake import THD75_AMES_LAKE
+from wasds150.plans.template import fleet_plans
 from wasds150.plans.thd75_scan import THD75_SCAN
 
 _REGISTRY: Dict[str, ChannelPlan] = {
@@ -27,6 +28,9 @@ _REGISTRY: Dict[str, ChannelPlan] = {
     THD75_SCAN.id: THD75_SCAN,
     ATD890_SCAN.id: ATD890_SCAN,
 }
+#: ``<radio>-fleet``: one per memory-list radio, generated from
+#: :mod:`wasds150.plans.template`; what the fleet wizard programs.
+_REGISTRY.update(fleet_plans())
 
 
 def list_plans() -> Dict[str, ChannelPlan]:

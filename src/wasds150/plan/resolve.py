@@ -13,8 +13,10 @@ import re
 from dataclasses import dataclass, field
 from typing import Dict, Iterator, List, Optional, Tuple
 
+from wasds150.catalog.dmr_talkgroup_tiers import channel_tier
 from wasds150.models.catalog import Catalog, Channel, Department, FavoritesList, System
 from wasds150.models.plan import (
+    TX_AUTO,
     TX_NONE,
     TX_REPEATER,
     TX_SIMPLEX,
@@ -23,8 +25,11 @@ from wasds150.models.plan import (
     SORT_FREQ,
     SORT_LABEL,
     SORT_NATURAL,
+    SORT_TIER_DISTANCE,
     natural_key,
 )
+from wasds150.radios.bandplan import band_for, may_transmit
+from wasds150.util.geo import haversine_miles
 from wasds150.plan.naming import NameAllocator
 from wasds150.radios.digital import DIGITAL_MODES, DigitalSpec, digital_identity, digital_spec
 from wasds150.radios.profile import RadioProfile
@@ -192,6 +197,24 @@ def _select_for_block(
         picked.sort(key=lambda item: (item[2].label.upper(), item[2].freq_mhz or 0.0))
     elif block.sort == SORT_NATURAL:
         picked.sort(key=lambda item: (natural_key(item[2].label), item[2].freq_mhz or 0.0))
+    elif block.sort == SORT_TIER_DISTANCE:
+        centre = next((s.within_miles for s in block.selectors if s.within_miles is not None), None)
+
+        def _distance(channel: Channel) -> float:
+            if centre is None:
+                return 0.0
+            if channel.lat is None or channel.lon is None:
+                return float("inf")
+            return haversine_miles(centre[0], centre[1], channel.lat, channel.lon)
+
+        picked.sort(
+            key=lambda item: (
+                channel_tier(item[2]),
+                _distance(item[2]),
+                item[2].freq_mhz or 0.0,
+                item[2].label,
+            )
+        )
     return picked
 
 
@@ -260,6 +283,9 @@ def resolve_plan(
 
     for block in plan.blocks:
         taken = 0
+        #: Channels held back by licence class, reported once per block: a
+        #: warning per channel would bury the ones that need attention.
+        licence_blocked = 0
         for favorite, department, channel in _select_for_block(block, candidates):
             if block.limit is not None and taken >= block.limit:
                 result.dropped.append(
@@ -309,6 +335,8 @@ def resolve_plan(
                 result.warnings.append(
                     f"{channel.label}: AM channels are receive-only; transmit disabled"
                 )
+            if transmit and block.tx_policy == TX_AUTO and channel.tx_freq_mhz is not None:
+                tx_freq = round(float(channel.tx_freq_mhz), 6)
             if transmit and block.tx_policy == TX_REPEATER:
                 if channel.tx_freq_mhz is None:
                     transmit = False
@@ -324,6 +352,12 @@ def resolve_plan(
                     f"{channel.label}: outside {profile.model} transmit coverage, "
                     "programmed receive-only"
                 )
+            if transmit and plan.license_class:
+                tx_at = tx_freq if tx_freq is not None else freq
+                if band_for(tx_at) is not None and not may_transmit(tx_at, plan.license_class):
+                    transmit = False
+                    tx_freq = None
+                    licence_blocked += 1
 
             spec = digital_spec(channel, mode)
             if transmit and mode == "DMR" and (spec is None or not spec.has_contact):
@@ -425,6 +459,11 @@ def resolve_plan(
                 seen_digital_identity.setdefault((freq, mode), planned)
 
         result.block_counts[block.label] = taken
+        if licence_blocked:
+            result.warnings.append(
+                f"{block.label}: {licence_blocked} channel(s) outside "
+                f"{plan.license_class}-class privileges, programmed receive-only"
+            )
 
     if capacity is not None:
         remaining = capacity - slot

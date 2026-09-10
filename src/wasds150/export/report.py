@@ -55,9 +55,12 @@ def render_plan_report(resolved: ResolvedPlan, *, max_drops_per_reason: int = 8)
         else:
             span = f"{start}-{start + count - 1}" if count > 1 else str(start)
             start += count
-        tx = {"none": "receive only", "simplex": "simplex", "repeater": "repeater"}[
-            block.tx_policy
-        ]
+        tx = {
+            "none": "receive only",
+            "simplex": "simplex",
+            "repeater": "repeater",
+            "auto": "repeater or simplex",
+        }[block.tx_policy]
         lines.append(f"| {span} | {block.label} | {count} | {tx} |")
     lines.append("")
 

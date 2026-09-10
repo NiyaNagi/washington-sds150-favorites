@@ -1411,6 +1411,170 @@ def cmd_install_hpdb_inspect(args: argparse.Namespace) -> int:
     return 0
 
 
+# ---------------------------------------------------------------- fleet ----
+def _fleet_radio_ids(args: argparse.Namespace) -> List[str]:
+    from wasds150.fleet.registry import fleet_ids, get_fleet_radio
+
+    if getattr(args, "all", False) or not getattr(args, "radios", None):
+        return fleet_ids()
+    return [get_fleet_radio(r).radio_id for r in args.radios.split(",") if r.strip()]
+
+
+def cmd_fleet_list(args: argparse.Namespace) -> int:
+    from wasds150.fleet.registry import list_fleet
+    from wasds150.radios.registry import get_profile
+
+    rows = [
+        {
+            "radio_id": radio.radio_id,
+            "label": get_profile(radio.radio_id).label,
+            "plan_id": radio.plan_id,
+            "target_id": radio.target_id,
+            "load_path": radio.load_path,
+            "verify": radio.verify,
+            "vendor_app": radio.vendor_app.label if radio.vendor_app else None,
+        }
+        for radio in list_fleet().values()
+    ]
+    if args.json:
+        _print_json({"radios": rows})
+        return 0
+    for row in rows:
+        print(
+            f"{row['radio_id']:10} {row['label']:20} {row['load_path']:18} "
+            f"plan={row['plan_id'] or '-'} target={row['target_id'] or '-'}"
+        )
+    return 0
+
+
+def cmd_fleet_describe(args: argparse.Namespace) -> int:
+    from wasds150.fleet.describe import render_markdown
+    from wasds150.fleet.registry import get_fleet_radio
+    from wasds150.fleet.settings import FleetSettings
+
+    try:
+        radio = get_fleet_radio(args.radio)
+    except KeyError as exc:
+        print(f"error: {exc.args[0]}", file=sys.stderr)
+        return 1
+    if args.json:
+        _print_json(radio.to_dict())
+        return 0
+    if args.markdown:
+        # The documentation form: defaults only, nothing from this machine.
+        print(render_markdown(radio), end="")
+        return 0
+    config = _build_config(args)
+    values = FleetSettings.load(config.fleet_settings_path).values_for(radio)
+    print(render_markdown(radio, values), end="")
+    return 0
+
+
+def cmd_fleet_docs(args: argparse.Namespace) -> int:
+    from wasds150.fleet.describe import stale_docs, write_docs
+
+    root = Path(args.root)
+    if args.check:
+        stale = stale_docs(root)
+        if stale:
+            print("fleet docs out of date for: " + ", ".join(stale), file=sys.stderr)
+            return 1
+        print("fleet docs are up to date")
+        return 0
+    written = write_docs(root)
+    for path in written:
+        print(f"  wrote {path}")
+    if not written:
+        print("fleet docs are up to date")
+    return 0
+
+
+def cmd_fleet_settings(args: argparse.Namespace) -> int:
+    from wasds150.fleet.registry import get_fleet_radio, list_fleet
+    from wasds150.fleet.settings import FleetSettings, parse_assignment
+
+    config = _build_config(args)
+    settings = FleetSettings.load(config.fleet_settings_path)
+    if args.set:
+        for assignment in args.set:
+            try:
+                radio_id, input_id, value = parse_assignment(assignment)
+                get_fleet_radio(radio_id).input(input_id)
+            except (KeyError, ValueError) as exc:
+                print(f"error: {exc.args[0] if exc.args else exc}", file=sys.stderr)
+                return 1
+            settings.set(radio_id, input_id, value)
+        config.ensure_dirs()
+        settings.save(config.fleet_settings_path)
+
+    rows = {
+        radio.radio_id: {
+            "values": settings.values_for(radio),
+            "missing": [spec.id for spec in settings.missing(radio)],
+        }
+        for radio in list_fleet().values()
+    }
+    if args.json:
+        _print_json({"path": str(config.fleet_settings_path), "radios": rows})
+        return 0
+    for radio_id, row in rows.items():
+        print(radio_id)
+        for key, value in row["values"].items():
+            print(f"  {key:20} {value or '-'}")
+        if row["missing"]:
+            print(f"  missing: {', '.join(row['missing'])}")
+    return 0
+
+
+def cmd_fleet_status(args: argparse.Namespace) -> int:
+    from wasds150.fleet.service import fleet_status
+
+    ctx = _build_ctx(args)
+    statuses = fleet_status(ctx)
+    if args.json:
+        _print_json({"radios": [status.to_dict() for status in statuses]})
+        return 0
+    for status in statuses:
+        mark = "STALE" if status.stale else "ok"
+        synced = status.record.synced_at if status.record else "never"
+        print(f"{status.radio_id:10} {mark:5} last synced {synced}")
+        for reason in status.reasons:
+            print(f"           - {reason}")
+    return 0
+
+
+def cmd_fleet_export(args: argparse.Namespace) -> int:
+    from wasds150.fleet.service import export_fleet
+
+    ctx = _build_ctx(args)
+    try:
+        radio_ids = _fleet_radio_ids(args)
+        exports = export_fleet(
+            ctx,
+            radio_ids,
+            out_dir=Path(args.out),
+            copy_to=Path(args.copy_to) if args.copy_to else None,
+            include_licensed=not args.exclude_licensed,
+        )
+    except (KeyError, NotImplementedError, ValueError, OSError) as exc:
+        print(f"error: {exc.args[0] if exc.args else exc}", file=sys.stderr)
+        return 1
+    if args.json:
+        _print_json({"exports": [export.to_dict() for export in exports]})
+        return 0
+    for export in exports:
+        print(f"{export.radio_id:10} {export.rows:5} rows  {export.path}")
+        if export.report_path:
+            print(f"           report {export.report_path}")
+        for path in export.copies[:3]:
+            print(f"           copied to {path}")
+        if len(export.copies) > 3:
+            print(f"           ... and {len(export.copies) - 3} more")
+        if export.warnings:
+            print(f"           {len(export.warnings)} warning(s); see the report")
+    return 0
+
+
 # --------------------------------------------------------------- parser ----
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="wasds150", description=__doc__)
@@ -1609,6 +1773,57 @@ def build_parser() -> argparse.ArgumentParser:
     p_loadout_diff.add_argument("loadout")
     p_loadout_diff.add_argument("--json", action="store_true")
     p_loadout_diff.set_defaults(func=cmd_loadout_diff)
+
+    p_fleet = subparsers.add_parser(
+        "fleet", help="Every radio: status, settings, checklists and exports"
+    )
+    fleet_sub = p_fleet.add_subparsers(dest="fleet_command", required=True)
+
+    p_fleet_list = fleet_sub.add_parser("list", help="Radios in the fleet and how each is loaded")
+    p_fleet_list.add_argument("--json", action="store_true")
+    p_fleet_list.set_defaults(func=cmd_fleet_list)
+
+    p_fleet_describe = fleet_sub.add_parser("describe", help="One radio's inputs and checklist")
+    p_fleet_describe.add_argument("radio")
+    p_fleet_describe.add_argument(
+        "--markdown", action="store_true", help="The documentation form, without local settings"
+    )
+    p_fleet_describe.add_argument("--json", action="store_true")
+    p_fleet_describe.set_defaults(func=cmd_fleet_describe)
+
+    p_fleet_docs = fleet_sub.add_parser(
+        "docs", help="Write the generated checklists into docs/fleet-updates.md"
+    )
+    p_fleet_docs.add_argument("--root", default=".", help="Repository root")
+    p_fleet_docs.add_argument("--check", action="store_true", help="Fail if the docs are out of date")
+    p_fleet_docs.set_defaults(func=cmd_fleet_docs)
+
+    p_fleet_settings = fleet_sub.add_parser("settings", help="Show or set per-radio inputs")
+    p_fleet_settings.add_argument(
+        "--set", action="append", metavar="RADIO.INPUT=VALUE",
+        help="e.g. td-h9.com_port=COM7; an empty value clears it (repeatable)",
+    )
+    p_fleet_settings.add_argument("--json", action="store_true")
+    p_fleet_settings.set_defaults(func=cmd_fleet_settings)
+
+    p_fleet_status = fleet_sub.add_parser("status", help="Which radios are out of date, and why")
+    p_fleet_status.add_argument("--json", action="store_true")
+    p_fleet_status.set_defaults(func=cmd_fleet_status)
+
+    p_fleet_export = fleet_sub.add_parser("export", help="Write programming files for some or all radios")
+    which = p_fleet_export.add_mutually_exclusive_group()
+    which.add_argument("--all", action="store_true", help="Every radio (the default)")
+    which.add_argument("--radios", help="Comma-separated radio ids")
+    p_fleet_export.add_argument("--out", default="wasds150-output/radios", help="Output directory")
+    p_fleet_export.add_argument(
+        "--copy-to", help="Also copy each file here (default: each radio's copy_to setting)"
+    )
+    p_fleet_export.add_argument(
+        "--exclude-licensed", action="store_true",
+        help="Leave out lists built from licensed data, for a copy that can be committed",
+    )
+    p_fleet_export.add_argument("--json", action="store_true")
+    p_fleet_export.set_defaults(func=cmd_fleet_export)
 
     p_hpe = subparsers.add_parser("hpe", help="Uniden .hpe/.hpd container/record engine")
     hpe_sub = p_hpe.add_subparsers(dest="hpe_command", required=True)

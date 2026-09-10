@@ -16,6 +16,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
+from wasds150.catalog.dmr_talkgroup_tiers import channel_tier
 from wasds150.util.geo import haversine_miles
 
 #: Transmit policy for a block.  Receive-only is the default everywhere,
@@ -24,7 +25,11 @@ from wasds150.util.geo import haversine_miles
 TX_NONE = "none"
 TX_SIMPLEX = "simplex"
 TX_REPEATER = "repeater"
-TX_POLICIES = (TX_NONE, TX_SIMPLEX, TX_REPEATER)
+#: Repeater when the channel publishes an input, simplex otherwise - for
+#: services whose channels are both (the main GMRS channels are also
+#: repeater outputs).
+TX_AUTO = "auto"
+TX_POLICIES = (TX_NONE, TX_SIMPLEX, TX_REPEATER, TX_AUTO)
 
 SORT_CATALOG = "catalog"
 SORT_FREQ = "freq"
@@ -33,7 +38,11 @@ SORT_LABEL = "label"
 #: channels run in channel-number order. Plain alphabetical sorting puts 15
 #: before 2, and frequency order interleaves services that share a band.
 SORT_NATURAL = "natural"
-SORT_ORDERS = (SORT_CATALOG, SORT_FREQ, SORT_LABEL, SORT_NATURAL)
+#: DMR talkgroup tier first (see :mod:`wasds150.catalog.dmr_talkgroup_tiers`),
+#: then distance from the block's radius centre, then frequency, so the first
+#: zone and scan list hold the calling groups on the nearest machines.
+SORT_TIER_DISTANCE = "tier-distance"
+SORT_ORDERS = (SORT_CATALOG, SORT_FREQ, SORT_LABEL, SORT_NATURAL, SORT_TIER_DISTANCE)
 
 _DIGITS = re.compile(r"(\d+)")
 
@@ -111,6 +120,10 @@ class ChannelSelector:
     exclude_department_pattern: str = ""
     #: See :data:`GEO_FALLBACKS`; consulted only when ``within_miles`` is set.
     geo_fallback: str = GEO_CHANNEL
+    #: Keep only channels whose DMR talkgroup falls in these tiers (see
+    #: :mod:`wasds150.catalog.dmr_talkgroup_tiers`); a channel with no
+    #: talkgroup counts as wide-area.
+    dmr_tiers: Tuple[int, ...] = ()
 
     def __post_init__(self) -> None:
         if self.geo_fallback not in GEO_FALLBACKS:
@@ -123,6 +136,7 @@ class ChannelSelector:
             (
                 self.favorite_keys,
                 self.favorite_key_pattern,
+                self.dmr_tiers,
                 self.department_pattern,
                 self.label_pattern,
                 self.freq_ranges,
@@ -176,6 +190,8 @@ class ChannelSelector:
             if mode not in {m.upper() for m in self.modes}:
                 return False
         if self.service_types and channel.service_type not in self.service_types:
+            return False
+        if self.dmr_tiers and channel_tier(channel) not in self.dmr_tiers:
             return False
         if self.within_miles is not None and not self._in_radius(channel, department):
             return False
@@ -267,6 +283,13 @@ class ChannelPlan:
     reserve_slots: int = 0
     #: Composite scan lists; ignored by targets whose radio has no scan lists.
     scan_groups: Tuple[ScanGroup, ...] = ()
+    #: Amateur licence class. When set, transmitting inside an amateur band
+    #: also needs that class's privileges there (see
+    #: :mod:`wasds150.radios.bandplan`); empty leaves the check to the blocks.
+    license_class: str = ""
+    #: The operator's GMRS call sign, carried into reports. Whether a block
+    #: transmits on GMRS is still that block's policy.
+    gmrs_call: str = ""
 
     def __post_init__(self) -> None:
         if self.reserve_slots < 0:
@@ -294,6 +317,8 @@ class ChannelPlan:
             "label": self.label,
             "description": self.description,
             "reserve_slots": self.reserve_slots,
+            "license_class": self.license_class,
+            "gmrs_call": self.gmrs_call,
             "scan_groups": [
                 {"name": group.name, "blocks": list(group.blocks), "notes": group.notes}
                 for group in self.scan_groups
