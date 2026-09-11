@@ -21,12 +21,29 @@ reconstructs the other 112.
 """
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import List, Optional
 
 from wasds150.hpe.record import Record, RecordDocument, parse_records, serialize_records
 from wasds150.hpe.schema import F_LIST_SCHEMA
 
 FLIST_TAG = "F-List"
+
+
+@dataclass(frozen=True)
+class ListSettings:
+    """How one installed list should appear on the scanner.
+
+    ``monitor`` is applied on every install. ``quick_key`` and
+    ``location_control`` are written only when the list's entry is created:
+    an existing entry keeps whatever the operator set (see
+    :func:`patch_entry`). ``lead`` lists are moved to the top of the index,
+    in quick-key order."""
+
+    monitor: bool = True
+    quick_key: Optional[int] = None
+    location_control: bool = False
+    lead: bool = False
 
 
 def parse_f_list(text: str) -> RecordDocument:
@@ -63,21 +80,29 @@ def patch_entry(
     return Record(tag=FLIST_TAG, fields=fields)
 
 
-def new_entry(user_name: str, filename: str) -> Record:
+def new_entry(
+    user_name: str,
+    filename: str,
+    *,
+    monitor: str = "On",
+    location_control: str = "Off",
+    quick_key: str = "0",
+) -> Record:
     """Synthesize a brand-new ``F-List`` entry using the exact defaults
     observed on a real single-entry ``f_list.cfg`` fixture: ``Monitor=On``,
     ``LocationControl=Off``, ``QuickKey=0``, ``NumberTag=Off``, and every
     StartupKey/S-Qkey slot ``Off``. Only ever used for a list that doesn't
     already have an entry — see module docstring for why existing entries
-    must go through :func:`patch_entry` instead.
+    must go through :func:`patch_entry` instead. A generated list may ask
+    for other monitor, location-control and quick-key values at creation.
     """
     total_fields = max(F_LIST_SCHEMA.arities) - 1
     fields = ["Off"] * total_fields
     _set(fields, "user_name", user_name)
     _set(fields, "filename", filename)
-    _set(fields, "location_control", "Off")
-    _set(fields, "monitor", "On")
-    _set(fields, "quick_key", "0")
+    _set(fields, "location_control", location_control)
+    _set(fields, "monitor", monitor)
+    _set(fields, "quick_key", quick_key)
     _set(fields, "number_tag", "Off")
     return Record(tag=FLIST_TAG, fields=fields)
 

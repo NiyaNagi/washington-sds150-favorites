@@ -89,9 +89,10 @@ def fleet_status(ctx: AppContext) -> List[RadioStatus]:
     ]
 
 
-def scanner_favorites(ctx: AppContext, *, include_licensed: bool = True) -> List[FavoritesList]:
+def scanner_favorites(ctx: AppContext, *, include_licensed: bool = True, near_me: bool = True) -> List[FavoritesList]:
     """The lists the SDS150 is loaded with: enabled, populated, and - for a
-    copy meant to be shared - not built from licensed data.
+    copy meant to be shared - not built from licensed data. The Near Me lists
+    built from them come first (``near_me=False`` leaves them out).
 
     Projected onto the SDS150 exactly as the ``.hpe`` export is, so the
     workspace installer never sees what the scanner cannot tune - the HF and
@@ -106,7 +107,22 @@ def scanner_favorites(ctx: AppContext, *, include_licensed: bool = True) -> List
         for favorite in generated.enabled_favorites
         if favorite.systems and (include_licensed or not favorite.licensed)
     ]
-    return [favorite for favorite in project_favorites(chosen, SDS150).favorites if favorite.systems]
+    favorites = [favorite for favorite in project_favorites(chosen, SDS150).favorites if favorite.systems]
+    if near_me:
+        from wasds150.plans.template import HOME
+        from wasds150.radios.near_me import build_near_me_lists
+
+        favorites = build_near_me_lists(favorites, home=HOME) + favorites
+    return favorites
+
+
+def scanner_list_settings(favorites: List[FavoritesList]) -> Dict[str, Any]:
+    """How each installed list appears on the scanner: the Near Me lists
+    lead on quick keys 1-6, location-controlled; everything else is
+    installed but not monitored (see :mod:`wasds150.radios.near_me`)."""
+    from wasds150.radios.near_me import list_settings
+
+    return list_settings(favorites)
 
 
 def _copy_into(source: Path, destination: Path) -> List[Path]:

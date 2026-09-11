@@ -170,15 +170,6 @@ class HttpCacheStore:
         ).fetchall()
         return [_row_to_entry(r) for r in rows]
 
-    def delete(self, url: str, *, remove_blob: bool = False) -> None:
-        """Forget ``url``. ``remove_blob`` also deletes its content file when no
-        other entry shares it (blobs are stored once per content hash)."""
-        entry = self.get(url) if remove_blob else None
+    def delete(self, url: str) -> None:
         self._conn.execute("DELETE FROM http_cache WHERE url = ?", (url,))
         self._conn.commit()
-        if entry is not None:
-            shared = self._conn.execute(
-                "SELECT 1 FROM http_cache WHERE content_hash = ? LIMIT 1", (entry.content_hash,)
-            ).fetchone()
-            if shared is None:
-                self._blob_path(entry.content_hash).unlink(missing_ok=True)

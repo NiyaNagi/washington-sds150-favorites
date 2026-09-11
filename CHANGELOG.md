@@ -9,6 +9,34 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Added
 
+- **Near Me** lists for the SDS150 (`wasds150.radios.near_me`): public
+  safety, tactical, air, ham, rail & marine and business, built from the
+  installed lists on every install. Every group is location-fenced (county,
+  airport, or a cluster of located stations; trunked systems keep their
+  fenced sites), a frequency appears in one list only, a DMR repeater is one
+  entry rather than one per talkgroup, and encrypted, data and continuous
+  broadcasts (ATIS, ASOS/AWOS, NOAA) are left out. The installer puts them
+  first on quick keys 1-6 with location control on; public safety, air and
+  ham are monitored, the rest one key away, and every other list is
+  installed unmonitored (`install_selected_favorites(list_settings=...)`;
+  an existing entry still changes only its name and monitor state). At home
+  the default scan drops from ~16,600 conventional entries to ~300.
+- Nearest-first memory plans: a new `nearest` sort ranks a block's
+  channels inside the radius first, by distance from home (the channel's
+  own site, else its department's fence centre), then by which selector
+  matched, then dispatch before tactical. Selectors marked `anywhere`
+  (national channel plans, statewide lists) count their unlocated rows as
+  here. Every service block of the fleet template uses it.
+- `ChannelPlan.fill_to_capacity`: after the budgeted pass, slots no block
+  used go to the next-nearest stations of the `fill` blocks, statewide if
+  need be; those beyond the radius are programmed but not scanned. The
+  TH-D75 and FTX-1 now fill every slot (local business, wildfire and marine
+  rows the block caps used to cut); `fill_limit` keeps the AT-D890UV's air
+  rows inside its 256-entry AM list. ATIS and ASOS/AWOS rows are programmed
+  but not scanned.
+- FAAAIR carries the FAA's military VHF operations channels (Gray AAF OPS
+  138.6 MHz, AM) to the radios that can program AM there.
+
 - `FAAAIR`, every FAA-published airband frequency in Washington as one located
   list, built from the NASR facility frequency file (`FRQ.csv`): towers,
   ground, clearance, ATIS, approach/departure, Seattle Center outlets,
@@ -18,11 +46,14 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   AT-D890UV, nearest first; the TD-H9 gets the nearest towers and ATIS in an
   eight-slot **Airport Towers** block; the SDS150 installs the whole list with
   its location control. FAA NASR is no longer a bulk source: every update
-  checks the index page, downloads a new cycle when one is posted and drops
-  the superseded zip from the cache.
+  checks the index page and downloads a new cycle only when one is posted.
 
 ### Fixed
 
+- A NOAA weather frequency another list also carries (an events list's
+  "NOAA Weather Radio", a trip pack's 162.500) no longer lands in a scanned
+  block: the weather block now comes before the service blocks and claims
+  all seven NOAA channels, unscanned, on every memory radio.
 - FAA NASR frequencies no longer reach the aviation rows (FL44, FL48, FL55)
   through the "aviation" keyword match, which had filled each with every
   facility in the state, VOR/TACAN beacons included, without positions; the

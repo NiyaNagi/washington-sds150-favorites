@@ -67,6 +67,50 @@ every source at once, including the bulk downloads, name them all:
 
 What is still unfinished is listed in [Open items](open-items.md).
 
+## In the car (SDS150)
+
+The scanner is loaded with six **Near Me** lists at the top, on quick keys
+1-6, and every other list below them, installed but not monitored. With GPS
+connected, turn the scanner on and it is already scanning what is around the
+car:
+
+| Quick key | List | At startup |
+|---|---|---|
+| 1 | Near Me - Public Safety: police, fire and EMS dispatch, interop and emergency operations; the trunked systems' dispatch talkgroups | on |
+| 2 | Near Me - Tactical: tactical, hospital and talk-around channels and talkgroups | off |
+| 3 | Near Me - Air: towers, approach, Seattle Center, CTAF/UNICOM | on |
+| 4 | Near Me - Ham: repeaters around you (one entry per DMR repeater) and the national calling channels | on |
+| 5 | Near Me - Rail & Marine: railroads and marine working channels | off |
+| 6 | Near Me - Business & GMRS: business, utilities, media, FCC-licensed digital, GMRS repeaters | off |
+| 0 | every other list (the full catalog), for trips and browsing | off |
+
+The Near Me lists are rebuilt from the full catalog on every install:
+
+- **Fenced.** Every group carries a location and range (its county, its
+  airport, or a cluster of repeaters) and each list is installed with
+  location control on, so the scanner covers only what is within reach of
+  the car. Trunked systems keep their fenced sites.
+- **Once.** A frequency lives in one Near Me list, the first in the order
+  public safety, air, ham, tactical, rail & marine, business.
+- **Live.** Encrypted channels, data (APRS, packet, paging, telemetry) and
+  broadcasts that never stop (ATIS, ASOS/AWOS, NOAA weather) are left out;
+  NOAA alerts are the scanner's own weather feature.
+
+At home the three default lists scan about 300 conventional channels and
+the nearby trunked sites: a pass of a few seconds, where the full catalog
+took minutes. Press a quick key to add a list for the drive; the next
+install puts the defaults back. On the scanner, service-type buttons mute
+a kind of traffic (every Near Me channel has a service type), and **Close
+Call** with priority catches strong nearby transmitters the lists do not
+hold.
+
+The handheld plans follow the same idea: every block keeps its nearest
+stations first (a county's rows by the county's fence, dispatch before
+tactical), and once each block has its budget, spare slots go to the
+next-nearest stations wherever they are. Those beyond 60 miles are
+programmed but locked out of the scan, so a fuller radio does not scan
+slower; ATIS and ASOS/AWOS are programmed but not scanned either.
+
 ## How an update runs
 
 1. **Sources.** Every configured source whose cache is stale is refreshed; any
@@ -78,7 +122,7 @@ What is still unfinished is listed in [Open items](open-items.md).
    `wasds150 sources configure --fcc-within-miles 60 --fcc-emissions DMR,NXDN,P25`.
    FAA NASR is checked on every update and rebuilds `FAAAIR`, the airband list
    behind each radio's **Airports Near Home** block (the TD-H9's **Airport
-   Towers**); a superseded cycle's zip is removed from the cache.
+   Towers**).
 2. **Each radio**, one after another: resolve its plan, compare with the last
    snapshot, export, load, verify, save a snapshot, and record the sync so the
    radio stops showing as out of date.

@@ -42,7 +42,15 @@ SORT_NATURAL = "natural"
 #: then distance from the block's radius centre, then frequency, so the first
 #: zone and scan list hold the calling groups on the nearest machines.
 SORT_TIER_DISTANCE = "tier-distance"
-SORT_ORDERS = (SORT_CATALOG, SORT_FREQ, SORT_LABEL, SORT_NATURAL, SORT_TIER_DISTANCE)
+#: Nearest first: channels inside the plan's radius before any outside it,
+#: then by distance from home (the channel's own site, else its department's
+#: geo-fence centre; an unlocated channel from an ``anywhere`` selector
+#: counts as here, any other unlocated one as farthest), then by which
+#: selector matched, then dispatch before tactical by service type. It shares
+#: its key with :data:`SORT_TIER_DISTANCE`, whose DMR tier is simply constant
+#: for non-DMR channels.
+SORT_NEAREST = "nearest"
+SORT_ORDERS = (SORT_CATALOG, SORT_FREQ, SORT_LABEL, SORT_NATURAL, SORT_TIER_DISTANCE, SORT_NEAREST)
 
 _DIGITS = re.compile(r"(\d+)")
 
@@ -124,6 +132,10 @@ class ChannelSelector:
     #: :mod:`wasds150.catalog.dmr_talkgroup_tiers`); a channel with no
     #: talkgroup counts as wide-area.
     dmr_tiers: Tuple[int, ...] = ()
+    #: Unlocated channels this selector matches are relevant wherever the
+    #: radio is - a national calling channel, a statewide channel plan - so
+    #: the nearest-first sorts count them as distance 0 rather than last.
+    anywhere: bool = False
 
     def __post_init__(self) -> None:
         if self.geo_fallback not in GEO_FALLBACKS:
@@ -236,6 +248,11 @@ class PlanBlock:
     #: Optional radio bank/group name. Blocks remain distinct in reports and
     #: ordering while sharing a physical group when this names another block.
     bank: str = ""
+    #: When the plan fills spare capacity, this block may take more than its
+    #: limit and reach past its radius, nearest first; ``fill_limit`` caps the
+    #: block then (``None``: only the radio's capacity does).
+    fill: bool = False
+    fill_limit: Optional[int] = None
 
     def __post_init__(self) -> None:
         if self.tx_policy not in TX_POLICIES:
@@ -295,6 +312,15 @@ class ChannelPlan:
     #: because their catch-all block overlaps every other block; the
     #: hand-written plans keep the memory map they were published with.
     skip_receive_duplicates: bool = False
+    #: Home and radius the nearest-first sorts measure from; a channel beyond
+    #: the radius sorts after every channel inside it.
+    home: Optional[Tuple[float, float]] = None
+    radius_miles: Optional[float] = None
+    #: After the budgeted pass, give the slots no block used to the
+    #: next-nearest stations of the ``fill`` blocks, statewide if need be.
+    #: Those beyond the radius are programmed but locked out of the scan, so a
+    #: fuller radio does not scan slower.
+    fill_to_capacity: bool = False
 
     def __post_init__(self) -> None:
         if self.reserve_slots < 0:
@@ -325,6 +351,9 @@ class ChannelPlan:
             "license_class": self.license_class,
             "gmrs_call": self.gmrs_call,
             "skip_receive_duplicates": self.skip_receive_duplicates,
+            "home": list(self.home) if self.home else None,
+            "radius_miles": self.radius_miles,
+            "fill_to_capacity": self.fill_to_capacity,
             "scan_groups": [
                 {"name": group.name, "blocks": list(group.blocks), "notes": group.notes}
                 for group in self.scan_groups
@@ -340,6 +369,8 @@ class ChannelPlan:
                     "skip_label_pattern": block.skip_label_pattern,
                     "notes": block.notes,
                     "bank": block.bank,
+                    "fill": block.fill,
+                    "fill_limit": block.fill_limit,
                 }
                 for block in self.blocks
             ],

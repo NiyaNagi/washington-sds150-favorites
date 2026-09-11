@@ -37,7 +37,7 @@ of the legacy radio exports. Everything not listed here is done and tested.
 | Item | Detail |
 |---|---|
 | Novice privileges | The band plan gives Novices 6 m, 2 m and 70 cm transmit privileges they do not hold under 47 CFR 97.301(f). No shipped plan is affected (the operator is General class). |
-| PSHAM02 after a refresh | Once WWARA is refreshed, PSHAM01 holds the same 6 m to 23 cm repeaters as the `PSHAM02` snapshot. Memory radios keep only one copy, but the SDS150 receives both lists. Disable PSHAM02 in the profile, or teach generation to drop it when PSHAM01 is populated. |
+| Learn which channels talk | The Near Me lists rank by distance and service type, not by activity. After a few drives with the SDS150 recording or Discovery logging to its card, read the hits back and demote channels that never transmit. |
 | NWAC and NIFC sources | Both change-detection sources fail with HTTP 404: NWAC's backcountry-radio page (`https://nwac.us/backcountry-radio-channels/`) is gone from its sitemap, and NIFC's `https://www.nifc.gov/nicc-files/radio` no longer exists, with no NIRSC document linked from the NICC reference pages. They only raise "document changed" alerts, never catalog data, so nothing else is affected. Point `src/wasds150/sources/nwac.py` and `nifc.py` at the new pages if they reappear, or retire them. |
 | FCC ULS scope | The working home keeps FCC land-mobile licences within 60 miles with DMR, NXDN or P25 emissions. Widen with `sources configure --fcc-within-miles 0 --fcc-emissions ""` if analog business channels are wanted too. |
 

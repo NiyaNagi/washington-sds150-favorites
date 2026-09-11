@@ -9,8 +9,9 @@ channels that look programmed.
 """
 from __future__ import annotations
 
+import math
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Dict, Iterator, List, Optional, Tuple
 
 from wasds150.catalog.dmr_talkgroup_tiers import channel_tier
@@ -25,6 +26,7 @@ from wasds150.models.plan import (
     SORT_FREQ,
     SORT_LABEL,
     SORT_NATURAL,
+    SORT_NEAREST,
     SORT_TIER_DISTANCE,
     natural_key,
 )
@@ -83,6 +85,9 @@ class PlannedChannel:
     #: radio still wants it so a monitored repeater is programmed in repeater
     #: mode rather than as a simplex frequency.
     input_freq_mhz: Optional[float] = None
+    #: Miles from the plan's home to the channel (its own site, else its
+    #: department's fence centre); ``None`` when neither is known.
+    distance_miles: Optional[float] = None
 
 
 @dataclass
@@ -180,42 +185,84 @@ def resolve_mode(channel: Channel, profile: RadioProfile) -> Optional[str]:
     return None
 
 
+#: Uniden service types in the order an operator most wants to hear them:
+#: dispatch, then interop and emergency operations, tactical, hospitals,
+#: talk-around; everything else after.
+_SERVICE_RANK = {1: 0, 2: 0, 3: 0, 4: 0, 11: 1, 29: 1, 6: 2, 7: 2, 8: 2, 9: 2, 12: 3, 22: 4, 23: 4, 24: 4, 25: 4}
+_OTHER_SERVICE = 5
+
+Selected = Tuple[FavoritesList, Department, Channel, Optional[float]]
+
+
+def service_rank(service_type: Optional[int]) -> int:
+    return _SERVICE_RANK.get(service_type, _OTHER_SERVICE) if service_type is not None else _OTHER_SERVICE
+
+
+def channel_position(department: Optional[Department], channel: Channel) -> Optional[Tuple[float, float]]:
+    """The channel's own site, else its department's geo-fence centre."""
+    if channel.lat is not None and channel.lon is not None:
+        return channel.lat, channel.lon
+    if department is not None and department.lat is not None and department.lon is not None:
+        return department.lat, department.lon
+    return None
+
+
 def _select_for_block(
     block: PlanBlock,
     candidates: List[Tuple[FavoritesList, System, Department, Channel]],
-) -> List[Tuple[FavoritesList, Department, Channel]]:
-    picked: List[Tuple[FavoritesList, Department, Channel]] = []
+    home: Optional[Tuple[float, float]] = None,
+    radius: Optional[float] = None,
+) -> List[Selected]:
+    """The block's channels in its sort order, each with its distance from
+    home (``None`` when unknown)."""
+    picked = []
     for favorite, _system, department, channel in candidates:
-        for selector in block.selectors:
+        for rank, selector in enumerate(block.selectors):
             if selector.matches(favorite.favorite_key, department.label, channel, department):
-                picked.append((favorite, department, channel))
+                picked.append((favorite, department, channel, rank, selector.anywhere))
                 break
 
+    centre = home or next(
+        ((s.within_miles[0], s.within_miles[1]) for s in block.selectors if s.within_miles is not None), None
+    )
+
+    def _distance(department: Department, channel: Channel, anywhere: bool) -> Optional[float]:
+        if centre is None:
+            return None
+        where = channel_position(department, channel)
+        if where is not None:
+            return haversine_miles(centre[0], centre[1], where[0], where[1])
+        # Unlocated: here if the list is relevant anywhere, else farthest.
+        return 0.0 if anywhere else math.inf
+
+    rows = [(f, d, c, rank, _distance(d, c, anywhere)) for f, d, c, rank, anywhere in picked]
     if block.sort == SORT_FREQ:
-        picked.sort(key=lambda item: (item[2].freq_mhz or 0.0, item[2].label))
+        rows.sort(key=lambda row: (row[2].freq_mhz or 0.0, row[2].label))
     elif block.sort == SORT_LABEL:
-        picked.sort(key=lambda item: (item[2].label.upper(), item[2].freq_mhz or 0.0))
+        rows.sort(key=lambda row: (row[2].label.upper(), row[2].freq_mhz or 0.0))
     elif block.sort == SORT_NATURAL:
-        picked.sort(key=lambda item: (natural_key(item[2].label), item[2].freq_mhz or 0.0))
-    elif block.sort == SORT_TIER_DISTANCE:
-        centre = next((s.within_miles for s in block.selectors if s.within_miles is not None), None)
+        rows.sort(key=lambda row: (natural_key(row[2].label), row[2].freq_mhz or 0.0))
+    elif block.sort in (SORT_TIER_DISTANCE, SORT_NEAREST):
 
-        def _distance(channel: Channel) -> float:
-            if centre is None:
-                return 0.0
-            if channel.lat is None or channel.lon is None:
-                return float("inf")
-            return haversine_miles(centre[0], centre[1], channel.lat, channel.lon)
-
-        picked.sort(
-            key=lambda item: (
-                channel_tier(item[2]),
-                _distance(item[2]),
-                item[2].freq_mhz or 0.0,
-                item[2].label,
+        def _nearest(row: tuple) -> tuple:
+            _favorite, _department, channel, rank, distance = row
+            miles = 0.0 if distance is None else distance
+            beyond = 1 if radius is not None and miles > radius else 0
+            return (
+                beyond,
+                channel_tier(channel),
+                miles,
+                rank,
+                service_rank(channel.service_type),
+                channel.freq_mhz or 0.0,
+                channel.label,
             )
-        )
-    return picked
+
+        rows.sort(key=_nearest)
+    return [
+        (f, d, c, distance if distance is not None and math.isfinite(distance) else None)
+        for f, d, c, _rank, distance in rows
+    ]
 
 
 def _resolve_tones(
@@ -251,13 +298,17 @@ def _resolve_tones(
     return NO_TONE, NO_TONE, notes
 
 
-def resolve_plan(
+def _resolve_once(
     plan: ChannelPlan,
-    catalog: Catalog,
-    profile: Optional[RadioProfile] = None,
+    profile: RadioProfile,
+    candidates: List[Tuple[FavoritesList, System, Department, Channel]],
+    *,
+    enforce_capacity: bool = True,
+    cache: Optional[Dict[tuple, List[Selected]]] = None,
 ) -> ResolvedPlan:
-    """Resolve ``plan`` against ``catalog`` for its target radio."""
-    profile = profile or get_profile(plan.radio_id)
+    """One pass over the blocks. ``enforce_capacity=False`` lets every block
+    take up to its limit regardless of the radio's size, which is how the
+    fill pass sees what each block would take next."""
     result = ResolvedPlan(plan=plan, profile=profile)
 
     if not profile.verified:
@@ -266,13 +317,13 @@ def resolve_plan(
             "against the manual before programming a radio from this plan"
         )
 
-    candidates = list(iter_catalog_channels(catalog))
     allocator = NameAllocator(
         profile.name_max_len or 64,
         charset=profile.name_charset,
         readable=(profile.name_style == "readable"),
     )
-    capacity = result.capacity
+    capacity = result.capacity if enforce_capacity else None
+    radius = plan.radius_miles
     seen_frequencies: Dict[Tuple, PlannedChannel] = {}
     #: Digital memories that carry a contact identity, keyed by
     #: ``(frequency, mode)``. A bare digital row (colour code only, as the
@@ -291,7 +342,15 @@ def resolve_plan(
         #: Channels held back by licence class, reported once per block: a
         #: warning per channel would bury the ones that need attention.
         licence_blocked = 0
-        for favorite, department, channel in _select_for_block(block, candidates):
+        # The selection depends on the selectors and sort alone, so the fill
+        # rounds, which only move limits, reuse it.
+        key = (block.selectors, block.sort, plan.home, radius)
+        selected = cache.get(key) if cache is not None else None
+        if selected is None:
+            selected = _select_for_block(block, candidates, home=plan.home, radius=radius)
+            if cache is not None:
+                cache[key] = selected
+        for favorite, department, channel, distance in selected:
             if block.limit is not None and taken >= block.limit:
                 result.dropped.append(
                     DroppedChannel(
@@ -460,6 +519,9 @@ def resolve_plan(
                         block.skip_label_pattern
                         and re.search(block.skip_label_pattern, channel.label, re.IGNORECASE)
                     )
+                    # A station the fill pass added from beyond the radius is
+                    # there to browse, not to slow every scan.
+                    or bool(plan.fill_to_capacity and radius is not None and distance is not None and distance > radius)
                 ),
                 comment=channel.notes or "",
                 dv_urcall=getattr(channel, "dv_urcall", ""),
@@ -469,6 +531,7 @@ def resolve_plan(
                 input_freq_mhz=(
                     round(float(channel.tx_freq_mhz), 6) if channel.tx_freq_mhz is not None else None
                 ),
+                distance_miles=round(distance, 1) if distance is not None else None,
             )
             result.channels.append(planned)
             seen_frequencies[tuning_key] = planned
@@ -492,4 +555,101 @@ def resolve_plan(
                 "plan filled every available slot; nothing was left for field additions"
             )
 
+    return result
+
+
+#: How far a fill pass may reach: all of Washington from anywhere in it.
+FILL_RADIUS_MILES = 500.0
+#: Dedupe between blocks can leave a slot or two after a round; a few more
+#: rounds pick those up.
+_FILL_ROUNDS = 3
+
+
+def resolve_plan(
+    plan: ChannelPlan,
+    catalog: Catalog,
+    profile: Optional[RadioProfile] = None,
+) -> ResolvedPlan:
+    """Resolve ``plan`` against ``catalog`` for its target radio.
+
+    With ``plan.fill_to_capacity``, slots the budgeted blocks leave empty go
+    to the next-nearest stations any ``fill`` block would take, wherever in
+    the state they are, until the radio (less its reserve) is full.
+    """
+    profile = profile or get_profile(plan.radio_id)
+    candidates = list(iter_catalog_channels(catalog))
+    cache: Dict[tuple, List[Selected]] = {}
+    result = _resolve_once(plan, profile, candidates, cache=cache)
+    if plan.fill_to_capacity and result.capacity is not None:
+        result = _fill_spare_capacity(plan, profile, candidates, result, cache)
+    return result
+
+
+def _widened(block: PlanBlock, limit: Optional[int]) -> PlanBlock:
+    selectors = tuple(
+        replace(s, within_miles=(s.within_miles[0], s.within_miles[1], max(s.within_miles[2], FILL_RADIUS_MILES)))
+        if s.within_miles is not None
+        else s
+        for s in block.selectors
+    )
+    return replace(block, selectors=selectors, limit=limit)
+
+
+def _fill_spare_capacity(
+    plan: ChannelPlan,
+    profile: RadioProfile,
+    candidates: List[Tuple[FavoritesList, System, Department, Channel]],
+    result: ResolvedPlan,
+    cache: Dict[tuple, List[Selected]],
+) -> ResolvedPlan:
+    capacity = result.capacity
+    current, added = plan, 0
+    budgeted = result.slots_used
+    for _round in range(_FILL_ROUNDS):
+        free = capacity - result.slots_used
+        if free <= 0 or not any(block.fill for block in current.blocks):
+            break
+        # What every fill block would take next with no limit but its fill
+        # ceiling and no radius but the state's.
+        probe_blocks = tuple(
+            _widened(block, max(block.fill_limit, block.limit or 0) if block.fill_limit else None)
+            if block.fill else block
+            for block in current.blocks
+        )
+        probe = _resolve_once(replace(current, blocks=probe_blocks), profile, candidates, enforce_capacity=False, cache=cache)
+        order = {block.label: index for index, block in enumerate(current.blocks)}
+        fillable = {block.label for block in current.blocks if block.fill}
+        seen: Dict[str, int] = {}
+        extras = []
+        for channel in probe.channels:
+            seen[channel.block] = seen.get(channel.block, 0) + 1
+            if channel.block in fillable and seen[channel.block] > result.block_counts.get(channel.block, 0):
+                miles = channel.distance_miles if channel.distance_miles is not None else math.inf
+                extras.append((miles, order[channel.block], seen[channel.block], channel.block))
+        extras.sort()
+        granted: Dict[str, int] = {}
+        for _miles, _order, _index, label in extras[:free]:
+            granted[label] = granted.get(label, 0) + 1
+        if not granted:
+            break
+        current = replace(
+            current,
+            blocks=tuple(
+                _widened(block, result.block_counts.get(block.label, 0) + granted[block.label])
+                if block.label in granted else block
+                for block in current.blocks
+            ),
+        )
+        before = result.slots_used
+        result = _resolve_once(current, profile, candidates, cache=cache)
+        if result.slots_used <= before:
+            break
+    added = result.slots_used - budgeted
+    if added > 0:
+        far = sum(1 for channel in result.channels if plan.radius_miles is not None
+                  and channel.distance_miles is not None and channel.distance_miles > plan.radius_miles)
+        result.warnings.append(
+            f"filled {added} spare slot(s) with the next-nearest stations; "
+            f"{far} beyond {plan.radius_miles:g} miles are programmed but not scanned"
+        )
     return result

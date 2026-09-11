@@ -171,22 +171,11 @@ class FaaNasrSource(OnlineSourceAdapter):
             source_id=self.name,
             max_bytes=400 * 1024 * 1024,
         )
-        self._forget_superseded_cycles(http_client, zip_url)
         return RawDoc(
             source_adapter=self.name,
             payload={"zip_bytes": zip_result.content, "zip_url": zip_url},
             fetched_at=datetime.datetime.now(datetime.timezone.utc).isoformat(),
         )
-
-    def _forget_superseded_cycles(self, http_client: Any, current_url: str) -> None:
-        """Each cycle is a ~250 MB zip under its own dated URL, and nothing
-        reads an older cycle again once a newer one is cached."""
-        store = getattr(http_client, "store", None)
-        if store is None or not hasattr(store, "entries_for_source"):
-            return
-        for entry in store.entries_for_source(self.name):
-            if entry.url != current_url and _ZIP_URL_RE.fullmatch(entry.url):
-                store.delete(entry.url, remove_blob=True)
 
     def normalize(self, raw: RawDoc) -> NormalizeResult:
         zip_bytes = raw.payload["zip_bytes"]

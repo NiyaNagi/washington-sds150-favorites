@@ -17,10 +17,19 @@ import tempfile
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Dict, List, Mapping, Optional, Sequence, Tuple
 
 from wasds150.hpe.builders import build_favorites_document
-from wasds150.hpe.flist import entries, find_entry_by_filename, new_entry, parse_f_list, patch_entry, render
+from wasds150.hpe.flist import (
+    FLIST_TAG,
+    ListSettings,
+    entries,
+    find_entry_by_filename,
+    new_entry,
+    parse_f_list,
+    patch_entry,
+    render,
+)
 from wasds150.hpe.record import Record, RecordDocument, serialize_records
 from wasds150.hpe.schema import F_LIST_SCHEMA, MAX_FAVORITES_LISTS
 from wasds150.hpe.validation import require_valid_document
@@ -194,21 +203,50 @@ def _allocate_assignments(
     return assignments
 
 
-def _patch_index(doc: RecordDocument, assignments: Sequence[WorkspaceAssignment]) -> RecordDocument:
+def _patch_index(
+    doc: RecordDocument,
+    assignments: Sequence[WorkspaceAssignment],
+    settings: Optional[Mapping[str, ListSettings]] = None,
+) -> RecordDocument:
     result = RecordDocument(records=list(doc.records), line_endings=list(doc.line_endings))
+    lead: Dict[str, int] = {}
     for assignment in assignments:
+        wanted = (settings or {}).get(assignment.favorite_key) or ListSettings()
+        monitor = "On" if wanted.monitor else "Off"
         existing = find_entry_by_filename(result, assignment.filename)
         replacement = (
-            patch_entry(existing, user_name=assignment.user_name, monitor="On")
+            patch_entry(existing, user_name=assignment.user_name, monitor=monitor)
             if existing is not None
-            else new_entry(assignment.user_name, assignment.filename)
+            else new_entry(
+                assignment.user_name,
+                assignment.filename,
+                monitor=monitor,
+                location_control="On" if wanted.location_control else "Off",
+                quick_key=str(wanted.quick_key) if wanted.quick_key is not None else "0",
+            )
         )
         if existing is not None:
             result.records[result.records.index(existing)] = replacement
         else:
             result.records.append(replacement)
             result.line_endings.append("\r\n")
+        if wanted.lead:
+            lead[assignment.filename] = wanted.quick_key if wanted.quick_key is not None else 99
+    if lead:
+        _lead_first(result, lead)
     return result
+
+
+def _lead_first(doc: RecordDocument, lead: Mapping[str, int]) -> None:
+    """Move the lead lists' entries to the top of the index in quick-key
+    order; every other entry keeps its order. The scanner lists them as the
+    index does."""
+    positions = [index for index, record in enumerate(doc.records) if record.tag == FLIST_TAG]
+    records = [doc.records[index] for index in positions]
+    first = sorted((r for r in records if _field(r, "filename") in lead), key=lambda r: lead[_field(r, "filename")])
+    rest = [r for r in records if _field(r, "filename") not in lead]
+    for index, record in zip(positions, first + rest):
+        doc.records[index] = record
 
 
 def _workspace_hpd_bytes(favorite: FavoritesList) -> bytes:
@@ -226,6 +264,7 @@ def _prepare_install(
     workspace: Path,
     profile_name: str,
     favorites: Sequence[FavoritesList],
+    list_settings: Optional[Mapping[str, ListSettings]] = None,
 ) -> Tuple[WorkspaceInstallResult, Dict[Path, bytes]]:
     favorites_dir, global_index, profile_index = _validate_workspace(workspace, profile_name)
     global_bytes = global_index.read_bytes()
@@ -238,8 +277,8 @@ def _prepare_install(
         favorites_dir / assignment.filename: _workspace_hpd_bytes(by_slug[assignment.slug])
         for assignment in assignments
     }
-    payloads[global_index] = render(_patch_index(global_doc, assignments)).encode("ascii")
-    payloads[profile_index] = render(_patch_index(profile_doc, assignments)).encode("ascii")
+    payloads[global_index] = render(_patch_index(global_doc, assignments, list_settings)).encode("ascii")
+    payloads[profile_index] = render(_patch_index(profile_doc, assignments, list_settings)).encode("ascii")
     fingerprint = {
         "workspace": str(workspace.resolve()),
         "profile": profile_name,
@@ -280,12 +319,17 @@ def install_selected_favorites(
     confirm: str = "",
     expected_plan_id: str = "",
     allow_replacements: bool = False,
+    list_settings: Optional[Mapping[str, ListSettings]] = None,
 ) -> WorkspaceInstallResult:
     """Plan or install selected generated lists into one Sentinel profile.
 
     All inputs are validated and serialized before a real operation takes one
     verified workspace backup. Detected failures trigger restoration from
     that backup. Sentinel must be closed while executing.
+
+    ``list_settings`` (by favorite key) sets each list's monitor state and,
+    for a list installed for the first time, its quick key and location
+    control; lists without an entry are monitored, as before.
     """
     if not favorites:
         raise InstallerError("select at least one populated Favorites List")
@@ -304,7 +348,7 @@ def install_selected_favorites(
     else:
         raise InstallerError("backup directory must be outside the Sentinel workspace")
     if not execute:
-        result, _ = _prepare_install(workspace, profile_name, favorites)
+        result, _ = _prepare_install(workspace, profile_name, favorites, list_settings)
         return result
     if confirm != confirmation_phrase(profile_name):
         raise InstallerError(f"confirmation phrase mismatch; expected {confirmation_phrase(profile_name)!r}")
@@ -312,7 +356,7 @@ def install_selected_favorites(
         raise InstallerError("execute requires the plan_id returned by a fresh dry run")
 
     with _workspace_lock(workspace):
-        result, payloads = _prepare_install(workspace, profile_name, favorites)
+        result, payloads = _prepare_install(workspace, profile_name, favorites, list_settings)
         if result.plan_id != expected_plan_id:
             raise InstallerError("Sentinel workspace or selection changed after planning; run Plan again")
         replacement_count = sum(assignment.replacing for assignment in result.assignments)

@@ -36,8 +36,11 @@ from wasds150.util.hashing import stable_id
 FAA_AIRBAND_KEY = "FAAAIR"
 #: Uniden service type 15 is Aircraft (``AIRCRAFT`` in the fleet template).
 AIRCRAFT_SERVICE_TYPE = 15
-#: Civil VHF and military UHF airband, both amplitude modulated.
-AIRBAND = ((108.0, 137.0), (225.0, 400.0))
+#: Civil VHF airband, the military VHF operations channels the FAA lists at
+#: towers (Gray AAF OPS 138.6), and military UHF airband; all AM.
+AIRBAND = ((108.0, 144.0), (225.0, 400.0))
+#: The part of :data:`AIRBAND` above the civil air band.
+MILITARY_VHF = (137.0, 144.0)
 _SOURCE_URL = "https://www.faa.gov/air_traffic/flight_info/aeronav/aero_data/NASR_Subscription/"
 
 #: (pattern over the FAA frequency use, short label, order within a facility)

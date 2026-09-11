@@ -7,7 +7,6 @@ from types import SimpleNamespace
 
 import pytest
 
-from wasds150.cache.store import HttpCacheStore
 from wasds150.sources.base import RawDoc
 from wasds150.sources.faa_nasr import CYCLE_ZIP_TTL_SECONDS, NASR_INDEX_URL, FaaNasrSource, discover_columns
 
@@ -121,19 +120,6 @@ def test_the_index_is_checked_daily_and_a_cycle_zip_downloaded_once():
     assert http.calls == [(NASR_INDEX_URL, 24 * 3600), (CURRENT, CYCLE_ZIP_TTL_SECONDS)]
     # So the one-step update refreshes it: no more "tick it once a month".
     assert FaaNasrSource.bulk is False
-
-
-def test_a_superseded_cycle_zip_is_dropped_from_the_cache(tmp_path):
-    store = HttpCacheStore(tmp_path)
-    try:
-        for url, content in ((OLD, b"old cycle"), (CURRENT, b"new cycle"), (NASR_INDEX_URL, b"index")):
-            store.put(url, content=content, ttl_seconds=60, status=200, source_id="faa_nasr")
-        old_blob = store._blob_path(store.get(OLD).content_hash)
-        FaaNasrSource().fetch(_Http(store))
-        assert store.get(OLD) is None and not old_blob.exists()
-        assert store.get(CURRENT) is not None and store.get(NASR_INDEX_URL) is not None
-    finally:
-        store.close()
 
 
 def test_discover_columns_is_case_insensitive():

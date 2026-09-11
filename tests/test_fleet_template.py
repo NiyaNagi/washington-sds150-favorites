@@ -317,9 +317,25 @@ def test_radioreference_county_lists_reach_every_fleet_plan():
         assert reasons.get("KCSO P25") == "unsupported-mode", radio_id
 
 
-def test_a_distant_county_list_stays_out():
+def test_a_distant_county_list_stays_out_of_the_budget_and_the_scan():
+    from dataclasses import replace
+
     favorite = _rr_king()
     department = favorite.systems[0].departments[0]
     department.lat, department.lon = 47.66, -117.43  # Spokane
-    resolved = resolve_plan(build_fleet_plan("td-h9"), Catalog(favorites=[favorite]), get_profile("td-h9"))
-    assert "KCSO Tac" not in {c.label for c in resolved.channels}
+    catalog = Catalog(favorites=[favorite])
+    budgeted = build_fleet_plan("td-h9", replace(default_knobs("td-h9"), fill_to_capacity=False))
+    assert "KCSO Tac" not in {c.label for c in resolve_plan(budgeted, catalog, get_profile("td-h9")).channels}
+    # With room to spare the fill pass programs it, but never scans it.
+    [far] = [c for c in resolve_plan(build_fleet_plan("td-h9"), catalog, get_profile("td-h9")).channels if c.label == "KCSO Tac"]
+    assert far.skip_scan and far.distance_miles > 200
+
+
+def test_a_noaa_frequency_another_list_carries_is_never_scanned():
+    # An events list's "NOAA Weather Radio" row would otherwise land in the
+    # scanned business block, and a weather carrier never stops.
+    weather = Department(id="wx", label="NOAA", channels=[Channel(id="wx1", label="KHB60 Seattle", freq_mhz=162.55, mode="FM")])
+    events = Department(id="ev", label="Events", channels=[Channel(id="ev1", label="NOAA Weather Radio", freq_mhz=162.55, mode="FM")])
+    catalog = Catalog(favorites=[_favorite("FL73", [events]), _favorite("FL75", [weather])])
+    [row] = [c for c in resolve_plan(build_fleet_plan("th-d75"), catalog, get_profile("th-d75")).channels if c.rx_freq_mhz == 162.55]
+    assert (row.block, row.skip_scan) == ("NOAA Weather", True)

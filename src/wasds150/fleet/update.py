@@ -30,7 +30,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 from wasds150.appctx import AppContext
 from wasds150.fleet.model import LOAD_AUTOMATED, STEP_AUTO, STEP_MANUAL, FleetRadio, StepSpec, render_instructions
 from wasds150.fleet.registry import get_fleet_radio
-from wasds150.fleet.service import export_radio, load_settings, record_sync, scanner_favorites
+from wasds150.fleet.service import export_radio, load_settings, record_sync, scanner_favorites, scanner_list_settings
 from wasds150.jobs.context import JobContext, StepHandle, StepSkipped
 from wasds150.jobs.events import CATALOG_DELTA, DECISION_SKIP, RADIO_DIFF
 from wasds150.jobs.runner import JobCancelled, JobRunner
@@ -323,8 +323,10 @@ def _load_sds150(ctx: AppContext, spec: FleetUpdateSpec, job: JobContext, hooks:
         if not favorites:
             raise StepSkipped("no enabled, populated Favorites Lists")
         backup_dir = ctx.config.backup_dir / "sentinel-workspace"
+        settings = scanner_list_settings(favorites)
         planned = hooks.install_sentinel(
-            workspace, profile_name, favorites, backup_dir=backup_dir, execute=False, allow_replacements=True
+            workspace, profile_name, favorites, backup_dir=backup_dir, execute=False, allow_replacements=True,
+            list_settings=settings,
         )
         for warning in planned.warnings:
             job.log(warning)
@@ -342,6 +344,7 @@ def _load_sds150(ctx: AppContext, spec: FleetUpdateSpec, job: JobContext, hooks:
             done = hooks.install_sentinel(
                 workspace, profile_name, favorites, backup_dir=backup_dir, execute=True,
                 confirm=typed, expected_plan_id=planned.plan_id, allow_replacements=True,
+                list_settings=settings,
             )
             handle.data["backup"] = str(done.backup_path or "")
             if done.outcome != "committed":

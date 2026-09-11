@@ -175,8 +175,12 @@ def test_airports_near_home_come_first_nearest_first_within_the_radius():
     resolved = _resolved("th-d75")
     local = _block(resolved, "Airports Near Home")
     assert local[0].label == "RNT TWR"  # Renton is the nearest field
-    assert {c.rx_freq_mhz for c in local} == {118.3, 120.6, 121.9, 127.75, 257.8, 124.7, 126.95, 119.2, 128.5, 120.3, 122.9}
-    assert 132.1 not in {c.rx_freq_mhz for c in resolved.channels}  # Spokane is out of range
+    near = [c for c in local if c.distance_miles <= 60]
+    assert {c.rx_freq_mhz for c in near} == {118.3, 120.6, 121.9, 127.75, 257.8, 124.7, 126.95, 119.2, 128.5, 120.3, 122.9}
+    # Broadcasts that never stop are programmed but kept out of the scan.
+    assert {c.label for c in near if c.skip_scan} == {"BFI ATIS", "RNT ASOS"}
+    # Spokane comes last, from the spare slots, programmed but not scanned.
+    assert (local[-1].rx_freq_mhz, local[-1].skip_scan) == (132.1, True)
     assert [c.label for c in _block(resolved, "Airband Civil")] == ["Far outlet"]
     assert not _block(resolved, "Airport Towers")
 
@@ -197,3 +201,13 @@ def test_the_anytone_air_blocks_fit_its_am_air_list():
     air = [b for b in build_fleet_plan("at-d890uv").blocks if b.bank.startswith("Air")]
     assert [b.label for b in air] == ["Airports Near Home", "Airband Civil", "Airband Military SAR"]
     assert sum(b.limit for b in air) <= AM_AIR_MAX
+    # nor may filling spare slots push them past it
+    assert sum(b.fill_limit or b.limit for b in air) <= AM_AIR_MAX
+
+
+def test_military_vhf_ops_reach_radios_that_can_program_am_there():
+    ops = _frq("GRF", "ATCT", "GRF", "OPS", 138.6, (47.08, -122.58), name="GRAY AAF")
+    catalog = Catalog(favorites=[build_faa_airband_favorite(washington() + [ops], home=HOME)])
+    assert 138.6 in {c.rx_freq_mhz for c in resolve_plan(build_fleet_plan("th-d75"), catalog).channels}
+    # The Anytone's main channel table has no AM; its air list stops at 137 MHz.
+    assert 138.6 not in {c.rx_freq_mhz for c in resolve_plan(build_fleet_plan("at-d890uv"), catalog).channels}

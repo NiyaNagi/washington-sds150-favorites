@@ -29,6 +29,10 @@ How blocks select, and why:
 Capacity is budgeted, not discovered: each radio's knobs cap every block so
 the ceilings add up to no more than the radio holds, and a later block (NOAA,
 the catch-all) can never be starved by a refresh that grows an earlier one.
+Every block keeps its nearest stations first. Once each block has its budget,
+the slots nobody used go to the next-nearest stations of the ``fill`` blocks,
+statewide if need be; those beyond the radius are programmed but locked out
+of the scan (``ChannelPlan.fill_to_capacity``).
 """
 from __future__ import annotations
 
@@ -40,6 +44,7 @@ from wasds150.models.plan import (
     GEO_EITHER,
     SORT_FREQ,
     SORT_NATURAL,
+    SORT_NEAREST,
     SORT_TIER_DISTANCE,
     TX_AUTO,
     TX_NONE,
@@ -88,6 +93,12 @@ INTEROP = (11, 29)
 
 AIR = ((108.0, 137.0),)
 MIL_AIR = ((108.0, 137.0), (225.0, 400.0))
+#: Military VHF operations channels the FAA lists at towers (Gray AAF OPS
+#: 138.6), received AM.
+MIL_VHF = ((137.0, 144.0),)
+#: Broadcasts that never stop (ATIS, ASOS/AWOS weather, PMSV METRO): worth
+#: programming, but a scan that lands on one would stay there.
+CONTINUOUS = r"\b(ATIS|D-ATIS|ASOS|AWOS|METRO|VOLMET)\b"
 #: Marine VHF from channel 5A up, plus the coast-station half of the duplex
 #: channels. Starts above 156.2475 because 156.0-156.24 MHz is land-mobile
 #: public safety in parts of Washington; AIS is excluded by label.
@@ -154,6 +165,13 @@ class RadioKnobs:
     limits: Mapping[str, int] = field(default_factory=dict, hash=False)
     #: Power labels the radio's exporter understands, as (high, mid, low).
     power: Tuple[str, str, str] = ("High", "Mid", "Low")
+    #: Give slots the budget leaves empty to the next-nearest stations,
+    #: statewide if need be (programmed, but not scanned beyond the radius).
+    fill_to_capacity: bool = True
+    #: Ceilings the fill pass may not push a block past, by block id.
+    fill_limits: Mapping[str, int] = field(default_factory=dict, hash=False)
+    #: The radio can program AM outside the civil air band (138.6 MHz).
+    am_outside_airband: bool = True
 
     @property
     def within(self) -> Tuple[float, float, float]:
@@ -206,6 +224,10 @@ class ServiceBlockSpec:
     tx_probe: Tuple[float, ...] = ()
     groups: Tuple[str, ...] = ()
     notes: str = ""
+    #: The block may take spare slots, nearest first, beyond its limit.
+    fill: bool = False
+    #: Channel labels programmed but locked out of the scan.
+    skip_labels: str = ""
 
     def __post_init__(self) -> None:
         if self.tx not in TX_KINDS:
@@ -225,6 +247,7 @@ def _keys(
     service_types: Iterable[int] = (),
     dmr_tiers: Iterable[int] = (),
     include_avoided: bool = False,
+    anywhere: bool = False,
 ) -> ChannelSelector:
     return ChannelSelector(
         favorite_keys=tuple(keys),
@@ -236,6 +259,7 @@ def _keys(
         service_types=tuple(service_types),
         dmr_tiers=tuple(dmr_tiers),
         include_avoided=include_avoided,
+        anywhere=anywhere,
     )
 
 
@@ -282,6 +306,7 @@ def _rr_state(
     dept: str = "",
     service_types: Iterable[int] = (),
     ranges: Iterable[Tuple[float, float]] = (),
+    anywhere: bool = False,
 ) -> ChannelSelector:
     """The statewide RadioReference list, minus the far side of the state."""
     return ChannelSelector(
@@ -290,6 +315,7 @@ def _rr_state(
         exclude_department_pattern=FAR_AWAY,
         freq_ranges=tuple(ranges),
         service_types=tuple(service_types),
+        anywhere=anywhere,
     )
 
 
@@ -319,7 +345,7 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
     ServiceBlockSpec(
         "ham-6m", "Ham 6m Repeaters", "Ham 6m",
         lambda k: (_near(k, "PSHAM01", "PSHAM02", dept=r"Analog 6 Meter|Linked Analog", ranges=((50.0, 54.0),)),),
-        tx=TXK_HAM_REPEATER, sort=SORT_TIER_DISTANCE, limit=40, radius=True, requires=_receives(52.0), tx_probe=(52.0,),
+        tx=TXK_HAM_REPEATER, sort=SORT_NEAREST, limit=40, radius=True, fill=True, requires=_receives(52.0), tx_probe=(52.0,),
         groups=(GROUP_HAM_ALL, GROUP_HAM_ANALOG),
     ),
     ServiceBlockSpec(
@@ -328,7 +354,7 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
             _near(k, "PSHAM01", dept=r"Analog 2 Meter|Linked Analog", ranges=((144.0, 148.0),)),
             _near(k, "THD75WWARA", dept=r"2 Meter", ranges=((144.0, 148.0),)),
         ),
-        tx=TXK_HAM_REPEATER, sort=SORT_TIER_DISTANCE, limit=160, radius=True, requires=_receives(146.0),
+        tx=TXK_HAM_REPEATER, sort=SORT_NEAREST, limit=160, radius=True, fill=True, requires=_receives(146.0),
         tx_probe=(146.0,), groups=(GROUP_HAM_ALL, GROUP_HAM_ANALOG),
         notes=(
             "Every current WWARA analog 2 m machine in range, nearest first so a small radio keeps "
@@ -341,7 +367,7 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
             _near(k, "PSHAM01", "PSHAM02", dept=r"Analog 1\.25 Meter|Linked Analog", ranges=((222.0, 225.0),)),
             _near(k, "THD75WWARA", dept=r"1\.25 Meter", ranges=((222.0, 225.0),)),
         ),
-        tx=TXK_HAM_REPEATER, sort=SORT_TIER_DISTANCE, limit=30, radius=True, requires=_receives(223.5),
+        tx=TXK_HAM_REPEATER, sort=SORT_NEAREST, limit=30, radius=True, fill=True, requires=_receives(223.5),
         tx_probe=(223.5,), groups=(GROUP_HAM_ALL, GROUP_HAM_ANALOG),
     ),
     ServiceBlockSpec(
@@ -351,13 +377,13 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
             _near(k, "THD75WWARA", dept=r"70 Centimeter", ranges=((420.0, 450.0),)),
             _keys("THD75USER"),
         ),
-        tx=TXK_HAM_REPEATER, sort=SORT_TIER_DISTANCE, limit=160, radius=True, requires=_receives(440.0),
+        tx=TXK_HAM_REPEATER, sort=SORT_NEAREST, limit=160, radius=True, fill=True, requires=_receives(440.0),
         tx_probe=(440.0,), groups=(GROUP_HAM_ALL, GROUP_HAM_ANALOG),
     ),
     ServiceBlockSpec(
         "dstar", "D-STAR Repeaters", "D-STAR",
         lambda k: (_near(k, "THD75LOCAL", dept=r"D-STAR", ranges=_VHF_UHF_HAM),),
-        tx=TXK_HAM_REPEATER, limit=60, radius=True,
+        tx=TXK_HAM_REPEATER, sort=SORT_NEAREST, limit=60, radius=True, fill=True,
         requires=_all(_demodulates("DV"), _knob("include_dstar")), tx_probe=(146.0, 440.0),
         groups=(GROUP_HAM_ALL,),
         notes="Also loaded into the TH-D75's native DR repeater list.",
@@ -376,7 +402,7 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
     ServiceBlockSpec(
         "dmr-local", "DMR Local", "DMR Local",
         lambda k: _dmr(k, _DMR_CORE),
-        tx=TXK_HAM_REPEATER, sort=SORT_TIER_DISTANCE, limit=600, radius=True,
+        tx=TXK_HAM_REPEATER, sort=SORT_TIER_DISTANCE, limit=600, radius=True, fill=True,
         requires=_all(_demodulates("DMR"), _knob("include_dmr")), tx_probe=(146.0, 440.0),
         groups=(GROUP_HAM_DMR,),
         notes="The remaining tier 0-1 channels, beyond the first hundred.",
@@ -384,7 +410,7 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
     ServiceBlockSpec(
         "dmr-wide", "DMR Wide Area", "DMR Wide",
         lambda k: _dmr(k, _DMR_WIDE) + (_near(k, "PSHAM01", dept=r"DMR", ranges=_VHF_UHF_HAM),),
-        tx=TXK_HAM_REPEATER, sort=SORT_TIER_DISTANCE, limit=800, radius=True,
+        tx=TXK_HAM_REPEATER, sort=SORT_TIER_DISTANCE, limit=800, radius=True, fill=True,
         requires=_all(_demodulates("DMR"), _knob("include_dmr")), tx_probe=(146.0, 440.0),
         groups=(GROUP_HAM_DMR,),
         notes="Wide-area and test talkgroups (tiers 2-3), and coordinated DMR machines with no published layout.",
@@ -452,21 +478,21 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
                 within_miles=k.within,
             ),
         ),
-        sort=SORT_TIER_DISTANCE, limit=0, radius=True,
+        sort=SORT_NEAREST, limit=0, radius=True, skip_labels=CONTINUOUS,
         requires=_all(_knob("include_air"), _demodulates("AM"), _receives(121.5)),
-        notes="The nearest towers and ATIS, for radios too small for the full airport block.",
+        notes="The nearest towers and ATIS (programmed, not scanned), for radios too small for the full airport block.",
     ),
     ServiceBlockSpec(
         "air-local", "Airports Near Home", "Air Local",
-        lambda k: (_near(k, "FAAAIR", ranges=MIL_AIR),),
-        sort=SORT_TIER_DISTANCE, limit=130, radius=True,
+        lambda k: (_near(k, "FAAAIR", ranges=MIL_AIR + (MIL_VHF if k.am_outside_airband else ())),),
+        sort=SORT_NEAREST, limit=130, radius=True, fill=True, skip_labels=CONTINUOUS,
         requires=_all(_knob("include_air"), _demodulates("AM"), _receives(121.5)),
         notes="FAA NASR: towers, ground, ATIS, approach, Seattle Center, CTAF/UNICOM and ASOS/AWOS; AM, nearest first.",
     ),
     ServiceBlockSpec(
         "air-civil", "Airband Civil", "Air Civil",
         lambda k: (
-            _keys("FL46", "FL48", ranges=AIR),
+            _keys("FL46", "FL48", ranges=AIR, anywhere=True),
             _rr_county(k, service_types=AIRCRAFT, ranges=AIR),
             _rr_state(
                 dept=r"Airports Air Traffic Control|Airports Boeing|Airports Airlines|Seaplanes|Air to Air|"
@@ -474,57 +500,82 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
                 ranges=AIR,
             ),
         ),
-        limit=200, requires=_all(_knob("include_air"), _demodulates("AM"), _receives(121.5)),
+        sort=SORT_NEAREST, limit=200, fill=True, skip_labels=CONTINUOUS,
+        requires=_all(_knob("include_air"), _demodulates("AM"), _receives(121.5)),
         notes="AM; the AT-D890UV routes these rows to its separate air-band list.",
     ),
     ServiceBlockSpec(
         "air-mil", "Airband Military SAR", "Air Mil SAR",
         lambda k: (
-            _keys("FL49", "FL44", "FL55", ranges=MIL_AIR),
+            _keys("FL49", "FL44", "FL55", ranges=MIL_AIR, anywhere=True),
             _rr_state(dept=r"JBLM|Joint Base|Fairchild|Civil Air Patrol", ranges=MIL_AIR),
         ),
-        limit=60, requires=_all(_knob("include_air"), _demodulates("AM"), _receives(121.5)),
+        sort=SORT_NEAREST, limit=60, fill=True, skip_labels=CONTINUOUS,
+        requires=_all(_knob("include_air"), _demodulates("AM"), _receives(121.5)),
+    ),
+    # -- weather: ahead of the service blocks, so a NOAA frequency another list
+    # also carries (an events list's "NOAA Weather Radio") is claimed here,
+    # unscanned, and never lands in a scanned block.
+    ServiceBlockSpec(
+        "noaa", "NOAA Weather", "NOAA WX",
+        lambda k: (
+            _keys("FL75", ranges=_exact(NOAA), anywhere=True),
+            # Any other list's copy of a NOAA channel the statewide list lacks
+            # (a trip pack's 162.500) is claimed here too, unscanned.
+            ChannelSelector(favorite_key_pattern=r".*", freq_ranges=_exact(NOAA), anywhere=True),
+        ),
+        sort=SORT_NEAREST, limit=7, skip_scan=True,
+        notes="Continuous carriers; select by hand.",
     ),
     # -- public service -------------------------------------------------------
     ServiceBlockSpec(
         "sar", "SAR and Interop", "SAR Interop",
         lambda k: (
-            _keys("FL01", "FL02", "FL03"),
-            _rr_state(dept=r"Search and Rescue|Mutual Aid|Interoperability|CEMNET"),
+            _keys("FL01", "FL02", "FL03", anywhere=True),
+            _rr_state(dept=r"Search and Rescue|Mutual Aid|Interoperability|CEMNET", anywhere=True),
             _rr_county(k, service_types=INTEROP),
         ),
-        limit=100, groups=(GROUP_PUB_SVC,),
+        sort=SORT_NEAREST, limit=100, fill=True, groups=(GROUP_PUB_SVC,),
     ),
     ServiceBlockSpec(
         "wildfire", "Wildfire", "Wildfire",
         lambda k: (
-            # FL34/FL35/FL37: Mountain Loop, Snoqualmie Pass and Mount Rainier,
-            # the three backcountry lists inside the home radius.
-            _keys("FL06", "FL07", "FL34", "FL35", "FL37"),
+            # None of these rows carries a position, so the order of the
+            # selectors is the ranking: the three backcountry lists inside the
+            # home radius (Mountain Loop, Snoqualmie Pass, Mount Rainier), the
+            # DNR regions that cover home, the statewide plans, then the rest.
+            _keys("FL34", "FL35", "FL37", anywhere=True),
+            _rr_state(dept=r"Natural Resources (Tactical|Aircraft|South Puget|Northwest)", anywhere=True),
+            _keys("FL06", "FL07", anywhere=True),
             _rr_state(
-                dept=r"Natural Resources (Tactical|Aircraft|South Puget|Northwest|Olympic|Pacific Cascade)|"
-                r"Forest Service|Mt Baker|Olympic National|National Park",
+                dept=r"Natural Resources (Olympic|Pacific Cascade)|Forest Service|Mt Baker|Olympic National|National Park",
+                anywhere=True,
             ),
         ),
-        limit=100, groups=(GROUP_PUB_SVC,),
+        sort=SORT_NEAREST, limit=100, fill=True, groups=(GROUP_PUB_SVC,),
     ),
     ServiceBlockSpec(
         "marine", "Marine", "Marine",
-        lambda k: (ChannelSelector(favorite_key_pattern=r".*", freq_ranges=MARINE, exclude_label_pattern=r"\bAIS\b"),),
-        limit=60, groups=(GROUP_MARINE_RAIL,),
-        notes="Selected by band: every marine working channel any list carries.",
+        lambda k: (
+            # The marine channel plans first (USCG, ferries and VTS, ports),
+            # then any other list's marine working channels, nearest first.
+            _keys("FL52", "FL53", "FL54", ranges=MARINE, exclude=r"\bAIS\b", anywhere=True),
+            ChannelSelector(favorite_key_pattern=r".*", freq_ranges=MARINE, exclude_label_pattern=r"\bAIS\b"),
+        ),
+        sort=SORT_NEAREST, limit=60, fill=True, groups=(GROUP_MARINE_RAIL,),
+        notes="Selected by band: every marine working channel any list carries, the channel plans first.",
     ),
     ServiceBlockSpec(
         "rail", "Rail", "Rail",
         lambda k: (
-            _keys("FL56", "FL58"),
+            _keys("FL56", "FL58", anywhere=True),
             _rr_state(
                 dept=r"Washington Railroads (Operations|Seattle|Scenic|Stampede|Bellingham|Sumas|"
                 r"Cherry Point|Capital|Tidelands|Other)",
             ),
             _rr_county(k, service_types=RAILROAD),
         ),
-        limit=40, groups=(GROUP_MARINE_RAIL,),
+        sort=SORT_NEAREST, limit=40, fill=True, groups=(GROUP_MARINE_RAIL,),
     ),
     # -- personal radio -------------------------------------------------------
     # GMRS and FRS transmit at the radio's highest power by the operator's
@@ -557,7 +608,7 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
             _near(k, "GMRS01", ranges=((462.54, 462.74),)),
             _rr_county(k, dept=r"GMRS", ranges=((462.54, 462.74),)),
         ),
-        tx=TXK_GMRS, sort=SORT_TIER_DISTANCE, limit=20, radius=True, tx_probe=_GMRS_PROBE,
+        tx=TXK_GMRS, sort=SORT_NEAREST, limit=20, radius=True, fill=True, tx_probe=_GMRS_PROBE,
         groups=(GROUP_PERSONAL,),
         notes="Nearest open repeaters first, each on its input and access tone.",
     ),
@@ -571,11 +622,13 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
     ServiceBlockSpec(
         "business", "Business and Events", "Business",
         lambda k: (
-            _keys("FL68", "FL72", "FL73", "FL74a", "FL69"),
+            # Itinerant, events, media and utility channels are used anywhere
+            # in the region; the county rows are ranked by distance.
+            _keys("FL68", "FL72", "FL73", "FL74a", "FL69", anywhere=True),
             _rr_county(k, service_types=BUSINESS),
             _rr_state(service_types=BUSINESS),
         ),
-        limit=400,
+        sort=SORT_NEAREST, limit=400, fill=True,
     ),
     ServiceBlockSpec(
         "public-safety", "Public Safety Conventional", "Pub Safety",
@@ -584,18 +637,18 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
             _rr_county(k, service_types=PUBLIC_SAFETY),
             _rr_state(service_types=PUBLIC_SAFETY),
         ),
-        limit=400, groups=(GROUP_PUB_SVC,),
-        notes="Conventional only; trunked P25 dispatch is the SDS150's job.",
+        sort=SORT_NEAREST, limit=400, fill=True, groups=(GROUP_PUB_SVC,),
+        notes="Conventional only, nearest county first and dispatch before tactical; trunked P25 is the SDS150's job.",
     ),
     ServiceBlockSpec(
         "commercial-digital", "Commercial Digital", "Comm Digital",
         lambda k: (
-            _keys("FL70a", "FL70b"),
+            _keys("FL70a", "FL70b", anywhere=True),
             _rr_county(k, modes=("DMR", "NXDN"), exclude=r"DSTAR"),
             # FCC-licensed digital voice, each at its licence location.
             _near(k, "FCCDIG"),
         ),
-        limit=100, requires=_demodulates("DMR", "NXDN"), groups=(GROUP_PUB_SVC,),
+        sort=SORT_NEAREST, limit=100, fill=True, requires=_demodulates("DMR", "NXDN"), groups=(GROUP_PUB_SVC,),
     ),
     # -- programmed, never scanned ----------------------------------------------
     ServiceBlockSpec(
@@ -605,12 +658,6 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
             _keys("FL62", "FL51", labels=r"Winlink|APRS|packet", include_avoided=True),
         ),
         limit=60, skip_scan=True,
-    ),
-    ServiceBlockSpec(
-        "noaa", "NOAA Weather", "NOAA WX",
-        lambda k: (_keys("FL75", ranges=_exact(NOAA)),),
-        limit=7, skip_scan=True,
-        notes="Continuous carriers; select by hand.",
     ),
     ServiceBlockSpec(
         "broadcast-fm", "FM Broadcast", "FM Bcast",
@@ -634,7 +681,7 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
                 geo_fallback=GEO_DEPARTMENT,
             ),
         ),
-        limit=100, radius=True, requires=_knob("include_trip_packs"),
+        sort=SORT_NEAREST, limit=100, radius=True, fill=True, requires=_knob("include_trip_packs"),
         notes="Area packs whose coverage reaches home; channels other blocks already hold are skipped.",
     ),
     ServiceBlockSpec(
@@ -642,7 +689,7 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
         # Not FAAAIR: airband has its own budgeted blocks, and on the Anytone
         # every air row lands in the 256-entry AM air list.
         lambda k: (ChannelSelector(favorite_key_pattern=r"^(?!FAAAIR$).*", within_miles=k.within, geo_fallback=GEO_EITHER),),
-        limit=60, radius=True, requires=_knob("catch_all"),
+        sort=SORT_NEAREST, limit=60, radius=True, fill=True, requires=_knob("catch_all"),
         notes="Anything located within range that no other block claimed, airband aside.",
     ),
 )
@@ -736,8 +783,11 @@ def build_fleet_plan(radio_id: str, knobs: Optional[RadioKnobs] = None) -> Chann
             sort=spec.sort,
             limit=knobs.limit_for(spec),
             skip_scan=spec.skip_scan,
+            skip_label_pattern=spec.skip_labels,
             notes=spec.notes,
             bank=spec.bank if knobs.bank_names else "",
+            fill=spec.fill and knobs.fill_to_capacity,
+            fill_limit=knobs.fill_limits.get(spec.id),
         )
         for spec in specs
     )
@@ -754,6 +804,9 @@ def build_fleet_plan(radio_id: str, knobs: Optional[RadioKnobs] = None) -> Chann
         # The catch-all overlaps every block; without this it would add a
         # receive-only copy of channels already programmed with transmit.
         skip_receive_duplicates=True,
+        home=knobs.home,
+        radius_miles=knobs.radius_miles,
+        fill_to_capacity=knobs.fill_to_capacity,
     )
 
 
@@ -818,6 +871,11 @@ _AT_D890UV = RadioKnobs(
     reserve_slots=200,
     power=("High", "Mid", "Low"),
     limits={"packs": 60, "air-local": 90, "air-civil": 140, "air-mil": 20},
+    # Filling spare slots must not push the air rows past the AM list either.
+    fill_limits={"air-local": 200, "air-civil": 36, "air-mil": 20},
+    # Its main channel table is analog FM or digital only: AM exists solely
+    # in the air-band list, so 138.6 MHz AM cannot be programmed.
+    am_outside_airband=False,
 )
 
 _DEFAULT_KNOBS: Dict[str, RadioKnobs] = {
