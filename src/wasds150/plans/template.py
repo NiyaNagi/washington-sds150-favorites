@@ -96,6 +96,10 @@ MIL_AIR = ((108.0, 137.0), (225.0, 400.0))
 #: Military VHF operations channels the FAA lists at towers (Gray AAF OPS
 #: 138.6), received AM.
 MIL_VHF = ((137.0, 144.0),)
+#: Everything outside the amateur bands (6 m, 2 m, 1.25 m, 70 cm, 33 cm,
+#: 23 cm): a repeater a curated list happens to carry belongs to the ham
+#: groups, not to wildfire or business.
+NON_HAM = ((25.0, 50.0), (54.0, 144.0), (148.0, 222.0), (225.0, 420.0), (450.0, 902.0), (928.0, 1240.0), (1300.0, 3000.0))
 #: Broadcasts that never stop (ATIS, ASOS/AWOS weather, PMSV METRO): worth
 #: programming, but a scan that lands on one would stay there.
 CONTINUOUS = r"\b(ATIS|D-ATIS|ASOS|AWOS|METRO|VOLMET)\b"
@@ -125,8 +129,8 @@ FAR_AWAY = (
 GROUP_HAM_ALL = "Ham All"
 GROUP_HAM_ANALOG = "Ham Analog"
 GROUP_HAM_DMR = "Ham DMR"
-GROUP_PUB_SVC = "Pub Svc"
-GROUP_MARINE_RAIL = "Marine Rail"
+GROUP_PUB_SVC = "Public Svc"
+GROUP_MARINE_RAIL = "Rail & Marine"
 GROUP_PERSONAL = "Personal"
 GROUP_EVERYTHING = "Everything"
 SCAN_GROUP_ORDER = (
@@ -340,7 +344,7 @@ def _dmr(knobs: RadioKnobs, tiers: Tuple[int, ...]) -> Tuple[ChannelSelector, ..
     )
 
 
-SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
+_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
     # -- amateur, transmit where licensed ------------------------------------
     ServiceBlockSpec(
         "ham-6m", "Ham 6m Repeaters", "Ham 6m",
@@ -381,7 +385,7 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
         tx_probe=(440.0,), groups=(GROUP_HAM_ALL, GROUP_HAM_ANALOG),
     ),
     ServiceBlockSpec(
-        "dstar", "D-STAR Repeaters", "D-STAR",
+        "dstar", "D-STAR Repeaters", "Ham D-STAR",
         lambda k: (_near(k, "THD75LOCAL", dept=r"D-STAR", ranges=_VHF_UHF_HAM),),
         tx=TXK_HAM_REPEATER, sort=SORT_NEAREST, limit=60, radius=True, fill=True,
         requires=_all(_demodulates("DV"), _knob("include_dstar")), tx_probe=(146.0, 440.0),
@@ -389,7 +393,7 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
         notes="Also loaded into the TH-D75's native DR repeater list.",
     ),
     ServiceBlockSpec(
-        "dmr-core", "DMR Core", "DMR Core",
+        "dmr-core", "DMR Core", "Ham DMR Core",
         lambda k: _dmr(k, _DMR_CORE),
         tx=TXK_HAM_REPEATER, sort=SORT_TIER_DISTANCE, limit=100, radius=True,
         requires=_all(_demodulates("DMR"), _knob("include_dmr")), tx_probe=(146.0, 440.0),
@@ -400,7 +404,7 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
         ),
     ),
     ServiceBlockSpec(
-        "dmr-local", "DMR Local", "DMR Local",
+        "dmr-local", "DMR Local", "Ham DMR Local",
         lambda k: _dmr(k, _DMR_CORE),
         tx=TXK_HAM_REPEATER, sort=SORT_TIER_DISTANCE, limit=600, radius=True, fill=True,
         requires=_all(_demodulates("DMR"), _knob("include_dmr")), tx_probe=(146.0, 440.0),
@@ -408,7 +412,7 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
         notes="The remaining tier 0-1 channels, beyond the first hundred.",
     ),
     ServiceBlockSpec(
-        "dmr-wide", "DMR Wide Area", "DMR Wide",
+        "dmr-wide", "DMR Wide Area", "Ham DMR Wide",
         lambda k: _dmr(k, _DMR_WIDE) + (_near(k, "PSHAM01", dept=r"DMR", ranges=_VHF_UHF_HAM),),
         tx=TXK_HAM_REPEATER, sort=SORT_TIER_DISTANCE, limit=800, radius=True, fill=True,
         requires=_all(_demodulates("DMR"), _knob("include_dmr")), tx_probe=(146.0, 440.0),
@@ -416,7 +420,7 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
         notes="Wide-area and test talkgroups (tiers 2-3), and coordinated DMR machines with no published layout.",
     ),
     ServiceBlockSpec(
-        "simplex", "Simplex Calling", "Simplex",
+        "simplex", "Simplex Calling", "Ham Simplex",
         lambda k: (
             _keys("HAM01", labels=r"FM simplex|SSB calling|SSB and CW calling"),
             _keys("PSHAM01", dept=r"Operator-Published", labels=r"Simplex"),
@@ -428,7 +432,7 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
         groups=(GROUP_HAM_ALL, GROUP_HAM_ANALOG),
     ),
     ServiceBlockSpec(
-        "seattle-acs", "Seattle ACS", "Seattle ACS",
+        "seattle-acs", "Seattle ACS", "Ham Seattle ACS",
         lambda k: (_keys("SEAACS", dept=r"^ACS (VHF|UHF)$", exclude=r"^[UV]2\d|N ", ranges=_VHF_UHF_HAM),),
         tx=TXK_HAM_REPEATER, sort=SORT_NATURAL, limit=120, requires=_receives(146.0, 440.0),
         tx_probe=(146.0, 440.0), groups=(GROUP_HAM_ALL, GROUP_HAM_ANALOG),
@@ -436,7 +440,7 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
     ),
     # -- HF -------------------------------------------------------------------
     ServiceBlockSpec(
-        "hf-nets", "HF Voice Nets", "HF Nets",
+        "hf-nets", "HF Voice Nets", "Ham HF Nets",
         lambda k: (
             _keys("HFNET01", dept=r"Emergency and Weather|Centres of Activity|Traffic and Calling|Pacific Northwest"),
         ),
@@ -444,19 +448,19 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
         notes="Receive only: nets run to a protocol.",
     ),
     ServiceBlockSpec(
-        "hf-calling", "HF Calling", "HF Calling",
+        "hf-calling", "HF Calling", "Ham HF Calling",
         lambda k: (_keys("HAM01", labels=r"QRP|CALLING|CLLNG", ranges=((1.8, 30.0),)),),
         tx=TXK_HAM_SIMPLEX, limit=40, requires=_all(_knob("include_hf"), _receives(14.2)),
         tx_probe=(7.2, 14.2, 21.3),
         notes="Band-plan calling and QRP centres; transmit only inside the licence class's privileges.",
     ),
     ServiceBlockSpec(
-        "hf-digital", "HF Digital", "HF Digital",
+        "hf-digital", "HF Digital", "Ham HF Digital",
         lambda k: (_keys("HAM01", labels=r"FT8|FT4|WSPR|PSK31|RTTY|SSTV"),),
         limit=40, skip_scan=True, requires=_all(_knob("include_hf"), _receives(14.2)),
     ),
     ServiceBlockSpec(
-        "hf-reference", "Beacons and Time", "Beacons Time",
+        "hf-reference", "Beacons and Time", "Beacons & Time",
         lambda k: (
             _keys("HFNET01", dept=r"Propagation Beacons|Time and Frequency|Utility and Aeronautical|6 Meter Calling"),
             _keys("HAM01", dept=r"Time and Frequency"),
@@ -492,7 +496,7 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
     ServiceBlockSpec(
         "air-civil", "Airband Civil", "Air Civil",
         lambda k: (
-            _keys("FL46", "FL48", ranges=AIR, anywhere=True),
+            _keys("FL46", "FL48", ranges=AIR),
             _rr_county(k, service_types=AIRCRAFT, ranges=AIR),
             _rr_state(
                 dept=r"Airports Air Traffic Control|Airports Boeing|Airports Airlines|Seaplanes|Air to Air|"
@@ -505,9 +509,12 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
         notes="AM; the AT-D890UV routes these rows to its separate air-band list.",
     ),
     ServiceBlockSpec(
-        "air-mil", "Airband Military SAR", "Air Mil SAR",
+        "air-mil", "Airband Military SAR", "Air Military",
         lambda k: (
-            _keys("FL49", "FL44", "FL55", ranges=MIL_AIR, anywhere=True),
+            # The national SAR aviation channels are heard anywhere; the
+            # military and medevac lists are regional.
+            _keys("FL44", ranges=MIL_AIR, anywhere=True),
+            _keys("FL49", "FL55", ranges=MIL_AIR),
             _rr_state(dept=r"JBLM|Joint Base|Fairchild|Civil Air Patrol", ranges=MIL_AIR),
         ),
         sort=SORT_NEAREST, limit=60, fill=True, skip_labels=CONTINUOUS,
@@ -517,7 +524,7 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
     # also carries (an events list's "NOAA Weather Radio") is claimed here,
     # unscanned, and never lands in a scanned block.
     ServiceBlockSpec(
-        "noaa", "NOAA Weather", "NOAA WX",
+        "noaa", "NOAA Weather", "Weather",
         lambda k: (
             _keys("FL75", ranges=_exact(NOAA), anywhere=True),
             # Any other list's copy of a NOAA channel the statewide list lacks
@@ -529,9 +536,9 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
     ),
     # -- public service -------------------------------------------------------
     ServiceBlockSpec(
-        "sar", "SAR and Interop", "SAR Interop",
+        "sar", "SAR and Interop", "SAR & Interop",
         lambda k: (
-            _keys("FL01", "FL02", "FL03", anywhere=True),
+            _keys("FL01", "FL02", "FL03", ranges=NON_HAM, anywhere=True),
             _rr_state(dept=r"Search and Rescue|Mutual Aid|Interoperability|CEMNET", anywhere=True),
             _rr_county(k, service_types=INTEROP),
         ),
@@ -544,12 +551,12 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
             # selectors is the ranking: the three backcountry lists inside the
             # home radius (Mountain Loop, Snoqualmie Pass, Mount Rainier), the
             # DNR regions that cover home, the statewide plans, then the rest.
-            _keys("FL34", "FL35", "FL37", anywhere=True),
-            _rr_state(dept=r"Natural Resources (Tactical|Aircraft|South Puget|Northwest)", anywhere=True),
-            _keys("FL06", "FL07", anywhere=True),
+            # Ham repeaters these lists carry belong to the ham groups.
+            _keys("FL34", "FL35", "FL37", ranges=NON_HAM),
+            _rr_state(dept=r"Natural Resources (Tactical|Aircraft|South Puget|Northwest)"),
+            _keys("FL06", "FL07", ranges=NON_HAM),
             _rr_state(
                 dept=r"Natural Resources (Olympic|Pacific Cascade)|Forest Service|Mt Baker|Olympic National|National Park",
-                anywhere=True,
             ),
         ),
         sort=SORT_NEAREST, limit=100, fill=True, groups=(GROUP_PUB_SVC,),
@@ -559,7 +566,8 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
         lambda k: (
             # The marine channel plans first (USCG, ferries and VTS, ports),
             # then any other list's marine working channels, nearest first.
-            _keys("FL52", "FL53", "FL54", ranges=MARINE, exclude=r"\bAIS\b", anywhere=True),
+            _keys("FL52", ranges=MARINE, exclude=r"\bAIS\b", anywhere=True),
+            _keys("FL53", "FL54", ranges=MARINE, exclude=r"\bAIS\b"),
             ChannelSelector(favorite_key_pattern=r".*", freq_ranges=MARINE, exclude_label_pattern=r"\bAIS\b"),
         ),
         sort=SORT_NEAREST, limit=60, fill=True, groups=(GROUP_MARINE_RAIL,),
@@ -568,7 +576,7 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
     ServiceBlockSpec(
         "rail", "Rail", "Rail",
         lambda k: (
-            _keys("FL56", "FL58", anywhere=True),
+            _keys("FL56", "FL58", ranges=NON_HAM),
             _rr_state(
                 dept=r"Washington Railroads (Operations|Seattle|Scenic|Stampede|Bellingham|Sumas|"
                 r"Cherry Point|Capital|Tidelands|Other)",
@@ -582,28 +590,28 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
     # choice. 47 CFR 95.1767 limits a GMRS station to 5 W ERP on channels 1-7
     # and 0.5 W ERP on 8-14; see docs/fleet-updates.md.
     ServiceBlockSpec(
-        "gmrs-interstitial", "GMRS 1-7", "GMRS FRS MURS",
+        "gmrs-interstitial", "GMRS 1-7", "GMRS/FRS/MURS",
         lambda k: (_keys("FL65", ranges=_exact(GMRS_INTERSTITIAL)),),
         tx=TXK_GMRS, sort=SORT_NATURAL, limit=7, tx_probe=_GMRS_PROBE,
         groups=(GROUP_PERSONAL,),
         notes="Full power by the operator's choice; 47 CFR 95.1767 sets 5 W ERP here.",
     ),
     ServiceBlockSpec(
-        "frs", "FRS 8-14", "GMRS FRS MURS",
+        "frs", "FRS 8-14", "GMRS/FRS/MURS",
         lambda k: (_keys("FL65", ranges=_exact(FRS_ONLY)),),
         tx=TXK_GMRS, sort=SORT_NATURAL, limit=7, tx_probe=_FRS_PROBE,
         groups=(GROUP_PERSONAL,),
         notes="Full power by the operator's choice; 47 CFR 95.1767 sets 0.5 W ERP here.",
     ),
     ServiceBlockSpec(
-        "gmrs-main", "GMRS 15-22", "GMRS FRS MURS",
+        "gmrs-main", "GMRS 15-22", "GMRS/FRS/MURS",
         lambda k: (_keys("FL65", ranges=_exact(GMRS_MAIN)),),
         tx=TXK_GMRS, sort=SORT_NATURAL, limit=8, tx_probe=_GMRS_PROBE,
         groups=(GROUP_PERSONAL,),
         notes="Simplex on the eight main channels; repeaters are the next block.",
     ),
     ServiceBlockSpec(
-        "gmrs-repeaters", "GMRS Repeaters", "GMRS FRS MURS",
+        "gmrs-repeaters", "GMRS Repeaters", "GMRS/FRS/MURS",
         lambda k: (
             _near(k, "GMRS01", ranges=((462.54, 462.74),)),
             _rr_county(k, dept=r"GMRS", ranges=((462.54, 462.74),)),
@@ -613,7 +621,7 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
         notes="Nearest open repeaters first, each on its input and access tone.",
     ),
     ServiceBlockSpec(
-        "murs", "MURS", "GMRS FRS MURS",
+        "murs", "MURS", "GMRS/FRS/MURS",
         lambda k: (_keys("FL66", ranges=_exact(MURS)),),
         tx=TXK_MURS, limit=5, power=POWER_LOW, tx_probe=_MURS_PROBE,
         groups=(GROUP_PERSONAL,),
@@ -622,18 +630,19 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
     ServiceBlockSpec(
         "business", "Business and Events", "Business",
         lambda k: (
-            # Itinerant, events, media and utility channels are used anywhere
-            # in the region; the county rows are ranked by distance.
-            _keys("FL68", "FL72", "FL73", "FL74a", "FL69", anywhere=True),
+            # The itinerant (color dot) channels are used anywhere; events,
+            # media and utility lists are regional; county rows rank by distance.
+            _keys("FL68", ranges=NON_HAM, anywhere=True),
+            _keys("FL72", "FL73", "FL74a", "FL69", ranges=NON_HAM),
             _rr_county(k, service_types=BUSINESS),
             _rr_state(service_types=BUSINESS),
         ),
         sort=SORT_NEAREST, limit=400, fill=True,
     ),
     ServiceBlockSpec(
-        "public-safety", "Public Safety Conventional", "Pub Safety",
+        "public-safety", "Public Safety Conventional", "Public Safety",
         lambda k: (
-            _keys("FL13", "FL14", "FL16", "FL71"),
+            _keys("FL13", "FL14", "FL16", "FL71", ranges=NON_HAM),
             _rr_county(k, service_types=PUBLIC_SAFETY),
             _rr_state(service_types=PUBLIC_SAFETY),
         ),
@@ -641,9 +650,9 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
         notes="Conventional only, nearest county first and dispatch before tactical; trunked P25 is the SDS150's job.",
     ),
     ServiceBlockSpec(
-        "commercial-digital", "Commercial Digital", "Comm Digital",
+        "commercial-digital", "Commercial Digital", "Business Digital",
         lambda k: (
-            _keys("FL70a", "FL70b", anywhere=True),
+            _keys("FL70a", "FL70b"),
             _rr_county(k, modes=("DMR", "NXDN"), exclude=r"DSTAR"),
             # FCC-licensed digital voice, each at its licence location.
             _near(k, "FCCDIG"),
@@ -660,13 +669,13 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
         limit=60, skip_scan=True,
     ),
     ServiceBlockSpec(
-        "broadcast-fm", "FM Broadcast", "FM Bcast",
+        "broadcast-fm", "FM Broadcast", "FM Broadcast",
         lambda k: (_keys("THD75BC", dept=r"FM Broadcast"),),
         limit=100, skip_scan=True,
         requires=_all(_knob("include_broadcast"), _demodulates("WFM", "FMB"), _receives(98.0)),
     ),
     ServiceBlockSpec(
-        "broadcast-am", "AM Broadcast", "AM Bcast",
+        "broadcast-am", "AM Broadcast", "AM Broadcast",
         lambda k: (_keys("THD75BC", dept=r"AM Broadcast"),),
         limit=60, skip_scan=True,
         requires=_all(_knob("include_broadcast"), _demodulates("AM"), _receives(1.0)),
@@ -694,6 +703,25 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
     ),
 )
 
+#: Plan order - the order of the groups on every radio and of the memories on
+#: the TD-H9 - follows the SDS150's Near Me lists: public service, air, ham,
+#: rail & marine, business, with each handheld-only group (SAR & interop,
+#: wildfire, GMRS/FRS/MURS...) beside its kin. Weather leads, unscanned,
+#: because it must claim the NOAA channels before any scanned group can; SAR
+#: and wildfire come before the broad public-safety group so their channels
+#: land in their own group on every radio, whatever its size.
+BLOCK_ORDER: Tuple[str, ...] = (
+    "noaa",
+    "sar", "wildfire", "public-safety",
+    "air-towers", "air-local", "air-civil", "air-mil",
+    "ham-6m", "ham-2m", "ham-125", "ham-70cm", "dstar", "dmr-core", "dmr-local", "dmr-wide",
+    "simplex", "seattle-acs", "hf-nets", "hf-calling", "hf-digital", "hf-reference",
+    "rail", "marine",
+    "gmrs-interstitial", "frs", "gmrs-main", "gmrs-repeaters", "murs",
+    "business", "commercial-digital",
+    "data", "broadcast-fm", "broadcast-am", "packs", "other-nearby",
+)
+SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = tuple(sorted(_BLOCKS, key=lambda spec: BLOCK_ORDER.index(spec.id)))
 SERVICE_BLOCKS_BY_ID: Dict[str, ServiceBlockSpec] = {spec.id: spec for spec in SERVICE_BLOCKS}
 
 
@@ -807,6 +835,7 @@ def build_fleet_plan(radio_id: str, knobs: Optional[RadioKnobs] = None) -> Chann
         home=knobs.home,
         radius_miles=knobs.radius_miles,
         fill_to_capacity=knobs.fill_to_capacity,
+        canonical_labels=True,
     )
 
 

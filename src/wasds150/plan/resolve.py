@@ -246,10 +246,18 @@ def _select_for_block(
 
         def _nearest(row: tuple) -> tuple:
             _favorite, _department, channel, rank, distance = row
-            miles = 0.0 if distance is None else distance
-            beyond = 1 if radius is not None and miles > radius else 0
+            if distance is None:
+                miles, bucket = 0.0, 0
+            elif math.isinf(distance):
+                # Unlocated rows of a regional list: probably near, but not
+                # known to be - after the stations known to be inside the
+                # radius, before those known to be outside it.
+                miles, bucket = distance, 1
+            else:
+                miles = distance
+                bucket = 2 if radius is not None and miles > radius else 0
             return (
-                beyond,
+                bucket,
                 channel_tier(channel),
                 miles,
                 rank,
@@ -305,6 +313,7 @@ def _resolve_once(
     *,
     enforce_capacity: bool = True,
     cache: Optional[Dict[tuple, List[Selected]]] = None,
+    labels: Optional[object] = None,
 ) -> ResolvedPlan:
     """One pass over the blocks. ``enforce_capacity=False`` lets every block
     take up to its limit regardless of the radio's size, which is how the
@@ -337,8 +346,16 @@ def _resolve_once(
     seen_receive: Dict[Tuple, PlannedChannel] = {}
     slot = 0
 
-    for block in plan.blocks:
-        taken = 0
+    #: With a fill pass, every group's stations inside the radius are placed
+    #: before any group's stations beyond it, so a nearer copy of a frequency
+    #: always wins over a far one some earlier group would have reached first.
+    two_pass = plan.fill_to_capacity and radius is not None
+    phases = [(block, "near" if two_pass and block.fill else "all") for block in plan.blocks]
+    if two_pass:
+        phases += [(block, "far") for block in plan.blocks if block.fill]
+    taken_by_block: Dict[str, int] = {}
+    for block, phase in phases:
+        taken = taken_by_block.get(block.label, 0)
         #: Channels held back by licence class, reported once per block: a
         #: warning per channel would bury the ones that need attention.
         licence_blocked = 0
@@ -351,6 +368,9 @@ def _resolve_once(
             if cache is not None:
                 cache[key] = selected
         for favorite, department, channel, distance in selected:
+            beyond = distance is not None and radius is not None and distance > radius
+            if (phase == "near" and beyond) or (phase == "far" and not beyond):
+                continue
             if block.limit is not None and taken >= block.limit:
                 result.dropped.append(
                     DroppedChannel(
@@ -497,12 +517,13 @@ def _resolve_once(
 
             slot += 1
             taken += 1
+            label = labels.label(department, channel) if labels is not None else channel.label
             planned = PlannedChannel(
                 slot=slot,
                 # Keyed per block: one channel programmed in two blocks (receive
                 # only, then with transmit) is two memories and needs two names.
-                name=allocator.allocate(channel.label, key=f"{block.label}\x00{channel.id}"),
-                label=channel.label,
+                name=allocator.allocate(label, key=f"{block.label}\x00{channel.id}"),
+                label=label,
                 rx_freq_mhz=freq,
                 mode=mode,
                 block=block.label,
@@ -539,6 +560,7 @@ def _resolve_once(
             if spec is not None and spec.has_contact:
                 seen_digital_identity.setdefault((freq, mode), planned)
 
+        taken_by_block[block.label] = taken
         result.block_counts[block.label] = taken
         if licence_blocked:
             result.warnings.append(
@@ -579,9 +601,14 @@ def resolve_plan(
     profile = profile or get_profile(plan.radio_id)
     candidates = list(iter_catalog_channels(catalog))
     cache: Dict[tuple, List[Selected]] = {}
-    result = _resolve_once(plan, profile, candidates, cache=cache)
+    labels = None
+    if plan.canonical_labels:
+        from wasds150.catalog.labels import StationLabels
+
+        labels = StationLabels(((f.favorite_key, d, c) for f, _s, d, c in candidates), home=plan.home)
+    result = _resolve_once(plan, profile, candidates, cache=cache, labels=labels)
     if plan.fill_to_capacity and result.capacity is not None:
-        result = _fill_spare_capacity(plan, profile, candidates, result, cache)
+        result = _fill_spare_capacity(plan, profile, candidates, result, cache, labels)
     return result
 
 
@@ -601,6 +628,7 @@ def _fill_spare_capacity(
     candidates: List[Tuple[FavoritesList, System, Department, Channel]],
     result: ResolvedPlan,
     cache: Dict[tuple, List[Selected]],
+    labels: Optional[object] = None,
 ) -> ResolvedPlan:
     capacity = result.capacity
     current, added = plan, 0
@@ -616,7 +644,8 @@ def _fill_spare_capacity(
             if block.fill else block
             for block in current.blocks
         )
-        probe = _resolve_once(replace(current, blocks=probe_blocks), profile, candidates, enforce_capacity=False, cache=cache)
+        probe = _resolve_once(replace(current, blocks=probe_blocks), profile, candidates, enforce_capacity=False, cache=cache,
+                              labels=labels)
         order = {block.label: index for index, block in enumerate(current.blocks)}
         fillable = {block.label for block in current.blocks if block.fill}
         seen: Dict[str, int] = {}
@@ -641,7 +670,7 @@ def _fill_spare_capacity(
             ),
         )
         before = result.slots_used
-        result = _resolve_once(current, profile, candidates, cache=cache)
+        result = _resolve_once(current, profile, candidates, cache=cache, labels=labels)
         if result.slots_used <= before:
             break
     added = result.slots_used - budgeted

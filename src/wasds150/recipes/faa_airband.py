@@ -11,9 +11,13 @@ rows into frequency facts and this recipe collects them into ``FAAAIR``.
   approach control (TRACON ``S46``), a Seattle Center outlet (RCAG), a
   non-towered field's CTAF. Each department carries a geo-fence, the
   scanner's location control, sized to how far that service is heard.
-* One channel per facility and frequency. Approach control publishes the
-  same frequency once for every airport it serves; the copy nearest home is
-  kept, so a radius filter asks "is this frequency used near here".
+* One channel per frequency and area. Approach control publishes the same
+  frequency once for every airport it serves; the copy nearest home is
+  kept. When facilities within reach of each other share a frequency, the
+  higher-ranked one keeps it (Renton Tower's 124.7, which the Lake
+  Washington seaplane base uses as its CTAF), and a CTAF or UNICOM that
+  several fields share becomes one "Common CTAF" channel fenced around all
+  of them, so every radio names it the same honest way.
 * Navigation aids (VOR, TACAN, VOT, NDB) are Morse identifiers or test
   signals, not voice, and are left out.
 
@@ -63,6 +67,9 @@ _USES: Tuple[Tuple[str, str, int], ...] = (
     (r"PMSV|METRO", "METRO", 12),
 )
 _NAVAID_USE = re.compile(r"\b(VOR|VORTAC|TACAN|VOT|NDB|DME|ILS|LOC)\b")
+#: Uses a field's own pilots talk on; shared by several fields, they become
+#: one "Common" channel.
+_SHARED_USES = ("CTAF", "UNICOM")
 
 #: Facility type -> (department order, geo-fence miles): how far out each
 #: service is worth hearing. Aircraft talk from altitude, so every fence is
@@ -79,6 +86,7 @@ _CLASSES: Dict[str, Tuple[int, float]] = {
     "ASOS_AWOS": (5, 20.0),
 }
 _OTHER_CLASS = (4, 20.0)
+_FIELD_FENCE = _CLASSES["NON-ATCT"][1]
 
 
 def _text(raw: Dict[str, Any], key: str) -> str:
@@ -116,6 +124,8 @@ def _sector(short: str, sectorization: str) -> str:
 
 def _label(raw: Dict[str, Any], provider: str, served: str, short: str) -> str:
     facility_type = _text(raw, "FACILITY_TYPE").upper()
+    if short == "GUARD":
+        return "Guard"
     if short in ("APP", "DEP") and facility_type in ("TRACON", "ATCT-TRACON", "ATCT-RATCF"):
         call = _text(raw, "PRIMARY_APPROACH_RADIO_CALL")
         ident = _title(call) if call else provider
@@ -150,6 +160,81 @@ def _miles(home: Optional[Tuple[float, float]], lat: Optional[float], lon: Optio
     return haversine_miles(home[0], home[1], lat, lon)
 
 
+def _centre(points: List[Tuple[float, float]]) -> Tuple[float, float, float]:
+    lat = sum(p[0] for p in points) / len(points)
+    lon = sum(p[1] for p in points) / len(points)
+    return lat, lon, max(haversine_miles(lat, lon, p[0], p[1]) for p in points)
+
+
+def _merge_shared(providers: "OrderedDict[str, Dict[str, Any]]", home: Optional[Tuple[float, float]]) -> List[tuple]:
+    """Leave one channel per frequency and area. Facilities within reach of
+    each other that share a frequency hand it to the highest-ranked one; a
+    CTAF or UNICOM shared only among fields becomes a Common department
+    (returned, with its sort key) fenced around every field that uses it."""
+    by_freq: Dict[float, List[tuple]] = {}
+    for provider, info in providers.items():
+        order, fence = info["class"]
+        for item in info["channels"]:
+            rank, freq, short, channel = item
+            if channel.lat is None or channel.lon is None:
+                continue
+            by_freq.setdefault(freq, []).append(((order, rank, _miles(home, channel.lat, channel.lon)), fence, provider, item))
+    dropped = set()
+    commons: List[tuple] = []
+    for freq, rows in by_freq.items():
+        if len(rows) < 2:
+            continue
+        rows.sort(key=lambda row: row[0])
+        clusters: List[List[tuple]] = []
+        for row in rows:
+            for cluster in clusters:
+                keeper = cluster[0]
+                a, b = keeper[3][3], row[3][3]
+                if haversine_miles(a.lat, a.lon, b.lat, b.lon) <= max(keeper[1], row[1]):
+                    cluster.append(row)
+                    break
+            else:
+                clusters.append([row])
+        for cluster in clusters:
+            if len(cluster) < 2:
+                continue
+            keeper, others = cluster[0], cluster[1:]
+            _key, _fence, keeper_provider, (_rank, _freq, short, channel) = keeper
+            for row in others:
+                dropped.add(id(row[3][3]))
+            if all(row[3][2] in _SHARED_USES for row in cluster):
+                dropped.add(id(channel))
+                fields = sorted({row[2] for row in cluster})
+                lat, lon, spread = _centre([(row[3][3].lat, row[3][3].lon) for row in cluster])
+                common = Channel(
+                    id=stable_id(f"faaair:common:{freq:.4f}:{keeper_provider}", kind="channel"),
+                    label=f"Common {short}",
+                    freq_mhz=freq,
+                    mode="AM",
+                    notes=f"FAA NASR: {short} shared by {', '.join(fields[:12])}" + (f" and {len(fields) - 12} more" if len(fields) > 12 else ""),
+                    service_type=AIRCRAFT_SERVICE_TYPE,
+                    lat=round(lat, 6),
+                    lon=round(lon, 6),
+                    location_precision="exact",
+                )
+                department = Department(
+                    id=stable_id(f"faaair:dept:common:{freq:.4f}:{keeper_provider}", kind="department"),
+                    label=f"Common {short} {freq:.3f}",
+                    channels=[common],
+                    lat=round(lat, 6),
+                    lon=round(lon, 6),
+                    range_miles=round(_FIELD_FENCE + spread, 1),
+                    shape="Circle",
+                )
+                commons.append(((_CLASSES["NON-ATCT"][0], _miles(home, lat, lon), f"~{freq:.4f}"), department))
+            else:
+                also = sorted({row[3][3].label for row in others})
+                channel.notes = "; ".join(part for part in (channel.notes, "also " + ", ".join(also[:12])) if part)
+    for info in providers.values():
+        info["channels"] = [item for item in info["channels"] if id(item[3]) not in dropped]
+    return commons
+
+
 def build_faa_airband_favorite(
     facts: Iterable[NormalizedFact], home: Optional[Tuple[float, float]] = None
 ) -> Optional[FavoritesList]:
@@ -177,9 +262,9 @@ def build_faa_airband_favorite(
         provider = _text(raw, "FACILITY").upper() or served or fact.entity_key
         grouped.setdefault(provider, OrderedDict()).setdefault(round(fact.freq_mhz, 4), []).append((fact, raw, use))
 
-    departments: List[Tuple[Tuple[int, float, str], Department]] = []
+    providers: "OrderedDict[str, Dict[str, Any]]" = OrderedDict()
     for provider, by_freq in grouped.items():
-        channels: List[Tuple[int, float, Channel]] = []
+        channels: List[Tuple[int, float, str, Channel]] = []
         facility_rows: List[Dict[str, Any]] = []
         for freq, candidates in by_freq.items():
             facility_rows.extend(raw for _fact, raw, _use_text in candidates)
@@ -198,7 +283,7 @@ def build_faa_airband_favorite(
                 ) if part
             )
             lat, lon = nearest[0].lat, nearest[0].lon
-            channels.append((rank, freq, Channel(
+            channels.append((rank, freq, short, Channel(
                 id=stable_id(f"faaair:{provider}:{freq:.4f}", kind="channel"),
                 label=_label(raw, provider, served, short),
                 freq_mhz=freq,
@@ -209,25 +294,33 @@ def build_faa_airband_favorite(
                 lon=lon,
                 location_precision="exact" if lat is not None else "unknown",
             )))
-        channels.sort(key=lambda item: (item[0], item[1]))
-        located = [c for _r, _f, c in channels if c.lat is not None and c.lon is not None]
-        order, fence = _facility_class(facility_rows)
+        providers[provider] = {"rows": facility_rows, "class": _facility_class(facility_rows), "channels": channels}
+
+    commons = _merge_shared(providers, home)
+
+    departments: List[Tuple[Tuple[int, float, str], Department]] = []
+    for provider, info in providers.items():
+        items = sorted(info["channels"], key=lambda item: (item[0], item[1]))
+        if not items:
+            continue
+        channels = [item[3] for item in items]
+        located = [c for c in channels if c.lat is not None and c.lon is not None]
+        order, fence = info["class"]
         lat = lon = radius = None
         if located:
-            lat = sum(c.lat for c in located) / len(located)
-            lon = sum(c.lon for c in located) / len(located)
-            spread = max(haversine_miles(lat, lon, c.lat, c.lon) for c in located)
+            lat, lon, spread = _centre([(c.lat, c.lon) for c in located])
             radius = round(fence + spread, 1)
         department = Department(
             id=stable_id(f"faaair:dept:{provider}", kind="department"),
-            label=_department_label(provider, facility_rows)[:64],
-            channels=[c for _r, _f, c in channels],
+            label=_department_label(provider, info["rows"])[:64],
+            channels=channels,
             lat=round(lat, 6) if lat is not None else None,
             lon=round(lon, 6) if lon is not None else None,
             range_miles=radius,
             shape="Circle" if lat is not None else "",
         )
         departments.append(((order, _miles(home, lat, lon), provider), department))
+    departments.extend(commons)
     departments.sort(key=lambda item: item[0])
 
     total = sum(len(d.channels) for _k, d in departments)

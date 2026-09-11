@@ -331,6 +331,22 @@ def test_a_distant_county_list_stays_out_of_the_budget_and_the_scan():
     assert far.skip_scan and far.distance_miles > 200
 
 
+def test_every_radio_uses_the_shared_group_words_in_one_order():
+    from wasds150.plans.template import BLOCK_ORDER, SERVICE_BLOCKS
+
+    assert sorted(BLOCK_ORDER) == sorted(spec.id for spec in SERVICE_BLOCKS)
+    words = ("Weather", "SAR & Interop", "Wildfire", "Public Safety", "Air", "Ham", "Beacons & Time", "Rail", "Marine",
+             "GMRS/FRS/MURS", "Business", "Data", "FM Broadcast", "AM Broadcast", "Local Packs", "Other Nearby")
+    first_seen = {}
+    for index, spec in enumerate(SERVICE_BLOCKS):
+        first_seen.setdefault(spec.bank, index)
+    for radio_id in FLEET_PLAN_RADIOS:
+        banks = list(dict.fromkeys(block.bank for block in build_fleet_plan(radio_id).blocks))
+        assert banks[0] == "Weather", radio_id
+        assert all(bank.startswith(words) for bank in banks), (radio_id, banks)
+        assert banks == sorted(banks, key=first_seen.__getitem__), radio_id
+
+
 def test_a_noaa_frequency_another_list_carries_is_never_scanned():
     # An events list's "NOAA Weather Radio" row would otherwise land in the
     # scanned business block, and a weather carrier never stops.

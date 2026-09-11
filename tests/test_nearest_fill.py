@@ -83,6 +83,16 @@ def test_spare_slots_take_the_next_nearest_and_the_far_ones_are_not_scanned():
     assert any("filled 2 spare slot" in w for w in resolved.warnings)
 
 
+def test_a_near_copy_beats_a_far_copy_an_earlier_group_reached_first():
+    far = _favorite("FAR", Department(id="f", label="Far", channels=[_at("Far agency", 155.5, 200)]))
+    near = _favorite("NEAR", Department(id="n", label="Near", channels=[_at("Near agency", 155.5, 10)]))
+    first = PlanBlock("First", sort=SORT_NEAREST, fill=True,
+                      selectors=(ChannelSelector(favorite_keys=("FAR",), within_miles=(HOME[0], HOME[1], 60.0)),))
+    second = PlanBlock("Second", sort=SORT_NEAREST, selectors=(ChannelSelector(favorite_keys=("NEAR",)),))
+    resolved = resolve_plan(_plan(first, second), Catalog(favorites=[far, near]))
+    assert [(c.label, c.block) for c in resolved.channels if c.rx_freq_mhz == 155.5] == [("Near agency", "Second")]
+
+
 def test_a_fill_limit_caps_the_block_and_no_fill_keeps_the_budget():
     assert _labels(resolve_plan(_plan(_repeater_block(fill_limit=2), reserve=196), _repeaters())) == ["5 mi", "30 mi"]
     assert _labels(resolve_plan(_plan(_repeater_block(), reserve=196, fill=False), _repeaters())) == ["5 mi"]

@@ -121,6 +121,29 @@ def test_a_tower_label_keeps_only_the_first_runway_pair():
     assert [c.label for c in department.channels] == ["SEA TWR 16L/34R"]
 
 
+def test_a_tower_keeps_a_frequency_a_nearby_field_shares():
+    w36 = _frq("W36", "NON-ATCT", "W36", "CTAF", 124.7, (47.53, -122.28), name="WILL ROGERS WILEY POST MEML")
+    departments = _departments(build_faa_airband_favorite(washington() + [w36], home=HOME))
+    [channel] = [c for d in departments.values() for c in d.channels if c.freq_mhz == 124.7]
+    assert channel.label == "RNT TWR" and "also W36 CTAF" in channel.notes
+    assert "W36 Will Rogers Wiley Post Meml" not in departments  # its only frequency is Renton's
+
+
+def test_a_ctaf_several_fields_share_becomes_one_common_channel():
+    fields = [_frq(f"F{i}", "NON-ATCT", f"F{i}", "CTAF", 122.9, (47.70 + i * 0.05, -122.05), name=f"FIELD {i}") for i in range(3)]
+    departments = _departments(build_faa_airband_favorite(washington() + fields, home=HOME))
+    [common] = [d for label, d in departments.items() if label.startswith("Common CTAF")]
+    [channel] = common.channels
+    assert (channel.label, channel.freq_mhz) == ("Common CTAF", 122.9)
+    assert "shared by F0, F1, F2" in channel.notes and common.range_miles > 15.0
+    assert [c for label, d in departments.items() if not label.startswith("Common") for c in d.channels if c.freq_mhz == 122.9] == []
+
+
+def test_guard_reads_guard():
+    guard = _frq("SEA", "ATCT", "SEA", "EMERG", 121.5, (47.45, -122.31), name="SEATTLE-TACOMA INTL")
+    assert [c.label for d in _departments(build_faa_airband_favorite([guard], home=HOME)).values() for c in d.channels] == ["Guard"]
+
+
 def test_no_faa_frequencies_means_no_list():
     assert build_faa_airband_favorite([]) is None
 

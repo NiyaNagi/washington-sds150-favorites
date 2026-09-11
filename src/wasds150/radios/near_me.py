@@ -29,9 +29,10 @@ import copy
 import math
 import re
 from collections import OrderedDict
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Sequence, Tuple
 
+from wasds150.catalog.labels import StationLabels, areas_overlap, station_key
 from wasds150.hpe.flist import ListSettings
 from wasds150.models.catalog import ORIGIN_LOCAL, Channel, Department, FavoritesList, System
 from wasds150.models.provenance import Provenance
@@ -177,6 +178,21 @@ class _Entry:
     department: Department
     channel: Channel
     order: int
+    #: Every label this station arrived under, for naming a DMR repeater.
+    labels: List[str] = field(default_factory=list)
+    #: Every tone it arrived with: copies that disagree get open squelch.
+    tones: set = field(default_factory=set)
+
+
+def _area(entry: _Entry) -> Optional[Tuple[float, float, float]]:
+    """Where the entry is scanned: its fence, its cell, or anywhere (None)."""
+    kind = entry.place[0]
+    if kind == "fence":
+        department = entry.department
+        return (department.lat, department.lon, float(department.range_miles))
+    if kind == "cell":
+        return (entry.channel.lat, entry.channel.lon, entry.spec.reach_miles)
+    return None
 
 
 def _better(a: _Entry, b: _Entry) -> bool:
@@ -188,8 +204,13 @@ def _better(a: _Entry, b: _Entry) -> bool:
 
 
 def _conventional(favorites: Sequence[FavoritesList], home: Optional[Tuple[float, float]]) -> Dict[str, List[Department]]:
-    claimed: "OrderedDict[tuple, _Entry]" = OrderedDict()
-    labels: Dict[tuple, List[str]] = {}
+    names = StationLabels(
+        ((f.favorite_key, d, c) for f in favorites for s in f.systems for d in s.departments for c in d.channels),
+        home=home,
+    )
+    # A frequency is a duplicate only where two copies would be scanned at
+    # the same time: the same frequency in two counties is two stations.
+    kept: "OrderedDict[tuple, List[_Entry]]" = OrderedDict()
     order = 0
     for favorite in favorites:
         for system in favorite.systems:
@@ -204,15 +225,24 @@ def _conventional(favorites: Sequence[FavoritesList], home: Optional[Tuple[float
                     place = _placement(spec, favorite.favorite_key, department, channel)
                     if place is None:
                         continue
-                    key = (round(channel.freq_mhz, 5), (channel.mode or "").upper(), channel.tone or "")
-                    labels.setdefault(key, []).append(channel.label)
-                    entry = _Entry(spec, place, favorite, department, channel, order)
-                    if key not in claimed or _better(entry, claimed[key]):
-                        claimed[key] = entry
+                    key = station_key(channel) or (round(channel.freq_mhz, 5), (channel.mode or "").upper(), channel.tone or "")
+                    entry = _Entry(spec, place, favorite, department, channel, order, [channel.label], {channel.tone or ""})
+                    rivals = kept.setdefault(key, [])
+                    for index, rival in enumerate(rivals):
+                        if areas_overlap(_area(rival), _area(entry)):
+                            rival.labels.append(channel.label)
+                            rival.tones.add(channel.tone or "")
+                            if _better(entry, rival):
+                                entry.labels, entry.tones = rival.labels, rival.tones
+                                rivals[index] = entry
+                            break
+                    else:
+                        rivals.append(entry)
 
     groups: "OrderedDict[tuple, List[Tuple[tuple, _Entry]]]" = OrderedDict()
-    for key, entry in claimed.items():
-        groups.setdefault((entry.spec.key,) + entry.place, []).append((key, entry))
+    for key, entries in kept.items():
+        for entry in entries:
+            groups.setdefault((entry.spec.key,) + entry.place, []).append((key, entry))
 
     result: Dict[str, List[Tuple[float, Department]]] = {}
     for group_key, members in groups.items():
@@ -221,12 +251,18 @@ def _conventional(favorites: Sequence[FavoritesList], home: Optional[Tuple[float
         channels = []
         for key, entry in sorted(members, key=lambda item: (service_rank(item[1].channel.service_type), item[1].channel.freq_mhz)):
             channel = copy.deepcopy(entry.channel)
-            if len(labels[key]) > 1 and (channel.mode or "").upper() == "DMR":
+            if len(entry.labels) > 1 and (channel.mode or "").upper() == "DMR":
                 # One entry per DMR repeater: name it for the repeater, not a talkgroup.
-                channel.label = (_common_suffix(labels[key]) or channel.label)[:64]
+                channel.label = (_common_suffix(entry.labels) or channel.label)[:64]
+            else:
+                # The name every radio uses for this station.
+                channel.label = names.label(entry.department, entry.channel)[:64]
+            if len(entry.tones) > 1 and key[2] == "":
+                # Two agencies' copies with different tones: open squelch hears both.
+                channel.tone = ""
             if channel.service_type is None and spec.default_service is not None:
                 channel.service_type = spec.default_service
-            channel.id = stable_id(f"nearme:{spec.key}:{key}", kind="channel")
+            channel.id = stable_id(f"nearme:{spec.key}:{key}:{entry.place}", kind="channel")
             channels.append(channel)
         first = members[0][1]
         if place[0] == "fence":

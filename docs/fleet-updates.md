@@ -111,6 +111,15 @@ next-nearest stations wherever they are. Those beyond 60 miles are
 programmed but locked out of the scan, so a fuller radio does not scan
 slower; ATIS and ASOS/AWOS are programmed but not scanned either.
 
+Names match from radio to radio. The groups use the same words everywhere
+and in the scanner's order - Weather (never scanned), SAR & Interop,
+Wildfire, Public Safety, Air, Ham, Rail, Marine, GMRS/FRS/MURS, Business -
+and a station has one name on every radio and in the Near Me lists, chosen
+once for the whole catalog: the FAA's for airport frequencies, then the
+curated and coordinated lists' names, then the database descriptions.
+Radios with short displays shorten that one name (`BFI TWR 14L/32R`,
+`BFITWR14L32R`, `BF14L32R`).
+
 ## How an update runs
 
 1. **Sources.** Every configured source whose cache is stale is refreshed; any

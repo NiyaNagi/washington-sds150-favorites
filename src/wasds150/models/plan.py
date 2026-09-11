@@ -321,6 +321,10 @@ class ChannelPlan:
     #: Those beyond the radius are programmed but locked out of the scan, so a
     #: fuller radio does not scan slower.
     fill_to_capacity: bool = False
+    #: Name each station as the whole catalog does (see
+    #: :mod:`wasds150.catalog.labels`) rather than as the copy this plan
+    #: happened to reach first, so it reads the same on every radio.
+    canonical_labels: bool = False
 
     def __post_init__(self) -> None:
         if self.reserve_slots < 0:
@@ -354,6 +358,7 @@ class ChannelPlan:
             "home": list(self.home) if self.home else None,
             "radius_miles": self.radius_miles,
             "fill_to_capacity": self.fill_to_capacity,
+            "canonical_labels": self.canonical_labels,
             "scan_groups": [
                 {"name": group.name, "blocks": list(group.blocks), "notes": group.notes}
                 for group in self.scan_groups

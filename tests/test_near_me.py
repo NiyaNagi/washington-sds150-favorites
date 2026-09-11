@@ -61,7 +61,7 @@ def _catalog():
         ]),
         Site(id="s9", label="Unfenced", departments=[]),
     ])
-    redmond = Department(id="red", label="Local", channels=[_ch("KCSO Disp copy", 155.55, mode="FM", service_type=2)], **KING)
+    redmond = Department(id="red", label="Local", channels=[_ch("KCSO Dispatch", 155.55, mode="NFM", service_type=2)], **KING)
     return [
         _fl("RRC-KING", _conv("King", king), licensed=True),
         _fl("RRWA", _conv("WA", statewide)),
@@ -96,12 +96,30 @@ def test_the_lists_come_in_quick_key_order_and_empty_ones_are_left_out():
 def test_public_safety_is_fenced_live_and_each_frequency_once():
     lists = _lists()
     departments = [d for s in lists["NM-PS"].systems for d in s.departments]
-    assert [(d.label, [c.label for c in d.channels]) for d in departments] == [("King: Law Dispatch", ["KCSO Disp"])]
+    # One channel for the station, named as every radio names it: the curated
+    # list's name wins over the database's, FM and NFM notwithstanding.
+    assert [(d.label, [c.label for c in d.channels]) for d in departments] == [("King: Law Dispatch", ["KCSO Dispatch"])]
     assert (departments[0].lat, departments[0].lon, departments[0].range_miles) == (47.49, -121.84, 30.0)
     # encrypted, data, NOAA and the unfenced statewide row are gone; tac has its own list
     assert [c.label for c in _conventional(lists["NM-TAC"])] == ["KCSO Tac"]
     everywhere = [c.freq_mhz for fl in lists.values() for c in _conventional(fl)]
     assert everywhere.count(155.55) == 1
+
+
+def test_the_same_frequency_in_another_county_is_another_station():
+    spokane = Department(id="spo", label="Law Dispatch", channels=[_ch("Spokane SO", 155.55, mode="FM", service_type=2)],
+                         lat=47.66, lon=-117.43, range_miles=30.0)
+    catalog = _catalog() + [_fl("RRC-SPOKANE", _conv("Spokane", spokane))]
+    lists = {fl.favorite_key: fl for fl in build_near_me_lists(catalog, home=HOME)}
+    assert sorted(c.label for c in _conventional(lists["NM-PS"]) if c.freq_mhz == 155.55) == ["KCSO Dispatch", "Spokane SO"]
+
+
+def test_copies_with_different_tones_get_open_squelch():
+    a = Department(id="a", label="A", channels=[_ch("Agency A", 155.1, mode="FM", service_type=2, tone="TONE=C103.5")], **KING)
+    b = Department(id="b", label="B", channels=[_ch("Agency B", 155.1, mode="FM", service_type=2, tone="TONE=C123.0")], **KING)
+    lists = {fl.favorite_key: fl for fl in build_near_me_lists([_fl("RRC-KING", _conv("King", a, b))], home=HOME)}
+    [channel] = [c for c in _conventional(lists["NM-PS"]) if c.freq_mhz == 155.1]
+    assert channel.tone == ""  # hears both agencies
 
 
 def test_air_keeps_the_towers_and_drops_broadcasts_that_never_stop():

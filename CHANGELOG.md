@@ -9,6 +9,17 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Added
 
+- One name per station on every radio (`wasds150.catalog.labels`). A
+  station is a frequency and mode in one area (FM/NFM and an analog tone do
+  not split it; the same frequency in two counties does); its name comes
+  from the FAA, then the lists written for radios (curated lists, WWARA,
+  GMRS, NOAA), then the database descriptions (RadioReference, FCC), the
+  copy nearest home first. The fleet plans (`ChannelPlan.canonical_labels`)
+  and the SDS150 Near Me lists both use it.
+- Shared group words: every handheld and the scanner say Public Safety,
+  SAR & Interop, Wildfire, Air, Ham, Rail, Marine, GMRS/FRS/MURS, Business
+  and Weather, in the scanner's Near Me order (`BLOCK_ORDER`); the Anytone
+  scan groups are "Public Svc" and "Rail & Marine".
 - **Near Me** lists for the SDS150 (`wasds150.radios.near_me`): public
   safety, tactical, air, ham, rail & marine and business, built from the
   installed lists on every install. Every group is location-fenced (county,
@@ -50,6 +61,19 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Fixed
 
+- Near Me counted the same frequency in two places as one station and kept
+  only one (Olympia and Walla Walla ground lost to Renton's on 121.6); two
+  copies are now duplicates only where their areas overlap.
+- "Relevant anywhere" covers only the nationwide plans (SAR calling,
+  marine, itinerant business, NOAA): regional curated lists no longer put a
+  Yakima or Spokane repeater at the top of a small radio's group. Ham
+  repeaters stay out of the non-ham groups, unlocated rows of regional
+  lists rank after the located stations near home, and with fill a nearer
+  copy of a frequency always wins over a far one.
+- FAAAIR keeps one channel per frequency and area: Renton Tower keeps
+  124.7 (the Lake Washington seaplane base's CTAF), a CTAF or UNICOM several
+  fields share becomes "Common CTAF"/"Common UNICOM" fenced around all of
+  them, and 121.5/243.0 read "Guard".
 - A NOAA weather frequency another list also carries (an events list's
   "NOAA Weather Radio", a trip pack's 162.500) no longer lands in a scanned
   block: the weather block now comes before the service blocks and claims
