@@ -9,7 +9,7 @@ from wasds150.radios.registry import get_profile
 def test_the_two_radios_that_had_extras_get_the_same_lists_in_the_same_order():
     """Order matters: ties in frequency-sorted blocks keep catalog order."""
     assert extra_keys_for(get_profile("th-d75")) == ["THD75BC", "THD75LOCAL", "THD75USER", "THD75WWARA"]
-    assert extra_keys_for(get_profile("at-d890uv")) == ["THD75BC", "THD75WWARA", "ATD890LOCAL", "DMRNET"]
+    assert extra_keys_for(get_profile("at-d890uv")) == ["THD75BC", "THD75WWARA", "ATD890LOCAL", "DMRNET", "BMNET"]
 
 
 def test_other_radios_get_what_their_capabilities_allow():

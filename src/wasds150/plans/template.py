@@ -309,6 +309,8 @@ def _dmr(knobs: RadioKnobs, tiers: Tuple[int, ...]) -> Tuple[ChannelSelector, ..
         # positions, and these are the machines the operator works daily.
         _keys("DMRNET", dept=r"^Puget Sound$", dmr_tiers=tiers),
         _near(knobs, "DMRNET", dmr_tiers=tiers),
+        # BrandMeister machines publish their owners' positions.
+        _near(knobs, "BMNET", dmr_tiers=tiers),
     )
 
 

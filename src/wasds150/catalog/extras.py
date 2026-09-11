@@ -63,6 +63,12 @@ def _dmr_networks() -> List[FavoritesList]:
     return list(favorites())
 
 
+def _brandmeister() -> List[FavoritesList]:
+    from wasds150.catalog.brandmeister_snapshot import favorites
+
+    return list(favorites())
+
+
 @dataclass(frozen=True)
 class ExtraCatalog:
     key: str
@@ -128,6 +134,12 @@ EXTRAS: Tuple[ExtraCatalog, ...] = (
         _dmr_networks,
         requires_modes=frozenset({"DMR"}),
         notes="PNWDigital / SeattleDMR repeater and talkgroup layout.",
+    ),
+    ExtraCatalog(
+        "BMNET",
+        _brandmeister,
+        requires_modes=frozenset({"DMR"}),
+        notes="BrandMeister repeaters near home and their static talkgroups.",
     ),
 )
 

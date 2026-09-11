@@ -96,6 +96,7 @@ and **Reset Digi. Protocol = DMR** keep that default across resets.
 | `DMRTalkGroups.CSV` | Every talkgroup any channel references, with a `Simplex 99` default. |
 | `DMRReceiveGroupCallList.CSV` | One receive group per network (`PNWDigital RX`, `SeattleDMR RX`, ...) so a DMR channel hears every talkgroup carried on its network. |
 | `RadioIDList.CSV` | `3227807, WA7DAM` - the registered DMR ID. |
+| (none) | The NXDN unit ID, **16240**, is a radio-wide setting rather than an import table: CPS **NX Setting > Unit ID(Own)**. The fleet checklist has a step for it; a codeplug opened from your saved `.rdt` already carries it. |
 | `AMAir.CSV`, `AMZone.CSV` | Air-band memories and zones (`Air Civil 01..`, `Air Mil SAR`); the zone's scan member list is the whole zone. |
 | `FM.CSV` | FM broadcast stations, all with `Scan = Del`. |
 | `atd890-scan.LST` | Manifest for Tool > Import > Import All. |
@@ -266,6 +267,7 @@ County 333153, Seattle 1/2, Link 1-6): <https://seattledmr.com/>.
 |---|---|
 | New RadioReference export in `.wasds150-home/rr-exports/` | `wasds150 sources update --only radioreference_premium --apply` |
 | PNWDigital / SeattleDMR repeater or talkgroup changes | `wasds150 sources update --only seattledmr --apply`, and `scripts/radios/build_atd890_dmr_snapshot.py` to refresh the committed snapshot |
+| BrandMeister repeater or static talkgroup changes | `scripts/radios/build_brandmeister_snapshot.py`, then commit `src/wasds150/catalog/brandmeister_snapshot.py`; the fleet plan's DMR zones pick it up (network `BrandMeister`, its own receive group) |
 | WWARA coordination changes | `wasds150 sources update --only wwara --apply` |
 | Anything above | re-run the export, re-import in the CPS, write |
 

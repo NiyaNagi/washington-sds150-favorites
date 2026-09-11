@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
 
+from wasds150 import station
 from wasds150.fleet.model import (
     LOAD_AUTOMATED,
     LOAD_GUIDED,
@@ -286,6 +287,12 @@ AT_D890UV = FleetRadio(
             "Model > Model Information must match the radio's frequency range.",
         ),
         StepSpec(
+            "set-nxdn-id", "Set the NXDN unit ID",
+            f"NX Setting > Unit ID(Own) = {station.NXDN_ID}, your radioid.net NXDN ID. It is a "
+            "radio-wide setting, not in the import bundle; a codeplug opened from {rdt_base} "
+            "already has it.",
+        ),
+        StepSpec(
             "import-all", "Import the bundle",
             "Tool > Import > choose {lst} > Import All. A name the CPS cannot resolve means the "
             "export is stale: re-export rather than editing in place.",
@@ -293,9 +300,9 @@ AT_D890UV = FleetRadio(
         ),
         StepSpec(
             "import-contacts", "Import the contact list",
-            "Tool > Import > Digital Contact List > choose {contacts}. A worldwide list takes several "
-            "minutes. The file's columns are not yet confirmed against this CPS, so check a few "
-            "entries afterwards.",
+            "Tool > Import > Digital Contact List > choose {contacts}, then the NXDN contact list "
+            "(NXDNContactList.CSV in the same folder). A worldwide list takes several minutes. The "
+            "files' columns are not yet confirmed against this CPS, so check a few entries afterwards.",
             optional=True, artifacts=("contacts",),
         ),
         StepSpec(

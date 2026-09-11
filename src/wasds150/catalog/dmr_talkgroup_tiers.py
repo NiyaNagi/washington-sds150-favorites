@@ -81,6 +81,15 @@ TIER_TABLE: Dict[Tuple[str, str], int] = {
     ("SeattleDMR", "BEARS 2"): _REGIONAL,
     ("SeattleDMR", "Parrot 1"): _TEST,
     ("SeattleDMR", "Audio Test 2"): _TEST,
+    # BrandMeister: the statewide group first, then the Pacific Northwest and
+    # emergency groups the local repeaters carry statically.
+    ("BrandMeister", "Washington - 10 Minute Limit"): _CORE,
+    ("BrandMeister", "Olympic Peninsula"): _REGIONAL,
+    ("BrandMeister", "PNW-West"): _REGIONAL,
+    ("BrandMeister", "PNWR"): _REGIONAL,
+    ("BrandMeister", "Washington TAC"): _REGIONAL,
+    ("BrandMeister", "Washington State ARES"): _REGIONAL,
+    ("BrandMeister", "Washington State ARES TAC"): _REGIONAL,
 }
 
 #: Echo/parrot and audio-test groups on networks the table does not list.

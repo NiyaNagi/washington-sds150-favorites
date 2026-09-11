@@ -391,6 +391,14 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   miles) and `GMRS01` (open GMRS repeaters, added by hand). GMRS and
   FRS transmit at full power on radios whose hardware covers them, by the
   operator's explicit choice.
+- Added BrandMeister: `BMNET`, the BrandMeister repeaters within 100 miles of
+  home with their owner-set static talkgroups, from a committed snapshot that
+  `scripts/radios/build_brandmeister_snapshot.py` regenerates from the
+  network's public v2 API (no key). DMR radios get it beside PNWDigital and
+  SeattleDMR, tiered so the Washington statewide group sorts into DMR Core.
+- Added the operator's NXDN unit ID (16240) to `station.py`, with a fleet
+  checklist step to set it in the Anytone CPS (NX Setting > Unit ID(Own)),
+  and the NXDN contact list to the contact import step.
 
 
 ### Changed
