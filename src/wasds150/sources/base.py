@@ -4,13 +4,14 @@ Two contracts exist:
 
 * :class:`SourceAdapter` (legacy/local) — used by
   :class:`wasds150.sources.static_pack.StaticPackSource` and the
-  not-yet-implemented ``repeaterbook``/``radioreference_free`` placeholders.
+  not-yet-implemented ``radioreference_free`` placeholder.
   ``fetch``/``normalize`` directly produce
   :class:`~wasds150.models.catalog.FavoritesList` objects.
 * :class:`OnlineSourceAdapter` — used by every online/local-file adapter
   added for the update-pipeline phase (NOAA, USCG, AMSAT, NWAC, WWARA,
   IACC, FAA NASR, FCC ULS, WA EMD/DNR, NIFC, Sentinel HPDB, RadioReference
-  Premium). ``fetch`` takes an optional
+  Premium; and RepeaterBook, which is ``explicit_only`` and runs only from
+  its own guarded command). ``fetch`` takes an optional
   :class:`~wasds150.cache.http.CachedHttpClient` (``None`` for local-file-only
   sources); ``normalize`` returns a
   :class:`~wasds150.sources.facts.NormalizeResult` (flat, adapter-agnostic
@@ -73,6 +74,11 @@ class OnlineSourceAdapter(ABC):
     #: FAA NASR). The fleet update refreshes them only when asked for by
     #: name, never just because their cache is stale.
     bulk: bool = False
+    #: True for a source that must never run implicitly: ``sources update``
+    #: skips it even when every other source runs, and ``sources fetch``
+    #: refuses it. It runs only from its own guarded action (RepeaterBook:
+    #: ``wasds150 repeaterbook refresh``).
+    explicit_only: bool = False
 
     @abstractmethod
     def fetch(self, http_client: Optional[Any] = None) -> RawDoc:

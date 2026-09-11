@@ -39,12 +39,12 @@ files go stale the moment the catalog changes. They were last regenerated on
 2026-09-10, after a full source refresh. Regenerate with:
 
 ```bash
-wasds150 --home .wasds150-home plan export h9-ozette --out radio-configs
-wasds150 --home .wasds150-home plan export ftx1-wa --target ftx1-file --out radio-configs
-wasds150 --home .wasds150-home plan export ftx1-local --target ftx1-file --out radio-configs
-wasds150 --home .wasds150-home plan export ftx1-scan --target ftx1-file --out radio-configs
-wasds150 --home .wasds150-home plan export thd75-ames-lake --target thd75-file --out radio-configs
-wasds150 --home .wasds150-home plan export thd75-scan --target thd75-file --out radio-configs
+wasds150 --home .wasds150-home plan export h9-ozette --out radio-configs --exclude-licensed
+wasds150 --home .wasds150-home plan export ftx1-wa --target ftx1-file --out radio-configs --exclude-licensed
+wasds150 --home .wasds150-home plan export ftx1-local --target ftx1-file --out radio-configs --exclude-licensed
+wasds150 --home .wasds150-home plan export ftx1-scan --target ftx1-file --out radio-configs --exclude-licensed
+wasds150 --home .wasds150-home plan export thd75-ames-lake --target thd75-file --out radio-configs --exclude-licensed
+wasds150 --home .wasds150-home plan export thd75-scan --target thd75-file --out radio-configs --exclude-licensed
 wasds150 --home .wasds150-home plan export atd890-scan --target atd890-cps --out radio-configs --exclude-licensed
 ```
 

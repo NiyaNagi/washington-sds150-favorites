@@ -533,7 +533,7 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
         ),
         tx=TXK_GMRS, sort=SORT_TIER_DISTANCE, limit=20, radius=True, tx_probe=_GMRS_PROBE,
         groups=(GROUP_PERSONAL,),
-        notes="Nearest listed open repeaters first, each on its published input and access tone.",
+        notes="Nearest open repeaters first, each on its input and access tone.",
     ),
     ServiceBlockSpec(
         "murs", "MURS", "GMRS FRS MURS",

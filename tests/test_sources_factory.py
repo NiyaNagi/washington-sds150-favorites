@@ -48,11 +48,13 @@ def test_runnable_names_are_available_online_adapters_in_registry_order():
     expected = [
         name
         for name, cls in list_sources().items()
-        if issubclass(cls, OnlineSourceAdapter) and cls.available and cls.kind != "contacts"
+        if issubclass(cls, OnlineSourceAdapter) and cls.available
+        and cls.kind != "contacts" and not cls.explicit_only
     ]
     assert runnable_source_names() == expected
     assert "static_pack" not in expected
     assert "radioid" not in expected and "radioid" in list_sources()
+    assert "repeaterbook" not in expected  # explicit-only: its own guarded command runs it
 
 
 def test_runnable_names_respect_only_and_skip():

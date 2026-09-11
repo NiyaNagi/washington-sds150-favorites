@@ -483,6 +483,7 @@ def cmd_plans_export(args: argparse.Namespace) -> int:
             out_dir=Path(args.out),
             copy_to=Path(args.copy_to) if args.copy_to else None,
             include_licensed=not args.exclude_licensed,
+            with_repeaterbook=getattr(args, "with_repeaterbook", False),
         )
     except (KeyError, NotImplementedError, ValueError, OSError) as exc:
         print(f"error: {exc}", file=sys.stderr)
@@ -1028,13 +1029,15 @@ def cmd_sources_list(args: argparse.Namespace) -> int:
     rows = []
     for name, cls in sorted(list_sources().items()):
         kind = getattr(cls, "kind", None) if issubclass(cls, OnlineSourceAdapter) else "legacy"
-        rows.append({"name": name, "available": cls.available, "kind": kind})
+        explicit = bool(getattr(cls, "explicit_only", False))
+        rows.append({"name": name, "available": cls.available, "kind": kind, "explicit_only": explicit})
 
     if args.json:
         _print_json({"sources": rows})
         return 0
     for row in rows:
-        print(f"  {row['name']:24} available={row['available']!s:5} kind={row['kind']}")
+        note = "  explicit-only: see 'wasds150 repeaterbook'" if row["explicit_only"] else ""
+        print(f"  {row['name']:24} available={row['available']!s:5} kind={row['kind']}{note}")
     return 0
 
 
@@ -1154,7 +1157,13 @@ def cmd_sources_fetch(args: argparse.Namespace) -> int:
     config = _build_config(args)
     configure_logging(config.log_file)
     sources_config = SourcesConfig.load(config.sources_config_path)
-    source = instantiate_source(args.name, sources_config)
+    from wasds150.sources.repeaterbook import ExplicitOnlyError
+
+    try:
+        source = instantiate_source(args.name, sources_config)
+    except ExplicitOnlyError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 1
     if source is None:
         print(f"Source {args.name!r} is not configured/runnable (see 'wasds150 sources configure').", file=sys.stderr)
         return 1
@@ -1175,14 +1184,21 @@ def cmd_sources_fetch(args: argparse.Namespace) -> int:
 
 def cmd_sources_update(args: argparse.Namespace) -> int:
     from wasds150.sources.config import SourcesConfig
-    from wasds150.sources.factory import build_http_client, instantiate_all
+    from wasds150.sources.factory import build_http_client, explicit_only_names, instantiate_all
     from wasds150.update.pipeline import build_and_merge, run_sources
+
+    only = set(args.only.split(",")) if args.only else None
+    refused = explicit_only_names(only or ())
+    if refused:
+        from wasds150.sources.repeaterbook import EXPLICIT_ONLY_MESSAGE
+
+        print(f"error: {', '.join(refused)}: {EXPLICIT_ONLY_MESSAGE}", file=sys.stderr)
+        return 1
 
     ctx = _build_ctx(args)
     sources_config = SourcesConfig.load(ctx.config.sources_config_path)
     offline = sources_config.offline or args.offline
 
-    only = set(args.only.split(",")) if args.only else None
     instances = instantiate_all(sources_config, only=only)
 
     http_client = build_http_client(ctx.config, offline)
@@ -1954,6 +1970,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="Leave out lists built from licensed data (RadioReference), for a "
         "copy that can be committed or shared",
     )
+    p_plan_export.add_argument(
+        "--with-repeaterbook",
+        action="store_true",
+        help="Append your applied, reviewed RepeaterBook records as a final block. "
+        "Reads the local store only; never contacts RepeaterBook. Not with --exclude-licensed",
+    )
     p_plan_export.add_argument("--json", action="store_true")
     p_plan_export.set_defaults(func=cmd_plans_export)
 
@@ -2211,6 +2233,10 @@ def build_parser() -> argparse.ArgumentParser:
     p_sources_provenance.add_argument("--json", action="store_true")
     p_sources_provenance.set_defaults(func=cmd_sources_provenance)
 
+    from wasds150 import cli_repeaterbook
+
+    cli_repeaterbook.add_parser(subparsers)
+
     p_install = subparsers.add_parser(
         "install", help="EXPERIMENTAL: direct SD-card installer (detect/backup/write/rollback)"
     )
@@ -2269,6 +2295,13 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: Optional[List[str]] = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+    try:
+        # RepeaterBook retention runs at every start-up; a no-op if never used.
+        from wasds150.sources.repeaterbook.service import purge_on_startup
+
+        purge_on_startup(_build_config(args))
+    except Exception as exc:  # pragma: no cover - never block a command on it
+        print(f"warning: RepeaterBook retention purge failed: {exc}", file=sys.stderr)
     try:
         return args.func(args)
     except Exception as exc:  # pragma: no cover - top-level safety net

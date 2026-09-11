@@ -123,6 +123,18 @@ def sample_csv_path(tmp_path: Path) -> Path:
     return write_sample_csv(tmp_path / "sample.csv")
 
 
+@pytest.fixture(autouse=True)
+def _no_repeaterbook_network(monkeypatch):
+    """No test anywhere may reach RepeaterBook. A test that needs a response
+    injects a fake transport; the real one fails the test if it is called."""
+    from wasds150.sources.repeaterbook import client
+
+    def refuse(*args, **kwargs):
+        raise AssertionError("a test tried to reach RepeaterBook")
+
+    monkeypatch.setattr(client, "urllib_transport", refuse)
+
+
 @pytest.fixture()
 def wasds_home(tmp_path: Path, monkeypatch) -> Path:
     """Point WASDS150_HOME at an isolated temp directory for this test."""

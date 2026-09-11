@@ -47,7 +47,7 @@ is [Updating every radio](docs/fleet-updates.md); what still needs doing is in
 - [Antenna measurement results](antenna-results/README.md) - calibrated handheld and installed-vehicle comparisons, family/service coverage matrix, explicit gap analysis, recommendations, scorecards, offline interactive analysis, raw Touchstone data, and the preserved JYR8010 EFHW report.
 - [Upper Lena Lake profile](docs/upper-lena-lake.md) - compact and comprehensive Hood Canal/Olympic wilderness, SAR, weather, public-safety, aviation, marine, amateur, and personal-radio profiles.
 - [Puget Sound ham repeaters and nets](docs/puget-sound-ham.md) - current WWARA-coordinated repeaters, operator-published net channels/schedules, mode grouping, source hierarchy, and update workflow.
-- [Radius-based lists and HF](docs/local-radius-lists.md) - building a list by distance from home rather than by county, why RepeaterBook could not be used, what the WWARA expiry date can and cannot tell you, and the HF nets and beacons worth tuning.
+- [Radius-based lists and HF](docs/local-radius-lists.md) - building a list by distance from home rather than by county, why the committed lists use WWARA rather than RepeaterBook, what the WWARA expiry date can and cannot tell you, and the HF nets and beacons worth tuning.
 - [Data-source architecture](docs/data-sources.md) - source provenance, caching, update and merge behavior.
 - [TD-H9 programming guide](docs/td-h9-programming.md) - complete hardware procedure, verified radio facts, cable troubleshooting, and the two failure modes that produce a silently wrong radio.
 - [TH-D75A Ames Lake loadout](docs/th-d75-ames-lake.md) - verified capabilities, 50-mile analog/D-STAR and wideband-receive plan, native-image safety, installed software, hashes, hardware write, and read-back results.
@@ -56,12 +56,7 @@ is [Updating every radio](docs/fleet-updates.md); what still needs doing is in
 - [RadioReference API application](docs/radioreference-api-application.md) - ready-to-paste text for the Database Web Service key request, and what happens after approval.
 - [Agent runbook](docs/agent-runbook.md) - copy-paste procedures for automating this repository, environment layout, API reference, and project invariants.
 - [Lake Ozette profile](docs/ozette-lake.md) - Olympic Peninsula coastal trip profile: Clallam County, SAR/interop, tribal, marine, aviation, and amateur coverage.
-- [Printable mounts and brackets](models/README.md) - parametric OpenSCAD visor mounts, Peak Design Capture bracket, and EFHW antenna enclosure, with print-ready 3MF/STL and the latch/fit reasoning behind each variant.
-- [Parametric modelling method](docs/modelling-method.md) - measurement-first workflow, tolerance and clearance conventions, and the automated geometry checks each model must pass.
-- [Peak Design capture bracket](docs/pd-capture-bracket.md) - the SDS150 bracket's dimensions, fastener options, and fit verification.
-- [EFHW antenna enclosure](docs/efhw-enclosure.md) - a 128mm screw-lid cylinder for an end-fed half-wave transformer: how it sheds rain without a gasket, the open-topped cable exits, and why the thread is deliberately coarse.
-- [Peak Design radio standoff](docs/peak-design-radio-standoff.md) - a cup-holder stalk with a continuously adjustable M6 head, captured-nut 1.40× GoPro-style knob, keyed TPU friction washers, SDS150 gravity keyhole, shortened full-width clip plate, coupons, and independent load/fit checks.
-- [Radio hardware measurements](docs/radio-hardware-measurements.md) - measured, derived, published, and conservative mounting dimensions kept separate for future designs.
+- [3D models (moved)](docs/3d-models.md) - the printable mounts, brackets, EFHW enclosure and parametric modelling method now live in [alturas-labs-models](https://github.com/NiyaNagi/alturas-labs-models).
 
 ## Radios and channel plans
 
@@ -359,6 +354,33 @@ Follow the [Sentinel HPDB completion plan](docs/sentinel-completion-plan.md)
 for the system-by-system priority order, merge rules, location-control
 pass, encrypted-talkgroup handling and release gates.
 
+## RepeaterBook (disabled until approved)
+
+For travel, or for repeaters across a nearby state or provincial line, the
+tool can pull amateur repeaters around one point from the RepeaterBook Export
+API. The adapter is implemented but **off by default, pending RepeaterBook's
+approval of this application**, and it never runs from `sources update`.
+Each user needs their own app-bound `rbuapp_` token from RepeaterBook's API
+Apps page; only the name of the environment variable holding it (or the path
+of a file outside this repository) is stored.
+
+```powershell
+$env:REPEATERBOOK_API_TOKEN = "<your rbuapp_ token>"      # never committed, never typed into the UI
+wasds150 repeaterbook configure --enable                   # only once RepeaterBook has approved
+wasds150 repeaterbook refresh --regions WA,OR --center 45.6,-121.2 --radius-mi 60 --bands 2m,70cm --radio th-d75
+wasds150 repeaterbook review --report md
+wasds150 repeaterbook apply
+wasds150 plan export thd75-ames-lake --target thd75-file --with-repeaterbook
+```
+
+Every refresh is bounded (up to three allowlisted regions, one centre, 1-60
+miles, four requests per 24 hours, at most 250 results), reviewed before it
+reaches a radio, kept apart from the catalog with 7/30/90-day retention, and
+removable with `wasds150 repeaterbook delete-all --yes`. RepeaterBook-derived
+records never go into a committed or shared file. Data courtesy of
+[RepeaterBook.com](https://www.repeaterbook.com/). The full rules are in the
+[RepeaterBook design](docs/repeaterbook-api-compliance-design.md).
+
 ## Development
 
 The runtime has no third-party dependencies. Install the development extra
@@ -381,20 +403,9 @@ python scripts/radios/fetch_chirp_tdh9_module.py
 
 Neither `.venv-chirp/` nor the fetched driver module is committed.
 
-The 3D models are a third, equally separate environment. They need OpenSCAD
-plus a scientific stack for the geometry checks, none of which the package
-uses:
-
-```bash
-python -m venv .venv-cad
-.venv-cad/bin/pip install -r scripts/cad/requirements.txt
-.venv-cad/bin/python scripts/cad/export_models.py    # regenerate every 3MF/STL
-.venv-cad/bin/python scripts/cad/build_all.py        # verify everything, then export
-```
-
-`build_all.py` runs all 31 geometry checks in order and stops at the first
-hard failure, so a broken model cannot overwrite good STLs. It goes quiet
-for minutes at a time while CGAL works.
+The 3D models and their `.venv-cad` environment moved to
+[alturas-labs-models](https://github.com/NiyaNagi/alturas-labs-models);
+see [docs/3d-models.md](docs/3d-models.md).
 
 Project invariants that must not be broken — zero runtime dependencies, the
 MIT/GPL boundary, never committing licensed data, reporting dropped channels

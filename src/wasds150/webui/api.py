@@ -602,6 +602,8 @@ def get_sources(ctx: AppContext, req: RequestContext) -> Response:
                     "name": name,
                     "available": cls.available,
                     "kind": getattr(cls, "kind", None) if issubclass(cls, OnlineSourceAdapter) else "legacy",
+                    # Listed, but never run by Fetch/Update: see the RepeaterBook panel.
+                    "explicit_only": bool(getattr(cls, "explicit_only", False)),
                 }
                 for name, cls in sorted(sources.items())
             ]
@@ -700,11 +702,15 @@ def post_sources_fetch(ctx: AppContext, req: RequestContext) -> Response:
     name = body.get("name")
     if not name:
         return _error(400, "'name' is required")
+    from wasds150.sources.repeaterbook import ExplicitOnlyError
+
     sources_config = SourcesConfig.load(ctx.config.sources_config_path)
     try:
         source = instantiate_source(name, sources_config)
     except KeyError as exc:
         return _error(404, str(exc))
+    except ExplicitOnlyError as exc:
+        return _error(400, str(exc))
     if source is None:
         return _error(400, f"source {name!r} is not configured/runnable (see Sources -> Configure)")
 
@@ -716,13 +722,18 @@ def post_sources_fetch(ctx: AppContext, req: RequestContext) -> Response:
 
 def post_sources_update(ctx: AppContext, req: RequestContext) -> Response:
     from wasds150.sources.config import SourcesConfig
-    from wasds150.sources.factory import build_http_client, instantiate_all
+    from wasds150.sources.factory import build_http_client, explicit_only_names, instantiate_all
     from wasds150.update.pipeline import build_and_merge, run_sources
 
     body = req.json_body() or {}
     sources_config = SourcesConfig.load(ctx.config.sources_config_path)
     offline = sources_config.offline or bool(body.get("offline", False))
     only = set(body["only"]) if body.get("only") else None
+    refused = explicit_only_names(only or ())
+    if refused:
+        from wasds150.sources.repeaterbook import EXPLICIT_ONLY_MESSAGE
+
+        return _error(400, f"{', '.join(refused)}: {EXPLICIT_ONLY_MESSAGE}")
 
     instances = instantiate_all(sources_config, only=only)
 
@@ -1235,7 +1246,10 @@ def post_plan_export(ctx: AppContext, req: RequestContext) -> Response:
     out_dir = Path(body.get("out") or DEFAULT_OUT_DIR)
 
     try:
-        export = export_plan(ctx, plan_id, target_id=target_id, out_dir=out_dir)
+        export = export_plan(
+            ctx, plan_id, target_id=target_id, out_dir=out_dir,
+            with_repeaterbook=bool(body.get("with_repeaterbook")),
+        )
     except KeyError as exc:
         return _error(404, str(exc))
     except NotImplementedError as exc:
@@ -1584,6 +1598,9 @@ def build_router(ctx: AppContext, runner: Any = None) -> Router:
     router.add("POST", "/api/v1/sources/fetch", lambda req: post_sources_fetch(ctx, req))
     router.add("POST", "/api/v1/sources/update", lambda req: post_sources_update(ctx, req))
     router.add("GET", "/api/v1/sources/provenance/{slug}", lambda req: get_sources_provenance(ctx, req))
+    from wasds150.webui import repeaterbook_api
+
+    repeaterbook_api.register(router, ctx)
     router.add("POST", "/api/v1/hpe/inspect", lambda req: post_hpe_inspect(ctx, req))
     router.add("POST", "/api/v1/hpe/validate", lambda req: post_hpe_validate(ctx, req))
     router.add("POST", "/api/v1/hpe/build", lambda req: post_hpe_build(ctx, req))

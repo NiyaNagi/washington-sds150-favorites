@@ -12,9 +12,15 @@ def test_list_sources_includes_static_pack_as_available():
 
 def test_placeholder_sources_marked_unavailable():
     sources = list_sources()
-    for name in ("radioreference_free", "repeaterbook"):
-        assert name in sources
-        assert sources[name].available is False
+    assert sources["radioreference_free"].available is False
+
+
+def test_repeaterbook_is_listed_but_explicit_only():
+    """Implemented and visible, but never run by 'sources update'/'fetch';
+    see tests/test_repeaterbook.py for the guarded path."""
+    cls = list_sources()["repeaterbook"]
+    assert cls.available is True
+    assert cls.explicit_only is True
 
 
 def test_implemented_sources_marked_available():

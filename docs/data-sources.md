@@ -213,20 +213,33 @@ a key is issued. Non-secret identifiers (username, app key) may be recorded via
 disk (`WASDS150_RR_PASSWORD` at run time only). Credentials are never logged
 (see `wasds150.logging_setup`'s redaction filter).
 
-### RepeaterBook
+### RepeaterBook (approval-gated, explicit-only)
 
-RepeaterBook bulk exports are not mirrored (`wasds150.sources.repeaterbook`
-remains an unimplemented placeholder — out of scope for this phase). The
-application may retain links or import a file that the user has lawfully
-exported for personal use in a future phase. Coordinator data such as WWARA
-is preferred where available.
+`wasds150.sources.repeaterbook` implements the RepeaterBook Export API under
+the plan in [`repeaterbook-api-compliance-design.md`](repeaterbook-api-compliance-design.md).
+It is **off by default, pending RepeaterBook's approval**, and it is
+**explicit-only**: `sources update` skips it even when running every other
+source, and `sources fetch` / `sources update --only repeaterbook` refuse it.
+It runs only from `wasds150 repeaterbook refresh` or the UI's RepeaterBook
+panel, and only with the local enable flag on and the user's own `rbuapp_`
+token set.
 
-Any future RepeaterBook API implementation must follow the pre-implementation
-review plan in [`repeaterbook-api-compliance-design.md`](repeaterbook-api-compliance-design.md):
-exact `User-Agent`, app-bound local token loading, manual bounded refreshes,
-numeric rate and pagination caps, 429 backoff, 7-day/30-day/90-day cache rules,
-non-redistribution controls, and visible `Data courtesy of RepeaterBook.com`
-attribution with a link to `https://www.repeaterbook.com/`.
+Every refresh is bounded: allowlisted regions only (at most three per
+action), one centre, a whole-number radius of 1-60 miles, a band the target
+radio supports, four HTTP requests per rolling 24 hours per token, 60 minutes
+before the same region again, at most 250 candidates, no pagination, no retry,
+and a lockout after a 429. Records are filtered locally, reviewed, and
+applied; they live in a separate store under `state/repeaterbook/` with
+7/30/90-day retention and a Delete All action, and reach a radio only through
+`plan export --with-repeaterbook`. They are never committed or bundled, and
+every view shows `Data courtesy of RepeaterBook.com` linked to
+`https://www.repeaterbook.com/`.
+
+The committed lists keep using coordinator data such as WWARA, which this
+project may program from and derive facts from; RepeaterBook data is for the
+operator's own local exports only. Public RepeaterBook pages may still be
+linked as directory pointers, but no committed channel may cite one as its
+source (`tests/test_no_repeaterbook_data.py`).
 
 ### King County municipal locations and local curation
 

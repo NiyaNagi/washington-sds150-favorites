@@ -35,7 +35,7 @@ from wasds150.catalog.validate import partition_validation_issues, validate_cata
 from wasds150.generate.determinism import generation_content_hash, sort_favorites
 from wasds150.models.catalog import Catalog, FavoritesList
 from wasds150.models.profile import Profile
-from wasds150.recipes.systems import dedupe_systems, populate_rollups, static_systems_for
+from wasds150.recipes.systems import dedupe_systems, populate_rollups, static_system_id, static_systems_for
 from wasds150.util.hashing import content_hash
 
 
@@ -70,8 +70,11 @@ def _populate_static_systems(fl: FavoritesList) -> FavoritesList:
     """Top up ``fl.systems`` in place with Tier C (see module docstring)
     and return it, for a compact call site in :func:`apply_profile`."""
     additional = static_systems_for(fl)
-    if additional:
-        refreshed_ids = {system.id for system in additional}
+    stale_id = static_system_id(fl)
+    # Also runs when the prose no longer names a frequency, so a channel
+    # withdrawn from the text does not live on in every persisted catalog.
+    if additional or any(system.id == stale_id for system in fl.systems):
+        refreshed_ids = {system.id for system in additional} | {stale_id}
         fl.systems = dedupe_systems([
             system for system in fl.systems if system.id not in refreshed_ids
         ] + additional)

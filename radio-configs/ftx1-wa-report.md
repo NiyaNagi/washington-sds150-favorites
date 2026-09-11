@@ -17,26 +17,26 @@
 | 162-165 | Amateur 6 Meter | 4 | repeater |
 | 166-273 | Amateur 2m Repeaters | 108 | repeater |
 | 274-498 | Amateur 70cm Repeaters | 225 | repeater |
-| 499-510 | Amateur West Peninsula | 12 | repeater |
-| 511-614 | Amateur Puget Sound | 104 | repeater |
-| 615-618 | ARES RACES and Winlink | 4 | repeater |
-| 619-622 | Data and Packet | 4 | repeater |
-| 623-634 | Linked and Intertie | 12 | repeater |
-| 635-639 | Amateur Satellites | 5 | receive only |
-| 640-701 | Marine VHF | 62 | receive only |
-| 702-708 | Ferries and VTS | 7 | receive only |
-| 709-753 | Aviation | 45 | receive only |
-| 754-771 | Medevac and Rescue Air | 18 | receive only |
-| 772-799 | SAR and Interop | 28 | receive only |
-| 800-835 | Wildfire and DNR | 36 | receive only |
-| 836-880 | Parks and Forests | 45 | receive only |
-| 881-894 | Clallam and Tribal | 14 | receive only |
-| 895-898 | Military Ground and Range | 4 | receive only |
-| 899-908 | Rail | 10 | receive only |
-| 909-923 | Business and Itinerant | 15 | receive only |
-| 924-933 | Events and Media | 10 | receive only |
-| 934-945 | Upper Lena Essentials | 12 | receive only |
-| 946-979 | Regional Public Safety | 34 | receive only |
+| 499-509 | Amateur West Peninsula | 11 | repeater |
+| 510-613 | Amateur Puget Sound | 104 | repeater |
+| 614-617 | ARES RACES and Winlink | 4 | repeater |
+| 618-621 | Data and Packet | 4 | repeater |
+| 622-625 | Linked and Intertie | 4 | repeater |
+| 626-630 | Amateur Satellites | 5 | receive only |
+| 631-692 | Marine VHF | 62 | receive only |
+| 693-699 | Ferries and VTS | 7 | receive only |
+| 700-744 | Aviation | 45 | receive only |
+| 745-762 | Medevac and Rescue Air | 18 | receive only |
+| 763-790 | SAR and Interop | 28 | receive only |
+| 791-826 | Wildfire and DNR | 36 | receive only |
+| 827-871 | Parks and Forests | 45 | receive only |
+| 872-885 | Clallam and Tribal | 14 | receive only |
+| 886-889 | Military Ground and Range | 4 | receive only |
+| 890-899 | Rail | 10 | receive only |
+| 900-914 | Business and Itinerant | 15 | receive only |
+| 915-924 | Events and Media | 10 | receive only |
+| 925-936 | Upper Lena Essentials | 12 | receive only |
+| 937-979 | Regional Public Safety | 43 | receive only |
 
 ## Channels
 
@@ -540,487 +540,487 @@
 | 496 | WA7HGR | 444.3750 | 449.3750 | FM | TONE=C94.8 | FTX01/Amateur 70 Centimeter Repeaters |
 | 497 | KD7JC | 444.4000 | 449.4000 | FM | TONE=C250.3 | FTX01/Amateur 70 Centimeter Repeaters |
 | 498 | KE7SFF | 444.4000 | 449.4000 | FM | - | FTX01/Amateur 70 Centimeter Repeaters |
-| 499 | PRTANGLSWF7W | 145.1300 | 144.5300 | FM | TONE=C100 | OZ01/Amateur West Peninsula |
-| 500 | GNDRSNW7FEL | 145.2100 | 144.6100 | FM | TONE=C100 | OZ01/Amateur West Peninsula |
-| 501 | 2MCALLING | 146.5200 | RX only | FM | - | OZ01/Amateur West Peninsula |
-| 502 | CRLSBRGW7FL | 146.7600 | 146.1600 | FM | TONE=C77 | OZ01/Amateur West Peninsula |
-| 503 | STRPDPKW7FL | 146.7600 | 146.1600 | FM | TONE=C100 | OZ01/Amateur West Peninsula |
-| 504 | NCSTSMPLX | 147.4200 | RX only | FM | - | OZ01/Amateur West Peninsula |
-| 505 | FORKSSIMPLEX | 147.5000 | RX only | FM | - | OZ01/Amateur West Peninsula |
-| 506 | OPCNTRLSMPLX | 147.5200 | RX only | FM | - | OZ01/Amateur West Peninsula |
-| 507 | JOYCESIMPLEX | 147.5400 | RX only | FM | - | OZ01/Amateur West Peninsula |
-| 508 | NCSTUHFSMPLX | 439.5500 | RX only | FM | - | OZ01/Amateur West Peninsula |
-| 509 | WUHFSIMPLEX | 439.6000 | RX only | FM | - | OZ01/Amateur West Peninsula |
-| 510 | 70CMCALLING | 446.0000 | RX only | FM | - | OZ01/Amateur West Peninsula |
-| 511 | WW7PSRSTTL | 52.8700 | 51.1700 | FM | TONE=C103.5 | PSHAM01/Seattle Metro - Analog 6 Meter |
-| 512 | WW7PSRSTTL6M | 52.8700 | RX only | FM | - | PSHAM01/Operator-Published Repeaters & Nets |
-| 513 | K7NPUNVRSTYP | 53.0100 | 51.3100 | FM | TONE=C100 | PSHAM01/South Sound - Analog 6 Meter |
-| 514 | KC7YRDMND | 53.0700 | 51.3700 | FM | TONE=C100 | PSHAM01/Eastside & Cascades - Analog 6 Meter |
-| 515 | K7LWHKRKLND | 53.1700 | 51.4700 | FM | TONE=C100 | PSHAM01/Seattle Metro - Analog 6 Meter |
-| 516 | K7HWTACOMA | 53.1900 | 51.4900 | FM | TONE=C100 | PSHAM01/South Sound - Analog 6 Meter |
-| 517 | W7MBYBLLNGHM | 53.2100 | 51.5100 | FM | TONE=C100 | PSHAM01/North Sound & Islands - Analog 6 Meter |
-| 518 | W7AWSEATTLE | 53.2900 | 51.5900 | FM | TONE=C100 | PSHAM01/Seattle Metro - Analog 6 Meter |
-| 519 | W7JCRPRTTWNS | 53.3700 | 51.6700 | FM | TONE=C100 | PSHAM01/North Sound & Islands - Analog 6 Meter |
-| 520 | K7TGUASHFORD | 53.3900 | 51.6900 | FM | TONE=C100 | PSHAM01/South Sound - Analog 6 Meter |
-| 521 | W7PFRETNVLL | 53.4100 | 51.7100 | FM | TONE=C100 | PSHAM01/South Sound - Analog 6 Meter |
-| 522 | W7NPCBNBRDGI | 53.4300 | 51.7300 | FM | TONE=C100 | PSHAM01/Seattle Metro - Analog 6 Meter |
-| 523 | WW7RGCPTLPK | 53.5700 | 51.8700 | FM | TONE=C100 | PSHAM01/Olympic & Kitsap - Analog 6 Meter |
-| 524 | WW7RGGRSSMTN | 53.8700 | 52.1700 | FM | TONE=C100 | PSHAM01/South Sound - Analog 6 Meter |
-| 525 | W7JCRPRTTWN2 | 145.1500 | 144.5500 | FM | TONE=C114.8 | PSHAM01/North Sound & Islands - Analog 2 Meter |
-| 526 | W7PSEOLYMPIA | 145.1500 | 144.5500 | FM | TONE=C103.5 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
-| 527 | NM7EBELFAIR | 145.1700 | 144.5700 | FM | TONE=C103.5 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
-| 528 | N7GDLYMNMTN | 145.1900 | 144.5900 | FM | TONE=C127.3 | PSHAM01/North Sound & Islands - Analog 2 Meter |
-| 529 | W7DKTACOMA | 145.2100 | 144.6100 | FM | TONE=C141.3 | PSHAM01/South Sound - Analog 2 Meter |
-| 530 | W7BPDKENDALL | 145.2300 | 144.6300 | FM | TONE=C103.5 | PSHAM01/North Sound & Islands - Analog 2 Meter |
-| 531 | K7DNRASHFORD | 145.2500 | 144.6500 | FM | TONE=C151.4 | PSHAM01/South Sound - Analog 2 Meter |
-| 532 | KK7DFLOLYMP | 145.2750 | 144.6750 | NFM | TONE=C100 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
-| 533 | KC7YRDMND2 | 145.3100 | 144.7100 | FM | TONE=C103.5 | PSHAM01/Eastside & Cascades - Analog 2 Meter |
-| 534 | K7NWSTGRMTNW | 145.3300 | 144.7300 | FM | TONE=C179.9 | PSHAM01/Eastside & Cascades - Analog 2 Meter |
-| 535 | W7ENMCLW | 145.3700 | 144.7700 | FM | TONE=C136.5 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
-| 536 | WB7DOBCRYSTL | 145.4100 | 144.8100 | FM | TONE=C162.2 | PSHAM01/South Sound - Analog 2 Meter |
-| 537 | KD7WDGSLVRDL | 145.4250 | 144.8250 | NFM | TONE=C88.5 | PSHAM01/Seattle Metro - Analog 2 Meter |
-| 538 | K7PGCHEHALIS | 145.4300 | 144.8300 | FM | TONE=C110.9 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
-| 539 | KB7CNNALDER | 145.4500 | 144.8500 | FM | TONE=C110.9 | PSHAM01/South Sound - Analog 2 Meter |
-| 540 | K7CPROLYMPIA | 145.4700 | 144.8700 | FM | TONE=C100 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
-| 541 | K7CMCNTRL | 145.4900 | 144.8900 | FM | TONE=C110.9 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
-| 542 | K7LWHKRKLND2 | 145.4900 | 144.8900 | FM | TONE=C103.5 | PSHAM01/Seattle Metro - Analog 2 Meter |
-| 543 | WB7DVNELDON | 146.4500 | 147.4500 | NFM | D245 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
-| 544 | KC7ZGOLDMTN | 146.6200 | 146.0200 | FM | TONE=C103.5 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
-| 545 | W7EDGWD | 146.6400 | 146.0400 | FM | TONE=C103.5 | PSHAM01/South Sound - Analog 2 Meter |
-| 546 | NC7GSEATAC | 146.6600 | 146.0600 | FM | TONE=C103.5 | PSHAM01/Seattle Metro - Analog 2 Meter |
-| 547 | N7JNFRDYHRBR | 146.7000 | 146.1000 | FM | TONE=C131.8 | PSHAM01/North Sound & Islands - Analog 2 Meter |
-| 548 | W7TETNVLL | 146.7000 | 146.1000 | FM | TONE=C103.5 | PSHAM01/South Sound - Analog 2 Meter |
-| 549 | MASONARC2M | 146.7200 | RX only | FM | - | PSHAM01/Operator-Published Repeaters & Nets |
-| 550 | N7SKSHELTON | 146.7200 | 146.1200 | FM | TONE=C103.5 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
-| 551 | K7KFLPCKWD | 146.7400 | 146.1400 | FM | TONE=C131.8 | PSHAM01/South Sound - Analog 2 Meter |
-| 552 | K7KFMCHHLS | 146.7400 | 146.1400 | FM | TONE=C110.9 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
-| 553 | WA7FWFEDWAY | 146.7600 | 146.1600 | FM | TONE=C103.5 | PSHAM01/South Sound - Analog 2 Meter |
-| 554 | W7DMLYNNWD | 146.7750 | 146.1750 | NFM | TONE=C156.7 | PSHAM01/Seattle Metro - Analog 2 Meter |
-| 555 | K7LDMKKY2M | 146.8200 | RX only | FM | - | PSHAM01/Operator-Published Repeaters & Nets |
-| 556 | W7VMOKHRBR | 146.8625 | RX only | NFM | - | PSHAM01/Operator-Published Repeaters & Nets |
-| 557 | WW7PSRSTTL2M | 146.9600 | RX only | FM | - | PSHAM01/Operator-Published Repeaters & Nets |
-| 558 | WW7STRTGRMTN | 147.0800 | 147.6800 | FM | TONE=C110.9 | PSHAM01/Eastside & Cascades - Analog 2 Meter |
-| 559 | N7IQZSHELTON | 147.1200 | 147.7200 | NFM | TONE=C173.8 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
-| 560 | W7AVMCLINTON | 147.2200 | RX only | FM | - | PSHAM01/Operator-Published Repeaters & Nets |
-| 561 | KF7NPLMPLVLL | 147.2600 | 147.8600 | FM | TONE=C103.5 | PSHAM01/Eastside & Cascades - Analog 2 Meter |
-| 562 | W7PGCMNISLND | 147.3600 | 147.9600 | FM | TONE=C127.3 | PSHAM01/North Sound & Islands - Analog 2 Meter |
-| 563 | K7CPROLYMPI2 | 430.1500 | 439.1500 | FM | - | PSHAM01/Olympic & Kitsap - Analog 70 Centimeter |
-| 564 | K7CPROLYMPI3 | 430.2500 | 439.2500 | FM | - | PSHAM01/Olympic & Kitsap - Analog 70 Centimeter |
-| 565 | K7CPROLYMPI4 | 430.3000 | 439.3000 | FM | - | PSHAM01/Olympic & Kitsap - Analog 70 Centimeter |
-| 566 | W7VMCPVLL | 430.7750 | 439.7750 | FM | TONE=C127.3 | PSHAM01/North Sound & Islands - Analog 70 Centimeter |
-| 567 | W7FLSTRPDPK | 439.0500 | 430.0500 | NFM | TONE=C203.5 | PSHAM01/North Sound & Islands - Analog 70 Centimeter |
-| 568 | W7USJOLYMPIA | 439.6500 | 439.6500 | FM | TONE=C77 | PSHAM01/Olympic & Kitsap - Analog 70 Centimeter |
-| 569 | W7AVMCLINTO2 | 439.7750 | 430.7750 | FM | TONE=C127.3 | PSHAM01/North Sound & Islands - Analog 70 Centimeter |
-| 570 | W7CSEVRTT | 440.1750 | 445.1750 | FM | TONE=C103.5 | PSHAM01/Seattle Metro - Analog 70 Centimeter |
-| 571 | KJ7GWRINDNL | 440.5750 | 445.5750 | FM | TONE=C123 | PSHAM01/Seattle Metro - Analog 70 Centimeter |
-| 572 | W7CSLKFRSTPK | 440.6000 | 445.6000 | FM | TONE=C141.3 | PSHAM01/Seattle Metro - Analog 70 Centimeter |
-| 573 | KG7QPSNHMSH | 441.1500 | 446.1500 | FM | TONE=C123 | PSHAM01/Eastside & Cascades - Analog 70 Centimeter |
-| 574 | K7SRGGOLDMTN | 441.2500 | 446.2500 | FM | TONE=C94.8 | PSHAM01/Olympic & Kitsap - Analog 70 Centimeter |
-| 575 | N7KNGRNBNK | 441.4250 | RX only | FM | - | PSHAM01/Operator-Published Repeaters & Nets |
-| 576 | K7FDFRENTON | 441.4750 | 446.4750 | FM | TONE=C103.5 | PSHAM01/Eastside & Cascades - Analog 70 Centimeter |
-| 577 | AF7UXMONROE | 441.5000 | 446.5000 | NFM | TONE=C69.3 | PSHAM01/Eastside & Cascades - Analog 70 Centimeter |
-| 578 | K7GFZCRNTN | 441.8500 | 446.8500 | FM | TONE=C103.5 | PSHAM01/Eastside & Cascades - Analog 70 Centimeter |
-| 579 | KF7VLBLLNGHM | 441.9250 | 446.9250 | FM | TONE=C103.5 | PSHAM01/North Sound & Islands - Analog 70 Centimeter |
-| 580 | K7NWSTGRMTN2 | 442.0750 | 447.0750 | FM | TONE=C110.9 | PSHAM01/Eastside & Cascades - Analog 70 Centimeter |
-| 581 | KG7SMMMSH | 442.1250 | 447.1250 | FM | TONE=C107.2 | PSHAM01/Eastside & Cascades - Analog 70 Centimeter |
-| 582 | K7DKKRVNRST | 442.2750 | 447.2750 | FM | TONE=C103.5 | PSHAM01/South Sound - Analog 70 Centimeter |
-| 583 | W7CSBCNHLL | 442.3000 | 447.3000 | FM | TONE=C141.3 | PSHAM01/Seattle Metro - Analog 70 Centimeter |
-| 584 | KC7CKOLACEY | 442.4750 | 447.4750 | NFM | TONE=C110.9 | PSHAM01/Olympic & Kitsap - Analog 70 Centimeter |
-| 585 | W7HJRBTHLL | 442.5500 | 447.5500 | FM | TONE=C131.8 | PSHAM01/Seattle Metro - Analog 70 Centimeter |
-| 586 | K7TGTGRMTNE | 442.6000 | 447.6000 | FM | TONE=C127.3 | PSHAM01/Eastside & Cascades - Analog 70 Centimeter |
-| 587 | W7ACSSEATTLE | 442.8750 | 447.8750 | FM | TONE=C141.3 | PSHAM01/Seattle Metro - Analog 70 Centimeter |
-| 588 | WA7FWFEDWAY2 | 442.9250 | 447.9250 | FM | D036 | PSHAM01/South Sound - Analog 70 Centimeter |
-| 589 | WA7FWFEDWAY3 | 442.9500 | 447.9500 | FM | TONE=C103.5 | PSHAM01/South Sound - Analog 70 Centimeter |
-| 590 | N7EHPUNVRSTY | 443.1500 | 448.1500 | FM | TONE=C71.9 | PSHAM01/South Sound - Analog 70 Centimeter |
-| 591 | K7RSDSEATTLE | 443.3750 | 448.3750 | FM | TONE=C103.5 | PSHAM01/Seattle Metro - Analog 70 Centimeter |
-| 592 | N7JNFRDYHRB2 | 443.4500 | 448.4500 | FM | TONE=C131.8 | PSHAM01/North Sound & Islands - Analog 70 Centimeter |
-| 593 | KG7QPSNHMSH2 | 443.9000 | 448.9000 | FM | TONE=C151.4 | PSHAM01/Eastside & Cascades - Analog 70 Centimeter |
-| 594 | N7QRLNGBRNCH | 443.9500 | 448.9500 | FM | TONE=C141.3 | PSHAM01/Olympic & Kitsap - Analog 70 Centimeter |
-| 595 | N7QORSEATTLE | 443.9500 | 448.9500 | FM | TONE=C127.3 | PSHAM01/Seattle Metro - Analog 70 Centimeter |
-| 596 | AF7DXSEQUIM | 444.2750 | 449.2750 | FM | TONE=C100 | PSHAM01/Olympic & Kitsap - Analog 70 Centimeter |
-| 597 | WW7SSTTL | 444.4250 | 449.4250 | FM | TONE=C141.3 | PSHAM01/Seattle Metro - Analog 70 Centimeter |
-| 598 | W7NPCBNBRDG2 | 444.4750 | 449.4750 | NFM | TONE=C103.5 | PSHAM01/Seattle Metro - Analog 70 Centimeter |
-| 599 | N7KGJSQKMTN | 444.5250 | 449.5250 | FM | TONE=C103.5 | PSHAM01/Eastside & Cascades - Analog 70 Centimeter |
-| 600 | W7ACSSEATTL2 | 444.5500 | 449.5500 | FM | TONE=C141.3 | PSHAM01/Seattle Metro - Analog 70 Centimeter |
-| 601 | W7LWEVRTT | 444.5750 | 449.5750 | FM | TONE=C103.5 | PSHAM01/Seattle Metro - Analog 70 Centimeter |
-| 602 | K7LWHBLLV | 444.6000 | 449.6000 | FM | TONE=C103.5 | PSHAM01/Seattle Metro - Analog 70 Centimeter |
-| 603 | N7CRMTVRNN | 444.6250 | 449.6250 | FM | TONE=C103.5 | PSHAM01/North Sound & Islands - Analog 70 Centimeter |
-| 604 | W7HRJTGRMTNE | 444.6500 | 449.6500 | FM | TONE=C131.8 | PSHAM01/Eastside & Cascades - Analog 70 Centimeter |
-| 605 | WB7DOBTHRSST | 444.6750 | 449.6750 | FM | TONE=C136.5 | PSHAM01/South Sound - Analog 70 Centimeter |
-| 606 | WW7SSTTL2 | 444.7000 | 449.7000 | FM | TONE=C103.5 | PSHAM01/Seattle Metro - Analog 70 Centimeter |
-| 607 | NW7DRKNGSTN | 444.7250 | 449.7250 | FM | TONE=C123 | PSHAM01/Seattle Metro - Analog 70 Centimeter |
-| 608 | KA6WINSEQUIM | 444.7500 | 449.7500 | FM | TONE=C100 | PSHAM01/Olympic & Kitsap - Analog 70 Centimeter |
-| 609 | W7PYPYLLP | 444.7500 | 449.7500 | FM | TONE=C103.5 | PSHAM01/South Sound - Analog 70 Centimeter |
-| 610 | K7DSBLLV | 444.7750 | 449.7750 | FM | TONE=C173.8 | PSHAM01/Eastside & Cascades - Analog 70 Centimeter |
-| 611 | W7USJGOLDMTN | 444.8000 | 449.8000 | FM | TONE=C100 | PSHAM01/Olympic & Kitsap - Analog 70 Centimeter |
-| 612 | WW7MSTSTTL | 444.8250 | 449.8250 | FM | TONE=C103.5 | PSHAM01/Seattle Metro - Analog 70 Centimeter |
-| 613 | K6MBYSEQUIM | 444.9000 | 449.9000 | FM | TONE=C131.8 | PSHAM01/North Sound & Islands - Analog 70 Centimeter |
-| 614 | N7JKCPTLPK | 444.9500 | 449.9500 | FM | TONE=C118.8 | PSHAM01/Olympic & Kitsap - Analog 70 Centimeter |
-| 615 | ESTSDKNGCOTC | 145.5100 | RX only | FM | - | FL62/Channels |
-| 616 | ESTSDKNGCO2 | 145.6500 | RX only | FM | - | FL62/Channels |
-| 617 | WAARSRCSACSC | 146.5800 | RX only | FM | - | FL62/Channels |
-| 618 | UHFCLLNGALT2 | 445.0000 | RX only | FM | - | FL62/Channels |
-| 619 | WINLINK | 144.9500 | RX only | FM | - | FL62/Channels |
-| 620 | WINLINK2 | 145.6300 | RX only | FM | - | FL62/Channels |
-| 621 | SSTV | 145.8000 | RX only | FM | - | FL51/Channels |
-| 622 | APRSDOWNLINK | 145.8250 | RX only | FM | - | FL51/Channels |
-| 623 | W7AWSEATTLE2 | 53.2900 | RX only | FM | - | FL60/Channels |
-| 624 | W7PSEOLYMPI2 | 145.1500 | RX only | FM | - | FL60/Channels |
-| 625 | KK7DFLOLYMP2 | 145.2750 | RX only | NFM | - | FL60/Channels |
-| 626 | K7CPROLYMPI5 | 145.4700 | RX only | FM | - | FL60/Channels |
-| 627 | SEATTLE2 | 146.2200 | RX only | FM | - | FL60/Channels |
-| 628 | OLYMPIAARES2 | 146.3600 | RX only | FM | - | FL60/Channels |
-| 629 | WW7MSTSTTL2 | 146.9000 | RX only | FM | - | FL60/Channels |
-| 630 | CHLNEVRGRNIN | 147.2600 | RX only | FM | - | FL60/Channels |
-| 631 | NT7HOLYMPIA | 147.3600 | RX only | FM | - | FL60/Channels |
-| 632 | CHLNEVRGRN2 | 147.8600 | RX only | FM | - | FL60/Channels |
-| 633 | K7CPROLYMPI6 | 430.1500 | RX only | FM | - | FL60/Channels |
-| 634 | K7CPROLYMPI7 | 430.2500 | RX only | FM | - | FL60/Channels |
-| 635 | AO91 | 145.9600 | RX only | FM | - | FL51/Channels |
-| 636 | W7RNKISSQH | 147.9950 | RX only | FM | - | FL51/Channels |
-| 637 | TEVEL | 436.4000 | RX only | FM | - | FL51/Channels |
-| 638 | SO50 | 436.7950 | RX only | FM | - | FL51/Channels |
-| 639 | CROSSBANDRPT | 437.8000 | RX only | FM | - | FL51/Channels |
-| 640 | CH01A | 156.0500 | RX only | FM | - | FL54/Channels |
-| 641 | CH5A | 156.2500 | RX only | FM | - | FL52/Channels |
-| 642 | CH6 | 156.3000 | RX only | FM | - | FL52/Channels |
-| 643 | CH07A | 156.3500 | RX only | FM | - | FL52/Channels |
-| 644 | CH13 | 156.6500 | RX only | FM | - | FL52/Channels |
-| 645 | CH14VTS | 156.7000 | RX only | FM | - | FL52/Channels |
-| 646 | CH16 | 156.8000 | RX only | FM | - | FL52/Channels |
-| 647 | CH22A | 157.1000 | RX only | FM | - | FL52/Channels |
-| 648 | CH67 | 156.3750 | RX only | FM | - | FL52/Channels |
-| 649 | CH78A | 156.9250 | RX only | FM | - | FL52/Channels |
-| 650 | CH79A | 156.9750 | RX only | FM | - | FL52/Channels |
-| 651 | CH18A | 156.9000 | RX only | FM | - | FTX01/Marine VHF |
-| 652 | CH19A | 156.9500 | RX only | FM | - | FTX01/Marine VHF |
-| 653 | CH20A | 157.0000 | RX only | FM | - | FTX01/Marine VHF |
-| 654 | CH63A | 156.1750 | RX only | FM | - | FTX01/Marine VHF |
-| 655 | CH65A | 156.2750 | RX only | FM | - | FTX01/Marine VHF |
-| 656 | CH66A | 156.3250 | RX only | FM | - | FTX01/Marine VHF |
-| 657 | CH80A | 157.0250 | RX only | FM | - | FTX01/Marine VHF |
-| 658 | CH81A | 157.0750 | RX only | FM | - | FTX01/Marine VHF |
-| 659 | CH82A | 157.1250 | RX only | FM | - | FTX01/Marine VHF |
-| 660 | LGCYTLPHN1 | 161.9000 | RX only | FM | - | FL54/Channels |
-| 661 | LGCYTLPHN2 | 161.8750 | RX only | FM | - | FL54/Channels |
-| 662 | MRN09CLLNG | 156.4500 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
-| 663 | MRN21USCG | 157.0500 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
-| 664 | MRN23USCG | 157.1500 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
-| 665 | MARINE68 | 156.4250 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
-| 666 | MARINE69 | 156.4750 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
-| 667 | MARINE71 | 156.5750 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
-| 668 | MARINE72 | 156.6250 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
-| 669 | MRN83USCG | 157.1750 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
-| 670 | MARINE88A | 157.4250 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
-| 671 | MARINEAIS1 | 161.9750 | RX only | FM | - | FTX01/Marine VHF |
-| 672 | MARINEAIS2 | 162.0250 | RX only | FM | - | FTX01/Marine VHF |
-| 673 | MARINECH8 | 156.4000 | RX only | FM | - | FTX01/Marine VHF |
-| 674 | MARINECH10 | 156.5000 | RX only | FM | - | FTX01/Marine VHF |
-| 675 | MARINECH12 | 156.6000 | RX only | FM | - | FTX01/Marine VHF |
-| 676 | MARINECH15 | 156.7500 | RX only | FM | - | FTX01/Marine VHF |
-| 677 | MARINECH17 | 156.8500 | RX only | FM | - | FTX01/Marine VHF |
-| 678 | MARINECH20 | 161.6000 | RX only | FM | - | FTX01/Marine VHF |
-| 679 | MARINECH24 | 161.8000 | RX only | FM | - | FTX01/Marine VHF |
-| 680 | MARINECH25 | 161.8500 | RX only | FM | - | FTX01/Marine VHF |
-| 681 | MARINECH27 | 161.9500 | RX only | FM | - | FTX01/Marine VHF |
-| 682 | MARINECH28 | 162.0000 | RX only | FM | - | FTX01/Marine VHF |
-| 683 | MARINECH70 | 156.5250 | RX only | FM | - | FTX01/Marine VHF |
-| 684 | MARINECH73 | 156.6750 | RX only | FM | - | FTX01/Marine VHF |
-| 685 | MARINECH77 | 156.8750 | RX only | FM | - | FTX01/Marine VHF |
-| 686 | MARINECH84 | 161.8250 | RX only | FM | - | FTX01/Marine VHF |
-| 687 | MARINECH86 | 161.9250 | RX only | FM | - | FTX01/Marine VHF |
-| 688 | MARINEVHF11 | 156.5500 | RX only | FM | - | FL52/Channels |
-| 689 | MARINEVHF24 | 157.2000 | RX only | FM | - | FL52/Channels |
-| 690 | MARINEVHF25 | 157.2500 | RX only | FM | - | FL52/Channels |
-| 691 | MARINEVHF26 | 157.3000 | RX only | FM | - | FL52/Channels |
-| 692 | MARINEVHF27 | 157.3500 | RX only | FM | - | FL52/Channels |
-| 693 | MARINEVHF28 | 157.4000 | RX only | FM | - | FL52/Channels |
-| 694 | MARINEVHF74 | 156.7250 | RX only | FM | - | FL52/Channels |
-| 695 | MARINEVHF84 | 157.2250 | RX only | FM | - | FL52/Channels |
-| 696 | MARINEVHF85 | 157.2750 | RX only | FM | - | FL52/Channels |
-| 697 | MARINEVHF86 | 157.3250 | RX only | FM | - | FL52/Channels |
-| 698 | MARINEVHF87 | 157.3750 | RX only | FM | - | FL52/Channels |
-| 699 | NOAAWXWX6 | 162.5000 | RX only | FM | - | FL52/Channels |
-| 700 | USCGAXLRY1 | 143.4750 | RX only | FM | - | FL52/Channels |
-| 701 | USCGAXLRY2 | 150.7000 | RX only | FM | - | FL52/Channels |
-| 702 | WSDOTV2 | 151.0250 | RX only | FM | - | FL53/Channels |
-| 703 | WAFRRSDCKSHR | 151.0400 | RX only | NFM | - | OZ01/Ferry Transport Utility |
-| 704 | WSDOTV1 | 151.0700 | RX only | FM | - | FL53/Channels |
-| 705 | WSDOTV3 | 156.1200 | RX only | FM | - | FL53/Channels |
-| 706 | BNNVLLPWR | 172.5250 | RX only | NFM | - | OZ01/Ferry Transport Utility |
-| 707 | MVCHLDNG | 461.1875 | RX only | NFM | - | OZ01/Ferry Transport Utility |
-| 708 | MVCOHOBRIDGE | 467.7750 | RX only | NFM | - | OZ01/Ferry Transport Utility |
-| 709 | BFIBFIVOT | 108.6000 | RX only | AM | - | FL48/Channels |
-| 710 | GEGGEGVOT | 109.6000 | RX only | AM | - | FL48/Channels |
-| 711 | PAEPAEVORDME | 110.6000 | RX only | AM | - | FL48/Channels |
-| 712 | FRCHLDTCNSK | 111.4000 | RX only | AM | - | FL48/Channels |
-| 713 | TTSHVRTCTOU | 112.2000 | RX only | AM | - | FL48/Channels |
-| 714 | EPHEPHVORTAC | 112.6000 | RX only | AM | - | FL48/Channels |
-| 715 | HUHHUHTACAN | 113.0000 | RX only | AM | - | FL48/Channels |
-| 716 | OLMOLMVORTAC | 113.4000 | RX only | AM | - | FL48/Channels |
-| 717 | PSCVRDMPSC | 113.7500 | RX only | AM | - | FL48/Channels |
-| 718 | NUWNUWTACAN | 113.8000 | RX only | AM | - | FL48/Channels |
-| 719 | SFFSFFVOT | 114.0000 | RX only | AM | - | FL48/Channels |
-| 720 | EATEATVORDME | 114.3500 | RX only | AM | - | FL48/Channels |
-| 721 | MSSLKVRDMMWH | 115.0000 | RX only | AM | - | FL48/Channels |
-| 722 | GEGGEGVORTAC | 115.5000 | RX only | AM | - | FL48/Channels |
-| 723 | YKMVRTCYKM | 116.0000 | RX only | AM | - | FL48/Channels |
-| 724 | ALWALWVORDME | 116.4000 | RX only | AM | - | FL48/Channels |
-| 725 | BTTLGRNDVRTC | 116.6000 | RX only | AM | - | FL48/Channels |
-| 726 | SEASEAVORTAC | 116.8000 | RX only | AM | - | FL48/Channels |
-| 727 | PLLMNVRDMPW | 117.1500 | RX only | AM | - | FL48/Channels |
-| 728 | CVVCVVVORDME | 117.2000 | RX only | AM | - | FL48/Channels |
-| 729 | SEASEAVOT | 117.5000 | RX only | AM | - | FL48/Channels |
-| 730 | HQMVRTCHQM | 117.7000 | RX only | AM | - | FL48/Channels |
-| 731 | ELLNSBRGVRDM | 117.9000 | RX only | AM | - | FL48/Channels |
-| 732 | ATIS | 118.0000 | RX only | AM | - | FL46/Channels |
-| 733 | CLSCLSAWOS3 | 118.0250 | RX only | AM | - | FL48/Channels |
-| 734 | S50S50AWS3PT | 118.0500 | RX only | AM | - | FL48/Channels |
-| 735 | VUOAPCHP | 118.1000 | RX only | AM | - | FL48/Channels |
-| 736 | FCTFCTASOS | 118.1500 | RX only | AM | - | FL48/Channels |
-| 737 | MCCHORDGNDP | 118.1750 | RX only | AM | - | FL48/Channels |
-| 738 | 0S9APCHPDEPP | 118.2000 | RX only | AM | - | FL48/Channels |
-| 739 | GRANTLCLP | 118.2500 | RX only | AM | - | FL48/Channels |
-| 740 | BOEINGLCLP | 118.3000 | RX only | AM | - | FL48/Channels |
-| 741 | EDIZHOOKAWOS | 118.3250 | RX only | AM | - | OZ01/Aviation |
-| 742 | ELNELNASOS | 118.3750 | RX only | AM | - | FL48/Channels |
-| 743 | S52S52AWOS3 | 118.4250 | RX only | AM | - | FL48/Channels |
-| 744 | ALWCTAF | 118.5000 | RX only | AM | - | FL48/Channels |
-| 745 | 68S68SAWS3PT | 118.5250 | RX only | AM | - | FL48/Channels |
-| 746 | WLLLWLLLRCG | 118.5500 | RX only | AM | - | FL48/Channels |
-| 747 | VUOCDP | 119.0000 | RX only | AM | - | FL48/Channels |
-| 748 | 0S90S9AWOS3P | 119.0250 | RX only | AM | - | FL48/Channels |
-| 749 | GRANTATIS | 119.0500 | RX only | AM | - | FL48/Channels |
-| 750 | ZSE1191 | 119.1000 | RX only | AM | - | FL48/Channels |
-| 751 | BNGAPCHPDPP | 119.2000 | RX only | AM | - | FL48/Channels |
-| 752 | SPKNSPKNRCG | 119.2250 | RX only | AM | - | FL48/Channels |
-| 753 | 63S63SAWOS3 | 119.2750 | RX only | AM | - | FL48/Channels |
-| 754 | GRAYLCLP | 119.3250 | RX only | AM | - | FL44/Channels |
-| 755 | SEATTLELCLP | 119.9000 | RX only | AM | - | FL44/Channels |
-| 756 | EATEATASOS | 119.9250 | RX only | AM | - | FL44/Channels |
-| 757 | TRICITIESCDP | 120.0000 | RX only | AM | - | FL44/Channels |
-| 758 | BNGAPCHPDPP2 | 120.1000 | RX only | AM | - | FL44/Channels |
-| 759 | PAINELCLP | 120.2000 | RX only | AM | - | FL44/Channels |
-| 760 | BCNHLLBCNHLL | 120.3000 | RX only | AM | - | FL44/Channels |
-| 761 | FRCHLDLCLP | 120.3500 | RX only | AM | - | FL44/Channels |
-| 762 | BNGAPCHPDPP3 | 120.4000 | RX only | AM | - | FL44/Channels |
-| 763 | FELTSATIS | 120.5500 | RX only | AM | - | FL44/Channels |
-| 764 | BOEINGLCLP2 | 120.6000 | RX only | AM | - | FL44/Channels |
-| 765 | BLLNGHMMDRNV | 120.7000 | RX only | AM | - | FL44/Channels |
-| 766 | SEATTLELCLP2 | 120.9500 | RX only | AM | - | FL44/Channels |
-| 767 | CLSAPCHP | 121.1000 | RX only | AM | - | FL44/Channels |
-| 768 | BVSBVSAWOS3 | 121.1250 | RX only | AM | - | FL44/Channels |
-| 769 | PWTPWTAWS3PT | 121.2000 | RX only | AM | - | FL44/Channels |
-| 770 | BDGRMTNBDGRM | 121.5000 | RX only | AM | - | FL44/Channels |
-| 771 | OLYMPIAGNDP | 121.6000 | RX only | AM | - | FL44/Channels |
-| 772 | CEMNET1 | 45.2000 | RX only | FM | - | FL03/Channels |
-| 773 | CEMNET2 | 45.3600 | RX only | FM | - | FL03/Channels |
-| 774 | CEMNET3 | 45.4800 | RX only | FM | - | FL03/Channels |
-| 775 | RADEF | 46.0000 | RX only | FM | - | FL03/Channels |
-| 776 | CMD | 46.5200 | RX only | FM | - | FL03/Channels |
-| 777 | VTAC11 | 151.1375 | RX only | NFM | - | FL02/Channels |
-| 778 | REDNET | 153.8300 | RX only | FM | - | FL01/Channels |
-| 779 | STATEFIRETAC | 154.2800 | RX only | FM | - | FL01/Channels |
-| 780 | VTAC12 | 154.4525 | RX only | NFM | - | FL02/Channels |
-| 781 | SAR1 | 155.1600 | RX only | FM | - | FL01/Channels |
-| 782 | SAR4 | 155.1675 | RX only | FM | - | FL01/Channels |
-| 783 | SAR5 | 155.1825 | RX only | FM | - | FL01/Channels |
-| 784 | SAR2 | 155.2425 | RX only | FM | - | FL01/Channels |
-| 785 | SAR3 | 155.3025 | RX only | FM | - | FL01/Channels |
-| 786 | HEAR | 155.3400 | RX only | FM | - | FL01/Channels |
-| 787 | LERN | 155.3700 | RX only | FM | - | FL01/Channels |
-| 788 | VCALL10 | 155.7525 | RX only | NFM | - | FL02/Channels |
-| 789 | OSCCR | 156.1350 | RX only | FM | - | FL01/Channels |
-| 790 | VTAC13 | 158.7375 | RX only | NFM | - | FL02/Channels |
-| 791 | VTAC14 | 159.4725 | RX only | NFM | - | FL02/Channels |
-| 792 | FEDIOPLE1 | 167.0875 | RX only | NFM | - | OZ01/SAR and Interop |
-| 793 | FEDIOPNC1 | 169.5375 | RX only | NFM | - | OZ01/SAR and Interop |
-| 794 | FEDIOPIR1 | 170.0125 | RX only | NFM | - | OZ01/SAR and Interop |
-| 795 | FEDIOPIR2 | 170.4125 | RX only | NFM | - | OZ01/SAR and Interop |
-| 796 | FEDIOPIR3 | 170.6875 | RX only | NFM | - | OZ01/SAR and Interop |
-| 797 | FDSRINCDNTCM | 410.8375 | RX only | NFM | - | OZ01/SAR and Interop |
-| 798 | UCALL40 | 453.2125 | RX only | NFM | - | FL02/Channels |
-| 799 | UTAC41 | 453.4625 | RX only | NFM | - | FL02/Channels |
-| 800 | AIRGROUND4 | 151.2125 | RX only | FM | - | FL06/Channels |
-| 801 | AIRGROUND6 | 151.2875 | RX only | FM | - | FL06/Channels |
-| 802 | AIRGROUND1 | 151.3100 | RX only | FM | - | FL06/Channels |
-| 803 | AIRGROUND2 | 151.3400 | RX only | FM | - | FL06/Channels |
-| 804 | DNRFLGHTFLLW | 151.3475 | RX only | NFM | - | OZ01/WA DNR Olympic Region |
-| 805 | AIRGROUND3 | 151.3850 | RX only | FM | - | FL06/Channels |
-| 806 | DNRCOMMON | 151.4150 | RX only | FM | - | FL06/Channels |
-| 807 | AIRGROUND7 | 156.0225 | RX only | FM | - | FL06/Channels |
-| 808 | DNRHOH | 159.2025 | RX only | NFM | - | OZ01/WA DNR Olympic Region |
-| 809 | DNRREGIONAL3 | 159.2400 | RX only | FM | - | FL06/Channels |
-| 810 | DNROZETTE | 159.2550 | RX only | NFM | - | OZ01/WA DNR Olympic Region |
-| 811 | AIRGROUND5 | 159.2700 | RX only | FM | - | FL06/Channels |
-| 812 | DNRSTRAITS | 159.3000 | RX only | NFM | - | OZ01/WA DNR Olympic Region |
-| 813 | DNRREGIONAL7 | 159.3150 | RX only | FM | - | FL06/Channels |
-| 814 | DNRREGIONAL4 | 159.3300 | RX only | FM | - | FL06/Channels |
-| 815 | DNRCANAL | 159.3450 | RX only | NFM | - | OZ01/WA DNR Olympic Region |
-| 816 | DNRREGIONAL6 | 159.3675 | RX only | FM | - | FL06/Channels |
-| 817 | DNRREGIONAL5 | 159.3750 | RX only | FM | - | FL06/Channels |
-| 818 | DNRREGIONAL1 | 159.4125 | RX only | FM | - | FL06/Channels |
-| 819 | DNRMAIN | 159.4200 | RX only | FM | - | FL06/Channels |
-| 820 | DNRREGIONAL2 | 159.4275 | RX only | FM | - | FL06/Channels |
-| 821 | DNRREGIONAL8 | 159.4350 | RX only | FM | - | FL06/Channels |
-| 822 | DNRREGIONAL9 | 159.4500 | RX only | FM | - | FL06/Channels |
-| 823 | DNRQUINAULT | 159.4575 | RX only | NFM | - | OZ01/WA DNR Olympic Region |
-| 824 | AIRTAC1 | 166.6125 | RX only | FM | - | FL07/Channels |
-| 825 | AIRTAC2 | 167.9500 | RX only | FM | - | FL07/Channels |
-| 826 | AIRTAC3 | 168.4000 | RX only | FM | - | FL07/Channels |
-| 827 | COMMAND6 | 168.4750 | RX only | FM | - | FL07/Channels |
-| 828 | ICP | 168.5500 | RX only | FM | - | FL07/Channels |
-| 829 | AIRGUARD | 168.6250 | RX only | FM | - | FL07/Channels |
-| 830 | FLGHTFLLWNG | 168.6500 | RX only | FM | - | FL07/Channels |
-| 831 | AIRTAC4 | 169.1500 | RX only | FM | - | FL07/Channels |
-| 832 | AIRTAC5 | 169.2000 | RX only | FM | - | FL07/Channels |
-| 833 | COMMAND5 | 169.7500 | RX only | FM | - | FL07/Channels |
-| 834 | COMMAND4 | 170.0000 | RX only | FM | - | FL07/Channels |
-| 835 | 6PROJECTFIRE | 170.1250 | RX only | FM | - | FL07/Channels |
-| 836 | WA7MVTWSPOKN | 53.1100 | RX only | FM | - | FL40/Channels |
-| 837 | W7TDWNTCHCHL | 53.3900 | RX only | FM | - | FL34/Channels |
-| 838 | K7DKKNCHSYKM | 53.6700 | RX only | FM | - | FL37/Channels |
-| 839 | N7YRCYKMYKMC | 53.9300 | RX only | FM | - | FL37/Channels |
-| 840 | NO7RFWNTHRPO | 145.1250 | RX only | FM | - | FL40/Channels |
-| 841 | W7GHJCHWLHWA | 145.1300 | RX only | FM | - | FL41/Channels |
-| 842 | W7SRTTNYKMCO | 145.1700 | RX only | FM | - | FL37/Channels |
-| 843 | N7XAYRPBLCFR | 145.1900 | RX only | FM | - | FL41/Channels |
-| 844 | NO7RFWNTHRP2 | 145.2100 | RX only | FM | - | FL40/Channels |
-| 845 | N7XAYCRLWFRR | 145.2300 | RX only | FM | - | FL41/Channels |
-| 846 | K7SRGCHWLHST | 145.2500 | RX only | FM | - | FL41/Channels |
-| 847 | WA7SARYKMKTT | 145.2700 | RX only | FM | - | FL35/Channels |
-| 848 | KC7SRGLDNDLK | 145.3300 | RX only | FM | - | FL39/Channels |
-| 849 | K7SRGCHWLHS2 | 145.4300 | RX only | FM | - | FL41/Channels |
-| 850 | K7SRGCLVLLST | 145.4500 | RX only | FM | - | FL41/Channels |
-| 851 | WA7DMRKTTTSK | 146.4875 | RX only | FM | - | FL35/Channels |
-| 852 | K7JARCLVLLST | 146.6200 | RX only | FM | - | FL41/Channels |
-| 853 | W7QYKMYKMCO | 146.6600 | RX only | FM | - | FL37/Channels |
-| 854 | W7TDWNTCHCH2 | 146.6800 | RX only | FM | - | FL34/Channels |
-| 855 | KB7UJICHWLHS | 146.7000 | RX only | FM | - | FL41/Channels |
-| 856 | N7RHTLVNWRTH | 146.7800 | RX only | FM | - | FL34/Channels |
-| 857 | K7SMXSTHKNCH | 146.8000 | RX only | FM | - | FL34/Channels |
-| 858 | W7QYKMYKMCO2 | 146.8400 | RX only | FM | - | FL37/Channels |
-| 859 | KE7NRAGRNDCL | 146.8600 | RX only | FM | - | FL40/Channels |
-| 860 | KC7SRGLDNDL2 | 146.9200 | RX only | FM | - | FL39/Channels |
-| 861 | W7CCYYKMYKMC | 146.9400 | RX only | FM | - | FL37/Channels |
-| 862 | K7RHTELLNSBR | 147.0000 | RX only | FM | - | FL35/Channels |
-| 863 | W7SRYKMYKMCO | 147.0600 | RX only | FM | - | FL37/Channels |
-| 864 | WA7SARTRTLKY | 147.0800 | RX only | FM | - | FL37/Channels |
-| 865 | W7SRYKMYKMC2 | 147.1200 | RX only | FM | - | FL37/Channels |
-| 866 | WA7DJCHSWOKN | 147.1400 | RX only | FM | - | FL40/Channels |
-| 867 | N7KGSELLNSBR | 147.1600 | RX only | FM | - | FL35/Channels |
-| 868 | K7SRGOMKOKNG | 147.2000 | RX only | FM | - | FL34/Channels |
-| 869 | KC7VQRSLHKTT | 147.2400 | RX only | FM | - | FL35/Channels |
-| 870 | W7QYKMYKMCO3 | 147.3000 | RX only | FM | - | FL37/Channels |
-| 871 | WA7MVTNSKTOK | 147.3200 | RX only | FM | - | FL40/Channels |
-| 872 | KB7APUUNDRWD | 147.4250 | RX only | FM | - | FL39/Channels |
-| 873 | KB7APUTRTLKS | 147.4375 | RX only | FM | - | FL39/Channels |
-| 874 | KCSARF2F32 | 153.7550 | RX only | FM | - | FL35/Channels |
-| 875 | CHELANFIRE | 154.4300 | RX only | FM | - | FL36/Channels |
-| 876 | WSPNW | 154.7550 | RX only | FM | - | FL34/Channels |
-| 877 | WSPD8 | 154.7700 | RX only | FM | - | FL32/Channels |
-| 878 | KCSARF2F3 | 154.9650 | RX only | FM | - | FL35/Channels |
-| 879 | KCMARS | 155.1900 | RX only | FM | - | FL35/Channels |
-| 880 | SNOSAR | 155.4150 | RX only | FM | - | FL33/Channels |
-| 881 | JOYCEFIRETAC | 154.4450 | RX only | NFM | - | OZ01/Clallam County |
-| 882 | MAKAHTRBPD | 155.0700 | RX only | NFM | - | OZ01/Tribal Neah Bay and La Push |
-| 883 | JYCFRDSP | 155.7225 | RX only | NFM | - | OZ01/Clallam County |
-| 884 | SEQUIMFIRE | 155.7825 | RX only | FM | - | FL18/Channels |
-| 885 | CLLLMFRDSP | 155.8200 | RX only | NFM | - | OZ01/Clallam County |
-| 886 | CLLLMPBLCWRK | 155.9250 | RX only | NFM | - | OZ01/Clallam County |
-| 887 | CLLLMPBLCWR2 | 158.8350 | RX only | NFM | - | OZ01/Clallam County |
-| 888 | CLALLAMETAC | 453.2750 | RX only | NFM | - | OZ01/Clallam County |
-| 889 | SEQUIMPD | 453.3000 | RX only | FM | - | FL18/Channels |
-| 890 | CLALLAMWDISP | 453.3750 | RX only | NFM | - | OZ01/Clallam County |
-| 891 | MKHTRBCNCL | 453.7000 | RX only | NFM | - | OZ01/Tribal Neah Bay and La Push |
-| 892 | FORKSCITY | 453.9750 | RX only | NFM | - | OZ01/Clallam County |
-| 893 | PRTANGLSPD | 460.1000 | RX only | FM | - | FL18/Channels |
-| 894 | QUILEUTEFIRE | 460.2125 | RX only | NFM | - | OZ01/Tribal Neah Bay and La Push |
-| 895 | FLGHTFLLWNGB | 34.6000 | RX only | FM | - | FL59/Channels |
-| 896 | RNGOPSSCNDRY | 40.2000 | RX only | FM | - | FL59/Channels |
-| 897 | RANGEOPSPRI | 41.1000 | RX only | FM | - | FL59/Channels |
-| 898 | FIRE | 140.0000 | RX only | FM | - | FL59/Channels |
-| 899 | CLMBRLGRPSHR | 160.5600 | RX only | NFM | - | FL57/Channels |
-| 900 | SWTCHNGAR36 | 160.6500 | RX only | NFM | - | FL56/Channels |
-| 901 | CLMBRLGRP2 | 160.8600 | RX only | NFM | - | FL57/Channels |
-| 902 | AAR54 | 160.9200 | RX only | NFM | - | FL57/Channels |
-| 903 | STCYYRDAR60 | 161.0100 | RX only | NFM | - | FL56/Channels |
-| 904 | AAR66 | 161.1000 | RX only | NFM | - | FL56/Channels |
-| 905 | AAR70 | 161.1600 | RX only | NFM | - | FL56/Channels |
-| 906 | AAR76 | 161.2500 | RX only | NFM | - | FL57/Channels |
-| 907 | BLMRYRDAAR80 | 161.3100 | RX only | NFM | - | FL56/Channels |
-| 908 | AAR87 | 161.4150 | RX only | NFM | - | FL56/Channels |
-| 909 | ITNRNTVHF1 | 151.5050 | RX only | FM | - | FL68/Channels |
-| 910 | ITNRNTVHF2 | 151.5150 | RX only | FM | - | FL68/Channels |
-| 911 | REDDOT | 151.6250 | RX only | FM | - | FL68/Channels |
-| 912 | ITNRNTVHF3 | 151.7000 | RX only | FM | - | FL68/Channels |
-| 913 | ITNRNTVHF4 | 151.7600 | RX only | FM | - | FL68/Channels |
-| 914 | UHF43250 | 464.3250 | RX only | FM | - | FTX01/Business and Itinerant UHF |
-| 915 | BROWNDOT | 464.5000 | RX only | FM | - | FL68/Channels |
-| 916 | YELLOWDOT | 464.5500 | RX only | FM | - | FL68/Channels |
-| 917 | UHF48250 | 464.8250 | RX only | FM | - | FTX01/Business and Itinerant UHF |
-| 918 | ITNRNTUHF1 | 467.7625 | RX only | FM | - | FL68/Channels |
-| 919 | ITNRNTUHF2 | 467.8125 | RX only | FM | - | FL68/Channels |
-| 920 | ITNRNTUHF3 | 467.8500 | RX only | FM | - | FL68/Channels |
-| 921 | ITNRNTUHF4 | 467.8750 | RX only | FM | - | FL68/Channels |
-| 922 | ITNRNTUHF5 | 467.9000 | RX only | FM | - | FL68/Channels |
-| 923 | SILVERSTAR | 467.9250 | RX only | FM | - | FL68/Channels |
-| 924 | ARARINFRML | 123.0250 | RX only | AM | - | FL74a/Channels |
-| 925 | ARARINFRML2 | 123.0500 | RX only | AM | - | FL74a/Channels |
-| 926 | ARARINFRML3 | 123.0750 | RX only | AM | - | FL74a/Channels |
-| 927 | AIRBOSS | 123.1500 | RX only | AM | - | FL73/Channels |
-| 928 | WA7UOJSPKNSP | 145.1100 | RX only | FM | - | FL73/Channels |
-| 929 | K7MMASPKNSPK | 145.2900 | RX only | FM | - | FL73/Channels |
-| 930 | K7TJSPKNSPKN | 145.3700 | RX only | FM | - | FL73/Channels |
-| 931 | W7UPSKNNWCKB | 145.3900 | RX only | FM | - | FL73/Channels |
-| 932 | KI7TRRRSPKNS | 146.4750 | RX only | FM | - | FL73/Channels |
-| 933 | WR7VHFSPKNSP | 146.8800 | RX only | FM | - | FL73/Channels |
-| 934 | HAMCALL4 | 52.5250 | RX only | AM | - | UL00/Channels |
-| 935 | SARAIR | 123.1000 | RX only | AM | - | UL00/Channels |
-| 936 | AIRLIFTNW | 129.8250 | RX only | AM | - | UL00/Channels |
-| 937 | BRINNONFIRE | 154.0925 | RX only | FM | - | UL00/Channels |
-| 938 | MASONFIRE5 | 154.1900 | RX only | FM | - | UL00/Channels |
-| 939 | ONFEAST | 164.8000 | RX only | FM | - | UL00/Channels |
-| 940 | ONFWEST | 164.8250 | RX only | FM | - | UL00/Channels |
-| 941 | ONPMAINT | 168.3500 | RX only | FM | - | UL00/Channels |
-| 942 | ONPMAIN | 168.5250 | RX only | FM | - | UL00/Channels |
-| 943 | JEFFERSONSO | 453.5750 | RX only | FM | - | UL00/Channels |
-| 944 | MASONSHERIFF | 460.2250 | RX only | FM | - | UL00/Channels |
-| 945 | MASONSO2 | 460.5125 | RX only | FM | - | UL00/Channels |
-| 946 | AC7DCPLLMNWH | 53.7500 | RX only | FM | - | FL27/Channels |
-| 947 | K7LLPLLMNWHT | 146.4125 | RX only | FM | - | FL27/Channels |
-| 948 | AC7DCPLLMNW2 | 146.7400 | RX only | FM | - | FL27/Channels |
-| 949 | W7OHIDVNPRTL | 147.0400 | RX only | FM | - | FL29/Channels |
-| 950 | K7SELPLLMNWH | 147.1000 | RX only | FM | - | FL27/Channels |
-| 951 | WA7DMREPHRTG | 147.4125 | RX only | FM | - | FL29/Channels |
-| 952 | WAHKIAKUMSO | 150.8525 | RX only | FM | - | FL19/Channels |
-| 953 | REPUBLICFIRE | 153.8450 | RX only | FM | - | FL26/Channels |
-| 954 | CCFD3 | 153.8750 | RX only | FM | - | FL27/Channels |
-| 955 | BLLNGHMPDTC | 154.0250 | RX only | AM | - | FL17/Channels |
-| 956 | FIRETAC1 | 154.0700 | RX only | FM | - | FL28/Channels |
-| 957 | SAR | 154.1075 | RX only | FM | - | FL28/Channels |
-| 958 | CNTYWDFRDSP | 154.1300 | RX only | FM | - | FL28/Channels |
-| 959 | SHERIFF | 154.1375 | RX only | FM | - | FL22/Channels |
-| 960 | PULLMANFIRE | 154.1450 | RX only | FM | - | FL27/Channels |
-| 961 | KITTITASFIRE | 154.2050 | RX only | FM | - | FL22/Channels |
-| 962 | FIRE2 | 154.2350 | RX only | FM | - | FL19/Channels |
-| 963 | YAKIMAFIRE | 154.2575 | RX only | FM | - | FL22/Channels |
-| 964 | FIRE22 | 154.2650 | RX only | FM | - | FL16/Channels |
-| 965 | FIRETAC2 | 154.3550 | RX only | FM | - | FL28/Channels |
-| 966 | FIRENS | 154.4000 | RX only | FM | - | FL26/Channels |
-| 967 | FIRENS2 | 154.4150 | RX only | FM | - | FL26/Channels |
-| 968 | GRYSHRBRSO | 154.7250 | RX only | FM | - | FL19/Channels |
-| 969 | WHITMANWCSO | 154.7850 | RX only | FM | - | FL27/Channels |
-| 970 | COWLITZSO | 154.8150 | RX only | FM | - | FL19/Channels |
-| 971 | YAKIMAFIRE2 | 155.0325 | RX only | FM | - | FL22/Channels |
-| 972 | COLUMBIACCSO | 155.1450 | RX only | FM | - | FL27/Channels |
-| 973 | AMRALS | 155.2200 | RX only | AM | - | FL22/Channels |
-| 974 | FERRYSOB2 | 155.2500 | RX only | FM | - | FL26/Channels |
-| 975 | PNDORLLSO | 155.3100 | RX only | FM | - | FL26/Channels |
-| 976 | AMRALS2 | 155.4000 | RX only | AM | - | FL22/Channels |
-| 977 | SHERIFF2 | 155.5575 | RX only | FM | - | FL22/Channels |
-| 978 | GRYSHRBRSO2 | 155.5650 | RX only | FM | - | FL19/Channels |
-| 979 | OTHELLOPD | 155.5950 | RX only | FM | - | FL29/Channels |
+| 499 | GNDRSNW7FEL | 145.2100 | 144.6100 | FM | TONE=C100 | OZ01/Amateur West Peninsula |
+| 500 | 2MCALLING | 146.5200 | RX only | FM | - | OZ01/Amateur West Peninsula |
+| 501 | CRLSBRGW7FL | 146.7600 | 146.1600 | FM | TONE=C77 | OZ01/Amateur West Peninsula |
+| 502 | STRPDPKW7FL | 146.7600 | 146.1600 | FM | TONE=C100 | OZ01/Amateur West Peninsula |
+| 503 | NCSTSMPLX | 147.4200 | RX only | FM | - | OZ01/Amateur West Peninsula |
+| 504 | FORKSSIMPLEX | 147.5000 | RX only | FM | - | OZ01/Amateur West Peninsula |
+| 505 | OPCNTRLSMPLX | 147.5200 | RX only | FM | - | OZ01/Amateur West Peninsula |
+| 506 | JOYCESIMPLEX | 147.5400 | RX only | FM | - | OZ01/Amateur West Peninsula |
+| 507 | NCSTUHFSMPLX | 439.5500 | RX only | FM | - | OZ01/Amateur West Peninsula |
+| 508 | WUHFSIMPLEX | 439.6000 | RX only | FM | - | OZ01/Amateur West Peninsula |
+| 509 | 70CMCALLING | 446.0000 | RX only | FM | - | OZ01/Amateur West Peninsula |
+| 510 | WW7PSRSTTL | 52.8700 | 51.1700 | FM | TONE=C103.5 | PSHAM01/Seattle Metro - Analog 6 Meter |
+| 511 | WW7PSRSTTL6M | 52.8700 | RX only | FM | - | PSHAM01/Operator-Published Repeaters & Nets |
+| 512 | K7NPUNVRSTYP | 53.0100 | 51.3100 | FM | TONE=C100 | PSHAM01/South Sound - Analog 6 Meter |
+| 513 | KC7YRDMND | 53.0700 | 51.3700 | FM | TONE=C100 | PSHAM01/Eastside & Cascades - Analog 6 Meter |
+| 514 | K7LWHKRKLND | 53.1700 | 51.4700 | FM | TONE=C100 | PSHAM01/Seattle Metro - Analog 6 Meter |
+| 515 | K7HWTACOMA | 53.1900 | 51.4900 | FM | TONE=C100 | PSHAM01/South Sound - Analog 6 Meter |
+| 516 | W7MBYBLLNGHM | 53.2100 | 51.5100 | FM | TONE=C100 | PSHAM01/North Sound & Islands - Analog 6 Meter |
+| 517 | W7AWSEATTLE | 53.2900 | 51.5900 | FM | TONE=C100 | PSHAM01/Seattle Metro - Analog 6 Meter |
+| 518 | W7JCRPRTTWNS | 53.3700 | 51.6700 | FM | TONE=C100 | PSHAM01/North Sound & Islands - Analog 6 Meter |
+| 519 | K7TGUASHFORD | 53.3900 | 51.6900 | FM | TONE=C100 | PSHAM01/South Sound - Analog 6 Meter |
+| 520 | W7PFRETNVLL | 53.4100 | 51.7100 | FM | TONE=C100 | PSHAM01/South Sound - Analog 6 Meter |
+| 521 | W7NPCBNBRDGI | 53.4300 | 51.7300 | FM | TONE=C100 | PSHAM01/Seattle Metro - Analog 6 Meter |
+| 522 | WW7RGCPTLPK | 53.5700 | 51.8700 | FM | TONE=C100 | PSHAM01/Olympic & Kitsap - Analog 6 Meter |
+| 523 | WW7RGGRSSMTN | 53.8700 | 52.1700 | FM | TONE=C100 | PSHAM01/South Sound - Analog 6 Meter |
+| 524 | W7JCRPRTTWN2 | 145.1500 | 144.5500 | FM | TONE=C114.8 | PSHAM01/North Sound & Islands - Analog 2 Meter |
+| 525 | W7PSEOLYMPIA | 145.1500 | 144.5500 | FM | TONE=C103.5 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
+| 526 | NM7EBELFAIR | 145.1700 | 144.5700 | FM | TONE=C103.5 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
+| 527 | N7GDLYMNMTN | 145.1900 | 144.5900 | FM | TONE=C127.3 | PSHAM01/North Sound & Islands - Analog 2 Meter |
+| 528 | W7DKTACOMA | 145.2100 | 144.6100 | FM | TONE=C141.3 | PSHAM01/South Sound - Analog 2 Meter |
+| 529 | W7BPDKENDALL | 145.2300 | 144.6300 | FM | TONE=C103.5 | PSHAM01/North Sound & Islands - Analog 2 Meter |
+| 530 | K7DNRASHFORD | 145.2500 | 144.6500 | FM | TONE=C151.4 | PSHAM01/South Sound - Analog 2 Meter |
+| 531 | KK7DFLOLYMP | 145.2750 | 144.6750 | NFM | TONE=C100 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
+| 532 | KC7YRDMND2 | 145.3100 | 144.7100 | FM | TONE=C103.5 | PSHAM01/Eastside & Cascades - Analog 2 Meter |
+| 533 | K7NWSTGRMTNW | 145.3300 | 144.7300 | FM | TONE=C179.9 | PSHAM01/Eastside & Cascades - Analog 2 Meter |
+| 534 | W7ENMCLW | 145.3700 | 144.7700 | FM | TONE=C136.5 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
+| 535 | WB7DOBCRYSTL | 145.4100 | 144.8100 | FM | TONE=C162.2 | PSHAM01/South Sound - Analog 2 Meter |
+| 536 | KD7WDGSLVRDL | 145.4250 | 144.8250 | NFM | TONE=C88.5 | PSHAM01/Seattle Metro - Analog 2 Meter |
+| 537 | K7PGCHEHALIS | 145.4300 | 144.8300 | FM | TONE=C110.9 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
+| 538 | KB7CNNALDER | 145.4500 | 144.8500 | FM | TONE=C110.9 | PSHAM01/South Sound - Analog 2 Meter |
+| 539 | K7CPROLYMPIA | 145.4700 | 144.8700 | FM | TONE=C100 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
+| 540 | K7CMCNTRL | 145.4900 | 144.8900 | FM | TONE=C110.9 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
+| 541 | K7LWHKRKLND2 | 145.4900 | 144.8900 | FM | TONE=C103.5 | PSHAM01/Seattle Metro - Analog 2 Meter |
+| 542 | WB7DVNELDON | 146.4500 | 147.4500 | NFM | D245 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
+| 543 | KC7ZGOLDMTN | 146.6200 | 146.0200 | FM | TONE=C103.5 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
+| 544 | W7EDGWD | 146.6400 | 146.0400 | FM | TONE=C103.5 | PSHAM01/South Sound - Analog 2 Meter |
+| 545 | NC7GSEATAC | 146.6600 | 146.0600 | FM | TONE=C103.5 | PSHAM01/Seattle Metro - Analog 2 Meter |
+| 546 | N7JNFRDYHRBR | 146.7000 | 146.1000 | FM | TONE=C131.8 | PSHAM01/North Sound & Islands - Analog 2 Meter |
+| 547 | W7TETNVLL | 146.7000 | 146.1000 | FM | TONE=C103.5 | PSHAM01/South Sound - Analog 2 Meter |
+| 548 | MASONARC2M | 146.7200 | RX only | FM | - | PSHAM01/Operator-Published Repeaters & Nets |
+| 549 | N7SKSHELTON | 146.7200 | 146.1200 | FM | TONE=C103.5 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
+| 550 | K7KFLPCKWD | 146.7400 | 146.1400 | FM | TONE=C131.8 | PSHAM01/South Sound - Analog 2 Meter |
+| 551 | K7KFMCHHLS | 146.7400 | 146.1400 | FM | TONE=C110.9 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
+| 552 | WA7FWFEDWAY | 146.7600 | 146.1600 | FM | TONE=C103.5 | PSHAM01/South Sound - Analog 2 Meter |
+| 553 | W7DMLYNNWD | 146.7750 | 146.1750 | NFM | TONE=C156.7 | PSHAM01/Seattle Metro - Analog 2 Meter |
+| 554 | K7LDMKKY2M | 146.8200 | RX only | FM | - | PSHAM01/Operator-Published Repeaters & Nets |
+| 555 | W7VMOKHRBR | 146.8625 | RX only | NFM | - | PSHAM01/Operator-Published Repeaters & Nets |
+| 556 | WW7PSRSTTL2M | 146.9600 | RX only | FM | - | PSHAM01/Operator-Published Repeaters & Nets |
+| 557 | WW7STRTGRMTN | 147.0800 | 147.6800 | FM | TONE=C110.9 | PSHAM01/Eastside & Cascades - Analog 2 Meter |
+| 558 | N7IQZSHELTON | 147.1200 | 147.7200 | NFM | TONE=C173.8 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
+| 559 | W7AVMCLINTON | 147.2200 | RX only | FM | - | PSHAM01/Operator-Published Repeaters & Nets |
+| 560 | KF7NPLMPLVLL | 147.2600 | 147.8600 | FM | TONE=C103.5 | PSHAM01/Eastside & Cascades - Analog 2 Meter |
+| 561 | W7PGCMNISLND | 147.3600 | 147.9600 | FM | TONE=C127.3 | PSHAM01/North Sound & Islands - Analog 2 Meter |
+| 562 | K7CPROLYMPI2 | 430.1500 | 439.1500 | FM | - | PSHAM01/Olympic & Kitsap - Analog 70 Centimeter |
+| 563 | K7CPROLYMPI3 | 430.2500 | 439.2500 | FM | - | PSHAM01/Olympic & Kitsap - Analog 70 Centimeter |
+| 564 | K7CPROLYMPI4 | 430.3000 | 439.3000 | FM | - | PSHAM01/Olympic & Kitsap - Analog 70 Centimeter |
+| 565 | W7VMCPVLL | 430.7750 | 439.7750 | FM | TONE=C127.3 | PSHAM01/North Sound & Islands - Analog 70 Centimeter |
+| 566 | W7FLSTRPDPK | 439.0500 | 430.0500 | NFM | TONE=C203.5 | PSHAM01/North Sound & Islands - Analog 70 Centimeter |
+| 567 | W7USJOLYMPIA | 439.6500 | 439.6500 | FM | TONE=C77 | PSHAM01/Olympic & Kitsap - Analog 70 Centimeter |
+| 568 | W7AVMCLINTO2 | 439.7750 | 430.7750 | FM | TONE=C127.3 | PSHAM01/North Sound & Islands - Analog 70 Centimeter |
+| 569 | W7CSEVRTT | 440.1750 | 445.1750 | FM | TONE=C103.5 | PSHAM01/Seattle Metro - Analog 70 Centimeter |
+| 570 | KJ7GWRINDNL | 440.5750 | 445.5750 | FM | TONE=C123 | PSHAM01/Seattle Metro - Analog 70 Centimeter |
+| 571 | W7CSLKFRSTPK | 440.6000 | 445.6000 | FM | TONE=C141.3 | PSHAM01/Seattle Metro - Analog 70 Centimeter |
+| 572 | KG7QPSNHMSH | 441.1500 | 446.1500 | FM | TONE=C123 | PSHAM01/Eastside & Cascades - Analog 70 Centimeter |
+| 573 | K7SRGGOLDMTN | 441.2500 | 446.2500 | FM | TONE=C94.8 | PSHAM01/Olympic & Kitsap - Analog 70 Centimeter |
+| 574 | N7KNGRNBNK | 441.4250 | RX only | FM | - | PSHAM01/Operator-Published Repeaters & Nets |
+| 575 | K7FDFRENTON | 441.4750 | 446.4750 | FM | TONE=C103.5 | PSHAM01/Eastside & Cascades - Analog 70 Centimeter |
+| 576 | AF7UXMONROE | 441.5000 | 446.5000 | NFM | TONE=C69.3 | PSHAM01/Eastside & Cascades - Analog 70 Centimeter |
+| 577 | K7GFZCRNTN | 441.8500 | 446.8500 | FM | TONE=C103.5 | PSHAM01/Eastside & Cascades - Analog 70 Centimeter |
+| 578 | KF7VLBLLNGHM | 441.9250 | 446.9250 | FM | TONE=C103.5 | PSHAM01/North Sound & Islands - Analog 70 Centimeter |
+| 579 | K7NWSTGRMTN2 | 442.0750 | 447.0750 | FM | TONE=C110.9 | PSHAM01/Eastside & Cascades - Analog 70 Centimeter |
+| 580 | KG7SMMMSH | 442.1250 | 447.1250 | FM | TONE=C107.2 | PSHAM01/Eastside & Cascades - Analog 70 Centimeter |
+| 581 | K7DKKRVNRST | 442.2750 | 447.2750 | FM | TONE=C103.5 | PSHAM01/South Sound - Analog 70 Centimeter |
+| 582 | W7CSBCNHLL | 442.3000 | 447.3000 | FM | TONE=C141.3 | PSHAM01/Seattle Metro - Analog 70 Centimeter |
+| 583 | KC7CKOLACEY | 442.4750 | 447.4750 | NFM | TONE=C110.9 | PSHAM01/Olympic & Kitsap - Analog 70 Centimeter |
+| 584 | W7HJRBTHLL | 442.5500 | 447.5500 | FM | TONE=C131.8 | PSHAM01/Seattle Metro - Analog 70 Centimeter |
+| 585 | K7TGTGRMTNE | 442.6000 | 447.6000 | FM | TONE=C127.3 | PSHAM01/Eastside & Cascades - Analog 70 Centimeter |
+| 586 | W7ACSSEATTLE | 442.8750 | 447.8750 | FM | TONE=C141.3 | PSHAM01/Seattle Metro - Analog 70 Centimeter |
+| 587 | WA7FWFEDWAY2 | 442.9250 | 447.9250 | FM | D036 | PSHAM01/South Sound - Analog 70 Centimeter |
+| 588 | WA7FWFEDWAY3 | 442.9500 | 447.9500 | FM | TONE=C103.5 | PSHAM01/South Sound - Analog 70 Centimeter |
+| 589 | N7EHPUNVRSTY | 443.1500 | 448.1500 | FM | TONE=C71.9 | PSHAM01/South Sound - Analog 70 Centimeter |
+| 590 | K7RSDSEATTLE | 443.3750 | 448.3750 | FM | TONE=C103.5 | PSHAM01/Seattle Metro - Analog 70 Centimeter |
+| 591 | N7JNFRDYHRB2 | 443.4500 | 448.4500 | FM | TONE=C131.8 | PSHAM01/North Sound & Islands - Analog 70 Centimeter |
+| 592 | KG7QPSNHMSH2 | 443.9000 | 448.9000 | FM | TONE=C151.4 | PSHAM01/Eastside & Cascades - Analog 70 Centimeter |
+| 593 | N7QRLNGBRNCH | 443.9500 | 448.9500 | FM | TONE=C141.3 | PSHAM01/Olympic & Kitsap - Analog 70 Centimeter |
+| 594 | N7QORSEATTLE | 443.9500 | 448.9500 | FM | TONE=C127.3 | PSHAM01/Seattle Metro - Analog 70 Centimeter |
+| 595 | AF7DXSEQUIM | 444.2750 | 449.2750 | FM | TONE=C100 | PSHAM01/Olympic & Kitsap - Analog 70 Centimeter |
+| 596 | WW7SSTTL | 444.4250 | 449.4250 | FM | TONE=C141.3 | PSHAM01/Seattle Metro - Analog 70 Centimeter |
+| 597 | W7NPCBNBRDG2 | 444.4750 | 449.4750 | NFM | TONE=C103.5 | PSHAM01/Seattle Metro - Analog 70 Centimeter |
+| 598 | N7KGJSQKMTN | 444.5250 | 449.5250 | FM | TONE=C103.5 | PSHAM01/Eastside & Cascades - Analog 70 Centimeter |
+| 599 | W7ACSSEATTL2 | 444.5500 | 449.5500 | FM | TONE=C141.3 | PSHAM01/Seattle Metro - Analog 70 Centimeter |
+| 600 | W7LWEVRTT | 444.5750 | 449.5750 | FM | TONE=C103.5 | PSHAM01/Seattle Metro - Analog 70 Centimeter |
+| 601 | K7LWHBLLV | 444.6000 | 449.6000 | FM | TONE=C103.5 | PSHAM01/Seattle Metro - Analog 70 Centimeter |
+| 602 | N7CRMTVRNN | 444.6250 | 449.6250 | FM | TONE=C103.5 | PSHAM01/North Sound & Islands - Analog 70 Centimeter |
+| 603 | W7HRJTGRMTNE | 444.6500 | 449.6500 | FM | TONE=C131.8 | PSHAM01/Eastside & Cascades - Analog 70 Centimeter |
+| 604 | WB7DOBTHRSST | 444.6750 | 449.6750 | FM | TONE=C136.5 | PSHAM01/South Sound - Analog 70 Centimeter |
+| 605 | WW7SSTTL2 | 444.7000 | 449.7000 | FM | TONE=C103.5 | PSHAM01/Seattle Metro - Analog 70 Centimeter |
+| 606 | NW7DRKNGSTN | 444.7250 | 449.7250 | FM | TONE=C123 | PSHAM01/Seattle Metro - Analog 70 Centimeter |
+| 607 | KA6WINSEQUIM | 444.7500 | 449.7500 | FM | TONE=C100 | PSHAM01/Olympic & Kitsap - Analog 70 Centimeter |
+| 608 | W7PYPYLLP | 444.7500 | 449.7500 | FM | TONE=C103.5 | PSHAM01/South Sound - Analog 70 Centimeter |
+| 609 | K7DSBLLV | 444.7750 | 449.7750 | FM | TONE=C173.8 | PSHAM01/Eastside & Cascades - Analog 70 Centimeter |
+| 610 | W7USJGOLDMTN | 444.8000 | 449.8000 | FM | TONE=C100 | PSHAM01/Olympic & Kitsap - Analog 70 Centimeter |
+| 611 | WW7MSTSTTL | 444.8250 | 449.8250 | FM | TONE=C103.5 | PSHAM01/Seattle Metro - Analog 70 Centimeter |
+| 612 | K6MBYSEQUIM | 444.9000 | 449.9000 | FM | TONE=C131.8 | PSHAM01/North Sound & Islands - Analog 70 Centimeter |
+| 613 | N7JKCPTLPK | 444.9500 | 449.9500 | FM | TONE=C118.8 | PSHAM01/Olympic & Kitsap - Analog 70 Centimeter |
+| 614 | ESTSDKNGCOTC | 145.5100 | RX only | FM | - | FL62/Channels |
+| 615 | ESTSDKNGCO2 | 145.6500 | RX only | FM | - | FL62/Channels |
+| 616 | WAARSRCSACSC | 146.5800 | RX only | FM | - | FL62/Channels |
+| 617 | UHFCLLNGALT2 | 445.0000 | RX only | FM | - | FL62/Channels |
+| 618 | WINLINK | 144.9500 | RX only | FM | - | FL62/Channels |
+| 619 | WINLINK2 | 145.6300 | RX only | FM | - | FL62/Channels |
+| 620 | SSTV | 145.8000 | RX only | FM | - | FL51/Channels |
+| 621 | APRSDOWNLINK | 145.8250 | RX only | FM | - | FL51/Channels |
+| 622 | EVRGRNINTRTV | 147.2600 | RX only | FM | - | FL61/Channels |
+| 623 | KA6WINSEQUI2 | 444.7500 | RX only | FM | - | FL61/Channels |
+| 624 | CHNKPSSND | 444.9250 | RX only | FM | - | FL61/Channels |
+| 625 | WINPRIMARY2 | 449.7500 | RX only | FM | - | FL61/Channels |
+| 626 | AO91 | 145.9600 | RX only | FM | - | FL51/Channels |
+| 627 | W7RNKISSQH | 147.9950 | RX only | FM | - | FL51/Channels |
+| 628 | TEVEL | 436.4000 | RX only | FM | - | FL51/Channels |
+| 629 | SO50 | 436.7950 | RX only | FM | - | FL51/Channels |
+| 630 | CROSSBANDRPT | 437.8000 | RX only | FM | - | FL51/Channels |
+| 631 | CH01A | 156.0500 | RX only | FM | - | FL54/Channels |
+| 632 | CH5A | 156.2500 | RX only | FM | - | FL52/Channels |
+| 633 | CH6 | 156.3000 | RX only | FM | - | FL52/Channels |
+| 634 | CH07A | 156.3500 | RX only | FM | - | FL52/Channels |
+| 635 | CH13 | 156.6500 | RX only | FM | - | FL52/Channels |
+| 636 | CH14VTS | 156.7000 | RX only | FM | - | FL52/Channels |
+| 637 | CH16 | 156.8000 | RX only | FM | - | FL52/Channels |
+| 638 | CH22A | 157.1000 | RX only | FM | - | FL52/Channels |
+| 639 | CH67 | 156.3750 | RX only | FM | - | FL52/Channels |
+| 640 | CH78A | 156.9250 | RX only | FM | - | FL52/Channels |
+| 641 | CH79A | 156.9750 | RX only | FM | - | FL52/Channels |
+| 642 | CH18A | 156.9000 | RX only | FM | - | FTX01/Marine VHF |
+| 643 | CH19A | 156.9500 | RX only | FM | - | FTX01/Marine VHF |
+| 644 | CH20A | 157.0000 | RX only | FM | - | FTX01/Marine VHF |
+| 645 | CH63A | 156.1750 | RX only | FM | - | FTX01/Marine VHF |
+| 646 | CH65A | 156.2750 | RX only | FM | - | FTX01/Marine VHF |
+| 647 | CH66A | 156.3250 | RX only | FM | - | FTX01/Marine VHF |
+| 648 | CH80A | 157.0250 | RX only | FM | - | FTX01/Marine VHF |
+| 649 | CH81A | 157.0750 | RX only | FM | - | FTX01/Marine VHF |
+| 650 | CH82A | 157.1250 | RX only | FM | - | FTX01/Marine VHF |
+| 651 | LGCYTLPHN1 | 161.9000 | RX only | FM | - | FL54/Channels |
+| 652 | LGCYTLPHN2 | 161.8750 | RX only | FM | - | FL54/Channels |
+| 653 | MRN09CLLNG | 156.4500 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
+| 654 | MRN21USCG | 157.0500 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
+| 655 | MRN23USCG | 157.1500 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
+| 656 | MARINE68 | 156.4250 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
+| 657 | MARINE69 | 156.4750 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
+| 658 | MARINE71 | 156.5750 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
+| 659 | MARINE72 | 156.6250 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
+| 660 | MRN83USCG | 157.1750 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
+| 661 | MARINE88A | 157.4250 | RX only | FM | - | OZ01/Marine and Vessel Traffic |
+| 662 | MARINEAIS1 | 161.9750 | RX only | FM | - | FTX01/Marine VHF |
+| 663 | MARINEAIS2 | 162.0250 | RX only | FM | - | FTX01/Marine VHF |
+| 664 | MARINECH8 | 156.4000 | RX only | FM | - | FTX01/Marine VHF |
+| 665 | MARINECH10 | 156.5000 | RX only | FM | - | FTX01/Marine VHF |
+| 666 | MARINECH12 | 156.6000 | RX only | FM | - | FTX01/Marine VHF |
+| 667 | MARINECH15 | 156.7500 | RX only | FM | - | FTX01/Marine VHF |
+| 668 | MARINECH17 | 156.8500 | RX only | FM | - | FTX01/Marine VHF |
+| 669 | MARINECH20 | 161.6000 | RX only | FM | - | FTX01/Marine VHF |
+| 670 | MARINECH24 | 161.8000 | RX only | FM | - | FTX01/Marine VHF |
+| 671 | MARINECH25 | 161.8500 | RX only | FM | - | FTX01/Marine VHF |
+| 672 | MARINECH27 | 161.9500 | RX only | FM | - | FTX01/Marine VHF |
+| 673 | MARINECH28 | 162.0000 | RX only | FM | - | FTX01/Marine VHF |
+| 674 | MARINECH70 | 156.5250 | RX only | FM | - | FTX01/Marine VHF |
+| 675 | MARINECH73 | 156.6750 | RX only | FM | - | FTX01/Marine VHF |
+| 676 | MARINECH77 | 156.8750 | RX only | FM | - | FTX01/Marine VHF |
+| 677 | MARINECH84 | 161.8250 | RX only | FM | - | FTX01/Marine VHF |
+| 678 | MARINECH86 | 161.9250 | RX only | FM | - | FTX01/Marine VHF |
+| 679 | MARINEVHF11 | 156.5500 | RX only | FM | - | FL52/Channels |
+| 680 | MARINEVHF24 | 157.2000 | RX only | FM | - | FL52/Channels |
+| 681 | MARINEVHF25 | 157.2500 | RX only | FM | - | FL52/Channels |
+| 682 | MARINEVHF26 | 157.3000 | RX only | FM | - | FL52/Channels |
+| 683 | MARINEVHF27 | 157.3500 | RX only | FM | - | FL52/Channels |
+| 684 | MARINEVHF28 | 157.4000 | RX only | FM | - | FL52/Channels |
+| 685 | MARINEVHF74 | 156.7250 | RX only | FM | - | FL52/Channels |
+| 686 | MARINEVHF84 | 157.2250 | RX only | FM | - | FL52/Channels |
+| 687 | MARINEVHF85 | 157.2750 | RX only | FM | - | FL52/Channels |
+| 688 | MARINEVHF86 | 157.3250 | RX only | FM | - | FL52/Channels |
+| 689 | MARINEVHF87 | 157.3750 | RX only | FM | - | FL52/Channels |
+| 690 | NOAAWXWX6 | 162.5000 | RX only | FM | - | FL52/Channels |
+| 691 | USCGAXLRY1 | 143.4750 | RX only | FM | - | FL52/Channels |
+| 692 | USCGAXLRY2 | 150.7000 | RX only | FM | - | FL52/Channels |
+| 693 | WSDOTV2 | 151.0250 | RX only | FM | - | FL53/Channels |
+| 694 | WAFRRSDCKSHR | 151.0400 | RX only | NFM | - | OZ01/Ferry Transport Utility |
+| 695 | WSDOTV1 | 151.0700 | RX only | FM | - | FL53/Channels |
+| 696 | WSDOTV3 | 156.1200 | RX only | FM | - | FL53/Channels |
+| 697 | BNNVLLPWR | 172.5250 | RX only | NFM | - | OZ01/Ferry Transport Utility |
+| 698 | MVCHLDNG | 461.1875 | RX only | NFM | - | OZ01/Ferry Transport Utility |
+| 699 | MVCOHOBRIDGE | 467.7750 | RX only | NFM | - | OZ01/Ferry Transport Utility |
+| 700 | BFIBFIVOT | 108.6000 | RX only | AM | - | FL48/Channels |
+| 701 | GEGGEGVOT | 109.6000 | RX only | AM | - | FL48/Channels |
+| 702 | PAEPAEVORDME | 110.6000 | RX only | AM | - | FL48/Channels |
+| 703 | FRCHLDTCNSK | 111.4000 | RX only | AM | - | FL48/Channels |
+| 704 | TTSHVRTCTOU | 112.2000 | RX only | AM | - | FL48/Channels |
+| 705 | EPHEPHVORTAC | 112.6000 | RX only | AM | - | FL48/Channels |
+| 706 | HUHHUHTACAN | 113.0000 | RX only | AM | - | FL48/Channels |
+| 707 | OLMOLMVORTAC | 113.4000 | RX only | AM | - | FL48/Channels |
+| 708 | PSCVRDMPSC | 113.7500 | RX only | AM | - | FL48/Channels |
+| 709 | NUWNUWTACAN | 113.8000 | RX only | AM | - | FL48/Channels |
+| 710 | SFFSFFVOT | 114.0000 | RX only | AM | - | FL48/Channels |
+| 711 | EATEATVORDME | 114.3500 | RX only | AM | - | FL48/Channels |
+| 712 | MSSLKVRDMMWH | 115.0000 | RX only | AM | - | FL48/Channels |
+| 713 | GEGGEGVORTAC | 115.5000 | RX only | AM | - | FL48/Channels |
+| 714 | YKMVRTCYKM | 116.0000 | RX only | AM | - | FL48/Channels |
+| 715 | ALWALWVORDME | 116.4000 | RX only | AM | - | FL48/Channels |
+| 716 | BTTLGRNDVRTC | 116.6000 | RX only | AM | - | FL48/Channels |
+| 717 | SEASEAVORTAC | 116.8000 | RX only | AM | - | FL48/Channels |
+| 718 | PLLMNVRDMPW | 117.1500 | RX only | AM | - | FL48/Channels |
+| 719 | CVVCVVVORDME | 117.2000 | RX only | AM | - | FL48/Channels |
+| 720 | SEASEAVOT | 117.5000 | RX only | AM | - | FL48/Channels |
+| 721 | HQMVRTCHQM | 117.7000 | RX only | AM | - | FL48/Channels |
+| 722 | ELLNSBRGVRDM | 117.9000 | RX only | AM | - | FL48/Channels |
+| 723 | ATIS | 118.0000 | RX only | AM | - | FL46/Channels |
+| 724 | CLSCLSAWOS3 | 118.0250 | RX only | AM | - | FL48/Channels |
+| 725 | S50S50AWS3PT | 118.0500 | RX only | AM | - | FL48/Channels |
+| 726 | VUOAPCHP | 118.1000 | RX only | AM | - | FL48/Channels |
+| 727 | FCTFCTASOS | 118.1500 | RX only | AM | - | FL48/Channels |
+| 728 | MCCHORDGNDP | 118.1750 | RX only | AM | - | FL48/Channels |
+| 729 | 0S9APCHPDEPP | 118.2000 | RX only | AM | - | FL48/Channels |
+| 730 | GRANTLCLP | 118.2500 | RX only | AM | - | FL48/Channels |
+| 731 | BOEINGLCLP | 118.3000 | RX only | AM | - | FL48/Channels |
+| 732 | EDIZHOOKAWOS | 118.3250 | RX only | AM | - | OZ01/Aviation |
+| 733 | ELNELNASOS | 118.3750 | RX only | AM | - | FL48/Channels |
+| 734 | S52S52AWOS3 | 118.4250 | RX only | AM | - | FL48/Channels |
+| 735 | ALWCTAF | 118.5000 | RX only | AM | - | FL48/Channels |
+| 736 | 68S68SAWS3PT | 118.5250 | RX only | AM | - | FL48/Channels |
+| 737 | WLLLWLLLRCG | 118.5500 | RX only | AM | - | FL48/Channels |
+| 738 | VUOCDP | 119.0000 | RX only | AM | - | FL48/Channels |
+| 739 | 0S90S9AWOS3P | 119.0250 | RX only | AM | - | FL48/Channels |
+| 740 | GRANTATIS | 119.0500 | RX only | AM | - | FL48/Channels |
+| 741 | ZSE1191 | 119.1000 | RX only | AM | - | FL48/Channels |
+| 742 | BNGAPCHPDPP | 119.2000 | RX only | AM | - | FL48/Channels |
+| 743 | SPKNSPKNRCG | 119.2250 | RX only | AM | - | FL48/Channels |
+| 744 | 63S63SAWOS3 | 119.2750 | RX only | AM | - | FL48/Channels |
+| 745 | GRAYLCLP | 119.3250 | RX only | AM | - | FL44/Channels |
+| 746 | SEATTLELCLP | 119.9000 | RX only | AM | - | FL44/Channels |
+| 747 | EATEATASOS | 119.9250 | RX only | AM | - | FL44/Channels |
+| 748 | TRICITIESCDP | 120.0000 | RX only | AM | - | FL44/Channels |
+| 749 | BNGAPCHPDPP2 | 120.1000 | RX only | AM | - | FL44/Channels |
+| 750 | PAINELCLP | 120.2000 | RX only | AM | - | FL44/Channels |
+| 751 | BCNHLLBCNHLL | 120.3000 | RX only | AM | - | FL44/Channels |
+| 752 | FRCHLDLCLP | 120.3500 | RX only | AM | - | FL44/Channels |
+| 753 | BNGAPCHPDPP3 | 120.4000 | RX only | AM | - | FL44/Channels |
+| 754 | FELTSATIS | 120.5500 | RX only | AM | - | FL44/Channels |
+| 755 | BOEINGLCLP2 | 120.6000 | RX only | AM | - | FL44/Channels |
+| 756 | BLLNGHMMDRNV | 120.7000 | RX only | AM | - | FL44/Channels |
+| 757 | SEATTLELCLP2 | 120.9500 | RX only | AM | - | FL44/Channels |
+| 758 | CLSAPCHP | 121.1000 | RX only | AM | - | FL44/Channels |
+| 759 | BVSBVSAWOS3 | 121.1250 | RX only | AM | - | FL44/Channels |
+| 760 | PWTPWTAWS3PT | 121.2000 | RX only | AM | - | FL44/Channels |
+| 761 | BDGRMTNBDGRM | 121.5000 | RX only | AM | - | FL44/Channels |
+| 762 | OLYMPIAGNDP | 121.6000 | RX only | AM | - | FL44/Channels |
+| 763 | CEMNET1 | 45.2000 | RX only | FM | - | FL03/Channels |
+| 764 | CEMNET2 | 45.3600 | RX only | FM | - | FL03/Channels |
+| 765 | CEMNET3 | 45.4800 | RX only | FM | - | FL03/Channels |
+| 766 | RADEF | 46.0000 | RX only | FM | - | FL03/Channels |
+| 767 | CMD | 46.5200 | RX only | FM | - | FL03/Channels |
+| 768 | VTAC11 | 151.1375 | RX only | NFM | - | FL02/Channels |
+| 769 | REDNET | 153.8300 | RX only | FM | - | FL01/Channels |
+| 770 | STATEFIRETAC | 154.2800 | RX only | FM | - | FL01/Channels |
+| 771 | VTAC12 | 154.4525 | RX only | NFM | - | FL02/Channels |
+| 772 | SAR1 | 155.1600 | RX only | FM | - | FL01/Channels |
+| 773 | SAR4 | 155.1675 | RX only | FM | - | FL01/Channels |
+| 774 | SAR5 | 155.1825 | RX only | FM | - | FL01/Channels |
+| 775 | SAR2 | 155.2425 | RX only | FM | - | FL01/Channels |
+| 776 | SAR3 | 155.3025 | RX only | FM | - | FL01/Channels |
+| 777 | HEAR | 155.3400 | RX only | FM | - | FL01/Channels |
+| 778 | LERN | 155.3700 | RX only | FM | - | FL01/Channels |
+| 779 | VCALL10 | 155.7525 | RX only | NFM | - | FL02/Channels |
+| 780 | OSCCR | 156.1350 | RX only | FM | - | FL01/Channels |
+| 781 | VTAC13 | 158.7375 | RX only | NFM | - | FL02/Channels |
+| 782 | VTAC14 | 159.4725 | RX only | NFM | - | FL02/Channels |
+| 783 | FEDIOPLE1 | 167.0875 | RX only | NFM | - | OZ01/SAR and Interop |
+| 784 | FEDIOPNC1 | 169.5375 | RX only | NFM | - | OZ01/SAR and Interop |
+| 785 | FEDIOPIR1 | 170.0125 | RX only | NFM | - | OZ01/SAR and Interop |
+| 786 | FEDIOPIR2 | 170.4125 | RX only | NFM | - | OZ01/SAR and Interop |
+| 787 | FEDIOPIR3 | 170.6875 | RX only | NFM | - | OZ01/SAR and Interop |
+| 788 | FDSRINCDNTCM | 410.8375 | RX only | NFM | - | OZ01/SAR and Interop |
+| 789 | UCALL40 | 453.2125 | RX only | NFM | - | FL02/Channels |
+| 790 | UTAC41 | 453.4625 | RX only | NFM | - | FL02/Channels |
+| 791 | AIRGROUND4 | 151.2125 | RX only | FM | - | FL06/Channels |
+| 792 | AIRGROUND6 | 151.2875 | RX only | FM | - | FL06/Channels |
+| 793 | AIRGROUND1 | 151.3100 | RX only | FM | - | FL06/Channels |
+| 794 | AIRGROUND2 | 151.3400 | RX only | FM | - | FL06/Channels |
+| 795 | DNRFLGHTFLLW | 151.3475 | RX only | NFM | - | OZ01/WA DNR Olympic Region |
+| 796 | AIRGROUND3 | 151.3850 | RX only | FM | - | FL06/Channels |
+| 797 | DNRCOMMON | 151.4150 | RX only | FM | - | FL06/Channels |
+| 798 | AIRGROUND7 | 156.0225 | RX only | FM | - | FL06/Channels |
+| 799 | DNRHOH | 159.2025 | RX only | NFM | - | OZ01/WA DNR Olympic Region |
+| 800 | DNRREGIONAL3 | 159.2400 | RX only | FM | - | FL06/Channels |
+| 801 | DNROZETTE | 159.2550 | RX only | NFM | - | OZ01/WA DNR Olympic Region |
+| 802 | AIRGROUND5 | 159.2700 | RX only | FM | - | FL06/Channels |
+| 803 | DNRSTRAITS | 159.3000 | RX only | NFM | - | OZ01/WA DNR Olympic Region |
+| 804 | DNRREGIONAL7 | 159.3150 | RX only | FM | - | FL06/Channels |
+| 805 | DNRREGIONAL4 | 159.3300 | RX only | FM | - | FL06/Channels |
+| 806 | DNRCANAL | 159.3450 | RX only | NFM | - | OZ01/WA DNR Olympic Region |
+| 807 | DNRREGIONAL6 | 159.3675 | RX only | FM | - | FL06/Channels |
+| 808 | DNRREGIONAL5 | 159.3750 | RX only | FM | - | FL06/Channels |
+| 809 | DNRREGIONAL1 | 159.4125 | RX only | FM | - | FL06/Channels |
+| 810 | DNRMAIN | 159.4200 | RX only | FM | - | FL06/Channels |
+| 811 | DNRREGIONAL2 | 159.4275 | RX only | FM | - | FL06/Channels |
+| 812 | DNRREGIONAL8 | 159.4350 | RX only | FM | - | FL06/Channels |
+| 813 | DNRREGIONAL9 | 159.4500 | RX only | FM | - | FL06/Channels |
+| 814 | DNRQUINAULT | 159.4575 | RX only | NFM | - | OZ01/WA DNR Olympic Region |
+| 815 | AIRTAC1 | 166.6125 | RX only | FM | - | FL07/Channels |
+| 816 | AIRTAC2 | 167.9500 | RX only | FM | - | FL07/Channels |
+| 817 | AIRTAC3 | 168.4000 | RX only | FM | - | FL07/Channels |
+| 818 | COMMAND6 | 168.4750 | RX only | FM | - | FL07/Channels |
+| 819 | ICP | 168.5500 | RX only | FM | - | FL07/Channels |
+| 820 | AIRGUARD | 168.6250 | RX only | FM | - | FL07/Channels |
+| 821 | FLGHTFLLWNG | 168.6500 | RX only | FM | - | FL07/Channels |
+| 822 | AIRTAC4 | 169.1500 | RX only | FM | - | FL07/Channels |
+| 823 | AIRTAC5 | 169.2000 | RX only | FM | - | FL07/Channels |
+| 824 | COMMAND5 | 169.7500 | RX only | FM | - | FL07/Channels |
+| 825 | COMMAND4 | 170.0000 | RX only | FM | - | FL07/Channels |
+| 826 | 6PROJECTFIRE | 170.1250 | RX only | FM | - | FL07/Channels |
+| 827 | WA7MVTWSPOKN | 53.1100 | RX only | FM | - | FL40/Channels |
+| 828 | W7TDWNTCHCHL | 53.3900 | RX only | FM | - | FL34/Channels |
+| 829 | K7DKKNCHSYKM | 53.6700 | RX only | FM | - | FL37/Channels |
+| 830 | N7YRCYKMYKMC | 53.9300 | RX only | FM | - | FL37/Channels |
+| 831 | NO7RFWNTHRPO | 145.1250 | RX only | FM | - | FL40/Channels |
+| 832 | W7GHJCHWLHWA | 145.1300 | RX only | FM | - | FL41/Channels |
+| 833 | K7LADWNTHRPO | 145.1500 | RX only | FM | - | FL40/Channels |
+| 834 | W7SRTTNYKMCO | 145.1700 | RX only | FM | - | FL37/Channels |
+| 835 | N7XAYRPBLCFR | 145.1900 | RX only | FM | - | FL41/Channels |
+| 836 | NO7RFWNTHRP2 | 145.2100 | RX only | FM | - | FL40/Channels |
+| 837 | N7XAYCRLWFRR | 145.2300 | RX only | FM | - | FL41/Channels |
+| 838 | K7SRGCHWLHST | 145.2500 | RX only | FM | - | FL41/Channels |
+| 839 | WA7SARYKMKTT | 145.2700 | RX only | FM | - | FL35/Channels |
+| 840 | KC7SRGLDNDLK | 145.3300 | RX only | FM | - | FL39/Channels |
+| 841 | K7SRGCHWLHS2 | 145.4300 | RX only | FM | - | FL41/Channels |
+| 842 | K7SRGCLVLLST | 145.4500 | RX only | FM | - | FL41/Channels |
+| 843 | KD7YSLHYKMCO | 145.4700 | RX only | FM | - | FL37/Channels |
+| 844 | WA7DMRKTTTSK | 146.4875 | RX only | FM | - | FL35/Channels |
+| 845 | K7JARCLVLLST | 146.6200 | RX only | FM | - | FL41/Channels |
+| 846 | W7QYKMYKMCO | 146.6600 | RX only | FM | - | FL37/Channels |
+| 847 | W7TDWNTCHCH2 | 146.6800 | RX only | FM | - | FL34/Channels |
+| 848 | KB7UJICHWLHS | 146.7000 | RX only | FM | - | FL41/Channels |
+| 849 | N7RHTLVNWRTH | 146.7800 | RX only | FM | - | FL34/Channels |
+| 850 | K7SMXSTHKNCH | 146.8000 | RX only | FM | - | FL34/Channels |
+| 851 | W7QYKMYKMCO2 | 146.8400 | RX only | FM | - | FL37/Channels |
+| 852 | KE7NRAGRNDCL | 146.8600 | RX only | FM | - | FL40/Channels |
+| 853 | WR7ADXWNTCHC | 146.9000 | RX only | FM | - | FL34/Channels |
+| 854 | KC7SRGLDNDL2 | 146.9200 | RX only | FM | - | FL39/Channels |
+| 855 | W7CCYYKMYKMC | 146.9400 | RX only | FM | - | FL37/Channels |
+| 856 | K7RHTELLNSBR | 147.0000 | RX only | FM | - | FL35/Channels |
+| 857 | W7SRYKMYKMCO | 147.0600 | RX only | FM | - | FL37/Channels |
+| 858 | WA7SARTRTLKY | 147.0800 | RX only | FM | - | FL37/Channels |
+| 859 | W7SRYKMYKMC2 | 147.1200 | RX only | FM | - | FL37/Channels |
+| 860 | WA7DJCHSWOKN | 147.1400 | RX only | FM | - | FL40/Channels |
+| 861 | N7KGSELLNSBR | 147.1600 | RX only | FM | - | FL35/Channels |
+| 862 | K7SRGOMKOKNG | 147.2000 | RX only | FM | - | FL34/Channels |
+| 863 | KC7VQRSLHKTT | 147.2400 | RX only | FM | - | FL35/Channels |
+| 864 | W7QYKMYKMCO3 | 147.3000 | RX only | FM | - | FL37/Channels |
+| 865 | WA7MVTNSKTOK | 147.3200 | RX only | FM | - | FL40/Channels |
+| 866 | N7KGSCLELMKT | 147.3600 | RX only | FM | - | FL35/Channels |
+| 867 | KB7APUUNDRWD | 147.4250 | RX only | FM | - | FL39/Channels |
+| 868 | KB7APUTRTLKS | 147.4375 | RX only | FM | - | FL39/Channels |
+| 869 | KCSARF2F32 | 153.7550 | RX only | FM | - | FL35/Channels |
+| 870 | CHELANFIRE | 154.4300 | RX only | FM | - | FL36/Channels |
+| 871 | WSPNW | 154.7550 | RX only | FM | - | FL34/Channels |
+| 872 | JOYCEFIRETAC | 154.4450 | RX only | NFM | - | OZ01/Clallam County |
+| 873 | MAKAHTRBPD | 155.0700 | RX only | NFM | - | OZ01/Tribal Neah Bay and La Push |
+| 874 | JYCFRDSP | 155.7225 | RX only | NFM | - | OZ01/Clallam County |
+| 875 | SEQUIMFIRE | 155.7825 | RX only | FM | - | FL18/Channels |
+| 876 | CLLLMFRDSP | 155.8200 | RX only | NFM | - | OZ01/Clallam County |
+| 877 | CLLLMPBLCWRK | 155.9250 | RX only | NFM | - | OZ01/Clallam County |
+| 878 | CLLLMPBLCWR2 | 158.8350 | RX only | NFM | - | OZ01/Clallam County |
+| 879 | CLALLAMETAC | 453.2750 | RX only | NFM | - | OZ01/Clallam County |
+| 880 | SEQUIMPD | 453.3000 | RX only | FM | - | FL18/Channels |
+| 881 | CLALLAMWDISP | 453.3750 | RX only | NFM | - | OZ01/Clallam County |
+| 882 | MKHTRBCNCL | 453.7000 | RX only | NFM | - | OZ01/Tribal Neah Bay and La Push |
+| 883 | FORKSCITY | 453.9750 | RX only | NFM | - | OZ01/Clallam County |
+| 884 | PRTANGLSPD | 460.1000 | RX only | FM | - | FL18/Channels |
+| 885 | QUILEUTEFIRE | 460.2125 | RX only | NFM | - | OZ01/Tribal Neah Bay and La Push |
+| 886 | FLGHTFLLWNGB | 34.6000 | RX only | FM | - | FL59/Channels |
+| 887 | RNGOPSSCNDRY | 40.2000 | RX only | FM | - | FL59/Channels |
+| 888 | RANGEOPSPRI | 41.1000 | RX only | FM | - | FL59/Channels |
+| 889 | FIRE | 140.0000 | RX only | FM | - | FL59/Channels |
+| 890 | CLMBRLGRPSHR | 160.5600 | RX only | NFM | - | FL57/Channels |
+| 891 | SWTCHNGAR36 | 160.6500 | RX only | NFM | - | FL56/Channels |
+| 892 | CLMBRLGRP2 | 160.8600 | RX only | NFM | - | FL57/Channels |
+| 893 | AAR54 | 160.9200 | RX only | NFM | - | FL57/Channels |
+| 894 | STCYYRDAR60 | 161.0100 | RX only | NFM | - | FL56/Channels |
+| 895 | AAR66 | 161.1000 | RX only | NFM | - | FL56/Channels |
+| 896 | AAR70 | 161.1600 | RX only | NFM | - | FL56/Channels |
+| 897 | AAR76 | 161.2500 | RX only | NFM | - | FL57/Channels |
+| 898 | BLMRYRDAAR80 | 161.3100 | RX only | NFM | - | FL56/Channels |
+| 899 | AAR87 | 161.4150 | RX only | NFM | - | FL56/Channels |
+| 900 | ITNRNTVHF1 | 151.5050 | RX only | FM | - | FL68/Channels |
+| 901 | ITNRNTVHF2 | 151.5150 | RX only | FM | - | FL68/Channels |
+| 902 | REDDOT | 151.6250 | RX only | FM | - | FL68/Channels |
+| 903 | ITNRNTVHF3 | 151.7000 | RX only | FM | - | FL68/Channels |
+| 904 | ITNRNTVHF4 | 151.7600 | RX only | FM | - | FL68/Channels |
+| 905 | UHF43250 | 464.3250 | RX only | FM | - | FTX01/Business and Itinerant UHF |
+| 906 | BROWNDOT | 464.5000 | RX only | FM | - | FL68/Channels |
+| 907 | YELLOWDOT | 464.5500 | RX only | FM | - | FL68/Channels |
+| 908 | UHF48250 | 464.8250 | RX only | FM | - | FTX01/Business and Itinerant UHF |
+| 909 | ITNRNTUHF1 | 467.7625 | RX only | FM | - | FL68/Channels |
+| 910 | ITNRNTUHF2 | 467.8125 | RX only | FM | - | FL68/Channels |
+| 911 | ITNRNTUHF3 | 467.8500 | RX only | FM | - | FL68/Channels |
+| 912 | ITNRNTUHF4 | 467.8750 | RX only | FM | - | FL68/Channels |
+| 913 | ITNRNTUHF5 | 467.9000 | RX only | FM | - | FL68/Channels |
+| 914 | SILVERSTAR | 467.9250 | RX only | FM | - | FL68/Channels |
+| 915 | WA7UOJSPKNSP | 53.2900 | RX only | FM | - | FL73/Channels |
+| 916 | ARARINFRML | 123.0250 | RX only | AM | - | FL74a/Channels |
+| 917 | ARARINFRML2 | 123.0500 | RX only | AM | - | FL74a/Channels |
+| 918 | ARARINFRML3 | 123.0750 | RX only | AM | - | FL74a/Channels |
+| 919 | AIRBOSS | 123.1500 | RX only | AM | - | FL73/Channels |
+| 920 | WA7UOJSPKNS2 | 145.1100 | RX only | FM | - | FL73/Channels |
+| 921 | K7MMASPKNSPK | 145.2900 | RX only | FM | - | FL73/Channels |
+| 922 | K7TJSPKNSPKN | 145.3700 | RX only | FM | - | FL73/Channels |
+| 923 | W7UPSKNNWCKB | 145.3900 | RX only | FM | - | FL73/Channels |
+| 924 | KI7TRRRSPKNS | 146.4750 | RX only | FM | - | FL73/Channels |
+| 925 | HAMCALL4 | 52.5250 | RX only | AM | - | UL00/Channels |
+| 926 | SARAIR | 123.1000 | RX only | AM | - | UL00/Channels |
+| 927 | AIRLIFTNW | 129.8250 | RX only | AM | - | UL00/Channels |
+| 928 | BRINNONFIRE | 154.0925 | RX only | FM | - | UL00/Channels |
+| 929 | MASONFIRE5 | 154.1900 | RX only | FM | - | UL00/Channels |
+| 930 | WSPD8 | 154.7700 | RX only | FM | - | UL00/Channels |
+| 931 | ONFEAST | 164.8000 | RX only | FM | - | UL00/Channels |
+| 932 | ONFWEST | 164.8250 | RX only | FM | - | UL00/Channels |
+| 933 | ONPMAINT | 168.3500 | RX only | FM | - | UL00/Channels |
+| 934 | ONPMAIN | 168.5250 | RX only | FM | - | UL00/Channels |
+| 935 | JEFFERSONSO | 453.5750 | RX only | FM | - | UL00/Channels |
+| 936 | MASONSHERIFF | 460.2250 | RX only | FM | - | UL00/Channels |
+| 937 | AC7DCPLLMNWH | 53.7500 | RX only | FM | - | FL27/Channels |
+| 938 | K7LLPLLMNWHT | 146.4125 | RX only | FM | - | FL27/Channels |
+| 939 | AC7DCPLLMNW2 | 146.7400 | RX only | FM | - | FL27/Channels |
+| 940 | W7OHIDVNPRTL | 147.0400 | RX only | FM | - | FL29/Channels |
+| 941 | K7SELPLLMNWH | 147.1000 | RX only | FM | - | FL27/Channels |
+| 942 | WA7DMREPHRTG | 147.4125 | RX only | FM | - | FL29/Channels |
+| 943 | WAHKIAKUMSO | 150.8525 | RX only | FM | - | FL19/Channels |
+| 944 | REPUBLICFIRE | 153.8450 | RX only | FM | - | FL26/Channels |
+| 945 | CCFD3 | 153.8750 | RX only | FM | - | FL27/Channels |
+| 946 | BLLNGHMPDTC | 154.0250 | RX only | AM | - | FL17/Channels |
+| 947 | FIRETAC1 | 154.0700 | RX only | FM | - | FL28/Channels |
+| 948 | SAR | 154.1075 | RX only | FM | - | FL28/Channels |
+| 949 | CNTYWDFRDSP | 154.1300 | RX only | FM | - | FL28/Channels |
+| 950 | SHERIFF | 154.1375 | RX only | FM | - | FL22/Channels |
+| 951 | PULLMANFIRE | 154.1450 | RX only | FM | - | FL27/Channels |
+| 952 | KITTITASFIRE | 154.2050 | RX only | FM | - | FL22/Channels |
+| 953 | FIRE2 | 154.2350 | RX only | FM | - | FL19/Channels |
+| 954 | YAKIMAFIRE | 154.2575 | RX only | FM | - | FL22/Channels |
+| 955 | FIRE22 | 154.2650 | RX only | FM | - | FL16/Channels |
+| 956 | FIRETAC2 | 154.3550 | RX only | FM | - | FL28/Channels |
+| 957 | FIRENS | 154.4000 | RX only | FM | - | FL26/Channels |
+| 958 | FIRENS2 | 154.4150 | RX only | FM | - | FL26/Channels |
+| 959 | GRYSHRBRSO | 154.7250 | RX only | FM | - | FL19/Channels |
+| 960 | WHITMANWCSO | 154.7850 | RX only | FM | - | FL27/Channels |
+| 961 | COWLITZSO | 154.8150 | RX only | FM | - | FL19/Channels |
+| 962 | YAKIMAFIRE2 | 155.0325 | RX only | FM | - | FL22/Channels |
+| 963 | COLUMBIACCSO | 155.1450 | RX only | FM | - | FL27/Channels |
+| 964 | ASOTINACSO | 155.1900 | RX only | FM | - | FL27/Channels |
+| 965 | AMRALS | 155.2200 | RX only | AM | - | FL22/Channels |
+| 966 | FERRYSOB2 | 155.2500 | RX only | FM | - | FL26/Channels |
+| 967 | PNDORLLSO | 155.3100 | RX only | FM | - | FL26/Channels |
+| 968 | AMRALS2 | 155.4000 | RX only | AM | - | FL22/Channels |
+| 969 | DGLSLWDSP | 155.4150 | RX only | FM | - | FL23/Channels |
+| 970 | SHERIFF2 | 155.5575 | RX only | FM | - | FL22/Channels |
+| 971 | GRYSHRBRSO2 | 155.5650 | RX only | FM | - | FL19/Channels |
+| 972 | OTHELLOPD | 155.5950 | RX only | FM | - | FL29/Channels |
+| 973 | SHERIFFRURAL | 155.6100 | RX only | FM | - | FL17/Channels |
+| 974 | CHLNLWDSP | 155.6250 | RX only | FM | - | FL23/Channels |
+| 975 | TONASKET | 155.6400 | RX only | FM | - | FL24/Channels |
+| 976 | FIRE2DISP | 155.6850 | RX only | FM | - | FL23/Channels |
+| 977 | SHERIFF22 | 155.7300 | RX only | FM | - | FL22/Channels |
+| 978 | LINCOLNSO | 156.0300 | RX only | FM | - | FL29/Channels |
+| 979 | FERRYSOB | 156.0900 | RX only | FM | - | FL26/Channels |
 
 ## Warnings
 
@@ -1055,30 +1055,19 @@
 - Winlink (2): no published repeater input, programmed receive-only
 - SSTV: no published repeater input, programmed receive-only
 - APRS downlink: no published repeater input, programmed receive-only
-- WW7PSR (Seattle): no published repeater input, programmed receive-only
-- W7AW (Seattle): no published repeater input, programmed receive-only
-- W7PSE (Olympia): no published repeater input, programmed receive-only
-- KK7DFL (Olympia): no published repeater input, programmed receive-only
-- K7CPR (Olympia): no published repeater input, programmed receive-only
-- Seattle (2): no published repeater input, programmed receive-only
-- Olympia ARES (2): no published repeater input, programmed receive-only
-- Seattle: no published repeater input, programmed receive-only
-- WW7MST (Seattle): no published repeater input, programmed receive-only
-- Olympia ARES: no published repeater input, programmed receive-only
-- WW7PSR (Seattle): no published repeater input, programmed receive-only
-- Chelan,Evergreen Intertie: no published repeater input, programmed receive-only
 - Evergreen Intertie via: no published repeater input, programmed receive-only
-- NT7H (Olympia): no published repeater input, programmed receive-only
-- Chelan,Evergreen Intertie (2): no published repeater input, programmed receive-only
-- K7CPR (Olympia): no published repeater input, programmed receive-only
-- K7CPR (Olympia): no published repeater input, programmed receive-only
+- KA6WIN (Sequim): no published repeater input, programmed receive-only
+- WIN primary: no published repeater input, programmed receive-only
+- Chinook Pass node: no published repeater input, programmed receive-only
+- NM7R (Chinook): no published repeater input, programmed receive-only
+- WIN primary (2): no published repeater input, programmed receive-only
 - plan filled every available slot; nothing was left for field additions
 
 ## Excluded channels
 
 Every catalog channel this plan matched but could not program, and why.
 
-### block-limit (2498) - the plan capped this block
+### block-limit (2481) - the plan capped this block
 
 - MURS 4 [154.5700]
 - MURS 5 [154.6000]
@@ -1088,21 +1077,21 @@ Every catalog channel this plan matched but could not program, and why.
 - NM7R [444.4000]
 - W7UPS [444.4000]
 - N7FM [444.4250]
-- ... and 2490 more
+- ... and 2473 more
 
-### capacity (62) - the radio ran out of memory slots
+### capacity (52) - the radio ran out of memory slots
 
-- Sheriff rural [155.6100]
-- Chelan law disp [155.6250]
-- Lewis Sheriff [155.6250]
-- Tonasket [155.6400]
-- Fire2 dispatch [155.6850]
-- Sheriff (2) [155.7300]
-- mid-valley [155.7300]
-- Lincoln Sheriff [156.0300]
-- ... and 54 more
+- Pateros [156.2400]
+- Odessa PD [158.7300]
+- ACSO Law1(Ritzville) [158.7600]
+- ACSO Law2(Othello) [158.8050]
+- Odessa PD (2) [158.9400]
+- Adams Fire [158.9700]
+- NO7RF (Lost River, Okanogan Co.) [438.3800]
+- NG7I (Ritzville, Adams Co.) [440.2000]
+- ... and 44 more
 
-### duplicate (979) - the frequency (or talkgroup on it) is already programmed
+### duplicate (953) - the frequency (or talkgroup on it) is already programmed
 
 - NOAA Weather Radio Astoria [162.4000]
 - NOAA Weather Radio Cle Elum [162.4000]
@@ -1112,19 +1101,19 @@ Every catalog channel this plan matched but could not program, and why.
 - NOAA Forks KXI27 [162.4250]
 - NOAA Weather Radio Forks [162.4250]
 - NOAA Weather Radio Plymouth [162.4250]
-- ... and 971 more
+- ... and 945 more
 
-### no-rx-coverage (18) - outside the radio's receive coverage
+### no-rx-coverage (16) - outside the radio's receive coverage
 
 - 1.25m Calling [223.5000]
 - Port Angeles 220 W6MPD [224.0600]
 - K7LED Mike & Key 1.25m [224.1200]
-- NT7H (Olympia) [224.4600]
-- WW7MST (Seattle) [224.6800]
 - USCG Air1 [326.1500]
 - USCG Air2 [379.0500]
 - USCG Air3 [345.0000]
-- ... and 10 more
+- USCG Air4 [237.9000]
+- Ham Call (3) [223.5000]
+- ... and 8 more
 
 ### not-conventional (84) - trunked talkgroup with no tunable frequency
 

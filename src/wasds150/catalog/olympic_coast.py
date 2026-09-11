@@ -74,7 +74,8 @@ _NAVCEN_VTS = "https://www.navcen.uscg.gov/vessel-traffic-services-radio-procedu
 _NWS_STATIONS = "https://www.weather.gov/nwr/stations?State=WA"
 _WAFOG = "https://mil.wa.gov/asset/6a1eeab054e7c/Washington-Field-Operations-Guide_FOG_1.10.pdf"
 _ULS = "https://data.fcc.gov/download/pub/uls/complete/l_LMpriv.zip"
-_REPEATERBOOK_CLALLAM = "https://www.repeaterbook.com/repeaters/location_search.php?type=county&loc=Clallam&state_id=53"
+#: WWARA coordination extract, 2026-08-27 edition; record ids are cited per channel.
+_WWARA = "https://www.wwara.org/DataBaseExtract.zip"
 
 NPS_USFS: Sequence[ChannelRow] = (
     ("Olympic NP Primary", 168.525, "", "NFM", _ST_OTHER, None, "", f"NPS Olympic National Park primary repeater, carrier squelch; {_RR_FED}"),
@@ -190,20 +191,20 @@ TRANSPORT: Sequence[ChannelRow] = (
 )
 
 #: Amateur repeaters and simplex channels on the west peninsula.  Inputs and
-#: tones are as published by RepeaterBook and the Washington Field Operations
-#: Guide; nothing here is derived from a standard band-plan offset.
+#: tones come from the WWARA coordination extract and the Washington Field
+#: Operations Guide; nothing here is derived from a standard band-plan offset.
+#: WWARA rows follow :mod:`wasds150.catalog.puget_ham`: ``tone`` is the
+#: published output tone (``CTCSS_OUT``) and ``tx_tone`` the access tone
+#: (``CTCSS_IN``).  Repeaters neither source confirms are left out rather
+#: than carried from a directory this project may not redistribute.
 AMATEUR: Sequence[ChannelRow] = (
     ("Ellis Mtn W7FEL", 147.060, "TONE=C100", "FM", _ST_HAM, 147.660, "TONE=C100", f"Clallam Bay, Ellis Mountain, W7FEL; nearest 2 m machine to Ozette; {_WAFOG}"),
     ("Gunderson Mtn W7FEL", 145.210, "TONE=C100", "FM", _ST_HAM, 144.610, "TONE=C100", f"Forks, Gunderson Mountain, W7FEL; {_WAFOG}"),
-    ("Mt Octopus K7PP", 147.280, "TONE=C123", "FM", _ST_HAM, 147.880, "TONE=C123", f"Forks, Mount Octopus, K7PP, high west peninsula site; {_REPEATERBOOK_CLALLAM}"),
+    ("Mt Octopus K7PP", 147.280, "TONE=C151.4", "FM", _ST_HAM, 147.880, "TONE=C123", f"Mt Octopus, Clallam County, K7PP; WWARA record 3015; {_WWARA}"),
     ("Striped Peak W7FEL", 146.760, "TONE=C100", "FM", _ST_HAM, 146.160, "TONE=C100", f"Port Angeles, Striped Peak, W7FEL, EchoLink; {_WAFOG}"),
-    ("Port Angeles WF7W", 145.130, "TONE=C100", "FM", _ST_HAM, 144.530, "TONE=C100", f"Port Angeles, WF7W; {_REPEATERBOOK_CLALLAM}"),
     ("Carlsborg W7FEL", 146.760, "TONE=C77", "FM", _ST_HAM, 146.160, "TONE=C77", f"Carlsborg repeater sharing the Striped Peak pair on a different tone; {_WAFOG}"),
-    ("Port Angeles 220 W6MPD", 224.060, "TONE=C107.2", "FM", _ST_HAM, 222.460, "TONE=C107.2", f"Port Angeles, W6MPD, 1.25 m; {_REPEATERBOOK_CLALLAM}"),
-    ("Sequim Dungeness W7FEL", 441.125, "TONE=C100", "FM", _ST_HAM, 446.125, "TONE=C100", f"Sequim, Dungeness Heights, W7FEL; {_REPEATERBOOK_CLALLAM}"),
-    ("Sequim Bell Hill KO6I", 442.050, "TONE=C103.5", "FM", _ST_HAM, 447.050, "TONE=C103.5", f"Sequim, Bell Hill, KO6I, EchoLink; {_REPEATERBOOK_CLALLAM}"),
-    ("Sequim Blyn Mtn N7NFY", 442.800, "TONE=C123", "FM", _ST_HAM, 447.800, "TONE=C123", f"Sequim, Blyn Mountain, N7NFY; {_REPEATERBOOK_CLALLAM}"),
-    ("Quilcene Buck Mtn W2ZT", 442.500, "TONE=C123", "FM", _ST_HAM, 447.500, "TONE=C123", f"Quilcene, Buck Mountain, W2ZT; {_REPEATERBOOK_CLALLAM}"),
+    ("Port Angeles 220 W6MPD", 224.060, "TONE=C107.2", "FM", _ST_HAM, 222.460, "TONE=C107.2", f"Port Angeles, W6MPD, 1.25 m; WWARA record 4100, coordination expired 2026-01-21; {_WWARA}"),
+    ("Sequim KO6I", 442.050, "TONE=C103.5", "NFM", _ST_HAM, 447.050, "TONE=C103.5", f"Sequim, KO6I, narrow FM; WWARA record 5342; {_WWARA}"),
     ("Forks Simplex", 147.500, "", "FM", _ST_HAM, None, "", f"Clallam County AUXCOMM 2 m simplex, Forks; {_WAFOG}"),
     ("North Coast Simplex", 147.420, "", "FM", _ST_HAM, None, "", f"Clallam County AUXCOMM 2 m simplex, north coast; {_WAFOG}"),
     ("Joyce Simplex", 147.540, "", "FM", _ST_HAM, None, "", f"Clallam County AUXCOMM 2 m simplex, Joyce; {_WAFOG}"),

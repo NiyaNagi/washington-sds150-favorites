@@ -1,6 +1,8 @@
 """Local, never-committed source configuration: offline mode + local-file
 paths for the ``local``-kind adapters (:mod:`wasds150.sources.sentinel_local`,
-:mod:`wasds150.sources.radioreference_premium`).
+:mod:`wasds150.sources.radioreference_premium`), and the RepeaterBook enable
+flag plus *where* its token is found (an environment-variable name or an
+external file path -- never the token itself).
 
 **Secrets discipline**: only *non-secret* RadioReference identifiers
 (username, app key) are ever persisted here — never a password. A future,
@@ -47,6 +49,15 @@ class SourcesConfig:
     fcc_uls_within_miles: Optional[float] = None
     #: Drop licences that are not active or have expired.
     fcc_uls_active_only: bool = True
+    #: Local enable flag for live RepeaterBook requests. Off by default and
+    #: pending RepeaterBook approval; a token alone is not enough.
+    repeaterbook_enabled: bool = False
+    #: The *name* of the environment variable holding the user's rbuapp_
+    #: token (default ``REPEATERBOOK_API_TOKEN``), never the token.
+    repeaterbook_token_env: Optional[str] = None
+    #: Absolute path to a file outside the repository holding the token.
+    #: Only the path is stored here, never the token.
+    repeaterbook_token_file: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)

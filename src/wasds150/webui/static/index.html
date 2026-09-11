@@ -514,6 +514,44 @@
         </div>
         <pre id="sources-result" class="result-box"></pre>
       </div>
+      <div class="panel" id="rb-panel">
+        <h3>RepeaterBook (disabled until approved)</h3>
+        <p class="hint">Amateur repeaters around one centre from the RepeaterBook Export API, for programming your own radios. Off by default and pending RepeaterBook approval. It never runs from Fetch or Update above, and no radio export contacts it. The token is never entered here: give the name of the environment variable holding your own <code>rbuapp_</code> token, or the path of a file outside this repository.</p>
+        <p class="hint"><a href="https://www.repeaterbook.com/" target="_blank" rel="noopener">Data courtesy of RepeaterBook.com</a></p>
+        <pre id="rb-status" class="result-box"></pre>
+        <div class="toolbar">
+          <label class="hint"><input type="checkbox" id="rb-enabled" /> Enable live requests (only once RepeaterBook has approved)</label>
+        </div>
+        <div class="toolbar">
+          <input type="text" id="rb-token-env" placeholder="Token environment variable name (default REPEATERBOOK_API_TOKEN)" />
+          <input type="text" id="rb-token-file" placeholder="...or an absolute token-file path outside the repository" />
+          <button id="rb-configure-btn">Save</button>
+          <button id="rb-forget-btn">Forget token location</button>
+        </div>
+        <h4>Refresh</h4>
+        <div class="toolbar">
+          <input type="text" id="rb-regions" placeholder="Up to 3 regions, e.g. WA,OR" value="WA" />
+          <input type="text" id="rb-center" placeholder="Centre latitude,longitude" />
+          <input type="number" id="rb-radius" min="1" max="60" step="1" value="60" title="Radius in whole miles, 1-60" />
+          <input type="text" id="rb-bands" placeholder="Bands, e.g. 2m,70cm" value="2m,70cm" />
+          <input type="text" id="rb-radio" placeholder="Radio id, e.g. th-d75" value="th-d75" />
+          <button id="rb-refresh-btn" disabled>Refresh RepeaterBook</button>
+          <button id="rb-offline-btn">Re-filter cached (no request)</button>
+        </div>
+        <h4>Review</h4>
+        <p class="hint"><a href="https://www.repeaterbook.com/" target="_blank" rel="noopener">Data courtesy of RepeaterBook.com</a></p>
+        <table class="data-table" id="rb-table">
+          <thead><tr><th>RepeaterBook id</th><th>Call</th><th>Output</th><th>Input</th><th>Tone</th><th>City</th><th>Miles</th><th>Flags</th><th>Page</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <div class="toolbar">
+          <label class="hint"><input type="checkbox" id="rb-include-flagged" /> Also apply flagged (off-air, closed, no input)</label>
+          <button id="rb-apply-btn">Apply reviewed</button>
+          <button id="rb-records-btn">Show applied records</button>
+          <button id="rb-delete-btn" class="danger">Delete All RepeaterBook Data</button>
+        </div>
+        <pre id="rb-result" class="result-box"></pre>
+      </div>
     </section>
   </main>
 

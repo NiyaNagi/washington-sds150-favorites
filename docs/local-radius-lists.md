@@ -5,17 +5,23 @@ asks *what exists in Washington*; this one asks *what can I actually work from
 home*. That turns out to be a much smaller list, and building it surfaced a few
 things worth writing down.
 
-## Why not RepeaterBook
+## Why WWARA, not RepeaterBook, for these lists
 
 The original request named RepeaterBook, and its "active" flag is exactly the
-signal wanted. It is not used here.
+signal wanted. It is not used for these lists.
 
-RepeaterBook's API moved to approval-gated access, and its terms prohibit
-bundling or redistributing the data offline. This repository commits its
-generated programming files so they can be loaded without running anything,
-which is precisely the redistribution that is not permitted. A stub adapter
-remains in the tree reporting `available=False`, so the gap is visible rather
-than silently filled.
+RepeaterBook's API is approval-gated, and its terms prohibit bundling or
+redistributing the data offline. This repository commits its generated
+programming files so they can be loaded without running anything, which is
+precisely the redistribution that is not permitted.
+
+A RepeaterBook adapter now exists for a different job: pulling repeaters
+around one chosen point, for the operator's own radios, when travelling or
+near a state or provincial border. It is approval-gated and explicit-only (off
+by default, never run by `sources update`), keeps its data in a separate local
+store with retention rules, and adds reviewed records to an export only on
+request (`plan export --with-repeaterbook`), never to a committed file. See
+[the RepeaterBook design](repeaterbook-api-compliance-design.md).
 
 The substitute is **WWARA**, the Western Washington Amateur Relay Association —
 the body that actually coordinates these pairs, so it is upstream of what

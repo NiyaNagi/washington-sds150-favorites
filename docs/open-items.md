@@ -23,7 +23,7 @@ of the legacy radio exports. Everything not listed here is done and tested.
 | AT-D890UV Optional Settings template | Capture two CPS **Export All** folders (a fresh codeplug and your configured one) and run `scripts/radios/build_atd890_settings_template.py`, so the export can carry your hotkeys and settings. Then set `at-d890uv.rdt_base` to the saved `.rdt`. |
 | FTX-1 profile | Built from documentation and never written to a radio. After the first load, check a few memories against the export report. |
 | TH-D75 tracked image | `radio-configs/thd75-current.d75` and its power-on bitmap still carry the earlier callsign KM7HKM. Replace them after the next write and read-back. |
-| GMRS repeater tones | The 17 repeaters in `GMRS01` (`src/wasds150/catalog/gmrs_repeaters.py`) carry directory-listed access tones that no owner confirms. Key each one up and fix any that do not open. Auburn (WRBQ486, 254.1) and Gig Harbor (WRPR468, 173.8 vs 141.3) are the doubtful ones. |
+| GMRS repeater tones | The 17 repeaters in `GMRS01` (`src/wasds150/catalog/gmrs_repeaters.py`) were added by hand, and their access tones are not yet confirmed on the air. Key each one up and fix any that do not open. Auburn (WRBQ486, 254.1) and Gig Harbor (WRPR468, 173.8, possibly 141.3) are the doubtful ones. |
 
 ## Needs an API key or an outside approval
 

@@ -58,7 +58,7 @@ Every channel in `OZ01` carries its own source URL in the channel note.
 | Marine channels and vessel traffic sectors | USCG NAVCEN and 33 CFR 161.12 |
 | NOAA Weather Radio | National Weather Service station dataset |
 | Aviation | FAA airport records via AirNav; Seattle ARTCC sectors from RadioReference aid/2235 |
-| Amateur repeaters | RepeaterBook and the WAFOG Clallam County AUXCOMM tables |
+| Amateur repeaters | WWARA coordination extract and the WAFOG Clallam County AUXCOMM tables |
 | FRS, GMRS, MURS | 47 CFR Part 95 |
 
 Repeater inputs come from a licence record or published coordination data.

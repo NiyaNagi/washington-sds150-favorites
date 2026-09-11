@@ -9,6 +9,40 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Added
 
+- Implemented the RepeaterBook Export API adapter
+  (`wasds150.sources.repeaterbook`, `wasds150 repeaterbook ...`, and a
+  RepeaterBook panel in the UI's Advanced tab), **off by default and pending
+  RepeaterBook's approval**. It is explicit-only: `sources update` skips it and
+  `sources fetch` refuses it. A live request needs the local enable flag, the
+  user's own `rbuapp_` token (from an environment variable or a file outside
+  the repository; only its location is stored), and a manual refresh that
+  passes every bound: up to three allowlisted regions (WA, OR, ID; BC listed
+  but disabled until its parameter is confirmed), one centre, a 1-60 mile
+  radius, a band the radio supports, four HTTP requests per rolling 24 hours
+  per token, 60 minutes before the same region again, at most 250 combined
+  candidates, no pagination, no retry, a 429 lockout and an authentication
+  block. Records are staged, reviewed and applied into a separate store with
+  7/30/90-day retention and Delete All, reach a radio only through
+  `plan export --with-repeaterbook`, and carry "Data courtesy of
+  RepeaterBook.com" wherever they appear. The exact User-Agent carries the
+  public project URL and a contact. `docs/repeaterbook-api-compliance-design.md`
+  is rewritten for the implementation, maps each acceptance criterion to its
+  tests, and lists the questions for RepeaterBook.
+- Log redaction now masks RepeaterBook tokens and registered secrets on every
+  log handler, so records from child loggers (`wasds150.webui`) are covered
+  too.
+
+### Removed
+
+- Removed RepeaterBook-derived values from the committed catalog: seven
+  Clallam County repeaters in `OZ01` and the `FL60` statewide sample cited
+  RepeaterBook listing pages. Three were re-sourced from the WWARA
+  coordination extract, four that neither WWARA nor the WAFOG confirms were
+  removed, and FL60 now samples four current WWARA records.
+  `tests/test_no_repeaterbook_data.py` guards against a recurrence. A
+  persisted catalog now picks up corrections to `OZ01` and to Tier C text
+  channels instead of keeping its old copy.
+
 - Added `docs/radio-transcriber/`: the complete research record and functional
   specification for an offline radio transcriber Android app. Three research
   documents (SBC hardware feasibility, phone platform feasibility, and ASR
@@ -354,9 +388,10 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   `docs/fleet-updates.md`; unfinished work is listed in `docs/open-items.md`.
 - Added the 1.25 m, 33 cm and 23 cm amateur bands to the band plan, `PSHAM02`
   (current WWARA voice repeaters on 6 m, 1.25 m, 33 cm and 23 cm within 60
-  miles) and `GMRS01` (open GMRS repeaters from public directories). GMRS and
+  miles) and `GMRS01` (open GMRS repeaters, added by hand). GMRS and
   FRS transmit at full power on radios whose hardware covers them, by the
   operator's explicit choice.
+
 
 ### Changed
 
@@ -366,6 +401,14 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Corrected the August 18 final GOWENIC EFHW feed-line description from 12 ft
   coax to 75 ft LS400 outdoors; earlier tuning-history runs that actually used
   12 ft remain unchanged.
+
+### Removed
+
+- Moved the 3D models to [NiyaNagi/alturas-labs-models](https://github.com/NiyaNagi/alturas-labs-models)
+  with their full history: the SDS150 visor mounts, the Peak Design bracket and radio standoff,
+  the ProClip plates, the EFHW enclosure and the hex insulator, together with `scripts/cad/`,
+  the modelling method and the radio hardware measurement registry. `docs/3d-models.md`
+  points there.
 
 ### Fixed
 
