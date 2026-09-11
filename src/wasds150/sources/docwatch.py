@@ -32,11 +32,13 @@ from wasds150.sources.htmlutil import extract_links
 def discover_document_links(html_text: str, *, base_url: str, pattern: str) -> List[str]:
     """Every absolute/relative link on the page matching ``pattern``
     (a plain substring, not a regex — kept simple/predictable), resolved
-    against ``base_url`` if relative."""
-    from urllib.parse import urljoin
+    against ``base_url`` if relative, and percent-encoded: pages link
+    documents such as ``/asset/<id>/SIEC Members.pdf`` with a literal space,
+    which ``urllib`` refuses to request."""
+    from urllib.parse import quote, urljoin
 
     hrefs = extract_links(html_text, href_contains=pattern)
-    return [urljoin(base_url, h) for h in hrefs]
+    return [quote(urljoin(base_url, h), safe=":/?#[]@!$&'()*+,;=%~") for h in hrefs]
 
 
 def check_document_links(
@@ -45,15 +47,26 @@ def check_document_links(
     *,
     source_id: str,
     ttl_seconds: int,
-    max_bytes: int = 2 * 1024 * 1024,
+    max_bytes: int = 32 * 1024 * 1024,
 ) -> List[ChangeAlert]:
     """Fetch each URL (through the shared cache) and classify it as
-    new/changed/unchanged based on the cache's own fetch status."""
+    new/changed/unchanged based on the cache's own fetch status.
+
+    A document that cannot be fetched (gone, or larger than ``max_bytes``)
+    becomes an ``unreachable`` alert instead of failing the whole source:
+    one broken link on a landing page should not hide the others."""
     alerts: List[ChangeAlert] = []
     now = datetime.datetime.now(datetime.timezone.utc).isoformat()
     for url in urls:
         had_prior_entry = http_client.store.get(url) is not None
-        result = http_client.fetch(url, ttl_seconds=ttl_seconds, source_id=source_id, max_bytes=max_bytes)
+        try:
+            result = http_client.fetch(url, ttl_seconds=ttl_seconds, source_id=source_id, max_bytes=max_bytes)
+        except Exception as exc:  # noqa: BLE001 - reported, never fatal
+            alerts.append(
+                ChangeAlert(source_id=source_id, doc_id=url, url=url, kind="unreachable",
+                            message=f"could not check: {exc}", detected_at=now)
+            )
+            continue
         if not had_prior_entry:
             kind = "new"
             message = "newly discovered document"

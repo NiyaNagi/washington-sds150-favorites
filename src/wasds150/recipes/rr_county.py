@@ -78,7 +78,9 @@ def _channel_from_fact(fact: NormalizedFact, county: str) -> Optional[Channel]:
     tx_tone = raw.get("tx_tone") or ""
     if tx_tone and not tone_is_valid(tx_tone):
         tx_tone = ""
-    label = fact.name.strip() or raw.get("rr_alpha") or f"{freq:.4f}"
+    # RadioReference descriptions can hold tabs and line breaks, which the
+    # scanner's list format cannot carry; collapse every run to one space.
+    label = " ".join((fact.name or "").split()) or " ".join(str(raw.get("rr_alpha") or "").split()) or f"{freq:.4f}"
     notes = "; ".join(
         part
         for part in (
@@ -155,7 +157,7 @@ def build_rr_favorites(
                 skipped += 1
                 continue
             raw = fact.raw if isinstance(fact.raw, dict) else {}
-            category = (raw.get("rr_category") or "Uncategorized").strip() or "Uncategorized"
+            category = " ".join(str(raw.get("rr_category") or "").split()) or "Uncategorized"
             departments.setdefault(category, []).append(channel)
         if not departments:
             continue

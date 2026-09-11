@@ -326,7 +326,15 @@ def post_sentinel_workspace_install(ctx: AppContext, req: RequestContext) -> Res
     missing = [slug for slug in normalized if slug not in by_slug]
     if missing:
         return _error(404, f"unknown or disabled Favorites Lists: {missing}")
-    favorites = [by_slug[slug] for slug in normalized]
+    # Project onto the scanner as the .hpe export does, so reference-only
+    # lists lose their HF/CW rows instead of failing the install.
+    from wasds150.radios.projection import project_favorites
+    from wasds150.radios.registry import SDS150
+
+    projected = project_favorites([by_slug[slug] for slug in normalized], SDS150).favorites
+    favorites = [favorite for favorite in projected if favorite.systems]
+    if not favorites:
+        return _error(400, "none of the selected Favorites Lists has anything the SDS150 can tune")
     try:
         result = install_selected_favorites(
             Path(workspace),

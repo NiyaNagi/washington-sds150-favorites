@@ -713,7 +713,7 @@ def cmd_ui(args: argparse.Namespace) -> int:
 
     ctx = _build_ctx(args)
     ctx.config.ensure_dirs()
-    return run_server(ctx, port=args.port, open_browser=not args.no_browser)
+    return run_server(ctx, port=args.port, open_browser=not args.no_browser, tab=args.tab)
 
 
 # ------------------------------------------------------------------- hpe ----
@@ -1913,6 +1913,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_ui = subparsers.add_parser("ui", help="Launch the local browser UI")
     p_ui.add_argument("--port", type=int, default=0, help="TCP port (0 = pick a free port)")
     p_ui.add_argument("--no-browser", action="store_true", help="Do not auto-open a browser tab")
+    p_ui.add_argument("--tab", default="", help="Open on this tab, e.g. fleet")
     p_ui.set_defaults(func=cmd_ui)
 
     p_radios = subparsers.add_parser("radios", help="Radio capability profiles")

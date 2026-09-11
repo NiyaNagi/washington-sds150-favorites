@@ -52,6 +52,13 @@
       refreshTab(btn.dataset.tab);
     });
   });
+  // A launcher can open one tab directly (`wasds150 ui --tab fleet` opens
+  // /#fleet). Deferred so every loader defined below exists first.
+  setTimeout(() => {
+    const wanted = (location.hash || "").slice(1);
+    const button = [...tabButtons].find((b) => b.dataset.tab === wanted);
+    if (button) button.click();
+  }, 0);
 
   function refreshTab(name) {
     if (name === "dashboard") loadDashboard();

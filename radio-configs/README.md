@@ -7,13 +7,13 @@ can be picked up and loaded without running the toolchain first.
 |---|---|---|
 | `h9-ozette.csv` | TIDRADIO TD-H9 | 185 memories, CHIRP Generic CSV |
 | `h9-ozette-report.md` | | Human-readable memory map |
-| `ftx1-wa.FTX1` | Yaesu FTX-1 | 960 memories + 47 scan pairs, native format |
+| `ftx1-wa.FTX1` | Yaesu FTX-1 | 979 memories + 47 scan pairs, native format |
 | `ftx1-wa-report.md` | | Human-readable memory map |
-| `ftx1-local.FTX1` | Yaesu FTX-1 | 351 memories, native format |
+| `ftx1-local.FTX1` | Yaesu FTX-1 | 355 memories, native format |
 | `ftx1-local-report.md` | | Human-readable memory map |
-| `ftx1-scan.FTX1` | Yaesu FTX-1 | One frequency-ordered list, everything tunable within 75 mi; data/beacons scan-skipped |
+| `ftx1-scan.FTX1` | Yaesu FTX-1 | One frequency-ordered list of 379 memories, everything tunable within 75 mi; data/beacons scan-skipped |
 | `ftx1-scan-report.md` | | Human-readable memory map |
-| `thd75-ames-lake-report.md` | Kenwood TH-D75A | 545 ordinary memories in 21 groups |
+| `thd75-ames-lake-report.md` | Kenwood TH-D75A | 692 ordinary memories in 21 groups |
 | `thd75-scan-report.md` | Kenwood TH-D75A | One frequency-ordered list, everything tunable within 75 mi; broadcast/data/CB scan-skipped |
 | `thd75-current.d75` | Kenwood TH-D75A | Exact operator-requested 545-memory image with all settings |
 | `thd75-current-settings.json` | | All 400 typed MCP settings decoded for review |
@@ -35,7 +35,8 @@ locked out of scan. `thd75-scan` does the same for the TH-D75A.
 native `.d75`; regenerate it locally with the command below.
 
 Everything here is **generated**. The catalog is the source of truth, so these
-files go stale the moment the catalog changes. Regenerate with:
+files go stale the moment the catalog changes. They were last regenerated on
+2026-09-10, after a full source refresh. Regenerate with:
 
 ```bash
 wasds150 --home .wasds150-home plan export h9-ozette --out radio-configs

@@ -132,17 +132,19 @@ def build_server(ctx: AppContext, port: int = 0, host: str = "127.0.0.1"):
     return server, token
 
 
-def run_server(ctx: AppContext, port: int = 0, open_browser: bool = True) -> int:
+def run_server(ctx: AppContext, port: int = 0, open_browser: bool = True, tab: str = "") -> int:
     server, token = build_server(ctx, port=port)
     host, actual_port = server.server_address[0], server.server_address[1]
     url = f"http://{host}:{actual_port}/"
+    # The page selects the tab named in the fragment, e.g. /#fleet.
+    open_url = f"{url}#{tab}" if tab else url
 
     print(f"wasds150 web UI listening on {url}")
     print(f"(auth token: {token} — already embedded in the served page)")
     print("Press Ctrl+C to stop.")
 
     if open_browser:
-        threading.Timer(0.3, lambda: webbrowser.open(url)).start()
+        threading.Timer(0.3, lambda: webbrowser.open(open_url)).start()
 
     try:
         server.serve_forever()

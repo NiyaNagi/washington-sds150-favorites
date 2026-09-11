@@ -321,7 +321,11 @@ def systems_from_flat_facts(fl: FavoritesList, facts: List[NormalizedFact]) -> L
     :func:`system_from_hpdb_fact` handles instead) becomes one
     :class:`~wasds150.models.catalog.Channel` in a single aggregate
     conventional System for this Favorites List. Returns ``[]`` if none of
-    ``facts`` carry a frequency."""
+    ``facts`` carry a frequency. A tone the scanner cannot parse is dropped
+    rather than copied: one source's free text in the tone field would
+    otherwise fail validation for the whole list."""
+    from wasds150.hpe.validation import tone_is_valid
+
     channels: List[Channel] = []
     for fact in facts:
         if fact.source_id == "sentinel_local" or fact.freq_mhz is None:
@@ -332,7 +336,7 @@ def systems_from_flat_facts(fl: FavoritesList, facts: List[NormalizedFact]) -> L
                 label=fact.name or fact.entity_key,
                 freq_mhz=fact.freq_mhz,
                 mode=fact.mode,
-                tone=fact.tone or "",
+                tone=fact.tone if fact.tone and tone_is_valid(fact.tone) else "",
             )
         )
     channels = dedupe_channels(channels)

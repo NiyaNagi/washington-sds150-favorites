@@ -146,6 +146,22 @@ def test_legacy_statewide_merged_catalog_gets_local_area_extension(wasds_home):
     assert len([favorite for favorite in ctx.catalog.favorites if favorite.favorite_key.startswith("KC")]) == 39
 
 
+def test_persisted_catalog_takes_the_baselines_reference_only_flag(wasds_home):
+    # A catalog saved before HFNET01 became reference-only kept the old flag,
+    # and the SDS150 export then failed on its 14 MHz channels.
+    from wasds150.catalog import baseline, loader
+
+    config = AppConfig.default()
+    config.ensure_dirs()
+    saved = baseline.load_baseline()
+    next(fl for fl in saved.favorites if fl.favorite_key == "HFNET01").reference_only = False
+    loader.save_json(saved, config.catalog_path)
+
+    ctx = build_context(config)
+
+    assert next(fl for fl in ctx.catalog.favorites if fl.favorite_key == "HFNET01").reference_only is True
+
+
 def test_persisted_catalog_refreshes_public_fields_and_preserves_systems(wasds_home):
     from wasds150.catalog import baseline, loader
     from wasds150.models.catalog import Department, System

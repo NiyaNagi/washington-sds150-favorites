@@ -345,6 +345,18 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   mutual aid, WSP/WSDOT, DNR/NIFC, mountain/park/forest profiles, aviation,
   marine/ferries/ports, amateur/ARES/simplex, personal radio, hospitals,
   roadside support, and NOAA Weather.
+- Added one-step updates for all five radios. Double-clicking
+  `Update Radios.cmd` opens the web UI on the Fleet tab (`wasds150 ui --tab
+  fleet`) against the repository's working home; **Update selected**
+  refreshes the stale sources, exports every radio from its `<radio>-fleet`
+  plan, and walks each radio's load checklist. The same runs from
+  `wasds150 fleet update` and resumes from `wasds150 jobs`. See
+  `docs/fleet-updates.md`; unfinished work is listed in `docs/open-items.md`.
+- Added the 1.25 m, 33 cm and 23 cm amateur bands to the band plan, `PSHAM02`
+  (current WWARA voice repeaters on 6 m, 1.25 m, 33 cm and 23 cm within 60
+  miles) and `GMRS01` (open GMRS repeaters from public directories). GMRS and
+  FRS transmit at full power on radios whose hardware covers them, by the
+  operator's explicit choice.
 
 ### Changed
 
@@ -356,6 +368,14 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   12 ft remain unchanged.
 
 ### Fixed
+
+- Fixed an IACC refresh failing the SDS150 export for 22 lists. IACC writes
+  tones as text (`136.5 In 136.5 Out`, `100.0 In`, `Closed System`) and the
+  adapter copied that text into the tone field. It is now decoded into output
+  and access tones, and any tone the scanner cannot parse is dropped when
+  public facts become channels.
+- Fixed the WA EMD change detector failing on document links that contain a
+  space, and the FAA NASR reader warning about its own column dictionary file.
 
 - Fixed the persisted catalog keeping damage done by an earlier enrichment
   run. Rebuilding the Puget Sound ham list from WWARA facts used to replace

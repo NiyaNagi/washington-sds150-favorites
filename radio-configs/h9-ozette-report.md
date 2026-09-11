@@ -178,45 +178,45 @@
 | 144 | NM7BLFR | 145.1700 | 144.5700 | FM | TONE=C103.5 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
 | 145 | N7GDELYM | 145.1900 | 144.5900 | FM | TONE=C127.3 | PSHAM01/North Sound & Islands - Analog 2 Meter |
 | 146 | W7DKTCM | 145.2100 | 144.6100 | FM | TONE=C141.3 | PSHAM01/South Sound - Analog 2 Meter |
-| 147 | N3KPGRHM | 145.2300 | 144.6300 | FM | TONE=C146.2 | PSHAM01/South Sound - Analog 2 Meter |
-| 148 | W7BPDKND | 145.2300 | 144.6300 | FM | TONE=C103.5 | PSHAM01/North Sound & Islands - Analog 2 Meter |
-| 149 | K7DNRASH | 145.2500 | 144.6500 | FM | TONE=C151.4 | PSHAM01/South Sound - Analog 2 Meter |
-| 150 | KK7DFLOL | 145.2750 | 144.6750 | NFM | TONE=C100 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
-| 151 | KC7IYERD | 145.3100 | 144.7100 | FM | TONE=C103.5 | PSHAM01/Eastside & Cascades - Analog 2 Meter |
-| 152 | K7NWSTGR | 145.3300 | 144.7300 | FM | TONE=C179.9 | PSHAM01/Eastside & Cascades - Analog 2 Meter |
-| 153 | W7ENMCLW | 145.3700 | 144.7700 | FM | TONE=C136.5 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
-| 154 | N7IGPRTO | 145.3900 | 144.7900 | FM | TONE=C88.5 | PSHAM01/Seattle Metro - Analog 2 Meter |
-| 155 | WB7DOBCR | 145.4100 | 144.8100 | FM | TONE=C162.2 | PSHAM01/South Sound - Analog 2 Meter |
-| 156 | KD7WDGSL | 145.4250 | 144.8250 | NFM | TONE=C88.5 | PSHAM01/Seattle Metro - Analog 2 Meter |
+| 147 | W7BPDKND | 145.2300 | 144.6300 | FM | TONE=C103.5 | PSHAM01/North Sound & Islands - Analog 2 Meter |
+| 148 | K7DNRASH | 145.2500 | 144.6500 | FM | TONE=C151.4 | PSHAM01/South Sound - Analog 2 Meter |
+| 149 | KK7DFLOL | 145.2750 | 144.6750 | NFM | TONE=C100 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
+| 150 | KC7IYERD | 145.3100 | 144.7100 | FM | TONE=C103.5 | PSHAM01/Eastside & Cascades - Analog 2 Meter |
+| 151 | K7NWSTGR | 145.3300 | 144.7300 | FM | TONE=C179.9 | PSHAM01/Eastside & Cascades - Analog 2 Meter |
+| 152 | W7ENMCLW | 145.3700 | 144.7700 | FM | TONE=C136.5 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
+| 153 | N7IGPRTO | 145.3900 | 144.7900 | FM | TONE=C88.5 | PSHAM01/Seattle Metro - Analog 2 Meter |
+| 154 | WB7DOBCR | 145.4100 | 144.8100 | FM | TONE=C162.2 | PSHAM01/South Sound - Analog 2 Meter |
+| 155 | KD7WDGSL | 145.4250 | 144.8250 | NFM | TONE=C88.5 | PSHAM01/Seattle Metro - Analog 2 Meter |
+| 156 | K7PGCHHL | 145.4300 | 144.8300 | FM | TONE=C110.9 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
 | 157 | KB7CNNAL | 145.4500 | 144.8500 | FM | TONE=C110.9 | PSHAM01/South Sound - Analog 2 Meter |
 | 158 | K7CPROLY | 145.4700 | 144.8700 | FM | TONE=C100 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
-| 159 | K7LWHKRK | 145.4900 | 144.8900 | FM | TONE=C103.5 | PSHAM01/Seattle Metro - Analog 2 Meter |
-| 160 | WB7DVNEL | 146.4500 | 147.4500 | NFM | D245 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
-| 161 | KC7ZGLDM | 146.6200 | 146.0200 | FM | TONE=C103.5 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
-| 162 | W7EDGWD | 146.6400 | 146.0400 | FM | TONE=C103.5 | PSHAM01/South Sound - Analog 2 Meter |
-| 163 | NC7GSTC | 146.6600 | 146.0600 | FM | TONE=C103.5 | PSHAM01/Seattle Metro - Analog 2 Meter |
-| 164 | A7THVSHN | 146.6875 | 146.0875 | NFM | TONE=C131.8 | PSHAM01/Seattle Metro - Analog 2 Meter |
-| 165 | N7JNFRDY | 146.7000 | 146.1000 | FM | TONE=C131.8 | PSHAM01/North Sound & Islands - Analog 2 Meter |
-| 166 | W7EATETN | 146.7000 | 146.1000 | FM | TONE=C103.5 | PSHAM01/South Sound - Analog 2 Meter |
-| 167 | N7SKSHLT | 146.7200 | 146.1200 | FM | TONE=C103.5 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
-| 168 | K7SKWLKT | 146.7400 | 146.1400 | FM | TONE=C127.3 | PSHAM01/North Sound & Islands - Analog 2 Meter |
-| 169 | W7FWFDWY | 146.7600 | 146.1600 | FM | TONE=C103.5 | PSHAM01/South Sound - Analog 2 Meter |
-| 170 | WA7DEMLY | 146.7750 | 146.1750 | NFM | TONE=C156.7 | PSHAM01/Seattle Metro - Analog 2 Meter |
-| 171 | WW7CHASH | 146.7800 | 146.1800 | FM | TONE=C103.5 | PSHAM01/South Sound - Analog 2 Meter |
-| 172 | KC7CKLCY | 146.7875 | 146.1875 | NFM | TONE=C110.9 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
-| 173 | KC7CKOCR | 146.8000 | 146.2000 | FM | TONE=C110.9 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
-| 174 | W7UFILYN | 146.8000 | 146.2000 | FM | TONE=C136.5 | PSHAM01/Seattle Metro - Analog 2 Meter |
-| 175 | K7LEDTGR | 146.8200 | 146.2200 | FM | TONE=C103.5 | PSHAM01/Eastside & Cascades - Analog 2 Meter |
-| 176 | WW7MSTST | 146.9000 | 146.3000 | FM | TONE=C103.5 | PSHAM01/Seattle Metro - Analog 2 Meter |
-| 177 | WA7DEMGR | 146.9250 | 146.3250 | NFM | TONE=C156.7 | PSHAM01/North Sound & Islands - Analog 2 Meter |
-| 178 | K7HWUNVR | 146.9375 | 146.3375 | NFM | TONE=C103.5 | PSHAM01/South Sound - Analog 2 Meter |
-| 179 | WW7PSRST | 146.9600 | 146.3600 | FM | TONE=C103.5 | PSHAM01/Seattle Metro - Analog 2 Meter |
-| 180 | K7MMIBLD | 146.9800 | 146.3800 | FM | TONE=C131.8 | PSHAM01/South Sound - Analog 2 Meter |
-| 181 | W7DXRDMN | 147.0000 | 146.4000 | FM | TONE=C103.5 | PSHAM01/Eastside & Cascades - Analog 2 Meter |
-| 182 | W7FWFDW2 | 147.0400 | 147.6400 | FM | TONE=C103.5 | PSHAM01/South Sound - Analog 2 Meter |
-| 183 | WW7STRCG | 147.0800 | 147.6800 | FM | TONE=C103.5 | PSHAM01/Eastside & Cascades - Analog 2 Meter |
-| 184 | WW7STRTG | 147.0800 | 147.6800 | FM | TONE=C110.9 | PSHAM01/Eastside & Cascades - Analog 2 Meter |
-| 185 | KC7RASCG | 147.1000 | 147.7000 | NFM | TONE=C123 | PSHAM01/Eastside & Cascades - Analog 2 Meter |
+| 159 | K7CEMCNT | 145.4900 | 144.8900 | FM | TONE=C110.9 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
+| 160 | K7LWHKRK | 145.4900 | 144.8900 | FM | TONE=C103.5 | PSHAM01/Seattle Metro - Analog 2 Meter |
+| 161 | WB7DVNEL | 146.4500 | 147.4500 | NFM | D245 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
+| 162 | KC7ZGLDM | 146.6200 | 146.0200 | FM | TONE=C103.5 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
+| 163 | W7EDGWD | 146.6400 | 146.0400 | FM | TONE=C103.5 | PSHAM01/South Sound - Analog 2 Meter |
+| 164 | NC7GSTC | 146.6600 | 146.0600 | FM | TONE=C103.5 | PSHAM01/Seattle Metro - Analog 2 Meter |
+| 165 | A7THVSHN | 146.6875 | 146.0875 | NFM | TONE=C131.8 | PSHAM01/Seattle Metro - Analog 2 Meter |
+| 166 | N7JNFRDY | 146.7000 | 146.1000 | FM | TONE=C131.8 | PSHAM01/North Sound & Islands - Analog 2 Meter |
+| 167 | W7EATETN | 146.7000 | 146.1000 | FM | TONE=C103.5 | PSHAM01/South Sound - Analog 2 Meter |
+| 168 | N7SKSHLT | 146.7200 | 146.1200 | FM | TONE=C103.5 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
+| 169 | K7KFLPCK | 146.7400 | 146.1400 | FM | TONE=C131.8 | PSHAM01/South Sound - Analog 2 Meter |
+| 170 | K7KFMCHH | 146.7400 | 146.1400 | FM | TONE=C110.9 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
+| 171 | W7FWFDWY | 146.7600 | 146.1600 | FM | TONE=C103.5 | PSHAM01/South Sound - Analog 2 Meter |
+| 172 | WA7DEMLY | 146.7750 | 146.1750 | NFM | TONE=C156.7 | PSHAM01/Seattle Metro - Analog 2 Meter |
+| 173 | WW7CHASH | 146.7800 | 146.1800 | FM | TONE=C103.5 | PSHAM01/South Sound - Analog 2 Meter |
+| 174 | KC7CKLCY | 146.7875 | 146.1875 | NFM | TONE=C110.9 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
+| 175 | KC7CKOCR | 146.8000 | 146.2000 | FM | TONE=C110.9 | PSHAM01/Olympic & Kitsap - Analog 2 Meter |
+| 176 | K7LEDTGR | 146.8200 | 146.2200 | FM | TONE=C103.5 | PSHAM01/Eastside & Cascades - Analog 2 Meter |
+| 177 | WW7MSTST | 146.9000 | 146.3000 | FM | TONE=C103.5 | PSHAM01/Seattle Metro - Analog 2 Meter |
+| 178 | WA7LMMSS | 146.9200 | 146.3200 | FM | TONE=C123 | PSHAM01/South Sound - Analog 2 Meter |
+| 179 | WA7DEMGR | 146.9250 | 146.3250 | NFM | TONE=C156.7 | PSHAM01/North Sound & Islands - Analog 2 Meter |
+| 180 | K7HWUNVR | 146.9375 | 146.3375 | NFM | TONE=C103.5 | PSHAM01/South Sound - Analog 2 Meter |
+| 181 | WW7PSRST | 146.9600 | 146.3600 | FM | TONE=C103.5 | PSHAM01/Seattle Metro - Analog 2 Meter |
+| 182 | W7DXRDMN | 147.0000 | 146.4000 | FM | TONE=C103.5 | PSHAM01/Eastside & Cascades - Analog 2 Meter |
+| 183 | W7FWFDW2 | 147.0400 | 147.6400 | FM | TONE=C103.5 | PSHAM01/South Sound - Analog 2 Meter |
+| 184 | WW7STRCG | 147.0800 | 147.6800 | FM | TONE=C103.5 | PSHAM01/Eastside & Cascades - Analog 2 Meter |
+| 185 | WW7STRTG | 147.0800 | 147.6800 | FM | TONE=C110.9 | PSHAM01/Eastside & Cascades - Analog 2 Meter |
 
 ## Warnings
 
@@ -226,8 +226,9 @@
 
 Every catalog channel this plan matched but could not program, and why.
 
-### capacity (197) - the radio ran out of memory slots
+### capacity (181) - the radio ran out of memory slots
 
+- KC7RAS - Cougar Mtn [147.1000]
 - KH6VM - Everett [147.1200]
 - N7IQZ - Shelton [147.1200]
 - WB7DOB - Baldi Mtn [147.1400]
@@ -235,10 +236,9 @@ Every catalog channel this plan matched but could not program, and why.
 - W7MIR - Mercer Island [147.1600]
 - WA7LAW - Everett [147.1800]
 - W7NEE - Shelton [147.2000]
-- W7AVM - Clinton [147.2200]
-- ... and 189 more
+- ... and 173 more
 
-### duplicate (2) - the frequency is already programmed
+### duplicate (2) - the frequency (or talkgroup on it) is already programmed
 
-- W6MPD - Port Angeles [224.0600]
+- W7FEL - Port Angeles [146.7600]
 - KO6I - Sequim [442.0500]

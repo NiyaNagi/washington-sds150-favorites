@@ -91,15 +91,22 @@ def fleet_status(ctx: AppContext) -> List[RadioStatus]:
 
 def scanner_favorites(ctx: AppContext, *, include_licensed: bool = True) -> List[FavoritesList]:
     """The lists the SDS150 is loaded with: enabled, populated, and - for a
-    copy meant to be shared - not built from licensed data."""
+    copy meant to be shared - not built from licensed data.
+
+    Projected onto the SDS150 exactly as the ``.hpe`` export is, so the
+    workspace installer never sees what the scanner cannot tune - the HF and
+    CW rows of reference-only lists such as HAM01 and HFNET01."""
     from wasds150.generate.pipeline import apply_profile
+    from wasds150.radios.projection import project_favorites
+    from wasds150.radios.registry import SDS150
 
     generated = apply_profile(ctx.catalog, ctx.load_profile())
-    return [
+    chosen = [
         favorite
         for favorite in generated.enabled_favorites
         if favorite.systems and (include_licensed or not favorite.licensed)
     ]
+    return [favorite for favorite in project_favorites(chosen, SDS150).favorites if favorite.systems]
 
 
 def _copy_into(source: Path, destination: Path) -> List[Path]:

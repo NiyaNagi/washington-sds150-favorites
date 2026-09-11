@@ -56,6 +56,10 @@ def _append_local_area_extension(catalog: Catalog) -> None:
         if current is not None:
             for field_name in CSV_FIELDS:
                 setattr(current, field_name, getattr(favorite, field_name))
+            # Not a CSV column, but just as much the baseline's to decide: a
+            # catalog saved before a list became reference-only would
+            # otherwise hand the scanner channels it cannot tune (HFNET01).
+            current.reference_only = favorite.reference_only
             if rebuilds_systems_from_facts(current):
                 present = {system.id for system in current.systems}
                 for system in favorite.systems:

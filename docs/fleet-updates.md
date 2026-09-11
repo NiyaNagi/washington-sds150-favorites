@@ -7,19 +7,63 @@ after the catalog changes, and the per-radio checklists below are generated
 from `src/wasds150/fleet/registry.py` (`wasds150 fleet docs`), so the wizard
 and this page cannot drift apart.
 
+## The one step
+
+Double-click **`Update Radios.cmd`** in the repository folder.
+
+It opens the web UI straight on the **Fleet** tab, working from the
+repository's own home, `.wasds150-home`, which holds the refreshed catalog and
+your RadioReference exports. Then:
+
+1. **Radios.** Out-of-date radios are ticked for you; every radio shows as out
+   of date until it has been synced once.
+2. **Sources.** Tick the sources to refresh. The two bulk downloads, FCC ULS
+   and FAA NASR, are unticked by default; tick them about once a month.
+3. Tick **Write to the radios**. Without it the update is a dry run: every
+   source is refreshed and every radio exported, but nothing is written.
+4. Press **Update selected**. The radios run one after another. At each
+   checklist step, plug in that radio or do what the step says in its vendor
+   program, then press **Done**. **Skip** passes over a step and **Abort**
+   stops the update.
+5. When the job shows finished, close the command window.
+
+Programming files are written to `wasds150-output\radios\`. Radio backups go
+to `radio-backups\`.
+
+### Before the first update
+
+Each radio card has a **Settings** section; a required setting that is missing
+is flagged there and blocks that radio until it is filled in.
+
+| Setting | Current value | What to do |
+|---|---|---|
+| `sds150.sentinel_profile` | `Preset` | The only profile in the Sentinel workspace. Change it if the scanner's lists live in another profile. |
+| `td-h9.com_port` | not set | Plug in the programming cable, find its port in Device Manager (a Prolific USB-to-Serial entry, for example COM7), and enter it. COM3 is an unrelated device. |
+| `th-d75.backup_d75` | newest `radio-backups\th-d75\*.d75` | Read the radio into a fresh backup first; the checklist's first step says how. |
+| `at-d890uv.rdt_base` | not set | Optional. After setting the Optional Settings in the CPS once, save the codeplug and point this at the `.rdt`, so later imports keep them. |
+
+### The same from a terminal
+
+From the repository folder:
+
 ```powershell
-wasds150 fleet status                     # which radios are out of date, and why
-wasds150 fleet settings --set td-h9.com_port=COM7
-wasds150 fleet update                     # dry run: refresh stale sources, export every radio
-wasds150 fleet update --execute           # the same, then load each radio (asks at every manual step)
-wasds150 fleet export --all               # just the programming files + reports
-wasds150 fleet describe at-d890uv         # one radio's checklist with your settings filled in
+.venv\Scripts\wasds150.exe --home .wasds150-home fleet status             # which radios are out of date, and why
+.venv\Scripts\wasds150.exe --home .wasds150-home fleet settings --set td-h9.com_port=COM7
+.venv\Scripts\wasds150.exe --home .wasds150-home fleet update             # dry run: refresh stale sources, export every radio
+.venv\Scripts\wasds150.exe --home .wasds150-home fleet update --execute   # the same, then load each radio (asks at every manual step)
+.venv\Scripts\wasds150.exe --home .wasds150-home fleet export --all       # just the programming files + reports
+.venv\Scripts\wasds150.exe --home .wasds150-home fleet describe at-d890uv # one radio's checklist with your settings filled in
 ```
 
-The same update runs from the browser: `wasds150 ui`, **Fleet** tab. Tick the
-radios (out-of-date ones are ticked for you) and the sources to refresh, press
-**Update selected**, and answer each checklist step with **Done**, **Skip** or
-**Abort** as the vendor programs need you.
+Every command needs `--home .wasds150-home`. Without it wasds150 uses an
+empty per-user home and starts again from the packaged baseline. To refresh
+every source at once, including the bulk downloads, name them all:
+
+```powershell
+.venv\Scripts\wasds150.exe --home .wasds150-home fleet update --only-sources wwara,seattledmr,noaa_nwr,uscg_navcen,amsat,iacc,nifc,nwac,wa_dnr,wa_emd,faa_nasr,fcc_uls,radioreference_premium,sentinel_local
+```
+
+What is still unfinished is listed in [Open items](open-items.md).
 
 ## How an update runs
 

@@ -23,8 +23,16 @@ than silently coercing it. Refresh a list at any time by re-exporting: the
 catalog is the source of truth. See
 [Radios and channel plans](#radios-and-channel-plans).
 
+**Updating every radio is one step:** double-click
+[`Update Radios.cmd`](Update%20Radios.cmd), press **Update selected** on the
+Fleet tab, and answer the checklist as each radio comes up. The full procedure
+is [Updating every radio](docs/fleet-updates.md); what still needs doing is in
+[Open items](docs/open-items.md).
+
 ## Files
 
+- [Updating every radio](docs/fleet-updates.md) - the one-step update (`Update Radios.cmd`), first-time settings, what each radio gets, transmit policy and every radio's checklist.
+- [Open items](docs/open-items.md) - what still needs a decision, a radio on the bench, or an API key.
 - [Changelog](CHANGELOG.md) - release history and user-visible changes.
 - [Master favorites guide](washington-sds150-favorites-master.md) - 75 numbered slots represented by 78 generated entries where encrypted/clear variants are split.
 - [Programming inventory](washington-sds150-favorites.csv) - machine-readable 78-entry statewide/core inventory; 42 public local-area intent rows are appended deterministically by the package.

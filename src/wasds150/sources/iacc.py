@@ -24,6 +24,7 @@ republished as a competing coordination database.
 from __future__ import annotations
 
 import datetime
+import re
 from typing import Any, List, Optional, Tuple
 
 from wasds150.sources.base import OnlineSourceAdapter, RawDoc
@@ -35,6 +36,36 @@ REPEATERS_URL = "https://www.iacc.online/?mm=repeaters"
 DEFAULT_TTL_SECONDS = 24 * 3600
 
 _EXPECTED_HEADER = ["Details", "Output", "Offset", "Reg", "State, County City", "Callsign", "CTCSS/DCS", "Features"]
+
+
+_TONE_TOKEN = re.compile(r"(D?\d{2,3}(?:\.\d)?)\s*(In|Out)?\b", re.IGNORECASE)
+
+
+def _tone_notation(token: str) -> str:
+    if token.upper().startswith("D"):
+        return f"D{token[1:].zfill(3)}"
+    value = float(token)
+    return f"TONE=C{value:g}" if 60.0 <= value <= 260.0 else ""
+
+
+def parse_iacc_tone(text: str) -> Tuple[str, str]:
+    """``(output tone, input tone)`` in catalog notation from IACC's
+    CTCSS/DCS cell.
+
+    The cell reads ``136.5 In 136.5 Out``, ``156.7 In 100.0 Out``,
+    ``100.0 In`` (access tone only, the output is carrier squelch) or
+    ``Closed System`` / ``Private System``. A bare number is the access
+    tone. Anything that is not a tone gives ``("", "")``: an unreadable cell
+    must never reach a radio as a tone.
+    """
+    output = input_ = ""
+    for token, direction in _TONE_TOKEN.findall(text or ""):
+        tone = _tone_notation(token)
+        if direction.lower() == "out":
+            output = output or tone
+        else:
+            input_ = input_ or tone
+    return output, input_
 
 
 def _parse_state_county_city(value: str) -> Tuple[str, str, str]:
@@ -98,6 +129,7 @@ class IaccSource(OnlineSourceAdapter):
             except ValueError:
                 offset_mhz = None
             entity_key = f"iacc:{callsign}:{output}" if callsign else f"iacc:{output}:{county}:{city}"
+            tone_out, tone_in = parse_iacc_tone(tone)
             facts.append(
                 NormalizedFact(
                     entity_key=entity_key,
@@ -105,7 +137,7 @@ class IaccSource(OnlineSourceAdapter):
                     name=f"{callsign} ({city}, {county} Co.)" if callsign else f"{city}, {county} Co.",
                     freq_mhz=freq,
                     offset_mhz=offset_mhz,
-                    tone=tone or None,
+                    tone=tone_out or None,
                     mode="FM",
                     county=county or None,
                     location_precision="unknown",
@@ -117,6 +149,8 @@ class IaccSource(OnlineSourceAdapter):
                         "reg": reg,
                         "city": city,
                         "features": features,
+                        "iacc_tone": tone,
+                        "tx_tone": tone_in,
                     },
                 )
             )
