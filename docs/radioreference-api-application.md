@@ -57,13 +57,23 @@ Windows (desktop command-line application, Python 3.9+)
 
 ## After approval
 
+The key was issued on 2026-09-11 and is configured in the local, git-ignored
+`.wasds150-home\state\sources.json`. Every data call also needs the
+RadioReference username and password (only `getCountryList` answers with the
+key alone). Store them once in Windows Credential Manager; `cmdkey` prompts
+for the password, so it never appears on a command line or in a file:
+
 ```powershell
-.\.venv\Scripts\wasds150.exe --home .wasds150-home sources configure --rr-username <username> --rr-app-key <key>
-$env:WASDS150_RR_PASSWORD = '<password>'     # never written to disk
-.\.venv\Scripts\wasds150.exe --home .wasds150-home sources fetch radioreference_api
+cmdkey /generic:wasds150-radioreference /user:<RadioReference username> /pass
+.\.venv\Scripts\wasds150.exe --home .wasds150-home sources update --only radioreference_api --apply
 ```
 
-The live adapter (`src/wasds150/sources/radioreference_api.py`) is the
-follow-up once the key arrives; until then the county/state CSV export path
-(`sources configure --rr-export-path .wasds150-home\rr-exports`) does the same
-job by hand.
+`WASDS150_RR_USERNAME` and `WASDS150_RR_PASSWORD` in the environment work too
+and take precedence. The adapter (`src/wasds150/sources/radioreference_api.py`)
+fetches the details, sites, site frequencies, talkgroups and talkgroup
+categories of every trunked system the catalog names by SID (16 systems,
+about seventy calls), builds each as a P25 scanner system, and replaces the
+older Sentinel HPDB copy of the same SID in every list that carries it,
+curated the same way. The fleet update runs it with the other sources. The
+county/state CSV export path (`sources configure --rr-export-path
+.wasds150-home\rr-exports`) still supplies the conventional county lists.

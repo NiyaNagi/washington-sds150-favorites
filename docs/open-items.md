@@ -29,7 +29,7 @@ of the legacy radio exports. Everything not listed here is done and tested.
 
 | Item | Detail |
 |---|---|
-| RadioReference Web Service key | Trunked-system talkgroups come from Sentinel's HPDB or the RadioReference SOAP API. The site-frequency refresh finds the matching systems but cannot build them without talkgroups. The application text is in [radioreference-api-application.md](radioreference-api-application.md); the adapter is not written until a key arrives. |
+| RadioReference login | The app key is configured (local `state/sources.json`) and the `radioreference_api` connector is built, but every data call also needs your RadioReference username and password. Store them once with `cmdkey /generic:wasds150-radioreference /user:<RadioReference username> /pass` (it prompts for the password; nothing reaches the repository). The next update then refreshes all 16 trunked systems the catalog names - sites, frequencies and every talkgroup - and replaces their older Sentinel HPDB copies. See [radioreference-api-application.md](radioreference-api-application.md). |
 | RepeaterBook API (request #229) | Would replace the GMRS directory data with owner-maintained tones and real coordinates, and cross-check WWARA's status data. |
 
 ## Code follow-ups

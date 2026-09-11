@@ -60,7 +60,7 @@ empty per-user home and starts again from the packaged baseline. To refresh
 every source at once, including the bulk downloads, name them all:
 
 ```powershell
-.venv\Scripts\wasds150.exe --home .wasds150-home fleet update --only-sources wwara,seattledmr,noaa_nwr,uscg_navcen,amsat,iacc,nifc,nwac,wa_dnr,wa_emd,faa_nasr,fcc_uls,radioreference_premium,sentinel_local
+.venv\Scripts\wasds150.exe --home .wasds150-home fleet update --only-sources wwara,seattledmr,noaa_nwr,uscg_navcen,amsat,iacc,nifc,nwac,wa_dnr,wa_emd,faa_nasr,fcc_uls,radioreference_premium,radioreference_api,sentinel_local
 ```
 
 What is still unfinished is listed in [Open items](open-items.md).

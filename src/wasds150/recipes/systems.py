@@ -546,10 +546,16 @@ def refresh_trunk_frequencies(
     HPE validator rejects it as missing talkgroups), so when the row has none
     no system is built; the message says where talkgroups come from.
     """
+    from wasds150.sources.radioreference_api import SYSTEM_ID_PREFIX as live_prefix
+
     table = [tf for system in systems_from_rr_site_facts(fl, site_facts, sids=sids) for tf in system.trunk_frequencies]
+    # A system fetched live from the web service already carries the site
+    # table with channel numbers; an export's frequency list would only
+    # replace it with a poorer one.
     targets = [
         system for system in fl.systems
-        if _has_talkgroups(system) and (system.sid is None or not sids or system.sid in sids)
+        if _has_talkgroups(system) and not system.id.startswith(live_prefix)
+        and (system.sid is None or not sids or system.sid in sids)
     ]
     if not targets:
         return False, (
@@ -591,6 +597,12 @@ def systems_from_matched_facts(fl: FavoritesList, matched_facts: List[Normalized
         system = system_from_hpdb_fact(fact)
         if system is not None:
             systems.append(system)
+    # A live RadioReference web-service system arrives already whole; it is
+    # curated below exactly as an HPDB system is, so a row that keeps only
+    # part of a shared system (PSERN fire vs law) still keeps only that part.
+    for fact in matched_facts:
+        if fact.source_id == "radioreference_api" and isinstance(fact.raw, dict) and fact.raw.get("system"):
+            systems.append(System.from_dict(copy.deepcopy(fact.raw["system"])))
     systems.extend(systems_from_flat_facts(fl, matched_facts))
     systems = curate_split_systems(fl, systems)
     from wasds150.recipes.local_area import curate_local_area_systems

@@ -55,6 +55,21 @@ def _radioreference_premium(sources_config: SourcesConfig) -> Optional[OnlineSou
     return None
 
 
+def _radioreference_api(sources_config: SourcesConfig) -> Optional[OnlineSourceAdapter]:
+    """The live web service; ``None`` until an app key is configured. The
+    login comes from the environment or Windows Credential Manager, never
+    from the configuration file."""
+    if not sources_config.radioreference_app_key:
+        return None
+    from wasds150.sources.radioreference_api import RadioReferenceApiSource, resolve_credentials
+
+    return RadioReferenceApiSource(
+        credentials=resolve_credentials(
+            sources_config.radioreference_app_key, sources_config.radioreference_username or ""
+        )
+    )
+
+
 def instantiate_source(name: str, sources_config: SourcesConfig) -> Optional[OnlineSourceAdapter]:
     """Build a ready-to-run adapter for ``sources fetch``/``update``.
 
@@ -73,6 +88,8 @@ def instantiate_source(name: str, sources_config: SourcesConfig) -> Optional[Onl
         return _sentinel_local(sources_config)
     if name == "radioreference_premium":
         return _radioreference_premium(sources_config)
+    if name == "radioreference_api":
+        return _radioreference_api(sources_config)
     if name == "faa_nasr":
         from wasds150.sources.faa_nasr import DEFAULT_SUBJECTS, FaaNasrSource
 

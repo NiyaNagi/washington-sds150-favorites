@@ -399,6 +399,14 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Added the operator's NXDN unit ID (16240) to `station.py`, with a fleet
   checklist step to set it in the Anytone CPS (NX Setting > Unit ID(Own)),
   and the NXDN contact list to the contact import step.
+- Added the RadioReference Database Web Service connector
+  (`radioreference_api`). For each of the 16 trunked systems the catalog
+  names by SID it fetches the sites, site frequencies, talkgroups and
+  talkgroup categories and builds a complete P25 scanner system, curated
+  per list exactly like a Sentinel HPDB system, which it then replaces.
+  Fully encrypted talkgroups are marked avoid. The app key lives in the
+  local `state/sources.json`; the RadioReference login is read from the
+  environment or Windows Credential Manager and never written anywhere.
 
 
 ### Changed

@@ -222,6 +222,14 @@ def enrich_catalog(
                     new_fl.provenance.append(prov)
                     existing.add(key)
             new_systems = systems_mod.systems_from_matched_facts(new_fl, matched_facts)
+            # A live RadioReference system is the current record of its SID:
+            # it replaces whatever earlier copy the row carried (a Sentinel
+            # HPDB import, or the previous refresh) rather than sitting beside it.
+            from wasds150.sources.radioreference_api import SYSTEM_ID_PREFIX as _RR_API_PREFIX
+
+            live_sids = {s.sid for s in new_systems if s.id.startswith(_RR_API_PREFIX) and s.sid is not None}
+            if live_sids:
+                new_fl.systems = [s for s in new_fl.systems if s.sid not in live_sids]
             policy = systems_mod.rebuild_policy(new_fl)
             if new_systems:
                 if policy.mode == systems_mod.REPLACE_SYSTEMS:

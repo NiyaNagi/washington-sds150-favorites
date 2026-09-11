@@ -33,6 +33,7 @@ from wasds150.sources.nifc import NifcSource
 from wasds150.sources.noaa_wx import NoaaNwrSource
 from wasds150.sources.nwac import NwacSource
 from wasds150.sources.radioreference_free import RadioReferenceFreeSource
+from wasds150.sources.radioreference_api import RadioReferenceApiSource
 from wasds150.sources.radioreference_premium import RadioReferencePremiumSource
 from wasds150.sources.repeaterbook import RepeaterBookSource
 from wasds150.sources.sentinel_local import SentinelLocalSource
@@ -61,6 +62,8 @@ _REGISTRY: Dict[str, AnySourceClass] = {
     FaaNasrSource.name: FaaNasrSource,
     FccUlsSource.name: FccUlsSource,
     SeattleDmrSource.name: SeattleDmrSource,
+    # Licensed live web service; needs the operator's RadioReference login.
+    RadioReferenceApiSource.name: RadioReferenceApiSource,
     # Online change-detection-only sources (PDF/image landing pages).
     NwacSource.name: NwacSource,
     WaEmdSource.name: WaEmdSource,
