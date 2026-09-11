@@ -39,7 +39,7 @@ catalog is the source of truth. See
 - [Antenna measurement results](antenna-results/README.md) - calibrated handheld and installed-vehicle comparisons, family/service coverage matrix, explicit gap analysis, recommendations, scorecards, offline interactive analysis, raw Touchstone data, and the preserved JYR8010 EFHW report.
 - [Upper Lena Lake profile](docs/upper-lena-lake.md) - compact and comprehensive Hood Canal/Olympic wilderness, SAR, weather, public-safety, aviation, marine, amateur, and personal-radio profiles.
 - [Puget Sound ham repeaters and nets](docs/puget-sound-ham.md) - current WWARA-coordinated repeaters, operator-published net channels/schedules, mode grouping, source hierarchy, and update workflow.
-- [Radius-based lists and HF](docs/local-radius-lists.md) - building a list by distance from home rather than by county, why RepeaterBook could not be used, what the WWARA expiry date can and cannot tell you, and the HF nets and beacons worth tuning.
+- [Radius-based lists and HF](docs/local-radius-lists.md) - building a list by distance from home rather than by county, why the committed lists use WWARA rather than RepeaterBook, what the WWARA expiry date can and cannot tell you, and the HF nets and beacons worth tuning.
 - [Data-source architecture](docs/data-sources.md) - source provenance, caching, update and merge behavior.
 - [TD-H9 programming guide](docs/td-h9-programming.md) - complete hardware procedure, verified radio facts, cable troubleshooting, and the two failure modes that produce a silently wrong radio.
 - [TH-D75A Ames Lake loadout](docs/th-d75-ames-lake.md) - verified capabilities, 50-mile analog/D-STAR and wideband-receive plan, native-image safety, installed software, hashes, hardware write, and read-back results.
@@ -350,6 +350,33 @@ card root. The two Sentinel path options are alternatives.
 Follow the [Sentinel HPDB completion plan](docs/sentinel-completion-plan.md)
 for the system-by-system priority order, merge rules, location-control
 pass, encrypted-talkgroup handling and release gates.
+
+## RepeaterBook (disabled until approved)
+
+For travel, or for repeaters across a nearby state or provincial line, the
+tool can pull amateur repeaters around one point from the RepeaterBook Export
+API. The adapter is implemented but **off by default, pending RepeaterBook's
+approval of this application**, and it never runs from `sources update`.
+Each user needs their own app-bound `rbuapp_` token from RepeaterBook's API
+Apps page; only the name of the environment variable holding it (or the path
+of a file outside this repository) is stored.
+
+```powershell
+$env:REPEATERBOOK_API_TOKEN = "<your rbuapp_ token>"      # never committed, never typed into the UI
+wasds150 repeaterbook configure --enable                   # only once RepeaterBook has approved
+wasds150 repeaterbook refresh --regions WA,OR --center 45.6,-121.2 --radius-mi 60 --bands 2m,70cm --radio th-d75
+wasds150 repeaterbook review --report md
+wasds150 repeaterbook apply
+wasds150 plan export thd75-ames-lake --target thd75-file --with-repeaterbook
+```
+
+Every refresh is bounded (up to three allowlisted regions, one centre, 1-60
+miles, four requests per 24 hours, at most 250 results), reviewed before it
+reaches a radio, kept apart from the catalog with 7/30/90-day retention, and
+removable with `wasds150 repeaterbook delete-all --yes`. RepeaterBook-derived
+records never go into a committed or shared file. Data courtesy of
+[RepeaterBook.com](https://www.repeaterbook.com/). The full rules are in the
+[RepeaterBook design](docs/repeaterbook-api-compliance-design.md).
 
 ## Development
 

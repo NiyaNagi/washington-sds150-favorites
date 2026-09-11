@@ -232,6 +232,29 @@ RadioReference rows become `licensed=True` lists (`RRC-KING`, `RRWA`, ...)
 that stay in the local catalog; `plan export --exclude-licensed` builds the
 copy that may be committed.
 
+### RepeaterBook (disabled until approved)
+
+Never run by `sources update`; it has its own guarded commands. Live requests
+need the enable flag (off by default, pending RepeaterBook approval) and the
+operator's own `rbuapp_` token in `REPEATERBOOK_API_TOKEN`. Never paste a
+token into a command line, file in this repository, or the UI.
+
+```powershell
+.\.venv\Scripts\wasds150.exe --home .wasds150-home repeaterbook status
+.\.venv\Scripts\wasds150.exe --home .wasds150-home repeaterbook regions
+.\.venv\Scripts\wasds150.exe --home .wasds150-home repeaterbook refresh --regions WA --center 47.633,-121.966 --radius-mi 60 --bands 2m,70cm --radio th-d75
+.\.venv\Scripts\wasds150.exe --home .wasds150-home repeaterbook review --report md
+.\.venv\Scripts\wasds150.exe --home .wasds150-home repeaterbook apply
+.\.venv\Scripts\wasds150.exe --home .wasds150-home plan export thd75-ames-lake --target thd75-file --out wasds150-output/radios --with-repeaterbook
+.\.venv\Scripts\wasds150.exe --home .wasds150-home repeaterbook delete-all --yes
+```
+
+`--with-repeaterbook` never combines with `--exclude-licensed`, and its output
+must never be written to `radio-configs/`: `tests/test_no_repeaterbook_data.py`
+fails if a committed radio file cites a RepeaterBook data page. Every limit is
+in `src/wasds150/sources/repeaterbook/policy.py`; do not loosen one without
+RepeaterBook's written approval.
+
 The CLI and the Radios tab both pick all three up automatically via
 `src/wasds150/plan/service.py`. No front-end change is needed.
 
