@@ -77,13 +77,17 @@ def washington():
         "counties": {
             2974: {"ctid": 2974, "countyName": "King", "lastUpdated": "2026-09-01T00:00:00",
                    "cats": [{"cid": 1, "cName": "King County Fire", "subcats": [{"scid": 101, "scName": "Dispatch"}]}],
-                   "trsList": [{"sid": 9001, "sName": "Example County P25", "lastUpdated": "L1"}]},
+                   "trsList": [{"sid": 9001, "sName": "Example County P25", "lastUpdated": "L1"}],
+                   "agencyList": [{"aid": 777, "aName": "Businesses", "aType": 2}]},
             2988: {"ctid": 2988, "countyName": "Snohomish", "lastUpdated": "2026-09-01T00:00:00",
                    "cats": [{"cid": 2, "cName": "Snohomish Sheriff", "subcats": [{"scid": 201, "scName": "Law"}]}],
                    "trsList": []},
         },
         "agencies": {555: {"aid": 555, "agencyName": "Washington State Patrol", "lastUpdated": "2026-08-01T00:00:00",
-                           "cats": [{"cid": 3, "cName": "WSP", "subcats": [{"scid": 301, "scName": "District 1"}]}]}},
+                           "cats": [{"cid": 3, "cName": "WSP", "subcats": [{"scid": 301, "scName": "District 1"}]}]},
+                     # An agency King County lists itself: its rows belong to King's list.
+                     777: {"aid": 777, "agencyName": "Businesses", "lastUpdated": "2026-08-01T00:00:00",
+                           "cats": [{"cid": 7, "cName": "Businesses", "subcats": [{"scid": 701, "scName": "Utilities"}]}]}},
         "freqs": {
             101: [{"fid": 1, "out": 154.43, "in": 0.0, "tone": "CSQ", "mode": "2", "descr": "Fire Dispatch",
                    "alpha": "KCFD Disp", "callsign": "KAB1", "enc": 0, "tags": [{"tagId": 3}]}],
@@ -91,6 +95,8 @@ def washington():
                    "alpha": "SCSO Disp", "callsign": "", "enc": 0, "tags": [{"tagId": 8}]}],
             301: [{"fid": 3, "out": 460.2, "in": 465.2, "tone": "293 NAC", "mode": "4", "descr": "District 1",
                    "alpha": "WSP D1", "callsign": "", "enc": 0, "tags": [{"tagId": 8}]}],
+            701: [{"fid": 7, "out": 451.5, "in": 456.5, "tone": "100.0 PL", "mode": "2", "descr": "Water Utility",
+                   "alpha": "Water", "callsign": "", "enc": 0, "tags": []}],
         },
         "systems": {
             7971: _system(7971, "WA State Patrol", 8, [2974, 2988], [(100, "WSP Car 1")]),
@@ -151,11 +157,13 @@ def test_first_pull_persists_the_state_and_turns_it_into_facts(tmp_path):
     raw, result = _run(FakeService(washington()), tmp_path)
     assert (tmp_path / "snapshot.json").is_file()
     assert raw.payload["full"] is True
-    assert result.warnings[0].startswith("RadioReference Washington baseline: 3 frequencies")
+    assert result.warnings[0].startswith("RadioReference Washington baseline: 4 frequencies")
     assert any("Legacy Smartnet" in w and "not Project 25" in w for w in result.warnings)
 
     freqs = {f.raw["fid"]: f for f in result.facts if f.fact_type == "frequency"}
     assert {f.county for f in freqs.values()} == {"King", "Snohomish", "Statewide"}
+    # an agency the county lists itself (its businesses) lands in that county's list
+    assert (freqs[7].county, freqs[7].raw["rr_category"]) == ("King", "Businesses Utilities")
     assert (freqs[1].mode, freqs[1].raw["rr_tag"], freqs[1].raw["rr_category"]) == ("NFM", "Fire Dispatch", "King County Fire Dispatch")
     assert (freqs[2].tone, freqs[2].tx_freq_mhz) == ("TONE=C103.5", 156.12)
     assert (freqs[3].mode, freqs[3].tone) == ("P25", "NAC=293")
@@ -174,7 +182,7 @@ def test_web_service_rows_replace_the_export_in_the_county_lists(tmp_path):
                                 mode="FM", county="King", source_id="radioreference_premium", raw={"rr_category": "Old"})
     lists = {fl.favorite_key: fl for fl in build_rr_favorites(result.facts + [export_row])}
     king = [c.label for s in lists["RRC-KING"].systems for d in s.departments for c in d.channels]
-    assert king == ["Fire Dispatch"]
+    assert king == ["Fire Dispatch", "Water Utility"]  # the export row is gone; the county's agency row is in
     assert {"RRC-KING", "RRC-SNOHOMISH", "RRWA"} <= set(lists)
 
 
@@ -224,7 +232,7 @@ def test_a_rerun_fetches_only_what_moved_and_reports_the_changes(tmp_path):
     assert "## Frequencies added (1)" in markdown and "tone 'CSQ' -> '107.2 PL'" in markdown
 
     unchanged = {f.raw["fid"] for f in result.facts if f.fact_type == "frequency"}
-    assert unchanged == {1, 3, 4}  # the agency's row was reused, not lost
+    assert unchanged == {1, 3, 4, 7}  # the agencies' rows were reused, not lost
 
 
 def test_everything_is_refetched_once_the_full_refresh_is_due(tmp_path):
@@ -261,3 +269,21 @@ def test_an_interrupted_pull_resumes_instead_of_starting_again(tmp_path):
     assert not resumed.called("getSubcatFreqs", scid=101)  # fetched before the drop
     assert resumed.called("getSubcatFreqs", scid=201)
     assert raw.payload["snapshot"]["complete"] and not (tmp_path / "snapshot.partial.json").exists()
+
+
+class BrokenTypeLookup(FakeService):
+    """RadioReference's getTrsType answers with an empty body (seen live on
+    2026-09-11, as do getTrsFlavor and getTrsVoice)."""
+
+    def __call__(self, body, action):
+        if action == "getTrsType":
+            self.calls.append((action, {}))
+            return b""
+        return super().__call__(body, action)
+
+
+def test_the_pull_survives_the_broken_type_lookup(tmp_path):
+    _raw, result = _run(BrokenTypeLookup(washington()), tmp_path)
+    systems = {f.raw["sid"] for f in result.facts if f.fact_type == "system"}
+    assert systems == {7971, 9001}  # type 8 is still known to be Project 25
+    assert any("Legacy Smartnet" in w and "type 1 is not Project 25" in w for w in result.warnings)

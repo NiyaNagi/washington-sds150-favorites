@@ -339,10 +339,26 @@ def _service_type(tags: Any, lookup: Optional[Dict[str, str]] = None) -> Optiona
     return None
 
 
+#: RadioReference trunking type ids, for when the service's own lookup
+#: (``getTrsType``) cannot be read: on 2026-09-11 it, ``getTrsFlavor`` and
+#: ``getTrsVoice`` all answered with an empty body, while WSP, PSERN,
+#: WSDOT, Sno911, JIWN, Spokane SREC and the US Army system - every one P25
+#: in the Sentinel database - all reported ``sType`` 8.
+KNOWN_TRS_TYPES = {8: "Project 25"}
+
+
+def _trs_types(api: "RadioReferenceApi") -> list:
+    """The trunking type table, or ``[]`` when the service will not give it."""
+    try:
+        return _as_list(api.call("getTrsType"))
+    except RadioReferenceApiError:
+        return []
+
+
 def _is_p25(record: Dict[str, Any]) -> Tuple[bool, str]:
     names = {int(t["sType"]): str(t.get("sTypeDescr") or "") for t in record.get("types") or [] if t.get("sType") is not None}
     stype = (record.get("details") or {}).get("sType")
-    description = names.get(stype, f"type {stype}")
+    description = names.get(stype) or KNOWN_TRS_TYPES.get(stype) or f"type {stype}"
     return ("project 25" in description.lower() or "p25" in description.lower()), description
 
 
@@ -521,7 +537,7 @@ class WashingtonPull:
             "errors": [],
         }
         api = self.api
-        types = _as_list(api.call("getTrsType"))
+        types = _trs_types(api)
         snapshot["lookups"] = {
             "modes": _lookup(api, "getMode", "mode", "mode", "modeName"),
             "tags": _lookup(api, "getTag", "id", "tagId", "tagDescr"),
@@ -534,7 +550,11 @@ class WashingtonPull:
             if isinstance(trs, dict) and trs.get("sid") is not None:
                 listed_systems[int(trs["sid"])] = trs.get("lastUpdated")
 
-        owners: List[Tuple[str, Dict[str, Any]]] = []
+        #: (owner key, fetched info, county the owner's frequencies belong to)
+        owners: List[Tuple[str, Dict[str, Any], Optional[str]]] = []
+        #: Agencies a county lists itself ("Businesses", "Airports", GMRS...),
+        #: whose frequencies belong to that county's list.
+        county_agencies: List[Tuple[int, Optional[str]]] = []
         for county in _as_list(state.get("countyList")):
             ctid = county.get("ctid") if isinstance(county, dict) else None
             if ctid is None:
@@ -543,23 +563,33 @@ class WashingtonPull:
             if info is None:
                 continue
             snapshot["counties"][str(ctid)] = info
-            owners.append((f"county:{ctid}", info))
+            county_name = str(info["info"].get("countyName") or county.get("countyName") or ctid)
+            owners.append((f"county:{ctid}", info, county_name))
+            for agency in _as_list(info["info"].get("agencyList")):
+                if isinstance(agency, dict) and agency.get("aid") is not None:
+                    county_agencies.append((int(agency["aid"]), county_name))
             for trs in _as_list(info["info"].get("trsList")):
                 if isinstance(trs, dict) and trs.get("sid") is not None:
                     listed_systems.setdefault(int(trs["sid"]), trs.get("lastUpdated"))
             self._maybe_checkpoint(snapshot)
-        for agency in _as_list(state.get("agencyList")):
-            aid = agency.get("aid") if isinstance(agency, dict) else None
-            if aid is None:
+        statewide_agencies = [
+            (int(agency["aid"]), None) for agency in _as_list(state.get("agencyList"))
+            if isinstance(agency, dict) and agency.get("aid") is not None
+        ]
+        seen_agencies = set()
+        for aid, county_name in statewide_agencies + county_agencies:
+            if aid in seen_agencies:
                 continue
-            info = self._fetch_owner("agencies", str(aid), "getAgencyInfo", aid=int(aid))
+            seen_agencies.add(aid)
+            info = self._fetch_owner("agencies", str(aid), "getAgencyInfo", aid=aid)
             if info is None:
                 continue
+            info = dict(info, county=county_name)
             snapshot["agencies"][str(aid)] = info
-            owners.append((f"agency:{aid}", info))
+            owners.append((f"agency:{aid}", info, county_name))
             self._maybe_checkpoint(snapshot)
 
-        for owner, info in owners:
+        for owner, info, county_name in owners:
             body = info["info"]
             owner_name = body.get("countyName") or body.get("agencyName") or owner
             for category in _as_list(body.get("cats")):
@@ -569,7 +599,7 @@ class WashingtonPull:
                         continue
                     snapshot["subcats"][str(scid)] = self._subcat(
                         str(scid), owner, str(owner_name), str(category.get("cName") or ""),
-                        str(subcat.get("scName") or ""), body.get("lastUpdated"), snapshot,
+                        str(subcat.get("scName") or ""), body.get("lastUpdated"), snapshot, county_name,
                     )
                     self._maybe_checkpoint(snapshot)
 
@@ -596,24 +626,25 @@ class WashingtonPull:
             raise RadioReferenceApiError(f"{operation} {params}: {exc}") from None
 
     def _subcat(self, scid: str, owner: str, owner_name: str, category: str, subcategory: str,
-                owner_updated: Any, snapshot: Dict[str, Any]) -> Dict[str, Any]:
+                owner_updated: Any, snapshot: Dict[str, Any], county: Optional[str] = None) -> Dict[str, Any]:
         partial = self._fresh_from_partial("subcats", scid)
         if partial is not None:
-            return partial
+            return dict(partial, county=county)
         previous = (self.previous.get("subcats") or {}).get(scid)
         if (not self.full and previous and previous.get("owner_updated") == owner_updated
                 and owner_updated not in (None, "")):
-            return dict(previous, owner=owner, owner_name=owner_name, category=category, subcategory=subcategory)
+            return dict(previous, owner=owner, owner_name=owner_name, category=category,
+                        subcategory=subcategory, county=county)
         try:
             freqs = _as_list(self.api.call("getSubcatFreqs", scid=int(scid)))
         except RadioReferenceApiError as exc:
             snapshot["errors"].append(f"subcategory {scid} ({owner_name} {category} {subcategory}): {exc}")
             if previous:
-                return previous
+                return dict(previous, county=county)
             freqs = []
         return {
             "owner": owner, "owner_name": owner_name, "category": category, "subcategory": subcategory,
-            "owner_updated": owner_updated, "freqs": freqs, "fetched_at": _now().isoformat(),
+            "county": county, "owner_updated": owner_updated, "freqs": freqs, "fetched_at": _now().isoformat(),
         }
 
     def _system(self, sid: int, listed_updated: Any, types: list, snapshot: Dict[str, Any]) -> Optional[Dict[str, Any]]:
@@ -860,7 +891,9 @@ def frequency_facts(snapshot: Dict[str, Any], retrieved_at: str) -> List[Normali
     facts = []
     for scid, subcat in (snapshot.get("subcats") or {}).items():
         owner = str(subcat.get("owner") or "")
-        county = subcat.get("owner_name") if owner.startswith("county:") else STATEWIDE
+        # A county's own rows, and an agency the county lists (its businesses,
+        # airports...), belong to that county; a statewide agency's to RRWA.
+        county = subcat.get("owner_name") if owner.startswith("county:") else (subcat.get("county") or STATEWIDE)
         category = " ".join(p for p in (subcat.get("category"), subcat.get("subcategory")) if p)
         for freq in _as_list(subcat.get("freqs")):
             out = _number(freq.get("out")) if isinstance(freq, dict) else None
@@ -995,7 +1028,7 @@ class RadioReferenceApiSource(OnlineSourceAdapter):
         api = self.api or RadioReferenceApi(self.credentials)
         fetched_at = (self.now or _now()).isoformat()
         if self.sids is not None:
-            types = _as_list(api.call("getTrsType"))
+            types = _trs_types(api)
             systems, errors = [], []
             for sid in self.sids:
                 try:
