@@ -125,7 +125,9 @@ record), and applies them. The browser never sees or sends the token.
 6. `plan export ... --with-repeaterbook` adds the applied records as a final
    block, reading the local store only.
 
-There is no scheduler, background refresh, or refresh at startup.
+There is no scheduler, background refresh, or refresh at startup. The
+application's global offline mode (`sources configure --offline`) also refuses
+a live refresh.
 
 ### Implementation
 
@@ -233,6 +235,7 @@ nothing is retried automatically.
 | `400`, `404` | Stop and report the filter or endpoint problem |
 | `408`, `425`, `500`, `502`, `503`, `504` | Stop; no same-action retry |
 | Any redirect | Refused, so the token header can never follow it to another host |
+| Unreachable host, timeout, connection reset, TLS failure, truncated body | Stop; recorded in the request ledger; no retry |
 | Any other status | Stop |
 
 Error messages name the status and the documented error code only. They never
@@ -275,20 +278,22 @@ there would leave the body on disk.
 
 | Data | Rule |
 |---|---|
-| Raw responses | Fresh for 7 days. Stale data may be re-filtered offline and viewed, marked stale, but can no longer be applied. Deleted by day 30. |
-| Staged candidates | Deleted by day 30; cannot be applied after 7 days |
-| Applied records | Deleted by day 90 unless refreshed and reviewed again |
+| Raw responses | Fresh for 7 days; only fresh data can be re-filtered offline or applied. Deleted by day 30. |
+| Staged candidates | Viewable, marked stale, after 7 days but never applied; deleted by day 30 |
+| Applied records | Deleted 90 days after the data was retrieved. Only a new request, reviewed and applied again, restarts that clock; applying late or re-filtering cached data does not. |
 | Request ledger | Deleted after 30 days |
-| Review and companion export reports | Registered, and deleted by day 90 |
+| Review reports, and every file a `--with-repeaterbook` export writes (the programming file, its companion report, and `--copy-to` copies) | Registered, and deleted by day 90 |
 
-Purges run at every startup of the CLI, and before and after every refresh.
+Purges run at every startup of the CLI, and before and after every refresh,
+including one that fails or is refused.
 All retention is computed from an injected clock, so it is tested at exact
 day boundaries.
 
 **Delete All RepeaterBook Data** (CLI `delete-all --yes`, UI button) removes the
 raw responses, staged candidates, applied records, the request ledger, and
-every report registered with the store, including companion export reports
-written elsewhere. It keeps only the rate-limit window and lockout timestamps
+every registered file: review reports, and everything a `--with-repeaterbook`
+export wrote, including copies made with `--copy-to`. Channels already written
+into a radio are outside the application's reach. It keeps only the rate-limit window and lockout timestamps
 (token fingerprints and times, no RepeaterBook data), which expire on their
 own within 24 hours; otherwise deleting data would reset the request budget.
 **This is a deliberate choice for RepeaterBook to confirm.** Deleting the
@@ -339,14 +344,14 @@ All tests are in `tests/test_repeaterbook.py` unless noted.
 | 1 | Every request sends the exact User-Agent with public URL and contact | `test_user_agent_is_the_approved_string_with_project_url_and_contact`, `test_request_sends_the_exact_user_agent_and_the_token_only_in_its_header`, `test_the_shared_default_user_agent_is_refused_before_sending` |
 | 2 | Only a user-owned `rbuapp_` token, from an environment variable or an external file; no `app_` token; no repository-stored token | `test_token_prefix_rules`, `test_shared_app_token_is_rejected_without_quoting_it`, `test_rbuapp_token_is_accepted_and_never_shown`, `test_token_from_an_external_file`, `test_token_file_inside_the_repository_or_relative_is_refused`, `test_configuration_stores_only_where_the_token_is` |
 | 3 | Token redaction | `test_token_never_reaches_the_store_logs_reports_or_config`, `test_errors_never_quote_the_token`, `test_log_redaction_masks_unregistered_tokens_from_child_loggers` |
-| 4 | No live request without an explicit action | `test_update_all_makes_zero_repeaterbook_requests`, `test_generic_source_paths_refuse_repeaterbook`, `test_refresh_is_refused_while_disabled_with_the_pending_approval_message`, `test_refresh_is_refused_without_a_token`, `test_status_is_ready_only_with_both_the_flag_and_a_token`, `test_the_ui_lists_repeaterbook_but_greys_out_refresh_until_ready`, `test_normal_radio_export_never_calls_repeaterbook`, `test_web_routes` |
+| 4 | No live request without an explicit action | `test_update_all_makes_zero_repeaterbook_requests`, `test_generic_source_paths_refuse_repeaterbook`, `test_refresh_is_refused_while_disabled_with_the_pending_approval_message`, `test_refresh_is_refused_without_a_token`, `test_status_is_ready_only_with_both_the_flag_and_a_token`, `test_the_ui_lists_repeaterbook_but_greys_out_refresh_until_ready`, `test_normal_radio_export_never_calls_repeaterbook`, `test_global_offline_mode_refuses_a_live_refresh`, `test_web_routes` |
 | 5 | No parallel requests | `test_a_second_refresh_while_one_runs_is_refused`, `test_another_process_lock_is_respected_and_a_stale_one_cleared`, `test_regions_are_requested_one_at_a_time_in_order` |
 | 6 | Request limits per token | `test_exactly_one_request_per_region`, `test_the_same_region_is_not_requested_again_within_60_minutes`, `test_at_most_four_requests_in_any_rolling_24_hours`, `test_the_budget_is_checked_for_every_region_before_anything_is_sent`, `test_delete_all_does_not_reset_the_request_budget` |
 | 7 | Allowlisted regions, one centre, radius 1-60, a supported band | `test_region_allowlist_and_its_verified_parameters`, `test_regions_outside_the_policy_are_refused_before_sending`, `test_radius_must_be_a_whole_number_from_1_to_60`, `test_radius_bounds_are_inclusive`, `test_exactly_one_valid_centre_is_required`, `test_bands_must_be_known_and_supported_by_the_radio`, `test_distance_is_great_circle`, `test_local_filtering_drops_rather_than_coerces` |
 | 8 | At most 250 candidates, combined; 251 fails closed | `test_251_candidates_fail_closed_and_import_nothing`, `test_250_candidates_are_staged`, `test_the_cap_applies_to_the_combined_regions` |
 | 9 | No pagination or parallel requests | `test_a_request_carries_only_the_region_parameters`, `test_regions_are_requested_one_at_a_time_in_order` |
-| 10 | 429 stops with no retry and locks until the later of Retry-After and 60 minutes; authentication, scope and User-Agent errors are never retried | `test_429_locks_refresh_until_the_later_of_retry_after_and_60_minutes`, `test_retry_after_as_an_http_date`, `test_a_429_mid_action_stops_the_remaining_regions`, `test_auth_scope_and_user_agent_errors_block_until_the_operator_acts`, `test_transient_errors_stop_without_retry`, `test_bad_filter_or_endpoint_stops`, `test_redirects_are_refused_so_the_token_cannot_follow_one`, `test_a_response_that_is_not_the_export_shape_imports_nothing` |
-| 11 | 7-day freshness, day-30 raw deletion, day-90 derived deletion, immediate deletion | `test_raw_is_fresh_for_7_days_after_which_it_cannot_be_applied`, `test_raw_responses_and_staging_are_deleted_by_day_30`, `test_applied_records_are_deleted_by_day_90_unless_reviewed_again`, `test_purges_run_before_a_refresh_and_at_startup`, `test_cli_startup_purges_expired_data`, `test_delete_all_removes_blobs_rows_ledger_and_reports`, `test_forget_token_is_a_separate_action` |
+| 10 | 429 stops with no retry and locks until the later of Retry-After and 60 minutes; authentication, scope and User-Agent errors are never retried | `test_429_locks_refresh_until_the_later_of_retry_after_and_60_minutes`, `test_retry_after_as_an_http_date`, `test_a_429_mid_action_stops_the_remaining_regions`, `test_auth_scope_and_user_agent_errors_block_until_the_operator_acts`, `test_transient_errors_stop_without_retry`, `test_bad_filter_or_endpoint_stops`, `test_redirects_are_refused_so_the_token_cannot_follow_one`, `test_a_response_that_is_not_the_export_shape_imports_nothing`, `test_429_lockout_is_measured_from_the_response_not_from_sending`, `test_transport_failures_are_classified_and_recorded`, `test_urllib_transport_turns_network_failures_into_transient_errors` |
+| 11 | 7-day freshness, day-30 raw deletion, day-90 derived deletion, immediate deletion | `test_raw_is_fresh_for_7_days_after_which_it_cannot_be_applied`, `test_raw_responses_and_staging_are_deleted_by_day_30`, `test_applied_records_are_deleted_by_day_90_unless_reviewed_again`, `test_purges_run_before_a_refresh_and_at_startup`, `test_cli_startup_purges_expired_data`, `test_delete_all_removes_blobs_rows_ledger_and_reports`, `test_delete_all_removes_every_file_a_repeaterbook_export_wrote`, `test_a_late_apply_or_an_offline_refilter_does_not_extend_the_90_days`, `test_an_older_staged_copy_never_replaces_a_newer_retrieval`, `test_purge_runs_after_a_failed_refresh_too`, `test_forget_token_is_a_separate_action` |
 | 12 | Generated files hold only programming fields, never raw bodies or credentials | `test_export_with_repeaterbook_holds_only_programming_fields`, `test_repeaterbook_records_never_go_into_a_redistributable_export`, `test_missing_input_tone_or_offset_is_never_synthesized` |
 | 13 | Visible, linked attribution everywhere RepeaterBook data appears | `test_attribution_appears_in_every_output`, `test_staging_review_apply_carries_source_id_date_and_attribution`, `test_detail_links_use_the_home_page_until_the_url_form_is_confirmed`, `test_html_report_escapes_third_party_text` |
 | 14 | Raw data is not committed, republished, sold or redistributed | `tests/test_no_repeaterbook_data.py` (all four tests), `test_the_reviewed_list_is_licensed_so_committable_exports_exclude_it`, `test_everything_lives_under_the_local_state_directory`, `test_the_in_repo_working_home_is_git_ignored` |

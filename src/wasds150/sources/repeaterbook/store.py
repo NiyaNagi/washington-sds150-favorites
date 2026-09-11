@@ -6,7 +6,9 @@ for public data and wrong here. This store lives in its own directory::
 
     <home>/state/repeaterbook/
         data.db      raw-response index, staging rows, applied records,
-                     request ledger, generated report paths
+                     request ledger, and the paths of every generated file
+                     holding RepeaterBook-derived rows (review reports,
+                     --with-repeaterbook exports and their --copy-to copies)
         raw/         one file per raw response
         reports/     review reports
         limits.json  rate-limit window and lockouts (timestamps and token
@@ -81,6 +83,14 @@ _STALE_LOCK_SECONDS = 15 * 60
 
 class ActionInProgress(RuntimeError):
     """Another RepeaterBook refresh is running; requests are never parallel."""
+
+
+def _remove_file(path: str) -> None:
+    """Delete one registered file. Only files are ever registered; anything
+    else at that path now (a directory someone made) is left alone."""
+    target = Path(path)
+    if target.is_file():
+        target.unlink()
 
 
 def iso(moment: datetime.datetime) -> str:
@@ -197,10 +207,12 @@ class RepeaterBookStore:
     # -- applied (derived) records -------------------------------------------------
     def upsert_derived(self, rb_key: str, record: Dict[str, Any], *, retrieved_at: str, reviewed_at: str) -> None:
         with self._db() as conn:
+            # Applying an older staged copy never replaces a newer retrieval.
             conn.execute(
                 """INSERT INTO derived (rb_key, record, retrieved_at, reviewed_at) VALUES (?, ?, ?, ?)
                    ON CONFLICT(rb_key) DO UPDATE SET record=excluded.record,
-                     retrieved_at=excluded.retrieved_at, reviewed_at=excluded.reviewed_at""",
+                     retrieved_at=excluded.retrieved_at, reviewed_at=excluded.reviewed_at
+                   WHERE excluded.retrieved_at >= derived.retrieved_at""",
                 (rb_key, json.dumps(record, sort_keys=True), retrieved_at, reviewed_at),
             )
 
@@ -346,15 +358,17 @@ class RepeaterBookStore:
                 counts["staging"] = conn.execute(
                     "DELETE FROM staging WHERE fetched_at <= ?", (iso(now - policy.STAGING_DELETE_AFTER),)
                 ).rowcount
+                # Aged from retrieval: only a new request (refreshed, then
+                # reviewed and applied again) keeps a record past day 90.
                 counts["derived"] = conn.execute(
-                    "DELETE FROM derived WHERE reviewed_at <= ?", (iso(now - policy.DERIVED_DELETE_AFTER),)
+                    "DELETE FROM derived WHERE retrieved_at <= ?", (iso(now - policy.DERIVED_DELETE_AFTER),)
                 ).rowcount
                 counts["ledger"] = conn.execute(
                     "DELETE FROM ledger WHERE requested_at <= ?", (iso(now - policy.LEDGER_DELETE_AFTER),)
                 ).rowcount
                 report_cut = iso(now - policy.DERIVED_DELETE_AFTER)
                 for row in conn.execute("SELECT path FROM reports WHERE created_at <= ?", (report_cut,)).fetchall():
-                    Path(row["path"]).unlink(missing_ok=True)
+                    _remove_file(row["path"])
                     conn.execute("DELETE FROM reports WHERE path = ?", (row["path"],))
                     counts["reports"] += 1
         if self.limits_path.exists():
@@ -376,7 +390,7 @@ class RepeaterBookStore:
                     counts[key] = conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
                 reports = [row["path"] for row in conn.execute("SELECT path FROM reports").fetchall()]
             for path in reports:
-                Path(path).unlink(missing_ok=True)
+                _remove_file(path)
             counts["reports"] = len(reports)
             for suffix in ("", "-journal", "-wal", "-shm"):
                 Path(str(self.db_path) + suffix).unlink(missing_ok=True)

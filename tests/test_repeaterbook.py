@@ -8,10 +8,14 @@ the real one is replaced by a function that fails the test if it is called.
 from __future__ import annotations
 
 import datetime
+import http.client
 import json
 import logging
 import os
+import ssl
 import time
+import urllib.error
+import urllib.request
 from pathlib import Path
 from urllib.parse import parse_qsl, urlsplit
 
@@ -51,6 +55,9 @@ from wasds150.sources.repeaterbook.service import (
 from wasds150.sources.repeaterbook.store import ActionInProgress, RepeaterBookStore
 from wasds150.sources.repeaterbook.token import Token, TokenError, load_token, validate_token
 
+#: Taken at import, before conftest's autouse guard replaces it, so the real
+#: transport's own error handling can be tested against a fake opener.
+REAL_URLLIB_TRANSPORT = client_mod.urllib_transport
 REPO_ROOT = Path(__file__).resolve().parents[1]
 TOKEN = "rbuapp_" + "SyntheticT0ken" * 3
 T0 = datetime.datetime(2026, 9, 10, 12, 0, tzinfo=datetime.timezone.utc)
@@ -105,11 +112,14 @@ def ok(records=None) -> HttpResponse:
 
 
 class FakeTransport:
-    """Records every request; answers from a queue, then with one record."""
+    """Records every request; answers from a queue (an exception in the queue
+    is raised), then with one record. ``on_call`` runs while the request is in
+    flight -- for example to let the clock move before the response."""
 
-    def __init__(self, responses=()):
+    def __init__(self, responses=(), on_call=None):
         self.calls = []
         self.responses = list(responses)
+        self.on_call = on_call
         self.in_flight = 0
         self.max_in_flight = 0
 
@@ -118,17 +128,17 @@ class FakeTransport:
         self.max_in_flight = max(self.max_in_flight, self.in_flight)
         try:
             self.calls.append({"url": url, "headers": dict(headers)})
-            return self.responses.pop(0) if self.responses else ok()
+            if self.on_call is not None:
+                self.on_call()
+            answer = self.responses.pop(0) if self.responses else ok()
+            if isinstance(answer, BaseException):
+                raise answer
+            return answer
         finally:
             self.in_flight -= 1
 
 
-@pytest.fixture(autouse=True)
-def no_network(monkeypatch):
-    def refuse(*args, **kwargs):
-        raise AssertionError("a test tried to reach RepeaterBook")
-
-    monkeypatch.setattr(client_mod, "urllib_transport", refuse)
+# No network: tests/conftest.py replaces the real transport for every test.
 
 
 @pytest.fixture()
@@ -179,7 +189,7 @@ def test_the_shared_default_user_agent_is_refused_before_sending():
     for agent in (DEFAULT_USER_AGENT, "Python-urllib/3.12", ""):
         client = RepeaterBookClient(Token(TOKEN, "test"), transport=transport, user_agent=agent)
         with pytest.raises(UserAgentRefused):
-            client.export(policy.REGIONS["WA"], now=T0)
+            client.export(policy.REGIONS["WA"], clock=lambda: T0)
     assert transport.calls == []
 
 
@@ -635,6 +645,47 @@ def test_429_locks_refresh_until_the_later_of_retry_after_and_60_minutes(home, r
     assert len(transport.calls) == 2
 
 
+def test_429_lockout_is_measured_from_the_response_not_from_sending(home):
+    enable(home)
+    clock = Clock()
+    transport = FakeTransport(
+        [HttpResponse(429, {"Retry-After": "3600"}, b"")], on_call=lambda: clock.advance(seconds=25)
+    )
+    svc = service(home, transport, clock)
+    with pytest.raises(RateLimited):
+        svc.refresh(request())
+    clock.now = T0 + datetime.timedelta(minutes=60, seconds=10)  # after send + 60 min, before receipt + 60 min
+    with pytest.raises(LimitError, match="locked until"):
+        svc.refresh(request(("OR",)))
+    clock.now = T0 + datetime.timedelta(minutes=60, seconds=26)
+    svc.refresh(request(("OR",)))
+    assert len(transport.calls) == 2
+
+
+@pytest.mark.parametrize("error", [TimeoutError("timed out"), ConnectionResetError(), http.client.IncompleteRead(b"")])
+def test_transport_failures_are_classified_and_recorded(home, error):
+    enable(home)
+    svc = service(home, FakeTransport([error]))
+    with pytest.raises(TransientError):
+        svc.refresh(request())
+    assert [row["outcome"] for row in svc.store.ledger()] == [type(error).__name__]
+
+
+@pytest.mark.parametrize(
+    "error",
+    [TimeoutError("read timed out"), ssl.SSLError("bad record"), http.client.IncompleteRead(b"partial"),
+     urllib.error.URLError("unreachable")],
+)
+def test_urllib_transport_turns_network_failures_into_transient_errors(monkeypatch, error):
+    class FailingOpener:
+        def open(self, request, timeout):
+            raise error
+
+    monkeypatch.setattr(urllib.request, "build_opener", lambda *handlers: FailingOpener())
+    with pytest.raises(TransientError):
+        REAL_URLLIB_TRANSPORT("https://example.invalid/", {}, 1, 1024)
+
+
 def test_retry_after_as_an_http_date():
     assert parse_retry_after("Thu, 10 Sep 2026 14:00:00 GMT", T0) == datetime.timedelta(hours=2)
     assert parse_retry_after("soon", T0) is None
@@ -748,6 +799,73 @@ def test_applied_records_are_deleted_by_day_90_unless_reviewed_again(home):
     svc.apply()  # record 1 reviewed again on day 60
     clock.advance(days=30)  # day 90 for record 2
     assert [r["rb_key"] for r in svc.records()["records"]] == ["53:1001"]
+
+
+def test_a_late_apply_or_an_offline_refilter_does_not_extend_the_90_days(home):
+    enable(home)
+    clock = Clock()
+    svc = service(home, FakeTransport(), clock)
+    svc.refresh(request())
+    clock.advance(days=6)
+    svc.refresh(request(), offline=True)  # the same retrieval, filtered again
+    assert svc.apply()["applied"] == 1
+    clock.now = T0 + datetime.timedelta(days=90)
+    assert svc.records()["records"] == []
+
+
+def test_an_older_staged_copy_never_replaces_a_newer_retrieval(home):
+    enable(home)
+    clock = Clock()
+    svc = service(home, FakeTransport(), clock)
+    first = svc.refresh(request())["action_id"]
+    clock.advance(minutes=61)
+    svc.refresh(request())
+    svc.apply()
+    svc.apply(first)
+    (applied,) = svc.records()["records"]
+    assert applied["retrieved_at"] == "2026-09-10T13:01:00+00:00"
+
+
+def test_purge_runs_after_a_failed_refresh_too(home, monkeypatch):
+    enable(home)
+    svc = service(home, FakeTransport([HttpResponse(503, {}, b"")]))
+    purges = []
+    real_purge = svc.store.purge
+    monkeypatch.setattr(svc.store, "purge", lambda now: purges.append(now) or real_purge(now))
+    with pytest.raises(TransientError):
+        svc.refresh(request())
+    assert len(purges) == 2  # before and after
+
+
+def test_global_offline_mode_refuses_a_live_refresh(home):
+    enable(home)
+    cfg = SourcesConfig.load(home.sources_config_path)
+    cfg.offline = True
+    cfg.save(home.sources_config_path)
+    transport = FakeTransport()
+    with pytest.raises(PolicyError, match="offline mode"):
+        service(home, transport).refresh(request())
+    assert transport.calls == []
+
+
+def test_delete_all_removes_every_file_a_repeaterbook_export_wrote(home, tmp_path):
+    from wasds150.appctx import build_context
+    from wasds150.plan.service import export_plan
+
+    enable(home)
+    svc = service(home, FakeTransport([ok([record(1, freq=146.955)])]))
+    svc.refresh(request())
+    svc.apply()
+    ctx = build_context(home)
+    plain = export_plan(ctx, "h9-ozette", out_dir=tmp_path / "plain")
+    exported = export_plan(
+        ctx, "h9-ozette", out_dir=tmp_path / "out", copy_to=tmp_path / "copy", with_repeaterbook=True
+    )
+    written = [exported.csv_path, exported.report_path, *exported.copies]
+    assert len(written) == 4 and all(path.is_file() for path in written)
+    svc.delete_all()
+    assert not any(path.exists() for path in written)
+    assert plain.csv_path.exists() and plain.report_path.exists()  # no RepeaterBook rows, not touched
 
 
 def test_purges_run_before_a_refresh_and_at_startup(home):

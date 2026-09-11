@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import datetime
 import email.utils
+import http.client
 import re
 import urllib.error
 import urllib.request
@@ -121,10 +122,19 @@ def urllib_transport(url: str, headers: Dict[str, str], timeout: float, max_byte
         with opener.open(request, timeout=timeout) as response:
             return HttpResponse(response.status, dict(response.headers.items()), _read_limited(response, max_bytes))
     except urllib.error.HTTPError as exc:
-        body = exc.read(65536) if exc.fp is not None else b""
+        try:
+            body = exc.read(65536) if exc.fp is not None else b""
+        except (OSError, http.client.HTTPException):
+            body = b""
         return HttpResponse(exc.code, dict((exc.headers or {}).items()), body)
-    except urllib.error.URLError as exc:
-        raise TransientError(f"could not reach RepeaterBook: {exc.reason}") from None
+    except RepeaterBookError:
+        raise
+    except (OSError, http.client.HTTPException) as exc:
+        # Unreachable host, timeout, reset, TLS failure, truncated body: all
+        # transient, none retried. The message names the kind only.
+        raise TransientError(
+            f"could not complete the RepeaterBook request ({type(exc).__name__}); not retried"
+        ) from None
 
 
 def build_export_url(region: Region) -> str:
@@ -209,11 +219,14 @@ class RepeaterBookClient:
             )
         return {"User-Agent": USER_AGENT, TOKEN_HEADER: self.token.reveal(), "Accept": "application/json"}
 
-    def export(self, region: Region, *, now: datetime.datetime) -> bytes:
-        """One HTTP request for one region. Raises on anything but a usable 200."""
+    def export(self, region: Region, *, clock: Callable[[], datetime.datetime]) -> bytes:
+        """One HTTP request for one region. Raises on anything but a usable 200.
+
+        ``clock`` is read when the response arrives, so an HTTP-date
+        ``Retry-After`` is measured from receipt, not from sending."""
         headers = self.request_headers()
         url = build_export_url(region)
         if self.token.reveal() in url:  # defence in depth; region.query() cannot carry it
             raise UserAgentRefused("refusing to put the token in a URL")
         response = self.transport(url, headers, self.timeout_seconds, self.max_bytes)
-        return classify(response, now)
+        return classify(response, clock())

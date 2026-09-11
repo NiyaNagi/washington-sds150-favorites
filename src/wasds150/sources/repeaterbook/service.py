@@ -9,7 +9,8 @@ before anything is sent:
    three; one centre; a whole-number radius from 1 to 60 miles; at least one
    band the target radio supports);
 2. the local enable flag is on (it defaults off, pending RepeaterBook's
-   approval) and a valid ``rbuapp_`` token is configured;
+   approval), global offline mode is off, and a valid ``rbuapp_`` token is
+   configured;
 3. no other refresh is in flight (requests are never parallel);
 4. the token has no authentication block and no 429 lockout;
 5. no requested region was requested in the last 60 minutes;
@@ -41,6 +42,7 @@ from wasds150.sources.repeaterbook.client import (
     RateLimited,
     RepeaterBookClient,
     RepeaterBookError,
+    TransientError,
     Transport,
 )
 from wasds150.sources.repeaterbook.normalize import FilterSpec, filter_records, parse_export
@@ -312,21 +314,23 @@ class RepeaterBookService:
         regions, spec = validate_request(request)
         now = self.clock()
         self.store.purge(now)
-        if offline:
-            per_region, sent = self._cached(regions, now), 0
-        else:
-            per_region = self._fetch(regions)
-            sent = len(regions)
-        result = filter_records(per_region, spec)
-        if len(result.candidates) > policy.CANDIDATE_CAP:
+        try:
+            if offline:
+                per_region, sent = self._cached(regions, now), 0
+            else:
+                per_region = self._fetch(regions)
+                sent = len(regions)
+            result = filter_records(per_region, spec)
+            if len(result.candidates) > policy.CANDIDATE_CAP:
+                raise CandidateCapError(
+                    f"{len(result.candidates)} repeaters matched; the limit is {policy.CANDIDATE_CAP}, so "
+                    "nothing was imported. Reduce the radius or the bands"
+                )
+            action_id = uuid.uuid4().hex[:12]
+            self.store.stage(action_id, result.candidates)
+        finally:
+            # After every refresh, including one that failed or was refused.
             self.store.purge(self.clock())
-            raise CandidateCapError(
-                f"{len(result.candidates)} repeaters matched; the limit is {policy.CANDIDATE_CAP}, so "
-                "nothing was imported. Reduce the radius or the bands"
-            )
-        action_id = uuid.uuid4().hex[:12]
-        self.store.stage(action_id, result.candidates)
-        self.store.purge(self.clock())
         return {
             "action_id": action_id,
             "regions": [region.code for region in regions],
@@ -350,6 +354,11 @@ class RepeaterBookService:
         cfg = self.sources_config()
         if not cfg.repeaterbook_enabled:
             raise NotEnabledError(policy.PENDING_APPROVAL_MESSAGE)
+        if cfg.offline:
+            raise PolicyError(
+                "offline mode is on ('sources configure --online' turns it off); nothing was sent. "
+                "Re-filter cached responses with --offline instead"
+            )
         token = self.token()
         if token is None:
             raise TokenMissingError(
@@ -366,10 +375,11 @@ class RepeaterBookService:
                 # Counted before sending: an attempt that dies in flight still spent budget.
                 self.store.record_request(fp, region.code, sent_at)
                 try:
-                    body = client.export(region, now=sent_at)
+                    body = client.export(region, clock=self.clock)
                 except RateLimited as exc:
+                    # Measured from the response, not from sending.
                     wait = max(policy.RATE_LIMIT_LOCKOUT, exc.retry_after or datetime.timedelta(0))
-                    self.store.set_block(fp, "rate-limit", sent_at + wait, str(exc))
+                    self.store.set_block(fp, "rate-limit", self.clock() + wait, str(exc))
                     self.store.ledger_add(fp, region.code, sent_at, exc.status, "rate-limited")
                     raise
                 except AuthError as exc:
@@ -379,6 +389,11 @@ class RepeaterBookService:
                 except RepeaterBookError as exc:
                     self.store.ledger_add(fp, region.code, sent_at, exc.status, type(exc).__name__)
                     raise
+                except Exception as exc:  # a transport failure outside the classified set
+                    self.store.ledger_add(fp, region.code, sent_at, None, type(exc).__name__)
+                    raise TransientError(
+                        f"the RepeaterBook request failed ({type(exc).__name__}); not retried"
+                    ) from None
                 # Nothing the server echoes may carry the token onto disk.
                 body = body.replace(token.reveal().encode("utf-8"), b"***REDACTED***")
                 self.store.put_raw(region.code, body, sent_at)
@@ -448,7 +463,8 @@ class RepeaterBookService:
         return favorite_from_records(self.store.derived())
 
     def register_export_report(self, path: Path) -> None:
-        """Record a companion report that holds RepeaterBook-derived rows so
+        """Record a file that holds RepeaterBook-derived rows -- an export's
+        programming file, its companion report, or a copy of either -- so
         retention and Delete All remove it too."""
         self.store.register_report(path, self.clock())
 

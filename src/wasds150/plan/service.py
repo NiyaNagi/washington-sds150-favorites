@@ -231,12 +231,6 @@ def export_plan(
     files = [Path(p) for p in getattr(result, "files", [])]
     report_path = directory / f"{plan.id}-report.md"
     report_path.write_text(render_plan_report(resolved), encoding="utf-8")
-    if with_repeaterbook and any(c.source.upper().startswith("RB01/") for c in resolved.channels):
-        from wasds150.sources.repeaterbook.service import RepeaterBookService
-
-        # The companion report lists RepeaterBook-derived rows: retention and
-        # Delete All must be able to find and remove it.
-        RepeaterBookService(ctx.config).register_export_report(report_path)
 
     copies: List[Path] = []
     if copy_to is not None:
@@ -252,6 +246,16 @@ def export_plan(
             else:
                 shutil.copy2(source, target_path)
                 copies.append(target_path)
+
+    if with_repeaterbook and any(c.source.upper().startswith("RB01/") for c in resolved.channels):
+        from wasds150.sources.repeaterbook.service import RepeaterBookService
+
+        # Every file written here holds RepeaterBook-derived rows: retention
+        # and Delete All must be able to find and remove each one.
+        service = RepeaterBookService(ctx.config)
+        for path in [csv_path, report_path, *files, *copies]:
+            if Path(path).is_file():
+                service.register_export_report(path)
 
     return PlanExport(
         plan_id=plan.id,
