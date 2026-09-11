@@ -110,6 +110,10 @@ TD_H9 = FleetRadio(
             "label", "text", "Backup label", required=False, default="td-h9",
             help="Prefix for the backup images in radio-backups\\ (radio-a, radio-b, ...).",
         ),
+        InputSpec(
+            "copy_to", "dir", "Also copy the file to", required=False,
+            help="Where you keep CHIRP files, if not the export folder.",
+        ),
     ),
     steps=(
         StepSpec(
@@ -155,6 +159,10 @@ TH_D75 = FleetRadio(
         InputSpec(
             "mcp_app", "app_path", "MCP-D75 program", required=False,
             default=MCP_D75.exe_candidates[0],
+        ),
+        InputSpec(
+            "copy_to", "dir", "Also copy the file to", required=False,
+            help="The folder you open MCP-D75 files from, if not the export folder.",
         ),
     ),
     steps=(
@@ -268,6 +276,10 @@ AT_D890UV = FleetRadio(
         InputSpec(
             "rdt_base", "file", "Saved codeplug (.rdt)", required=False,
             help="The .rdt saved after setting the Optional Settings; the bundle is imported into it.",
+        ),
+        InputSpec(
+            "contacts_to", "dir", "Also keep the contact lists in", required=False,
+            help="A standing copy of the DMR/NXDN contact lists, for example radio-configs\\contacts in the repository.",
         ),
     ),
     steps=(

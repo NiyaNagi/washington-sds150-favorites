@@ -164,6 +164,7 @@ not cap it. MURS stays at low power, inside its 2 W limit (95.2767).
 |---|---|---|---|
 | `td-h9.com_port` (Programming cable port) | yes |  | For example COM7. |
 | `td-h9.label` (Backup label) | no | `td-h9` | Prefix for the backup images in radio-backups\ (radio-a, radio-b, ...). |
+| `td-h9.copy_to` (Also copy the file to) | no |  | Where you keep CHIRP files, if not the export folder. |
 
 1. **Connect the radio** _(confirm)_ - Plug the cable into the same USB socket as last time (the Prolific driver binds per socket), seat the two-pin plug fully - it seats about a millimetre after it looks seated - and turn the radio on.
 2. **Back up and dry-run** _(automatic)_ - Read the radio on <com_port>, save a timestamped image to radio-backups\, and stage <export> into it. Nothing is written to the radio.
@@ -184,6 +185,7 @@ not cap it. MURS stays at low power, inside its 2 W limit (95.2767).
 |---|---|---|---|
 | `th-d75.backup_d75` (Pre-change radio backup) | no |  | Defaults to the newest radio-backups\th-d75\*.d75; the export is built on it. |
 | `th-d75.mcp_app` (MCP-D75 program) | no | `C:\Program Files (x86)\Kenwood\MCP-D75\MCP-D75.exe` |  |
+| `th-d75.copy_to` (Also copy the file to) | no |  | The folder you open MCP-D75 files from, if not the export folder. |
 
 1. **Read the radio into a fresh backup** - In MCP-D75, read the radio and save it into radio-backups\th-d75\ with today's date. The export is patched onto this exact image and the finalize step restores its settings. Never use COM3 for this radio: it is an unrelated device.
 2. **Export the memory file** _(automatic)_ - Export th-d75-fleet with target thd75-file, based on <backup_d75>.
@@ -229,6 +231,7 @@ not cap it. MURS stays at low power, inside its 2 W limit (95.2767).
 | `at-d890uv.cps_app` (D890UV CPS) | no | `C:\D890UV\D890UV.exe` |  |
 | `at-d890uv.copy_to` (Also copy the bundle to) | no |  | A folder the CPS's import dialog opens easily. |
 | `at-d890uv.rdt_base` (Saved codeplug (.rdt)) | no |  | The .rdt saved after setting the Optional Settings; the bundle is imported into it. |
+| `at-d890uv.contacts_to` (Also keep the contact lists in) | no |  | A standing copy of the DMR/NXDN contact lists, for example radio-configs\contacts in the repository. |
 
 1. **Export the CPS bundle** _(automatic)_ - Export at-d890uv-fleet with target atd890-cps.
 2. **Start the CPS** _(automatic)_ - Start the D890UV CPS.

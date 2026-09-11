@@ -91,7 +91,9 @@ def test_settings_store_clear_and_fall_back_to_defaults(tmp_path):
     settings = FleetSettings()
     assert [spec.id for spec in settings.missing(radio)] == ["com_port"]
     settings.set("td-h9", "com_port", "COM7")
-    assert settings.values_for(radio) == {"com_port": "COM7", "label": "td-h9"}
+    values = settings.values_for(radio)
+    assert (values["com_port"], values["label"]) == ("COM7", "td-h9")
+    assert not values.get("copy_to")  # optional, no default
     assert settings.missing(radio) == []
     path = tmp_path / "fleet-settings.json"
     settings.save(path)

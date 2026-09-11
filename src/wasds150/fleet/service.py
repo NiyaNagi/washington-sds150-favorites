@@ -172,14 +172,19 @@ def _write_contacts(
     if not tables:
         return [], [], ["no DMR/NXDN contact list downloaded yet; the fleet update fetches it from radioid.net"]
     files, warnings = contact_files(tables, profile.contacts)
+    # ``contacts_to`` keeps a standing copy of the lists (for example a
+    # tracked folder in the repository), apart from the bundle.
+    keep = load_settings(ctx).get(radio_id, "contacts_to")
     written: List[Path] = []
     copies: List[Path] = []
     for name, text in files.items():
         path = bundle_dir / name
         path.write_bytes(text.encode("ascii", errors="replace"))
         written.append(path)
-        if copy_to is not None:
-            target = Path(copy_to) / bundle_dir.name / name
+        targets = [Path(copy_to) / bundle_dir.name / name] if copy_to is not None else []
+        if keep:
+            targets.append(Path(keep) / name)
+        for target in targets:
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(path, target)
             copies.append(target)
