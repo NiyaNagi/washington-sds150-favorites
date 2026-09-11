@@ -381,14 +381,6 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   roadside support, and NOAA Weather.
 
 
-### Removed
-
-- Moved the 3D models to [NiyaNagi/alturas-labs-models](https://github.com/NiyaNagi/alturas-labs-models)
-  with their full history: the SDS150 visor mounts, the Peak Design bracket and radio standoff,
-  the ProClip plates, the EFHW enclosure and the hex insulator, together with `scripts/cad/`,
-  the modelling method and the radio hardware measurement registry. `docs/3d-models.md`
-  points there.
-
 ### Changed
 
 - Corrected the JYR8010 two-choke report to match the verified vendor identity:
@@ -397,6 +389,14 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Corrected the August 18 final GOWENIC EFHW feed-line description from 12 ft
   coax to 75 ft LS400 outdoors; earlier tuning-history runs that actually used
   12 ft remain unchanged.
+
+### Removed
+
+- Moved the 3D models to [NiyaNagi/alturas-labs-models](https://github.com/NiyaNagi/alturas-labs-models)
+  with their full history: the SDS150 visor mounts, the Peak Design bracket and radio standoff,
+  the ProClip plates, the EFHW enclosure and the hex insulator, together with `scripts/cad/`,
+  the modelling method and the radio hardware measurement registry. `docs/3d-models.md`
+  points there.
 
 ### Fixed
 

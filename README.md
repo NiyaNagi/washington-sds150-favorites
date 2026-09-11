@@ -399,10 +399,6 @@ The 3D models and their `.venv-cad` environment moved to
 [alturas-labs-models](https://github.com/NiyaNagi/alturas-labs-models);
 see [docs/3d-models.md](docs/3d-models.md).
 
-`build_all.py` runs all 31 geometry checks in order and stops at the first
-hard failure, so a broken model cannot overwrite good STLs. It goes quiet
-for minutes at a time while CGAL works.
-
 Project invariants that must not be broken — zero runtime dependencies, the
 MIT/GPL boundary, never committing licensed data, reporting dropped channels
 rather than coercing them — are listed in the
