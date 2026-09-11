@@ -29,7 +29,7 @@ of the legacy radio exports. Everything not listed here is done and tested.
 
 | Item | Detail |
 |---|---|
-| RadioReference login | The app key is configured (local `state/sources.json`) and the `radioreference_api` connector is built, but every data call also needs your RadioReference username and password. Store them once with `cmdkey /generic:wasds150-radioreference /user:<RadioReference username> /pass` (it prompts for the password; nothing reaches the repository). The next update then refreshes all 16 trunked systems the catalog names - sites, frequencies and every talkgroup - and replaces their older Sentinel HPDB copies. See [radioreference-api-application.md](radioreference-api-application.md). |
+| RadioReference login | The app key is configured (local `state/sources.json`) and the `radioreference_api` connector is built, but every data call also needs your RadioReference username and password. Store them once with `cmdkey /generic:wasds150-radioreference /user:<RadioReference username> /pass` (it prompts for the password; nothing reaches the repository). The next update then pulls everything RadioReference holds for Washington - every county's and statewide agency's conventional frequencies and every trunked system's sites, frequencies and talkgroups - and each later run reports what changed since the last one in `.wasds150-home\radioreference\runs\`. See [radioreference-api-application.md](radioreference-api-application.md). |
 | RepeaterBook API (request #229) | Would replace the GMRS directory data with owner-maintained tones and real coordinates, and cross-check WWARA's status data. |
 
 ## Code follow-ups

@@ -407,6 +407,15 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   Fully encrypted talkgroups are marked avoid. The app key lives in the
   local `state/sources.json`; the RadioReference login is read from the
   environment or Windows Credential Manager and never written anywhere.
+- Extended the RadioReference connector to all of Washington. It pulls every
+  county's and statewide agency's conventional frequencies and every trunked
+  system, and keeps the pull in `.wasds150-home\radioreference\snapshot.json`.
+  Reruns re-fetch only what RadioReference's "last updated" stamps moved,
+  with a full refresh at least weekly, and resume if interrupted. Each run
+  writes a change report (frequencies, talkgroups, sites and systems added,
+  removed or changed) under `radioreference\runs\`. Conventional rows
+  replace the CSV export in the `RRC-*` lists, and trunked systems no
+  catalog row names get per-county `RRT-*` lists.
 
 
 ### Changed

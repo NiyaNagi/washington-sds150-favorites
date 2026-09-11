@@ -37,6 +37,9 @@ class SourcesConfig:
     radioreference_export_path: Optional[str] = None
     radioreference_username: Optional[str] = None
     radioreference_app_key: Optional[str] = None
+    #: The web-service pull re-fetches everything at least this often, even
+    #: where RadioReference's "last updated" stamps did not move.
+    radioreference_full_every_days: int = 7
     #: FAA NASR subjects to read (``NAV_BASE``, ``COM``, ``FRQ``); ``None`` = all.
     faa_nasr_subjects: Optional[List[str]] = None
     #: FCC ULS services to download (``lmpriv``, ``lmcomm``, ``amat``,

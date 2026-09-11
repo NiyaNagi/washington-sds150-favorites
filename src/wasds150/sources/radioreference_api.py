@@ -1,34 +1,55 @@
-"""RadioReference Database Web Service (SOAP): live trunked-system data.
+"""RadioReference Database Web Service (SOAP): everything it holds for
+Washington, kept fresh, with a report of what changed between runs.
 
-For every trunked system the catalog names by SID (``SID 7971`` in a row's
-text), this adapter asks the service for the system's details
-(``getTrsDetails``), its sites and their frequencies (``getTrsSites``), its
-talkgroups (``getTrsTalkgroups``) and talkgroup categories
-(``getTrsTalkgroupCats``), plus the trunking type table once
-(``getTrsType``), and builds a complete scanner system from them: sites with
-their coverage circles, the site frequency table, and one talkgroup
-department per RadioReference category. Only Project 25 systems are built;
-the scanner file writer has no other trunking technology.
+**What a run fetches** (``scope="washington"``, the default):
+
+* lookup tables once: modes (``getMode``), service tags (``getTag``) and
+  trunking types (``getTrsType``);
+* the state (``getStateInfo``): its 39 counties, its statewide agencies
+  (Washington State Patrol, DNR, ...) and every trunked system;
+* every county (``getCountyInfo``) and agency (``getAgencyInfo``): their
+  categories and subcategories, and the county's trunked systems;
+* every subcategory's conventional frequencies (``getSubcatFreqs``);
+* every trunked system (``getTrsDetails``, ``getTrsSites``,
+  ``getTrsTalkgroups``, ``getTrsTalkgroupCats``). Project 25 systems become
+  complete scanner systems; others are recorded and reported, because the
+  scanner file writer only builds P25.
+
+``scope="systems"`` (an explicit ``sids=`` list) fetches only those systems.
+
+**Fresh data on every rerun.** The whole pull is persisted as
+``<home>/radioreference/snapshot.json``. A rerun asks for the state and every
+county and agency again (about seventy calls), then re-fetches a
+subcategory only when its county's or agency's ``lastUpdated`` stamp moved,
+and a trunked system only when the state's list stamps it newer. At least
+every ``full_every_days`` (default 7) it re-fetches everything regardless,
+so nothing can drift for long behind a stamp that did not move. The
+snapshot is checkpointed while a run goes, so an interrupted run resumes
+where it stopped instead of starting again.
+
+**What changed.** Each completed run is compared with the previous complete
+snapshot by RadioReference's own stable ids - frequency ``fid``, system
+``sid`` + talkgroup decimal, site id - and the result is written as
+``<home>/radioreference/runs/<timestamp>.json`` and ``.md``: frequencies
+added, removed and changed field by field, talkgroups added/removed/changed,
+sites and systems added or removed. The first line of the source's warnings
+is the one-line summary, so it shows in the update log.
 
 **Authentication.** Every data call needs a RadioReference Premium username
 and password as well as the application key (``getCountryList`` is the only
-call that answers with the key alone). The key and username live in the
-local ``state/sources.json`` (``wasds150 sources configure --rr-app-key``,
-``--rr-username``). The password is read at run time from the
-``WASDS150_RR_PASSWORD`` environment variable or from Windows Credential
-Manager, where ``cmdkey /generic:wasds150-radioreference /user:<name> /pass``
-stores it (the generic credential's user name also supplies the username).
-It is never written to disk, logged, or echoed in an error message.
+call that answers with the key alone). The key lives in the local
+``state/sources.json``. The login is read at run time from
+``WASDS150_RR_USERNAME``/``WASDS150_RR_PASSWORD`` or from Windows Credential
+Manager (``cmdkey /generic:wasds150-radioreference /user:<name> /pass``). It is
+never written to disk, logged, or echoed in an error message.
 
-**Licensing.** This is data the operator is licensed to use personally. The
-systems it produces land in the local catalog only, are matched to rows by
-exact SID (see :mod:`wasds150.recipes.engine`), and replace older copies of
-the same system - a Sentinel HPDB import or a previous refresh - because
-the web service is the current record.
+**Licensing.** This is data the operator is licensed to use personally. It
+is kept in the working home and the local catalog, never in the repository.
 """
 from __future__ import annotations
 
 import datetime
+import json
 import os
 import sys
 import time
@@ -36,13 +57,14 @@ import urllib.error
 import urllib.request
 import xml.etree.ElementTree as ET
 from collections import OrderedDict
-from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
+from pathlib import Path
+from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple
 from xml.sax.saxutils import escape
 
 from wasds150.models.catalog import Channel, Department, Site, System, TrunkFrequency
 from wasds150.sources.base import OnlineSourceAdapter, RawDoc
 from wasds150.sources.facts import NormalizedFact, NormalizeResult
-from wasds150.sources.radioreference_premium import RadioReferenceCredentials
+from wasds150.sources.radioreference_premium import RadioReferenceCredentials, normalize_mode, parse_rr_tone
 from wasds150.util.hashing import stable_id
 
 SOURCE_ID = "radioreference_api"
@@ -56,9 +78,15 @@ CREDENTIAL_TARGET = "wasds150-radioreference"
 #: engine can tell a live copy from an HPDB one.
 SYSTEM_ID_PREFIX = "rrapi:"
 SID_URL = "https://www.radioreference.com/db/sid/{}"
-#: Seconds between requests. The service is shared and a full refresh is
-#: about seventy calls, so there is no reason to hurry it.
+SUBCAT_URL = "https://www.radioreference.com/db/subcat/{}"
+WASHINGTON_STID = 53
+STATEWIDE = "Statewide"
+DEFAULT_FULL_EVERY_DAYS = 7
+#: Seconds between requests. The service is shared; a full pull is a few
+#: thousand calls and there is no reason to hurry it.
 REQUEST_SPACING = 0.25
+CHECKPOINT_EVERY = 100
+SNAPSHOT_VERSION = 1
 LOGIN_HELP = (
     "RadioReference login not configured: store it with "
     f"'cmdkey /generic:{CREDENTIAL_TARGET} /user:<RadioReference username> /pass' "
@@ -75,6 +103,10 @@ Transport = Callable[[bytes, str], bytes]
 class RadioReferenceApiError(RuntimeError):
     """A SOAP fault or a transport failure. The message never carries the
     request, so it can never carry a credential."""
+
+
+def _now() -> datetime.datetime:
+    return datetime.datetime.now(datetime.timezone.utc)
 
 
 # ---------------------------------------------------------------- credentials
@@ -241,10 +273,28 @@ class RadioReferenceApi:
             "sid": int(sid),
             "types": list(types),
             "details": self.call("getTrsDetails", sid=sid) or {},
-            "sites": self.call("getTrsSites", sid=sid) or [],
-            "talkgroups": self.call("getTrsTalkgroups", sid=sid, tgCid=0, tgTag=0, tgDec=0) or [],
-            "categories": self.call("getTrsTalkgroupCats", sid=sid) or [],
+            "sites": _as_list(self.call("getTrsSites", sid=sid)),
+            "talkgroups": _as_list(self.call("getTrsTalkgroups", sid=sid, tgCid=0, tgTag=0, tgDec=0)),
+            "categories": _as_list(self.call("getTrsTalkgroupCats", sid=sid)),
         }
+
+
+def _as_list(value: Any) -> list:
+    if isinstance(value, list):
+        return value
+    return [] if value in (None, "", {}) else [value]
+
+
+def _ids(value: Any, key: str) -> List[int]:
+    """Ids out of an id array, whatever shape the service chose for it."""
+    ids = []
+    for item in _as_list(value):
+        raw = item.get(key) if isinstance(item, dict) else item
+        try:
+            ids.append(int(raw))
+        except (TypeError, ValueError):
+            continue
+    return ids
 
 
 # ----------------------------------------------------------- system builder
@@ -267,11 +317,23 @@ def _fence(item: Dict[str, Any]) -> Tuple[Optional[float], Optional[float], Opti
     return lat, lon, radius if radius else None, "Circle" if radius else ""
 
 
-def _service_type(tags: Any) -> Optional[int]:
+def _tag_names(tags: Any, lookup: Dict[str, str]) -> List[str]:
+    names = []
+    for tag in _as_list(tags):
+        if isinstance(tag, dict):
+            name = tag.get("tagDescr") or lookup.get(str(tag.get("tagId")), "")
+        else:
+            name = lookup.get(str(tag), "")
+        if name:
+            names.append(str(name))
+    return names
+
+
+def _service_type(tags: Any, lookup: Optional[Dict[str, str]] = None) -> Optional[int]:
     from wasds150.recipes.rr_county import _service_type as by_tag
 
-    for tag in tags if isinstance(tags, list) else []:
-        code = by_tag(str((tag or {}).get("tagDescr") or ""))
+    for name in _tag_names(tags, lookup or {}):
+        code = by_tag(name)
         if code is not None:
             return code
     return None
@@ -284,7 +346,7 @@ def _is_p25(record: Dict[str, Any]) -> Tuple[bool, str]:
     return ("project 25" in description.lower() or "p25" in description.lower()), description
 
 
-def system_from_api(record: Dict[str, Any]) -> Tuple[Optional[System], List[str]]:
+def system_from_api(record: Dict[str, Any], tag_lookup: Optional[Dict[str, str]] = None) -> Tuple[Optional[System], List[str]]:
     """One trunked :class:`System` from :meth:`RadioReferenceApi.trunked_system`
     data, or ``None`` with the reason."""
     from wasds150.hpe.validation import frequency_is_scannable
@@ -314,7 +376,7 @@ def system_from_api(record: Dict[str, Any]) -> Tuple[Optional[System], List[str]
             label=_clean(tg.get("tgAlpha") or tg.get("tgDescr") or f"TG {dec}"),
             tgid=int(dec),
             mode="ALL",
-            service_type=_service_type(tg.get("tags")),
+            service_type=_service_type(tg.get("tags"), tag_lookup),
             avoid=enc >= 2,
             notes=note,
         ))
@@ -341,7 +403,7 @@ def system_from_api(record: Dict[str, Any]) -> Tuple[Optional[System], List[str]
             id=stable_id(f"{SYSTEM_ID_PREFIX}{sid}:site:{site_id}", kind="site"),
             label=label or f"Site {site_id}", lat=lat, lon=lon, range_miles=radius, shape=shape,
         ))
-        for entry in site.get("siteFreqs") or []:
+        for entry in _as_list(site.get("siteFreqs")):
             freq = _number(entry.get("freq"))
             if freq is None or not frequency_is_scannable(freq) or (freq, site_id) in seen:
                 continue
@@ -357,8 +419,7 @@ def system_from_api(record: Dict[str, Any]) -> Tuple[Optional[System], List[str]
                       f"scannable frequencies and {len(departments)} talkgroup categories; not built"]
     # The HPDB lays talkgroup departments after the last site; mirror it.
     sites[-1].departments = departments
-    sysids = details.get("sysid") or []
-    wacn = next((str(s.get("wacn")) for s in sysids if isinstance(s, dict) and s.get("wacn")), None)
+    wacn = next((str(s.get("wacn")) for s in _as_list(details.get("sysid")) if isinstance(s, dict) and s.get("wacn")), None)
     return System(
         id=f"{SYSTEM_ID_PREFIX}TrunkId:{sid}",
         label=name,
@@ -379,6 +440,512 @@ def catalog_system_ids() -> Tuple[int, ...]:
     return tuple(sorted({sid for recipe in build_default_recipes(load_baseline()) for sid in recipe.match.configured_sids()}))
 
 
+# ------------------------------------------------------------ Washington pull
+def _parse_time(text: Any) -> Optional[datetime.datetime]:
+    try:
+        parsed = datetime.datetime.fromisoformat(str(text))
+    except (TypeError, ValueError):
+        return None
+    return parsed if parsed.tzinfo else parsed.replace(tzinfo=datetime.timezone.utc)
+
+
+def _lookup(api: RadioReferenceApi, operation: str, id_param: str, id_key: str, name_key: str) -> Dict[str, str]:
+    """A lookup table (id 0 asks for all of it); empty if the service refuses."""
+    try:
+        rows = _as_list(api.call(operation, **{id_param: 0}))
+    except RadioReferenceApiError:
+        return {}
+    return {str(row.get(id_key)): str(row.get(name_key) or "") for row in rows if isinstance(row, dict)}
+
+
+class WashingtonPull:
+    """One run: refreshes what moved since ``previous`` (or everything)."""
+
+    def __init__(
+        self,
+        api: RadioReferenceApi,
+        previous: Optional[Dict[str, Any]] = None,
+        *,
+        partial: Optional[Dict[str, Any]] = None,
+        now: Optional[datetime.datetime] = None,
+        full_every_days: int = DEFAULT_FULL_EVERY_DAYS,
+        force_full: bool = False,
+        extra_sids: Iterable[int] = (),
+        checkpoint: Optional[Callable[[Dict[str, Any]], None]] = None,
+        checkpoint_every: int = CHECKPOINT_EVERY,
+    ):
+        self.api = api
+        self.previous = previous or {}
+        self.now = now or _now()
+        last_full = _parse_time(self.previous.get("last_full_at"))
+        self.full = bool(
+            force_full or not previous or last_full is None
+            or (self.now - last_full) >= datetime.timedelta(days=max(0, full_every_days))
+        )
+        # An interrupted run's items fetched after it started count as fresh.
+        self.partial = partial or {}
+        self.partial_started = _parse_time(self.partial.get("started_at"))
+        self.extra_sids = tuple(int(s) for s in extra_sids)
+        self.checkpoint = checkpoint
+        self.checkpoint_every = max(1, checkpoint_every)
+        self._last_checkpoint = 0
+
+    def _fresh_from_partial(self, section: str, key: str) -> Optional[Dict[str, Any]]:
+        item = (self.partial.get(section) or {}).get(key)
+        fetched = _parse_time((item or {}).get("fetched_at"))
+        if item and self.partial_started and fetched and fetched >= self.partial_started:
+            return item
+        return None
+
+    def _maybe_checkpoint(self, snapshot: Dict[str, Any]) -> None:
+        if self.checkpoint and self.api.calls - self._last_checkpoint >= self.checkpoint_every:
+            self._last_checkpoint = self.api.calls
+            self.checkpoint(snapshot)
+
+    def run(self) -> Dict[str, Any]:
+        stamp = self.now.isoformat()
+        started = self.partial.get("started_at") if self.partial_started else stamp
+        snapshot: Dict[str, Any] = {
+            "version": SNAPSHOT_VERSION,
+            "started_at": started,
+            "finished_at": None,
+            "complete": False,
+            "full": self.full,
+            "last_full_at": stamp if self.full else self.previous.get("last_full_at"),
+            "lookups": {},
+            "state": {},
+            "counties": {},
+            "agencies": {},
+            "subcats": {},
+            "systems": {},
+            "errors": [],
+        }
+        api = self.api
+        types = _as_list(api.call("getTrsType"))
+        snapshot["lookups"] = {
+            "modes": _lookup(api, "getMode", "mode", "mode", "modeName"),
+            "tags": _lookup(api, "getTag", "id", "tagId", "tagDescr"),
+            "types": types,
+        }
+        state = api.call("getStateInfo", stid=WASHINGTON_STID) or {}
+        snapshot["state"] = {k: v for k, v in state.items() if k not in ("trsList",)}
+        listed_systems: Dict[int, Any] = {}
+        for trs in _as_list(state.get("trsList")):
+            if isinstance(trs, dict) and trs.get("sid") is not None:
+                listed_systems[int(trs["sid"])] = trs.get("lastUpdated")
+
+        owners: List[Tuple[str, Dict[str, Any]]] = []
+        for county in _as_list(state.get("countyList")):
+            ctid = county.get("ctid") if isinstance(county, dict) else None
+            if ctid is None:
+                continue
+            info = self._fetch_owner("counties", str(ctid), "getCountyInfo", ctid=int(ctid))
+            if info is None:
+                continue
+            snapshot["counties"][str(ctid)] = info
+            owners.append((f"county:{ctid}", info))
+            for trs in _as_list(info["info"].get("trsList")):
+                if isinstance(trs, dict) and trs.get("sid") is not None:
+                    listed_systems.setdefault(int(trs["sid"]), trs.get("lastUpdated"))
+            self._maybe_checkpoint(snapshot)
+        for agency in _as_list(state.get("agencyList")):
+            aid = agency.get("aid") if isinstance(agency, dict) else None
+            if aid is None:
+                continue
+            info = self._fetch_owner("agencies", str(aid), "getAgencyInfo", aid=int(aid))
+            if info is None:
+                continue
+            snapshot["agencies"][str(aid)] = info
+            owners.append((f"agency:{aid}", info))
+            self._maybe_checkpoint(snapshot)
+
+        for owner, info in owners:
+            body = info["info"]
+            owner_name = body.get("countyName") or body.get("agencyName") or owner
+            for category in _as_list(body.get("cats")):
+                for subcat in _as_list((category or {}).get("subcats")):
+                    scid = subcat.get("scid") if isinstance(subcat, dict) else None
+                    if scid is None:
+                        continue
+                    snapshot["subcats"][str(scid)] = self._subcat(
+                        str(scid), owner, str(owner_name), str(category.get("cName") or ""),
+                        str(subcat.get("scName") or ""), body.get("lastUpdated"), snapshot,
+                    )
+                    self._maybe_checkpoint(snapshot)
+
+        for sid in sorted(set(listed_systems) | set(self.extra_sids)):
+            entry = self._system(sid, listed_systems.get(sid), types, snapshot)
+            if entry is not None:
+                snapshot["systems"][str(sid)] = entry
+            self._maybe_checkpoint(snapshot)
+
+        snapshot["complete"] = True
+        snapshot["finished_at"] = _now().isoformat() if self.now is None else self.now.isoformat()
+        return snapshot
+
+    def _fetch_owner(self, section: str, key: str, operation: str, **params: Any) -> Optional[Dict[str, Any]]:
+        partial = self._fresh_from_partial(section, key)
+        if partial is not None:
+            return partial
+        try:
+            return {"info": self.api.call(operation, **params) or {}, "fetched_at": _now().isoformat()}
+        except RadioReferenceApiError as exc:
+            previous = (self.previous.get(section) or {}).get(key)
+            if previous is not None:
+                return previous
+            raise RadioReferenceApiError(f"{operation} {params}: {exc}") from None
+
+    def _subcat(self, scid: str, owner: str, owner_name: str, category: str, subcategory: str,
+                owner_updated: Any, snapshot: Dict[str, Any]) -> Dict[str, Any]:
+        partial = self._fresh_from_partial("subcats", scid)
+        if partial is not None:
+            return partial
+        previous = (self.previous.get("subcats") or {}).get(scid)
+        if (not self.full and previous and previous.get("owner_updated") == owner_updated
+                and owner_updated not in (None, "")):
+            return dict(previous, owner=owner, owner_name=owner_name, category=category, subcategory=subcategory)
+        try:
+            freqs = _as_list(self.api.call("getSubcatFreqs", scid=int(scid)))
+        except RadioReferenceApiError as exc:
+            snapshot["errors"].append(f"subcategory {scid} ({owner_name} {category} {subcategory}): {exc}")
+            if previous:
+                return previous
+            freqs = []
+        return {
+            "owner": owner, "owner_name": owner_name, "category": category, "subcategory": subcategory,
+            "owner_updated": owner_updated, "freqs": freqs, "fetched_at": _now().isoformat(),
+        }
+
+    def _system(self, sid: int, listed_updated: Any, types: list, snapshot: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        key = str(sid)
+        partial = self._fresh_from_partial("systems", key)
+        if partial is not None:
+            return partial
+        previous = (self.previous.get("systems") or {}).get(key)
+        if (not self.full and previous and listed_updated not in (None, "")
+                and previous.get("last_updated") == listed_updated):
+            return previous
+        try:
+            record = self.api.trunked_system(sid, types)
+        except RadioReferenceApiError as exc:
+            snapshot["errors"].append(f"SID {sid}: {exc}")
+            return previous
+        return {"record": record, "last_updated": listed_updated, "fetched_at": _now().isoformat()}
+
+
+# ---------------------------------------------------------------- change diff
+_FREQ_FIELDS = ("out", "in", "tone", "mode", "descr", "alpha", "callsign", "enc", "colorCode", "tg", "slot")
+_TG_FIELDS = ("tgAlpha", "tgDescr", "tgMode", "enc", "tgCid")
+
+
+def _freq_index(snapshot: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
+    index = {}
+    for scid, subcat in (snapshot.get("subcats") or {}).items():
+        where = " / ".join(p for p in (subcat.get("owner_name"), subcat.get("category"), subcat.get("subcategory")) if p)
+        for freq in _as_list(subcat.get("freqs")):
+            if isinstance(freq, dict) and freq.get("fid") is not None:
+                index[str(freq["fid"])] = {"where": where, "scid": scid, "freq": freq}
+    return index
+
+
+def _tg_index(snapshot: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
+    index = {}
+    for sid, entry in (snapshot.get("systems") or {}).items():
+        record = (entry or {}).get("record") or {}
+        name = (record.get("details") or {}).get("sName") or f"SID {sid}"
+        for tg in _as_list(record.get("talkgroups")):
+            if isinstance(tg, dict) and tg.get("tgDec") is not None:
+                index[f"{sid}:{tg['tgDec']}"] = {"system": name, "sid": sid, "tg": tg}
+    return index
+
+
+def _site_index(snapshot: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
+    index = {}
+    for sid, entry in (snapshot.get("systems") or {}).items():
+        record = (entry or {}).get("record") or {}
+        name = (record.get("details") or {}).get("sName") or f"SID {sid}"
+        for site in _as_list(record.get("sites")):
+            if isinstance(site, dict) and site.get("siteId") is not None:
+                freqs = sorted(f.get("freq") for f in _as_list(site.get("siteFreqs")) if isinstance(f, dict) and f.get("freq") is not None)
+                index[f"{sid}:{site['siteId']}"] = {"system": name, "site": site.get("siteDescr") or "", "freqs": freqs}
+    return index
+
+
+def _field_changes(old: Dict[str, Any], new: Dict[str, Any], fields: Sequence[str]) -> Dict[str, List[Any]]:
+    return {field: [old.get(field), new.get(field)] for field in fields if old.get(field) != new.get(field)}
+
+
+def diff_snapshots(old: Optional[Dict[str, Any]], new: Dict[str, Any]) -> Dict[str, Any]:
+    """What changed from ``old`` to ``new``, keyed by RadioReference's ids."""
+    if not old:
+        freqs, tgs = _freq_index(new), _tg_index(new)
+        return {
+            "baseline": True, "from": None, "to": new.get("finished_at"),
+            "summary": {
+                "frequencies": len(freqs), "talkgroups": len(tgs),
+                "systems": len(new.get("systems") or {}), "subcategories": len(new.get("subcats") or {}),
+            },
+        }
+    report: Dict[str, Any] = {"baseline": False, "from": old.get("finished_at"), "to": new.get("finished_at")}
+    for name, index_fn, fields in (("frequencies", _freq_index, _FREQ_FIELDS), ("talkgroups", _tg_index, _TG_FIELDS)):
+        before, after = index_fn(old), index_fn(new)
+        payload_key = "freq" if name == "frequencies" else "tg"
+        changed = []
+        for key in sorted(set(before) & set(after)):
+            delta = _field_changes(before[key][payload_key], after[key][payload_key], fields)
+            if delta:
+                changed.append(dict(after[key], key=key, changes=delta))
+        report[name] = {
+            "added": [dict(after[k], key=k) for k in sorted(set(after) - set(before))],
+            "removed": [dict(before[k], key=k) for k in sorted(set(before) - set(after))],
+            "changed": changed,
+        }
+    before, after = _site_index(old), _site_index(new)
+    report["sites"] = {
+        "added": [dict(after[k], key=k) for k in sorted(set(after) - set(before))],
+        "removed": [dict(before[k], key=k) for k in sorted(set(before) - set(after))],
+        "frequencies_changed": [
+            dict(after[k], key=k, added=sorted(set(after[k]["freqs"]) - set(before[k]["freqs"])),
+                 removed=sorted(set(before[k]["freqs"]) - set(after[k]["freqs"])))
+            for k in sorted(set(before) & set(after)) if before[k]["freqs"] != after[k]["freqs"]
+        ],
+    }
+    old_systems, new_systems = set(old.get("systems") or {}), set(new.get("systems") or {})
+    report["systems"] = {"added": sorted(new_systems - old_systems), "removed": sorted(old_systems - new_systems)}
+    report["summary"] = {
+        f"{section}_{kind}": len(report[section][kind])
+        for section in ("frequencies", "talkgroups") for kind in ("added", "removed", "changed")
+    }
+    report["summary"].update({
+        "sites_added": len(report["sites"]["added"]), "sites_removed": len(report["sites"]["removed"]),
+        "site_frequency_changes": len(report["sites"]["frequencies_changed"]),
+        "systems_added": len(report["systems"]["added"]), "systems_removed": len(report["systems"]["removed"]),
+    })
+    return report
+
+
+def summary_line(report: Dict[str, Any]) -> str:
+    s = report.get("summary") or {}
+    if report.get("baseline"):
+        return (f"RadioReference Washington baseline: {s.get('frequencies', 0):,} frequencies in "
+                f"{s.get('subcategories', 0):,} subcategories, {s.get('systems', 0)} trunked systems, "
+                f"{s.get('talkgroups', 0):,} talkgroups")
+    return (
+        f"RadioReference changes since {report.get('from')}: frequencies +{s.get('frequencies_added', 0)} "
+        f"-{s.get('frequencies_removed', 0)} ~{s.get('frequencies_changed', 0)}; talkgroups "
+        f"+{s.get('talkgroups_added', 0)} -{s.get('talkgroups_removed', 0)} ~{s.get('talkgroups_changed', 0)}; "
+        f"sites +{s.get('sites_added', 0)} -{s.get('sites_removed', 0)}; systems "
+        f"+{s.get('systems_added', 0)} -{s.get('systems_removed', 0)}"
+    )
+
+
+def report_markdown(report: Dict[str, Any], limit: int = 300) -> str:
+    lines = ["# RadioReference Washington changes", "", summary_line(report), ""]
+    if report.get("baseline"):
+        lines.append("First complete pull: nothing to compare against yet. The next run reports changes.")
+        return "\n".join(lines) + "\n"
+
+    def freq_line(item: Dict[str, Any]) -> str:
+        f = item.get("freq") or {}
+        return f"- {f.get('out')} MHz {f.get('alpha') or ''} - {f.get('descr') or ''} ({item.get('where')}, fid {item.get('key')})"
+
+    def tg_line(item: Dict[str, Any]) -> str:
+        t = item.get("tg") or {}
+        return f"- {item.get('system')}: TG {t.get('tgDec')} {t.get('tgAlpha') or ''} - {t.get('tgDescr') or ''}"
+
+    for title, section, fmt in (("Frequencies", "frequencies", freq_line), ("Talkgroups", "talkgroups", tg_line)):
+        for kind in ("added", "removed", "changed"):
+            items = report[section][kind]
+            if not items:
+                continue
+            lines += [f"## {title} {kind} ({len(items)})", ""]
+            for item in items[:limit]:
+                line = fmt(item)
+                if kind == "changed":
+                    line += ": " + "; ".join(f"{k} {v[0]!r} -> {v[1]!r}" for k, v in item["changes"].items())
+                lines.append(line)
+            if len(items) > limit:
+                lines.append(f"- ... and {len(items) - limit} more (see the .json report)")
+            lines.append("")
+    sites = report["sites"]
+    for kind in ("added", "removed"):
+        if sites[kind]:
+            lines += [f"## Sites {kind} ({len(sites[kind])})", ""]
+            lines += [f"- {s['system']}: {s['site']}" for s in sites[kind][:limit]] + [""]
+    if sites["frequencies_changed"]:
+        lines += [f"## Site frequency changes ({len(sites['frequencies_changed'])})", ""]
+        lines += [f"- {s['system']}: {s['site']}: +{s['added']} -{s['removed']}" for s in sites["frequencies_changed"][:limit]] + [""]
+    for kind in ("added", "removed"):
+        if report["systems"][kind]:
+            lines += [f"## Systems {kind}", "", "- SID " + ", ".join(report["systems"][kind]), ""]
+    return "\n".join(lines) + "\n"
+
+
+# ------------------------------------------------------------- snapshot store
+class SnapshotStore:
+    """``<home>/radioreference``: the last complete pull, the checkpoint of a
+    run in progress, and one change report per completed run."""
+
+    def __init__(self, directory: Path):
+        self.directory = Path(directory)
+
+    @property
+    def snapshot_path(self) -> Path:
+        return self.directory / "snapshot.json"
+
+    @property
+    def partial_path(self) -> Path:
+        return self.directory / "snapshot.partial.json"
+
+    def _read(self, path: Path) -> Optional[Dict[str, Any]]:
+        try:
+            return json.loads(path.read_text(encoding="utf-8"))
+        except (FileNotFoundError, ValueError):
+            return None
+
+    def _write(self, path: Path, data: Dict[str, Any]) -> None:
+        self.directory.mkdir(parents=True, exist_ok=True)
+        tmp = path.with_suffix(path.suffix + ".tmp")
+        tmp.write_text(json.dumps(data, sort_keys=True), encoding="utf-8")
+        os.replace(tmp, path)
+
+    def load(self) -> Optional[Dict[str, Any]]:
+        return self._read(self.snapshot_path)
+
+    def load_partial(self) -> Optional[Dict[str, Any]]:
+        return self._read(self.partial_path)
+
+    def checkpoint(self, snapshot: Dict[str, Any]) -> None:
+        self._write(self.partial_path, snapshot)
+
+    def commit(self, snapshot: Dict[str, Any], report: Dict[str, Any]) -> Tuple[Path, Path]:
+        self._write(self.snapshot_path, snapshot)
+        try:
+            self.partial_path.unlink()
+        except FileNotFoundError:
+            pass
+        runs = self.directory / "runs"
+        runs.mkdir(parents=True, exist_ok=True)
+        stamp = str(snapshot.get("finished_at") or _now().isoformat()).replace(":", "").replace("+0000", "Z")[:17]
+        json_path = runs / f"{stamp}.json"
+        md_path = runs / f"{stamp}.md"
+        json_path.write_text(json.dumps(report, indent=1, sort_keys=True, default=str), encoding="utf-8")
+        md_path.write_text(report_markdown(report), encoding="utf-8")
+        return json_path, md_path
+
+
+# ----------------------------------------------------------------- the facts
+def _county_names(snapshot: Dict[str, Any]) -> Dict[int, str]:
+    names = {}
+    for ctid, entry in (snapshot.get("counties") or {}).items():
+        name = ((entry or {}).get("info") or {}).get("countyName")
+        if name:
+            names[int(ctid)] = str(name)
+    for county in _as_list((snapshot.get("state") or {}).get("countyList")):
+        if isinstance(county, dict) and county.get("ctid") is not None and county.get("countyName"):
+            names.setdefault(int(county["ctid"]), str(county["countyName"]))
+    return names
+
+
+def _mode_name(value: Any, modes: Dict[str, str]) -> str:
+    text = str(value or "").strip()
+    return modes.get(text, text)
+
+
+def frequency_facts(snapshot: Dict[str, Any], retrieved_at: str) -> List[NormalizedFact]:
+    """Every conventional frequency, in the shape the RadioReference county
+    lists are built from (see :mod:`wasds150.recipes.rr_county`)."""
+    lookups = snapshot.get("lookups") or {}
+    modes, tags = lookups.get("modes") or {}, lookups.get("tags") or {}
+    facts = []
+    for scid, subcat in (snapshot.get("subcats") or {}).items():
+        owner = str(subcat.get("owner") or "")
+        county = subcat.get("owner_name") if owner.startswith("county:") else STATEWIDE
+        category = " ".join(p for p in (subcat.get("category"), subcat.get("subcategory")) if p)
+        for freq in _as_list(subcat.get("freqs")):
+            out = _number(freq.get("out")) if isinstance(freq, dict) else None
+            if not out:
+                continue
+            tone = parse_rr_tone(freq.get("tone"))
+            mode_label = _mode_name(freq.get("mode"), modes)
+            input_mhz = _number(freq.get("in"))
+            tag_names = _tag_names(freq.get("tags"), tags)
+            try:
+                color = int(freq.get("colorCode")) if str(freq.get("colorCode") or "").strip() else tone.color_code
+            except (TypeError, ValueError):
+                color = tone.color_code
+            facts.append(NormalizedFact(
+                entity_key=f"{SOURCE_ID}:fid:{freq.get('fid')}",
+                fact_type="frequency",
+                name=_clean(freq.get("descr") or freq.get("alpha") or f"{out:.4f}", 120),
+                freq_mhz=out,
+                tx_freq_mhz=input_mhz if input_mhz else None,
+                tone=tone.tone or None,
+                mode=normalize_mode(mode_label),
+                county=str(county or STATEWIDE),
+                source_id=SOURCE_ID,
+                source_url=SUBCAT_URL.format(scid),
+                retrieved_at=retrieved_at,
+                dmr_color_code=color,
+                dmr_timeslot=tone.slot,
+                dmr_talkgroup=tone.talkgroup,
+                nxdn_ran=tone.ran,
+                raw={
+                    "fid": freq.get("fid"),
+                    "scid": scid,
+                    "rr_category": category,
+                    "rr_alpha": freq.get("alpha") or "",
+                    "rr_callsign": freq.get("callsign") or "",
+                    "rr_mode": mode_label,
+                    "rr_tone_out": tone.raw,
+                    "rr_tag": tag_names[0] if tag_names else "",
+                    "tx_tone": tone.tone if tone.tone.startswith(("TONE=", "D")) else "",
+                    "enc": freq.get("enc"),
+                },
+            ))
+    return facts
+
+
+def system_facts(snapshot: Dict[str, Any], retrieved_at: str) -> Tuple[List[NormalizedFact], List[str]]:
+    tags = (snapshot.get("lookups") or {}).get("tags") or {}
+    counties = _county_names(snapshot)
+    facts, notes = [], []
+    for sid, entry in sorted((snapshot.get("systems") or {}).items(), key=lambda kv: int(kv[0])):
+        record = (entry or {}).get("record")
+        if not record:
+            continue
+        system, reasons = system_from_api(record, tags)
+        notes.extend(reasons)
+        if system is None:
+            continue
+        system_counties = [counties[c] for c in _ids((record.get("details") or {}).get("sCounty"), "ctid") if c in counties]
+        facts.append(_system_fact(system, retrieved_at, system_counties))
+    return facts, notes
+
+
+def _system_fact(system: System, retrieved_at: str, counties: Sequence[str] = ()) -> NormalizedFact:
+    talkgroups = sum(len(d.channels) for site in system.sites for d in site.departments)
+    primary = counties[0] if len(counties) == 1 else STATEWIDE
+    return NormalizedFact(
+        entity_key=f"{SOURCE_ID}:TrunkId:{system.sid}",
+        fact_type="system",
+        name=system.label,
+        county=primary,
+        source_id=SOURCE_ID,
+        source_url=SID_URL.format(system.sid),
+        retrieved_at=retrieved_at,
+        raw={
+            "sid": system.sid,
+            "sid_kind": "TrunkId",
+            "system": system.to_dict(),
+            "talkgroups": talkgroups,
+            "sites": len(system.sites),
+            "frequencies": len(system.trunk_frequencies),
+            "counties": list(counties),
+        },
+    )
+
+
 # ------------------------------------------------------------------ adapter
 class RadioReferenceApiSource(OnlineSourceAdapter):
     name = SOURCE_ID
@@ -391,55 +958,88 @@ class RadioReferenceApiSource(OnlineSourceAdapter):
         *,
         sids: Optional[Sequence[int]] = None,
         api: Optional[RadioReferenceApi] = None,
+        store_dir: Optional[Path] = None,
+        full_every_days: int = DEFAULT_FULL_EVERY_DAYS,
+        force_full: bool = False,
+        now: Optional[datetime.datetime] = None,
+        checkpoint_every: int = CHECKPOINT_EVERY,
+        extra_sids: Optional[Sequence[int]] = None,
     ):
+        #: Systems fetched even if the state's list omits them; ``None`` means
+        #: every SID the catalog names.
+        self.extra_sids = tuple(extra_sids) if extra_sids is not None else None
         self.credentials = credentials or RadioReferenceCredentials()
+        #: An explicit list fetches just those systems; ``None`` pulls the state.
         self.sids = tuple(sids) if sids is not None else None
         self.api = api
+        self.store_dir = Path(store_dir) if store_dir is not None else None
+        self.full_every_days = full_every_days
+        self.force_full = force_full
+        self.now = now
+        self.checkpoint_every = checkpoint_every
+
+    def _store(self, http_client: Optional[Any]) -> Optional[SnapshotStore]:
+        if self.store_dir is not None:
+            return SnapshotStore(self.store_dir)
+        cache_dir = getattr(getattr(http_client, "store", None), "cache_dir", None)
+        if cache_dir is not None:
+            # <home>/state/http-cache -> <home>/radioreference
+            return SnapshotStore(Path(cache_dir).parent.parent / "radioreference")
+        return None
 
     def fetch(self, http_client: Optional[Any] = None) -> RawDoc:
-        # SOAP is POST-only, so the shared GET cache (http_client) is unused.
+        # SOAP is POST-only, so the shared GET cache is used only to locate
+        # the working home for the snapshot.
         if not self.credentials.is_configured():
             raise RadioReferenceApiError(LOGIN_HELP)
         api = self.api or RadioReferenceApi(self.credentials)
-        sids = self.sids if self.sids is not None else catalog_system_ids()
-        types = api.call("getTrsType") or []
-        systems, errors = [], []
-        for sid in sids:
-            try:
-                systems.append(api.trunked_system(sid, types))
-            except RadioReferenceApiError as exc:
-                errors.append(f"SID {sid}: {exc}")
-        if errors and not systems:
-            raise RadioReferenceApiError(errors[0])
-        return RawDoc(
-            source_adapter=self.name,
-            payload={"systems": systems, "errors": errors, "calls": api.calls},
-            fetched_at=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        fetched_at = (self.now or _now()).isoformat()
+        if self.sids is not None:
+            types = _as_list(api.call("getTrsType"))
+            systems, errors = [], []
+            for sid in self.sids:
+                try:
+                    systems.append(api.trunked_system(sid, types))
+                except RadioReferenceApiError as exc:
+                    errors.append(f"SID {sid}: {exc}")
+            if errors and not systems:
+                raise RadioReferenceApiError(errors[0])
+            return RawDoc(source_adapter=self.name, fetched_at=fetched_at,
+                          payload={"scope": "systems", "systems": systems, "errors": errors, "calls": api.calls})
+
+        store = self._store(http_client)
+        previous = store.load() if store else None
+        partial = store.load_partial() if store else None
+        pull = WashingtonPull(
+            api, previous, partial=partial, now=self.now, full_every_days=self.full_every_days,
+            force_full=self.force_full,
+            extra_sids=self.extra_sids if self.extra_sids is not None else catalog_system_ids(),
+            checkpoint=store.checkpoint if store else None, checkpoint_every=self.checkpoint_every,
         )
+        snapshot = pull.run()
+        report = diff_snapshots(previous, snapshot)
+        paths = store.commit(snapshot, report) if store else None
+        return RawDoc(source_adapter=self.name, fetched_at=fetched_at, payload={
+            "scope": "washington", "snapshot": snapshot, "summary": summary_line(report),
+            "report_path": str(paths[1]) if paths else "", "calls": api.calls, "full": pull.full,
+        })
 
     def normalize(self, raw: RawDoc) -> NormalizeResult:
+        payload = raw.payload or {}
+        if payload.get("scope") == "washington":
+            snapshot = payload["snapshot"]
+            facts = frequency_facts(snapshot, raw.fetched_at)
+            systems, notes = system_facts(snapshot, raw.fetched_at)
+            where = f"; report {payload['report_path']}" if payload.get("report_path") else ""
+            mode = "full" if payload.get("full") else "incremental"
+            warnings = [f"{payload.get('summary')} ({mode} run, {payload.get('calls', 0)} calls{where})"]
+            warnings += list(snapshot.get("errors") or []) + notes
+            return NormalizeResult(facts=facts + systems, warnings=warnings)
         facts: List[NormalizedFact] = []
-        warnings: List[str] = list(raw.payload.get("errors") or [])
-        for record in raw.payload.get("systems") or []:
-            system, notes = system_from_api(record)
-            warnings.extend(notes)
-            if system is None:
-                continue
-            talkgroups = sum(len(d.channels) for site in system.sites for d in site.departments)
-            facts.append(NormalizedFact(
-                entity_key=f"{SOURCE_ID}:TrunkId:{system.sid}",
-                fact_type="system",
-                name=system.label,
-                source_id=SOURCE_ID,
-                source_url=SID_URL.format(system.sid),
-                retrieved_at=raw.fetched_at,
-                raw={
-                    "sid": system.sid,
-                    "sid_kind": "TrunkId",
-                    "system": system.to_dict(),
-                    "talkgroups": talkgroups,
-                    "sites": len(system.sites),
-                    "frequencies": len(system.trunk_frequencies),
-                },
-            ))
+        warnings: List[str] = list(payload.get("errors") or [])
+        for record in payload.get("systems") or []:
+            system, reasons = system_from_api(record)
+            warnings.extend(reasons)
+            if system is not None:
+                facts.append(_system_fact(system, raw.fetched_at))
         return NormalizeResult(facts=facts, warnings=warnings)

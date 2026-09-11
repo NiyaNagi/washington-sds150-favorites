@@ -135,8 +135,14 @@ def build_rr_favorites(
     """
     by_county: "OrderedDict[str, List[NormalizedFact]]" = OrderedDict()
     sites_by_county: Dict[str, int] = {}
+    facts = list(facts)
+    # The live web service covers the whole state; when it ran, a downloaded
+    # export would only add a second, older copy of the same rows.
+    live = any(f.source_id == "radioreference_api" and f.fact_type == "frequency" for f in facts)
     for fact in facts:
         if fact.source_id not in RR_SOURCE_IDS:
+            continue
+        if live and fact.source_id != "radioreference_api" and fact.fact_type == "frequency":
             continue
         county = _county_of(fact)
         if fact.fact_type == "site":
@@ -246,6 +252,95 @@ def build_rr_favorites(
                         confidence="verified",
                     )
                 ],
+            )
+        )
+    return favorites
+
+
+TRUNKED_KEY_PREFIX = "RRT-"
+TRUNKED_STATE_KEY = "RRT-WA"
+_RR_STATE_URL = "https://www.radioreference.com/db/browse/stid/53"
+
+
+def trunked_key(county: str) -> str:
+    if county == STATEWIDE:
+        return TRUNKED_STATE_KEY
+    return TRUNKED_KEY_PREFIX + county.upper().replace(" ", "")
+
+
+def build_rr_trunked_favorites(
+    facts: Iterable[NormalizedFact],
+    *,
+    home: Optional[Tuple[float, float]] = None,
+    enable_within_miles: Optional[float] = None,
+    exclude_sids: Iterable[int] = (),
+) -> List[FavoritesList]:
+    """One licensed ``RRT-<COUNTY>`` list per county of the P25 trunked
+    systems the RadioReference web service returned, leaving out any system
+    a catalog row names by SID (that row already carries it, curated).
+
+    A system on one county goes to that county's list; one spanning several
+    (or none) goes to ``RRT-WA``. Start-enabled follows the county lists:
+    only near home. Each list is its own file on the scanner, so one very
+    large trunked system cannot push a county's conventional list over the
+    scanner's file size.
+    """
+    import copy
+
+    exclude = {int(sid) for sid in exclude_sids}
+    by_county: "OrderedDict[str, List[System]]" = OrderedDict()
+    for fact in facts:
+        if fact.source_id != "radioreference_api" or fact.fact_type != "system":
+            continue
+        raw = fact.raw if isinstance(fact.raw, dict) else {}
+        try:
+            sid = int(raw.get("sid"))
+        except (TypeError, ValueError):
+            continue
+        if sid in exclude or not raw.get("system"):
+            continue
+        county = (fact.county or STATEWIDE).strip() or STATEWIDE
+        by_county.setdefault(county, []).append(System.from_dict(copy.deepcopy(raw["system"])))
+
+    favorites: List[FavoritesList] = []
+    for county, systems in sorted(by_county.items()):
+        point = county_point(county) if county != STATEWIDE else None
+        enabled = True
+        if home is not None and enable_within_miles is not None and county != STATEWIDE:
+            enabled = point is not None and (
+                haversine_miles(home[0], home[1], point.lat, point.lon) <= enable_within_miles + point.radius_miles
+            )
+        talkgroups = sum(len(d.channels) for s in systems for site in s.sites for d in site.departments)
+        key = trunked_key(county)
+        favorites.append(
+            FavoritesList(
+                id=stable_id(key.lower()),
+                slug=key.lower(),
+                favorite_key=key,
+                favorite_name=(
+                    "RadioReference Trunked - Washington Statewide" if county == STATEWIDE
+                    else f"RadioReference Trunked - {county} County"
+                ),
+                region="Washington" if county == STATEWIDE else county,
+                counties="Statewide" if county == STATEWIDE else county,
+                scenario="Every P25 trunked system RadioReference lists here that no curated list already carries",
+                source_type="RadioReference Database Web Service (licensed; local catalog only)",
+                system_or_category=f"{len(systems)} trunked systems",
+                sites_or_coverage="Each system's own site coverage circles",
+                departments_or_channels=f"{talkgroups} talkgroups",
+                mode="P25",
+                monitorability="Native P25 on the scanner; trunked, so scanner only",
+                upgrade_required="None",
+                source_url=_RR_STATE_URL,
+                notes=(
+                    "Built live from the RadioReference web service. Licensed data: stays in the local "
+                    "catalog and is never committed or redistributed."
+                ),
+                enabled=enabled,
+                origin=ORIGIN_LOCAL,
+                licensed=True,
+                systems=sorted(systems, key=lambda s: s.label),
+                provenance=[Provenance(source_adapter="radioreference_api", source_url=_RR_STATE_URL, confidence="verified")],
             )
         )
     return favorites

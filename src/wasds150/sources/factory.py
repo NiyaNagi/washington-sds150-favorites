@@ -66,7 +66,8 @@ def _radioreference_api(sources_config: SourcesConfig) -> Optional[OnlineSourceA
     return RadioReferenceApiSource(
         credentials=resolve_credentials(
             sources_config.radioreference_app_key, sources_config.radioreference_username or ""
-        )
+        ),
+        full_every_days=sources_config.radioreference_full_every_days,
     )
 
 

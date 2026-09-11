@@ -69,11 +69,53 @@ cmdkey /generic:wasds150-radioreference /user:<RadioReference username> /pass
 ```
 
 `WASDS150_RR_USERNAME` and `WASDS150_RR_PASSWORD` in the environment work too
-and take precedence. The adapter (`src/wasds150/sources/radioreference_api.py`)
-fetches the details, sites, site frequencies, talkgroups and talkgroup
-categories of every trunked system the catalog names by SID (16 systems,
-about seventy calls), builds each as a P25 scanner system, and replaces the
-older Sentinel HPDB copy of the same SID in every list that carries it,
-curated the same way. The fleet update runs it with the other sources. The
-county/state CSV export path (`sources configure --rr-export-path
-.wasds150-home\rr-exports`) still supplies the conventional county lists.
+and take precedence.
+
+### What it pulls
+
+The adapter (`src/wasds150/sources/radioreference_api.py`) pulls everything
+the service holds for Washington:
+
+- the state: its 39 counties, its statewide agencies and every trunked system;
+- every county and agency: categories and subcategories;
+- every subcategory's conventional frequencies (output, input, tone, mode,
+  tags, colour code / talkgroup / slot, encryption);
+- every trunked system: details, sites with their coverage circles, site
+  frequencies with channel numbers, talkgroups and talkgroup categories;
+- the mode, service-tag and trunking-type lookup tables.
+
+Where it goes:
+
+- Conventional frequencies become the `RRC-<COUNTY>` and `RRWA` lists,
+  replacing the CSV export whenever the service ran.
+- A trunked system a catalog row names by SID replaces that row's older
+  Sentinel HPDB copy, curated the same way.
+- Every other P25 system goes into a per-county `RRT-<COUNTY>` list (or
+  `RRT-WA` when it spans counties), switched on only near home.
+- Non-P25 systems are recorded and reported but not built, because the
+  scanner file writer only builds P25.
+
+### Fresh data on every rerun, and what changed
+
+The whole pull is kept in `.wasds150-home\radioreference\snapshot.json`.
+Each rerun asks for the state and every county and agency again (about
+seventy calls). It re-fetches a subcategory only when its county's or agency's
+"last updated" stamp moved, and a trunked system only when the state's list
+stamps it newer. Every `radioreference_full_every_days` days (default 7, in
+`state/sources.json`) it re-fetches everything regardless. A run that is
+interrupted resumes from its checkpoint (`snapshot.partial.json`).
+
+Every completed run is compared with the previous one by RadioReference's own
+ids and writes `.wasds150-home\radioreference\runs\<time>.md` (and `.json`):
+
+- frequencies added, removed, and changed field by field;
+- talkgroups added, removed and changed;
+- sites and site frequencies;
+- systems added or removed.
+
+The one-line summary is the first message the update log shows for the
+source. The first pull is a baseline; the second is the first with a
+change report.
+
+Everything stays in the git-ignored working home: RadioReference data is
+licensed for personal use and never goes into the repository.

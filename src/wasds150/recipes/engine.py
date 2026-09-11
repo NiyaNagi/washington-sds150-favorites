@@ -253,6 +253,17 @@ def enrich_catalog(
     rr_lists = build_rr_favorites(
         facts, home=(AMES_LAKE_LAT, AMES_LAKE_LON), enable_within_miles=RR_ENABLE_RADIUS_MILES
     )
+    # Every other Washington trunked system the web service returned becomes
+    # a per-county RRT-* list; the ones a catalog row names by SID already
+    # live in that row (see above) and are not repeated.
+    from wasds150.recipes.rr_county import build_rr_trunked_favorites
+
+    rr_lists += build_rr_trunked_favorites(
+        facts,
+        home=(AMES_LAKE_LAT, AMES_LAKE_LON),
+        enable_within_miles=RR_ENABLE_RADIUS_MILES,
+        exclude_sids={sid for recipe in recipes for sid in recipe.match.configured_sids()},
+    )
     # The regional DMR network layout (PNWDigital / SeattleDMR) is rebuilt
     # the same way from the Config Builder facts, with repeater positions
     # joined from the coordinator rows the catalog already holds.
