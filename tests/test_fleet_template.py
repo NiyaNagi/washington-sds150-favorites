@@ -34,13 +34,15 @@ from wasds150.radios.bandplan import may_transmit
 from wasds150.radios.registry import get_profile
 
 #: Slots each legacy plan resolves to against the repository CSV. The fleet
-#: work must not move any of them.
+#: work must not move any of them. ftx1-wa (-5, FL60 no longer feeds its
+#: linked-system block) and h9-ozette (-4 OZ01 repeaters) moved when the
+#: RepeaterBook-derived channels were removed from the catalog.
 LEGACY_SLOTS = {
     "atd890-scan": 957,
     "ftx1-local": 188,
     "ftx1-scan": 183,
-    "ftx1-wa": 855,
-    "h9-ozette": 141,
+    "ftx1-wa": 850,
+    "h9-ozette": 137,
     "thd75-ames-lake": 386,
     "thd75-scan": 391,
 }
