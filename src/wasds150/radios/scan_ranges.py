@@ -84,8 +84,8 @@ HF_HAM: Tuple[ScanRange, ...] = (
     _ham("10m-fm", "10m FM", "10m", 29.500, 29.700, "FM", "FM repeaters and simplex", 48),
 )
 
-#: Amateur VHF and UHF.  1.25 m is deliberately absent: no radio in this
-#: project can reach 222-225 MHz.
+#: Amateur VHF and UHF.  1.25 m is deliberately absent: the FTX-1, whose
+#: scan pairs these fill, cannot receive 174-400 MHz.
 VHF_UHF_HAM: Tuple[ScanRange, ...] = (
     _ham("6m-ssb", "6m SSB/CW", "6m", 50.000, 50.300, "USB", "Beacons 50.06-50.08", 26),
     _ham("6m-fm", "6m FM", "6m", 51.000, 54.000, "FM", "Repeaters and simplex", 46),

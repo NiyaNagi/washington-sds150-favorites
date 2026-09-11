@@ -20,6 +20,7 @@ from wasds150.plan.service import resolve_named_plan
 from wasds150.plans import get_plan, list_plans
 from wasds150.plans.template import (
     FLEET_PLAN_RADIOS,
+    FRS_ONLY,
     GMRS_INTERSTITIAL,
     GMRS_MAIN,
     HOME,
@@ -45,7 +46,7 @@ LEGACY_SLOTS = {
     "thd75-scan": 391,
 }
 
-_PERSONAL_FREQS = set(GMRS_MAIN) | set(GMRS_INTERSTITIAL) | set(MURS)
+_PERSONAL_FREQS = set(GMRS_MAIN) | set(GMRS_INTERSTITIAL) | set(FRS_ONLY) | set(MURS)
 
 
 @pytest.fixture(scope="module")
@@ -119,21 +120,23 @@ def test_transmit_only_in_licensed_blocks():
                 assert block.label in licensed, (radio_id, block.label)
 
 
-def test_gmrs_and_murs_transmit_wherever_the_hardware_does():
+def test_gmrs_frs_and_murs_transmit_wherever_the_hardware_does():
     policies = {b.label: b.tx_policy for b in build_fleet_plan("td-h9").blocks}
-    assert policies["GMRS 1-7"] == TX_AUTO and policies["GMRS 15-22"] == TX_AUTO
+    for label in ("GMRS 1-7", "FRS 8-14", "GMRS 15-22", "GMRS Repeaters"):
+        assert policies[label] == TX_AUTO, label
     assert policies["MURS"] == TX_SIMPLEX
-    assert policies["FRS 8-14"] == TX_NONE
     for radio_id in ("ftx1", "th-d75", "at-d890uv"):
         for block in build_fleet_plan(radio_id).blocks:
             if block.label.startswith(("GMRS", "FRS", "MURS")):
                 assert block.tx_policy == TX_NONE, (radio_id, block.label)
 
 
-def test_gmrs_power_respects_the_interstitial_cap():
+def test_gmrs_and_frs_run_at_full_power_and_murs_stays_low():
+    # The operator's explicit choice: every GMRS and FRS channel at the
+    # radio's highest step, regardless of the 95.1767 ERP limits.
     powers = {b.label: b.power for b in build_fleet_plan("td-h9").blocks}
-    assert powers["GMRS 1-7"] == "5.0W"
-    assert powers["GMRS 15-22"] == "10W"
+    for label in ("GMRS 1-7", "FRS 8-14", "GMRS 15-22", "GMRS Repeaters"):
+        assert powers[label] == "10W", label
     assert powers["MURS"] == "1.0W"
 
 
@@ -154,9 +157,7 @@ def test_resolved_fleet_plans_fit_and_transmit_legally(real_ctx):
             freq = channel.tx_freq_mhz if channel.tx_freq_mhz is not None else channel.rx_freq_mhz
             assert resolved.profile.can_transmit(freq), (radio_id, channel.label)
             personal = any(abs(channel.rx_freq_mhz - f) < 0.001 for f in _PERSONAL_FREQS)
-            # The band plan does not model 1.25 m (no radio reached it when it
-            # was written); 222-225 MHz is entirely inside General privileges.
-            amateur = may_transmit(freq, "general") or 222.0 <= freq <= 225.0
+            amateur = may_transmit(freq, "general")
             assert personal or amateur, (radio_id, channel.label, freq)
 
 

@@ -40,6 +40,22 @@ Departments distinguish analog 6 m, 2 m, 1.25 m, 70 cm, 33 cm and 23 cm,
 linked analog, P25, DMR, and unsupported digital carriers. Channel notes retain
 input frequency, offset, sponsor, link data, source URL and operator comments.
 
+## PSHAM02: 6 m, 1.25 m, 33 cm and 23 cm without a refresh
+
+Until WWARA is fetched, PSHAM01 holds almost nothing outside 2 m and 70 cm.
+`PSHAM02` (`src/wasds150/catalog/wwara_band_snapshot.py`) is a checked-in
+subset of the extract dated **2026-09-10** covering only those four bands: every
+current voice coordination within 60 miles of Ames Lake. That comes to 14 on
+6 m, 21 on 1.25 m, 8 on 33 cm and 3 on 23 cm. The rows go through the same
+code as a refresh, so tones, inputs and notes match, and a coordination that
+lapses later is marked avoided the same way. The fleet repeater blocks select
+PSHAM01 first, so after a refresh the refreshed copy wins and the snapshot
+duplicate is dropped.
+
+WWARA lists no coordinated 10 m FM repeater within 60 miles; 29.600 simplex
+remains in HAM01. On 33 cm and 23 cm only the SDS150 receives, and no fleet
+radio transmits.
+
 ## Operator-published net channels
 
 Times below are Pacific local time and should be rechecked before relying on a

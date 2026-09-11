@@ -37,7 +37,7 @@ import datetime
 import io
 import re
 import zipfile
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 from wasds150.sources.base import OnlineSourceAdapter, RawDoc
 from wasds150.sources.facts import NormalizedFact, NormalizeResult
@@ -69,6 +69,79 @@ def parse_wwara_zip(data: bytes):
     return list(reader), source_updated
 
 
+def fact_from_row(
+    row: Dict[str, str],
+    *,
+    source_updated: str,
+    retrieved_at: str,
+    url: str = DATABASE_EXTRACT_URL,
+    warnings: Optional[List[str]] = None,
+) -> NormalizedFact:
+    """One WWARA CSV row as a fact.
+
+    Shared by a live refresh and by the checked-in snapshot in
+    :mod:`wasds150.catalog.wwara_band_snapshot`, so a snapshot channel and
+    its refreshed counterpart are built identically.
+    """
+    call = row.get("CALL", "").strip()
+    try:
+        freq = float(row["OUTPUT_FREQ"]) if row.get("OUTPUT_FREQ") else None
+    except ValueError:
+        freq = None
+        if warnings is not None:
+            warnings.append(f"{call}: could not parse OUTPUT_FREQ {row.get('OUTPUT_FREQ')!r}")
+    try:
+        input_freq = float(row["INPUT_FREQ"]) if row.get("INPUT_FREQ") else None
+    except ValueError:
+        input_freq = None
+    offset_mhz = (input_freq - freq) if (freq is not None and input_freq is not None) else None
+    tone = row.get("CTCSS_OUT") or row.get("DCS_CDCSS") or None
+    try:
+        lat = float(row["LATITUDE"]) if row.get("LATITUDE") else None
+        lon = float(row["LONGITUDE"]) if row.get("LONGITUDE") else None
+    except ValueError:
+        lat = lon = None
+    record_id = row.get("FC_RECORD_ID", "").strip()
+    entity_key = f"wwara:{record_id}" if record_id else f"wwara:{call}:{freq}"
+    if row.get("DMR") == "Y":
+        mode = "DMR"
+        color_code = re.sub(r"\D", "", row.get("DMR_COLOR_CODE", ""))
+        tone = f"ColorCode={color_code}" if color_code else None
+    elif row.get("P25_PHASE_1") == "Y" or row.get("P25_PHASE_2") == "Y":
+        mode = "P25"
+        nac = row.get("P25_NAC", "").strip()
+        tone = f"NAC={nac}" if nac else None
+    elif row.get("FM_NARROW") == "Y":
+        mode = "NFM"
+        tone = row.get("CTCSS_OUT", "").strip() or row.get("DCS_CDCSS", "").strip() or None
+    elif row.get("FM_WIDE") == "Y":
+        mode = "FM"
+        tone = row.get("CTCSS_OUT", "").strip() or row.get("DCS_CDCSS", "").strip() or None
+    else:
+        mode = "AUTO"  # D-STAR/Fusion/other carrier: scanner cannot decode voice.
+        tone = None
+    if tone and mode in ("FM", "NFM"):
+        tone = f"TONE=C{tone}" if row.get("CTCSS_OUT", "").strip() else f"D{tone.zfill(3)}"
+    return NormalizedFact(
+        entity_key=entity_key,
+        fact_type="coordination",
+        name=f"{call} ({row.get('CITY', '')})".strip(),
+        freq_mhz=freq,
+        offset_mhz=offset_mhz,
+        tone=tone,
+        mode=mode,
+        county=None,  # WWARA publishes city/locale, not county directly
+        lat=lat,
+        lon=lon,
+        location_precision=ASSUME_LOCATION_PRECISION,
+        source_id=WwaraSource.name,
+        source_url=row.get("URL") or url,
+        source_updated=source_updated,
+        retrieved_at=retrieved_at,
+        raw=row,
+    )
+
+
 class WwaraSource(OnlineSourceAdapter):
     name = "wwara"
     available = True
@@ -95,66 +168,16 @@ class WwaraSource(OnlineSourceAdapter):
         rows, source_updated = parse_wwara_zip(raw.payload)
         facts: List[NormalizedFact] = []
         warnings: List[str] = []
-
         for row in rows:
             if row.get("STATE", "").strip() != self.state:
                 continue
-            call = row.get("CALL", "").strip()
-            try:
-                freq = float(row["OUTPUT_FREQ"]) if row.get("OUTPUT_FREQ") else None
-            except ValueError:
-                freq = None
-                warnings.append(f"{call}: could not parse OUTPUT_FREQ {row.get('OUTPUT_FREQ')!r}")
-            try:
-                input_freq = float(row["INPUT_FREQ"]) if row.get("INPUT_FREQ") else None
-            except ValueError:
-                input_freq = None
-            offset_mhz = (input_freq - freq) if (freq is not None and input_freq is not None) else None
-            tone = row.get("CTCSS_OUT") or row.get("DCS_CDCSS") or None
-            try:
-                lat = float(row["LATITUDE"]) if row.get("LATITUDE") else None
-                lon = float(row["LONGITUDE"]) if row.get("LONGITUDE") else None
-            except ValueError:
-                lat = lon = None
-            record_id = row.get("FC_RECORD_ID", "").strip()
-            entity_key = f"wwara:{record_id}" if record_id else f"wwara:{call}:{freq}"
-            if row.get("DMR") == "Y":
-                mode = "DMR"
-                color_code = re.sub(r"\D", "", row.get("DMR_COLOR_CODE", ""))
-                tone = f"ColorCode={color_code}" if color_code else None
-            elif row.get("P25_PHASE_1") == "Y" or row.get("P25_PHASE_2") == "Y":
-                mode = "P25"
-                nac = row.get("P25_NAC", "").strip()
-                tone = f"NAC={nac}" if nac else None
-            elif row.get("FM_NARROW") == "Y":
-                mode = "NFM"
-                tone = row.get("CTCSS_OUT", "").strip() or row.get("DCS_CDCSS", "").strip() or None
-            elif row.get("FM_WIDE") == "Y":
-                mode = "FM"
-                tone = row.get("CTCSS_OUT", "").strip() or row.get("DCS_CDCSS", "").strip() or None
-            else:
-                mode = "AUTO"  # D-STAR/Fusion/other carrier: scanner cannot decode voice.
-                tone = None
-            if tone and mode in ("FM", "NFM"):
-                tone = f"TONE=C{tone}" if row.get("CTCSS_OUT", "").strip() else f"D{tone.zfill(3)}"
             facts.append(
-                NormalizedFact(
-                    entity_key=entity_key,
-                    fact_type="coordination",
-                    name=f"{call} ({row.get('CITY', '')})".strip(),
-                    freq_mhz=freq,
-                    offset_mhz=offset_mhz,
-                    tone=tone,
-                    mode=mode,
-                    county=None,  # WWARA publishes city/locale, not county directly
-                    lat=lat,
-                    lon=lon,
-                    location_precision=ASSUME_LOCATION_PRECISION,
-                    source_id=self.name,
-                    source_url=row.get("URL") or self.url,
+                fact_from_row(
+                    row,
                     source_updated=source_updated,
                     retrieved_at=raw.fetched_at,
-                    raw=row,
+                    url=self.url,
+                    warnings=warnings,
                 )
             )
         return NormalizeResult(facts=facts, warnings=warnings)

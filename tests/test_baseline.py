@@ -8,21 +8,23 @@ from wasds150.catalog import baseline, loader
 from wasds150.catalog.ames_lake import favorites as ames_lake_favorites
 from wasds150.catalog.band_profiles import favorites as band_favorites
 from wasds150.catalog.ftx1_import import favorites as ftx1_import_favorites
+from wasds150.catalog.gmrs_repeaters import favorite as gmrs_repeaters_favorite
 from wasds150.catalog.hf_nets import favorites as hf_nets_favorites
 from wasds150.catalog.ham_bandplan import favorites as ham_bandplan_favorites
 from wasds150.catalog.olympic_coast import favorites as olympic_coast_favorites
 from wasds150.catalog.puget_ham import favorite as puget_ham_favorite
 from wasds150.catalog.upper_lena_lake import favorites as upper_lena_favorites
+from wasds150.catalog.wwara_band_snapshot import favorite as wwara_band_favorite
 from wasds150.models.catalog import Catalog
 from wasds150.recipes.systems import static_systems_for
 
 
 def test_load_baseline_returns_statewide_and_king_county_favorites():
     catalog = baseline.load_baseline()
-    assert len(catalog.favorites) == 141
+    assert len(catalog.favorites) == 143
     assert len([fl for fl in catalog.favorites if fl.favorite_key.startswith("KC")]) == 39
-    assert {fl.favorite_key for fl in catalog.favorites[-6:]} == {
-        "UL03", "PSHAM01", "OZ01", "HAM01", "FTX01", "HFNET01",
+    assert {fl.favorite_key for fl in catalog.favorites[-8:]} == {
+        "UL03", "PSHAM01", "PSHAM02", "GMRS01", "OZ01", "HAM01", "FTX01", "HFNET01",
     }
 
 
@@ -43,7 +45,7 @@ def test_baseline_matches_repo_csv(repo_csv_path):
         for fl in ames_lake_favorites()
         + band_favorites()
         + upper_lena_favorites()
-        + [puget_ham_favorite()]
+        + [puget_ham_favorite(), wwara_band_favorite(), gmrs_repeaters_favorite()]
         + olympic_coast_favorites()
         + ham_bandplan_favorites()
         + ftx1_import_favorites()

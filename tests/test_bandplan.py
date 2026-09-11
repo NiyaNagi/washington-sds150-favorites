@@ -43,6 +43,9 @@ class TestBandEdges:
     def test_band_lookup(self):
         assert band_for(14.2).id == "20m"
         assert band_for(146.52).id == "2m"
+        assert band_for(223.5).id == "1.25m"
+        assert band_for(927.5).id == "33cm"
+        assert band_for(1294.5).id == "23cm"
         assert band_for(500.0) is None
 
 
@@ -74,11 +77,21 @@ class TestGeneralClassPrivileges:
             (28.500, True),
             (50.100, True),
             (146.520, True),
+            (223.500, True),
             (446.000, True),
+            (927.500, True),
+            (1294.500, True),
         ],
     )
     def test_general_transmit_privileges(self, mhz, allowed):
         assert may_transmit(mhz, CLASS_GENERAL) is allowed
+
+    def test_novice_privileges_above_fifty_megahertz(self):
+        # 47 CFR 97.301(f): 222-225 and 1270-1295 MHz only.
+        assert may_transmit(223.5, "novice")
+        assert may_transmit(1280.0, "novice")
+        assert not may_transmit(1250.0, "novice")
+        assert not may_transmit(927.5, "novice")
 
     def test_extra_has_everything_a_general_has(self):
         for band in BANDS:
@@ -122,8 +135,9 @@ class TestScanRanges:
         selected = ranges_by_priority(10)
         assert selected == sorted(selected, key=lambda r: (r.priority, r.id))
 
-    def test_no_range_covers_the_unreachable_band(self):
-        # 222-225 MHz cannot be received by any radio in this project.
+    def test_no_range_covers_1_25_metres(self):
+        # These ranges fill the FTX-1's scan pairs, and the FTX-1 cannot
+        # receive 174-400 MHz, even though the TD-H9 and TH-D75 work 1.25 m.
         for scan_range in ALL_RANGES:
             assert not (222.0 <= scan_range.low_mhz <= 225.0), scan_range.id
 

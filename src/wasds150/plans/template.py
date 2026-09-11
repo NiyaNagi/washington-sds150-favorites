@@ -76,6 +76,7 @@ POWER_LOW = "low"
 
 #: Representative frequencies for "can this radio transmit on GMRS / MURS".
 _GMRS_PROBE = (462.600,)
+_FRS_PROBE = (467.6375,)
 _MURS_PROBE = (151.880,)
 
 # Uniden service types (see wasds150.hpe.schema.SERVICE_TYPES).
@@ -315,8 +316,8 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
     # -- amateur, transmit where licensed ------------------------------------
     ServiceBlockSpec(
         "ham-6m", "Ham 6m Repeaters", "Ham 6m",
-        lambda k: (_near(k, "PSHAM01", dept=r"Analog 6 Meter|Linked Analog", ranges=((50.0, 54.0),)),),
-        tx=TXK_HAM_REPEATER, limit=40, radius=True, requires=_receives(52.0), tx_probe=(52.0,),
+        lambda k: (_near(k, "PSHAM01", "PSHAM02", dept=r"Analog 6 Meter|Linked Analog", ranges=((50.0, 54.0),)),),
+        tx=TXK_HAM_REPEATER, sort=SORT_TIER_DISTANCE, limit=40, radius=True, requires=_receives(52.0), tx_probe=(52.0,),
         groups=(GROUP_HAM_ALL, GROUP_HAM_ANALOG),
     ),
     ServiceBlockSpec(
@@ -325,18 +326,21 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
             _near(k, "PSHAM01", dept=r"Analog 2 Meter|Linked Analog", ranges=((144.0, 148.0),)),
             _near(k, "THD75WWARA", dept=r"2 Meter", ranges=((144.0, 148.0),)),
         ),
-        tx=TXK_HAM_REPEATER, limit=160, radius=True, requires=_receives(146.0), tx_probe=(146.0,),
-        groups=(GROUP_HAM_ALL, GROUP_HAM_ANALOG),
-        notes="Every current WWARA analog 2 m machine in range; transmit uses the published access tone.",
+        tx=TXK_HAM_REPEATER, sort=SORT_TIER_DISTANCE, limit=160, radius=True, requires=_receives(146.0),
+        tx_probe=(146.0,), groups=(GROUP_HAM_ALL, GROUP_HAM_ANALOG),
+        notes=(
+            "Every current WWARA analog 2 m machine in range, nearest first so a small radio keeps "
+            "the closest; transmit uses the published access tone."
+        ),
     ),
     ServiceBlockSpec(
         "ham-125", "Ham 1.25m Repeaters", "Ham 1.25m",
         lambda k: (
-            _near(k, "PSHAM01", dept=r"Analog 1\.25 Meter|Linked Analog", ranges=((222.0, 225.0),)),
+            _near(k, "PSHAM01", "PSHAM02", dept=r"Analog 1\.25 Meter|Linked Analog", ranges=((222.0, 225.0),)),
             _near(k, "THD75WWARA", dept=r"1\.25 Meter", ranges=((222.0, 225.0),)),
         ),
-        tx=TXK_HAM_REPEATER, limit=30, radius=True, requires=_receives(223.5), tx_probe=(223.5,),
-        groups=(GROUP_HAM_ALL, GROUP_HAM_ANALOG),
+        tx=TXK_HAM_REPEATER, sort=SORT_TIER_DISTANCE, limit=30, radius=True, requires=_receives(223.5),
+        tx_probe=(223.5,), groups=(GROUP_HAM_ALL, GROUP_HAM_ANALOG),
     ),
     ServiceBlockSpec(
         "ham-70cm", "Ham 70cm Repeaters", "Ham 70cm",
@@ -345,8 +349,8 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
             _near(k, "THD75WWARA", dept=r"70 Centimeter", ranges=((420.0, 450.0),)),
             _keys("THD75USER"),
         ),
-        tx=TXK_HAM_REPEATER, limit=160, radius=True, requires=_receives(440.0), tx_probe=(440.0,),
-        groups=(GROUP_HAM_ALL, GROUP_HAM_ANALOG),
+        tx=TXK_HAM_REPEATER, sort=SORT_TIER_DISTANCE, limit=160, radius=True, requires=_receives(440.0),
+        tx_probe=(440.0,), groups=(GROUP_HAM_ALL, GROUP_HAM_ANALOG),
     ),
     ServiceBlockSpec(
         "dstar", "D-STAR Repeaters", "D-STAR",
@@ -497,31 +501,39 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
         limit=40, groups=(GROUP_MARINE_RAIL,),
     ),
     # -- personal radio -------------------------------------------------------
+    # GMRS and FRS transmit at the radio's highest power by the operator's
+    # choice. 47 CFR 95.1767 limits a GMRS station to 5 W ERP on channels 1-7
+    # and 0.5 W ERP on 8-14; see docs/fleet-updates.md.
     ServiceBlockSpec(
         "gmrs-interstitial", "GMRS 1-7", "GMRS FRS MURS",
         lambda k: (_keys("FL65", ranges=_exact(GMRS_INTERSTITIAL)),),
-        tx=TXK_GMRS, sort=SORT_NATURAL, limit=7, power=POWER_MID, tx_probe=_GMRS_PROBE,
+        tx=TXK_GMRS, sort=SORT_NATURAL, limit=7, tx_probe=_GMRS_PROBE,
         groups=(GROUP_PERSONAL,),
-        notes="47 CFR 95.1767 caps these at 5 W ERP.",
+        notes="Full power by the operator's choice; 47 CFR 95.1767 sets 5 W ERP here.",
     ),
     ServiceBlockSpec(
         "frs", "FRS 8-14", "GMRS FRS MURS",
         lambda k: (_keys("FL65", ranges=_exact(FRS_ONLY)),),
-        sort=SORT_NATURAL, limit=7, groups=(GROUP_PERSONAL,),
-        notes=(
-            "Receive only: GMRS may use 467 MHz channels 8-14 only at 0.5 W ERP from a "
-            "handheld, below the lowest power step of the fleet's transmitters."
-        ),
+        tx=TXK_GMRS, sort=SORT_NATURAL, limit=7, tx_probe=_FRS_PROBE,
+        groups=(GROUP_PERSONAL,),
+        notes="Full power by the operator's choice; 47 CFR 95.1767 sets 0.5 W ERP here.",
     ),
     ServiceBlockSpec(
         "gmrs-main", "GMRS 15-22", "GMRS FRS MURS",
+        lambda k: (_keys("FL65", ranges=_exact(GMRS_MAIN)),),
+        tx=TXK_GMRS, sort=SORT_NATURAL, limit=8, tx_probe=_GMRS_PROBE,
+        groups=(GROUP_PERSONAL,),
+        notes="Simplex on the eight main channels; repeaters are the next block.",
+    ),
+    ServiceBlockSpec(
+        "gmrs-repeaters", "GMRS Repeaters", "GMRS FRS MURS",
         lambda k: (
-            _keys("FL65", ranges=_exact(GMRS_MAIN)),
+            _near(k, "GMRS01", ranges=((462.54, 462.74),)),
             _rr_county(k, dept=r"GMRS", ranges=((462.54, 462.74),)),
         ),
-        tx=TXK_GMRS, sort=SORT_NATURAL, limit=16, tx_probe=_GMRS_PROBE,
+        tx=TXK_GMRS, sort=SORT_TIER_DISTANCE, limit=20, radius=True, tx_probe=_GMRS_PROBE,
         groups=(GROUP_PERSONAL,),
-        notes="Main channels and local GMRS repeaters; repeaters transmit on their published input.",
+        notes="Nearest listed open repeaters first, each on its published input and access tone.",
     ),
     ServiceBlockSpec(
         "murs", "MURS", "GMRS FRS MURS",
@@ -736,7 +748,7 @@ _TD_H9 = RadioKnobs(
     limits={
         "ham-2m": 38, "ham-125": 4, "ham-70cm": 36, "simplex": 6, "seattle-acs": 0,
         "air-civil": 8, "air-mil": 0, "sar": 10, "wildfire": 6, "marine": 12, "rail": 4,
-        "gmrs-interstitial": 7, "frs": 7, "gmrs-main": 12, "murs": 5, "business": 6,
+        "gmrs-interstitial": 7, "frs": 7, "gmrs-main": 8, "gmrs-repeaters": 9, "murs": 5, "business": 6,
         "public-safety": 12, "data": 0, "noaa": 7, "other-nearby": 10,
     },
 )
@@ -752,7 +764,7 @@ _FTX1 = RadioKnobs(
         "hf-nets": 40, "hf-calling": 40, "hf-digital": 40, "hf-reference": 40,
         "air-civil": 50, "air-mil": 20, "sar": 40, "wildfire": 40, "marine": 30, "rail": 15,
         "business": 30, "public-safety": 50, "data": 10, "broadcast-am": 20, "packs": 20,
-        "other-nearby": 20,
+        "gmrs-repeaters": 10, "other-nearby": 20,
     },
 )
 
@@ -765,7 +777,7 @@ _TH_D75 = RadioKnobs(
         "simplex": 20, "seattle-acs": 50, "hf-nets": 20, "hf-calling": 20, "hf-digital": 10,
         "hf-reference": 20, "air-civil": 40, "air-mil": 20, "sar": 40, "wildfire": 40,
         "marine": 30, "rail": 15, "business": 30, "public-safety": 50, "data": 10,
-        "broadcast-fm": 40, "broadcast-am": 20, "packs": 20, "other-nearby": 20,
+        "broadcast-fm": 40, "broadcast-am": 20, "packs": 20, "gmrs-repeaters": 10, "other-nearby": 20,
     },
 )
 

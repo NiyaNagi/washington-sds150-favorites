@@ -39,6 +39,8 @@ from wasds150.catalog.ames_lake import favorites as ames_lake_favorites
 from wasds150.catalog.band_profiles import favorites as band_favorites
 from wasds150.catalog.upper_lena_lake import favorites as upper_lena_favorites
 from wasds150.catalog.puget_ham import favorite as puget_ham_favorite
+from wasds150.catalog.wwara_band_snapshot import favorite as wwara_band_favorite
+from wasds150.catalog.gmrs_repeaters import favorite as gmrs_repeaters_favorite
 from wasds150.catalog.olympic_coast import favorites as olympic_coast_favorites
 from wasds150.catalog.ham_bandplan import favorites as ham_bandplan_favorites
 from wasds150.catalog.ftx1_import import favorites as ftx1_import_favorites
@@ -61,7 +63,7 @@ def load_baseline() -> Catalog:
         ames_lake_favorites()
         + band_favorites()
         + upper_lena_favorites()
-        + [puget_ham_favorite()]
+        + [puget_ham_favorite(), wwara_band_favorite(), gmrs_repeaters_favorite()]
         + olympic_coast_favorites()
         + ham_bandplan_favorites()
         + ftx1_import_favorites()

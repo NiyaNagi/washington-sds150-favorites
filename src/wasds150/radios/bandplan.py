@@ -139,6 +139,11 @@ _ALL = (CLASS_GENERAL, CLASS_ADVANCED, CLASS_EXTRA)
 _ALL_PLUS_TECH = (CLASS_NOVICE, CLASS_TECHNICIAN) + _ALL
 _EXTRA_ONLY = (CLASS_EXTRA,)
 _EXTRA_ADV = (CLASS_ADVANCED, CLASS_EXTRA)
+_TECH_AND_UP = (CLASS_TECHNICIAN,) + _ALL
+
+#: Pacific Northwest repeater pairings, read from WWARA's coordinations
+#: rather than the ARRL national plan, which differs on 33 cm and 23 cm.
+_WWARA_PAIRING = "Pacific Northwest practice, per WWARA coordinations"
 
 
 BANDS: Tuple[Band, ...] = (
@@ -486,6 +491,31 @@ BANDS: Tuple[Band, ...] = (
         ),
     ),
     Band(
+        id="1.25m",
+        label="1.25 meters",
+        low_mhz=222.000,
+        high_mhz=225.000,
+        # 47 CFR 97.301(a) and (f): Technicians and above, and Novices, hold
+        # all of 222-225 MHz. 219-220 MHz is a separate allocation for fixed
+        # digital message forwarding (97.303) and is not modelled.
+        license_segments=(LicenseSegment(222.000, 225.000, _ALL_PLUS_TECH),),
+        mode_segments=(
+            ModeSegment(222.000, 222.150, "Weak-signal CW and SSB"),
+            ModeSegment(222.150, 222.250, "Local option: weak signal, repeater inputs, control"),
+            ModeSegment(222.250, 223.380, "FM repeater inputs"),
+            ModeSegment(223.400, 223.520, "FM simplex"),
+            ModeSegment(223.520, 223.640, "Digital and packet"),
+            ModeSegment(223.640, 223.700, "Links and control"),
+            ModeSegment(223.710, 223.850, "Local option: FM simplex, packet, repeater outputs"),
+            ModeSegment(223.850, 224.980, "FM repeater outputs"),
+        ),
+        calling=(
+            CallingFrequency(222.100, "1.25m SSB and CW calling", "USB", ARRL_BAND_PLAN),
+            CallingFrequency(223.500, "1.25m FM simplex calling", "FM", ARRL_BAND_PLAN),
+        ),
+        note="Local repeaters transmit 1.6 MHz below their output (WWARA).",
+    ),
+    Band(
         id="70cm",
         label="70 centimeters",
         low_mhz=420.000,
@@ -512,19 +542,54 @@ BANDS: Tuple[Band, ...] = (
             CallingFrequency(446.000, "70cm FM simplex calling", "FM", ARRL_BAND_PLAN),
         ),
     ),
+    Band(
+        id="33cm",
+        label="33 centimeters",
+        low_mhz=902.000,
+        high_mhz=928.000,
+        # 47 CFR 97.301(a): Technician and above; no Novice privileges.
+        license_segments=(LicenseSegment(902.000, 928.000, _TECH_AND_UP),),
+        mode_segments=(
+            ModeSegment(902.000, 903.000, "FM repeater inputs, 25 MHz below the output", _WWARA_PAIRING),
+            ModeSegment(927.000, 928.000, "FM and P25 repeater outputs", _WWARA_PAIRING),
+        ),
+        calling=(
+            CallingFrequency(903.100, "33cm SSB and CW calling", "USB", ARRL_BAND_PLAN),
+            CallingFrequency(906.500, "33cm FM simplex calling", "FM", ARRL_BAND_PLAN),
+        ),
+        note="Secondary allocation, shared with ISM devices and location services (47 CFR 97.303).",
+    ),
+    Band(
+        id="23cm",
+        label="23 centimeters",
+        low_mhz=1240.000,
+        high_mhz=1300.000,
+        license_segments=(
+            LicenseSegment(1240.000, 1300.000, _TECH_AND_UP),
+            # 47 CFR 97.301(f), at 5 W PEP (97.313).
+            LicenseSegment(1270.000, 1295.000, (CLASS_NOVICE,), "Novice, 5 W PEP"),
+        ),
+        mode_segments=(
+            ModeSegment(1270.000, 1274.000, "FM and D-STAR repeater inputs, 20 MHz below the output", _WWARA_PAIRING),
+            ModeSegment(1290.000, 1294.000, "FM and D-STAR repeater outputs", _WWARA_PAIRING),
+            ModeSegment(1294.000, 1295.000, "FM simplex"),
+            ModeSegment(1295.000, 1297.000, "Weak signal"),
+        ),
+        calling=(
+            CallingFrequency(1294.500, "23cm FM simplex calling", "FM", ARRL_BAND_PLAN),
+            CallingFrequency(1296.100, "23cm SSB and CW calling", "USB", ARRL_BAND_PLAN),
+        ),
+        note="Secondary allocation (47 CFR 97.303). Only the SDS150 receives here; no fleet radio transmits.",
+    ),
 )
 
 BANDS_BY_ID: Dict[str, Band] = {band.id: band for band in BANDS}
 
-#: 222-225 MHz is a US amateur band, but no radio in this project can reach
-#: it: the SDS150 has no transmitter and the FTX-1's receiver has a hard
-#: 174-400 MHz gap. It is recorded here so its absence is a stated fact
-#: rather than an oversight.
+#: Amateur bands no radio in this project can receive, recorded so their
+#: absence is a stated fact rather than an oversight. 1.25 m used to be here;
+#: the TD-H9 and TH-D75 both transmit on it.
 UNREACHABLE_BANDS = {
-    "1.25m": (
-        "222-225 MHz. The FTX-1 cannot receive 174-400 MHz and the TD-H9 "
-        "covers only 220-230 MHz for receive, not transmit."
-    ),
+    "13cm and up": "2300 MHz and above. The SDS150, the widest receiver in the fleet, stops at 1300 MHz.",
 }
 
 

@@ -233,6 +233,11 @@ Power is set per block and the plan encodes the legal limits directly:
 plan** and asserts these limits hold, so a future edit cannot quietly raise
 MURS to 10 W.
 
+The table describes the Ozette trip plan (`h9-ozette`). The fleet plan
+(`td-h9-fleet`) differs by the operator's explicit choice: GMRS 1-7, FRS 8-14,
+GMRS 15-22 and the GMRS repeaters all transmit at High (10 W), and MURS stays
+at 1 W. See [fleet-updates.md](fleet-updates.md#transmit).
+
 Transmit is opt-in per block via `tx_policy`. `TX_NONE` programs a channel for
 listening only and is the default for every public-safety, marine, aviation and
 NOAA block. Transmitting on those is illegal without the appropriate licence

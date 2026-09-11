@@ -61,7 +61,7 @@ def _append_local_area_extension(catalog: Catalog) -> None:
                 for system in favorite.systems:
                     if system.id not in present:
                         current.systems.append(copy.deepcopy(system))
-        elif favorite.favorite_key.startswith(("KC", "LA", "OUT", "BAND", "UL", "PSHAM", "OZ", "HAM", "FTX", "HFNET")):
+        elif favorite.favorite_key.startswith(("KC", "LA", "OUT", "BAND", "UL", "PSHAM", "GMRS", "OZ", "HAM", "FTX", "HFNET")):
             catalog.favorites.append(copy.deepcopy(favorite))
 
 

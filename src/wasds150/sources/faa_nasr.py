@@ -48,7 +48,8 @@ from each file's header through :data:`_FRQ_COLUMN_CANDIDATES`; a file
 without a frequency, state or facility column is skipped with a warning
 naming the header it did find, and a row without its own position takes the
 airport's from ``APT_BASE.csv``. ``subjects`` chooses which of ``NAV_BASE``,
-``COM`` and ``FRQ`` are read.
+``COM`` and ``FRQ`` are read. Checked against the real cycle on 2026-09-10:
+discovery found every column and produced 790 Washington frequency facts.
 
 Public domain (US federal work) — fully ingestible/redistributable.
 """
@@ -279,7 +280,13 @@ class FaaNasrSource(OnlineSourceAdapter):
     def _frq_facts(
         self, inner_zip: zipfile.ZipFile, zip_url: str, retrieved_at: str, warnings: List[str]
     ) -> List[NormalizedFact]:
-        files = [name for name in inner_zip.namelist() if _FRQ_FILE.search(name)]
+        # Each cycle ships a column dictionary (FRQ_CSV_DATA_STRUCTURE.csv)
+        # beside the data; it matches the name pattern but holds no rows.
+        files = [
+            name
+            for name in inner_zip.namelist()
+            if _FRQ_FILE.search(name) and "DATA_STRUCTURE" not in name.upper()
+        ]
         if not files:
             warnings.append("FRQ*.csv not found in this cycle's CSV data; facility frequencies skipped")
             return []

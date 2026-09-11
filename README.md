@@ -59,7 +59,7 @@ catalog is the source of truth. See
 
 | Radio | Role | Memories | Loaded now | Status |
 |---|---|---:|---:|---|
-| Uniden SDS150 | Trunk-tracking scanner, receive only | unlimited | 141 Favorites Lists | Verified |
+| Uniden SDS150 | Trunk-tracking scanner, receive only | unlimited | 143 Favorites Lists | Verified |
 | TIDRADIO TD-H9 | Analog handheld transceiver | 199 | 185 memories | Verified against hardware |
 | Kenwood TH-D75A | Tri-band analog/D-STAR and wideband receiver | 1,000 + 1,500 DR | 545 memories + 21 DR repeaters | Verified; current image tracked |
 | Yaesu FTX-1 | HF/VHF/UHF transceiver | 999 | 960 statewide **or** 351 local memories | Profile from documentation, **unverified** |
@@ -153,10 +153,10 @@ Writing to a radio always backs it up first, always requires an explicit
 
 | Measure | Current baseline |
 |---|---:|
-| Curated Favorites List entries | 141 |
+| Curated Favorites List entries | 143 |
 | Statewide/core entries | 78 |
 | King County municipal entries | 39 |
-| Lists generated with no private input | 73 |
+| Lists generated with no private input | 79 |
 | Lists generated after current local Sentinel enrichment | 135 |
 | Unique structured channel records after enrichment | 1,855 |
 | Remaining local warnings | 2 |
@@ -164,9 +164,9 @@ Writing to a radio always backs it up first, always requires an explicit
 | Registered radio profiles | 3 |
 | Registered channel plans | 6 |
 
-Four of the 141 entries are transceiver-oriented and carry fully cited
+Four of the 143 entries are transceiver-oriented and carry fully cited
 channel lists rather than scanner metadata: **OZ01** (Olympic Coast / Lake
-Ozette, 141 channels), **HAM01** (US amateur band plan, 88 calling and
+Ozette, 141 channels), **HAM01** (US amateur band plan, 94 calling and
 convention frequencies, reference only), **FTX01** (FTX-1 factory memory
 import, 453 channels) and **HFNET01** (HF nets, beacons and utility stations,
 54 channels, reference only).
