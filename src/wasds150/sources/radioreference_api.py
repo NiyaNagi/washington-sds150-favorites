@@ -382,14 +382,18 @@ def system_from_api(record: Dict[str, Any], tag_lookup: Optional[Dict[str, str]]
         if dec is None:
             continue
         enc = int(tg.get("enc") or 0)
+        alpha = _clean(tg.get("tgAlpha"), 120)
         note = "; ".join(part for part in (
-            _clean(tg.get("tgDescr"), 120),
+            f"alpha tag {alpha}" if alpha else "",
             f"RadioReference TG {dec}",
             "encrypted" if enc >= 2 else ("partly encrypted" if enc == 1 else ""),
         ) if part)
         grouped.setdefault(int(tg.get("tgCid") or 0), []).append(Channel(
             id=stable_id(f"{SYSTEM_ID_PREFIX}{sid}:tg:{dec}", kind="channel"),
-            label=_clean(tg.get("tgAlpha") or tg.get("tgDescr") or f"TG {dec}"),
+            # The description, as Uniden's HPDB names talkgroups: the recipes
+            # match on it ("Snoqualmie Valley"), which the 16-character alpha
+            # tag ("Snoq Valley Hosp") would miss.
+            label=_clean(tg.get("tgDescr") or tg.get("tgAlpha") or f"TG {dec}"),
             tgid=int(dec),
             mode="ALL",
             service_type=_service_type(tg.get("tags"), tag_lookup),

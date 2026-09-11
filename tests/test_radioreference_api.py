@@ -182,7 +182,9 @@ def test_a_p25_system_is_built_whole_and_validates_for_the_scanner():
     from wasds150.recipes.rr_county import _service_type as service_type_for_tag
 
     fire = departments["Fire"].channels[0]
-    assert (fire.label, fire.tgid, fire.mode, fire.avoid) == ("FD Disp?", 1001, "ALL", False)
+    # named by the description, as the HPDB does; the alpha tag rides in the note
+    assert (fire.label, fire.tgid, fire.mode, fire.avoid) == ("Fire Dispatch", 1001, "ALL", False)
+    assert "alpha tag FD Disp?" in fire.notes
     # RadioReference tags map to the scanner's service types through the same
     # table the county lists use.
     assert fire.service_type == service_type_for_tag("Fire Dispatch") is not None
