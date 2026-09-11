@@ -42,7 +42,10 @@ def _never(*args, **kwargs):
 
 
 def _hooks(**overrides) -> UpdateHooks:
-    values = dict(fetch=_never, launch=_never, program_tdh9=_never, install_sentinel=_never)
+    values = dict(
+        fetch=_never, launch=_never, program_tdh9=_never, install_sentinel=_never,
+        refresh_contacts=lambda ctx, job: "contacts not fetched in tests",
+    )
     values.update(overrides)
     return UpdateHooks(**values)
 

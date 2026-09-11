@@ -120,12 +120,19 @@ def _default_install(*args: Any, **kwargs: Any) -> Any:
     return install_selected_favorites(*args, **kwargs)
 
 
+def _default_refresh_contacts(ctx: AppContext, job: JobContext) -> str:
+    from wasds150.contacts.refresh import refresh_contacts
+
+    return refresh_contacts(ctx, job)
+
+
 @dataclass
 class UpdateHooks:
     fetch: Callable[..., Any] = _default_fetch
     launch: Callable[[Path, List[str]], None] = _default_launch
     program_tdh9: Callable[..., Any] = _default_program_tdh9
     install_sentinel: Callable[..., Any] = _default_install
+    refresh_contacts: Callable[[AppContext, JobContext], str] = _default_refresh_contacts
 
 
 # ---------------------------------------------------------------- sources --
@@ -248,20 +255,19 @@ def _refresh_sources(ctx: AppContext, spec: FleetUpdateSpec, job: JobContext, ho
         summary["catalog"] = f"not applied: {exc}"
 
 
-def _refresh_contacts(ctx: AppContext, spec: FleetUpdateSpec, job: JobContext, summary: Dict[str, Any]) -> None:
+def _refresh_contacts(ctx: AppContext, spec: FleetUpdateSpec, job: JobContext, hooks: UpdateHooks,
+                      summary: Dict[str, Any]) -> None:
     from wasds150.radios.registry import get_profile
 
-    if not spec.refresh_contacts or not any(get_profile(r).contacts for r in spec.radio_ids):
+    if not any(get_profile(r).contacts for r in spec.radio_ids):
         return
     title = "Refresh DMR/NXDN contacts"
-    try:
-        from wasds150.contacts.refresh import refresh_contacts
-    except ImportError:
-        job.skip("contacts.refresh", title, "the contact list is not available in this build", optional=True)
+    if not spec.refresh_contacts:
+        job.skip("contacts.refresh", title, "turned off", optional=True)
         return
     try:
         with job.step("contacts.refresh", title, optional=True) as handle:
-            handle.message = refresh_contacts(ctx, job)
+            handle.message = hooks.refresh_contacts(ctx, job)
         summary["contacts"] = "ok"
     except JobCancelled:
         raise
@@ -278,7 +284,7 @@ def _checklist_step(job: JobContext, spec: FleetUpdateSpec, prefix: str, step: S
         job.skip(step_id, step.title, "manual steps skipped", optional=step.optional)
         return False
     done = {"ok": False}
-    artifacts = {k: str(context[k]) for k in ("export", "lst", "final", "report") if context.get(k)}
+    artifacts = {k: str(context[k]) for k in ("export", "lst", "contacts", "final", "report") if context.get(k)}
     with job.step(step_id, step.title, optional=step.optional) as handle:
         answer = job.wait_for_user(render_instructions(step.instructions, context), kind=step.kind, artifacts=artifacts)
         if answer.decision == DECISION_SKIP:
@@ -548,7 +554,7 @@ def _update_radio(ctx: AppContext, spec: FleetUpdateSpec, job: JobContext, hooks
     if prior and (prior.get("artifacts") or {}).get("export"):
         artifact = prior["artifacts"]["export"]
         context.update(export=artifact["path"], lst=prior.get("lst", ""), rows=prior.get("rows", 0),
-                       report=prior.get("report", ""))
+                       report=prior.get("report", ""), contacts=prior.get("contacts", ""))
         export_sha = artifact["sha256"]
         job.skip(export_id, f"{label}: export", f"reused {artifact['path']} from the resumed job")
     else:
@@ -559,10 +565,12 @@ def _update_radio(ctx: AppContext, spec: FleetUpdateSpec, job: JobContext, hooks
                                   include_licensed=spec.include_licensed)
             handle.artifact("export", export.path)
             lst = next((str(f) for f in export.files if f.suffix.upper() == ".LST"), "")
-            handle.data.update(rows=export.rows, report=str(export.report_path or ""), lst=lst,
+            contacts = next((str(f) for f in export.files if f.name.upper().startswith("DIGITALCONTACTLIST")), "")
+            handle.data.update(rows=export.rows, report=str(export.report_path or ""), lst=lst, contacts=contacts,
                                copies=len(export.copies), warnings=len(export.warnings))
             handle.message = f"{export.rows} rows -> {export.path}"
-            context.update(export=str(export.path), lst=lst, rows=export.rows, report=str(export.report_path or ""))
+            context.update(export=str(export.path), lst=lst, rows=export.rows, report=str(export.report_path or ""),
+                           contacts=contacts)
         export_sha = job._job.status.step(export_id).data["artifacts"]["export"]["sha256"]
     result["exported"] = context["export"]
 
@@ -600,7 +608,7 @@ def run_fleet_update(ctx: AppContext, spec: FleetUpdateSpec, job: JobContext,
     summary: Dict[str, Any] = {"sources": {}, "catalog": None, "radios": {}}
     if spec.refresh_sources:
         _refresh_sources(ctx, spec, job, hooks, summary)
-    _refresh_contacts(ctx, spec, job, summary)
+    _refresh_contacts(ctx, spec, job, hooks, summary)
     failed = []
     for radio_id in spec.radio_ids:
         radio = get_fleet_radio(radio_id)

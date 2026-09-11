@@ -1685,6 +1685,7 @@ def cmd_fleet_update(args: argparse.Namespace) -> int:
                 skip_sources=_split_names(args.skip_sources),
                 apply_sources=not args.no_apply,
                 force_conflicts=args.force,
+                refresh_contacts=not args.no_contacts,
                 include_licensed=not args.exclude_licensed,
                 execute=args.execute,
                 skip_manual=args.skip_manual,
@@ -2045,6 +2046,9 @@ def build_parser() -> argparse.ArgumentParser:
     p_fleet_update.add_argument("--skip-sources", help="Never refresh these sources (comma-separated)")
     p_fleet_update.add_argument("--no-apply", action="store_true", help="Fetch sources but do not change the catalog")
     p_fleet_update.add_argument("--force", action="store_true", help="Apply the merge even with conflicts")
+    p_fleet_update.add_argument(
+        "--no-contacts", action="store_true", help="Do not refresh the radioid.net contact list"
+    )
     p_fleet_update.add_argument(
         "--execute", action="store_true",
         help="Actually write radios and the Sentinel workspace (default: dry run, export only)",

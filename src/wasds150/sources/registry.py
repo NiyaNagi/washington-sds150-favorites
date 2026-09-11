@@ -17,6 +17,7 @@ from __future__ import annotations
 
 from typing import Dict, Type, Union
 
+from wasds150.contacts.radioid import RadioIdSource
 from wasds150.sources.amsat import AmsatSource
 from wasds150.sources.base import OnlineSourceAdapter, SourceAdapter
 from wasds150.sources.faa_nasr import FaaNasrSource
@@ -60,6 +61,9 @@ _REGISTRY: Dict[str, AnySourceClass] = {
     WaEmdSource.name: WaEmdSource,
     WaDnrSource.name: WaDnrSource,
     NifcSource.name: NifcSource,
+    # Contact directories: no catalog facts, fetched by the fleet update's
+    # contact step or `sources fetch radioid`.
+    RadioIdSource.name: RadioIdSource,
 }
 
 

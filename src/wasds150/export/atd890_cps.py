@@ -25,14 +25,16 @@ import csv
 import io
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from wasds150.export.atd890_bundle import (
+    RADIO_ID,
     RADIO_ID_NAME,
-    RADIO_ID_PLACEHOLDER,
     Atd890Bundle,
     build_bundle,
 )
+from wasds150.export.atd890_settings import Atd890Settings, render_settings_files
+from wasds150.export.atd890_settings_template import SettingsTemplate, load_packaged_template
 from wasds150.plan.resolve import PlannedChannel, ResolvedPlan
 from wasds150.radios.tones import TONE_CTCSS, TONE_DCS, ToneSpec
 
@@ -218,7 +220,15 @@ def channel_row(channel: PlannedChannel, number: int, bundle: Atd890Bundle, warn
     return row
 
 
-def render_files(resolved: ResolvedPlan) -> Tuple[Dict[str, str], Atd890Bundle]:
+def render_files(
+    resolved: ResolvedPlan,
+    *,
+    settings_template: Optional[SettingsTemplate] = None,
+    settings: Optional[Atd890Settings] = None,
+) -> Tuple[Dict[str, str], Atd890Bundle]:
+    """Every file of the bundle. ``settings_template`` (a captured Optional
+    Settings / hot key template) adds those files and lists them in the
+    manifest; without one the bundle is the nine tables it always was."""
     bundle = build_bundle(resolved)
     warnings = list(bundle.warnings)
 
@@ -251,7 +261,7 @@ def render_files(resolved: ResolvedPlan) -> Tuple[Dict[str, str], Atd890Bundle]:
     for number, contact in enumerate(bundle.contacts, start=1):
         talkgroup_rows.append([str(number), str(contact.dmr_id), contact.name, contact.call_type, "None"])
 
-    radio_rows: List[List[str]] = [list(RADIOID_HEADER), ["1", str(RADIO_ID_PLACEHOLDER), RADIO_ID_NAME]]
+    radio_rows: List[List[str]] = [list(RADIOID_HEADER), ["1", str(RADIO_ID), RADIO_ID_NAME]]
 
     rx_group_rows: List[List[str]] = [list(RXGROUP_HEADER)]
     for number, group in enumerate(bundle.rx_groups, start=1):
@@ -289,21 +299,31 @@ def render_files(resolved: ResolvedPlan) -> Tuple[Dict[str, str], Atd890Bundle]:
         "AMAir.CSV": _csv(am_rows),
         "AMZone.CSV": _csv(am_zone_rows),
     }
-    manifest_lines = [str(len(BUNDLE_FILES))] + [f'{index},"{name}"' for index, name in enumerate(BUNDLE_FILES)]
+    manifest = list(BUNDLE_FILES)
+    if settings_template is not None:
+        extra, notes = render_settings_files(
+            settings_template,
+            zone_names=[zone.name for zone in bundle.zones] + [zone.name for zone in bundle.am_zones],
+            settings=settings,
+        )
+        files.update(extra)
+        warnings.extend(notes)
+        manifest += list(extra)
+    manifest_lines = [str(len(manifest))] + [f'{index},"{name}"' for index, name in enumerate(manifest)]
     files[f"{resolved.plan.id}.LST"] = "\r\n".join(manifest_lines) + "\r\n"
     bundle.warnings = warnings
     return files, bundle
 
 
 def render_atd890(resolved: ResolvedPlan) -> Atd890ExportResult:
-    files, bundle = render_files(resolved)
+    files, bundle = render_files(resolved, settings_template=load_packaged_template())
     summary = "\n".join(f"{name}: {text.count(chr(10)) - 1} rows" for name, text in files.items() if name.endswith(".CSV"))
     return Atd890ExportResult(text=summary, rows=bundle.rows, warnings=bundle.warnings)
 
 
 def write_atd890(resolved: ResolvedPlan, path: Path) -> Atd890ExportResult:
     """Write the bundle into directory ``path`` (created if needed)."""
-    files, bundle = render_files(resolved)
+    files, bundle = render_files(resolved, settings_template=load_packaged_template())
     path = Path(path)
     path.mkdir(parents=True, exist_ok=True)
     written: List[Path] = []

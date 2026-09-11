@@ -98,12 +98,16 @@ def _fcc_uls(sources_config: SourcesConfig) -> OnlineSourceAdapter:
 def runnable_source_names(
     *, only: Optional[Collection[str]] = None, skip: Collection[str] = ()
 ) -> List[str]:
-    """Available online adapters in registry order, narrowed to ``only``
-    (when given) and without ``skip``. Unknown names in either are ignored,
-    matching how ``sources update --only`` has always behaved."""
+    """Available online adapters that produce catalog content, in registry
+    order, narrowed to ``only`` (when given) and without ``skip``. Unknown
+    names in either are ignored, matching how ``sources update --only`` has
+    always behaved. Contact directories (``kind="contacts"``) are never
+    part of a catalog update."""
     names = []
     for name, cls in list_sources().items():
         if not issubclass(cls, OnlineSourceAdapter) or not cls.available:
+            continue
+        if getattr(cls, "kind", "facts") == "contacts":
             continue
         if only is not None and name not in only:
             continue

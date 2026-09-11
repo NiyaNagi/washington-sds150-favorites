@@ -26,6 +26,7 @@ from collections import OrderedDict
 from dataclasses import dataclass, field
 from typing import Dict, Iterable, List, Optional, Tuple
 
+from wasds150 import station
 from wasds150.plan.resolve import PlannedChannel, ResolvedPlan
 
 AM_AIR_MAX = 256
@@ -36,10 +37,10 @@ RX_GROUP_MEMBER_MAX = 64
 SCAN_LIST_MAX = 250
 NAME_MAX = 16
 
-#: WA7DAM has no registered DMR ID yet; the CPS needs one on every channel,
-#: so the bundle ships this placeholder and shouts about it.
-RADIO_ID_PLACEHOLDER = 1
-RADIO_ID_NAME = "WA7DAM"
+#: The operator's registered DMR ID and the name the CPS files it under;
+#: every channel row references it (see :mod:`wasds150.station`).
+RADIO_ID = station.DMR_ID
+RADIO_ID_NAME = station.CALLSIGN
 
 #: Every channel row references a contact, analog rows included, so a
 #: contact must exist even when the plan holds no DMR channel.
@@ -318,11 +319,7 @@ def build_bundle(resolved: ResolvedPlan) -> Atd890Bundle:
     if len(am_zones) > AM_ZONE_MAX:
         raise Atd890ExportError(f"{len(am_zones)} AM zones exceed the radio's {AM_ZONE_MAX}")
 
-    warnings.append(
-        f"RadioIDList.CSV carries placeholder DMR ID {RADIO_ID_PLACEHOLDER} for {RADIO_ID_NAME}; "
-        "register at https://radioid.net and replace it in the CPS before transmitting on DMR"
-    )
-    nxdn = [c for c in channels if c.digital is not None and c.digital.protocol == "NXDN"]
+    nxdn =[c for c in channels if c.digital is not None and c.digital.protocol == "NXDN"]
     if nxdn:
         warnings.append(
             f"{len(nxdn)} NXDN channels written with the RAN in the EnRan/DeRan columns; that column "

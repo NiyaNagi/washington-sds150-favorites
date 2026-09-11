@@ -11,7 +11,7 @@ from __future__ import annotations
 import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 from wasds150.appctx import AppContext
 from wasds150.fleet.registry import FLEET, get_fleet_radio
@@ -148,6 +148,37 @@ def _export_scanner(
     )
 
 
+def _write_contacts(
+    ctx: AppContext, radio_id: str, bundle_dir: Path, copy_to: Optional[Path]
+) -> Tuple[List[Path], List[Path], List[str]]:
+    """Write the stored contact directories into a CPS bundle folder (see
+    :mod:`wasds150.export.atd890_contacts`)."""
+    from wasds150.contacts.model import ContactStore
+    from wasds150.export.atd890_contacts import contact_files
+    from wasds150.radios.registry import get_profile
+
+    profile = get_profile(radio_id)
+    if profile.contacts is None or not bundle_dir.is_dir():
+        return [], [], []
+    store = ContactStore(ctx.config.contacts_dir)
+    tables = [t for t in (store.load(p) for p in sorted(profile.contacts.protocols)) if t is not None]
+    if not tables:
+        return [], [], ["no DMR/NXDN contact list downloaded yet; the fleet update fetches it from radioid.net"]
+    files, warnings = contact_files(tables, profile.contacts)
+    written: List[Path] = []
+    copies: List[Path] = []
+    for name, text in files.items():
+        path = bundle_dir / name
+        path.write_bytes(text.encode("ascii", errors="replace"))
+        written.append(path)
+        if copy_to is not None:
+            target = Path(copy_to) / bundle_dir.name / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(path, target)
+            copies.append(target)
+    return written, copies, warnings
+
+
 def export_radio(
     ctx: AppContext,
     radio_id: str,
@@ -176,6 +207,7 @@ def export_radio(
         copy_to=copy_to,
         include_licensed=include_licensed,
     )
+    contact_paths, contact_copies, contact_warnings = _write_contacts(ctx, radio.radio_id, export.csv_path, copy_to)
     return FleetExport(
         radio_id=radio.radio_id,
         plan_id=radio.plan_id,
@@ -184,9 +216,9 @@ def export_radio(
         report_path=export.report_path,
         rows=export.rows,
         sha256=sha256_of_path(export.csv_path),
-        files=[Path(p) for p in export.files],
-        copies=[Path(p) for p in export.copies],
-        warnings=list(export.warnings),
+        files=[Path(p) for p in export.files] + contact_paths,
+        copies=[Path(p) for p in export.copies] + contact_copies,
+        warnings=list(export.warnings) + contact_warnings,
     )
 
 

@@ -255,7 +255,7 @@ class TestBundle:
         assert groups == {"PNWDigital RX": ["Washington 1"], "SeattleDMR RX": ["King County"]}
         assert bundle.rx_group_by_channel["Cougar WA1"] == "PNWDigital RX"
         assert bundle.contact_by_channel["WW7PSR Seattle"] == "Simplex 99"
-        assert any("placeholder DMR ID" in w for w in bundle.warnings)
+        assert not any("placeholder" in w for w in bundle.warnings)  # the registered DMR ID ships
 
     def test_bad_zone_name_is_rejected(self):
         bad = plan(PlanBlock("Ham", (ALL,), bank="Ham|Broken"))
@@ -320,7 +320,7 @@ class TestCpsFiles:
         tg = list(csv.reader(io.StringIO(files["DMRTalkGroups.CSV"])))
         assert tg[1][1:] == ["3153", "Washington 1", "Group Call", "None"]
         rid = list(csv.reader(io.StringIO(files["RadioIDList.CSV"])))
-        assert rid[1] == ["1", "1", "WA7DAM"]
+        assert rid[1] == ["1", "3227807", "WA7DAM"]
         rgl = list(csv.reader(io.StringIO(files["DMRReceiveGroupCallList.CSV"])))
         assert rgl[1] == ["1", "PNWDigital RX", "Washington 1", "3153"]
         manifest = files["atd890-test.LST"].split("\r\n")

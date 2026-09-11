@@ -48,10 +48,11 @@ def test_runnable_names_are_available_online_adapters_in_registry_order():
     expected = [
         name
         for name, cls in list_sources().items()
-        if issubclass(cls, OnlineSourceAdapter) and cls.available
+        if issubclass(cls, OnlineSourceAdapter) and cls.available and cls.kind != "contacts"
     ]
     assert runnable_source_names() == expected
     assert "static_pack" not in expected
+    assert "radioid" not in expected and "radioid" in list_sources()
 
 
 def test_runnable_names_respect_only_and_skip():

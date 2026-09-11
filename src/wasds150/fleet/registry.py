@@ -292,9 +292,11 @@ AT_D890UV = FleetRadio(
             artifacts=("lst",),
         ),
         StepSpec(
-            "set-radio-id", "Set the Radio ID",
-            "Digital > Radio ID List: replace placeholder ID 1 with the DMR ID registered for "
-            "{callsign}.",
+            "import-contacts", "Import the contact list",
+            "Tool > Import > Digital Contact List > choose {contacts}. A worldwide list takes several "
+            "minutes. The file's columns are not yet confirmed against this CPS, so check a few "
+            "entries afterwards.",
+            optional=True, artifacts=("contacts",),
         ),
         StepSpec(
             "write-radio", "Save and write",

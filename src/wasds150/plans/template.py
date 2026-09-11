@@ -50,7 +50,7 @@ from wasds150.models.plan import (
     PlanBlock,
     ScanGroup,
 )
-from wasds150.radios.bandplan import CLASS_GENERAL
+from wasds150 import station
 from wasds150.radios.profile import RadioProfile
 from wasds150.radios.registry import get_profile
 
@@ -135,10 +135,10 @@ class RadioKnobs:
     reserve_slots: int = 0
     #: Amateur licence class (see :mod:`wasds150.radios.bandplan`); empty
     #: means no amateur licence and no amateur transmit.
-    license_class: str = CLASS_GENERAL
-    callsign: str = "WA7DAM"
+    license_class: str = station.LICENSE_CLASS
+    callsign: str = station.CALLSIGN
     gmrs_licensed: bool = True
-    gmrs_call: str = "WRWH962"
+    gmrs_call: str = station.GMRS_CALL
     murs_tx: bool = True
     include_hf: bool = True
     include_dmr: bool = True

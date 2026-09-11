@@ -68,7 +68,8 @@ def test_markdown_numbers_the_steps_and_fills_the_plan_id():
     text = render_markdown(get_fleet_radio("at-d890uv"))
     assert "1. **Export the CPS bundle** _(automatic)_ - Export at-d890uv-fleet" in text
     assert "`at-d890uv.cps_app`" in text
-    assert "WA7DAM" in text
+    assert "**Import the contact list** _(optional)_" in text
+    assert "Radio ID" not in text  # the bundle carries the registered ID; nothing to set by hand
 
 
 def test_sync_replaces_only_the_generated_section():

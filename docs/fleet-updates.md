@@ -189,7 +189,7 @@ operator's own, explicit choice. The power caps above are applied regardless.
 2. **Start the CPS** _(automatic)_ - Start the D890UV CPS.
 3. **Open the codeplug** - File > Open <rdt_base> to keep your Optional Settings, or File > New for a first build. Model > Model Information must match the radio's frequency range.
 4. **Import the bundle** - Tool > Import > choose <lst> > Import All. A name the CPS cannot resolve means the export is stale: re-export rather than editing in place.
-5. **Set the Radio ID** - Digital > Radio ID List: replace placeholder ID 1 with the DMR ID registered for WA7DAM.
+5. **Import the contact list** _(optional)_ - Tool > Import > Digital Contact List > choose <contacts>. A worldwide list takes several minutes. The file's columns are not yet confirmed against this CPS, so check a few entries afterwards.
 6. **Save and write** - Save the codeplug into radio-backups\at-d890uv\, then Write to radio (Other Data; Digital Contact List only if one was loaded).
 7. **Read back** _(optional)_ - Read from radio, then Tool > Export > Export All into a new radio-backups\at-d890uv\<date>-readback\ folder.
 8. **Compare the read-back** _(automatic, optional)_ - Compare the read-back folder with the generated bundle, table by table.

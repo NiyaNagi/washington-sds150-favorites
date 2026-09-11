@@ -23,7 +23,7 @@ has been written to the radio and read back.
 | D890UV CPS **1.05** | Installed by this project into `C:\D890UV\D890UV.exe` (Inno Setup, silent). CPS and firmware versions must match exactly. |
 | Firmware **1.05** (2026-05-20) | Official DMR build. Scan lists grew from 50 to 100 members in this release, which the exporter relies on. |
 | NX_DMR **1.05** overlay | The NXDN+DMR firmware Anytone distributes through dealers (Wouxun.us mirror). Flashed *after* official 1.05. |
-| DMR ID | Register `WA7DAM` at <https://radioid.net> (free, needs the licence). The bundle ships placeholder ID `1` until you do. |
+| DMR ID | `3227807`, registered to `WA7DAM` at <https://radioid.net>. Every bundle carries it (`src/wasds150/station.py`). |
 
 All packages, change logs and manuals are fetched by
 `radio-tools/anytone-d890uv/download.ps1` into the git-ignored
@@ -41,7 +41,7 @@ downloaded on 2026-09-10.
 
 # 2. In the CPS (C:\D890UV\D890UV.exe): File > New, then Tool > Import > choose
 #    wasds150-output\radios\atd890-scan\atd890-scan.LST > Import All
-# 3. Set the handful of Optional Settings listed below, fix the Radio ID, write.
+# 3. Set the handful of Optional Settings listed below, then write.
 ```
 
 The full bundle lands in `wasds150-output/radios/atd890-scan/` (git-ignored
@@ -95,7 +95,7 @@ and **Reset Digi. Protocol = DMR** keep that default across resets.
 | `ScanList.CSV` | One scan list per zone (same name) plus the composite groups. |
 | `DMRTalkGroups.CSV` | Every talkgroup any channel references, with a `Simplex 99` default. |
 | `DMRReceiveGroupCallList.CSV` | One receive group per network (`PNWDigital RX`, `SeattleDMR RX`, ...) so a DMR channel hears every talkgroup carried on its network. |
-| `RadioIDList.CSV` | `1, WA7DAM` - **replace the ID** after registering. |
+| `RadioIDList.CSV` | `3227807, WA7DAM` - the registered DMR ID. |
 | `AMAir.CSV`, `AMZone.CSV` | Air-band memories and zones (`Air Civil 01..`, `Air Mil SAR`); the zone's scan member list is the whole zone. |
 | `FM.CSV` | FM broadcast stations, all with `Scan = Del`. |
 | `atd890-scan.LST` | Manifest for Tool > Import > Import All. |
@@ -136,7 +136,7 @@ Scan groups (composite lists, each chunked at 100 members: `Ham All 01`,
 4. If Import All refuses the manifest, import the files one at a time in the
    manifest order (Channel, RadioIDList, DMRZone, ScanList, DMRTalkGroups, FM,
    DMRReceiveGroupCallList, AMAir, AMZone).
-5. Digital > Radio ID List: replace ID `1` with the registered DMR ID.
+5. Digital > Radio ID List shows `3227807` / `WA7DAM`; nothing to change.
 
 ### Optional Settings to set by hand
 
@@ -168,6 +168,45 @@ project does not generate. Set them once; they persist in your saved `.rdt`.
 Save the codeplug (`radio-backups/at-d890uv/atd890-scan-<date>.rdt`), then
 **Write to radio** (Other Data; Digital Contact List only if you loaded one).
 
+### Capture the settings once instead
+
+Setting the table above by hand after every fresh import is error-prone.
+Capture it once and every export carries it:
+
+1. In the CPS: File > New, then Tool > Export > Export All into
+   `radio-backups/at-d890uv/fixtures/fresh/`.
+2. Apply the settings table above, then Export All again into
+   `radio-backups/at-d890uv/fixtures/configured/`.
+3. Build the template:
+
+   ```powershell
+   .\.venv\Scripts\python.exe scripts\radios\build_atd890_settings_template.py `
+       --fresh radio-backups\at-d890uv\fixtures\fresh `
+       --configured radio-backups\at-d890uv\fixtures\configured
+   ```
+
+This writes `src/wasds150/data/atd890_settings_template.json` - the configured
+`OptionalSetting.CSV` and `HotKey_*.CSV` with every cell you changed. Your Radio
+ID and call sign are blanked in the template and filled back in at export.
+From then on every bundle includes those files and lists them in the `.LST`,
+so Import All restores the settings. A zone the settings name (MEM Zone A,
+Priority Zone A, AM Work Zone) must exist in the bundle; if it does not, the
+export uses the first zone and says so in the report.
+
+### Contact list
+
+`wasds150 fleet update` downloads the worldwide DMR and NXDN ID registry from
+radioid.net (through the HTTP cache: once a month at most) and the fleet
+export writes it next to the bundle as `DigitalContactList.CSV` (and
+`NXDNContactList.CSV`), every entry a Private Call, split into numbered files
+if it ever exceeds the radio's 500,000 contacts. **Its column layout is not yet
+confirmed against this CPS**, so it is deliberately left out of the `.LST`:
+import it on its own (Tool > Import > Digital Contact List), then open a few
+entries. Once an Export All of a codeplug with contacts confirms the header and
+file name, set `CONTACT_FORMAT_VERIFIED` in
+`src/wasds150/export/atd890_contacts.py` and paste the captured header over
+`CONTACT_HEADER`. Importing ~300,000 contacts takes several minutes.
+
 ### Using it as a scanner
 
 - Main receiver A: pick a zone with the up/down key; Menu > Scan > Scan List
@@ -184,11 +223,25 @@ Save the codeplug (`radio-backups/at-d890uv/atd890-scan-<date>.rdt`), then
 ### Read back and verify
 
 After writing: Read from radio, Tool > Export > Export All into
-`radio-backups/at-d890uv/<date>-readback/`, and compare `Channel.CSV`,
-`DMRZone.CSV` and `ScanList.CSV` with the generated bundle. Any column the CPS
-rewrote is a bug in `CHANNEL_DEFAULTS` (`src/wasds150/export/atd890_cps.py`),
-not something to ignore. Once a round trip is clean, flip `verified=True` on
-the profile and record the export's SHA-256 here.
+`radio-backups/at-d890uv/<date>-readback/`, then compare it with the bundle:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\radios\diff_atd890_export.py `
+    --bundle wasds150-output\radios\at-d890uv-fleet `
+    --readback radio-backups\at-d890uv\<date>-readback
+```
+
+Rows are matched by name (channel, zone, scan list, talkgroup ID), `No.` is
+ignored, frequencies compare numerically, and
+zone/scan members that only changed order are listed but do not count. It exits
+0 when the read-back matches and prints the SHA-256 of the bundle and each file.
+Any other column the CPS rewrote is a bug in `CHANNEL_DEFAULTS`
+(`src/wasds150/export/atd890_cps.py`), not something to ignore; a column the
+CPS legitimately normalises goes in `CPS_NORMALIZED_COLUMNS`
+(`src/wasds150/export/atd890_diff.py`) with the reason. The fleet update's
+optional **Compare the read-back** step runs the same comparison. Once a round
+trip is clean, flip `verified=True` on the profile and record the printed
+SHA-256 lines here.
 
 ---
 
