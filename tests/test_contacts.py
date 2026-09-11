@@ -32,8 +32,9 @@ class FakeHttp:
         self.bodies = bodies
         self.calls = []
 
-    def fetch(self, url, ttl_seconds=0, source_id=None, max_bytes=None):
+    def fetch(self, url, ttl_seconds=0, source_id=None, max_bytes=None, force=False):
         self.calls.append((url, source_id, max_bytes))
+        self.forced = getattr(self, "forced", []) + [force]
         return SimpleNamespace(content=self.bodies[url].encode("utf-8"))
 
 
@@ -124,6 +125,8 @@ def test_refresh_stores_what_the_fleet_can_hold(ctx):
     })
     summary = refresh_contacts(ctx, http_client=http)
     assert summary == "DMR 3 contacts; NXDN 1 contacts"
+    # radioid.net republishes daily: every refresh revalidates, never trusts the TTL.
+    assert http.forced and all(http.forced)
     assert ContactStore(ctx.config.contacts_dir).load("NXDN").rows[0].callsign == "KB7NXD"
 
 

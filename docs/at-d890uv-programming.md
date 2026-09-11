@@ -24,6 +24,7 @@ has been written to the radio and read back.
 | Firmware **1.05** (2026-05-20) | Official DMR build. Scan lists grew from 50 to 100 members in this release, which the exporter relies on. |
 | NX_DMR **1.05** overlay | The NXDN+DMR firmware Anytone distributes through dealers (Wouxun.us mirror). Flashed *after* official 1.05. |
 | DMR ID | `3227807`, registered to `WA7DAM` at <https://radioid.net>. Every bundle carries it (`src/wasds150/station.py`). |
+| NXDN ID | `16240`, registered at <https://radioid.net>. Set once in the CPS at NX Setting > Unit ID(Own); the fleet checklist has a step for it (`src/wasds150/station.py`). |
 
 All packages, change logs and manuals are fetched by
 `radio-tools/anytone-d890uv/download.ps1` into the git-ignored
@@ -197,7 +198,8 @@ export uses the first zone and says so in the report.
 ### Contact list
 
 `wasds150 fleet update` downloads the worldwide DMR and NXDN ID registry from
-radioid.net (through the HTTP cache: once a month at most) and the fleet
+radioid.net, checking with the server on every update (radioid.net republishes
+daily; an unchanged file is not downloaded again), and the fleet
 export writes it next to the bundle as `DigitalContactList.CSV` (and
 `NXDNContactList.CSV`), every entry a Private Call, split into numbered files
 if it ever exceeds the radio's 500,000 contacts. **Its column layout is not yet

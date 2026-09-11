@@ -97,13 +97,17 @@ class RadioIdSource(OnlineSourceAdapter):
                 raise ValueError(f"unknown contact protocol {protocol!r}; choices: {list(URLS)}")
         self.ttl_seconds = ttl_seconds
 
-    def fetch(self, http_client: Optional[Any] = None) -> RawDoc:
+    def fetch(self, http_client: Optional[Any] = None, *, force: bool = False) -> RawDoc:
+        """``force`` revalidates with the server even while the cached copy
+        is inside its TTL (a conditional GET, so an unchanged file is not
+        downloaded again)."""
         if http_client is None:
             raise ValueError(f"{self.name} requires an http_client")
         payload = {}
         for protocol in self.protocols:
             result = http_client.fetch(
-                URLS[protocol], ttl_seconds=self.ttl_seconds, source_id=self.name, max_bytes=MAX_BYTES
+                URLS[protocol], ttl_seconds=self.ttl_seconds, source_id=self.name, max_bytes=MAX_BYTES,
+                force=force,
             )
             payload[protocol] = {"url": URLS[protocol], "text": result.content.decode("utf-8-sig", errors="replace")}
         return RawDoc(

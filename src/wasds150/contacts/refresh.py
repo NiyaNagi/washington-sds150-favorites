@@ -26,8 +26,12 @@ def refresh_contacts(
     http_client: Optional[Any] = None,
     protocols: Optional[Sequence[str]] = None,
 ) -> str:
-    """Fetch radioid.net (through the HTTP cache, so a month-old copy is not
-    re-downloaded) and store each table; returns a one-line summary."""
+    """Fetch radioid.net and store each table; returns a one-line summary.
+
+    radioid.net republishes its directories every day, so every refresh
+    revalidates with the server rather than trusting the cached copy's
+    30-day TTL. The request is conditional: an unchanged directory costs one
+    round trip, a changed one is downloaded."""
     wanted = tuple(protocols or protocols_for_fleet())
     if not wanted:
         return "no radio keeps a contact list"
@@ -37,7 +41,7 @@ def refresh_contacts(
 
         http_client = build_http_client(ctx.config, SourcesConfig.load(ctx.config.sources_config_path).offline)
     source = RadioIdSource(protocols=wanted)
-    raw = source.fetch(http_client)
+    raw = source.fetch(http_client, force=True)
     store = ContactStore(ctx.config.contacts_dir)
     parts = []
     for table in source.tables(raw):
