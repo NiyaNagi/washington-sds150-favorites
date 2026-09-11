@@ -17,8 +17,10 @@ your RadioReference exports. Then:
 
 1. **Radios.** Out-of-date radios are ticked for you; every radio shows as out
    of date until it has been synced once.
-2. **Sources.** Tick the sources to refresh. The two bulk downloads, FCC ULS
-   and FAA NASR, are unticked by default; tick them about once a month.
+2. **Sources.** Tick the sources to refresh. The bulk download, FCC ULS, is
+   unticked by default; tick it about once a month. FAA NASR refreshes on its
+   own: it checks the FAA's small index page and downloads the ~250 MB cycle
+   only when a new one is posted (every 28 days).
 3. Tick **Write to the radios**. Without it the update is a dry run: every
    source is refreshed and every radio exported, but nothing is written.
 4. Press **Update selected**. The radios run one after another. At each
@@ -70,10 +72,13 @@ What is still unfinished is listed in [Open items](open-items.md).
 1. **Sources.** Every configured source whose cache is stale is refreshed; any
    of them can be skipped (`--skip-sources`, or untick it). One failing source
    never stops the update. What they found is merged into the catalog once, and
-   the change is recorded in `state/updates/`. The two bulk downloads, FCC ULS
-   (hundreds of MB) and FAA NASR (~250 MB), are refreshed only when named
-   (`--only-sources fcc_uls`, or tick them); narrow them first with
+   the change is recorded in `state/updates/`. The bulk download, FCC ULS
+   (hundreds of MB), is refreshed only when named (`--only-sources fcc_uls`,
+   or tick it); narrow it first with
    `wasds150 sources configure --fcc-within-miles 60 --fcc-emissions DMR,NXDN,P25`.
+   FAA NASR is checked on every update and rebuilds `FAAAIR`, the airband list
+   behind each radio's **Airports Near Home** block (the TD-H9's **Airport
+   Towers**); a superseded cycle's zip is removed from the cache.
 2. **Each radio**, one after another: resolve its plan, compare with the last
    snapshot, export, load, verify, save a snapshot, and record the sync so the
    radio stops showing as out of date.

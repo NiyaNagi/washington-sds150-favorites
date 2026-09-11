@@ -66,8 +66,12 @@ from wasds150.sources.base import OnlineSourceAdapter, RawDoc
 from wasds150.sources.facts import NormalizedFact, NormalizeResult
 
 NASR_INDEX_URL = "https://www.faa.gov/air_traffic/flight_info/aeronav/aero_data/NASR_Subscription/"
-#: 28-day AIRAC cycle; check weekly for a filename-date change.
-DEFAULT_TTL_SECONDS = 7 * 24 * 3600
+#: The index page names the current 28-day cycle; it is small, so it is
+#: checked daily and a new cycle is picked up the day the FAA posts it.
+DEFAULT_TTL_SECONDS = 24 * 3600
+#: A cycle's zip never changes at its dated URL (a new cycle is a new URL),
+#: so the ~250 MB download happens once per cycle, not once per check.
+CYCLE_ZIP_TTL_SECONDS = 35 * 24 * 3600
 
 _ZIP_URL_RE = re.compile(r"https://nfdc\.faa\.gov/webContent/28DaySub/28DaySubscription_Effective_[\d-]+\.zip")
 
@@ -132,8 +136,10 @@ class FaaNasrSource(OnlineSourceAdapter):
     name = "faa_nasr"
     available = True
     kind = "facts"
-    #: ~250 MB per cycle: refreshed only when asked for by name.
-    bulk = True
+    #: Not a bulk source any more: every update checks the small index page,
+    #: and the ~250 MB zip is downloaded only when the FAA posts a new cycle.
+    #: That is what keeps the FAAAIR airband list current without a manual step.
+    bulk = False
 
     def __init__(
         self,
@@ -141,6 +147,7 @@ class FaaNasrSource(OnlineSourceAdapter):
         index_url: str = NASR_INDEX_URL,
         ttl_seconds: int = DEFAULT_TTL_SECONDS,
         subjects: Sequence[str] = DEFAULT_SUBJECTS,
+        zip_ttl_seconds: int = CYCLE_ZIP_TTL_SECONDS,
     ):
         unknown = sorted(set(s.upper() for s in subjects) - set(DEFAULT_SUBJECTS))
         if unknown:
@@ -148,6 +155,7 @@ class FaaNasrSource(OnlineSourceAdapter):
         self.state = state
         self.index_url = index_url
         self.ttl_seconds = ttl_seconds
+        self.zip_ttl_seconds = zip_ttl_seconds
         self.subjects = tuple(s.upper() for s in subjects)
 
     def fetch(self, http_client: Optional[Any] = None) -> RawDoc:
@@ -159,15 +167,26 @@ class FaaNasrSource(OnlineSourceAdapter):
             raise ValueError(f"could not find a 28DaySubscription zip URL on {self.index_url}")
         zip_result = http_client.fetch(
             zip_url,
-            ttl_seconds=self.ttl_seconds,
+            ttl_seconds=self.zip_ttl_seconds,
             source_id=self.name,
             max_bytes=400 * 1024 * 1024,
         )
+        self._forget_superseded_cycles(http_client, zip_url)
         return RawDoc(
             source_adapter=self.name,
             payload={"zip_bytes": zip_result.content, "zip_url": zip_url},
             fetched_at=datetime.datetime.now(datetime.timezone.utc).isoformat(),
         )
+
+    def _forget_superseded_cycles(self, http_client: Any, current_url: str) -> None:
+        """Each cycle is a ~250 MB zip under its own dated URL, and nothing
+        reads an older cycle again once a newer one is cached."""
+        store = getattr(http_client, "store", None)
+        if store is None or not hasattr(store, "entries_for_source"):
+            return
+        for entry in store.entries_for_source(self.name):
+            if entry.url != current_url and _ZIP_URL_RE.fullmatch(entry.url):
+                store.delete(entry.url, remove_blob=True)
 
     def normalize(self, raw: RawDoc) -> NormalizeResult:
         zip_bytes = raw.payload["zip_bytes"]
@@ -316,6 +335,10 @@ class FaaNasrSource(OnlineSourceAdapter):
                     continue
                 facility = (row.get(columns["facility"]) or "").strip()
                 use = (row.get(columns["use"]) or "").strip() if columns["use"] else ""
+                # An NDB's frequency is in kilohertz (WATON NDB "382.0"), so it
+                # would read as a 382 MHz channel; it is a Morse beacon anyway.
+                if re.search(r"\bNDB\b", f"{use} {row.get('SERVICED_SITE_TYPE') or ''}", re.IGNORECASE):
+                    continue
                 label = (row.get(columns["name"]) or "").strip() if columns["name"] else ""
                 lat = _float(row.get(columns["lat"])) if columns["lat"] else None
                 lon = _float(row.get(columns["lon"])) if columns["lon"] else None

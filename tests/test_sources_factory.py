@@ -86,7 +86,8 @@ def test_bulk_source_options_reach_the_adapters():
     assert isinstance(uls, FccUlsSource)
     assert uls.services == ("lmpriv", "lmcomm") and uls.within_miles == 60.0 and uls.home is not None
     assert uls.emission_codes == {"7K60FXE"} and uls.emission_modes == {"DMR"} and uls.active_only is False
-    assert FccUlsSource.bulk and FaaNasrSource.bulk and not NoaaNwrSource.bulk
+    # FAA NASR checks a small index daily and downloads only a new cycle.
+    assert FccUlsSource.bulk and not FaaNasrSource.bulk and not NoaaNwrSource.bulk
 
 
 def test_choice_lists_are_cleaned_and_checked():

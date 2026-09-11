@@ -23,7 +23,7 @@ those choices.
 | Source | Adapter | Coverage | Typical refresh | Usage |
 |---|---|---|---:|---|
 | FCC ULS bulk files | `fcc_uls` | Non-federal licenses and frequencies (`HD`/`EN`/`LO`/`FR` bulk `.dat` tables) | Weekly | Business, public safety, GMRS, marine, aviation ground and amateur licensing |
-| FAA NASR | `faa_nasr` | Airports and communications (`NAV_BASE.csv`, `COM.csv`) | 28 days | Airports, CTAF, NAVAIDs, RCO/FSS facility citations |
+| FAA NASR | `faa_nasr` | Facility frequencies (`FRQ.csv`: tower, ground, clearance, ATIS, approach/departure, Seattle Center outlets, CTAF/UNICOM, ASOS/AWOS), plus `NAV_BASE.csv` and `COM.csv` | 28 days; the index is checked daily and a new cycle downloaded when posted | Builds the located `FAAAIR` list (one geo-fenced department per facility) that feeds every radio's airband; RCO/FSS facility citations |
 | NOAA Weather Radio | `noaa_nwr` | NWR transmitters and SAME county coverage | Annual/on change | Weather frequencies and county alert codes |
 | USCG NAVCEN | `uscg_navcen` | Marine VHF channel plan + NOAA weather channels | On change | Marine calling, safety and operational channels |
 | WA EMD/SIEC/SCIP | `wa_emd` | State interoperability plan documents (change detection only) | Irregular | Flags a new/changed SAR, mutual aid, CEMNET, OSCCR or SCIP document for manual review |

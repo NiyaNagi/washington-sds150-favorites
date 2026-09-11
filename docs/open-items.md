@@ -47,7 +47,8 @@ of the legacy radio exports. Everything not listed here is done and tested.
   changes, and at least monthly: WWARA regenerates nightly, the FAA publishes a
   new NASR cycle every 28 days, and RadioReference exports go stale as
   agencies rebuild their systems.
-- Tick the two bulk sources (FCC ULS, FAA NASR) about once a month; they are
-  hundreds of megabytes each and unticked by default.
+- Tick the bulk source (FCC ULS) about once a month; it is hundreds of
+  megabytes and unticked by default. FAA NASR needs nothing: every update
+  checks for a new cycle and rebuilds the `FAAAIR` airband list.
 - Re-export RadioReference CSVs into `.wasds150-home\rr-exports\` when you want
   newer county data; the refresh imports whatever is there.

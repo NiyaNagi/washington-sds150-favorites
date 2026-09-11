@@ -9,6 +9,26 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Added
 
+- `FAAAIR`, every FAA-published airband frequency in Washington as one located
+  list, built from the NASR facility frequency file (`FRQ.csv`): towers,
+  ground, clearance, ATIS, approach/departure, Seattle Center outlets,
+  CTAF/UNICOM and ASOS/AWOS, one geo-fenced department per facility,
+  navigation beacons left out. A new **Airports Near Home** block puts every
+  one within the radius on the TH-D75 (VHF and military UHF), FTX-1 and
+  AT-D890UV, nearest first; the TD-H9 gets the nearest towers and ATIS in an
+  eight-slot **Airport Towers** block; the SDS150 installs the whole list with
+  its location control. FAA NASR is no longer a bulk source: every update
+  checks the index page, downloads a new cycle when one is posted and drops
+  the superseded zip from the cache.
+
+### Fixed
+
+- FAA NASR frequencies no longer reach the aviation rows (FL44, FL48, FL55)
+  through the "aviation" keyword match, which had filled each with every
+  facility in the state, VOR/TACAN beacons included, without positions; the
+  copies already there are removed when the FAA source runs. An NDB's
+  frequency, published in kilohertz, is no longer read as megahertz.
+
 - Implemented the RepeaterBook Export API adapter
   (`wasds150.sources.repeaterbook`, `wasds150 repeaterbook ...`, and a
   RepeaterBook panel in the UI's Advanced tab), **off by default and pending

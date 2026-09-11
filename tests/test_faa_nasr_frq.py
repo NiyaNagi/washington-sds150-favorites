@@ -3,11 +3,13 @@ from __future__ import annotations
 
 import io
 import zipfile
+from types import SimpleNamespace
 
 import pytest
 
+from wasds150.cache.store import HttpCacheStore
 from wasds150.sources.base import RawDoc
-from wasds150.sources.faa_nasr import FaaNasrSource, discover_columns
+from wasds150.sources.faa_nasr import CYCLE_ZIP_TTL_SECONDS, NASR_INDEX_URL, FaaNasrSource, discover_columns
 
 EXPECTED_HEADER = "EFF_DATE,FAC_ID,FAC_TYPE,SERVICED_FACILITY,SERVICED_STATE,TOWER_OR_COMM_CALL,FREQ,FREQ_USE,LAT_DECIMAL,LONG_DECIMAL"
 EXPECTED_ROWS = [
@@ -85,6 +87,53 @@ def test_subjects_choose_what_is_read():
     assert not any("NAV_BASE" in w or "COM.csv" in w for w in result.warnings)
     with pytest.raises(ValueError):
         FaaNasrSource(subjects=("FRQ", "TWR"))
+
+
+def test_an_ndb_frequency_in_kilohertz_is_not_read_as_megahertz():
+    header = "EFF_DATE,FACILITY,FACILITY_TYPE,SERVICED_FACILITY,SERVICED_STATE,SERVICED_SITE_TYPE,FREQ,FREQ_USE,LAT_DECIMAL,LONG_DECIMAL"
+    rows = [
+        "2026/08/06,AW,NAVAID,AW,WA,NDB,382.0,AW NDB,47.9,-122.3",
+        "2026/08/06,BFI,ATCT,BFI,WA,AIRPORT,118.3,LCL/P,47.53,-122.30",
+    ]
+    result = _normalize(_frq_only(), {"FRQ.csv": header + "\n" + "\n".join(rows) + "\n", "APT_BASE.csv": APT_BASE})
+    assert [f.freq_mhz for f in result.facts] == [118.3]
+
+
+CURRENT = "https://nfdc.faa.gov/webContent/28DaySub/28DaySubscription_Effective_2026-08-06.zip"
+OLD = "https://nfdc.faa.gov/webContent/28DaySub/28DaySubscription_Effective_2026-07-09.zip"
+
+
+class _Http:
+    def __init__(self, store=None):
+        self.calls = []
+        self.store = store
+
+    def fetch(self, url, *, ttl_seconds, source_id, max_bytes=None, force=False):
+        self.calls.append((url, ttl_seconds))
+        if url == NASR_INDEX_URL:
+            return SimpleNamespace(content=f'<a href="{CURRENT}">Current</a> <a href="{OLD}">Previous</a>'.encode())
+        return SimpleNamespace(content=b"zip")
+
+
+def test_the_index_is_checked_daily_and_a_cycle_zip_downloaded_once():
+    http = _Http()
+    FaaNasrSource().fetch(http)
+    assert http.calls == [(NASR_INDEX_URL, 24 * 3600), (CURRENT, CYCLE_ZIP_TTL_SECONDS)]
+    # So the one-step update refreshes it: no more "tick it once a month".
+    assert FaaNasrSource.bulk is False
+
+
+def test_a_superseded_cycle_zip_is_dropped_from_the_cache(tmp_path):
+    store = HttpCacheStore(tmp_path)
+    try:
+        for url, content in ((OLD, b"old cycle"), (CURRENT, b"new cycle"), (NASR_INDEX_URL, b"index")):
+            store.put(url, content=content, ttl_seconds=60, status=200, source_id="faa_nasr")
+        old_blob = store._blob_path(store.get(OLD).content_hash)
+        FaaNasrSource().fetch(_Http(store))
+        assert store.get(OLD) is None and not old_blob.exists()
+        assert store.get(CURRENT) is not None and store.get(NASR_INDEX_URL) is not None
+    finally:
+        store.close()
 
 
 def test_discover_columns_is_case_insensitive():

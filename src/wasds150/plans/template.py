@@ -439,6 +439,30 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
         notes="Continuous carriers: tune by hand.",
     ),
     # -- air --------------------------------------------------------------------
+    # FAAAIR (the FAA's own frequency file) comes first: every tower, approach,
+    # Seattle Center outlet, CTAF and weather broadcast within the radius,
+    # nearest first. The blocks after it add only what it does not hold.
+    ServiceBlockSpec(
+        "air-towers", "Airport Towers", "Air Towers",
+        lambda k: (
+            ChannelSelector(
+                favorite_keys=("FAAAIR",),
+                label_pattern=r"\b(TWR|ATIS)\b",
+                freq_ranges=AIR,
+                within_miles=k.within,
+            ),
+        ),
+        sort=SORT_TIER_DISTANCE, limit=0, radius=True,
+        requires=_all(_knob("include_air"), _demodulates("AM"), _receives(121.5)),
+        notes="The nearest towers and ATIS, for radios too small for the full airport block.",
+    ),
+    ServiceBlockSpec(
+        "air-local", "Airports Near Home", "Air Local",
+        lambda k: (_near(k, "FAAAIR", ranges=MIL_AIR),),
+        sort=SORT_TIER_DISTANCE, limit=130, radius=True,
+        requires=_all(_knob("include_air"), _demodulates("AM"), _receives(121.5)),
+        notes="FAA NASR: towers, ground, ATIS, approach, Seattle Center, CTAF/UNICOM and ASOS/AWOS; AM, nearest first.",
+    ),
     ServiceBlockSpec(
         "air-civil", "Airband Civil", "Air Civil",
         lambda k: (
@@ -615,9 +639,11 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
     ),
     ServiceBlockSpec(
         "other-nearby", "Other Nearby", "Other Nearby",
-        lambda k: (ChannelSelector(favorite_key_pattern=r".*", within_miles=k.within, geo_fallback=GEO_EITHER),),
+        # Not FAAAIR: airband has its own budgeted blocks, and on the Anytone
+        # every air row lands in the 256-entry AM air list.
+        lambda k: (ChannelSelector(favorite_key_pattern=r"^(?!FAAAIR$).*", within_miles=k.within, geo_fallback=GEO_EITHER),),
         limit=60, radius=True, requires=_knob("catch_all"),
-        notes="Anything located within range that no other block claimed.",
+        notes="Anything located within range that no other block claimed, airband aside.",
     ),
 )
 
@@ -749,7 +775,7 @@ _TD_H9 = RadioKnobs(
     power=("10W", "5.0W", "1.0W"),
     limits={
         "ham-2m": 38, "ham-125": 4, "ham-70cm": 36, "simplex": 6, "seattle-acs": 0,
-        "air-civil": 8, "air-mil": 0, "sar": 10, "wildfire": 6, "marine": 12, "rail": 4,
+        "air-towers": 8, "air-local": 0, "air-civil": 0, "air-mil": 0, "sar": 10, "wildfire": 6, "marine": 12, "rail": 4,
         "gmrs-interstitial": 7, "frs": 7, "gmrs-main": 8, "gmrs-repeaters": 9, "murs": 5, "business": 6,
         "public-safety": 12, "data": 0, "noaa": 7, "other-nearby": 10,
     },
@@ -762,9 +788,10 @@ _FTX1 = RadioKnobs(
     include_dstar=False,
     power=("High", "Mid", "Low"),
     limits={
-        "ham-6m": 40, "ham-2m": 150, "ham-70cm": 150, "simplex": 20, "seattle-acs": 40,
+        "ham-6m": 20, "ham-2m": 110, "ham-70cm": 150, "simplex": 20, "seattle-acs": 40,
         "hf-nets": 40, "hf-calling": 40, "hf-digital": 40, "hf-reference": 40,
-        "air-civil": 50, "air-mil": 20, "sar": 40, "wildfire": 40, "marine": 30, "rail": 15,
+        # VHF airband only: the FTX-1 does not receive 225-400 MHz.
+        "air-local": 90, "air-civil": 40, "air-mil": 10, "sar": 40, "wildfire": 40, "marine": 30, "rail": 15,
         "business": 30, "public-safety": 50, "data": 10, "broadcast-am": 20, "packs": 20,
         "gmrs-repeaters": 10, "other-nearby": 20,
     },
@@ -775,19 +802,22 @@ _TH_D75 = RadioKnobs(
     reserve_slots=50,
     power=("5.0W", "5.0W", "0.5W"),
     limits={
-        "ham-6m": 20, "ham-2m": 150, "ham-125": 30, "ham-70cm": 150, "dstar": 40,
+        "ham-6m": 20, "ham-2m": 70, "ham-125": 30, "ham-70cm": 125, "dstar": 25,
         "simplex": 20, "seattle-acs": 50, "hf-nets": 20, "hf-calling": 20, "hf-digital": 10,
-        "hf-reference": 20, "air-civil": 40, "air-mil": 20, "sar": 40, "wildfire": 40,
+        # Band B hears civil VHF and military UHF airband alike.
+        "hf-reference": 20, "air-local": 130, "air-civil": 40, "air-mil": 10, "sar": 40, "wildfire": 40,
         "marine": 30, "rail": 15, "business": 30, "public-safety": 50, "data": 10,
         "broadcast-fm": 40, "broadcast-am": 20, "packs": 20, "gmrs-repeaters": 10, "other-nearby": 20,
     },
 )
 
-#: AT-D890UV: 4,000 channels in zones of up to 160; the template defaults fit.
+#: AT-D890UV: 4,000 channels in zones of up to 160. Air rows go to the
+#: separate AM air list, which holds 256 (``AM_AIR_MAX``), so the three air
+#: blocks together stay under it.
 _AT_D890UV = RadioKnobs(
     reserve_slots=200,
     power=("High", "Mid", "Low"),
-    limits={"packs": 60},
+    limits={"packs": 60, "air-local": 90, "air-civil": 140, "air-mil": 20},
 )
 
 _DEFAULT_KNOBS: Dict[str, RadioKnobs] = {

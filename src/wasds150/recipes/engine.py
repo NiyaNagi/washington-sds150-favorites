@@ -74,6 +74,12 @@ def _fact_matches(recipe: Recipe, fact: NormalizedFact) -> bool:
         # business and public-safety frequency in a county into whichever
         # public row names that county; only GMRS licences enrich a row.
         return False
+    if fact.source_id == "faa_nasr" and fact.freq_mhz is not None:
+        # Airport, approach, centre and navigation-aid frequencies have their
+        # own located list (FAAAIR, built in enrich_catalog). Matched by the
+        # "aviation" keyword they poured every facility in the state, beacons
+        # included, into each aviation row without positions.
+        return False
     configured_sids = recipe.match.configured_sids()
     if configured_sids:
         raw_sid = fact.raw.get("sid") if isinstance(fact.raw, dict) else None
@@ -185,6 +191,28 @@ def _refresh_trunk_sites(
             fl.provenance.append(prov)
 
 
+def _drop_keyword_faa_rows(fl: FavoritesList, entity_keys: List[str]) -> None:
+    """Remove the FAA frequencies an earlier keyword match put into ``fl``'s
+    aggregate public-facts system (ids as :func:`systems_mod.systems_from_flat_facts`
+    makes them), now that FAAAIR carries them with their positions."""
+    from wasds150.util.hashing import stable_id
+
+    aggregate = stable_id(f"{fl.slug}:public-facts", kind="system")
+    leaked = {stable_id(f"{fl.slug}:faa_nasr:{key}", kind="channel") for key in entity_keys}
+    kept = []
+    for system in fl.systems:
+        if system.id == aggregate:
+            for department in system.departments:
+                department.channels = [c for c in department.channels if c.id not in leaked]
+            system.departments = [d for d in system.departments if d.channels]
+            if not system.departments:
+                continue
+        kept.append(system)
+    fl.systems = kept
+    # A row the FAA still cites (a COM facility record) is re-cited below.
+    fl.provenance = [p for p in fl.provenance if p.source_adapter != "faa_nasr"]
+
+
 def enrich_catalog(
     base_catalog: Catalog, facts: List[NormalizedFact], recipes: List[Recipe]
 ) -> "EnrichResult":
@@ -206,10 +234,13 @@ def enrich_catalog(
     recipes_by_slug = {r.slug: r for r in recipes}
     new_favorites: List[FavoritesList] = []
     coverage: List[RecipeCoverage] = []
+    faa_keys = [f.entity_key for f in facts if f.source_id == "faa_nasr" and f.freq_mhz is not None]
 
     for fl in base_catalog.favorites:
         recipe = recipes_by_slug.get(fl.slug)
         new_fl = copy.deepcopy(fl)
+        if faa_keys and any(p.source_adapter == "faa_nasr" for p in new_fl.provenance):
+            _drop_keyword_faa_rows(new_fl, faa_keys)
         if recipe is not None:
             cov = evaluate_recipe(recipe, facts)
             coverage.append(cov)
@@ -275,7 +306,12 @@ def enrich_catalog(
     from wasds150.recipes.fcc_digital import build_fcc_digital_favorite
 
     fcc_digital = build_fcc_digital_favorite(facts)
-    rebuilt = rr_lists + network_lists + ([fcc_digital] if fcc_digital is not None else [])
+    # FAA NASR airport, approach, centre and weather frequencies become one
+    # located public list, rebuilt the same way.
+    from wasds150.recipes.faa_airband import build_faa_airband_favorite
+
+    faa_airband = build_faa_airband_favorite(facts, home=(AMES_LAKE_LAT, AMES_LAKE_LON))
+    rebuilt = rr_lists + network_lists + [fl for fl in (fcc_digital, faa_airband) if fl is not None]
     if rebuilt:
         replaced = {fl.slug for fl in rebuilt}
         previous_enabled = {fl.slug: fl.enabled for fl in base_catalog.favorites if fl.origin == "local"}
