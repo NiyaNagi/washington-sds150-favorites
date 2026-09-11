@@ -247,12 +247,66 @@ AT_D890UV = RadioProfile(
     verified=False,
 )
 
+#: Icom ID-52A, the US model (not the PLUS).
+#:
+#: Sources: Icom's ID-52A product specifications (receive 108-174 and
+#: 225-479 MHz, transmit 144-148 and 430-450 MHz at 5 W, modes DV, FM and
+#: FM-N with AM, AM-N and WFM receive only) and the ID-52A advanced manual
+#: (1,000 memories in up to 100 groups of 100, 16-character group and memory
+#: names, a 2,500-entry DR repeater list in up to 50 groups, 300 call signs,
+#: 300 GPS memories, 500 broadcast-station memories).
+#:
+#: The broadcast-station memories are a separate store this project does not
+#: write, and the documented receive coverage starts at 108 MHz, so no
+#: broadcast band is claimed here. D-STAR routing (URCALL/RPT1/RPT2) is
+#: written, as on the TH-D75, and the DR repeater list is a second file.
+#: Programmed with Icom's free CS-52 software, which imports a CSV per memory
+#: group and a CSV for the repeater list; the radio reads the same files from
+#: its own microSD card.
+ID52A = RadioProfile(
+    id="id-52a",
+    vendor="Icom",
+    model="ID-52A",
+    rx_bands=(
+        (108.0, 174.0),
+        (225.0, 479.0),
+    ),
+    modes=frozenset({"FM", "NFM", "AM", "WFM", "DV"}),
+    tx_bands=(
+        (144.0, 148.0),
+        (430.0, 450.0),
+    ),
+    max_channels=1000,
+    name_max_len=16,
+    name_style="readable",
+    supports_trunking=False,
+    supports_talkgroups=False,
+    supports_banks=True,
+    supports_per_channel_tone=True,
+    supports_per_channel_mode=True,
+    supports_per_channel_step=True,
+    #: Memory groups, not zones: 100 groups of 100 memories.
+    zone_max=100,
+    zone_member_max=100,
+    notes=(
+        "Dual-band D-STAR handheld with a wide receiver (air band, marine, "
+        "public safety, military UHF air) but no HF and no broadcast bands. "
+        "Transmits 2 m and 70 cm only; every other band is receive only. No "
+        "DMR, NXDN, P25, Fusion or trunk tracking. Memories live in named "
+        "groups of up to 100; D-STAR repeaters have their own 2,500-entry DR "
+        "list. PRELIMINARY: built from Icom's published specifications and "
+        "real ID-52 CSV files, not yet confirmed against CS-52 or the radio."
+    ),
+    verified=False,
+)
+
 _REGISTRY: Dict[str, RadioProfile] = {
     SDS150.id: SDS150,
     TD_H9.id: TD_H9,
     FTX1.id: FTX1,
     TH_D75.id: TH_D75,
     AT_D890UV.id: AT_D890UV,
+    ID52A.id: ID52A,
 }
 
 

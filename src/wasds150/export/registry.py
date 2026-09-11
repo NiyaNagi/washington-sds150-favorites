@@ -22,6 +22,7 @@ from typing import Any, Callable, Dict, List
 from wasds150.export.atd890_cps import render_atd890, write_atd890
 from wasds150.export.chirp_csv import render_chirp_csv, write_chirp_csv
 from wasds150.export.ftx1_target import render_ftx1, write_ftx1
+from wasds150.export.id52_csv import render_id52, write_id52
 from wasds150.export.thd75_target import render_thd75, write_thd75
 from wasds150.plan.resolve import ResolvedPlan
 
@@ -144,8 +145,28 @@ ATD890_CPS = ExportTarget(
     write=write_atd890,
 )
 
+#: Icom CS-52 (and the radio's own SD card) read plain CSV: one file per
+#: memory group plus the D-STAR repeater list, in the folders the radio
+#: expects on its card.
+ID52_CSV = ExportTarget(
+    id="id52-csv",
+    radio_id="id-52a",
+    label="Icom ID-52A CSV set",
+    extension="",
+    kind="directory",
+    description=(
+        "Directory holding Csv/MemoryCh/<group>.csv (one per memory group) "
+        "and Csv/RptList/DSTAR_Near_Home.csv. Import each group in CS-52 "
+        "(Memory CH > right-click a group > Import > Group), or copy the Csv "
+        "folder into ID-52\\ on the radio's microSD card."
+    ),
+    render=render_id52,
+    write=write_id52,
+)
+
 _REGISTRY: Dict[str, ExportTarget] = {
     CHIRP_CSV_TD_H9.id: CHIRP_CSV_TD_H9,
+    ID52_CSV.id: ID52_CSV,
     RT_SYSTEMS_CSV_FTX1.id: RT_SYSTEMS_CSV_FTX1,
     FTX1_FILE.id: FTX1_FILE,
     THD75_FILE.id: THD75_FILE,

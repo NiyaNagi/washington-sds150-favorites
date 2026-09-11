@@ -4,7 +4,7 @@ import pytest
 from wasds150.hpe import validation
 from wasds150.radios import parse_tone
 from wasds150.radios.profile import RadioProfile
-from wasds150.radios.registry import FTX1, SDS150, TD_H9, get_profile, profile_ids
+from wasds150.radios.registry import FTX1, ID52A, SDS150, TD_H9, get_profile, profile_ids
 from wasds150.radios.tones import (
     TONE_COLOR_CODE,
     TONE_CTCSS,
@@ -17,7 +17,7 @@ from wasds150.radios.tones import (
 
 class TestRegistry:
     def test_known_radios_are_registered(self):
-        assert profile_ids() == ["at-d890uv", "ftx1", "sds150", "td-h9", "th-d75"]
+        assert profile_ids() == ["at-d890uv", "ftx1", "id-52a", "sds150", "td-h9", "th-d75"]
 
     def test_lookup_is_case_insensitive(self):
         assert get_profile("TD-H9") is TD_H9
@@ -104,6 +104,45 @@ class TestFtx1Profile:
         assert FTX1.can_receive(14.2)
         assert not SDS150.can_receive(14.2)
         assert not TD_H9.can_receive(14.2)
+
+
+class TestId52aProfile:
+    def test_is_marked_unverified_until_checked_against_cs52(self):
+        # Built from Icom's published specifications and real ID-52 CSV files,
+        # not yet from a file CS-52 itself wrote.
+        assert not ID52A.verified
+
+    @pytest.mark.parametrize("freq", [118.3, 146.52, 162.55, 443.575, 462.5625])
+    def test_receives_the_bands_we_plan_for(self, freq):
+        assert ID52A.can_receive(freq)
+
+    @pytest.mark.parametrize(
+        "freq,why",
+        [
+            (14.2, "HF, which the FTX-1 covers and this does not"),
+            (222.5, "the 1.25 m gap between its two receive bands"),
+            (773.10625, "700 MHz public safety"),
+        ],
+    )
+    def test_has_a_gap_between_its_two_bands(self, freq, why):
+        assert not ID52A.can_receive(freq), why
+
+    def test_transmits_only_on_the_two_ham_bands_it_holds(self):
+        assert ID52A.can_transmit(146.52) and ID52A.can_transmit(446.0)
+        assert not ID52A.can_transmit(162.55)
+        assert not ID52A.can_transmit(462.5625)
+
+    def test_is_the_second_d_star_radio_and_carries_no_other_digital_mode(self):
+        assert ID52A.supports_mode("DV")
+        for other in ("P25", "DMR", "NXDN"):
+            assert not ID52A.supports_mode(other)
+
+    def test_group_limits_match_the_csv_writers(self):
+        from wasds150.export.id52_csv import GROUP_MAX, GROUP_MEMBER_MAX
+
+        assert ID52A.zone_max == GROUP_MAX
+        assert ID52A.zone_member_max == GROUP_MEMBER_MAX
+        assert ID52A.max_channels == 1000 and ID52A.name_max_len == 16
 
 
 class TestProfileValidation:

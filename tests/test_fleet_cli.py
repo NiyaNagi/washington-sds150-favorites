@@ -17,7 +17,7 @@ def run(argv):
 def test_fleet_list_json(wasds_home, sample_csv_path, capsys):
     assert run(["--csv", str(sample_csv_path), "fleet", "list", "--json"]) == 0
     radios = json.loads(capsys.readouterr().out)["radios"]
-    assert [r["radio_id"] for r in radios] == ["sds150", "td-h9", "th-d75", "ftx1", "at-d890uv"]
+    assert [r["radio_id"] for r in radios] == ["sds150", "td-h9", "th-d75", "ftx1", "at-d890uv", "id-52a"]
     assert radios[1]["plan_id"] == "td-h9-fleet"
 
 

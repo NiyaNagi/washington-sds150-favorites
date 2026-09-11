@@ -1,6 +1,8 @@
 """Fleet model, registry, settings, sync state and generated docs."""
 from __future__ import annotations
 
+import re
+
 import pytest
 
 from conftest import REPO_ROOT
@@ -24,7 +26,7 @@ from wasds150.radios.registry import get_profile
 
 # --------------------------------------------------------------- registry --
 def test_every_fleet_radio_is_a_registered_radio_with_a_usable_target():
-    assert list(FLEET) == ["sds150", "td-h9", "th-d75", "ftx1", "at-d890uv"]
+    assert list(FLEET) == ["sds150", "td-h9", "th-d75", "ftx1", "at-d890uv", "id-52a"]
     for radio in FLEET.values():
         get_profile(radio.radio_id)
         if radio.plan_id:
@@ -70,6 +72,18 @@ def test_markdown_numbers_the_steps_and_fills_the_plan_id():
     assert "`at-d890uv.cps_app`" in text
     assert "**Import the contact list** _(optional)_" in text
     assert "Radio ID" not in text  # the bundle carries the registered ID; nothing to set by hand
+
+
+def test_the_id52a_checklist_reads_the_radio_before_it_imports():
+    text = render_markdown(get_fleet_radio("id-52a"))
+    steps = [line for line in text.splitlines() if re.match(r"\d+\. \*\*", line)]
+    order = [next(i for i, line in enumerate(steps) if fragment in line)
+             for fragment in ("Read the radio", "Import each memory group", "Write the radio")]
+    # Reading the radio first is what keeps the operator's call sign, GPS and
+    # APRS settings: the import replaces memories only.
+    assert order == sorted(order)
+    assert any("Import > Group" in line for line in steps)
+    assert "microSD" in text  # the no-PC path is documented alongside CS-52
 
 
 def test_sync_replaces_only_the_generated_section():

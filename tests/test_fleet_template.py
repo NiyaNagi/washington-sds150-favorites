@@ -100,6 +100,11 @@ def test_blocks_follow_capabilities():
     assert "HF Voice Nets" in labels["ftx1"] and "HF Voice Nets" not in labels["at-d890uv"]
     assert "Ham 1.25m Repeaters" in labels["th-d75"] and "Ham 1.25m Repeaters" not in labels["ftx1"]
     assert "FM Broadcast" in labels["at-d890uv"] and "FM Broadcast" not in labels["ftx1"]
+    # The ID-52A is the second D-STAR radio, and the only other one; it has no
+    # HF, no DMR and no broadcast bands to fill.
+    assert "D-STAR Repeaters" in labels["id-52a"]
+    for absent in ("DMR Core", "HF Voice Nets", "FM Broadcast", "Ham 1.25m Repeaters"):
+        assert absent not in labels["id-52a"], absent
 
 
 def test_banks_and_scan_groups_fit_the_anytone_display():
@@ -127,7 +132,7 @@ def test_gmrs_frs_and_murs_transmit_wherever_the_hardware_does():
     for label in ("GMRS 1-7", "FRS 8-14", "GMRS 15-22", "GMRS Repeaters"):
         assert policies[label] == TX_AUTO, label
     assert policies["MURS"] == TX_SIMPLEX
-    for radio_id in ("ftx1", "th-d75", "at-d890uv"):
+    for radio_id in ("ftx1", "th-d75", "at-d890uv", "id-52a"):
         for block in build_fleet_plan(radio_id).blocks:
             if block.label.startswith(("GMRS", "FRS", "MURS")):
                 assert block.tx_policy == TX_NONE, (radio_id, block.label)

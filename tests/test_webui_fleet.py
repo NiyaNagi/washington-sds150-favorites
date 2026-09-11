@@ -56,7 +56,9 @@ def _json(live, path, method="GET", body=None):
 def test_fleet_lists_every_radio_and_the_sources(live):
     status, data = _json(live, "/api/v1/fleet")
     assert status == 200
-    assert [r["radio_id"] for r in data["radios"]] == ["sds150", "td-h9", "th-d75", "ftx1", "at-d890uv"]
+    assert [r["radio_id"] for r in data["radios"]] == [
+        "sds150", "td-h9", "th-d75", "ftx1", "at-d890uv", "id-52a"
+    ]
     assert all(r["status"]["stale"] for r in data["radios"])
     assert any(s["name"] == "noaa_nwr" for s in data["sources"])
 

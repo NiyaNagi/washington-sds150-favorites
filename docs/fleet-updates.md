@@ -301,3 +301,26 @@ not cap it. MURS stays at low power, inside its 2 W limit (95.2767).
 8. **Read back** _(optional)_ - Read from radio, then Tool > Export > Export All into a new radio-backups\at-d890uv\<date>-readback\ folder.
 9. **Compare the read-back** _(automatic, optional)_ - Compare the read-back folder with the generated bundle, table by table.
 <!-- fleet:end at-d890uv -->
+
+<!-- fleet:begin id-52a -->
+### Icom ID-52A (`id-52a`)
+
+- Built from plan `id-52a-fleet`, exported as `id52-csv`.
+- **Prepared and guided**: the wizard exports and opens the vendor program, then waits for you at each manual step.
+- Vendor program: Icom CS-52.
+- Verification: none.
+- Profile and CSV layout are unverified: import one group in CS-52 and check it before writing the radio. The same files load without a PC by copying the Csv folder into ID-52\ on the microSD card (MENU > SD Card > Import/Export > Import).
+
+| Setting | Required | Default | Notes |
+|---|---|---|---|
+| `id-52a.cs52_app` (Icom CS-52 program) | no | `C:\Program Files (x86)\Icom\CS-52\CS-52.exe` |  |
+| `id-52a.copy_to` (Also copy the CSV set to) | no |  | A folder CS-52 opens easily, or the ID-52 folder on the radio's microSD card. |
+
+1. **Export the CSV set** _(automatic)_ - Export id-52a-fleet with target id52-csv: one CSV per memory group under Csv\MemoryCh, plus the D-STAR repeater list under Csv\RptList.
+2. **Start CS-52** _(automatic)_ - Start Icom CS-52.
+3. **Read the radio first** - Read the radio into CS-52 before importing anything, so the memories land on top of your own settings - call sign, GPS and APRS - rather than on a blank file.
+4. **Import each memory group** - Memory CH > right-click the group > Import > Group, and choose the matching file from <export>\Csv\MemoryCh, in file-name order; each file names the group it fills. Answer No when CS-52 asks about USE(FROM). Close the files in any spreadsheet first.
+5. **Import the D-STAR repeater list** _(optional)_ - Digital > Repeater List > right-click a group > Import > Group, and choose <export>\Csv\RptList\DSTAR_Near_Home.csv, so the DR function finds the local repeaters by position.
+6. **Write the radio** - Save the file into radio-backups\id-52a\, then write it to the radio.
+7. **Check the radio** _(confirm)_ - On the radio, open a group near home and check a few memories (<rows> in all), then press DR and confirm a local D-STAR repeater is listed.
+<!-- fleet:end id-52a -->

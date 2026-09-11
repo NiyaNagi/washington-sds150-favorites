@@ -9,6 +9,17 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Added
 
+- **Icom ID-52A** as the sixth radio in the fleet (`id-52a`): a radio
+  profile, a fleet plan of 950 memories in 23 groups, and a CSV export
+  target (`id52-csv`) writing the tree CS-52 and the radio's own microSD
+  card read - one file per memory group under `Csv/MemoryCh`, plus a DR
+  repeater list under `Csv/RptList` built from the D-STAR memories that
+  carry a call sign and a position. A block longer than the radio's
+  100-memory group is split into `Name 2`, as the Anytone's zones are.
+  Only ordinary memories and the repeater list are written; the checklist
+  reads the radio first so the call sign, GPS and APRS settings stay.
+  The profile and the column layout are unverified until a file saved by
+  CS-52 confirms them (see [docs/open-items.md](docs/open-items.md)).
 - One name per station on every radio (`wasds150.catalog.labels`). A
   station is a frequency and mode in one area (FM/NFM and an analog tone do
   not split it; the same frequency in two counties does); its name comes

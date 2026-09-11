@@ -88,6 +88,10 @@ class PlannedChannel:
     #: Miles from the plan's home to the channel (its own site, else its
     #: department's fence centre); ``None`` when neither is known.
     distance_miles: Optional[float] = None
+    #: The station's own position, when the catalog publishes one. Exporters
+    #: that write a located table (the ID-52A's DR repeater list) need it.
+    lat: Optional[float] = None
+    lon: Optional[float] = None
 
 
 @dataclass
@@ -553,6 +557,8 @@ def _resolve_once(
                     round(float(channel.tx_freq_mhz), 6) if channel.tx_freq_mhz is not None else None
                 ),
                 distance_miles=round(distance, 1) if distance is not None else None,
+                lat=channel.lat,
+                lon=channel.lon,
             )
             result.channels.append(planned)
             seen_frequencies[tuning_key] = planned

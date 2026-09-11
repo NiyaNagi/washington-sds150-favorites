@@ -3,8 +3,8 @@
 A curated statewide radio programming catalog and generator. One unified,
 source-cited database drives every radio: a Uniden SDS150 scanner (organized
 for Sentinel, location control, GPS and quick keys), a TIDRADIO TD-H9
-handheld, a Kenwood TH-D75A, a Yaesu FTX-1, and an Anytone AT-D890UV
-DMR/NXDN handheld.
+handheld, a Kenwood TH-D75A, a Yaesu FTX-1, an Anytone AT-D890UV
+DMR/NXDN handheld, and an Icom ID-52A D-STAR handheld.
 
 The catalog covers all 39 Washington counties and includes:
 
@@ -67,6 +67,7 @@ is [Updating every radio](docs/fleet-updates.md); what still needs doing is in
 | Kenwood TH-D75A | Tri-band analog/D-STAR and wideband receiver | 1,000 + 1,500 DR | 545 memories + 21 DR repeaters | Verified; current image tracked |
 | Yaesu FTX-1 | HF/VHF/UHF transceiver | 999 | 960 statewide **or** 351 local memories | Profile from documentation, **unverified** |
 | Anytone AT-D890UV | DMR/NXDN/analog handheld, AM air-band and FM receive | 4,000 + 256 air + 100 FM | ~1,400 channels in 23 zones, 57 scan lists (with RadioReference data) | Profile from CPS 1.05 and a real export, **unverified on hardware** |
+| Icom ID-52A | Dual-band analog/D-STAR handheld, AM air-band receive | 1,000 in 100 groups + 2,500 DR | 950 memories in 23 groups + 21 DR repeaters | Profile and CSV layout from documentation, **unverified** |
 
 The FTX-1 has three loadouts, chosen from the same dropdown. `ftx1-wa` is the
 statewide inventory. `ftx1-local` is the working list: amateur repeaters within
@@ -428,8 +429,9 @@ requires a separate licence; public-safety, marine, aviation and business
 channels require authorization you almost certainly do not have. Verify before
 you key up.
 
-The **Yaesu FTX-1 profile is unverified** — built from documentation, not
-tested against hardware. The UI and `radios list` both flag it.
+The **Yaesu FTX-1, Anytone AT-D890UV and Icom ID-52A profiles are
+unverified** — built from documentation and vendor software, not tested
+against hardware. The UI and `radios list` both flag them.
 
 ## Primary sources
 

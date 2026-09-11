@@ -57,6 +57,14 @@ D890_CPS = VendorApp(
     label="Anytone D890UV CPS 1.05",
     exe_candidates=(r"C:\D890UV\D890UV.exe",),
 )
+CS_52 = VendorApp(
+    id="cs-52",
+    label="Icom CS-52",
+    exe_candidates=(
+        r"C:\Program Files (x86)\Icom\CS-52\CS-52.exe",
+        r"C:\Program Files\Icom\CS-52\CS-52.exe",
+    ),
+)
 
 SDS150 = FleetRadio(
     radio_id="sds150",
@@ -340,8 +348,73 @@ AT_D890UV = FleetRadio(
     notes="Profile unverified until a written bundle has been read back clean.",
 )
 
+ID52A = FleetRadio(
+    radio_id="id-52a",
+    plan_id=fleet_plan_id("id-52a"),
+    target_id="id52-csv",
+    load_path=LOAD_GUIDED,
+    inputs=(
+        InputSpec(
+            "cs52_app", "app_path", "Icom CS-52 program", required=False, default=CS_52.exe_candidates[0],
+        ),
+        InputSpec(
+            "copy_to", "dir", "Also copy the CSV set to", required=False,
+            help="A folder CS-52 opens easily, or the ID-52 folder on the radio's microSD card.",
+        ),
+    ),
+    steps=(
+        StepSpec(
+            "export", "Export the CSV set",
+            "Export {plan_id} with target id52-csv: one CSV per memory group under Csv\\MemoryCh, "
+            "plus the D-STAR repeater list under Csv\\RptList.",
+            kind=STEP_AUTO, artifacts=("export",),
+        ),
+        StepSpec(
+            "open-cs52", "Start CS-52",
+            "Start Icom CS-52.",
+            kind=STEP_AUTO,
+        ),
+        StepSpec(
+            "read-radio", "Read the radio first",
+            "Read the radio into CS-52 before importing anything, so the memories land on top of "
+            "your own settings - call sign, GPS and APRS - rather than on a blank file.",
+        ),
+        StepSpec(
+            "import-groups", "Import each memory group",
+            "Memory CH > right-click the group > Import > Group, and choose the matching file from "
+            "{export}\\Csv\\MemoryCh, in file-name order; each file names the group it fills. Answer "
+            "No when CS-52 asks about USE(FROM). Close the files in any spreadsheet first.",
+        ),
+        StepSpec(
+            "import-repeaters", "Import the D-STAR repeater list",
+            "Digital > Repeater List > right-click a group > Import > Group, and choose "
+            "{export}\\Csv\\RptList\\DSTAR_Near_Home.csv, so the DR function finds the local "
+            "repeaters by position.",
+            optional=True,
+        ),
+        StepSpec(
+            "write-radio", "Write the radio",
+            "Save the file into radio-backups\\id-52a\\, then write it to the radio.",
+        ),
+        StepSpec(
+            "confirm-count", "Check the radio",
+            "On the radio, open a group near home and check a few memories ({rows} in all), then "
+            "press DR and confirm a local D-STAR repeater is listed.",
+            kind=STEP_CONFIRM, verify=True,
+        ),
+    ),
+    verify=VERIFY_NONE,
+    vendor_app=CS_52,
+    doc=FLEET_DOC,
+    notes=(
+        "Profile and CSV layout are unverified: import one group in CS-52 and check it before "
+        "writing the radio. The same files load without a PC by copying the Csv folder into ID-52\\ "
+        "on the microSD card (MENU > SD Card > Import/Export > Import)."
+    ),
+)
+
 FLEET: Dict[str, FleetRadio] = {
-    radio.radio_id: radio for radio in (SDS150, TD_H9, TH_D75, FTX1, AT_D890UV)
+    radio.radio_id: radio for radio in (SDS150, TD_H9, TH_D75, FTX1, AT_D890UV, ID52A)
 }
 
 

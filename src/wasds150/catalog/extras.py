@@ -106,10 +106,11 @@ EXTRAS: Tuple[ExtraCatalog, ...] = (
         "THD75LOCAL",
         _thd75_local,
         requires_modes=frozenset({"DV"}),
-        radio_ids=("th-d75",),
+        radio_ids=("th-d75", "id-52a"),
         notes=(
-            "D-STAR repeaters with URCALL/RPT1/RPT2 routing. Only the TH-D75 "
-            "target writes D-STAR routing; the FTX-1's digital voice is C4FM."
+            "D-STAR repeaters with URCALL/RPT1/RPT2 routing, and the source of "
+            "the ID-52A's DR repeater list. Only the TH-D75 and ID-52A targets "
+            "write D-STAR routing; the FTX-1's digital voice is C4FM."
         ),
     ),
     ExtraCatalog(
