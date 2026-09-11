@@ -24,7 +24,7 @@ import os
 import stat
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Union
 
 
 @dataclass
@@ -35,6 +35,18 @@ class SourcesConfig:
     radioreference_export_path: Optional[str] = None
     radioreference_username: Optional[str] = None
     radioreference_app_key: Optional[str] = None
+    #: FAA NASR subjects to read (``NAV_BASE``, ``COM``, ``FRQ``); ``None`` = all.
+    faa_nasr_subjects: Optional[List[str]] = None
+    #: FCC ULS services to download (``lmpriv``, ``lmcomm``, ``amat``,
+    #: ``gmrs``); ``None`` = Land Mobile Private only.
+    fcc_uls_services: Optional[List[str]] = None
+    #: Keep only frequencies licensed for these emission designators or modes
+    #: (``7K60FXE``, ``DMR``, ``NXDN``, ``P25``); ``None`` = every emission.
+    fcc_uls_emissions: Optional[List[str]] = None
+    #: Keep only licence locations within this many miles of home.
+    fcc_uls_within_miles: Optional[float] = None
+    #: Drop licences that are not active or have expired.
+    fcc_uls_active_only: bool = True
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -55,3 +67,18 @@ class SourcesConfig:
         path.write_text(json.dumps(self.to_dict(), indent=2, sort_keys=True), encoding="utf-8")
         if os.name == "posix":
             path.chmod(stat.S_IRUSR | stat.S_IWUSR)
+
+
+def parse_choice_list(
+    value: Union[str, Iterable[str], None], allowed: Optional[Sequence[str]] = None, *, what: str = "value",
+    upper: bool = False,
+) -> Optional[List[str]]:
+    """``"a,b"`` or ``["a", "b"]`` -> a clean list; empty -> ``None`` (use the
+    default). Raises :class:`ValueError` for a value outside ``allowed``."""
+    items = value.split(",") if isinstance(value, str) else list(value or [])
+    cleaned = [str(item).strip().upper() if upper else str(item).strip() for item in items if str(item).strip()]
+    if allowed is not None:
+        unknown = [item for item in cleaned if item not in allowed]
+        if unknown:
+            raise ValueError(f"unknown {what} {unknown}; choices: {list(allowed)}")
+    return cleaned or None

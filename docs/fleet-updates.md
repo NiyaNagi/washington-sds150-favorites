@@ -26,7 +26,10 @@ radios (out-of-date ones are ticked for you) and the sources to refresh, press
 1. **Sources.** Every configured source whose cache is stale is refreshed; any
    of them can be skipped (`--skip-sources`, or untick it). One failing source
    never stops the update. What they found is merged into the catalog once, and
-   the change is recorded in `state/updates/`.
+   the change is recorded in `state/updates/`. The two bulk downloads, FCC ULS
+   (hundreds of MB) and FAA NASR (~250 MB), are refreshed only when named
+   (`--only-sources fcc_uls`, or tick them); narrow them first with
+   `wasds150 sources configure --fcc-within-miles 60 --fcc-emissions DMR,NXDN,P25`.
 2. **Each radio**, one after another: resolve its plan, compare with the last
    snapshot, export, load, verify, save a snapshot, and record the sync so the
    radio stops showing as out of date.

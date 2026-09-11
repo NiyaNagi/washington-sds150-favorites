@@ -621,6 +621,27 @@ def get_sources_status(ctx: AppContext, req: RequestContext) -> Response:
     return Response.json(200, {"offline": sources_config.offline, "sources": rows})
 
 
+def _apply_bulk_source_options(sources_config: Any, body: Dict[str, Any]) -> None:
+    """FAA NASR / FCC ULS options shared with ``wasds150 sources configure``."""
+    from wasds150.sources.config import parse_choice_list
+    from wasds150.sources.faa_nasr import DEFAULT_SUBJECTS
+    from wasds150.sources.fcc_uls import SERVICE_ZIPS
+
+    if "faa_nasr_subjects" in body:
+        sources_config.faa_nasr_subjects = parse_choice_list(
+            body["faa_nasr_subjects"], DEFAULT_SUBJECTS, what="NASR subject", upper=True
+        )
+    if "fcc_uls_services" in body:
+        sources_config.fcc_uls_services = parse_choice_list(body["fcc_uls_services"], tuple(SERVICE_ZIPS), what="ULS service")
+    if "fcc_uls_emissions" in body:
+        sources_config.fcc_uls_emissions = parse_choice_list(body["fcc_uls_emissions"], upper=True)
+    if "fcc_uls_within_miles" in body:
+        miles = body["fcc_uls_within_miles"]
+        sources_config.fcc_uls_within_miles = float(miles) if miles not in (None, "", 0) else None
+    if "fcc_uls_active_only" in body:
+        sources_config.fcc_uls_active_only = bool(body["fcc_uls_active_only"])
+
+
 def post_sources_configure(ctx: AppContext, req: RequestContext) -> Response:
     from wasds150.sources.config import SourcesConfig
 
@@ -641,6 +662,10 @@ def post_sources_configure(ctx: AppContext, req: RequestContext) -> Response:
         sources_config.radioreference_username = body["radioreference_username"] or None
     if "radioreference_app_key" in body:
         sources_config.radioreference_app_key = body["radioreference_app_key"] or None
+    try:
+        _apply_bulk_source_options(sources_config, body)
+    except (TypeError, ValueError) as exc:
+        return _error(400, str(exc))
     sources_config.save(ctx.config.sources_config_path)
     # Never echo credential-like values back in the response body.
     return Response.json(

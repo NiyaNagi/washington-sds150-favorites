@@ -68,6 +68,12 @@ class RecipeCoverage:
 
 
 def _fact_matches(recipe: Recipe, fact: NormalizedFact) -> bool:
+    if fact.source_id == "fcc_uls" and (fact.raw or {}).get("radio_service_code") != "ZA":
+        # Land-mobile licences have their own list (FCCDIG, built in
+        # enrich_catalog). Matched by county or keyword they would pour every
+        # business and public-safety frequency in a county into whichever
+        # public row names that county; only GMRS licences enrich a row.
+        return False
     configured_sids = recipe.match.configured_sids()
     if configured_sids:
         raw_sid = fact.raw.get("sid") if isinstance(fact.raw, dict) else None
@@ -158,6 +164,27 @@ def _provenance_for(fact: NormalizedFact) -> Provenance:
     )
 
 
+def _refresh_trunk_sites(
+    fl: FavoritesList, recipe: Recipe, coverage: RecipeCoverage, facts: List[NormalizedFact]
+) -> None:
+    """Tier D: RadioReference trunked-site rows refresh a SID row's frequency
+    table (see :func:`wasds150.recipes.systems.refresh_trunk_frequencies`)."""
+    sids = recipe.match.configured_sids()
+    site_facts = systems_mod.rr_site_facts_for(fl, facts, sids)
+    if not site_facts:
+        return
+    refreshed, message = systems_mod.refresh_trunk_frequencies(fl, site_facts, sids=sids)
+    known = set(coverage.matched_fact_keys)
+    coverage.matched_fact_keys.extend(f.entity_key for f in site_facts if f.entity_key not in known)
+    if coverage.status == "none":
+        coverage.status = "partial"
+    coverage.warnings.append(message)
+    if refreshed:
+        prov = _provenance_for(site_facts[0])
+        if (prov.source_adapter, prov.source_url) not in {(p.source_adapter, p.source_url) for p in fl.provenance}:
+            fl.provenance.append(prov)
+
+
 def enrich_catalog(
     base_catalog: Catalog, facts: List[NormalizedFact], recipes: List[Recipe]
 ) -> "EnrichResult":
@@ -195,14 +222,17 @@ def enrich_catalog(
                     new_fl.provenance.append(prov)
                     existing.add(key)
             new_systems = systems_mod.systems_from_matched_facts(new_fl, matched_facts)
+            policy = systems_mod.rebuild_policy(new_fl)
             if new_systems:
-                if systems_mod.rebuilds_systems_from_facts(new_fl):
+                if policy.mode == systems_mod.REPLACE_SYSTEMS:
                     # Freshly built systems win by id; anything the row carries
                     # that the source did not produce (operator-published net
                     # channels, for instance) is preserved.
                     new_fl.systems = systems_mod.dedupe_systems(new_systems + new_fl.systems)
                 else:
                     new_fl.systems = systems_mod.dedupe_systems(new_fl.systems + new_systems)
+            if policy.mode == systems_mod.REPLACE_TRUNK_FREQUENCIES:
+                _refresh_trunk_sites(new_fl, recipe, cov, facts)
         new_favorites.append(new_fl)
 
     # RadioReference conventional rows become their own licensed per-county
@@ -221,7 +251,12 @@ def enrich_catalog(
     from wasds150.recipes.dmr_networks import build_network_favorites, coordinate_lookup_from_catalog
 
     network_lists = build_network_favorites(facts, coords=coordinate_lookup_from_catalog(base_catalog))
-    rebuilt = rr_lists + network_lists
+    # FCC-licensed digital voice systems (DMR/NXDN/P25 by emission
+    # designator) become one public list, rebuilt the same way.
+    from wasds150.recipes.fcc_digital import build_fcc_digital_favorite
+
+    fcc_digital = build_fcc_digital_favorite(facts)
+    rebuilt = rr_lists + network_lists + ([fcc_digital] if fcc_digital is not None else [])
     if rebuilt:
         replaced = {fl.slug for fl in rebuilt}
         previous_enabled = {fl.slug: fl.enabled for fl in base_catalog.favorites if fl.origin == "local"}

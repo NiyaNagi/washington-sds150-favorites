@@ -134,6 +134,7 @@ def source_choices(ctx: AppContext) -> List[Dict[str, Any]]:
     from wasds150.cache.store import HttpCacheStore
     from wasds150.sources.config import SourcesConfig
     from wasds150.sources.factory import instantiate_source, runnable_source_names
+    from wasds150.sources.registry import get_source_class
 
     sources_config = SourcesConfig.load(ctx.config.sources_config_path)
     store = HttpCacheStore(ctx.config.cache_dir)
@@ -147,6 +148,7 @@ def source_choices(ctx: AppContext) -> List[Dict[str, Any]]:
                 "name": name,
                 "configured": configured,
                 "stale": stale,
+                "bulk": bool(getattr(get_source_class(name), "bulk", False)),
                 "cached_urls": len(entries),
                 "last_fetch": max((entry.fetched_at for entry in entries), default=None),
             }
@@ -161,7 +163,8 @@ def selected_sources(ctx: AppContext, spec: FleetUpdateSpec) -> List[str]:
     if spec.only_sources is not None:
         chosen = [r["name"] for r in rows if r["name"] in spec.only_sources and r["configured"]]
     else:
-        chosen = [r["name"] for r in rows if r["stale"]]
+        # Bulk downloads (hundreds of MB) are never refreshed implicitly.
+        chosen = [r["name"] for r in rows if r["stale"] and not r["bulk"]]
     return [name for name in chosen if name not in spec.skip_sources]
 
 
@@ -198,6 +201,8 @@ def _refresh_sources(ctx: AppContext, spec: FleetUpdateSpec, job: JobContext, ho
                 reason = "not configured"
             elif spec.only_sources is not None:
                 reason = "not selected"
+            elif row["bulk"] and row["stale"]:
+                reason = "large download: refreshed only when selected"
             else:
                 reason = "fresh in the cache"
             job.skip(step_id, title, reason, optional=True)

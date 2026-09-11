@@ -554,6 +554,8 @@ SERVICE_BLOCKS: Tuple[ServiceBlockSpec, ...] = (
         lambda k: (
             _keys("FL70a", "FL70b"),
             _rr_county(k, modes=("DMR", "NXDN"), exclude=r"DSTAR"),
+            # FCC-licensed digital voice, each at its licence location.
+            _near(k, "FCCDIG"),
         ),
         limit=100, requires=_demodulates("DMR", "NXDN"), groups=(GROUP_PUB_SVC,),
     ),

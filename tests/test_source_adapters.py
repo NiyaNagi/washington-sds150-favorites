@@ -104,7 +104,8 @@ def test_faa_nasr_parses_nav_and_com_facts():
 def test_fcc_uls_parses_hd_en_lo_fr_join():
     from wasds150.sources.fcc_uls import FccUlsSource
 
-    source = FccUlsSource(service="lmpriv", state="WA")
+    # The fixture's licence expired on 2025-06-01, so keep expired licences.
+    source = FccUlsSource(service="lmpriv", state="WA", active_only=False)
     data = (FIXTURES / "fcc_uls_lmpriv_sample.zip").read_bytes()
     raw = RawDoc(source_adapter="fcc_uls", payload=data, fetched_at="2026-01-01T00:00:00+00:00")
     result = source.normalize(raw)

@@ -1089,6 +1089,28 @@ def cmd_sources_configure(args: argparse.Namespace) -> int:
         sources_config.radioreference_username = args.rr_username or None
     if args.rr_app_key is not None:
         sources_config.radioreference_app_key = args.rr_app_key or None
+    from wasds150.sources.config import parse_choice_list
+    from wasds150.sources.faa_nasr import DEFAULT_SUBJECTS
+    from wasds150.sources.fcc_uls import SERVICE_ZIPS
+
+    try:
+        if args.faa_subjects is not None:
+            sources_config.faa_nasr_subjects = parse_choice_list(
+                args.faa_subjects, DEFAULT_SUBJECTS, what="NASR subject", upper=True
+            )
+        if args.fcc_services is not None:
+            sources_config.fcc_uls_services = parse_choice_list(args.fcc_services, tuple(SERVICE_ZIPS), what="ULS service")
+        if args.fcc_emissions is not None:
+            sources_config.fcc_uls_emissions = parse_choice_list(args.fcc_emissions, upper=True)
+    except ValueError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 1
+    if args.fcc_within_miles is not None:
+        sources_config.fcc_uls_within_miles = args.fcc_within_miles or None
+    if args.fcc_all_licences:
+        sources_config.fcc_uls_active_only = False
+    if args.fcc_active_only:
+        sources_config.fcc_uls_active_only = True
 
     sources_config.save(config.sources_config_path)
     # Never echo credential-like values back, even redacted -- only confirm
@@ -1104,6 +1126,13 @@ def cmd_sources_configure(args: argparse.Namespace) -> int:
                     sources_config.radioreference_export_path
                     or (sources_config.radioreference_username and sources_config.radioreference_app_key)
                 ),
+                "faa_nasr_subjects": sources_config.faa_nasr_subjects,
+                "fcc_uls": {
+                    "services": sources_config.fcc_uls_services,
+                    "emissions": sources_config.fcc_uls_emissions,
+                    "within_miles": sources_config.fcc_uls_within_miles,
+                    "active_only": sources_config.fcc_uls_active_only,
+                },
             }
         )
         return 0
@@ -2138,6 +2167,22 @@ def build_parser() -> argparse.ArgumentParser:
     p_sources_configure.add_argument("--rr-export-path", help="Path to a user-exported RR Premium CSV/XML file")
     p_sources_configure.add_argument("--rr-username", help="RadioReference username (non-secret identifier only)")
     p_sources_configure.add_argument("--rr-app-key", help="RadioReference app key (never a password)")
+    p_sources_configure.add_argument(
+        "--faa-subjects", help="FAA NASR subjects to read: NAV_BASE,COM,FRQ (empty = all)"
+    )
+    p_sources_configure.add_argument(
+        "--fcc-services", help="FCC ULS services to download: lmpriv,lmcomm,amat,gmrs (empty = lmpriv)"
+    )
+    p_sources_configure.add_argument(
+        "--fcc-emissions",
+        help="Keep only these emission designators or modes, e.g. DMR,NXDN,P25 or 7K60FXE (empty = all)",
+    )
+    p_sources_configure.add_argument(
+        "--fcc-within-miles", type=float, help="Keep only licence locations this close to home (0 = anywhere)"
+    )
+    licences = p_sources_configure.add_mutually_exclusive_group()
+    licences.add_argument("--fcc-active-only", action="store_true", help="Only active, unexpired licences (default)")
+    licences.add_argument("--fcc-all-licences", action="store_true", help="Include expired and cancelled licences")
     p_sources_configure.add_argument("--json", action="store_true")
     p_sources_configure.set_defaults(func=cmd_sources_configure)
 

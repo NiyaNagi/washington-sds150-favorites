@@ -2651,11 +2651,12 @@
     sources.forEach((source) => {
       const row = fleetEl("label", { class: source.configured ? "fleet-source" : "fleet-source muted" });
       const tick = fleetEl("input", { type: "checkbox", "data-source": source.name });
-      tick.checked = !!source.stale;
+      tick.checked = !!source.stale && !source.bulk;
       tick.disabled = !source.configured;
       row.appendChild(tick);
       const when = source.last_fetch ? `fetched ${source.last_fetch.slice(0, 16).replace("T", " ")}` : "never fetched";
-      const state = !source.configured ? "not configured" : source.stale ? `stale, ${when}` : `fresh, ${when}`;
+      let state = !source.configured ? "not configured" : source.stale ? `stale, ${when}` : `fresh, ${when}`;
+      if (source.bulk) state += ", large download";
       row.appendChild(document.createTextNode(` ${source.name} (${state})`));
       box.appendChild(row);
     });

@@ -69,7 +69,30 @@ def instantiate_source(name: str, sources_config: SourcesConfig) -> Optional[Onl
         return _sentinel_local(sources_config)
     if name == "radioreference_premium":
         return _radioreference_premium(sources_config)
+    if name == "faa_nasr":
+        from wasds150.sources.faa_nasr import DEFAULT_SUBJECTS, FaaNasrSource
+
+        return FaaNasrSource(subjects=tuple(sources_config.faa_nasr_subjects or DEFAULT_SUBJECTS))
+    if name == "fcc_uls":
+        return _fcc_uls(sources_config)
     return cls()
+
+
+def _fcc_uls(sources_config: SourcesConfig) -> OnlineSourceAdapter:
+    from wasds150.sources.fcc_uls import FccUlsSource
+
+    home = None
+    if sources_config.fcc_uls_within_miles:
+        from wasds150.plans.template import HOME
+
+        home = HOME
+    return FccUlsSource(
+        services=tuple(sources_config.fcc_uls_services or ("lmpriv",)),
+        emissions=tuple(sources_config.fcc_uls_emissions or ()),
+        home=home,
+        within_miles=sources_config.fcc_uls_within_miles or None,
+        active_only=sources_config.fcc_uls_active_only,
+    )
 
 
 def runnable_source_names(

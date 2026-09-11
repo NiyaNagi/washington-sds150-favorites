@@ -69,6 +69,10 @@ class OnlineSourceAdapter(ABC):
     #: only ChangeAlert rows — the PDF/link-only sources) | "local" (reads
     #: local files only, e.g. Sentinel HPDB; never touches the network).
     kind: str = "facts"
+    #: True for sources whose download is hundreds of megabytes (FCC ULS,
+    #: FAA NASR). The fleet update refreshes them only when asked for by
+    #: name, never just because their cache is stale.
+    bulk: bool = False
 
     @abstractmethod
     def fetch(self, http_client: Optional[Any] = None) -> RawDoc:

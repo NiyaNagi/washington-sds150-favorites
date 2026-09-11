@@ -232,6 +232,8 @@ def test_a_source_with_nothing_new_leaves_the_catalog_alone(ctx, runner, tmp_pat
 def test_source_selection_prefers_stale_sources_and_respects_skips(ctx):
     stale = selected_sources(ctx, FleetUpdateSpec(radio_ids=["td-h9"]))
     assert "noaa_nwr" in stale and "sentinel_local" not in stale  # nothing cached yet; Sentinel unconfigured
+    assert "fcc_uls" not in stale and "faa_nasr" not in stale  # bulk downloads only when named
+    assert selected_sources(ctx, FleetUpdateSpec(radio_ids=["td-h9"], only_sources=["fcc_uls"])) == ["fcc_uls"]
     assert "noaa_nwr" not in selected_sources(ctx, FleetUpdateSpec(radio_ids=["td-h9"], skip_sources=["noaa_nwr"]))
     assert selected_sources(ctx, FleetUpdateSpec(radio_ids=["td-h9"], only_sources=["amsat"])) == ["amsat"]
     assert selected_sources(ctx, FleetUpdateSpec(radio_ids=["td-h9"], refresh_sources=False)) == []

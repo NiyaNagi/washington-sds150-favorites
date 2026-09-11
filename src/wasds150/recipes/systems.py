@@ -40,8 +40,8 @@ from __future__ import annotations
 
 import copy
 import re
-from dataclasses import replace
-from typing import Dict, List, Optional
+from dataclasses import dataclass, replace
+from typing import Dict, List, Optional, Tuple
 
 from wasds150.models.catalog import Catalog, Channel, Department, FavoritesList, System
 from wasds150.models.provenance import Provenance
@@ -347,17 +347,208 @@ def systems_from_flat_facts(fl: FavoritesList, facts: List[NormalizedFact]) -> L
     return [system]
 
 
-def rebuilds_systems_from_facts(fl: FavoritesList) -> bool:
-    """True when a row's systems are derived wholly from a public source.
+# ---------------------------------------------------------------------------
+# Rebuild policy: how a refresh treats the systems a row already carries
+# ---------------------------------------------------------------------------
 
-    Most rows accumulate: a locally enriched HPDB system is precious and must
-    survive a refresh that cannot see it.  A row like ``PSHAM01`` is different
-    - every channel in it comes from the WWARA coordination extract, and its
-    system carries a deterministic id, so merging by id would let the previous
-    run's copy win forever and the row would never pick up a new coordination,
-    a corrected tone or a repeater input.
+ACCUMULATE = "accumulate"
+REPLACE_SYSTEMS = "replace-systems"
+REPLACE_TRUNK_FREQUENCIES = "replace-trunk-frequencies"
+_RR_SOURCE_IDS = ("radioreference_premium", "radioreference_api")
+
+
+@dataclass(frozen=True)
+class RebuildPolicy:
+    """``accumulate`` keeps every system and adds what is new (a locally
+    enriched HPDB system is precious and must survive a refresh that cannot
+    see it). ``replace-systems`` lets freshly built systems win by id, for a
+    row rebuilt wholly from one public source. ``replace-trunk-frequencies``
+    keeps a trunked system's sites, departments and talkgroups and replaces
+    only its frequency table, which is the part a RadioReference export
+    refreshes."""
+
+    source_ids: Tuple[str, ...]
+    mode: str
+
+
+def rebuild_policy(fl: FavoritesList) -> RebuildPolicy:
+    if fl.favorite_key == "PSHAM01":
+        # Every channel comes from the WWARA extract and the system id is
+        # deterministic, so merging by id would let the previous run's copy
+        # win forever and never pick up a new coordination or corrected tone.
+        return RebuildPolicy(("wwara",), REPLACE_SYSTEMS)
+    from wasds150.recipes.default_recipes import _detect_sids
+
+    if _detect_sids(fl.system_or_category, fl.source_url):
+        return RebuildPolicy(_RR_SOURCE_IDS, REPLACE_TRUNK_FREQUENCIES)
+    return RebuildPolicy((), ACCUMULATE)
+
+
+def rebuilds_systems_from_facts(fl: FavoritesList) -> bool:
+    """True when a row's systems are derived wholly from a public source
+    (see :func:`rebuild_policy`)."""
+    return rebuild_policy(fl).mode == REPLACE_SYSTEMS
+
+
+# ---------------------------------------------------------------------------
+# Tier D: RadioReference trunked-site rows -> a system's frequency table
+# ---------------------------------------------------------------------------
+
+_PAREN = re.compile(r"\(([^)]*)\)")
+_WORD = re.compile(r"[A-Za-z0-9]+")
+#: RadioReference mode -> the trunk technology tag the HPE writer uses.
+_TECH_BY_MODE = {"P25": "P25Standard"}
+
+
+def _name_key(text: str) -> str:
+    return " ".join(_WORD.findall(_PAREN.sub(" ", text or "").lower()))
+
+
+#: Capitalised words that name a technology or band, not a system. Matching
+#: on them would tie every "(P25)" system to every row that mentions P25.
+_NOT_SYSTEM_ACRONYMS = frozenset({"P25", "DMR", "NXDN", "TRBO", "LMR", "UHF", "VHF", "EMS", "SID", "TRS", "USA"})
+
+
+def _acronyms(text: str) -> set:
+    """Acronyms: tokens written in capitals, three or more characters with
+    at least two letters, wherever they appear - ``(PSERN)``, ``TCERN (...)``,
+    ``MACC 911``. Mixed-case words such as ``(SeaTac Airport)`` are not
+    acronyms and never match, and neither are technology names."""
+    return {
+        token
+        for token in re.findall(r"\b[A-Z0-9]{3,}\b", text or "")
+        if sum(c.isalpha() for c in token) >= 2 and token not in _NOT_SYSTEM_ACRONYMS
+    }
+
+
+def _names_match(row_texts: List[str], category: str) -> bool:
+    """A RadioReference system category names the same system as a row when
+    one name contains the other (ignoring parentheses and punctuation, both
+    at least ten characters) or they share a parenthesised acronym
+    (``Justice Integrated Wireless Network`` / ``... (JIWN)``)."""
+    category_key = _name_key(category)
+    for text in row_texts:
+        key = _name_key(text)
+        if len(category_key) >= 10 and len(key) >= 10 and (category_key in key or key in category_key):
+            return True
+    row_words = {w.upper() for text in row_texts for w in _WORD.findall(text or "")}
+    category_words = {w.upper() for w in _WORD.findall(category or "")}
+    row_acronyms = set().union(*(_acronyms(text) for text in row_texts)) if row_texts else set()
+    return bool((_acronyms(category) & row_words) or (row_acronyms & category_words))
+
+
+def rr_site_facts_for(fl: FavoritesList, facts: List[NormalizedFact], sids: tuple) -> List[NormalizedFact]:
+    """RadioReference trunked-site facts describing ``fl``'s system: by SID
+    when the fact carries one (the web-service API does), else by name."""
+    texts = [fl.favorite_name, fl.system_or_category]
+    matched = []
+    for fact in facts:
+        if fact.fact_type != "site" or fact.source_id not in _RR_SOURCE_IDS:
+            continue
+        raw = fact.raw if isinstance(fact.raw, dict) else {}
+        try:
+            if raw.get("sid") is not None and int(raw["sid"]) in sids:
+                matched.append(fact)
+                continue
+        except (TypeError, ValueError):
+            pass
+        if _names_match(texts, str(raw.get("rr_category", ""))):
+            matched.append(fact)
+    return matched
+
+
+def systems_from_rr_site_facts(fl: FavoritesList, site_facts: List[NormalizedFact], *, sids: tuple) -> List[System]:
+    """One system per RadioReference category: its sites (county-centre
+    fences; the export gives no site position) and every site frequency in
+    one table. Exports do not mark control channels, so ``lcn`` stays unset
+    and ``usage`` records the site."""
+    from collections import OrderedDict
+
+    from wasds150.catalog.wa_counties import county_point
+    from wasds150.models.catalog import Site, TrunkFrequency
+
+    by_category: "OrderedDict[str, List[NormalizedFact]]" = OrderedDict()
+    for fact in site_facts:
+        raw = fact.raw if isinstance(fact.raw, dict) else {}
+        by_category.setdefault(str(raw.get("rr_category") or "RadioReference system").strip(), []).append(fact)
+
+    systems: List[System] = []
+    for category, facts in by_category.items():
+        sites: "OrderedDict[str, NormalizedFact]" = OrderedDict()
+        table: List[TrunkFrequency] = []
+        seen = set()
+        for fact in facts:
+            raw = fact.raw if isinstance(fact.raw, dict) else {}
+            site_label = str(raw.get("rr_description") or fact.name or "Site").strip()[:64]
+            sites.setdefault(site_label, fact)
+            freq = _round_freq(fact.freq_mhz)
+            if freq is None or (freq, site_label) in seen:
+                continue
+            seen.add((freq, site_label))
+            table.append(
+                TrunkFrequency(
+                    id=stable_id(f"{fl.slug}:rr-site:{category}:{site_label}:{freq}", kind="trunk_frequency"),
+                    freq_mhz=freq,
+                    lcn=None,
+                    usage=f"site:{site_label}",
+                )
+            )
+        site_objects = []
+        for label, fact in sites.items():
+            point = county_point(fact.county) if fact.county else None
+            site_objects.append(
+                Site(
+                    id=stable_id(f"{fl.slug}:rr-site:{category}:{label}", kind="site"),
+                    label=label,
+                    lat=point.lat if point else None,
+                    lon=point.lon if point else None,
+                    range_miles=point.radius_miles if point else None,
+                    shape="Circle" if point else "",
+                )
+            )
+        modes = {(fact.mode or "").upper() for fact in facts}
+        systems.append(
+            System(
+                id=stable_id(f"{fl.slug}:rr-sites:{category}", kind="system"),
+                label=category[:64],
+                sid=sids[0] if len(sids) == 1 else None,
+                tech=next((_TECH_BY_MODE[m] for m in sorted(modes) if m in _TECH_BY_MODE), None),
+                sites=site_objects,
+                trunk_frequencies=table,
+            )
+        )
+    return systems
+
+
+def _has_talkgroups(system: System) -> bool:
+    departments = list(system.departments) + [d for site in system.sites for d in site.departments]
+    return any(channel.tgid is not None for department in departments for channel in department.channels)
+
+
+def refresh_trunk_frequencies(
+    fl: FavoritesList, site_facts: List[NormalizedFact], *, sids: tuple
+) -> Tuple[bool, str]:
+    """Replace the frequency table of ``fl``'s trunked systems with the
+    RadioReference site rows, keeping their sites and talkgroups.
+
+    A trunked system without talkgroups is nothing a scanner can use (the
+    HPE validator rejects it as missing talkgroups), so when the row has none
+    no system is built; the message says where talkgroups come from.
     """
-    return fl.favorite_key == "PSHAM01"
+    table = [tf for system in systems_from_rr_site_facts(fl, site_facts, sids=sids) for tf in system.trunk_frequencies]
+    targets = [
+        system for system in fl.systems
+        if _has_talkgroups(system) and (system.sid is None or not sids or system.sid in sids)
+    ]
+    if not targets:
+        return False, (
+            f"{fl.favorite_key}: {len(table)} RadioReference site frequencies matched, but the row has no "
+            "talkgroups to go with them; talkgroups come from a Sentinel HPDB import or the RadioReference "
+            "web-service API (needs an application key), so no trunked system was built"
+        )
+    for system in targets:
+        system.trunk_frequencies = [copy.deepcopy(tf) for tf in table]
+    return True, f"{fl.favorite_key}: trunk frequency table replaced with {len(table)} RadioReference site frequencies"
 
 
 def systems_from_matched_facts(fl: FavoritesList, matched_facts: List[NormalizedFact]) -> List[System]:
