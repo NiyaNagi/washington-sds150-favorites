@@ -48,12 +48,7 @@ catalog is the source of truth. See
 - [RadioReference API application](docs/radioreference-api-application.md) - ready-to-paste text for the Database Web Service key request, and what happens after approval.
 - [Agent runbook](docs/agent-runbook.md) - copy-paste procedures for automating this repository, environment layout, API reference, and project invariants.
 - [Lake Ozette profile](docs/ozette-lake.md) - Olympic Peninsula coastal trip profile: Clallam County, SAR/interop, tribal, marine, aviation, and amateur coverage.
-- [Printable mounts and brackets](models/README.md) - parametric OpenSCAD visor mounts, Peak Design Capture bracket, and EFHW antenna enclosure, with print-ready 3MF/STL and the latch/fit reasoning behind each variant.
-- [Parametric modelling method](docs/modelling-method.md) - measurement-first workflow, tolerance and clearance conventions, and the automated geometry checks each model must pass.
-- [Peak Design capture bracket](docs/pd-capture-bracket.md) - the SDS150 bracket's dimensions, fastener options, and fit verification.
-- [EFHW antenna enclosure](docs/efhw-enclosure.md) - a 128mm screw-lid cylinder for an end-fed half-wave transformer: how it sheds rain without a gasket, the open-topped cable exits, and why the thread is deliberately coarse.
-- [Peak Design radio standoff](docs/peak-design-radio-standoff.md) - a cup-holder stalk with a continuously adjustable M6 head, captured-nut 1.40× GoPro-style knob, keyed TPU friction washers, SDS150 gravity keyhole, shortened full-width clip plate, coupons, and independent load/fit checks.
-- [Radio hardware measurements](docs/radio-hardware-measurements.md) - measured, derived, published, and conservative mounting dimensions kept separate for future designs.
+- [3D models (moved)](docs/3d-models.md) - the printable mounts, brackets, EFHW enclosure and parametric modelling method now live in [alturas-labs-models](https://github.com/NiyaNagi/alturas-labs-models).
 
 ## Radios and channel plans
 
@@ -400,16 +395,9 @@ python scripts/radios/fetch_chirp_tdh9_module.py
 
 Neither `.venv-chirp/` nor the fetched driver module is committed.
 
-The 3D models are a third, equally separate environment. They need OpenSCAD
-plus a scientific stack for the geometry checks, none of which the package
-uses:
-
-```bash
-python -m venv .venv-cad
-.venv-cad/bin/pip install -r scripts/cad/requirements.txt
-.venv-cad/bin/python scripts/cad/export_models.py    # regenerate every 3MF/STL
-.venv-cad/bin/python scripts/cad/build_all.py        # verify everything, then export
-```
+The 3D models and their `.venv-cad` environment moved to
+[alturas-labs-models](https://github.com/NiyaNagi/alturas-labs-models);
+see [docs/3d-models.md](docs/3d-models.md).
 
 `build_all.py` runs all 31 geometry checks in order and stops at the first
 hard failure, so a broken model cannot overwrite good STLs. It goes quiet

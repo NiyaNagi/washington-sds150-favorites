@@ -11,13 +11,15 @@ macOS/Linux.
 
 ## Environments
 
-Three virtual environments, deliberately separate:
+Two virtual environments, deliberately separate:
 
 | Environment | Purpose | Why separate |
 |---|---|---|
 | `.venv` | The `wasds150` package, CLI, web UI, tests | Zero runtime deps, Python 3.9+ |
 | `.venv-chirp` | CHIRP, hardware programming only | CHIRP is GPL-3 and needs Python 3.10+ |
-| `.venv-cad` | OpenSCAD/trimesh model checks | Heavy scientific deps, unrelated |
+
+`.venv-cad`, for the 3D-model checks, moved with the models to
+[alturas-labs-models](https://github.com/NiyaNagi/alturas-labs-models).
 
 **Never** add a dependency to `.venv` or import CHIRP from inside
 `src/wasds150/`. The zero-dependency guarantee and the MIT/GPL boundary both
