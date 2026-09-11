@@ -117,7 +117,15 @@ def _make_handler_class(router: Router, token: str) -> type:
 
 
 def build_server(ctx: AppContext, port: int = 0, host: str = "127.0.0.1"):
-    router = build_router(ctx)
+    from wasds150.jobs.runner import JobRunner
+
+    # One runner per server: it owns the job threads, and a job a previous
+    # server left mid-flight is marked interrupted so it can be resumed.
+    runner = JobRunner(ctx.config.jobs_dir)
+    interrupted = runner.recover()
+    if interrupted:
+        logger.warning("marked %d interrupted job(s): %s", len(interrupted), ", ".join(interrupted))
+    router = build_router(ctx, runner)
     token = auth.generate_token()
     handler_class = _make_handler_class(router, token)
     server = ThreadingHTTPServer((host, port), handler_class)

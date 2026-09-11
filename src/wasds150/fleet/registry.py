@@ -7,7 +7,7 @@ wizard and the documentation read the same text.
 """
 from __future__ import annotations
 
-from typing import Dict, List
+from typing import Any, Dict, List, Optional
 
 from wasds150.fleet.model import (
     LOAD_AUTOMATED,
@@ -330,6 +330,21 @@ def fleet_ids() -> List[str]:
 
 def list_fleet() -> Dict[str, FleetRadio]:
     return dict(FLEET)
+
+
+def fleet_info(radio_id: str) -> Optional[Dict[str, Any]]:
+    """How a radio is loaded, for pages that decide what to offer (the Radios
+    tab enables direct programming only for automatically loaded radios)."""
+    radio = FLEET.get(str(radio_id).strip().lower())
+    if radio is None:
+        return None
+    return {
+        "radio_id": radio.radio_id,
+        "plan_id": radio.plan_id,
+        "target_id": radio.target_id,
+        "load_path": radio.load_path,
+        "inputs": [spec.to_dict() for spec in radio.inputs],
+    }
 
 
 def get_fleet_radio(radio_id: str) -> FleetRadio:

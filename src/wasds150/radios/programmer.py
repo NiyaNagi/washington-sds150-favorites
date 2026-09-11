@@ -14,13 +14,16 @@ no shell.
 from __future__ import annotations
 
 import os
+import queue
 import re
 import shutil
 import subprocess
 import sys
+import threading
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 #: Serial port names we are willing to hand to a subprocess.  Windows COM
 #: ports and POSIX tty device paths, nothing else.  Anything containing a
@@ -199,6 +202,7 @@ class ProgrammerRun:
     stdout: str
     stderr: str
     timed_out: bool = False
+    cancelled: bool = False
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -208,6 +212,7 @@ class ProgrammerRun:
             "stdout": self.stdout,
             "stderr": self.stderr,
             "timed_out": self.timed_out,
+            "cancelled": self.cancelled,
         }
 
 
@@ -294,6 +299,97 @@ def run(
         returncode=completed.returncode,
         stdout=completed.stdout or "",
         stderr=completed.stderr or "",
+    )
+
+
+def _stop(proc: "subprocess.Popen[str]") -> None:
+    proc.terminate()
+    try:
+        proc.wait(timeout=5)
+    except subprocess.TimeoutExpired:
+        proc.kill()
+
+
+def run_streaming(
+    argv: List[str],
+    on_line: Callable[[str], None],
+    *,
+    should_cancel: Optional[Callable[[], bool]] = None,
+    root: Optional[Path] = None,
+    timeout: int = DEFAULT_TIMEOUT_SECONDS,
+) -> ProgrammerRun:
+    """Run a prepared programmer command, handing each output line to
+    ``on_line`` as it arrives.
+
+    Used by the fleet wizard, which reports progress while the radio is being
+    read and written instead of blocking silently for two minutes. stderr is
+    merged into stdout so lines stay in the order the child printed them.
+    ``should_cancel`` is polled between lines; when it turns true the child
+    is terminated (killed if it ignores that) and the run reports
+    ``cancelled``. Like :func:`run`, never uses a shell.
+    """
+    base = root or repo_root()
+    env = dict(os.environ)
+    env.setdefault("PYTHONIOENCODING", "utf-8")
+    env.setdefault("PYTHONUNBUFFERED", "1")
+    try:
+        proc = subprocess.Popen(  # noqa: S603 - argv vector, shell=False
+            argv,
+            cwd=str(base),
+            env=env,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            bufsize=1,
+            shell=False,
+        )
+    except OSError as exc:
+        raise ProgrammerError(f"could not start the programmer: {exc}") from exc
+
+    lines: "queue.Queue[Optional[str]]" = queue.Queue()
+
+    def pump() -> None:
+        assert proc.stdout is not None
+        for raw in proc.stdout:
+            lines.put(raw.rstrip("\r\n"))
+        lines.put(None)
+
+    reader = threading.Thread(target=pump, name="programmer-output", daemon=True)
+    reader.start()
+    output: List[str] = []
+    deadline = time.monotonic() + timeout
+    cancelled = timed_out = False
+    while True:
+        if should_cancel is not None and should_cancel():
+            cancelled = True
+            _stop(proc)
+            break
+        if time.monotonic() > deadline:
+            timed_out = True
+            _stop(proc)
+            break
+        try:
+            line = lines.get(timeout=0.2)
+        except queue.Empty:
+            continue
+        if line is None:
+            break
+        output.append(line)
+        on_line(line)
+
+    returncode = proc.wait()
+    reader.join(timeout=2)
+    note = "cancelled" if cancelled else (f"timed out after {timeout}s" if timed_out else "")
+    return ProgrammerRun(
+        ok=returncode == 0 and not cancelled and not timed_out,
+        command=list(argv),
+        returncode=returncode,
+        stdout="\n".join(output),
+        stderr=note,
+        timed_out=timed_out,
+        cancelled=cancelled,
     )
 
 

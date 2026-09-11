@@ -709,6 +709,9 @@ def build_fleet_plan(radio_id: str, knobs: Optional[RadioKnobs] = None) -> Chann
         scan_groups=_scan_groups(specs) if profile.supports_banks else (),
         license_class=knobs.license_class,
         gmrs_call=knobs.gmrs_call if knobs.gmrs_licensed else "",
+        # The catch-all overlaps every block; without this it would add a
+        # receive-only copy of channels already programmed with transmit.
+        skip_receive_duplicates=True,
     )
 
 

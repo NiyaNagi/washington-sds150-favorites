@@ -1235,12 +1235,16 @@ def get_loadout_detail(ctx: AppContext, req: RequestContext) -> Response:
     """Everything currently configured for one radio, in its native shape."""
     from wasds150.plan.loadout import get_loadout
 
+    from wasds150.fleet.registry import fleet_info
+
     loadout_id = req.params.get("loadout_id", "")
     try:
         loadout = get_loadout(ctx, loadout_id)
     except KeyError as exc:
         return _error(404, str(exc))
-    return Response.json(200, loadout.to_dict())
+    payload = loadout.to_dict()
+    payload["fleet"] = fleet_info(payload.get("radio_id", ""))
+    return Response.json(200, payload)
 
 
 def post_loadout_snapshot(ctx: AppContext, req: RequestContext) -> Response:
@@ -1312,7 +1316,211 @@ def post_programmer_run(ctx: AppContext, req: RequestContext) -> Response:
     return Response.json(200, payload)
 
 
-def build_router(ctx: AppContext) -> Router:
+def get_plan_export_zip(ctx: AppContext, req: RequestContext) -> Response:
+    """The plan's programming file (or CPS bundle) and report as one zip, so
+    a browser can hand it to whichever machine runs the vendor program."""
+    import io
+    import tempfile
+    import zipfile
+
+    from wasds150.export.registry import targets_for_radio
+    from wasds150.plan.service import export_plan
+    from wasds150.plans import get_plan as get_named_plan
+
+    try:
+        plan = get_named_plan(req.params.get("plan_id", ""))
+    except KeyError as exc:
+        return _error(404, str(exc.args[0] if exc.args else exc))
+    target_id = (req.query.get("target") or [""])[0] or next(
+        (t.id for t in targets_for_radio(plan.radio_id) if t.available), ""
+    )
+    if not target_id:
+        return _error(400, f"no export target serves {plan.radio_id}")
+    buffer = io.BytesIO()
+    with tempfile.TemporaryDirectory(prefix="wasds150-zip-") as tmp:
+        root = Path(tmp)
+        try:
+            export = export_plan(ctx, plan.id, target_id=target_id, out_dir=root)
+        except KeyError as exc:
+            return _error(404, str(exc.args[0] if exc.args else exc))
+        except NotImplementedError as exc:
+            return _error(501, str(exc))
+        except (ValueError, OSError) as exc:
+            return _error(400, str(exc))
+        with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as archive:
+            for path in (export.csv_path, export.report_path):
+                members = sorted(p for p in path.rglob("*") if p.is_file()) if path.is_dir() else [path]
+                for member in members:
+                    archive.write(member, member.relative_to(root).as_posix())
+    return Response(
+        status=200,
+        body=buffer.getvalue(),
+        content_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{plan.id}.zip"'},
+    )
+
+
+# ------------------------------------------------------------------ fleet --
+def _fleet_rows(ctx: AppContext) -> List[Dict[str, Any]]:
+    from wasds150.fleet.registry import list_fleet
+    from wasds150.fleet.service import fleet_status, load_settings
+    from wasds150.radios.registry import get_profile as get_radio_profile
+
+    settings = load_settings(ctx)
+    statuses = {status.radio_id: status for status in fleet_status(ctx)}
+    rows = []
+    for radio in list_fleet().values():
+        row = radio.to_dict()
+        row["label"] = get_radio_profile(radio.radio_id).label
+        row["values"] = settings.values_for(radio)
+        row["missing"] = [spec.id for spec in settings.missing(radio)]
+        row["status"] = statuses[radio.radio_id].to_dict()
+        rows.append(row)
+    return rows
+
+
+def get_fleet(ctx: AppContext, req: RequestContext) -> Response:
+    """Every radio with its stale state and settings, plus the sources an
+    update would refresh."""
+    from wasds150.fleet.update import source_choices
+
+    return Response.json(200, {"radios": _fleet_rows(ctx), "sources": source_choices(ctx)})
+
+
+def get_fleet_state(ctx: AppContext, req: RequestContext) -> Response:
+    from wasds150.fleet.service import fleet_status
+
+    return Response.json(200, {"radios": [status.to_dict() for status in fleet_status(ctx)]})
+
+
+def get_fleet_settings(ctx: AppContext, req: RequestContext) -> Response:
+    from wasds150.fleet.registry import list_fleet
+    from wasds150.fleet.service import load_settings
+
+    settings = load_settings(ctx)
+    return Response.json(
+        200,
+        {
+            "radios": {
+                radio.radio_id: {
+                    "values": settings.values_for(radio),
+                    "missing": [spec.id for spec in settings.missing(radio)],
+                }
+                for radio in list_fleet().values()
+            }
+        },
+    )
+
+
+def post_fleet_settings(ctx: AppContext, req: RequestContext) -> Response:
+    """``{"set": {"td-h9.com_port": "COM7"}}``; an empty value clears one."""
+    from wasds150.fleet.registry import get_fleet_radio
+    from wasds150.fleet.service import load_settings
+    from wasds150.fleet.settings import parse_assignment
+
+    body = req.json_body() or {}
+    assignments = body.get("set") or {}
+    if not isinstance(assignments, dict):
+        return _error(400, "'set' must map radio.input to a value")
+    settings = load_settings(ctx)
+    for key, value in assignments.items():
+        try:
+            radio_id, input_id, _ = parse_assignment(f"{key}=")
+            get_fleet_radio(radio_id).input(input_id)
+        except (KeyError, ValueError) as exc:
+            return _error(400, str(exc.args[0] if exc.args else exc))
+        settings.set(radio_id, input_id, str(value or "").strip())
+    ctx.config.ensure_dirs()
+    settings.save(ctx.config.fleet_settings_path)
+    return get_fleet_settings(ctx, req)
+
+
+def post_fleet_update(ctx: AppContext, runner: Any, req: RequestContext) -> Response:
+    """Start the update wizard in the background; returns its job id."""
+    from wasds150.fleet.update import FleetUpdateSpec, start_fleet_update
+    from wasds150.jobs.runner import JobBusy
+
+    body = req.json_body() or {}
+    try:
+        job_id = start_fleet_update(runner, ctx, FleetUpdateSpec.from_dict(body))
+    except JobBusy as exc:
+        return Response.json(409, {"error": str(exc), "job_id": exc.job_id})
+    except (KeyError, ValueError, TypeError) as exc:
+        return _error(400, str(exc.args[0] if exc.args else exc))
+    return Response.json(202, {"job_id": job_id})
+
+
+def get_jobs(runner: Any, req: RequestContext) -> Response:
+    return Response.json(200, {"jobs": [status.to_dict() for status in runner.list()[:50]]})
+
+
+def get_job(runner: Any, req: RequestContext) -> Response:
+    try:
+        return Response.json(200, runner.get(req.params.get("job_id", "")).to_dict())
+    except KeyError as exc:
+        return _error(404, str(exc.args[0] if exc.args else exc))
+
+
+def get_job_events(runner: Any, req: RequestContext) -> Response:
+    try:
+        since = int((req.query.get("since") or ["0"])[0] or 0)
+    except ValueError:
+        return _error(400, "'since' must be an integer")
+    job_id = req.params.get("job_id", "")
+    try:
+        events = runner.events(job_id, since)
+        status = runner.get(job_id)
+    except KeyError as exc:
+        return _error(404, str(exc.args[0] if exc.args else exc))
+    return Response.json(
+        200, {"events": [e.to_dict() for e in events], "last_seq": status.last_seq, "status": status.status}
+    )
+
+
+def post_job_answer(runner: Any, req: RequestContext) -> Response:
+    body = req.json_body() or {}
+    try:
+        runner.answer(
+            req.params.get("job_id", ""), str(body.get("step_id", "")), str(body.get("decision", "")),
+            body.get("inputs") or {},
+        )
+    except KeyError as exc:
+        return _error(404, str(exc.args[0] if exc.args else exc))
+    except ValueError as exc:
+        return _error(409, str(exc))
+    return Response.json(200, {"answered": True})
+
+
+def post_job_cancel(runner: Any, req: RequestContext) -> Response:
+    try:
+        return Response.json(200, {"cancelled": runner.cancel(req.params.get("job_id", ""))})
+    except KeyError as exc:
+        return _error(404, str(exc.args[0] if exc.args else exc))
+
+
+def post_job_resume(ctx: AppContext, runner: Any, req: RequestContext) -> Response:
+    from wasds150.fleet.update import JOB_KIND, resume_fleet_update
+    from wasds150.jobs.runner import JobBusy
+
+    job_id = req.params.get("job_id", "")
+    try:
+        if runner.get(job_id).kind != JOB_KIND:
+            return _error(400, "only fleet updates can be resumed")
+        new_id = resume_fleet_update(runner, ctx, job_id)
+    except KeyError as exc:
+        return _error(404, str(exc.args[0] if exc.args else exc))
+    except JobBusy as exc:
+        return Response.json(409, {"error": str(exc), "job_id": exc.job_id})
+    except ValueError as exc:
+        return _error(409, str(exc))
+    return Response.json(202, {"job_id": new_id})
+
+
+def build_router(ctx: AppContext, runner: Any = None) -> Router:
+    from wasds150.jobs.runner import JobRunner
+
+    if runner is None:
+        runner = JobRunner(ctx.config.jobs_dir)
     router = Router()
     router.add("GET", "/api/v1/dashboard", lambda req: get_dashboard(ctx, req))
     router.add("GET", "/api/v1/catalog", lambda req: get_catalog(ctx, req))
@@ -1366,4 +1574,16 @@ def build_router(ctx: AppContext) -> Router:
     router.add("POST", "/api/v1/loadouts/{loadout_id}/snapshot", lambda req: post_loadout_snapshot(ctx, req))
     router.add("GET", "/api/v1/loadouts/{loadout_id}/snapshots", lambda req: get_loadout_snapshots(ctx, req))
     router.add("GET", "/api/v1/loadouts/{loadout_id}/diff", lambda req: get_loadout_diff(ctx, req))
+    router.add("GET", "/api/v1/plans/{plan_id}/export.zip", lambda req: get_plan_export_zip(ctx, req))
+    router.add("GET", "/api/v1/fleet", lambda req: get_fleet(ctx, req))
+    router.add("GET", "/api/v1/fleet/state", lambda req: get_fleet_state(ctx, req))
+    router.add("GET", "/api/v1/fleet/settings", lambda req: get_fleet_settings(ctx, req))
+    router.add("POST", "/api/v1/fleet/settings", lambda req: post_fleet_settings(ctx, req))
+    router.add("POST", "/api/v1/fleet/update", lambda req: post_fleet_update(ctx, runner, req))
+    router.add("GET", "/api/v1/jobs", lambda req: get_jobs(runner, req))
+    router.add("GET", "/api/v1/jobs/{job_id}", lambda req: get_job(runner, req))
+    router.add("GET", "/api/v1/jobs/{job_id}/events", lambda req: get_job_events(runner, req))
+    router.add("POST", "/api/v1/jobs/{job_id}/answer", lambda req: post_job_answer(runner, req))
+    router.add("POST", "/api/v1/jobs/{job_id}/cancel", lambda req: post_job_cancel(runner, req))
+    router.add("POST", "/api/v1/jobs/{job_id}/resume", lambda req: post_job_resume(ctx, runner, req))
     return router

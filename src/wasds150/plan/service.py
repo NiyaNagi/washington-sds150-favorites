@@ -112,8 +112,11 @@ def channel_row(channel) -> Dict[str, Any]:
 
 def plan_detail(resolved: ResolvedPlan) -> Dict[str, Any]:
     """Full description of a resolved plan for the UI's detail view."""
+    from wasds150.fleet.registry import fleet_info
+
     profile = resolved.profile
     return {
+        "fleet": fleet_info(profile.id),
         "plan": resolved.plan.to_dict(),
         "radio": {
             "id": profile.id,

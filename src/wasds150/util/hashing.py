@@ -39,6 +39,22 @@ def sha256_of_bytes(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+def sha256_of_path(path: Any) -> str:
+    """SHA-256 of a file, or of a directory as ``name  sha`` lines in name
+    order (the shape ``sha256sum`` prints, so it can be checked by hand)."""
+    from pathlib import Path
+
+    path = Path(path)
+    if path.is_file():
+        return sha256_of_bytes(path.read_bytes())
+    lines = [
+        f"{child.relative_to(path).as_posix()}  {sha256_of_bytes(child.read_bytes())}"
+        for child in sorted(path.rglob("*"))
+        if child.is_file()
+    ]
+    return sha256_of("\n".join(lines))
+
+
 def content_hash(obj: Any) -> str:
     """sha256 over the canonical JSON form of ``obj``."""
     return sha256_of(canonical_json(obj))

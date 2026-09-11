@@ -11,7 +11,6 @@ changes (which ``content_hash`` deliberately does not see).
 from __future__ import annotations
 
 import datetime
-import hashlib
 import json
 import os
 from dataclasses import asdict, dataclass, field
@@ -20,7 +19,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from wasds150.catalog.delta import structure_hash
 from wasds150.fleet.model import FleetRadio
-from wasds150.util.hashing import sha256_of
+from wasds150.util.hashing import sha256_of, sha256_of_path  # noqa: F401 - re-exported
 
 
 @dataclass
@@ -89,20 +88,6 @@ def plan_fingerprint(plan: Any) -> str:
     """Stable hash of a plan definition, selectors included (the dataclass
     ``repr`` is deterministic: tuples, strings and floats only)."""
     return sha256_of(repr(plan)) if plan is not None else ""
-
-
-def sha256_of_path(path: Path) -> str:
-    """SHA-256 of a file, or of a directory as ``name  sha`` lines in name
-    order (the shape ``sha256sum`` prints, so it can be checked by hand)."""
-    path = Path(path)
-    if path.is_file():
-        return hashlib.sha256(path.read_bytes()).hexdigest()
-    lines = [
-        f"{child.relative_to(path).as_posix()}  {hashlib.sha256(child.read_bytes()).hexdigest()}"
-        for child in sorted(path.rglob("*"))
-        if child.is_file()
-    ]
-    return sha256_of("\n".join(lines))
 
 
 @dataclass

@@ -13,7 +13,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from wasds150 import __version__
 from wasds150.appctx import AppContext, build_context
@@ -1575,6 +1575,186 @@ def cmd_fleet_export(args: argparse.Namespace) -> int:
     return 0
 
 
+def _split_names(text: Optional[str]) -> List[str]:
+    return [part.strip() for part in (text or "").split(",") if part.strip()]
+
+
+def _print_event(event: Any, as_json: bool) -> None:
+    if as_json:
+        print(json.dumps(event.to_dict(), sort_keys=True), flush=True)
+        return
+    if event.kind == "step.log":
+        print(f"      {event.message}", flush=True)
+    elif event.kind == "step.progress":
+        return
+    else:
+        where = f" {event.step_id}" if event.step_id else ""
+        print(f"{event.ts[11:19]} {event.kind:15}{where}  {event.message}", flush=True)
+
+
+def _prompt_answer(waiting: Dict[str, Any]) -> Tuple[str, Dict[str, str]]:
+    """Ask on the terminal. End of input aborts rather than guessing."""
+    print()
+    print(f"  >> {waiting.get('title', '')}")
+    print(f"     {waiting.get('instructions', '')}")
+    for name, path in (waiting.get("artifacts") or {}).items():
+        print(f"     {name}: {path}")
+    try:
+        if waiting.get("inputs"):
+            values = {}
+            for spec in waiting["inputs"]:
+                values[spec["id"]] = input(f"     {spec.get('label', spec['id'])}: ").strip()
+            return ("done" if any(values.values()) else "skip"), values
+        while True:
+            choice = input("     [d]one, [s]kip or [a]bort? ").strip().lower()
+            if choice in ("d", "done"):
+                return "done", {}
+            if choice in ("s", "skip"):
+                return "skip", {}
+            if choice in ("a", "abort"):
+                return "abort", {}
+    except EOFError:
+        print("     (no input: aborting)")
+        return "abort", {}
+
+
+def _follow_job(runner: Any, job_id: str, *, answer: bool, as_json: bool = False) -> Any:
+    import time
+
+    seq = 0
+    while True:
+        for event in runner.events(job_id, seq):
+            seq = event.seq
+            _print_event(event, as_json)
+            if answer and event.kind in ("step.waiting", "input.required"):
+                status = runner.get(job_id)
+                waiting = status.waiting or {}
+                if status.status == "waiting" and waiting.get("step_id") == event.step_id:
+                    decision, values = _prompt_answer(waiting)
+                    runner.answer(job_id, event.step_id, decision, values)
+        status = runner.get(job_id)
+        if not status.active and seq >= status.last_seq:
+            return status
+        time.sleep(0.2)
+
+
+def cmd_fleet_update(args: argparse.Namespace) -> int:
+    from wasds150.fleet.update import FleetUpdateSpec, resume_fleet_update, start_fleet_update
+    from wasds150.jobs.runner import JobBusy, JobRunner
+
+    ctx = _build_ctx(args)
+    ctx.config.ensure_dirs()
+    runner = JobRunner(ctx.config.jobs_dir)
+    try:
+        if args.resume:
+            job_id = resume_fleet_update(runner, ctx, args.resume)
+        else:
+            spec = FleetUpdateSpec(
+                radio_ids=_fleet_radio_ids(args),
+                refresh_sources=not args.no_refresh,
+                only_sources=_split_names(args.only_sources) or None,
+                skip_sources=_split_names(args.skip_sources),
+                apply_sources=not args.no_apply,
+                force_conflicts=args.force,
+                include_licensed=not args.exclude_licensed,
+                execute=args.execute,
+                skip_manual=args.skip_manual,
+                launch_apps=not args.no_launch,
+                out_dir=args.out,
+            )
+            job_id = start_fleet_update(runner, ctx, spec)
+    except JobBusy as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 1
+    except (KeyError, ValueError) as exc:
+        print(f"error: {exc.args[0] if exc.args else exc}", file=sys.stderr)
+        return 1
+    if not args.json:
+        print(f"job {job_id}")
+    status = _follow_job(runner, job_id, answer=True, as_json=args.json)
+    if not args.json:
+        print(f"\n{status.status}" + (f": {status.error}" if status.error else ""))
+        if status.status in ("failed", "cancelled"):
+            print(f"resume with: wasds150 fleet update --resume {job_id}")
+    return 0 if status.status == "finished" else 1
+
+
+def _jobs_runner(args: argparse.Namespace) -> Any:
+    from wasds150.jobs.runner import JobRunner
+
+    return JobRunner(_build_config(args).jobs_dir)
+
+
+def cmd_jobs_list(args: argparse.Namespace) -> int:
+    rows = [s.to_dict() for s in _jobs_runner(args).list()]
+    if args.json:
+        _print_json({"jobs": [{k: r[k] for k in ("job_id", "kind", "title", "status", "created_at", "error")} for r in rows]})
+        return 0
+    for row in rows:
+        print(f"{row['job_id']}  {row['status']:11} {row['title']}")
+    return 0
+
+
+def cmd_jobs_show(args: argparse.Namespace) -> int:
+    try:
+        status = _jobs_runner(args).get(args.job)
+    except KeyError as exc:
+        print(f"error: {exc.args[0]}", file=sys.stderr)
+        return 1
+    if args.json:
+        _print_json(status.to_dict())
+        return 0
+    print(f"{status.job_id}  {status.status}  {status.title}")
+    if status.error:
+        print(f"  error: {status.error}")
+    for step in status.steps:
+        print(f"  {step.status:9} {step.id}  {step.message}")
+    if status.waiting:
+        print(f"  waiting at {status.waiting['step_id']}: {status.waiting.get('instructions', '')}")
+    return 0
+
+
+def cmd_jobs_tail(args: argparse.Namespace) -> int:
+    runner = _jobs_runner(args)
+    try:
+        if args.follow:
+            _follow_job(runner, args.job, answer=False)
+            return 0
+        for event in runner.events(args.job, args.since):
+            _print_event(event, False)
+    except KeyError as exc:
+        print(f"error: {exc.args[0]}", file=sys.stderr)
+        return 1
+    return 0
+
+
+def cmd_jobs_answer(args: argparse.Namespace) -> int:
+    inputs = {}
+    for pair in args.input or []:
+        key, sep, value = pair.partition("=")
+        if not sep:
+            print(f"error: expected key=value, got {pair!r}", file=sys.stderr)
+            return 1
+        inputs[key.strip()] = value
+    try:
+        _jobs_runner(args).answer(args.job, args.step, args.decision, inputs)
+    except (KeyError, ValueError) as exc:
+        print(f"error: {exc.args[0] if exc.args else exc}", file=sys.stderr)
+        return 1
+    print(f"answered {args.step}: {args.decision}")
+    return 0
+
+
+def cmd_jobs_cancel(args: argparse.Namespace) -> int:
+    try:
+        cancelled = _jobs_runner(args).cancel(args.job)
+    except KeyError as exc:
+        print(f"error: {exc.args[0]}", file=sys.stderr)
+        return 1
+    print("cancellation requested" if cancelled else "the job is not running")
+    return 0 if cancelled else 1
+
+
 # --------------------------------------------------------------- parser ----
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="wasds150", description=__doc__)
@@ -1824,6 +2004,55 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_fleet_export.add_argument("--json", action="store_true")
     p_fleet_export.set_defaults(func=cmd_fleet_export)
+
+    p_fleet_update = fleet_sub.add_parser(
+        "update", help="Refresh stale sources, then export and load every selected radio"
+    )
+    chosen = p_fleet_update.add_mutually_exclusive_group()
+    chosen.add_argument("--all", action="store_true", help="Every radio (the default)")
+    chosen.add_argument("--radios", help="Comma-separated radio ids")
+    p_fleet_update.add_argument("--no-refresh", action="store_true", help="Do not refresh any source")
+    p_fleet_update.add_argument("--only-sources", help="Refresh exactly these sources (comma-separated)")
+    p_fleet_update.add_argument("--skip-sources", help="Never refresh these sources (comma-separated)")
+    p_fleet_update.add_argument("--no-apply", action="store_true", help="Fetch sources but do not change the catalog")
+    p_fleet_update.add_argument("--force", action="store_true", help="Apply the merge even with conflicts")
+    p_fleet_update.add_argument(
+        "--execute", action="store_true",
+        help="Actually write radios and the Sentinel workspace (default: dry run, export only)",
+    )
+    p_fleet_update.add_argument(
+        "--skip-manual", action="store_true", help="Skip vendor-program checklist items instead of prompting"
+    )
+    p_fleet_update.add_argument("--no-launch", action="store_true", help="Do not start vendor programs")
+    p_fleet_update.add_argument("--exclude-licensed", action="store_true")
+    p_fleet_update.add_argument("--out", default="wasds150-output/radios", help="Output directory")
+    p_fleet_update.add_argument("--resume", metavar="JOB", help="Resume a failed, cancelled or interrupted update")
+    p_fleet_update.add_argument("--json", action="store_true", help="One JSON event per line")
+    p_fleet_update.set_defaults(func=cmd_fleet_update)
+
+    p_jobs = subparsers.add_parser("jobs", help="Background jobs: list, show, follow, answer, cancel")
+    jobs_sub = p_jobs.add_subparsers(dest="jobs_command", required=True)
+    p_jobs_list = jobs_sub.add_parser("list", help="Recent jobs, newest first")
+    p_jobs_list.add_argument("--json", action="store_true")
+    p_jobs_list.set_defaults(func=cmd_jobs_list)
+    p_jobs_show = jobs_sub.add_parser("show", help="One job's steps and state")
+    p_jobs_show.add_argument("job")
+    p_jobs_show.add_argument("--json", action="store_true")
+    p_jobs_show.set_defaults(func=cmd_jobs_show)
+    p_jobs_tail = jobs_sub.add_parser("tail", help="Print a job's events")
+    p_jobs_tail.add_argument("job")
+    p_jobs_tail.add_argument("--since", type=int, default=0)
+    p_jobs_tail.add_argument("--follow", action="store_true", help="Keep printing until the job stops")
+    p_jobs_tail.set_defaults(func=cmd_jobs_tail)
+    p_jobs_answer = jobs_sub.add_parser("answer", help="Answer a step a job is waiting on")
+    p_jobs_answer.add_argument("job")
+    p_jobs_answer.add_argument("step")
+    p_jobs_answer.add_argument("decision", choices=("done", "skip", "abort"))
+    p_jobs_answer.add_argument("--input", action="append", metavar="KEY=VALUE")
+    p_jobs_answer.set_defaults(func=cmd_jobs_answer)
+    p_jobs_cancel = jobs_sub.add_parser("cancel", help="Cancel a running job")
+    p_jobs_cancel.add_argument("job")
+    p_jobs_cancel.set_defaults(func=cmd_jobs_cancel)
 
     p_hpe = subparsers.add_parser("hpe", help="Uniden .hpe/.hpd container/record engine")
     hpe_sub = p_hpe.add_subparsers(dest="hpe_command", required=True)

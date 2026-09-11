@@ -10,9 +10,42 @@ and this page cannot drift apart.
 ```powershell
 wasds150 fleet status                     # which radios are out of date, and why
 wasds150 fleet settings --set td-h9.com_port=COM7
-wasds150 fleet export --all               # every radio's programming file + report
+wasds150 fleet update                     # dry run: refresh stale sources, export every radio
+wasds150 fleet update --execute           # the same, then load each radio (asks at every manual step)
+wasds150 fleet export --all               # just the programming files + reports
 wasds150 fleet describe at-d890uv         # one radio's checklist with your settings filled in
 ```
+
+The same update runs from the browser: `wasds150 ui`, **Fleet** tab. Tick the
+radios (out-of-date ones are ticked for you) and the sources to refresh, press
+**Update selected**, and answer each checklist step with **Done**, **Skip** or
+**Abort** as the vendor programs need you.
+
+## How an update runs
+
+1. **Sources.** Every configured source whose cache is stale is refreshed; any
+   of them can be skipped (`--skip-sources`, or untick it). One failing source
+   never stops the update. What they found is merged into the catalog once, and
+   the change is recorded in `state/updates/`.
+2. **Each radio**, one after another: resolve its plan, compare with the last
+   snapshot, export, load, verify, save a snapshot, and record the sync so the
+   radio stops showing as out of date.
+3. **Loading** is automatic for the SDS150 (the Sentinel workspace installer:
+   backup, typed `IMPORT <profile>` confirmation, automatic rollback) and the
+   TD-H9 (CHIRP: backup, typed `WRITE COMn` confirmation, read-back). The
+   TH-D75, FTX-1 and AT-D890UV are prepared and guided: the wizard exports,
+   opens the vendor program and waits at each step below.
+
+Without `--execute` nothing touches a radio or the Sentinel workspace: every
+radio is resolved and exported, and the SDS150 install is only planned.
+
+An update runs as a background job (`state/jobs/`). `wasds150 jobs list`,
+`jobs show`, `jobs tail --follow`, `jobs answer <job> <step> done` and
+`jobs cancel` work on it from any terminal, including a job the browser
+started. If one radio fails, the job stops as failed and
+`wasds150 fleet update --resume <job>` picks up where it stopped, reusing every
+export still on disk unchanged; a job the process was killed during is marked
+interrupted the next time the web UI starts, and resumes the same way.
 
 ## What each radio gets
 

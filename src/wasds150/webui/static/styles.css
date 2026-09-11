@@ -637,3 +637,31 @@ footer {
   font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
   text-align: right;
 }
+
+/* ---------------------------------------------------------------- fleet -- */
+.fleet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0.75rem;
+}
+.fleet-card { display: flex; flex-direction: column; gap: 0.35rem; }
+.fleet-card-head { font-weight: 600; cursor: pointer; }
+.fleet-card ul { margin: 0; padding-left: 1.1rem; }
+.badge {
+  align-self: flex-start;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  border: 1px solid var(--border);
+}
+.badge.stale { color: var(--warn); border-color: var(--warn); }
+.badge.current { color: var(--ok); border-color: var(--ok); }
+.fleet-input { display: block; margin: 0.35rem 0; color: var(--muted); font-size: 0.85rem; }
+.fleet-input input { display: block; width: 100%; box-sizing: border-box; margin-top: 0.15rem; }
+.fleet-sources { display: flex; flex-wrap: wrap; gap: 0.35rem 1rem; }
+.fleet-source { font-size: 0.85rem; }
+.fleet-waiting { border-color: var(--accent); }
+.fleet-waiting h4 { margin: 0 0 0.4rem; color: var(--accent); }
+#fleet-steps-table tr.step-failed td { color: var(--danger); }
+#fleet-steps-table tr.step-skipped td { color: var(--muted); }
+#fleet-steps-table tr.step-waiting td { color: var(--accent); }

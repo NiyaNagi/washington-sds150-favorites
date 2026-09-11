@@ -17,6 +17,7 @@
     <button data-tab="catalog" class="tab-btn">Catalog</button>
     <button data-tab="display" class="tab-btn">Display</button>
     <button data-tab="radios" class="tab-btn">Radios</button>
+    <button data-tab="fleet" class="tab-btn">Fleet</button>
     <button data-tab="profile" class="tab-btn">Profile</button>
     <button data-tab="export" class="tab-btn">Export</button>
     <button data-tab="advanced" class="tab-btn">Advanced</button>
@@ -188,6 +189,7 @@
         <label for="plan-target-select">Target</label>
         <select id="plan-target-select"></select>
         <button id="plan-export-btn" class="primary">Export</button>
+        <button id="plan-zip-btn">Download zip</button>
         <span id="plan-export-status" class="hint" aria-live="polite"></span>
       </div>
       <p class="hint" id="plan-target-description"></p>
@@ -221,6 +223,63 @@
         <pre id="programmer-command" class="command-preview">—</pre>
         <pre id="programmer-output" class="command-output" aria-live="polite"></pre>
       </div>
+    </section>
+
+    <section id="tab-fleet" class="tab-panel">
+      <h2>Fleet</h2>
+      <p class="hint">
+        Bring every radio up to date from the catalog. Stale sources are refreshed first (untick any
+        you want to skip), then each selected radio is resolved, exported and loaded. Radios programmed
+        through a vendor program stop at each step that needs a click: do it, then press
+        <strong>Done</strong>. Without <strong>Write to the radios</strong> the update is a dry run
+        that only exports.
+      </p>
+
+      <h3>1. Radios</h3>
+      <div id="fleet-radios" class="fleet-grid"></div>
+
+      <h3>2. Sources to refresh first</h3>
+      <div class="toolbar">
+        <label><input type="checkbox" id="fleet-refresh" checked /> Refresh the ticked sources</label>
+        <label><input type="checkbox" id="fleet-apply" checked /> Apply what they find to the catalog</label>
+      </div>
+      <div id="fleet-sources" class="fleet-sources"></div>
+
+      <h3>3. Run</h3>
+      <div class="toolbar">
+        <label><input type="checkbox" id="fleet-execute" /> Write to the radios</label>
+        <label><input type="checkbox" id="fleet-include-licensed" checked /> Include RadioReference lists</label>
+        <button id="fleet-update-btn" class="primary">Update selected</button>
+        <button id="fleet-cancel-btn" class="danger" hidden>Cancel</button>
+        <span id="fleet-job-status" class="hint" aria-live="polite"></span>
+      </div>
+
+      <div id="fleet-waiting" class="panel fleet-waiting" hidden>
+        <h4 id="fleet-waiting-title"></h4>
+        <p id="fleet-waiting-text"></p>
+        <ul id="fleet-waiting-artifacts" class="hint"></ul>
+        <div id="fleet-waiting-inputs"></div>
+        <div class="toolbar">
+          <button id="fleet-done-btn" class="primary">Done</button>
+          <button id="fleet-skip-btn">Skip</button>
+          <button id="fleet-abort-btn" class="danger">Abort</button>
+        </div>
+      </div>
+
+      <table class="data-table" id="fleet-steps-table">
+        <thead><tr><th>Step</th><th>Status</th><th>Detail</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <details class="panel">
+        <summary>Event log</summary>
+        <pre id="fleet-log" class="command-output"></pre>
+      </details>
+
+      <h3>Recent updates</h3>
+      <table class="data-table" id="fleet-jobs-table">
+        <thead><tr><th>Job</th><th>Status</th><th>Started</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
     </section>
 
     <section id="tab-profile" class="tab-panel">

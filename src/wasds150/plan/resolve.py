@@ -279,6 +279,11 @@ def resolve_plan(
     #: coordinator publishes it) adds nothing once a talkgroup channel for the
     #: same repeater is programmed, so it is dropped as covered.
     seen_digital_identity: Dict[Tuple[float, str], PlannedChannel] = {}
+    #: Every signal some memory already receives, keyed without transmit
+    #: settings. A receive-only memory for a signal already in the radio adds
+    #: nothing - the usual case is a catch-all block meeting a channel an
+    #: earlier block programmed with transmit.
+    seen_receive: Dict[Tuple, PlannedChannel] = {}
     slot = 0
 
     for block in plan.blocks:
@@ -400,6 +405,16 @@ def resolve_plan(
                     )
                 )
                 continue
+            receive_key = (freq, mode if spec is not None else "", identity)
+            receiving = seen_receive.get(receive_key)
+            if plan.skip_receive_duplicates and not transmit and receiving is not None:
+                result.dropped.append(
+                    DroppedChannel(
+                        channel.label, freq, block.label, "duplicate",
+                        f"already received in slot {receiving.slot} as {receiving.label!r}",
+                    )
+                )
+                continue
             if spec is not None and not spec.has_contact:
                 covering = seen_digital_identity.get((freq, mode))
                 if covering is not None:
@@ -425,7 +440,9 @@ def resolve_plan(
             taken += 1
             planned = PlannedChannel(
                 slot=slot,
-                name=allocator.allocate(channel.label, key=channel.id),
+                # Keyed per block: one channel programmed in two blocks (receive
+                # only, then with transmit) is two memories and needs two names.
+                name=allocator.allocate(channel.label, key=f"{block.label}\x00{channel.id}"),
                 label=channel.label,
                 rx_freq_mhz=freq,
                 mode=mode,
@@ -455,6 +472,7 @@ def resolve_plan(
             )
             result.channels.append(planned)
             seen_frequencies[tuning_key] = planned
+            seen_receive.setdefault(receive_key, planned)
             if spec is not None and spec.has_contact:
                 seen_digital_identity.setdefault((freq, mode), planned)
 

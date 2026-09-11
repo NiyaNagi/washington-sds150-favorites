@@ -160,6 +160,18 @@ def test_resolved_fleet_plans_fit_and_transmit_legally(real_ctx):
             assert personal or amateur, (radio_id, channel.label, freq)
 
 
+def test_fleet_plans_have_unique_names_and_the_anytone_bundle_builds(real_ctx):
+    from wasds150.export.atd890_bundle import build_bundle
+
+    for radio_id in FLEET_PLAN_RADIOS:
+        _plan, resolved = resolve_named_plan(real_ctx, f"{radio_id}-fleet")
+        names = [c.name for c in resolved.channels]
+        assert len(names) == len(set(names)), radio_id
+        if radio_id == "at-d890uv":
+            bundle = build_bundle(resolved)
+            assert bundle.zones and bundle.scan_lists
+
+
 def test_legacy_plans_are_unchanged(real_ctx):
     for plan_id, slots in LEGACY_SLOTS.items():
         assert resolve_named_plan(real_ctx, plan_id)[1].slots_used == slots, plan_id
@@ -203,6 +215,47 @@ def test_tx_auto_uses_a_published_input_and_otherwise_stays_simplex():
     assert by_label["GMRS Rpt 15"].transmit and by_label["GMRS Rpt 15"].tx_freq_mhz == 467.55
     assert by_label["GMRS 1"].transmit and by_label["GMRS 1"].tx_freq_mhz is None
     assert not resolved.warnings
+
+
+def test_a_receive_only_copy_of_a_programmed_signal_is_a_duplicate():
+    """The catch-all meets channels earlier blocks already programmed with
+    transmit; a second, receive-only memory for them wastes a slot."""
+    repeater = Channel(id="r", label="W7ABC Rpt", freq_mhz=146.90, tx_freq_mhz=146.30, mode="FM")
+    catalog = Catalog(favorites=[_favorite("RPT", [Department(id="d", label="2 Meter", channels=[repeater])])])
+    selector = ChannelSelector(favorite_keys=("RPT",))
+    blocks = (
+        PlanBlock(label="Repeaters", selectors=(selector,), tx_policy="repeater"),
+        PlanBlock(label="Catch-all", selectors=(selector,)),
+    )
+    plan = ChannelPlan(id="t", radio_id="td-h9", label="t", blocks=blocks, skip_receive_duplicates=True)
+    resolved = resolve_plan(plan, catalog, get_profile("td-h9"))
+    assert [c.block for c in resolved.channels] == ["Repeaters"]
+    assert resolved.dropped[0].reason == "duplicate" and "already received" in resolved.dropped[0].detail
+    # Hand-written plans keep their published memory map.
+    legacy = ChannelPlan(id="t", radio_id="td-h9", label="t", blocks=blocks)
+    kept = resolve_plan(legacy, catalog, get_profile("td-h9"))
+    assert [c.block for c in kept.channels] == ["Repeaters", "Catch-all"]
+    assert len({c.name for c in kept.channels}) == 2
+
+
+def test_every_fleet_plan_skips_receive_duplicates():
+    assert all(build_fleet_plan(radio_id).skip_receive_duplicates for radio_id in FLEET_PLAN_RADIOS)
+
+
+def test_a_transmit_copy_after_a_receive_only_one_gets_its_own_name():
+    simplex = Channel(id="s", label="Calling", freq_mhz=146.52, mode="FM")
+    catalog = Catalog(favorites=[_favorite("SPX", [Department(id="d", label="Simplex", channels=[simplex])])])
+    selector = ChannelSelector(favorite_keys=("SPX",))
+    plan = ChannelPlan(
+        id="t", radio_id="td-h9", label="t",
+        blocks=(
+            PlanBlock(label="Listen", selectors=(selector,)),
+            PlanBlock(label="Talk", selectors=(selector,), tx_policy="simplex"),
+        ),
+    )
+    resolved = resolve_plan(plan, catalog, get_profile("td-h9"))
+    assert [c.transmit for c in resolved.channels] == [False, True]
+    assert len({c.name for c in resolved.channels}) == 2
 
 
 def test_tier_distance_sort_puts_near_calling_groups_first():

@@ -290,6 +290,11 @@ class ChannelPlan:
     #: The operator's GMRS call sign, carried into reports. Whether a block
     #: transmits on GMRS is still that block's policy.
     gmrs_call: str = ""
+    #: Drop a receive-only memory when an earlier slot already receives the
+    #: same signal (typically with transmit). Generated fleet plans turn it on
+    #: because their catch-all block overlaps every other block; the
+    #: hand-written plans keep the memory map they were published with.
+    skip_receive_duplicates: bool = False
 
     def __post_init__(self) -> None:
         if self.reserve_slots < 0:
@@ -319,6 +324,7 @@ class ChannelPlan:
             "reserve_slots": self.reserve_slots,
             "license_class": self.license_class,
             "gmrs_call": self.gmrs_call,
+            "skip_receive_duplicates": self.skip_receive_duplicates,
             "scan_groups": [
                 {"name": group.name, "blocks": list(group.blocks), "notes": group.notes}
                 for group in self.scan_groups

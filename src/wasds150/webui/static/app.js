@@ -16,7 +16,7 @@
       headers["Content-Type"] = "application/json";
     }
     const resp = await fetch(path, Object.assign({}, options, { headers }));
-    if (path.startsWith("/api/v1/export/") || path.startsWith("/api/v1/generate/hpe/") || path.startsWith("/api/v1/display/palettes/") || path === "/api/v1/display/custom") {
+    if (path.startsWith("/api/v1/export/") || path.startsWith("/api/v1/generate/hpe/") || path.startsWith("/api/v1/display/palettes/") || path === "/api/v1/display/custom" || path.includes("/export.zip")) {
       if (!resp.ok) {
         const err = await resp.json().catch(() => ({ error: resp.statusText }));
         throw new Error(err.error || "download failed");
@@ -62,6 +62,7 @@
       loadPlans();
       loadProgrammerStatus();
     }
+    if (name === "fleet") loadFleet();
     if (name === "profile") loadProfile();
     if (name === "export") {
       loadHistory();
@@ -2141,6 +2142,7 @@
       ? chosen.description
       : "This radio is written from the Export tab, not from a channel plan.";
     document.getElementById("plan-export-btn").disabled = !available;
+    document.getElementById("plan-zip-btn").disabled = !available;
   }
 
   function renderLoadoutSummary(detail) {
@@ -2394,6 +2396,7 @@
       );
       statusEl.textContent = `Wrote ${result.rows} channels to ${result.csv_path}`;
       setStatus(`Exported ${planId}`);
+      lastExport = result;
       updateProgrammerCommand();
     } catch (e) {
       statusEl.textContent = "";
@@ -2402,12 +2405,22 @@
   });
 
   // ------------------------------------------------------- programmer --
+  let lastExport = null;
+
+  function programmerApplies() {
+    // Direct programming exists only for memory-list radios the fleet loads
+    // automatically (the CHIRP path). Any other radio would get the wrong
+    // file written to the wrong hardware, so the buttons stay disabled.
+    const fleet = currentPlanDetail && currentPlanDetail.fleet;
+    return !!(fleet && fleet.load_path === "automated" && currentPlanDetail.kind === "memory-list");
+  }
+
   function currentCsvPath() {
-    // Only the TD-H9 has a hardware programming path in this project, and it
-    // consumes CHIRP CSV. Returning a path for any other radio would build a
-    // command that writes the wrong file to the wrong hardware.
-    if (!currentPlanDetail || currentPlanDetail.radio_id !== "td-h9") return "";
+    if (!programmerApplies()) return "";
     const planId = currentPlanDetail.plan_id;
+    if (lastExport && lastExport.plan === planId && /\.csv$/i.test(lastExport.csv_path || "")) {
+      return lastExport.csv_path;
+    }
     return planId ? `wasds150-output/radios/${planId}.csv` : "";
   }
 
@@ -2418,17 +2431,17 @@
     const preview = document.getElementById("programmer-command");
     const note = document.getElementById("programmer-availability");
 
-    const isTdh9 = currentPlanDetail && currentPlanDetail.radio_id === "td-h9";
+    const applies = programmerApplies();
     ["programmer-backup-btn", "programmer-dryrun-btn", "programmer-flash-btn"].forEach((id) => {
-      document.getElementById(id).disabled = !programmerReady || !isTdh9;
+      document.getElementById(id).disabled = !programmerReady || !applies;
     });
 
-    if (!isTdh9) {
+    if (!applies) {
       const name = currentPlanDetail ? currentPlanDetail.radio_label : "this radio";
       preview.textContent = "—";
       note.textContent =
-        `Direct programming is only wired up for the TIDRADIO TD-H9. Export a file ` +
-        `for ${name} above and load it with that radio's own programmer.`;
+        `Direct programming is wired up only for radios the fleet loads automatically. Export a ` +
+        `file for ${name} above and load it with that radio's own programmer, or use the Fleet tab.`;
       note.className = "hint";
       return;
     }
@@ -2524,6 +2537,295 @@
       return;
     }
     runProgrammer({ execute: true });
+  });
+
+  document.getElementById("plan-zip-btn").addEventListener("click", async () => {
+    const planId = planSelect.value;
+    try {
+      setStatus("Building the zip…");
+      const resp = await api(
+        `/api/v1/plans/${encodeURIComponent(planId)}/export.zip?target=${encodeURIComponent(planTargetSelect.value)}`
+      );
+      const url = URL.createObjectURL(await resp.blob());
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${planId}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      setStatus(`Downloaded ${planId}.zip`);
+    } catch (e) {
+      setStatus("Download failed: " + e.message, true);
+    }
+  });
+
+  // --------------------------------------------------------------- fleet --
+  const FLEET_TERMINAL = ["finished", "failed", "cancelled", "interrupted"];
+  let fleetJobId = null;
+  let fleetSeq = 0;
+  let fleetTimer = null;
+  let fleetWaitingStep = null;
+
+  function fleetEl(tag, attrs, text) {
+    const node = document.createElement(tag);
+    Object.entries(attrs || {}).forEach(([key, value]) => {
+      if (key === "class") node.className = value;
+      else node.setAttribute(key, value);
+    });
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  async function loadFleet() {
+    try {
+      const data = await apiGet("/api/v1/fleet");
+      renderFleetRadios(data.radios || []);
+      renderFleetSources(data.sources || []);
+      await loadFleetJobs(true);
+    } catch (e) {
+      setStatus("Could not load the fleet: " + e.message, true);
+    }
+  }
+
+  function renderFleetRadios(radios) {
+    const box = document.getElementById("fleet-radios");
+    box.innerHTML = "";
+    radios.forEach((radio) => {
+      const card = fleetEl("div", { class: "card fleet-card" });
+      const head = fleetEl("label", { class: "fleet-card-head" });
+      const tick = fleetEl("input", { type: "checkbox", "data-radio": radio.radio_id });
+      tick.checked = !!radio.status.stale;
+      head.appendChild(tick);
+      head.appendChild(document.createTextNode(" " + radio.label));
+      card.appendChild(head);
+      card.appendChild(
+        fleetEl("span", { class: radio.status.stale ? "badge stale" : "badge current" },
+          radio.status.stale ? "out of date" : "up to date")
+      );
+      const reasons = fleetEl("ul", { class: "hint" });
+      (radio.status.reasons || []).forEach((reason) => reasons.appendChild(fleetEl("li", {}, reason)));
+      card.appendChild(reasons);
+      card.appendChild(fleetEl("div", { class: "hint" }, radio.load_path === "automated"
+        ? "Loaded automatically"
+        : `Guided through ${radio.vendor_app ? radio.vendor_app.label : "the vendor program"}`));
+      if ((radio.inputs || []).length) {
+        const details = fleetEl("details", {});
+        const missing = (radio.missing || []).length;
+        details.appendChild(fleetEl("summary", {}, missing ? `Settings (${missing} missing)` : "Settings"));
+        details.open = missing > 0;
+        radio.inputs.forEach((spec) => {
+          const row = fleetEl("label", { class: "fleet-input" }, spec.label + (spec.required ? " *" : ""));
+          const input = fleetEl("input", { type: "text", "data-setting": `${radio.radio_id}.${spec.id}` });
+          input.value = (radio.values || {})[spec.id] || "";
+          if (spec.help) input.title = spec.help;
+          row.appendChild(input);
+          details.appendChild(row);
+        });
+        const save = fleetEl("button", {}, "Save settings");
+        save.addEventListener("click", () => saveFleetSettings(details));
+        details.appendChild(save);
+        card.appendChild(details);
+      }
+      box.appendChild(card);
+    });
+  }
+
+  async function saveFleetSettings(container) {
+    const values = {};
+    container.querySelectorAll("input[data-setting]").forEach((input) => {
+      values[input.dataset.setting] = input.value.trim();
+    });
+    try {
+      await apiPost("/api/v1/fleet/settings", { set: values });
+      setStatus("Settings saved");
+      loadFleet();
+    } catch (e) {
+      setStatus("Could not save settings: " + e.message, true);
+    }
+  }
+
+  function renderFleetSources(sources) {
+    const box = document.getElementById("fleet-sources");
+    box.innerHTML = "";
+    sources.forEach((source) => {
+      const row = fleetEl("label", { class: source.configured ? "fleet-source" : "fleet-source muted" });
+      const tick = fleetEl("input", { type: "checkbox", "data-source": source.name });
+      tick.checked = !!source.stale;
+      tick.disabled = !source.configured;
+      row.appendChild(tick);
+      const when = source.last_fetch ? `fetched ${source.last_fetch.slice(0, 16).replace("T", " ")}` : "never fetched";
+      const state = !source.configured ? "not configured" : source.stale ? `stale, ${when}` : `fresh, ${when}`;
+      row.appendChild(document.createTextNode(` ${source.name} (${state})`));
+      box.appendChild(row);
+    });
+  }
+
+  async function startFleetUpdate() {
+    const radios = [...document.querySelectorAll("#fleet-radios input[data-radio]")]
+      .filter((box) => box.checked)
+      .map((box) => box.dataset.radio);
+    if (!radios.length) {
+      setStatus("Tick at least one radio", true);
+      return;
+    }
+    const execute = document.getElementById("fleet-execute").checked;
+    if (execute && !confirm(
+      `Write ${radios.length} radio(s)? Each is backed up first, and every step that ` +
+      "touches hardware or the Sentinel workspace asks again before it writes."
+    )) return;
+    const body = {
+      radio_ids: radios,
+      refresh_sources: document.getElementById("fleet-refresh").checked,
+      only_sources: [...document.querySelectorAll("#fleet-sources input[data-source]")]
+        .filter((box) => box.checked)
+        .map((box) => box.dataset.source),
+      apply_sources: document.getElementById("fleet-apply").checked,
+      include_licensed: document.getElementById("fleet-include-licensed").checked,
+      execute,
+    };
+    try {
+      const result = await apiPost("/api/v1/fleet/update", body);
+      followFleetJob(result.job_id);
+    } catch (e) {
+      setStatus("Could not start the update: " + e.message, true);
+    }
+  }
+
+  function followFleetJob(jobId) {
+    if (fleetTimer) clearTimeout(fleetTimer);
+    fleetJobId = jobId;
+    fleetSeq = 0;
+    fleetWaitingStep = null;
+    document.getElementById("fleet-log").textContent = "";
+    document.getElementById("fleet-cancel-btn").hidden = false;
+    pollFleetJob();
+  }
+
+  async function pollFleetJob() {
+    if (!fleetJobId) return;
+    const jobPath = `/api/v1/jobs/${encodeURIComponent(fleetJobId)}`;
+    try {
+      const data = await apiGet(`${jobPath}/events?since=${fleetSeq}`);
+      const log = document.getElementById("fleet-log");
+      (data.events || []).forEach((event) => {
+        fleetSeq = Math.max(fleetSeq, event.seq);
+        if (event.kind === "step.progress") return;
+        log.textContent += `${event.ts.slice(11, 19)} ${event.kind.padEnd(15)} ${event.step_id} ${event.message}\n`;
+      });
+      const status = await apiGet(jobPath);
+      renderFleetJob(status);
+      if (FLEET_TERMINAL.includes(status.status)) {
+        fleetTimer = null;
+        document.getElementById("fleet-cancel-btn").hidden = true;
+        loadFleet();
+        return;
+      }
+    } catch (e) {
+      setStatus("Lost track of the update: " + e.message, true);
+    }
+    fleetTimer = setTimeout(pollFleetJob, 750);
+  }
+
+  function renderFleetJob(status) {
+    const summary = status.error ? `${status.status}: ${status.error}` : status.status;
+    document.getElementById("fleet-job-status").textContent = `${status.title} — ${summary}`;
+    const tbody = document.querySelector("#fleet-steps-table tbody");
+    tbody.innerHTML = "";
+    (status.steps || []).forEach((step) => {
+      const tr = fleetEl("tr", { class: `step-${step.status}` });
+      tr.appendChild(fleetEl("td", {}, step.title));
+      tr.appendChild(fleetEl("td", {}, step.status));
+      tr.appendChild(fleetEl("td", {}, step.message || ""));
+      tbody.appendChild(tr);
+    });
+    const panel = document.getElementById("fleet-waiting");
+    const waiting = status.status === "waiting" ? status.waiting : null;
+    panel.hidden = !waiting;
+    if (!waiting) {
+      fleetWaitingStep = null;
+      return;
+    }
+    if (fleetWaitingStep === waiting.step_id) return; // keep what the operator is typing
+    fleetWaitingStep = waiting.step_id;
+    document.getElementById("fleet-waiting-title").textContent = waiting.title;
+    document.getElementById("fleet-waiting-text").textContent = waiting.instructions;
+    const artifacts = document.getElementById("fleet-waiting-artifacts");
+    artifacts.innerHTML = "";
+    Object.entries(waiting.artifacts || {}).forEach(([name, path]) => {
+      artifacts.appendChild(fleetEl("li", {}, `${name}: ${path}`));
+    });
+    const inputs = document.getElementById("fleet-waiting-inputs");
+    inputs.innerHTML = "";
+    (waiting.inputs || []).forEach((spec) => {
+      const row = fleetEl("label", { class: "fleet-input" }, spec.label || spec.id);
+      row.appendChild(fleetEl("input", { type: "text", "data-input": spec.id }));
+      inputs.appendChild(row);
+    });
+  }
+
+  async function answerFleetStep(decision) {
+    if (!fleetJobId || !fleetWaitingStep) return;
+    const inputs = {};
+    document.querySelectorAll("#fleet-waiting-inputs input[data-input]").forEach((input) => {
+      inputs[input.dataset.input] = input.value.trim();
+    });
+    try {
+      await apiPost(`/api/v1/jobs/${encodeURIComponent(fleetJobId)}/answer`, {
+        step_id: fleetWaitingStep, decision, inputs,
+      });
+      document.getElementById("fleet-waiting").hidden = true;
+      fleetWaitingStep = null;
+    } catch (e) {
+      setStatus("Could not answer: " + e.message, true);
+    }
+  }
+
+  async function loadFleetJobs(followActive) {
+    const data = await apiGet("/api/v1/jobs");
+    const jobs = (data.jobs || []).filter((job) => job.kind === "fleet-update");
+    const tbody = document.querySelector("#fleet-jobs-table tbody");
+    tbody.innerHTML = "";
+    jobs.slice(0, 15).forEach((job) => {
+      const tr = fleetEl("tr", {});
+      tr.appendChild(fleetEl("td", {}, job.title));
+      tr.appendChild(fleetEl("td", {}, job.error ? `${job.status}: ${job.error}` : job.status));
+      tr.appendChild(fleetEl("td", {}, (job.created_at || "").slice(0, 19).replace("T", " ")));
+      const actions = fleetEl("td", {});
+      const watch = fleetEl("button", {}, "Show");
+      watch.addEventListener("click", () => followFleetJob(job.job_id));
+      actions.appendChild(watch);
+      if (["failed", "cancelled", "interrupted"].includes(job.status)) {
+        const resume = fleetEl("button", {}, "Resume");
+        resume.addEventListener("click", async () => {
+          try {
+            const result = await apiPost(`/api/v1/jobs/${encodeURIComponent(job.job_id)}/resume`, {});
+            followFleetJob(result.job_id);
+          } catch (e) {
+            setStatus("Could not resume: " + e.message, true);
+          }
+        });
+        actions.appendChild(resume);
+      }
+      tr.appendChild(actions);
+      tbody.appendChild(tr);
+    });
+    const active = jobs.find((job) => !FLEET_TERMINAL.includes(job.status));
+    if (followActive && active && !fleetTimer) followFleetJob(active.job_id);
+  }
+
+  document.getElementById("fleet-update-btn").addEventListener("click", startFleetUpdate);
+  document.getElementById("fleet-done-btn").addEventListener("click", () => answerFleetStep("done"));
+  document.getElementById("fleet-skip-btn").addEventListener("click", () => answerFleetStep("skip"));
+  document.getElementById("fleet-abort-btn").addEventListener("click", () => answerFleetStep("abort"));
+  document.getElementById("fleet-cancel-btn").addEventListener("click", async () => {
+    if (!fleetJobId) return;
+    try {
+      await apiPost(`/api/v1/jobs/${encodeURIComponent(fleetJobId)}/cancel`, {});
+      setStatus("Cancellation requested");
+    } catch (e) {
+      setStatus("Could not cancel: " + e.message, true);
+    }
   });
 
   // ------------------------------------------------------------- initial --
