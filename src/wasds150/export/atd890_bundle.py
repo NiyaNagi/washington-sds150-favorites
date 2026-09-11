@@ -180,7 +180,8 @@ def _contact_for(channel: PlannedChannel) -> Optional[Contact]:
         return None
     name = spec.talkgroup_name.strip() or f"TG {spec.talkgroup}"
     call_type = {"private": "Private Call", "all": "All Call"}.get(spec.call_type, "Group Call")
-    return Contact(name=name[:NAME_MAX], dmr_id=spec.talkgroup, call_type=call_type)
+    # Truncating can leave a trailing space the CPS keeps but never matches on.
+    return Contact(name=name[:NAME_MAX].rstrip() or f"TG {spec.talkgroup}", dmr_id=spec.talkgroup, call_type=call_type)
 
 
 def build_bundle(resolved: ResolvedPlan) -> Atd890Bundle:
@@ -218,25 +219,60 @@ def build_bundle(resolved: ResolvedPlan) -> Atd890Bundle:
     contacts: "OrderedDict[str, Contact]" = OrderedDict()
     contact_by_channel: Dict[str, str] = {}
     network_contacts: "OrderedDict[str, List[Contact]]" = OrderedDict()
+    #: The CPS files contacts by id, so one id can carry only one name. Two
+    #: networks naming the same talkgroup differently must collapse to the
+    #: first name seen, or Import All fails on DMRTalkGroups.CSV.
+    contact_by_id: Dict[int, Contact] = {}
+    aliases: Dict[int, set] = {}
     for channel in channels:
         contact = _contact_for(channel)
         if contact is None:
             continue
-        existing = contacts.get(contact.name)
-        if existing is not None and existing.dmr_id != contact.dmr_id:
-            # Two networks naming different ids the same way; keep both.
-            contact = Contact(name=f"{contact.name[:NAME_MAX - 7]} {contact.dmr_id}"[:NAME_MAX], dmr_id=contact.dmr_id, call_type=contact.call_type)
+        canonical = contact_by_id.get(contact.dmr_id)
+        if canonical is not None:
+            if contact.name != canonical.name:
+                aliases.setdefault(contact.dmr_id, set()).add(contact.name)
+            contact = canonical
+        else:
+            existing = contacts.get(contact.name)
+            if existing is not None and existing.dmr_id != contact.dmr_id:
+                # Two networks naming different ids the same way; keep both.
+                contact = Contact(name=f"{contact.name[:NAME_MAX - 7]} {contact.dmr_id}"[:NAME_MAX].rstrip(), dmr_id=contact.dmr_id, call_type=contact.call_type)
+            contact_by_id[contact.dmr_id] = contact
         contacts.setdefault(contact.name, contact)
         contact_by_channel[channel.name] = contact.name
         network = channel.digital.network if channel.digital else ""
         bucket = network_contacts.setdefault(network or "Other", [])
         if contact not in bucket:
             bucket.append(contact)
+    for dmr_id, names in sorted(aliases.items()):
+        kept = contact_by_id[dmr_id].name
+        warnings.append(
+            f"talkgroup {dmr_id} is named {kept!r} and also "
+            + ", ".join(repr(n) for n in sorted(names))
+            + f"; the CPS files contacts by id, so every channel uses {kept!r}"
+        )
     default = Contact(*DEFAULT_CONTACT)
-    if default.name not in contacts:
+    existing_default = contact_by_id.get(default.dmr_id)
+    if existing_default is not None:
+        default = existing_default
+    elif default.name not in contacts:
         contacts[default.name] = default
+        contact_by_id[default.dmr_id] = default
     for channel in channels:
         contact_by_channel.setdefault(channel.name, default.name)
+
+    # The CPS aborts Import All with ImportFromFileListError when
+    # DMRTalkGroups.CSV files one id under two names; fail here instead.
+    name_by_id: Dict[int, str] = {}
+    for contact in contacts.values():
+        _validate_name(contact.name, "contact")
+        clash = name_by_id.get(contact.dmr_id)
+        if clash is not None:
+            raise Atd890ExportError(
+                f"two contacts share DMR id {contact.dmr_id}: {clash!r} and {contact.name!r}"
+            )
+        name_by_id[contact.dmr_id] = contact.name
 
     rx_groups: List[RxGroup] = []
     rx_group_by_channel: Dict[str, str] = {}

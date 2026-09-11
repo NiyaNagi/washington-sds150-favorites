@@ -6,7 +6,7 @@ report is how that becomes visible before the radio is programmed.
 """
 from __future__ import annotations
 
-from typing import List
+from typing import List, Optional, Sequence
 
 from wasds150.plan.resolve import ResolvedPlan
 from wasds150.radios.digital import describe as describe_digital
@@ -21,7 +21,15 @@ _REASON_EXPLANATIONS = {
 }
 
 
-def render_plan_report(resolved: ResolvedPlan, *, max_drops_per_reason: int = 8) -> str:
+def render_plan_report(
+    resolved: ResolvedPlan,
+    *,
+    max_drops_per_reason: int = 8,
+    extra_warnings: Optional[Sequence[str]] = None,
+) -> str:
+    """``extra_warnings`` carries what the export target found - a name the
+    radio's own tables cannot hold, a contact two networks name differently -
+    which the plan stage cannot know about."""
     profile = resolved.profile
     plan = resolved.plan
     lines: List[str] = []
@@ -98,10 +106,14 @@ def render_plan_report(resolved: ResolvedPlan, *, max_drops_per_reason: int = 8)
         )
         lines.append("")
 
-    if resolved.warnings:
+    warnings = list(resolved.warnings)
+    for warning in extra_warnings or ():
+        if warning not in warnings:
+            warnings.append(warning)
+    if warnings:
         lines.append("## Warnings")
         lines.append("")
-        for warning in resolved.warnings:
+        for warning in warnings:
             lines.append(f"- {warning}")
         lines.append("")
 

@@ -257,6 +257,38 @@ class TestBundle:
         assert bundle.contact_by_channel["WW7PSR Seattle"] == "Simplex 99"
         assert not any("placeholder" in w for w in bundle.warnings)  # the registered DMR ID ships
 
+    def test_one_talkgroup_id_keeps_one_name(self):
+        # Two networks name TG 3153 differently.  The CPS files contacts by
+        # id, so a second row for the same id makes Import All fail with
+        # ImportFromFileListError halfway through the manifest.
+        catalog = make_catalog(
+            dmr("Cougar WA1", 147.02, 147.62, 3153, 1, name="Washington 1", id="d1"),
+            dmr("Tiger WA10", 147.18, 147.78, 3153, 1, name="Washington - 10", network="SeattleDMR", id="d2"),
+        )
+        bundle = build_bundle(resolve_plan(plan(PlanBlock("Ham", (ALL,), bank="Ham 2m")), catalog))
+        ids = [c.dmr_id for c in bundle.contacts]
+        assert len(ids) == len(set(ids)), [(c.name, c.dmr_id) for c in bundle.contacts]
+        assert bundle.contact_by_channel["Cougar WA1"] == bundle.contact_by_channel["Tiger WA10"] == "Washington 1"
+        assert any("3153 is named 'Washington 1' and also 'Washington - 10'" in w for w in bundle.warnings)
+
+    def test_two_ids_sharing_a_name_still_keep_both(self):
+        catalog = make_catalog(
+            dmr("Cougar WA", 147.02, 147.62, 3153, 1, name="Washington", id="d1"),
+            dmr("Tiger WA", 147.18, 147.78, 31539, 2, name="Washington", network="SeattleDMR", id="d2"),
+        )
+        bundle = build_bundle(resolve_plan(plan(PlanBlock("Ham", (ALL,), bank="Ham 2m")), catalog))
+        by_id = {c.dmr_id: c.name for c in bundle.contacts}
+        assert by_id[3153] == "Washington" and by_id[31539] == "Washingto 31539"
+        assert len({c.name for c in bundle.contacts}) == len(bundle.contacts)
+
+    def test_a_truncated_contact_name_keeps_no_trailing_space(self):
+        catalog = make_catalog(
+            dmr("Cougar", 147.02, 147.62, 3153, 1, name="Washington - 10 Statewide", id="d1"),
+        )
+        bundle = build_bundle(resolve_plan(plan(PlanBlock("Ham", (ALL,), bank="Ham 2m")), catalog))
+        name = bundle.contact_by_channel["Cougar"]
+        assert name == "Washington - 10" and name == name.strip()
+
     def test_bad_zone_name_is_rejected(self):
         bad = plan(PlanBlock("Ham", (ALL,), bank="Ham|Broken"))
         with pytest.raises(Atd890ExportError):

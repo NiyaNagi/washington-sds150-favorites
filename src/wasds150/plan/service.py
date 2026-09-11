@@ -233,7 +233,10 @@ def export_plan(
     result = target.write(resolved, csv_path)
     files = [Path(p) for p in getattr(result, "files", [])]
     report_path = directory / f"{plan.id}-report.md"
-    report_path.write_text(render_plan_report(resolved), encoding="utf-8")
+    report_path.write_text(
+        render_plan_report(resolved, extra_warnings=list(getattr(result, "warnings", []))),
+        encoding="utf-8",
+    )
 
     copies: List[Path] = []
     if copy_to is not None:
