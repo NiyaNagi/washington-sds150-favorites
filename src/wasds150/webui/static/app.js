@@ -71,6 +71,8 @@
     if (name === "advanced") {
       loadSourcesList();
       loadInstallSlugOptions();
+      loadRepeaterBookStatus();
+      loadRepeaterBookStaged();
     }
   }
 
@@ -2062,6 +2064,152 @@
       setStatus(`Provenance for ${slug}: ${result.provenance.length} entr${result.provenance.length === 1 ? "y" : "ies"}`);
     } catch (e) {
       setStatus("Provenance lookup failed: " + e.message, true);
+    }
+  });
+
+  // ------------------------------------------------ advanced: repeaterbook --
+  // Every RepeaterBook-derived value is written with textContent, never
+  // innerHTML: it is third-party text.
+  const RB_ATTRIBUTION = "Data courtesy of RepeaterBook.com <https://www.repeaterbook.com/>";
+
+  async function loadRepeaterBookStatus() {
+    try {
+      const s = await apiGet("/api/v1/repeaterbook/status");
+      document.getElementById("rb-enabled").checked = !!s.enabled;
+      const lines = [
+        s.message || "Enabled.",
+        "Token: " + (s.token_source || "not configured") + (s.token_error ? " (" + s.token_error + ")" : ""),
+        "Requests in the last 24 h: " + s.requests_last_24h + " (" + s.requests_remaining_24h + " remaining)",
+      ];
+      (s.blocks || []).forEach((b) => lines.push("Blocked (" + b.kind + ") until " + (b.until || "operator action") + ": " + b.reason));
+      lines.push("Regions: " + (s.regions || []).map((r) => r.code + (r.verified ? "" : " (disabled)") + " cache=" + r.cache).join(", "));
+      lines.push("Staged for review: " + s.staged_pending + "; applied records: " + s.applied_records);
+      document.getElementById("rb-status").textContent = lines.join("\n");
+      // Greyed out until the enable flag and a token are both set.
+      document.getElementById("rb-refresh-btn").disabled = !s.ready;
+    } catch (e) {
+      setStatus("RepeaterBook status failed: " + e.message, true);
+    }
+  }
+
+  function rbCell(tr, text) {
+    const td = document.createElement("td");
+    td.textContent = text === null || text === undefined ? "" : String(text);
+    tr.appendChild(td);
+    return td;
+  }
+
+  function renderRepeaterBookRows(rows) {
+    const tbody = document.querySelector("#rb-table tbody");
+    tbody.innerHTML = "";
+    (rows || []).forEach((c) => {
+      const tr = document.createElement("tr");
+      rbCell(tr, c.rb_key);
+      rbCell(tr, c.callsign);
+      rbCell(tr, c.output_mhz);
+      rbCell(tr, c.input_mhz || "none");
+      rbCell(tr, c.tx_tone || "-");
+      rbCell(tr, c.city);
+      rbCell(tr, c.distance_mi);
+      rbCell(tr, (c.flags || []).join(", "));
+      const link = document.createElement("a");
+      link.href = c.detail_url;
+      link.target = "_blank";
+      link.rel = "noopener";
+      link.textContent = "RepeaterBook";
+      rbCell(tr, "").appendChild(link);
+      tbody.appendChild(tr);
+    });
+  }
+
+  async function loadRepeaterBookStaged() {
+    try {
+      const staged = await apiGet("/api/v1/repeaterbook/staged");
+      renderRepeaterBookRows(staged.candidates);
+    } catch (e) {
+      setStatus("RepeaterBook review list failed: " + e.message, true);
+    }
+  }
+
+  async function repeaterBookRefresh(offline) {
+    const resultBox = document.getElementById("rb-result");
+    const body = {
+      regions: document.getElementById("rb-regions").value,
+      center: document.getElementById("rb-center").value,
+      radius_mi: parseInt(document.getElementById("rb-radius").value, 10),
+      bands: document.getElementById("rb-bands").value,
+      radio: document.getElementById("rb-radio").value,
+      offline: offline,
+    };
+    try {
+      const result = await apiPost("/api/v1/repeaterbook/refresh", body);
+      renderRepeaterBookRows(result.candidates);
+      resultBox.textContent = RB_ATTRIBUTION + "\n" + (result.candidates || []).length +
+        " candidate(s) staged; requests sent: " + result.requests_sent + "\nDropped: " + JSON.stringify(result.drops);
+      setStatus("RepeaterBook candidates staged for review");
+    } catch (e) {
+      setStatus("RepeaterBook refresh refused: " + e.message, true);
+    } finally {
+      loadRepeaterBookStatus();
+    }
+  }
+  document.getElementById("rb-refresh-btn").addEventListener("click", () => repeaterBookRefresh(false));
+  document.getElementById("rb-offline-btn").addEventListener("click", () => repeaterBookRefresh(true));
+
+  document.getElementById("rb-configure-btn").addEventListener("click", async () => {
+    const body = { enabled: document.getElementById("rb-enabled").checked };
+    const tokenEnv = document.getElementById("rb-token-env").value.trim();
+    const tokenFile = document.getElementById("rb-token-file").value.trim();
+    if (tokenEnv) body.token_env = tokenEnv;
+    if (tokenFile) body.token_file = tokenFile;
+    try {
+      await apiPost("/api/v1/repeaterbook/configure", body);
+      setStatus("RepeaterBook settings saved");
+    } catch (e) {
+      setStatus("RepeaterBook settings refused: " + e.message, true);
+    }
+    loadRepeaterBookStatus();
+  });
+
+  document.getElementById("rb-forget-btn").addEventListener("click", async () => {
+    if (!confirm("Forget where the RepeaterBook token is? The variable or file itself is yours to remove.")) return;
+    await apiPost("/api/v1/repeaterbook/forget-token", {});
+    loadRepeaterBookStatus();
+  });
+
+  document.getElementById("rb-apply-btn").addEventListener("click", async () => {
+    const resultBox = document.getElementById("rb-result");
+    try {
+      const result = await apiPost("/api/v1/repeaterbook/apply", {
+        include_flagged: document.getElementById("rb-include-flagged").checked,
+      });
+      resultBox.textContent = RB_ATTRIBUTION + "\nApplied " + result.applied + " record(s)." +
+        (result.skipped || []).map((s) => "\n  skipped " + s.rb_key + ": " + s.reason).join("");
+      loadRepeaterBookStatus();
+    } catch (e) {
+      setStatus("RepeaterBook apply failed: " + e.message, true);
+    }
+  });
+
+  document.getElementById("rb-records-btn").addEventListener("click", async () => {
+    try {
+      const data = await apiGet("/api/v1/repeaterbook/records");
+      renderRepeaterBookRows(data.records);
+      document.getElementById("rb-result").textContent = RB_ATTRIBUTION + "\n" + data.records.length + " applied record(s).";
+    } catch (e) {
+      setStatus("RepeaterBook records failed: " + e.message, true);
+    }
+  });
+
+  document.getElementById("rb-delete-btn").addEventListener("click", async () => {
+    if (!confirm("Delete All RepeaterBook Data: raw responses, staged and applied records, the request ledger and reports?")) return;
+    try {
+      const result = await apiPost("/api/v1/repeaterbook/delete-all", { confirm: "DELETE" });
+      document.getElementById("rb-result").textContent = "Deleted: " + JSON.stringify(result.deleted);
+      renderRepeaterBookRows([]);
+      loadRepeaterBookStatus();
+    } catch (e) {
+      setStatus("Delete failed: " + e.message, true);
     }
   });
 

@@ -65,6 +65,10 @@ def instantiate_source(name: str, sources_config: SourcesConfig) -> Optional[Onl
     cls = get_source_class(name)
     if not issubclass(cls, OnlineSourceAdapter):
         return None  # static_pack / legacy placeholders: not part of the update pipeline
+    if cls.explicit_only:
+        from wasds150.sources.repeaterbook import EXPLICIT_ONLY_MESSAGE, ExplicitOnlyError
+
+        raise ExplicitOnlyError(EXPLICIT_ONLY_MESSAGE)
     if name == "sentinel_local":
         return _sentinel_local(sources_config)
     if name == "radioreference_premium":
@@ -77,10 +81,12 @@ def runnable_source_names(
 ) -> List[str]:
     """Available online adapters in registry order, narrowed to ``only``
     (when given) and without ``skip``. Unknown names in either are ignored,
-    matching how ``sources update --only`` has always behaved."""
+    matching how ``sources update --only`` has always behaved. An
+    ``explicit_only`` adapter (RepeaterBook) is never included, even when
+    ``only`` names it -- see :func:`explicit_only_names`."""
     names = []
     for name, cls in list_sources().items():
-        if not issubclass(cls, OnlineSourceAdapter) or not cls.available:
+        if not issubclass(cls, OnlineSourceAdapter) or not cls.available or cls.explicit_only:
             continue
         if only is not None and name not in only:
             continue
@@ -88,6 +94,17 @@ def runnable_source_names(
             continue
         names.append(name)
     return names
+
+
+def explicit_only_names(names: Collection[str]) -> List[str]:
+    """The names in ``names`` that only their own guarded action may run, so a
+    caller can refuse ``sources update --only repeaterbook`` out loud rather
+    than silently doing nothing."""
+    sources = list_sources()
+    return [
+        name for name in names
+        if name in sources and issubclass(sources[name], OnlineSourceAdapter) and sources[name].explicit_only
+    ]
 
 
 def instantiate_all(

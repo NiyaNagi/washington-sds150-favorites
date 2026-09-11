@@ -84,6 +84,20 @@ def render_plan_report(resolved: ResolvedPlan, *, max_drops_per_reason: int = 8)
         )
     lines.append("")
 
+    from_repeaterbook = [c for c in resolved.channels if c.source.upper().startswith("RB01/")]
+    if from_repeaterbook:
+        from wasds150.sources.repeaterbook.policy import ATTRIBUTION_TEXT, ATTRIBUTION_URL
+
+        lines.append("## Source attribution")
+        lines.append("")
+        lines.append(
+            f"[{ATTRIBUTION_TEXT}]({ATTRIBUTION_URL}). {len(from_repeaterbook)} channel(s) in this "
+            "file came from operator-reviewed RepeaterBook records (block RB01); each channel note "
+            "carries its RepeaterBook id and retrieval date. For programming the operator's own "
+            "radios only; not for redistribution."
+        )
+        lines.append("")
+
     if resolved.warnings:
         lines.append("## Warnings")
         lines.append("")

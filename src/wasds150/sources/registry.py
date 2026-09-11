@@ -2,12 +2,17 @@
 
 Two adapter families are registered side by side (see
 :mod:`wasds150.sources.base` for why): legacy :class:`SourceAdapter`
-(``static_pack``, plus the still-unimplemented ``radioreference_free`` and
-``repeaterbook`` placeholders — public-page scraping/bulk-mirroring that
-stays intentionally out of scope, see ``docs/data-sources.md``), and the
-newer fact-producing :class:`OnlineSourceAdapter` family (everything else
-below), each independently verified against real data or file formats
-during implementation (see each adapter's module docstring for specifics).
+(``static_pack``, plus the still-unimplemented ``radioreference_free``
+placeholder — public-page scraping that stays intentionally out of scope,
+see ``docs/data-sources.md``), and the newer fact-producing
+:class:`OnlineSourceAdapter` family (everything else below), each
+independently verified against real data or file formats during
+implementation (see each adapter's module docstring for specifics).
+
+``repeaterbook`` is listed here so it is visible, but it is
+``explicit_only``: approval-gated and off by default, it never runs from
+``sources update``/``sources fetch``, only from ``wasds150 repeaterbook
+refresh`` (see :mod:`wasds150.sources.repeaterbook`).
 
 ``available=False`` entries are still listed (never hidden) so the CLI/UI
 can show users what exists but isn't wired up, instead of silently

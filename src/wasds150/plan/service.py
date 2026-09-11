@@ -44,7 +44,7 @@ def _extra_favorites(radio_id: str) -> List[FavoritesList]:
 
 
 def resolve_named_plan(
-    ctx: AppContext, plan_id: str, *, include_licensed: bool = True
+    ctx: AppContext, plan_id: str, *, include_licensed: bool = True, with_repeaterbook: bool = False
 ) -> Tuple[ChannelPlan, ResolvedPlan]:
     """Resolve ``plan_id`` against the catalog with the user profile applied.
 
@@ -55,7 +55,15 @@ def resolve_named_plan(
     ``include_licensed=False`` leaves out lists built from a licensed
     database (RadioReference), which is how a redistributable copy of a
     programming file is produced for the repository.
+
+    ``with_repeaterbook=True`` appends the operator's applied RepeaterBook
+    records as a final block. They come from the local store only -- no
+    request is made -- and can never go into a redistributable copy.
     """
+    import dataclasses
+
+    if with_repeaterbook and not include_licensed:
+        raise ValueError("RepeaterBook records cannot go into a redistributable (--exclude-licensed) export")
     plan = get_plan(plan_id)
     profile = ctx.load_profile()
     generated = apply_profile(ctx.catalog, profile)
@@ -64,6 +72,14 @@ def resolve_named_plan(
     # a refreshed copy under the same key (``wasds150 sources update``).
     present = {fl.favorite_key.upper() for fl in favorites}
     favorites.extend(fl for fl in _extra_favorites(plan.radio_id) if fl.favorite_key.upper() not in present)
+    if with_repeaterbook:
+        from wasds150.sources.repeaterbook.catalog import plan_block
+        from wasds150.sources.repeaterbook.service import RepeaterBookService
+
+        reviewed = RepeaterBookService(ctx.config).reviewed_favorite()
+        if reviewed is not None:
+            favorites.append(reviewed)
+            plan = dataclasses.replace(plan, blocks=tuple(plan.blocks) + (plan_block(),))
     catalog = Catalog(favorites=favorites)
     return plan, resolve_plan(plan, catalog)
 
@@ -181,6 +197,7 @@ def export_plan(
     out_dir: Optional[Path] = None,
     copy_to: Optional[Path] = None,
     include_licensed: bool = True,
+    with_repeaterbook: bool = False,
 ) -> PlanExport:
     """Resolve and write a plan, returning the paths written.
 
@@ -200,7 +217,9 @@ def export_plan(
     from wasds150.export.registry import get_target
     from wasds150.export.report import render_plan_report
 
-    plan, resolved = resolve_named_plan(ctx, plan_id, include_licensed=include_licensed)
+    plan, resolved = resolve_named_plan(
+        ctx, plan_id, include_licensed=include_licensed, with_repeaterbook=with_repeaterbook
+    )
     target = get_target(target_id)
     target.check_radio(resolved)
 
@@ -212,6 +231,12 @@ def export_plan(
     files = [Path(p) for p in getattr(result, "files", [])]
     report_path = directory / f"{plan.id}-report.md"
     report_path.write_text(render_plan_report(resolved), encoding="utf-8")
+    if with_repeaterbook and any(c.source.upper().startswith("RB01/") for c in resolved.channels):
+        from wasds150.sources.repeaterbook.service import RepeaterBookService
+
+        # The companion report lists RepeaterBook-derived rows: retention and
+        # Delete All must be able to find and remove it.
+        RepeaterBookService(ctx.config).register_export_report(report_path)
 
     copies: List[Path] = []
     if copy_to is not None:
