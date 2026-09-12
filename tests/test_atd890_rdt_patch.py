@@ -1,4 +1,4 @@
-"""Restoring full scan-list membership to a saved .rdt.
+﻿"""Restoring full scan-list membership to a saved .rdt.
 
 The format was decoded from two real codeplugs that differed by exactly one
 scan-list member (radio-backups/at-d890uv/rdt-a.rdt and rdt-b.rdt): rebuilding
@@ -22,7 +22,7 @@ from patch_atd890_scanlists import (  # noqa: E402
     NAME,
     SETTINGS,
     PatchError,
-    find_scan_lists,
+    locate,
     patch,
     read_record,
     verify,
@@ -68,12 +68,14 @@ def test_a_record_decodes_and_the_separator_is_the_next_index():
     assert rec["sep"] == 2
 
 
-def test_the_whole_section_is_found_from_any_one_name():
+def test_a_record_is_located_by_its_content_not_a_stride():
     lists = [("Alpha", [1, 2]), ("Bravo", [3, 4, 5]), ("Charlie", [6])]
     data = codeplug(lists)
-    for anchor in ("Charlie", "Alpha", "Bravo"):
-        found = find_scan_lists(data, [anchor])
-        assert [r["name"] for r in found] == ["Alpha", "Bravo", "Charlie"], anchor
+    for name, members in lists:
+        rec = locate(data, name, members)
+        assert rec is not None and rec["members"] == members, name
+    # A list whose members are not what the export left is not this record.
+    assert locate(data, "Bravo", [9, 9, 9]) is None
 
 
 def test_extending_a_list_keeps_every_other_byte():
@@ -84,7 +86,7 @@ def test_extending_a_list_keeps_every_other_byte():
     verify(out, sidecar(full))
 
     assert len(out) == len(data) + 50 * ENTRY
-    recs = {r["name"]: r for r in find_scan_lists(out, ["Alpha"])}
+    recs = {n: locate(out, n, m) for n, m in full}
     assert recs["Alpha"]["members"] == list(range(100))
     assert recs["Bravo"]["members"] == [900, 901]
     # The separator still carries Bravo's index, and Bravo is untouched.
@@ -130,11 +132,13 @@ def test_the_real_codeplugs_confirm_the_format():
     if not (a.exists() and b.exists()):
         pytest.skip("the captured codeplugs are not in this checkout")
     da, db = a.read_bytes(), b.read_bytes()
-    ra = {r["name"]: r for r in find_scan_lists(da, ["Wildfire 01"])}
-    rb = {r["name"]: r for r in find_scan_lists(db, ["Wildfire 01"])}
-    assert ra["Wildfire 01"]["count"] == 50
-    assert rb["Wildfire 01"]["count"] == 51
-    assert rb["Wildfire 01"]["members"][:50] == ra["Wildfire 01"]["members"]
-    # Patching A to B's membership must reproduce B exactly.
-    side = sidecar([(name, rec["members"]) for name, rec in rb.items()])
-    assert patch(da, side) == db
+    fifty = list(range(42, 92))          # what rdt-a's Wildfire 01 holds
+    fifty_one = fifty + [92]             # and what rdt-b's does
+
+    assert locate(da, "Wildfire 01", fifty) is not None
+    assert locate(da, "Wildfire 01", fifty_one) is None
+    assert locate(db, "Wildfire 01", fifty_one) is not None
+
+    # Patching A up to B's membership must reproduce B byte for byte. That is
+    # what says the container has no checksum and nothing else to maintain.
+    assert patch(da, sidecar([("Wildfire 01", fifty_one)])) == db

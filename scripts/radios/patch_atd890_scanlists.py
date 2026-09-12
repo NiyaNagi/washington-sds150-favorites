@@ -1,4 +1,4 @@
-"""Restore full scan-list membership to a saved AT-D890UV codeplug.
+﻿"""Restore full scan-list membership to a saved AT-D890UV codeplug.
 
 The CPS's CSV importer keeps scan-list members in a fixed array of fifty; a
 51st raises VB6 runtime error 9, subscript out of range. The radio holds a
@@ -10,15 +10,22 @@ So ``ScanList.CSV`` ships the first fifty of each list, the exporter writes the
 full membership beside it in ``scanlists.json``, and this puts the rest back
 into the codeplug the CPS saved.
 
-The ``.rdt`` is a plain uncompressed container with no checksum. Its scan-list
-section is a chain of records::
+The ``.rdt`` is a plain uncompressed container with no checksum. A scan-list
+record is a name, some settings, a ``uint16le`` count and that many three-byte
+members::
 
-    [index:1] [name:16] [settings:10] [count:uint16le] [count x member]
     member = [channel:uint16le] [sep:1]
 
 ``sep`` is zero except on the last member of a record, where it carries the
 next record's index byte - so it is a separator, not a flag. A ``uint32le`` at
 offset 5 holds the container length, filesize minus the fourteen-byte header.
+
+The gap between the name and the count is **not** fixed - an eleven-character
+name puts the count at +26 and a sixteen-character one at +30 - so a record is
+found by its content rather than by a stride: the count must equal the number
+of members the CPS imported, and those members must be exactly the ones this
+export asked for. That is also what stops a same-named zone matching, and what
+refuses a codeplug built from some other export.
 
 Only member arrays grow: no record is added, removed or renumbered, so nothing
 that refers to a scan list by index - every channel does - is disturbed.
@@ -89,85 +96,75 @@ def read_record(data: bytes, at: int) -> Optional[Dict]:
     }
 
 
-def find_scan_lists(data: bytes, names: List[str]) -> List[Dict]:
-    """Every scan-list record, in file order.
+#: How far past a name the count field has been seen to sit. The stride is not
+#: fixed - an eleven-character name puts it at +26 and a sixteen-character one
+#: at +30 - so it is searched for rather than assumed.
+COUNT_SEARCH = range(16, 48)
 
-    Anchored on a name from the bundle and walked forwards and backwards, so
-    the section is found without hard-coding an offset.
+
+def locate(data: bytes, name: str, head: List[int]) -> Optional[Dict]:
+    """Find the record for ``name`` whose members begin with ``head``.
+
+    Locating by content rather than by a stride: the count must equal the
+    number of members the CPS imported, and those members must be exactly the
+    ones the export asked for. A zone of the same name does not match, because
+    its member ids are stored differently, and neither does a record from some
+    other export.
     """
-    anchor = None
-    for name in names:
-        hits = [m.start() for m in re.finditer(re.escape(name.encode("ascii")), data)]
-        # Zones share their scan list's name, and the zone section comes first,
-        # so the last occurrence is the scan-list one.
-        for at in reversed(hits):
-            rec = read_record(data, at)
-            if rec is not None and rec["name"] == name:
-                anchor = at
-                break
-        if anchor is not None:
-            break
-    if anchor is None:
-        raise PatchError("no scan-list record found for any name in the sidecar")
-
-    start = anchor
-    while True:
-        for back in range(1, 1200):
-            rec = read_record(data, start - back)
-            if rec is not None and rec["end"] == start:
-                start = start - back
-                break
-        else:
-            break
-
-    out: List[Dict] = []
-    at = start
-    while True:
-        rec = read_record(data, at)
-        if rec is None:
-            break
-        out.append(rec)
-        at = rec["end"]
-    return out
+    for at in [m.start() for m in re.finditer(re.escape(name.encode("ascii")), data)]:
+        after = data[at + len(name):at + len(name) + 1]
+        if after and after != b"\x00":
+            continue  # a longer name that merely starts with this one
+        for gap in COUNT_SEARCH:
+            count_at = at + gap
+            if int.from_bytes(data[count_at:count_at + 2], "little") != len(head):
+                continue
+            body = data[count_at + 2:count_at + 2 + len(head) * ENTRY]
+            if len(body) < len(head) * ENTRY:
+                continue
+            members = [int.from_bytes(body[k:k + 2], "little") for k in range(0, len(body), ENTRY)]
+            seps = [body[k + 2] for k in range(0, len(body), ENTRY)]
+            if members != head or any(s != 0 for s in seps[:-1]):
+                continue
+            return {"name": name, "at": at, "count_at": count_at, "count": len(head),
+                    "members": members, "sep": seps[-1],
+                    "end": count_at + 2 + len(head) * ENTRY}
+    return None
 
 
 def patch(data: bytes, sidecar: Dict) -> bytes:
-    wanted = {entry["name"]: list(entry["members"]) for entry in sidecar["scan_lists"]}
-    records = find_scan_lists(data, [e["name"] for e in sidecar["scan_lists"]])
-    print(f"found {len(records)} scan-list record(s) in the codeplug")
-
-    known = [r for r in records if r["name"] in wanted]
-    if not known:
-        raise PatchError("none of the codeplug's scan lists are named in the sidecar")
-
     csv_max = int(sidecar.get("csv_scanlist_max", 50))
-    changed = 0
-    for rec in known:
-        full = wanted[rec["name"]]
-        if len(full) > MAX_MEMBERS:
-            raise PatchError(f"{rec['name']!r}: {len(full)} members exceeds the radio's {MAX_MEMBERS}")
-        # The importer truncates, so what is in the file must be the head of
-        # what the plan intended. If it is not, this codeplug came from some
-        # other export and patching it would scramble the list.
-        head = full[:min(len(full), csv_max)]
-        if rec["members"] != head:
-            raise PatchError(
-                f"{rec['name']!r}: the codeplug holds {rec['members'][:4]}... but the sidecar's "
-                f"first members are {head[:4]}... - this .rdt was not built from this export"
-            )
-        if rec["members"] != full:
-            changed += 1
+    wanted = {entry["name"]: list(entry["members"]) for entry in sidecar["scan_lists"]}
 
-    print(f"{len(known)} list(s) matched the sidecar, {changed} need extending")
+    found: List[Dict] = []
+    missing: List[str] = []
+    for name, full in wanted.items():
+        if len(full) > MAX_MEMBERS:
+            raise PatchError(f"{name!r}: {len(full)} members exceeds the radio's {MAX_MEMBERS}")
+        rec = locate(data, name, full[:min(len(full), csv_max)])
+        if rec is None:
+            missing.append(name)
+        else:
+            rec["full"] = full
+            found.append(rec)
+    if missing:
+        raise PatchError(
+            f"{len(missing)} of {len(wanted)} scan list(s) were not found as this export left them, "
+            f"e.g. {missing[:3]} - this .rdt was not built from this export, or was edited since"
+        )
+
+    found.sort(key=lambda r: r["count_at"])
+    changed = [r for r in found if r["members"] != r["full"]]
+    print(f"located all {len(found)} scan list(s); {len(changed)} need extending")
     if not changed:
         return data
 
     out = bytearray()
     cursor = 0
-    for rec in known:
-        full = wanted[rec["name"]]
-        if rec["members"] == full:
-            continue
+    for rec in changed:
+        if rec["count_at"] < cursor:
+            raise PatchError(f"{rec['name']!r}: records overlap, refusing to patch")
+        full = rec["full"]
         out += data[cursor:rec["count_at"]]
         out += len(full).to_bytes(2, "little")
         for i, channel in enumerate(full):
@@ -181,18 +178,16 @@ def patch(data: bytes, sidecar: Dict) -> bytes:
 
 def verify(data: bytes, sidecar: Dict) -> None:
     """Re-parse the patched bytes and check every list against the sidecar."""
-    wanted = {entry["name"]: list(entry["members"]) for entry in sidecar["scan_lists"]}
-    records = {r["name"]: r for r in find_scan_lists(data, list(wanted))}
     declared = int.from_bytes(data[LENGTH_AT:LENGTH_AT + 4], "little")
     if declared != len(data) - HEADER:
         raise PatchError(f"container length {declared} != {len(data) - HEADER}")
-    for name, full in wanted.items():
-        rec = records.get(name)
-        if rec is None:
-            raise PatchError(f"{name!r} is missing after patching")
-        if rec["members"] != full:
-            raise PatchError(f"{name!r}: {len(rec['members'])} members after patching, wanted {len(full)}")
-    print(f"verified: {len(wanted)} list(s) match the sidecar, container length is consistent")
+    for entry in sidecar["scan_lists"]:
+        full = list(entry["members"])
+        # Locating on the FULL membership: it only matches if every member of
+        # every list is now in the file, in order.
+        if locate(data, entry["name"], full) is None:
+            raise PatchError(f"{entry['name']!r} does not hold its {len(full)} members after patching")
+    print(f"verified: {len(sidecar['scan_lists'])} list(s) hold their full membership, length is consistent")
 
 
 def main() -> int:
