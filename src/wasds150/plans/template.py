@@ -126,6 +126,7 @@ FAR_AWAY = (
     r"Ferry|Stevens|Pend Oreille|San Juan|Whatcom"
 )
 
+GROUP_NEAR_ME = "Near Me"
 GROUP_HAM_ALL = "Ham All"
 GROUP_HAM_ANALOG = "Ham Analog"
 GROUP_HAM_DMR = "Ham DMR"
@@ -133,7 +134,31 @@ GROUP_PUB_SVC = "Public Svc"
 GROUP_MARINE_RAIL = "Rail & Marine"
 GROUP_PERSONAL = "Personal"
 GROUP_EVERYTHING = "Everything"
+#: The one list worth leaving running: the nearest few of every service worth
+#: hearing, inside a single scan list so it never splits into chunks the radio
+#: cannot scan together. Quotas are nearest-first, because every block is.
+#: Left out on purpose, as noise rather than content: NOAA and the broadcast
+#: bands (continuous carriers), packet and data, the HF blocks (a different
+#: radio mode) and the air blocks (a separate AM receiver on the Anytone).
+NEAR_ME_QUOTAS = (
+    ("SAR and Interop", 4),
+    ("Wildfire", 2),
+    ("Public Safety Conventional", 5),
+    ("Ham 2m Repeaters", 7),
+    ("Ham 1.25m Repeaters", 2),
+    ("Ham 70cm Repeaters", 5),
+    ("DMR Core", 6),
+    ("Simplex Calling", 4),
+    ("Seattle ACS", 2),
+    ("Rail", 1),
+    ("Marine", 2),
+    ("GMRS 15-22", 3),
+    ("GMRS Repeaters", 4),
+    ("MURS", 2),
+)
+
 SCAN_GROUP_ORDER = (
+    GROUP_NEAR_ME,
     GROUP_HAM_ALL,
     GROUP_HAM_ANALOG,
     GROUP_HAM_DMR,
@@ -766,7 +791,22 @@ def included_blocks(profile: RadioProfile, knobs: RadioKnobs) -> List[ServiceBlo
 
 def _scan_groups(specs: List[ServiceBlockSpec]) -> Tuple[ScanGroup, ...]:
     groups: List[ScanGroup] = []
+    # Near Me is quota-driven rather than block-driven, so it is built from
+    # NEAR_ME_QUOTAS directly and skips any block this radio did not get.
+    scannable = {s.label for s in specs if not s.skip_scan}
+    near = tuple((label, n) for label, n in NEAR_ME_QUOTAS if label in scannable)
+    if near:
+        groups.append(
+            ScanGroup(
+                GROUP_NEAR_ME,
+                tuple(label for label, _ in near),
+                take=near,
+                notes="The nearest few of every service worth hearing, in one list.",
+            )
+        )
     for name in SCAN_GROUP_ORDER:
+        if name == GROUP_NEAR_ME:
+            continue
         members = tuple(s.label for s in specs if name in s.groups and not s.skip_scan)
         if members:
             groups.append(ScanGroup(name, members))

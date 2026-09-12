@@ -329,12 +329,21 @@ def build_bundle(resolved: ResolvedPlan) -> Atd890Bundle:
         for member in members:
             scan_list_by_channel.setdefault(member.name, names[0] if names else "")
     for group in plan.scan_groups:
+        quotas = group.quotas
         members: List[PlannedChannel] = []
         for block_label in group.blocks:
-            members.extend(c for c in channels if c.block == block_label and not c.skip_scan)
+            block = [c for c in channels if c.block == block_label and not c.skip_scan]
+            if quotas:
+                block = block[: quotas.get(block_label, 0)]
+            members.extend(block)
         if not members:
             warnings.append(f"scan group {group.name!r} matched no scannable channels")
             continue
+        if quotas and len(members) > limit:
+            warnings.append(
+                f"scan group {group.name!r}: quotas total {len(members)}, over the radio's "
+                f"{limit} per list, so it splits instead of scanning in one pass"
+            )
         _validate_name(group.name, "scan group")
         chunks = _chunk(members, limit)
         for name, chunk in zip(_numbered(group.name, len(chunks)), chunks):

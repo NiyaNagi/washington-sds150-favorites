@@ -111,11 +111,19 @@ def test_banks_and_scan_groups_fit_the_anytone_display():
     plan = build_fleet_plan("at-d890uv")
     assert all(block.bank and len(block.bank) <= 16 for block in plan.blocks)
     names = [group.name for group in plan.scan_groups]
-    assert names[:2] == ["Ham All", "Ham Analog"] and names[-1] == "Everything"
+    assert names[:3] == ["Near Me", "Ham All", "Ham Analog"] and names[-1] == "Everything"
     skipped = {block.label for block in plan.blocks if block.skip_scan}
     for group in plan.scan_groups:
         assert len(group.name) <= 13
         assert not set(group.blocks) & skipped
+
+    # Near Me has to be ONE list: the radio scans a single scan list at a time,
+    # so a group that splits into chunks cannot be scanned in one pass.
+    from wasds150.radios.registry import get_profile
+
+    near = next(g for g in plan.scan_groups if g.name == "Near Me")
+    assert sum(n for _, n in near.take) <= get_profile("at-d890uv").scan_list_member_max
+    assert set(near.quotas) == set(near.blocks)
 
 
 # --------------------------------------------------------------- transmit --

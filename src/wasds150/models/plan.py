@@ -274,17 +274,35 @@ class ScanGroup:
     combination - "everything amateur", "public service" - built from the
     non-``skip_scan`` channels of the named blocks in plan order. A target
     with a per-list member ceiling splits the group into numbered lists.
+
+    ``take`` turns that round: instead of every channel of every block,
+    chunked, it keeps at most ``take[block]`` from each - the first of them,
+    which is the nearest, because blocks are ordered nearest-first. A group
+    with quotas that add up to the radio's per-list ceiling is one list that
+    never splits, which is the only kind a radio can scan in a single pass.
+    A block named in ``blocks`` but absent from ``take`` contributes nothing.
     """
 
     name: str
     blocks: Tuple[str, ...]
     notes: str = ""
+    #: block label -> how many of its channels to keep, nearest first
+    take: Tuple[Tuple[str, int], ...] = ()
 
     def __post_init__(self) -> None:
         if not self.name.strip():
             raise ValueError("scan group needs a name")
         if not self.blocks:
             raise ValueError(f"scan group {self.name!r} names no blocks")
+        for label, count in self.take:
+            if count <= 0:
+                raise ValueError(f"scan group {self.name!r}: {label!r} quota must be positive")
+            if label not in self.blocks:
+                raise ValueError(f"scan group {self.name!r}: quota for {label!r}, which it does not name")
+
+    @property
+    def quotas(self) -> Dict[str, int]:
+        return dict(self.take)
 
 
 @dataclass(frozen=True)
