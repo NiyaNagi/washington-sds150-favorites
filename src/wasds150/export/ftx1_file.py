@@ -17,7 +17,7 @@ Confirmed layout::
     0x00  magic  "^Yaesu FTX-1"
     0x5E  first record; records are 295 bytes, fixed stride
 
-    record + 0x00  u8          in use: 1 = programmed, 0 = empty
+    record + 0x00  u8          bit 0 in use, bit 1 M-Grp (Set Menu 55)
     record + 0x01  uint32 LE   receive frequency, Hz
     record + 0x05  uint32 LE   transmit frequency, Hz
     record + 0x0D  u8          offset direction: 0 simplex, 1 minus, 2 plus
@@ -54,6 +54,16 @@ HEADER_LEN = 0x5E
 RECORD_LEN = 295
 
 OFF_IN_USE = 0x00
+#: Byte 0x00 carries two flags. Bit 0 is what makes the programmer show the
+#: row at all; bit 1 is the ``M-Grp`` checkbox, the radio's Set Menu
+#: ``55: MEM Group``. Decoded from a probe file where six of twelve otherwise
+#: identical memories had M-Grp ticked: those six, and nothing else anywhere
+#: in the file, went from 0x01 to 0x03.
+#:
+#: M-Grp is the FTX-1's only memory subset - it has no banks - so it is where
+#: a composite scan list has to live. See :mod:`wasds150.plan.scanning`.
+IN_USE_MASK = 0x01
+MGRP_MASK = 0x02
 OFF_RX = 0x01
 OFF_TX = 0x05
 #: Repeater shift magnitude in Hz, uint32 LE. Redundant with the stored
@@ -267,7 +277,12 @@ class Ftx1Record:
     @property
     def in_use(self) -> bool:
         """Whether the programmer will show this record as a populated row."""
-        return self.raw[OFF_IN_USE] != 0
+        return bool(self.raw[OFF_IN_USE] & IN_USE_MASK)
+
+    @property
+    def mgrp(self) -> bool:
+        """The ``M-Grp`` checkbox: this memory is in the radio's memory group."""
+        return bool(self.raw[OFF_IN_USE] & MGRP_MASK)
 
     @property
     def empty(self) -> bool:
@@ -295,6 +310,7 @@ class Ftx1Record:
         mode: Optional[str] = None,
         skip: Optional[bool] = None,
         in_use: Optional[bool] = None,
+        mgrp: Optional[bool] = None,
     ) -> "Ftx1Record":
         buffer = bytearray(self.raw)
         if rx_hz is not None:
@@ -340,8 +356,21 @@ class Ftx1Record:
             buffer[OFF_MODE] = code
         if skip is not None:
             buffer[OFF_SKIP] = 1 if skip else 0
-        if in_use is not None:
-            buffer[OFF_IN_USE] = 1 if in_use else 0
+        # Both flags share one byte, so each is set without disturbing the
+        # other: writing a plain 1 for "in use" would silently clear M-Grp.
+        # Emptying a record is the exception - a memory that is not there is
+        # not in the memory group either - so it clears the byte outright
+        # unless the caller says otherwise.
+        if in_use is False and mgrp is None:
+            buffer[OFF_IN_USE] = 0
+        elif in_use is not None:
+            buffer[OFF_IN_USE] = (buffer[OFF_IN_USE] & ~IN_USE_MASK) | (
+                IN_USE_MASK if in_use else 0
+            )
+        if mgrp is not None:
+            buffer[OFF_IN_USE] = (buffer[OFF_IN_USE] & ~MGRP_MASK) | (
+                MGRP_MASK if mgrp else 0
+            )
         return Ftx1Record(index=self.index, raw=bytes(buffer))
 
     def describe(self) -> str:

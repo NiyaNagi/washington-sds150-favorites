@@ -84,7 +84,7 @@ every memory was identical except one column (see
 
 | Offset | Size | Field | How it was confirmed |
 |---|---|---|---|
-| `0x00` | u8 | In use. Bit 1 was guessed to be M-Grp; **unverified** | 967/967 vendor records, all `0x01` |
+| `0x00` | u8 | Bit 0 in use, **bit 1 `M-Grp`** (Set Menu 55) | 967/967 vendor records; M-Grp from a probe file |
 | `0x01` | u32 LE | Receive frequency, Hz | round-trips on every record |
 | `0x05` | u32 LE | Transmit frequency, Hz | round-trips on every record |
 | `0x09` | u32 LE | Offset/shift magnitude, Hz | equals \|tx-rx\| on 963/967 |
@@ -102,13 +102,18 @@ every memory was identical except one column (see
 | `0x4F` | u8 | Noise Blanker level | probe file |
 | `0x85` | utf-16 | Comment, 79 characters | vendor records up to 79 chars |
 
-Byte `0x00` is `0x01` on every in-use record of every file seen so far - all
-553 memories of a file read from the radio, and the factory default - so
-nothing observed yet says where `M-Grp` is stored. The programmer offers it
-as a single checkbox per memory (the FTX-1 has no banks: there is no Bank
-column and no Bank Settings view), and the radio's Set Menu item is
-`55: MEM Group`. That makes it the radio's one and only memory subset, which
-is the shape of a `Near Me` list - see `docs/scan-groups.md`.
+Byte `0x00` carries two flags. Bit 0 makes the programmer show the row; bit 1
+is `M-Grp`, a single checkbox per memory matching the radio's Set Menu
+`55: MEM Group`. The FTX-1 has no banks - no Bank column, no Bank Settings
+view - so that checkbox is its one and only memory subset, which is the shape
+of a `Near Me` list; see `docs/scan-groups.md`.
+
+Bit 1 was long a guess, because every in-use record of every file here is
+`0x01`: all 553 memories read from the radio, and the factory default. A
+probe of twelve identical memories with six boxes ticked confirmed it, and
+moved nothing else in the file. Set each flag without rewriting the byte:
+`patched(in_use=True)` on a record that is already in the group must not
+clear it.
 
 ### Operating mode codes
 

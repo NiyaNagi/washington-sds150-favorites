@@ -31,6 +31,7 @@ from wasds150.export.ftx1_file import (
     Ftx1Record,
 )
 from wasds150.plan.resolve import ResolvedPlan
+from wasds150.plan.scanning import group_members
 from wasds150.radios.bandplan import BANDS_BY_ID
 from wasds150.radios.scan_ranges import ranges_by_priority
 
@@ -58,6 +59,10 @@ class Ftx1ExportResult:
 
     rows: int = 0
     scan_pairs: int = 0
+    #: Name of the scan group written into M-Grp, and how many memories it
+    #: reached. Empty when the plan defines no scan groups.
+    mgrp_group: str = ""
+    mgrp_rows: int = 0
     warnings: List[str] = field(default_factory=list)
 
 
@@ -211,6 +216,15 @@ def render_ftx1(
     result = Ftx1ExportResult()
     bases = _band_bases(ftx1)
 
+    # The FTX-1 has no banks. M-Grp - one checkbox per memory, Set Menu 55 on
+    # the radio - is its only memory subset, so the plan's first scan group
+    # goes there and the rest cannot be expressed at all.
+    groups = resolved.plan.scan_groups
+    mgrp_names: set = set()
+    if groups:
+        mgrp_names = {c.name for c in group_members(groups[0], resolved.channels)}
+        result.mgrp_group = groups[0].name
+
     channels = resolved.channels[:MEMORY_CAPACITY]
     if len(resolved.channels) > MEMORY_CAPACITY:
         result.warnings.append(
@@ -257,8 +271,11 @@ def render_ftx1(
             mode=mode,
             skip=channel.skip_scan,
             in_use=True,
+            mgrp=channel.name in mgrp_names,
         )
         result.rows += 1
+        if channel.name in mgrp_names:
+            result.mgrp_rows += 1
 
     # Clear any template memory beyond what the plan filled, so a stale
     # channel from the template can never appear on the radio.

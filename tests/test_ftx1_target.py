@@ -25,6 +25,7 @@ from wasds150.export.ftx1_target import (
     template_path,
     write_ftx1,
 )
+from wasds150.plan.scanning import group_members
 from wasds150.plan.service import resolve_named_plan
 
 
@@ -139,6 +140,33 @@ def test_receive_only_channels_get_no_shift(resolved):
     for planned, record in zip(resolved.channels, memories):
         if not planned.transmit:
             assert record.tx_hz == record.rx_hz
+
+
+def test_the_first_scan_group_becomes_the_memory_group(ctx):
+    """M-Grp is the FTX-1's only memory subset, so Near Me goes there."""
+    _template_or_skip()
+    _plan, resolved = resolve_named_plan(ctx, "ftx1-fleet")
+    group = resolved.plan.scan_groups[0]
+    wanted = {c.name for c in group_members(group, resolved.channels)}
+    assert wanted, "the fleet plan should put channels in its first scan group"
+
+    ftx1, result = render_ftx1(resolved)
+
+    assert result.mgrp_group == group.name
+    assert result.mgrp_rows == len(wanted)
+    flagged = {r.name for r in ftx1.memories() if not r.empty and r.mgrp}
+    assert flagged == {name[:NAME_LEN] for name in wanted}
+    # Everything else keeps the plain in-use flag, so the subset stays a
+    # subset rather than becoming every memory on the radio.
+    assert len([r for r in ftx1.memories() if not r.empty]) > len(flagged)
+
+
+def test_a_plan_without_scan_groups_flags_nothing(resolved):
+    _template_or_skip()
+    assert not resolved.plan.scan_groups
+    ftx1, result = render_ftx1(resolved)
+    assert result.mgrp_group == "" and result.mgrp_rows == 0
+    assert not any(r.mgrp for r in ftx1.memories())
 
 
 def test_missing_template_raises_a_useful_error(resolved, tmp_path):

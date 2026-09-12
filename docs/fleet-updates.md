@@ -272,7 +272,7 @@ the operator's own, explicit choice; the template does not cap any of it.
 1. **Export the memory file** _(automatic)_ - Export ftx1-fleet with target ftx1-file (patched onto radio-templates\ftx1-blank.FTX1).
 2. **Open the file in RT Systems** _(automatic)_ - Open <export> in the RT Systems FTX-1 programmer.
 3. **Send to the radio** - Connect the FTX-1 and send the file to the radio from RT Systems' communications menu.
-4. **Check the radio** _(confirm)_ - On the radio, confirm the last used memory matches the export (<rows> channels) and that a repeater near home keys with its tone.
+4. **Check the radio** _(confirm)_ - On the radio, confirm the last used memory matches the export (<rows> channels) and that a repeater near home keys with its tone. The M-Grp column is ticked on the Near Me channels, which Set Menu 55: MEM Group turns into the radio's one memory subset - the FTX-1 has no banks.
 <!-- fleet:end ftx1 -->
 
 <!-- fleet:begin at-d890uv -->

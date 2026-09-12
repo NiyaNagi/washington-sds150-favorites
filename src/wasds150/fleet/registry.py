@@ -259,7 +259,9 @@ FTX1 = FleetRadio(
         StepSpec(
             "confirm-count", "Check the radio",
             "On the radio, confirm the last used memory matches the export ({rows} channels) and "
-            "that a repeater near home keys with its tone.",
+            "that a repeater near home keys with its tone. The M-Grp column is ticked on the "
+            "Near Me channels, which Set Menu 55: MEM Group turns into the radio's one memory "
+            "subset - the FTX-1 has no banks.",
             kind=STEP_CONFIRM, verify=True,
         ),
     ),

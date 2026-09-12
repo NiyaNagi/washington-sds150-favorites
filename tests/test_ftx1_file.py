@@ -9,7 +9,10 @@ from wasds150.export.ftx1_file import (
     DUPLEX_PLUS,
     DUPLEX_SIMPLEX,
     HEADER_LEN,
+    IN_USE_MASK,
+    MGRP_MASK,
     OFF_DUPLEX,
+    OFF_IN_USE,
     PMS_FIRST,
     PMS_PAIRS,
     RECORD_LEN,
@@ -19,9 +22,58 @@ from wasds150.export.ftx1_file import (
 
 SOURCE = pathlib.Path(r"Z:\Texts\HAM\Radio Programming\FTX1 WA.FTX1")
 
+#: The probe that decoded M-Grp: twelve identical memories, six with the box
+#: ticked in the programmer, and its unedited reference re-saved beside it.
+MGRP_PROBE = pathlib.Path(r"Z:\Texts\HAM\Radio Programming\ftx1-banks-mgrp.FTX1")
+MGRP_REFERENCE = pathlib.Path(r"Z:\Texts\HAM\Radio Programming\ftx1-banks-reference.FTX1")
+
 pytestmark = pytest.mark.skipif(
     not SOURCE.exists(), reason="operator's FTX-1 file is not available"
 )
+
+
+class TestMemoryGroupFlag:
+    """``M-Grp`` is bit 1 of byte 0x00, sharing the byte with the in-use bit.
+
+    The FTX-1 has no banks, so this single checkbox is the only subset of
+    memories the radio can be told about, which makes the encoding worth
+    pinning down rather than trusting.
+    """
+
+    def test_the_two_flags_do_not_disturb_each_other(self):
+        blank = Ftx1Record(index=0, raw=bytes(RECORD_LEN))
+        both = blank.patched(rx_hz=146_520_000, in_use=True, mgrp=True)
+        assert both.raw[OFF_IN_USE] == IN_USE_MASK | MGRP_MASK
+        assert both.in_use and both.mgrp
+
+        # Re-marking it in use must not clear the group flag.
+        again = both.patched(name="KEEP", in_use=True)
+        assert again.mgrp
+
+        # Nor must dropping the group flag empty the record.
+        dropped = both.patched(mgrp=False)
+        assert dropped.in_use and not dropped.mgrp
+
+    def test_emptying_a_record_clears_both(self):
+        blank = Ftx1Record(index=0, raw=bytes(RECORD_LEN))
+        both = blank.patched(rx_hz=146_520_000, in_use=True, mgrp=True)
+        assert both.patched(in_use=False).raw[OFF_IN_USE] == 0
+
+    @pytest.mark.skipif(
+        not (MGRP_PROBE.exists() and MGRP_REFERENCE.exists()),
+        reason="the M-Grp probe pair is not available",
+    )
+    def test_the_probe_moved_only_that_bit_on_only_those_rows(self):
+        before = Ftx1File.load(MGRP_REFERENCE)
+        after = Ftx1File.load(MGRP_PROBE)
+        ticked = [i for i in range(12) if after.records[i].mgrp]
+        # Every other row was left alone in the programmer.
+        assert ticked == [1, 3, 5, 7, 9, 11]
+        assert not any(before.records[i].mgrp for i in range(12))
+        for index in range(12):
+            left, right = before.records[index].raw, after.records[index].raw
+            assert left[1:] == right[1:], f"record {index} moved outside byte 0"
+            assert right[OFF_IN_USE] == (0x03 if index in ticked else 0x01)
 
 
 @pytest.fixture(scope="module")
