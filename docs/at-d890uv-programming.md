@@ -21,7 +21,7 @@ has been written to the radio and read back.
 | Anytone AT-D890UV | Band mode **00014**: Rx and Tx 136-174, 220-225 and 400-520. Check **Menu > Settings > Device Info > Frequency Range**, or the CPS title bar. The plan assumes it - a radio still in the factory US mode 00007 (Rx 136-174 / 400-480, Tx 144-148 / 420-450) has no 220 MHz and cannot key GMRS. Mode 14 is not in the CPS's Model Information dropdown; set it with the AT Options utility, whose band descriptor and password are in `radio-tools/anytone-d890uv/options/AT_BANDS.txt`. |
 | Programming cable | The USB-C to USB-A cable in the box. Windows needs the virtual COM driver from the firmware package (`official-1.05/A READ FIRST - Update Instructions/Virtual Driver Installation.pdf`). |
 | D890UV CPS **1.05** | Installed by this project into `C:\D890UV\D890UV.exe` (Inno Setup, silent). CPS and firmware versions must match exactly. |
-| Firmware **1.05** (2026-05-20) | Official DMR build. Scan lists grew from 50 to 100 members in this release, which the exporter relies on. |
+| Firmware **1.05** (2026-05-20) | Official DMR build. Its change log says "Modify the scan groups 50 channels limit to 100 channels limit", but that is the **radio**: the CPS's CSV import still refuses a scan list of 51, so the exporter chunks at 50. See [Scan lists hold 50, not 100](#scan-lists-hold-50-not-100). |
 | NX_DMR **1.05** overlay | The NXDN+DMR firmware Anytone distributes through dealers (Wouxun.us mirror). Flashed *after* official 1.05. |
 | DMR ID | `3227807`, registered to `WA7DAM` at <https://radioid.net>. Every bundle carries it (`src/wasds150/station.py`). |
 | NXDN ID | `16240`, registered at <https://radioid.net>. Set once in the CPS at NX Setting > Unit ID(Own); the fleet checklist has a step for it (`src/wasds150/station.py`). |
@@ -121,7 +121,7 @@ and the `Comm Digital` channels simply stay quiet.
 | File | Contents |
 |---|---|
 | `Channel.CSV` | 77-column channel table: every VHF/UHF memory, ordered by zone. Analog rows carry the transmit CTCSS/DCS; DMR rows carry contact, colour code and timeslot; receive-only rows have `PTT Prohibit = On`. |
-| `DMRZone.CSV` | One zone per plan bank, split into `Name 01`, `Name 02` at 100 members. |
+| `DMRZone.CSV` | One zone per plan bank, split into `Name 01`, `Name 02` at 50 members. |
 | `ScanList.CSV` | One scan list per zone (same name) plus the composite groups. |
 | `DMRTalkGroups.CSV` | Every talkgroup any channel references, with a `Simplex 99` default. |
 | `DMRReceiveGroupCallList.CSV` | One receive group per network (`PNWDigital RX`, `SeattleDMR RX`, ...) so a DMR channel hears every talkgroup carried on its network. |
@@ -144,7 +144,7 @@ Zones, in scan-priority order:
 | `SAR Interop`, `Wildfire`, `Marine`, `Rail`, `GMRS FRS MURS`, `Business`, `Pub Safety`, `Comm Digital` | no | Receive only |
 | `ACS Data`, `NOAA WX`, `FM Bcast` | no | Programmed, never in any scan list |
 
-Scan groups (composite lists, each chunked at 100 members: `Ham All 01`,
+Scan groups (composite lists, each chunked at 50 members: `Ham All 01`,
 `Ham All 02`, ...):
 
 - **Ham All** - analog repeaters, DMR Puget Sound, simplex, ACS
@@ -181,6 +181,40 @@ Scan groups (composite lists, each chunked at 100 members: `Ham All 01`,
 
    Channel first and the zone and scan lists after the channels they name.
 5. Digital > Radio ID List shows `3227807` / `WA7DAM`; nothing to change.
+
+### Scan lists hold 50, not 100
+
+Firmware 1.05's change log line 10 reads "Modify the scan groups 50 channels
+limit to 100 channels limit". That is the radio. **The CPS's CSV import still
+refuses 51.** Tested against this radio, one member at a time, a single scan
+list imported alone:
+
+| Members | Import |
+|---:|---|
+| 35 | passes |
+| 50 | passes |
+| 51 | **fails** |
+| 100 | fails |
+
+So `scan_list_member_max` on the profile is 50, and the plan chunks both the
+per-zone lists and the composite groups at that. The fleet plan becomes 93 scan
+lists and 43 zones, well inside the 250 the manual gives for each.
+
+This is the failure that looks like something else. `Channel.CSV` is ~1,500
+rows and fills nearly the whole progress bar, so the scan-list table is always
+processed last and a rejection of the *whole table* reads as "failed towards
+the end". Importing fewer lists does not help, because the first oversized list
+kills it whatever its position; importing the scan list on its own with no
+channels in the codeplug fails instantly instead, because no member resolves.
+
+### Priority Channel 1/2 must be `Off`
+
+The CPS writes a real channel name and its frequencies into `Priority Channel
+1` and `Priority Channel 2` when it exports. **It will not import that back.**
+A single scan list that differs only in carrying those names is refused; the
+same list with `Off` and empty frequency cells imports. So the exporter's `Off`
+is not a placeholder to improve on - do not "fix" it to match what Export All
+writes.
 
 ### The manifest index is a slot, not a position
 
@@ -363,7 +397,7 @@ into.
 - **NXDN conventional only**, and only with the overlay firmware active.
 - **NXDN column mapping is unverified.** The exporter writes the RAN into the
   `EnRan`/`DeRan` columns; check one NXDN channel in the CPS after import.
-- **Scan lists hold 100 members**; long groups are chunked and the operator
+- **Scan lists hold 50 members**; long groups are chunked and the operator
   picks the chunk. The radio has no group-link scan across lists.
 - **Air band is a separate receiver.** AM channels cannot be mixed into a
   VHF/UHF scan list; they scan from the B receiver's AM zone.

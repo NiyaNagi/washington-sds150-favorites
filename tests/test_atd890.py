@@ -97,7 +97,9 @@ class TestProfile:
 
     def test_structure_limits(self):
         assert (AT_D890UV.max_channels, AT_D890UV.name_max_len) == (4000, 16)
-        assert (AT_D890UV.zone_max, AT_D890UV.zone_member_max, AT_D890UV.scan_list_member_max) == (250, 160, 100)
+        # 50, not the firmware's 100: the CPS's CSV import refuses a scan list
+        # of 51 members, tested against the radio.
+        assert (AT_D890UV.zone_max, AT_D890UV.zone_member_max, AT_D890UV.scan_list_member_max) == (250, 160, 50)
         assert AT_D890UV.name_style == "readable"
         assert TD_H9.zone_max is None and TD_H9.name_style == "compact"
         assert not AT_D890UV.verified

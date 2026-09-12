@@ -237,8 +237,13 @@ AT_D890UV = RadioProfile(
     supports_per_channel_mode=True,
     supports_per_channel_step=False,
     zone_max=250,
+    # Zones of 100 import cleanly; 160 is from the planning notes, untested.
     zone_member_max=160,
-    scan_list_member_max=100,
+    # Firmware 1.05 "Modify the scan groups 50 channels limit to 100 channels
+    # limit" describes the *radio*. The CPS's CSV import still refuses a scan
+    # list of 51, tested a member at a time against this radio: 50 imports, 51
+    # fails. Raise this only when a CPS that accepts 51 has been seen.
+    scan_list_member_max=50,
     # The 500,000 ceiling comes from the planning notes, not from a CPS
     # capture; the exporter chunks at it and warns, and the first real CPS
     # import is what confirms it.
