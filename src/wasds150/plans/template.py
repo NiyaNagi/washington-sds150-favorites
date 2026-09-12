@@ -139,18 +139,34 @@ GROUP_EVERYTHING = "Everything"
 #: together. Quotas are nearest-first, because every block is.
 #:
 #: Amateur only, by choice: the repeaters carrying nets, the nearest analog
-#: machines on all three bands, the DMR core and local talkgroups, simplex
+#: machines on every band the radio has, its digital voice mode, simplex
 #: calling and the ACS plan. Public safety, marine, rail and the personal
 #: radio services have their own groups; a list meant to be left running all
 #: day is more useful when everything on it is a conversation you could join.
 #: Never included anywhere: NOAA and the broadcast bands (continuous
 #: carriers), packet and data, HF (a different radio mode) and the air blocks
 #: (a separate AM receiver on the Anytone, which cannot share a VHF/UHF list).
+#:
+#: A radio contributes nothing for a block it does not have, so these do not
+#: total the same everywhere and are not meant to: 100 on the AT-D890UV,
+#: which is its scan list's ceiling, and less on radios that lack a band or a
+#: digital mode. Whichever digital voice a radio speaks is in here - DMR,
+#: D-STAR or none - because on the radio that has it, it is where the local
+#: amateur traffic is.
+#:
+#: The quotas are deliberately modest against what each block holds - 14 of
+#: 96 70 cm repeaters, say. Blocks are nearest-first, so raising a quota adds
+#: machines that are progressively farther off and quieter, while every
+#: addition lengthens the sweep for the channels already on it. The ceiling
+#: that matters is not the radio's, it is how long a pass can take and still
+#: catch a call.
 NEAR_ME_QUOTAS = (
     ("Nets", 24),
+    ("Ham 6m Repeaters", 4),
     ("Ham 2m Repeaters", 14),
     ("Ham 1.25m Repeaters", 4),
     ("Ham 70cm Repeaters", 14),
+    ("D-STAR Repeaters", 10),
     ("DMR Core", 20),
     ("DMR Local", 10),
     ("Simplex Calling", 6),
@@ -984,10 +1000,12 @@ _AT_D890UV = RadioKnobs(
 #: The reserve carries the operator's own fifty slots and, on top of them,
 #: the ``Near Me`` group: the radio scans one memory group at a time and a
 #: memory belongs to one group, so that list exists only as a second copy of
-#: its sixty-six channels. They come off the far end of the fill blocks,
-#: which is the most distant thing the radio was holding.
+#: its seventy-six channels. They come off the far end of the fill blocks,
+#: which is the most distant thing the radio was holding. This is the only
+#: radio where widening Near Me costs memories - the Anytone spends a scan
+#: list, the FTX-1 a flag on channels already there.
 _ID52A = RadioKnobs(
-    reserve_slots=116,
+    reserve_slots=126,
     include_hf=False,
     include_broadcast=False,
     include_dmr=False,
@@ -998,9 +1016,9 @@ _ID52A = RadioKnobs(
         "nets": 44, "ham-2m": 78, "ham-70cm": 78, "dstar": 25, "simplex": 20, "seattle-acs": 50,
         "rail": 15, "marine": 40,
         "gmrs-interstitial": 7, "frs": 7, "gmrs-main": 8, "gmrs-repeaters": 10, "murs": 5,
-        # Sixty off the three widest-reaching blocks, which is what the
+        # Seventy off the three widest-reaching blocks, which is what the
         # Near Me copy costs; these are the most distant rows on the radio.
-        "business": 70, "data": 10, "packs": 40, "other-nearby": 30,
+        "business": 65, "data": 10, "packs": 35, "other-nearby": 30,
     },
 )
 

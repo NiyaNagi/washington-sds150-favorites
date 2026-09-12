@@ -13,10 +13,17 @@ hardware allows, and no further.
 | Radio | Mechanism | `Near Me` |
 |---|---|---|
 | AT-D890UV | scan lists, 100 members, any channel in any number of them | **exactly the 100 curated channels**, plus `Ham All`, `Ham Analog`, `Ham DMR`, `Public Svc`, `Rail & Marine`, `Personal`, `Everything` |
-| TH-D75A | Memory Group Link: an ordered list of memory groups scanned as one pass | **the six groups Near Me draws from, whole** - 242 channels rather than 70 |
-| ID-52A | Group scan, one memory group at a time; a memory belongs to one group | **its own group of 66 copies**, the same channels in the same order |
-| FTX-1 | `M-Grp`, one checkbox per memory: a single subset of the memories | **the 66 curated channels**, flagged in place - no copies, no slots |
+| TH-D75A | Memory Group Link: an ordered list of memory groups scanned as one pass | **the eight groups Near Me draws from, whole** - 275 channels rather than 84 |
+| ID-52A | Group scan, one memory group at a time; a memory belongs to one group | **its own group of 76 copies**, the same channels in the same order |
+| FTX-1 | `M-Grp`, one checkbox per memory: a single subset of the memories | **the 70 curated channels**, flagged in place - no copies, no slots |
 | TD-H9 | no group or bank concept at all | none |
+
+The totals differ because the radios do. Every one takes the nearest few of
+every local amateur service **it can use**: the Anytone's hundred includes
+thirty DMR channels the others cannot hear, the D75 and ID-52A carry D-STAR
+instead, and the D75 and FTX-1 are the only two with 6 m. The blocks and
+their quotas are the same everywhere; a radio simply contributes nothing for
+a band or a mode it does not have.
 
 ## AT-D890UV
 
@@ -32,7 +39,9 @@ A memory belongs to exactly one group, so the D75 cannot hold a curated
 subset. What it does have is **Memory Group Link**: 30 bytes at image offset
 `0x10A0`, an ordered list of group numbers terminated by `0xFF`, scanned
 together by Group Link Scan. The exporter writes the groups `Near Me` draws
-from - Ham Nets, Ham 2m, Ham 1.25m, Ham 70cm, Ham Simplex, Ham Seattle ACS.
+from - Ham Nets, Ham 6m, Ham 2m, Ham 1.25m, Ham 70cm, Ham D-STAR, Ham
+Simplex, Ham Seattle ACS, which on this radio is groups 7 to 14: the whole
+amateur run and nothing else.
 
 That reaches whole groups, so it is a superset: the right stations plus their
 more distant neighbours. Blocks are ordered nearest-first, so the nearest are
@@ -47,10 +56,14 @@ the four configured links appear as `00 01 02 03 FF...`.
 
 Group scan reaches one group, and a memory is in one group, so `Near Me`
 exists only as a second copy of its channels in a group of its own - the last
-one CS-52 imports. Sixty-six memories, which the plan funds by reserving them:
-`_ID52A.reserve_slots` carries the operator's fifty free slots **and** the
-copy, and the three widest-reaching blocks give up sixty of their most distant
-rows to pay for it.
+one CS-52 imports. Seventy-six memories, which the plan funds by reserving
+them: `_ID52A.reserve_slots` carries the operator's fifty free slots **and**
+the copy, and the three widest-reaching blocks give up seventy of their most
+distant rows to pay for it.
+
+This is the one radio where widening `Near Me` costs anything real. The
+Anytone spends a scan list it has 250 of, the D75 links one more group, the
+FTX-1 ticks a box - only the ID-52A buys each channel twice.
 
 Only the first scan group is copied. A second would cost another group's worth
 of memories on a radio that can only scan one of them at a time anyway.
