@@ -62,10 +62,29 @@ Neither gets a composite list.
 The TD-H9 has nothing to build one with: CHIRP writes memories and a skip
 flag, and the radio scans all of them.
 
-The FTX-1 does have banks, but an RT Systems `.FTX1` is a flat array of
-295-byte records with no separate bank table - the blank template and a file
-saved from the programmer differ nowhere outside the records - so bank
-membership must live in bytes inside a record that this project has not
-decoded. Decoding it needs a probe pair: in the FTX-1 programmer, save a file,
-add one memory to one bank, save again under a new name, and diff. Until then
-the FTX-1 gets its memory blocks in plan order and nothing else.
+The FTX-1 does have banks. The programmer edits them as a checkbox per bank
+in the memory grid - `Settings > Bank Settings` hides every other column - so
+a memory can be in several at once, which is what would let `Near Me` be a
+bank without the ID-52A's duplicate memories.
+
+What is missing is where the file keeps them. An RT Systems `.FTX1` is a flat
+array of 295-byte records with no separate bank table: the blank template and
+a file saved from the programmer differ nowhere outside the records, and the
+header's region table names no such region. So membership is most likely a
+bitmask inside a record, in bytes this project has not decoded.
+
+`scripts/radios/make_ftx1_probe.py` writes `ftx1-banks.FTX1`, twelve memories
+on 146.520 whose Comment column says which boxes to tick - single banks on
+either side of a byte boundary to pin down byte and bit order, then two
+combinations to confirm it is a mask rather than an index - plus
+`ftx1-banks-reference.FTX1`, the same file to re-save unedited. Then:
+
+```powershell
+# inside the records
+python scripts\radios\decode_ftx1_probe.py <edited>\ftx1-banks.FTX1
+# anywhere in the file, in case they are not
+python scripts\radios\decode_ftx1_probe.py <edited>\ftx1-banks.FTX1 --against <saved>\ftx1-banks-reference.FTX1
+```
+
+Until that comes back the FTX-1 gets its memory blocks in plan order and
+nothing else.

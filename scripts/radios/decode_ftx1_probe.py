@@ -25,11 +25,50 @@ from wasds150.export.ftx1_file import Ftx1File  # noqa: E402
 NAME_SPAN = (0x0F, 0x0F + 24)
 COMMENT_START = 0x85
 
+HEADER_LEN = 0x5E
+RECORD_LEN = 295
+
 
 def ignored(offset: int, record_len: int) -> bool:
     if NAME_SPAN[0] <= offset < NAME_SPAN[1]:
         return True
     return offset >= COMMENT_START
+
+
+def _where(offset: int) -> str:
+    """Describe a file offset as a record and offset within it."""
+    if offset < HEADER_LEN:
+        return f"header +0x{offset:02X}"
+    index, within = divmod(offset - HEADER_LEN, RECORD_LEN)
+    return f"record {index:4d} +0x{within:03X}"
+
+
+def compare_whole_file(path: pathlib.Path, reference: pathlib.Path) -> int:
+    """Every byte that differs between two files, anywhere.
+
+    The record-by-record decode below only sees inside a record. A field the
+    programmer keeps elsewhere - a membership table, a name list - would move
+    bytes this finds and that one cannot.
+    """
+    left, right = reference.read_bytes(), path.read_bytes()
+    if len(left) != len(right):
+        print(f"sizes differ: {reference.name} {len(left)}, {path.name} {len(right)}")
+    diffs = [i for i in range(min(len(left), len(right))) if left[i] != right[i]]
+    print(f"{reference.name} -> {path.name}: {len(diffs)} differing bytes")
+    if not diffs:
+        print()
+        print("Nothing changed anywhere in the file. Either the edit was not")
+        print("saved, or the programmer does not store this for the FTX-1.")
+        return 1
+    print()
+    outside = [i for i in diffs if i >= HEADER_LEN + RECORD_LEN * 999 or i < HEADER_LEN]
+    for offset in diffs:
+        print(f"  0x{offset:06X}  {_where(offset):<22} "
+              f"{left[offset]:02X} -> {right[offset]:02X}")
+    if outside:
+        print()
+        print(f"{len(outside)} of them lie outside the 999 memory records.")
+    return 0
 
 
 def main(argv=None) -> int:
@@ -41,9 +80,19 @@ def main(argv=None) -> int:
         default=0,
         help="Row index to treat as the unchanged reference (default: first)",
     )
+    parser.add_argument(
+        "--against",
+        help="A second .FTX1 to diff the whole file against, byte for byte, "
+             "for a field that may not live inside a memory record",
+    )
     args = parser.parse_args(argv)
 
     path = pathlib.Path(args.path)
+    if args.against:
+        reference = pathlib.Path(args.against)
+        if not reference.is_file():
+            raise SystemExit(f"reference not found at {reference}")
+        return compare_whole_file(path, reference)
     ftx1 = Ftx1File.load(path)
     records = [r for r in ftx1.records[:999] if not r.empty]
     if len(records) < 2:

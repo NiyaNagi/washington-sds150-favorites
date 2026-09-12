@@ -145,6 +145,11 @@ python scripts/radios/make_ftx1_probe.py --out "path/to/a/scratch/folder"
 
 # Read back exactly which byte moved for which value
 python scripts/radios/decode_ftx1_probe.py "path/to/ftx1-modes.FTX1"
+
+# For a field that may not be inside a record at all - bank membership is the
+# open one - diff the whole file against a copy re-saved with nothing changed
+python scripts/radios/decode_ftx1_probe.py "path/to/ftx1-banks.FTX1" \
+    --against "path/to/ftx1-banks-reference.FTX1"
 ```
 
 Because only one variable changes per row, the offset and its encoding fall

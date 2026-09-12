@@ -105,6 +105,30 @@ TONE_ROWS = [
     ("TONE-OTHER2", "set Tone Mode to another remaining option, if any"),
 ]
 
+#: Bank membership, which the programmer edits as a checkbox per bank rather
+#: than a value in a cell (Settings > Bank Settings hides every other column).
+#: A memory may be in several banks at once, so this is almost certainly a
+#: bitmask somewhere in the record - the single-bank rows below are chosen to
+#: pin down both which byte and which bit, including across byte boundaries,
+#: and the combination rows confirm it is a mask rather than an index.
+#:
+#: Nothing here is known: the number of banks is whatever the programmer
+#: offers, and rows naming a bank that does not exist are simply left alone.
+BANK_ROWS = [
+    ("BANK-NONE", "leave every Bank box unticked"),
+    ("BANK-01", "tick Bank 1 only"),
+    ("BANK-02", "tick Bank 2 only"),
+    ("BANK-03", "tick Bank 3 only"),
+    ("BANK-04", "tick Bank 4 only"),
+    ("BANK-08", "tick Bank 8 only"),
+    ("BANK-09", "tick Bank 9 only"),
+    ("BANK-16", "tick Bank 16 only, or skip this row if there is no Bank 16"),
+    ("BANK-17", "tick Bank 17 only, or skip this row if there is no Bank 17"),
+    ("BANK-24", "tick the LAST bank only, whatever its number"),
+    ("BANK-1-2-3", "tick Banks 1, 2 and 3 together"),
+    ("BANK-ALL", "tick every Bank box there is"),
+]
+
 #: 20 m USB. The receiver controls below are greyed out on an FM memory, so
 #: probing them on 146.520 proved only that they were unavailable. On an HF
 #: SSB memory they are live, which is what decides whether they are stored per
@@ -190,7 +214,7 @@ def main(argv=None) -> int:
     # the programmer. Regenerating over the top destroys that work, and the
     # file looks superficially fine afterwards, so refuse by default.
     planned = ["ftx1-modes.FTX1", "ftx1-fields.FTX1", "ftx1-tones.FTX1",
-               "ftx1-hf.FTX1"]
+               "ftx1-hf.FTX1", "ftx1-banks.FTX1"]
     existing = [name for name in planned if (out / name).is_file()]
     if existing and not args.force:
         raise SystemExit(
@@ -235,15 +259,34 @@ def main(argv=None) -> int:
     hf_path = out / "ftx1-hf.FTX1"
     hf.save(hf_path)
 
+    banks = build(
+        [name for name, _ in BANK_ROWS],
+        [note for _, note in BANK_ROWS],
+        template,
+    )
+    banks_path = out / "ftx1-banks.FTX1"
+    banks.save(banks_path)
+    # Bank membership may not live in the record at all. A reference copy
+    # saved by the programmer with nothing ticked lets the whole file be
+    # diffed, not only the records; see decode_ftx1_probe.py --against.
+    banks_ref = out / "ftx1-banks-reference.FTX1"
+    banks.save(banks_ref)
+
     print(f"wrote {modes_path}  ({len(MODE_ROWS)} memories)")
     print(f"wrote {fields_path} ({len(FIELD_ROWS)} memories)")
     print(f"wrote {tones_path}  ({len(TONE_ROWS)} memories)")
     print(f"wrote {hf_path}     ({len(HF_ROWS)} memories on "
           f"{HF_PROBE_HZ / 1e6:.3f} MHz USB)")
+    print(f"wrote {banks_path}  ({len(BANK_ROWS)} memories)")
+    print(f"wrote {banks_ref}   (open and re-save this one unedited)")
     print()
     print("Open each in the RT Systems programmer. Every memory is already on")
     print(f"{PROBE_HZ / 1e6:.3f} MHz and its Comment column says what to change.")
     print("Change only that one column per row, save, and hand the files back.")
+    print()
+    print("The banks probe needs both files: open the reference, save it with")
+    print("nothing changed, then open ftx1-banks.FTX1, tick the boxes each row")
+    print("asks for under Settings > Bank Settings, and save that too.")
     return 0
 
 
