@@ -105,9 +105,13 @@ def favorite() -> FavoritesList:
                  priority=True, tx=147.680),
         _channel("WW7STR Cougar 70cm", 441.550, "TONE=C103.5", "FM",
                  "Red Cross King County Net Tue 20:00 (SeaTac Repeater Assn)", tx=446.550),
-        _channel("WW7MST VA Med Ctr", 443.550, "TONE=C103.5", "FM",
-                 "MST Weekly Net Thu 19:30, WWMSEC; linked to 146.900; Seattle ACS channel U42",
-                 priority=True, tx=448.550),
+        # WW7MST 443.550 carries the MST Weekly Net on Thursdays, but the
+        # operator wants it with the other 70cm repeaters rather than in the
+        # nets zone; the WWARA layer already programs it, note and all.
+        _channel("KC7BAE E Tiger", 443.050, "TONE=C103.5", "FM",
+                 "Issaquah / East Tiger Mtn; operator-supplied. No net schedule confirmed against "
+                 "a club source - kept here because the operator uses it.",
+                 priority=True, tx=448.050),
         _channel("W7ACS Magnolia", 443.475, "TONE=C141.3", "FM",
                  "Seattle ACS CW Sector Net Mon 18:30; frequency carried over from the prior calendar series",
                  tx=448.475),
