@@ -627,6 +627,33 @@ line; the best non‑L built only from 50 ft throws is F10‑A with leg 2 re-aim
 Map colours: validated categorical slots 1–3 all-pairs (`validate_palette.js`), orange taken at its
 dark step because the light step sat 0.001 outside the dark lightness band.
 
+## Phase 15 — 2026-09-12: feeding from the roof
+
+**Operator asked:** with the feed at a red dot they marked on the roof in the lineup map, sloping
+down off the house — or up from it — would it be better? Add those to the list, map the top three
+slopers and top three V‑or‑L shapes from that point, and regenerate the lineup graphic.
+
+**Where the dot is.** Read from the annotated screenshot of the page's own map: 13.6 px/m, checked
+against CURRENT's far end and RB‑POST20's post, both within a pixel. ENU (−10.7, −10.5) — 15.0 m /
+49 ft at 225.6°T / 210°M, on the roof. **Height not given; 25 ft assumed** (`ROOF_FEED_FT`), with
+20 and 30 ft re-run on the page.
+
+`topology_search.py` now takes any feed point and searches **downward** slopers whenever the feed is
+15 ft or higher. A downward wire is scored end for end from its low end — the standing-wave pattern
+and current maxima are symmetric. Transformer results are unchanged (a 10 ft feed cannot slope
+down to an 8 ft end).
+
+**Result.** Downward from 25 ft is geometrically boxed in: 17 ft of drop over 130 ft of wire is
+at most 7.5°, so the best "down" wire is near-flat at 21–25 ft and scores **34/75**. Upward from the
+roof: slopers 50/75 (same as from the transformer, but the best supports land 67–78 ft past the
+south line); **inverted‑V 54/75, −0.02 dBi, against 50/75 from the transformer** — the only roof
+gain on a model the study trusts; inverted‑L 59/75 on the unvalidated hybrid. The lineup page is
+now "Sixteen Wires on One Lot" (same URL), with a roof section, and `imagery/lineup_roof.jpg`.
+
+This does not contradict the Phase 10 roof-feed "wash" (G‑ROOF vs G‑FEED, 0.04 dB): that compared
+slopers at matched geometry, and slopers are again a wash here. What the roof point changes is
+where a *V* can put its apex.
+
 ## Corrections summary
 
 | # | Error | Corrected in | Status |

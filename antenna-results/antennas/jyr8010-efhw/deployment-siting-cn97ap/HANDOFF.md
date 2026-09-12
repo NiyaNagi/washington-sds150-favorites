@@ -143,9 +143,10 @@ Full list in `AGENT_GUIDE.md`. The ones most likely to bite this task:
 
 ## Also done 2026-09-12: the lineup and the 40 + 20 m search
 
-`tools/topology_search.py` + `tools/build_lineup_page.py` → a third artifact, "Ten Wires on One
-Lot" — https://claude.ai/code/artifact/eab86385-ffd8-44a3-b8e2-090b72026cb4 — and
-`imagery/lineup_*.jpg`. Inverted‑Ls lead both rankings on a new,
+`tools/topology_search.py` + `tools/build_lineup_page.py` → a third artifact, "Sixteen Wires on
+One Lot" — https://claude.ai/code/artifact/eab86385-ffd8-44a3-b8e2-090b72026cb4 — and
+`imagery/lineup_*.jpg`. It includes feeds from the operator's roof point (SESSION-LOG Phase 15;
+height 25 ft is assumed, not measured). Inverted‑Ls lead both rankings on a new,
 unvalidated hybrid model — see SESSION-LOG Phase 14 before quoting them. Highest-value next
 step: **one NEC run on Inverted‑L 1**.
 

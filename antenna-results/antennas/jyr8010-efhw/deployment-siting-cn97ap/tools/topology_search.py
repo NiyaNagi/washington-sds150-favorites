@@ -1,29 +1,34 @@
 #!/usr/bin/env python3
-"""Search three wire families with the feed held at 10 ft, and re-rank on 40+20 m.
+"""Search three wire families from a given feed point, and re-rank on 40+20 m.
 
 Asked 2026-09-12: overlay the as-built sloper, BASE, RB-POST20, F10-A, the top
 three slopers and the top three inverted-V or inverted-L deployments on the
 property, and separately find the best options if only 40 m and 20 m mattered.
+Then the same families fed from a point on the house roof (ROOF_FEED below),
+sloping either down off the house or up from it.
+
 The operator set the limits:
 
-  SL  STRAIGHT SLOPER. Feed 10 ft, support anywhere up to the 150 ft tree cap.
-      Parcel NOT enforced ("doesn't need to be on the lot") - status reported.
-      Slant model, METHOD.md section 9. LOW confidence.
-  V   INVERTED-V. Feed 10 ft -> apex at 50 ft -> end tied off at 10 ft.
-      Apex and end on the lot. Horizontal bent-wire model (sections 3/4),
-      exactly as V1/V2 are scored.
-  L   INVERTED-L WITH THE VERTICAL AT THE FAR END. Feed 10 ft -> top of a
-      support, rising no more than 30 deg -> the rest of the wire hangs
-      straight down, bottom at least 8 ft up. Support on the lot. The vertical
-      is NOT at the feed: that end is a voltage maximum and radiates poorly
-      there (AGENT_GUIDE.md).
+  SL  STRAIGHT SLOPER. Support anywhere up to the 150 ft tree cap. Parcel
+      NOT enforced ("doesn't need to be on the lot") - status reported.
+      From a feed above ~15 ft the wire may also slope DOWN to a low end at
+      least 8 ft up. Slant model, METHOD.md section 9. LOW confidence.
+  V   INVERTED-V. Feed -> apex at 50 ft -> end tied off at 10 ft. Apex and
+      end on the lot. Horizontal bent-wire model (sections 3/4), exactly as
+      V1/V2 are scored.
+  L   INVERTED-L WITH THE VERTICAL AT THE FAR END. Feed -> top of a support,
+      rising no more than 30 deg -> the rest of the wire hangs straight down,
+      bottom at least 8 ft up. Support on the lot. The vertical is NOT at the
+      feed: that end is a voltage maximum and radiates poorly there
+      (AGENT_GUIDE.md).
 
 The L needs a model the study did not have. Both legs are scored on the
 section 9 slant model - the rising leg at its own slope, the hanging leg at
 90 deg - and combined as a union exactly as section 3 combines two horizontal
-legs. At least 10 m must hang vertically, or it is just a sloper. That combination is NEW and UNVALIDATED
-and the two legs are orthogonal - a 90 deg bend, which endpoint_study.py
-classes as OVERSTATED. L figures are the least trustworthy numbers in the study.
+legs. At least 10 m must hang vertically, or it is just a sloper. That
+combination is NEW and UNVALIDATED and the two legs are orthogonal - a 90 deg
+bend, which endpoint_study.py classes as OVERSTATED. L figures are the least
+trustworthy numbers in the study.
 
 Bend filter: V candidates are ranked only with a bend of 70 deg or less, the
 limit endpoint_study.py gives for what section 3 is entitled to score.
@@ -52,8 +57,17 @@ from site_geometry import (          # noqa: E402
 )
 
 FT = 0.3048
-FEED_FT = 10.0
-F = FEED_FT * FT
+FEED10 = ((0.0, 0.0), 10.0)          # the surveyed transformer, as it is now
+
+# A point on the house roof the operator marked on the lineup map
+# (2026-09-12). Read from their annotated screenshot of that map and
+# scale-checked against two drawn points of known position: CURRENT's far end
+# and RB-POST20's post both land within a pixel (13.6 px/m either way).
+# 15.0 m (49 ft) from the transformer at 225.6 T. Precision about +/-0.3 m.
+# HEIGHT IS ASSUMED: 25 ft, the roof-feed height compare_options.py already
+# uses (ROOF_FEED_FT). build_lineup_page.py reports 20 and 30 ft as well.
+ROOF_FEED = ((-10.7, -10.5), 25.0)
+
 APEX_FT = 50.0
 END_FT = 10.0
 L_BOTTOM_FT = 8.0
@@ -66,6 +80,8 @@ L_MIN_VERTICAL_M = 10.0
 # from the feed - a near-vertical first leg at the high-voltage end, scored as
 # if it were horizontal.
 V_MAX_LEG_SLOPE_DEG = 40.0
+# Downward slopers need the feed high enough that the end can clear 8 ft.
+DOWN_MIN_FEED_FT = 15.0
 METRICS = {"3band": list(C.MULTIBAND), "40+20": ["40m", "20m"]}
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -84,6 +100,16 @@ def bend_deg(b1, b2):
 
 def trust(bend):
     return "OK" if bend <= 70 else "OVERSTATED" if bend <= 110 else "NOT VALID"
+
+
+def rel(en, feed):
+    """(distance, bearing) of a point from the feed."""
+    return polar(en[0] - feed[0][0], en[1] - feed[0][1])
+
+
+def feed_words(feed):
+    return ("the roof" if math.dist(feed[0], (0.0, 0.0)) > 0.5
+            else "the transformer")
 
 
 def parcel_status(o):
@@ -106,19 +132,58 @@ def parcel_status(o):
 # Family constructors
 # --------------------------------------------------------------------------
 
-def make_sloper(top_en, key="x"):
-    run, brg = polar(*top_en)
-    top_ft = FEED_FT + math.sqrt(WIRE_M ** 2 - run ** 2) / FT
-    o = C._sloper(key, f"Sloper, feed 10 ft to a {top_ft:.0f} ft support "
-                       f"{run/FT:.0f} ft out at {mag(brg):.0f}°M",
-                  (0.0, 0.0), FEED_FT, top_en, "Topology search.")
-    o.family, o.bend, o.model = "sloper", 0.0, "slant (§9, LOW)"
+def make_sloper(top_en, key="x", feed=FEED10):
+    """Wire rising from the feed to a support."""
+    fen, fft = feed
+    run, brg = rel(top_en, feed)
+    if run >= WIRE_M:
+        return None
+    top_ft = fft + math.sqrt(WIRE_M ** 2 - run ** 2) / FT
+    o = C._sloper(key, f"Sloper up from {feed_words(feed)} ({fft:.0f} ft) to a "
+                       f"{top_ft:.0f} ft support {run/FT:.0f} ft out at "
+                       f"{mag(brg):.0f}°M",
+                  fen, fft, top_en, "Topology search.")
+    o.family, o.bend, o.model, o.direction = "sloper", 0.0, "slant (§9, LOW)", "up"
+    o.feed = feed
     return o
 
 
-def make_vee(apex_en, b2, key="x"):
-    d1, b1 = polar(*apex_en)
+def make_down_sloper(end_en, key="x", feed=ROOF_FEED):
+    """Wire falling from a high feed to a low end at least 8 ft up.
+
+    Scored as the same wire rising from its low end: a resonant standing-wave
+    pattern and its current maxima are symmetric end for end, so reversing
+    the axis changes nothing but the bookkeeping.
+    """
+    fen, fft = feed
+    run, brg = rel(end_en, feed)
+    if run >= WIRE_M:
+        return None
+    drop = math.sqrt(WIRE_M ** 2 - run ** 2)
+    end_ft = fft - drop / FT
+    if end_ft < L_BOTTOM_FT:
+        return None
+    slope = math.degrees(math.atan2(drop, run))
+    o = C.Option(
+        key, f"Sloper DOWN from {feed_words(feed)} ({fft:.0f} ft) to a "
+             f"{end_ft:.0f} ft end {run/FT:.0f} ft out at {mag(brg):.0f}°M",
+        [(WIRE_M, (fft + end_ft) / 2 * FT, (brg + 180) % 360)],
+        [("feed", int(round(fft)), fen), ("low end", int(round(end_ft)), end_en)],
+        f"Slope {slope:.1f} deg down. Scored end for end from the low end.",
+        slope_deg=slope, feed_h=end_ft * FT, top_h=fft * FT)
+    o.family, o.bend, o.direction = "sloper", 0.0, "down"
+    o.model = "slant (§9, LOW)" if o.is_slant else "horizontal (§3/§4)"
+    o.feed = feed
+    return o
+
+
+def make_vee(apex_en, b2, key="x", feed=FEED10):
+    fen, fft = feed
+    F = fft * FT
+    d1, b1 = rel(apex_en, feed)
     a, e = APEX_FT * FT, END_FT * FT
+    if a <= F:
+        return None
     leg1 = math.hypot(d1, a - F)
     leg2 = WIRE_M - leg1
     if leg2 <= (a - e) + 0.5:
@@ -130,46 +195,51 @@ def make_vee(apex_en, b2, key="x"):
     end_en = offset(apex_en, b2, run2)
     bend = bend_deg(b1, b2)
     o = C.Option(
-        key, f"Inverted-V, apex 50 ft {d1/FT:.0f} ft out at {mag(b1):.0f}°M, "
-             f"second leg to {mag(b2):.0f}°M",
+        key, f"Inverted-V from {feed_words(feed)}, apex 50 ft {d1/FT:.0f} ft "
+             f"out at {mag(b1):.0f}°M, second leg to {mag(b2):.0f}°M",
         [(leg1, (F + a) / 2, b1), (leg2, (a + e) / 2, b2)],
-        [("feed", int(FEED_FT), (0.0, 0.0)), ("apex", int(APEX_FT), apex_en),
+        [("feed", int(round(fft)), fen), ("apex", int(APEX_FT), apex_en),
          ("end", int(END_FT), end_en)],
         f"Bend {bend:.0f} deg ({trust(bend)}). Horizontal bent-wire model.")
     o.family, o.bend, o.model = "inverted-V", bend, "bent wire (§3/§4)"
+    o.feed = feed
     return o
 
 
 class InvertedL(C.Option):
     """Feed -> top of a support -> wire hangs straight down.
 
-    Scored as the union of a horizontal-model leg and a slant-model vertical
-    leg. See the module docstring: new, unvalidated, lowest confidence.
+    Scored as the union of two slant-model legs. See the module docstring:
+    new, unvalidated, lowest confidence.
     """
 
-    def __init__(self, key, top_en, top_ft):
-        d1, b1 = polar(*top_en)
+    def __init__(self, key, top_en, top_ft, feed=FEED10):
+        fen, fft = feed
+        self.F = fft * FT
+        d1, b1 = rel(top_en, feed)
         H = top_ft * FT
-        self.leg1 = math.hypot(d1, H - F)
+        self.leg1 = math.hypot(d1, H - self.F)
         self.leg2 = WIRE_M - self.leg1
         self.H = H
         bottom = H - self.leg2
         super().__init__(
-            key, f"Inverted-L, rising to {top_ft:.0f} ft {d1/FT:.0f} ft out at "
-                 f"{mag(b1):.0f}°M, then {self.leg2/FT:.0f} ft hanging down",
-            [(self.leg1, (F + H) / 2, b1), (self.leg2, (H + bottom) / 2, b1)],
-            [("feed", int(FEED_FT), (0.0, 0.0)),
+            key, f"Inverted-L from {feed_words(feed)}, rising to {top_ft:.0f} ft "
+                 f"{d1/FT:.0f} ft out at {mag(b1):.0f}°M, then "
+                 f"{self.leg2/FT:.0f} ft hanging down",
+            [(self.leg1, (self.F + H) / 2, b1), (self.leg2, (H + bottom) / 2, b1)],
+            [("feed", int(round(fft)), fen),
              ("support top", int(round(top_ft)), top_en),
              ("hanging end", int(round(bottom / FT)), top_en)],
-            "Vertical section at the FAR end. Union of horizontal and slant "
-            "models - NEW, UNVALIDATED, lowest confidence in the study.")
-        self.rise_deg = math.degrees(math.atan2(H - F, d1))
+            "Vertical section at the FAR end. Union of two slant-model legs - "
+            "NEW, UNVALIDATED, lowest confidence in the study.")
+        self.rise_deg = math.degrees(math.atan2(H - self.F, d1))
         self.family, self.bend = "inverted-L", 90.0
         self.model = "hybrid §3+§9 (UNVALIDATED)"
+        self.feed = feed
 
     def height_at_wire(self, s):
         if s <= self.leg1:
-            return F + s * (self.H - F) / self.leg1
+            return self.F + s * (self.H - self.F) / self.leg1
         return self.H - (s - self.leg1)
 
     def score(self, bearing, arrival_deg, band="20m", raw_elev=False):
@@ -203,10 +273,10 @@ class InvertedL(C.Option):
         return net_1, net_2, max(net_1, net_2)
 
 
-def make_ell(top_en, top_ft, key="x"):
-    if not (0 < top_ft <= C.TREE_MAX_FT):
+def make_ell(top_en, top_ft, key="x", feed=FEED10):
+    if not (0 < top_ft <= C.TREE_MAX_FT) or top_ft <= feed[1]:
         return None
-    o = InvertedL(key, top_en, top_ft)
+    o = InvertedL(key, top_en, top_ft, feed)
     if o.leg2 < L_MIN_VERTICAL_M or o.rise_deg > L_MAX_RISE_DEG or \
             o.H - o.leg2 < L_BOTTOM_FT * FT:
         return None
@@ -232,46 +302,70 @@ def _pick(cands, n, far_enough, refine):
     return picks
 
 
-def search_slopers(bands, n=3):
+def search_slopers(bands, n=3, feed=FEED10, direction="both"):
+    fen, fft = feed
+    F = fft * FT
+    up = direction in ("both", "up")
+    down = direction in ("both", "down") and fft >= DOWN_MIN_FEED_FT
+    down_min = math.sqrt(max(WIRE_M ** 2 - (F - L_BOTTOM_FT * FT) ** 2, 0))
+
+    def build(en, d):
+        return make_sloper(en, feed=feed) if d == "up" else \
+            make_down_sloper(en, feed=feed)
+
     cands = []
     for b in range(0, 360, 5):
-        for r2 in range(20, 80):                      # run 10.0 .. 39.5 m
-            run = r2 / 2
-            if FEED_FT + math.sqrt(WIRE_M ** 2 - run ** 2) / FT > C.TREE_MAX_FT:
-                continue
-            en = offset((0.0, 0.0), float(b), run)
-            cands.append((rank_key(make_sloper(en), bands), en))
+        if up:
+            for r2 in range(20, 80):                  # run 10.0 .. 39.5 m
+                run = r2 / 2
+                if fft + math.sqrt(WIRE_M ** 2 - run ** 2) / FT > C.TREE_MAX_FT:
+                    continue
+                en = offset(fen, float(b), run)
+                cands.append((rank_key(build(en, "up"), bands), en, "up"))
+        if down:
+            for i in range(8):                        # down_min .. just short
+                run = down_min + i * (WIRE_M - 0.02 - down_min) / 7
+                o = build(offset(fen, float(b), run), "down")
+                if o is not None:
+                    cands.append((rank_key(o, bands), o.supports[1][2], "down"))
 
     def refine(c):
         best = c
-        run0, b0 = polar(*c[1])
+        run0, b0 = rel(c[1], feed)
+        steps = ([run0 + dr / 10 for dr in range(-5, 6)] if c[2] == "up" else
+                 [run0 + dr / 50 for dr in range(-5, 6)])
         for db in range(-4, 5):
-            for dr in range(-5, 6):
-                run = run0 + dr / 10
-                if not 10.0 <= run < WIRE_M or FEED_FT + math.sqrt(
+            for run in steps:
+                if not 10.0 <= run < WIRE_M:
+                    continue
+                if c[2] == "up" and fft + math.sqrt(
                         WIRE_M ** 2 - run ** 2) / FT > C.TREE_MAX_FT:
                     continue
-                en = offset((0.0, 0.0), b0 + db, run)
-                k = rank_key(make_sloper(en), bands)
+                en = offset(fen, b0 + db, run)
+                o = build(en, c[2])
+                if o is None:
+                    continue
+                k = rank_key(o, bands)
                 if k > best[0]:
-                    best = (k, en)
+                    best = (k, en, c[2])
         return best
 
     def far(a, b):
         return math.dist(a[1], b[1]) >= 8.0
-    return [make_sloper(p[1]) for p in _pick(cands, n, far, refine)]
+    return [build(p[1], p[2]) for p in _pick(cands, n, far, refine)]
 
 
-def search_vees(bands, n=3):
-    apexes = [C.APEX_EN] + [offset((0.0, 0.0), float(b), float(d))
+def search_vees(bands, n=3, feed=FEED10):
+    fen, _ = feed
+    apexes = [C.APEX_EN] + [offset(fen, float(b), float(d))
                             for d in range(4, 25, 2) for b in range(0, 360, 10)]
     cands = []
     for ap in apexes:
         if not C.inside_parcel(ap, 0.0):
             continue
-        b1 = polar(*ap)[1]
+        b1 = rel(ap, feed)[1]
         for delta in range(-70, 71, 5):
-            o = make_vee(ap, b1 + delta)
+            o = make_vee(ap, b1 + delta, feed=feed)
             if o is None or not C.inside_parcel(o.supports[2][2], 0.0):
                 continue
             cands.append((rank_key(o, bands), ap, (b1 + delta) % 360))
@@ -283,10 +377,9 @@ def search_vees(bands, n=3):
                 ap = (c[1][0] + de, c[1][1] + dn)
                 if not C.inside_parcel(ap, 0.0):
                     continue
-                b1 = polar(*ap)[1]
                 for db in range(-3, 4):
                     b2 = c[2] + db
-                    o = make_vee(ap, b2)
+                    o = make_vee(ap, b2, feed=feed)
                     if o is None or o.bend > 70 or \
                             not C.inside_parcel(o.supports[2][2], 0.0):
                         continue
@@ -299,19 +392,20 @@ def search_vees(bands, n=3):
         # Distinct designs, not one V slid along its own leg: the apexes must
         # be 10 m apart or the first legs must point 20 deg apart.
         return (math.dist(a[1], b[1]) >= 10.0
-                or bend_deg(polar(*a[1])[1], polar(*b[1])[1]) >= 20)
-    return [make_vee(p[1], p[2]) for p in _pick(cands, n, far, refine)]
+                or bend_deg(rel(a[1], feed)[1], rel(b[1], feed)[1]) >= 20)
+    return [make_vee(p[1], p[2], feed=feed) for p in _pick(cands, n, far, refine)]
 
 
-def search_ells(bands, n=3):
+def search_ells(bands, n=3, feed=FEED10):
+    fen, _ = feed
     cands = []
     for b in range(0, 360, 10):
         for d in range(6, 39):
-            en = offset((0.0, 0.0), float(b), float(d))
+            en = offset(fen, float(b), float(d))
             if not C.inside_parcel(en, 0.0):
                 continue
             for h2 in range(10, 93):                   # 5.0 .. 46.0 m
-                o = make_ell(en, h2 / 2 / FT)
+                o = make_ell(en, h2 / 2 / FT, feed=feed)
                 if o is not None:
                     cands.append((rank_key(o, bands), en, h2 / 2 / FT))
 
@@ -323,7 +417,7 @@ def search_ells(bands, n=3):
                 if not C.inside_parcel(en, 0.0):
                     continue
                 for dh in (-3, -1.5, 0, 1.5, 3):
-                    o = make_ell(en, c[2] + dh)
+                    o = make_ell(en, c[2] + dh, feed=feed)
                     if o is None:
                         continue
                     k = rank_key(o, bands)
@@ -333,11 +427,12 @@ def search_ells(bands, n=3):
 
     def far(a, b):
         return math.dist(a[1], b[1]) >= 6.0
-    return [make_ell(p[1], p[2]) for p in _pick(cands, n, far, refine)]
+    return [make_ell(p[1], p[2], feed=feed) for p in _pick(cands, n, far, refine)]
 
 
 def search_redbox_post20(bands):
     """RB-POST20's post re-placed in the staked strip for a different metric."""
+    F = FEED10[1] * FT
     apex_h, post_h = APEX_FT * FT, 20.0 * FT
     leg1 = math.hypot(C.APEX_DIST, apex_h - F)
     rest = WIRE_M - leg1
@@ -360,12 +455,13 @@ def search_redbox_post20(bands):
                f"{mag(b):.0f}°M")
     o.family, o.bend, o.model = "garden post", bend_deg(
         C.APEX_BRG, o.segments[1][2]), "bent wire (§3/§4)"
+    o.feed = FEED10
     return o
 
 
 def search_f10a_leg2(bands):
     """F10-A with leg 2 swung, as endpoint_study.py does, bend <= 70 deg."""
-    f, a, fs, e = F, 50 * FT, 50 * FT, 30 * FT
+    f, a, fs, e = FEED10[1] * FT, 50 * FT, 50 * FT, 30 * FT
     leg1 = math.hypot(C.APEX_DIST, a - f)
     into = 29.7 - leg1
     tail = (WIRE_M - leg1) - into
@@ -390,6 +486,7 @@ def search_f10a_leg2(bands):
     o.label = f"F10-A with leg 2 re-aimed to {mag(best[2]):.0f}°M for 40+20 m"
     o.family, o.bend, o.model = "bent flat-top", bend_deg(
         C.APEX_BRG, best[2]), "bent wire (§3/§4)"
+    o.feed = FEED10
     return o
 
 
@@ -409,11 +506,32 @@ def tag_existing(o):
         bs = [s[2] for s in o.segments]
         o.bend = max((bend_deg(bs[i], bs[i + 1]) for i in range(len(bs) - 1)),
                      default=0.0)
+    o.feed = (o.supports[0][2], float(o.supports[0][1])) if o.supports \
+        else FEED10
     return o
 
 
+def run_feed(feed, bands=None, prefix="R", verbose=False):
+    """Slopers (up and down), Vs and Ls from one feed point, one metric."""
+    say = print if verbose else (lambda *a, **k: None)
+    bands = bands or METRICS["3band"]
+    say(f"searching from {feed_words(feed)} at {feed[1]:.0f} ft ...")
+    sl = search_slopers(bands, feed=feed)
+    vv = search_vees(bands, feed=feed)
+    ll = search_ells(bands, feed=feed)
+    for fam, group in (("SL", sl), ("V", vv), ("L", ll)):
+        for i, o in enumerate(group, 1):
+            o.key = f"{prefix}-{fam}{i}"
+    down = search_slopers(bands, n=1, feed=feed, direction="down")
+    for o in down:
+        o.key = f"{prefix}-DN1"
+    vl = sorted(vv + ll, key=lambda o: rank_key(o, bands), reverse=True)
+    return {"sloper": sl, "vee": vv, "ell": ll, "vee_or_ell": vl[:3],
+            "down": down}
+
+
 def run(verbose=True):
-    """Every search, both metrics. Returns a dict of named groups of Options."""
+    """Every transformer-fed search, both metrics. Returns named groups."""
     say = print if verbose else (lambda *a, **k: None)
     existing = [tag_existing(o) for o in C.build_options()]
     E = {o.key: o for o in existing}
@@ -468,8 +586,10 @@ def describe(o):
 
 def main():
     res = run()
+    roof = run_feed(ROOF_FEED, verbose=True)
     all3 = sorted(list(res["existing"].values()) + res["3band:sloper"]
-                  + res["3band:vee"] + res["3band:ell"],
+                  + res["3band:vee"] + res["3band:ell"] + roof["sloper"]
+                  + roof["vee"] + roof["ell"] + roof["down"],
                   key=lambda o: rank_key(o, METRICS["3band"]), reverse=True)
 
     print("\n" + "=" * 110)
@@ -483,29 +603,33 @@ def main():
             print(f"     {describe(o)}")
 
     print("\n" + "=" * 110)
+    print(f"FROM THE ROOF - {math.dist(ROOF_FEED[0], (0, 0))/FT:.0f} ft from the "
+          f"transformer at {polar(*ROOF_FEED[0])[1]:.0f}T, feed "
+          f"{ROOF_FEED[1]:.0f} ft (ASSUMED)")
+    print("=" * 110)
+    for grp in ("sloper", "vee", "ell", "down"):
+        print(f"\n  {grp}:")
+        for o in roof[grp]:
+            print(f"     #{all3.index(o)+1:2d}  {describe(o)}")
+
+    print("\n" + "=" * 110)
     print("40 + 20 m RANKING - existing options plus every family re-searched")
     print("=" * 110)
     pool = res["40+20:pool"]
     for i, o in enumerate(pool[:15], 1):
         print(f"  #{i:2d}  {describe(o)}")
-    print("  ...")
-    for o in lineup(res):
-        if o in pool:
-            print(f"  #{pool.index(o)+1:2d}  {describe(o)}")
-        else:
-            m2 = C.aggregate_multiband(o, METRICS["40+20"])
-            rank = 1 + sum(1 for p in pool if rank_key(p, METRICS["40+20"])
-                           > rank_key(o, METRICS["40+20"]))
-            print(f"  ~#{rank:2d} {describe(o)}")
 
     # Outputs -------------------------------------------------------------
     seen, rows = set(), []
-    for grp, metric in (("lineup", "3band"), ("3band:sloper", "3band"),
-                        ("3band:vee", "3band"), ("3band:ell", "3band"),
-                        ("40+20:pool", "40+20")):
-        group = lineup(res) if grp == "lineup" else res[grp]
-        if grp == "40+20:pool":
-            group = group[:10]
+    for grp, group in (("lineup", lineup(res)),
+                       ("3band:sloper", res["3band:sloper"]),
+                       ("3band:vee", res["3band:vee"]),
+                       ("3band:ell", res["3band:ell"]),
+                       ("roof:sloper", roof["sloper"]),
+                       ("roof:vee", roof["vee"]),
+                       ("roof:ell", roof["ell"]),
+                       ("roof:down", roof["down"]),
+                       ("40+20:pool", res["40+20:pool"][:10])):
         for o in group:
             if o.key in seen:
                 continue
@@ -514,8 +638,9 @@ def main():
 
     with open(os.path.join(DATA, "topology-search.csv"), "w",
               encoding="utf-8", newline="") as fh:
-        fh.write("# Topology search, feed 10 ft. Generated by "
-                 "tools/topology_search.py.\n")
+        fh.write("# Topology search. Generated by tools/topology_search.py.\n")
+        fh.write("# Transformer feed 10 ft; roof feed at ENU (-10.7,-10.5), "
+                 "25 ft ASSUMED.\n")
         fh.write("# Slopers: parcel NOT enforced (operator's choice). V and L: "
                  "supports on the lot.\n")
         fh.write("# 3b_* = 40+20+15 m over 75 cells; w_* = 40+20 m over 50 cells."
@@ -523,20 +648,25 @@ def main():
         fh.write("# model: slant = METHOD.md s9 (LOW); hybrid = inverted-L, "
                  "NEW and UNVALIDATED.\n")
         fh.write("# No model includes tree absorption.\n")
-        fh.write("group,key,family,model,bend_deg,trust,max_anchor_ft,parcel,"
+        fh.write("group,key,family,feed_ft,feed_from_transformer_ft,model,"
+                 "bend_deg,trust,max_anchor_ft,parcel,"
                  "3b_dBi,3b_cells,3b_regions,3b_worst,w_dBi,w_cells,w_regions,"
                  "w_worst," + ",".join(f"{b}_dBi,{b}_n" for b in C.BAND_KEYS)
                  + ",supports,label\n")
         for grp, o in rows:
             m3 = C.aggregate_multiband(o, METRICS["3band"])
             m2 = C.aggregate_multiband(o, METRICS["40+20"])
-            sup = "; ".join(f"{nm} {h}ft {polar(*en)[0]/FT:.0f}ft@"
-                            f"{mag(polar(*en)[1]):.0f}M" if polar(*en)[0] > 0.01
-                            else f"{nm} {h}ft" for nm, h, en in o.supports)
+            feed = o.feed
+            sup = "; ".join(
+                f"{nm} {h}ft {rel(en, feed)[0]/FT:.0f}ft@"
+                f"{mag(rel(en, feed)[1]):.0f}M" if rel(en, feed)[0] > 0.01
+                else f"{nm} {h}ft" for nm, h, en in o.supports)
             per = ",".join(f"{C.aggregate(o, b)['mean_power_dBi']:.2f},"
                            f"{C.aggregate(o, b)['n_workable']}"
                            for b in C.BAND_KEYS)
-            fh.write(f"{grp},{o.key},{o.family},\"{o.model}\",{o.bend:.0f},"
+            fh.write(f"{grp},{o.key},{o.family},{feed[1]:.0f},"
+                     f"{math.dist(feed[0], (0, 0))/FT:.0f},\"{o.model}\","
+                     f"{o.bend:.0f},"
                      f"{trust(o.bend)},{o.max_anchor_ft},\"{parcel_status(o)}\","
                      f"{m3['mean_power_dBi']:.2f},{m3['n_workable']},"
                      f"{m3['n_regions_covered']},{m3['worst_dBi']:.1f},"

@@ -90,10 +90,28 @@ print("running topology search ...")
 RES = T.run(verbose=False)
 E = RES["existing"]
 LINEUP = T.lineup(RES)
-BEST_V = RES["3band:vee"][0]
+BEST_V = max(RES["3band:vee"], key=lambda o: T.rank_key(o, M3))
+
+# The operator's roof point (2026-09-12). Height assumed 25 ft; 20 and 30 ft
+# are searched too so the page can say whether the assumption matters.
+ROOF = T.ROOF_FEED
+print("searching from the roof at 20 / 25 / 30 ft ...")
+RR = T.run_feed(ROOF, prefix="R")
+ROOF_SET = RR["sloper"] + RR["vee_or_ell"]
+ROOF_DOWN = RR["down"][0] if RR["down"] else None
+ROOF_SENS = {ROOF[1]: RR}
+for _ft in (20.0, 30.0):
+    ROOF_SENS[_ft] = T.run_feed((ROOF[0], _ft), prefix=f"R{int(_ft)}")
+LINEUP_ALL = LINEUP + ROOF_SET
+LABELS_ALL = ([str(i) for i in range(1, len(LINEUP) + 1)]
+              + [f"R{i}" for i in range(1, len(ROOF_SET) + 1)])
+NUMBER_WORD = {10: "Ten", 12: "Twelve", 14: "Fourteen", 15: "Fifteen",
+               16: "Sixteen", 17: "Seventeen"}.get(len(LINEUP_ALL),
+                                                   str(len(LINEUP_ALL)))
 
 U3, A3 = unique_ranked(list(E.values()) + RES["3band:sloper"]
-                       + RES["3band:vee"] + RES["3band:ell"], M3)
+                       + RES["3band:vee"] + RES["3band:ell"]
+                       + RR["sloper"] + RR["vee"] + RR["ell"] + RR["down"], M3)
 U2, A2 = unique_ranked(list(E.values()) + RES["3band:sloper"]
                        + RES["3band:vee"] + RES["3band:ell"]
                        + RES["40+20:sloper"] + RES["40+20:vee"]
@@ -134,9 +152,12 @@ def name_of(o):
     pre, rest = o.key.split("-", 1)
     kind = "".join(ch for ch in rest if ch.isalpha())
     num = rest[len(kind):]
-    nm = {"SL": "Sloper", "V": "Inverted-V", "L": "Inverted-L"}[kind] + " " + num
+    nm = {"SL": "Sloper", "V": "Inverted-V", "L": "Inverted-L",
+          "DN": "Down-sloper"}[kind] + " " + num
     if pre == "W":
         nm = "40/20 " + nm
+    elif pre.startswith("R"):
+        nm = "Roof " + nm[0].lower() + nm[1:]
     dup = A3.get(o.key) or A2.get(o.key)
     if dup is not None and dup.key in E:
         nm += f" (= {dup.key})"
@@ -177,11 +198,17 @@ def confidence(o):
 
 
 def schedule(o):
+    """Support list, distances measured from THIS wire's feed."""
     out = []
+    fen = o.supports[0][2]
     for i, (nm, h, en) in enumerate(o.supports):
-        d, b = polar(*en)
-        if d < 0.01:
-            out.append(f"<li>{esc(nm)} · {h} ft · at the transformer</li>")
+        d, b = polar(en[0] - fen[0], en[1] - fen[1])
+        if i == 0:
+            td, tb = polar(*fen)
+            where = ("at the transformer" if td < 0.5 else
+                     f"on the roof, {td/FT:.0f} ft from the transformer @ "
+                     f"{mag(tb):.0f}°M")
+            out.append(f"<li>{esc(nm)} · {h} ft · {where}</li>")
         elif i and math.dist(en, o.supports[i - 1][2]) < 0.01:
             out.append(f"<li>then hangs straight down to {h} ft</li>")
         else:
@@ -234,7 +261,9 @@ for _o in (BEST_SL2, EASY):
         WIN.append(_o)
 
 print("classifying canopy ...")
-CANOPY = canopy_all({o.key: o for o in LINEUP + WIN + [BEST_V]}.values())
+CANOPY = canopy_all({o.key: o for o in LINEUP_ALL + WIN + [BEST_V]
+                     + [RR["sloper"][0], RR["vee"][0], RR["ell"][0]]
+                     + ([ROOF_DOWN] if ROOF_DOWN else [])}.values())
 
 
 # --------------------------------------------------------------------------
@@ -412,6 +441,10 @@ def map_svg(items, faded=(), crop=None, aria="", map_id=None, small=False):
             if not clash:
                 break
             bx, by = bx - dy / L * 26 * s, by + dx / L * 26 * s
+        # Keep the badge inside the frame - a wire ending at the photo's edge
+        # (Roof sloper 2) pushed its badge half off the first render.
+        bx = min(max(bx, x + 16 * s), x + w - 16 * s)
+        by = min(max(by, y + 16 * s), y + h - 16 * s)
         placed.append((bx, by))
         g.append(f'<circle cx="{bx:.1f}" cy="{by:.1f}" r="{12.5*s:.1f}" '
                  f'fill="{col}" stroke="#0b0d0f" stroke-width="{2.5*s:.1f}"/>'
@@ -425,6 +458,19 @@ def map_svg(items, faded=(), crop=None, aria="", map_id=None, small=False):
     fx, fy = P((0.0, 0.0))
     o.append(f'<circle cx="{fx:.1f}" cy="{fy:.1f}" r="{7*s:.1f}" fill="#fff" '
              f'stroke="#0b0d0f" stroke-width="{3*s:.1f}"/>')
+    # Roof feed(s): a white square, so it cannot be mistaken for a support.
+    roofs = {(ob.supports[0][2], ob.supports[0][1]) for _, ob, _, _ in items
+             if math.dist(ob.supports[0][2], (0.0, 0.0)) > 0.5}
+    for (ren, rft) in roofs:
+        rx, ry = P(ren)
+        o.append(f'<rect x="{rx - 7*s:.1f}" y="{ry - 7*s:.1f}" '
+                 f'width="{14*s:.1f}" height="{14*s:.1f}" fill="#fff" '
+                 f'stroke="#0b0d0f" stroke-width="{3*s:.1f}"/>')
+        if not small:
+            o.append(f'<text x="{rx - 12*s:.1f}" y="{ry + 22*s:.1f}" '
+                     f'class="lp" style="font-size:{14*s:.1f}px" '
+                     f'text-anchor="end" filter="url(#sh)">roof feed · '
+                     f'{rft} ft</text>')
     if not small:
         o.append(f'<text x="{fx - 12*s:.1f}" y="{fy - 12*s:.1f}" class="lp" '
                  f'style="font-size:{14*s:.1f}px" text-anchor="end" filter="url(#sh)">'
@@ -507,6 +553,7 @@ def render_jpeg(items, faded, crop, title, rows, path, out_px=1600):
         qx, qy = Q(prev)
         L = math.hypot(ex - qx, ey - qy) or 1
         bx, by = ex + (ex - qx) / L * 34, ey + (ey - qy) / L * 34
+        bx, by = min(max(bx, 24), out_px - 24), min(max(by, 24), out_px - 24)
         d.ellipse([bx - 20, by - 20, bx + 20, by + 20], fill=rgb + (255,),
                   outline=(11, 13, 15), width=4)
         ink = (255, 255, 255) if BADGE_INK.get(col) else (11, 13, 15)
@@ -517,6 +564,11 @@ def render_jpeg(items, faded, crop, title, rows, path, out_px=1600):
     fx, fy = Q((0.0, 0.0))
     d.ellipse([fx - 11, fy - 11, fx + 11, fy + 11], fill=(255, 255, 255),
               outline=(11, 13, 15), width=4)
+    for ren in {ob.supports[0][2] for _, ob, _, _ in items
+                if math.dist(ob.supports[0][2], (0.0, 0.0)) > 0.5}:
+        rx, ry = Q(ren)
+        d.rectangle([rx - 11, ry - 11, rx + 11, ry + 11], fill=(255, 255, 255),
+                    outline=(11, 13, 15), width=4)
 
     # Legend BELOW the photo - laid over it, it hid the south ends of three
     # wires on the first render.
@@ -662,17 +714,20 @@ def legend(items, map_id, bands, uniq, alias, cells_of):
 
 
 def build():
-    labels = [str(i) for i in range(1, len(LINEUP) + 1)]
-    items = items_for(LINEUP, labels)
+    items = items_for(LINEUP_ALL, LABELS_ALL)
     col_of = {o.key: (lab, col, dash) for lab, o, col, dash in items}
-    crop1 = crop_for(LINEUP)
-    map1 = map_svg(items, (), crop1, "All ten wires on the aerial photo",
-                   "map1")
+    crop1 = crop_for(LINEUP_ALL)
+    map1 = map_svg(items, (), crop1,
+                   f"All {len(LINEUP_ALL)} wires on the aerial photo", "map1")
+    roof_items = [it for it in items if it[1] in ROOF_SET]
+    map_roof = map_svg(roof_items, LINEUP, crop_for(ROOF_SET),
+                       "The roof-fed wires, with the transformer-fed lineup "
+                       "faint behind", "maproof")
 
     wl = [chr(ord("A") + i) for i in range(len(WIN))]
     items2 = items_for(WIN, wl)
-    crop2 = crop_for(WIN + LINEUP)
-    map2 = map_svg(items2, [o for o in LINEUP if o not in WIN], crop2,
+    crop2 = crop_for(WIN + LINEUP_ALL)
+    map2 = map_svg(items2, [o for o in LINEUP_ALL if o not in WIN], crop2,
                    "The best wires for 40 m and 20 m, with the lineup faded",
                    "map2")
 
@@ -698,7 +753,7 @@ def build():
                 f'<td>{esc(T.parcel_status(o))}</td>'
                 f'<td><span class="chip {cc}">{conf}</span></td></tr>')
 
-    score_rows = "".join(score_row(o, *col_of[o.key][:2]) for o in LINEUP)
+    score_rows = "".join(score_row(o, *col_of[o.key][:2]) for o in LINEUP_ALL)
     score_rows += score_row(BEST_V, "", "#1baf7a", ' class="ref"')
 
     band_rows = "".join(
@@ -707,16 +762,16 @@ def build():
         + "".join(f'<td class="n">{sg(C.aggregate(o, b)["mean_power_dBi"])} '
                   f'<span style="color:var(--muted)">'
                   f'({C.aggregate(o, b)["n_workable"]})</span></td>'
-                  for b in C.BAND_KEYS) + "</tr>" for o in LINEUP)
+                  for b in C.BAND_KEYS) + "</tr>" for o in LINEUP_ALL)
 
     # --- heat map -------------------------------------------------------
-    means = {o.key: region_means(o, M3) for o in LINEUP}
+    means = {o.key: region_means(o, M3) for o in LINEUP_ALL}
     head = "".join(f'<th class="o">{badge(col_of[o.key][0], col_of[o.key][1])}'
-                   f'</th>' for o in LINEUP)
+                   f'</th>' for o in LINEUP_ALL)
     hrows = []
     for i, (name, lat, lon, arr) in enumerate(C.TARGETS):
         cells = []
-        for o in LINEUP:
+        for o in LINEUP_ALL:
             v = means[o.key][i]
             c, t = heat(v, "light")
             cd, td = heat(v, "dark")
@@ -737,7 +792,8 @@ def build():
         m2 = C.aggregate_multiband(o, M2)
         eff, hi = effort(o)
         conf, cc = confidence(o)
-        thumb = map_svg([(lab, o, col, dash)], [x for x in LINEUP if x is not o],
+        thumb = map_svg([(lab, o, col, dash)],
+                        [x for x in LINEUP_ALL if x is not o],
                         crop_for([o], 6.0, 30.0), name_of(o), small=True)
         fam = family_of(o)
         if o.key == "CURRENT":
@@ -762,6 +818,9 @@ def build():
                     f"straight down. The hanging end is the ~1 kV voltage "
                     f"maximum; keep it out of reach. Scored on the new, "
                     f"unvalidated model.")
+        if math.dist(o.supports[0][2], (0.0, 0.0)) > 0.5:
+            take = (f"Fed from the roof at {o.supports[0][1]} ft (assumed). "
+                    + take)
         cards.append(
             f'<article class="card">{thumb}<div class="body"><div class="hd">'
             f'{badge(lab, col)}<h3>{esc(name_of(o))}</h3></div>'
@@ -780,7 +839,7 @@ def build():
 
     # --- 40+20 table ----------------------------------------------------
     col2 = {o.key: (lab, col) for lab, o, col, dash in items2}
-    rows2_opts = sorted({o.key: o for o in WIN + LINEUP}.values(),
+    rows2_opts = sorted({o.key: o for o in WIN + LINEUP_ALL}.values(),
                         key=lambda o: rank(o, U2, A2))
     rows2 = []
     for o in rows2_opts:
@@ -820,9 +879,155 @@ def build():
     losses = ", ".join(f"{n} {sg(v, '+.1f')}" for v, n in d_wf[::-1][:3])
 
     legend2 = legend(items2, "map2", M2, U2, A2, 50)
+
+    # --- roof section ---------------------------------------------------
+    rk3 = lambda o: T.rank_key(o, M3)             # noqa: E731
+    # Best BY SCORE, not the first pick: refinement can leave a later pick
+    # ahead (the first build reported the roof V as 52/75 when R-V2 is 54).
+    tx_best = {"sloper": max(RES["3band:sloper"], key=rk3),
+               "inverted-V": max(RES["3band:vee"], key=rk3),
+               "inverted-L": max(RES["3band:ell"], key=rk3)}
+    rf_best = {"sloper": max(RR["sloper"], key=rk3),
+               "inverted-V": max(RR["vee"], key=rk3),
+               "inverted-L": max(RR["ell"], key=rk3)}
+
+    def four(o):
+        if o is None:
+            return '<td class="n">—</td>' * 4
+        m = C.aggregate_multiband(o, M3)
+        return (f'<td class="n"><b>{m["n_workable"]}</b> / 75</td>'
+                f'<td class="n">{sg(m["mean_power_dBi"])}</td>'
+                f'<td class="n">{sg(m["worst_dBi"], "+.1f")}</td>'
+                f'<td class="n">{effort(o)[1]} ft</td>')
+
+    def dcell(a, b):
+        if a is None or b is None:
+            return '<td class="n">—</td>'
+        dv = (C.aggregate_multiband(b, M3)["n_workable"]
+              - C.aggregate_multiband(a, M3)["n_workable"])
+        return f'<td class="n"><b>{dv:+d}</b></td>'
+
+    cmp_rows = "".join(
+        f'<tr><td class="nm">Best {fam}</td>{four(tx_best[fam])}'
+        f'{four(rf_best[fam])}{dcell(tx_best[fam], rf_best[fam])}</tr>'
+        for fam in ("sloper", "inverted-V", "inverted-L"))
+    cmp_rows += (f'<tr><td class="nm">Best sloping <em>down</em></td>'
+                 f'{four(None)}{four(ROOF_DOWN)}<td class="n">—</td></tr>')
+
+    sens_rows = []
+    for gk, nm in (("sloper", "Best sloper"), ("vee", "Best inverted-V"),
+                   ("ell", "Best inverted-L"), ("down", "Best sloping down")):
+        cells = []
+        for ft in (20.0, ROOF[1], 30.0):
+            g = ROOF_SENS[ft][gk]
+            if g:
+                m = C.aggregate_multiband(max(g, key=rk3), M3)
+                cells.append(f'<td class="n">{m["n_workable"]} / 75 · '
+                             f'{sg(m["mean_power_dBi"])}</td>')
+            else:
+                cells.append('<td class="n">—</td>')
+        sens_rows.append(f'<tr><td class="nm">{nm}</td>{"".join(cells)}</tr>')
+
+    rd, rb_ = polar(*ROOF[0])
+    max_down = math.degrees(math.asin((ROOF[1] - T.L_BOTTOM_FT) * FT / C.WIRE_M))
+    top_tx = max(tx_best.values(), key=rk3)
+    top_rf = max(rf_best.values(), key=rk3)
+    nl_tx = max((tx_best["sloper"], tx_best["inverted-V"]), key=rk3)
+    nl_rf = max((rf_best["sloper"], rf_best["inverted-V"]), key=rk3)
+
+    def cells3(o):
+        return C.aggregate_multiband(o, M3)["n_workable"]
+
+    def word(a, b):
+        # On workable cells, the primary key - a tie there is a tie, whatever
+        # the finer tiebreaks say.
+        d = cells3(b) - cells3(a)
+        return ("better" if d > 0 else "worse" if d < 0 else
+                "tied on workable cells")
+
+    if ROOF_DOWN is not None:
+        md = C.aggregate_multiband(ROOF_DOWN, M3)
+        dd, db_ = polar(ROOF_DOWN.supports[1][2][0] - ROOF[0][0],
+                        ROOF_DOWN.supports[1][2][1] - ROOF[0][1])
+        down_txt = (f"The best one runs {dd/FT:.0f} ft out at {mag(db_):.0f}°M "
+                    f"down to {ROOF_DOWN.supports[1][1]} ft and scores "
+                    f"<b>{md['n_workable']} / 75</b> "
+                    f"({sg(md['mean_power_dBi'])} dBi, worst "
+                    f"{sg(md['worst_dBi'], '+.0f')}) — against "
+                    f"{cells3(E['CURRENT'])} for what is up now and "
+                    f"{cells3(E['RB-POST20'])} for RB-POST20.")
+    else:
+        down_txt = "No downward wire clears the 8 ft minimum end height."
+
+    roof_html = f"""
+<section>
+  <div class="sec-head">
+    <div class="eyebrow">From the red dot · feed on the roof</div>
+    <h2>Moving the feed onto the roof</h2>
+  </div>
+  <p>The point you marked is <b>{rd/FT:.0f} ft from the transformer at
+  {mag(rb_):.0f}° magnetic</b>, on the roof. Its height is <b>assumed at
+  {ROOF[1]:.0f} ft</b>; the table further down re-runs everything at 20 and
+  30 ft. Every family was searched again from there — wires sloping up to a
+  support, sloping down off the house, inverted-Vs and inverted-Ls — under
+  the same limits as before. <b>R1–R6</b> are the top three slopers and top
+  three V-or-L shapes, and they are also in the scorecard, heat map and cards
+  below.</p>
+  <div class="lay">
+    <figure>{map_roof}<figcaption>The <b>white square</b> is the roof feed;
+    the white circle is the transformer where it is now. Family colours as
+    above; the transformer-fed lineup is faint behind. Point at a name to
+    isolate its wire.</figcaption></figure>
+    {legend(roof_items, "maproof", M3, U3, A3, 75)}
+  </div>
+  <div class="tbl"><table>
+    <caption>Best of each family · transformer at 10 ft vs roof at
+    {ROOF[1]:.0f} ft · 40 + 20 + 15 m</caption>
+    <thead><tr><th rowspan="2">Family</th>
+      <th colspan="4">From the transformer</th>
+      <th colspan="4">From the roof</th><th rowspan="2">Δ cells</th></tr>
+      <tr><th>Cells</th><th>dBi</th><th>Worst</th><th>Highest</th>
+      <th>Cells</th><th>dBi</th><th>Worst</th><th>Highest</th></tr></thead>
+    <tbody>{cmp_rows}</tbody>
+  </table></div>
+  <div class="note">
+    <b>Is the roof better?</b> Best wire of any kind: the roof is
+    <b>{word(top_tx, top_rf)}</b> — {cells3(top_rf)} / 75 against
+    {cells3(top_tx)} / 75, and both of those are inverted-Ls on the
+    unvalidated model. Leaving the Ls out, the roof is
+    <b>{word(nl_tx, nl_rf)}</b>: {esc(name_of(nl_rf))} at {cells3(nl_rf)} / 75
+    ({effort(nl_rf)[1]} ft high point) against {esc(name_of(nl_tx))} at
+    {cells3(nl_tx)} / 75 ({effort(nl_tx)[1]} ft). The study's earlier
+    roof-feed result was a 0.04 dB wash; the feed is a current null, so moving
+    it mostly matters through where it lets the rest of the wire go.
+  </div>
+  <div class="note alarm">
+    <b>Sloping down off the house can't be steep.</b> From {ROOF[1]:.0f} ft, a
+    130 ft straight wire can drop only {ROOF[1] - T.L_BOTTOM_FT:.0f} ft before
+    its end is within reach, so every downward wire sits within
+    <b>{max_down:.1f}° of level</b> — a long, low, nearly flat wire. {down_txt}
+    Sloping <em>up</em> from the roof has no such limit, which is why every
+    roof wire on the map climbs.
+  </div>
+  <div class="tbl"><table>
+    <caption>Does the roof height matter? Best of each family at three
+    assumed heights · cells / 75 · dBi</caption>
+    <thead><tr><th>Family</th><th>Roof 20 ft</th><th>Roof {ROOF[1]:.0f} ft</th>
+      <th>Roof 30 ft</th></tr></thead>
+    <tbody>{"".join(sens_rows)}</tbody>
+  </table></div>
+  <div class="note">
+    <b>Before you move the transformer.</b> The feed end of an EFHW is its
+    other voltage maximum — about 700 V RMS at 150 W — so a roof feed puts
+    that end, the transformer and the coax run up the wall right beside
+    gutters, flashing and house wiring. Several roof wires also cross the roof
+    itself. Nothing in these models knows the house is there.
+  </div>
+</section>
+"""
     css = G_CSS + EXTRA_CSS + HEAT_CSS
 
-    return f"""<title>Ten Wires on One Lot</title>
+    return f"""<title>{NUMBER_WORD} Wires on One Lot</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>{css}</style>
 {ortho_defs()}
@@ -831,11 +1036,13 @@ def build():
 
 <header class="mast">
   <div class="eyebrow">Comparison · JYR8010 EFHW · CN97ap · feed at 10 ft in every line</div>
-  <h1>Ten wires<br>on one lot</h1>
+  <h1>{NUMBER_WORD} wires<br>on one lot</h1>
   <p class="lede">What is up now, your original plan, both current
-  recommendations, and the best slopers and V-or-L shapes a fresh search could
-  find — drawn on the 2025 King County aerial and scored the same way. Then
-  the whole search again, as if only 40 m and 20 m mattered.</p>
+  recommendations, the best slopers and V-or-L shapes a fresh search could
+  find from the transformer — and the same again with the feed moved to the
+  spot you marked on the roof. All drawn on the 2025 King County aerial and
+  scored the same way. Then the whole search again, as if only 40 m and 20 m
+  mattered.</p>
   <div class="meta">
     <span>Distinct wires scored <b>{len(U2)}</b></span>
     <span>Three-band cells <b>75</b></span>
@@ -855,8 +1062,9 @@ def build():
     recommendations, blue for slopers, aqua for inverted-Ls, white for what is
     up now and grey dashes for the original plan. Solid, dashed and dotted
     lines tell members of one family apart; the numbered badge sits past each
-    wire's far end. A <b>ring with ↓</b> marks where an L's wire hangs straight
-    down. White dashes are the lot's south and east lines; the red outline is
+    wire's far end; <b>R</b> badges are fed from the roof, which is the
+    <b>white square</b>. A <b>ring with ↓</b> marks where an L's wire hangs
+    straight down. White dashes are the lot's south and east lines; the red outline is
     your staked strip. Point at a name to isolate its wire.</figcaption></figure>
     {legend(items, "map1", M3, U3, A3, 75)}
   </div>
@@ -875,6 +1083,7 @@ def build():
     {C.aggregate_multiband(top_non_l_3, M3)["n_workable"]} / 75.
   </div>
 </section>
+{roof_html}
 
 <section>
   <div class="sec-head">
@@ -1033,14 +1242,20 @@ G_CSS = G.CSS
 
 if __name__ == "__main__":
     html = build()
-    items = items_for(LINEUP, [str(i) for i in range(1, len(LINEUP) + 1)])
-    render_jpeg(items, (), crop_for(LINEUP),
-                "The lineup · ranked on 40 + 20 + 15 m",
+    items = items_for(LINEUP_ALL, LABELS_ALL)
+    render_jpeg(items, (), crop_for(LINEUP_ALL),
+                "The lineup · ranked on 40 + 20 + 15 m · R = fed from the roof",
                 jpeg_rows(items, M3, U3, A3, 75),
                 os.path.join(IMGDIR, "lineup_3band.jpg"))
+    roof_items = [it for it in items if it[1] in ROOF_SET]
+    render_jpeg(roof_items, LINEUP, crop_for(ROOF_SET),
+                f"From the roof · feed {ROOF[1]:.0f} ft (assumed) · "
+                f"transformer-fed lineup faded",
+                jpeg_rows(roof_items, M3, U3, A3, 75),
+                os.path.join(IMGDIR, "lineup_roof.jpg"))
     items2 = items_for(WIN, [chr(ord("A") + i) for i in range(len(WIN))])
-    render_jpeg(items2, [o for o in LINEUP if o not in WIN],
-                crop_for(WIN + LINEUP), "Best for 40 + 20 m · lineup faded",
+    render_jpeg(items2, [o for o in LINEUP_ALL if o not in WIN],
+                crop_for(WIN + LINEUP_ALL), "Best for 40 + 20 m · lineup faded",
                 jpeg_rows(items2, M2, U2, A2, 50),
                 os.path.join(IMGDIR, "lineup_40_20.jpg"))
     out = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "lineup.html")

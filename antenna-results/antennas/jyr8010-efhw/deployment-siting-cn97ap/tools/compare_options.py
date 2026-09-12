@@ -1149,7 +1149,7 @@ def kml_style_for(key):
     """Style id for an option key. Checked most-specific first."""
     if key == "CURRENT":
         return "optC"
-    if key.startswith("SRCH-"):
+    if key.startswith(("SRCH-", "R-")):
         return "optX"
     if key.startswith("W-"):
         return "optW"

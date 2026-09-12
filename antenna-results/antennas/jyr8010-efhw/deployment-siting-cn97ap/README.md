@@ -15,7 +15,7 @@ Europe, the continental US, Australia, Japan, China and Russia.
 
 Published field plan: <https://claude.ai/code/artifact/1128955c-5f0e-44c7-82a9-a08a9f9d2fa9>
 Published deployment guide: <https://claude.ai/code/artifact/0a8562b0-04ee-473f-9732-3a079305d96b>
-Published lineup comparison ("Ten Wires on One Lot"): <https://claude.ai/code/artifact/eab86385-ffd8-44a3-b8e2-090b72026cb4>
+Published lineup comparison ("Sixteen Wires on One Lot", including the roof feed): <https://claude.ai/code/artifact/eab86385-ffd8-44a3-b8e2-090b72026cb4>
 (regenerate with `python tools/build_lineup_page.py <out.html>`, then publish to that URL)
 
 ---
@@ -112,7 +112,8 @@ three inverted‑V‑or‑L deployments on the property and compare them; then f
 if only 40 m and 20 m mattered. Built by
 [`tools/topology_search.py`](tools/topology_search.py) and
 [`tools/build_lineup_page.py`](tools/build_lineup_page.py); pictures in
-[`imagery/lineup_3band.jpg`](imagery/lineup_3band.jpg) and
+[`imagery/lineup_3band.jpg`](imagery/lineup_3band.jpg),
+[`imagery/lineup_roof.jpg`](imagery/lineup_roof.jpg) and
 [`imagery/lineup_40_20.jpg`](imagery/lineup_40_20.jpg).
 
 **Limits the operator set:** feed at 10 ft for everything. Slopers may run off the lot (status
@@ -131,7 +132,7 @@ never at the feed.
 | Inverted‑L 1 | up to 53 ft 87 ft @ 256°, 33 ft hanging | **58/75** | −0.59 | −27.2 | 39/50 | 53 ft |
 | Inverted‑L 3 | up to 56 ft 84 ft @ 237°, 34 ft hanging | 57/75 | −1.06 | −30.6 | 42/50 | 56 ft |
 | Inverted‑L 2 | up to 52 ft 76 ft @ 153°, 43 ft hanging — inside setback | 56/75 | −1.19 | −51.8 | 40/50 | 52 ft |
-| *best inverted‑V* | *apex 50 ft 53 ft @ 333°, leg 2 to 21°* | *50/75* | *−0.51* | *−32.3* | *28/50* | *50 ft* |
+| *best inverted‑V* | *apex 50 ft 52 ft @ 3°, leg 2 to 333°* | *50/75* | *−0.57* | *−33.0* | *28/50* | *50 ft* |
 
 **All three V‑or‑L picks are inverted‑Ls, and they lead the entire study — which is exactly why
 they are not a recommendation.** No model here could score an L before this search. Both legs
@@ -155,6 +156,30 @@ Dropping 15 m costs the recommendations most, because 15 m was their strongest b
 north** — the same re-aim the study rejected on three bands for what it costs toward Hawaii and
 VK (see "Moving the far end"). On 40 + 20 m that trade looks better; the region-by-region cost is
 on the comparison page.
+
+### Feeding from the roof
+
+The operator marked a point on the house roof on the lineup map: **49 ft from the transformer at
+210°M** (ENU −10.7, −10.5, read from their screenshot and scale-checked against two drawn points).
+**Height assumed 25 ft**, the study's existing roof-feed figure; the page re-runs 20 and 30 ft.
+Every family was searched from there, including wires sloping **down** off the house.
+
+| Best of family (3-band) | From the transformer, 10 ft | From the roof, 25 ft |
+|---|---|---|
+| Sloper | 50/75, −2.93 dBi, worst −105.5, 107 ft (15 ft off the lot) | 50/75, −1.97 dBi, worst −55.1, 113 ft (**67 ft** off the lot) |
+| Inverted‑V | 50/75, −0.57 dBi, worst −33.0 | **54/75, −0.02 dBi**, worst −33.6 — apex 50 ft 56 ft @ 334°, leg 2 to 3° |
+| Inverted‑L (unvalidated) | 58/75, −0.59 dBi | 59/75, −0.75 dBi, worst −19.9 — up to 67 ft, 44 ft hanging |
+| Sloping **down** | — | 34/75, −3.37 dBi, worst −114.7 — 25 ft to 21 ft, 130 ft @ 339° |
+
+**Sloping down off the house doesn't work with this wire.** From 25 ft a 130 ft straight wire can
+drop only 17 ft before its end is within reach, so it stays within 7.5° of level; the best one is a
+low, near-flat wire at 34/75. **Sloping up from the roof is where the gain is**, and the one gain
+on a model the study trusts is the **inverted‑V: +4 cells over the best transformer-fed V**, still
+with a 50 ft throw. **That gain does not hinge on the assumed roof height**: the best roof V is
+53, 54 and 55/75 at 20, 25 and 30 ft. Downward wires stay poor at any of them (24–36/75). The best
+roof slopers put their support 67–78 ft past the south line. A roof
+feed also puts the ~700 V RMS feed end, the transformer and the coax run beside gutters and house
+wiring, which no model here knows about.
 
 ---
 
