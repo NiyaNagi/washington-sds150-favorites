@@ -2,8 +2,8 @@
 
 - Radio: Anytone AT-D890UV (at-d890uv)
 - Purpose: Every conventional channel the AT-D890UV can hear within 60 miles of home, one zone per service in scan-priority order: coordinated 2 m / 70 cm repeaters and the PNWDigital / SeattleDMR talkgroup layout (transmit enabled), simplex, Seattle ACS, air band (routed to the radio's AM list), SAR, wildfire, marine, rail, personal radio, business, conventional public safety and commercial DMR/NXDN (receive only). NOAA and FM broadcast are programmed but never scanned.
-- Channels programmed: 1276 of 3800 available (2524 free, 200 reserved)
-- Coverage: 87.6-108, 108-137, 136-174, 400-480 MHz
+- Channels programmed: 1134 of 3800 available (2666 free, 200 reserved)
+- Coverage: 87.6-108, 108-137, 136-174, 220-225, 400-520 MHz
 
 ## Memory map
 
@@ -15,19 +15,19 @@
 | 510-694 | DMR Other Repeaters | 185 | receive only |
 | 695-723 | Simplex | 29 | simplex |
 | 724-757 | Seattle ACS | 34 | repeater |
-| 758-925 | Airband Civil | 168 | receive only |
-| 926-927 | Airband Military SAR | 2 | receive only |
-| 928-946 | SAR and Interop | 19 | receive only |
-| 947-982 | Wildfire | 36 | receive only |
-| 983-1046 | Marine | 64 | receive only |
-| 1047-1053 | Rail | 7 | receive only |
-| 1054-1078 | GMRS FRS MURS | 25 | receive only |
-| 1079-1167 | Business and Events | 89 | receive only |
-| 1168-1185 | Public Safety Conventional | 18 | receive only |
-| 1186-1188 | Commercial Digital | 3 | receive only |
-| 1189-1244 | ACS Packet and Data | 56 | receive only |
+| 758-778 | Airband Civil | 21 | receive only |
+| 779-785 | Airband Military SAR | 7 | receive only |
+| 786-804 | SAR and Interop | 19 | receive only |
+| 805-840 | Wildfire | 36 | receive only |
+| 841-904 | Marine | 64 | receive only |
+| 905-911 | Rail | 7 | receive only |
+| 912-936 | GMRS FRS MURS | 25 | receive only |
+| 937-1025 | Business and Events | 89 | receive only |
+| 1026-1043 | Public Safety Conventional | 18 | receive only |
+| 1044-1046 | Commercial Digital | 3 | receive only |
+| 1047-1102 | ACS Packet and Data | 56 | receive only |
 | - | NOAA Weather | 0 | receive only |
-| 1245-1276 | FM Broadcast | 32 | receive only |
+| 1103-1134 | FM Broadcast | 32 | receive only |
 
 ## Channels
 
@@ -790,535 +790,395 @@
 | 755 | V84 Stampede | 147.3600 | 147.9600 | FM | TONE=C141.3 | SEAACS/ACS VHF |
 | 756 | V85 Ellensburg | 146.7200 | 146.1200 | FM | TONE=C131.8 | SEAACS/ACS VHF |
 | 757 | V86 Larch Mt | 146.8400 | 146.2400 | FM | - | SEAACS/ACS VHF |
-| 758 | BFI BFI VOT | 108.6000 | RX only | AM | - | FL48/Channels |
-| 759 | GEG GEG VOT | 109.6000 | RX only | AM | - | FL48/Channels |
-| 760 | PAE PAE VOR DME | 110.6000 | RX only | AM | - | FL48/Channels |
-| 761 | FRCHLD TCN SKA | 111.4000 | RX only | AM | - | FL48/Channels |
-| 762 | TTSH VRTC TOU | 112.2000 | RX only | AM | - | FL48/Channels |
-| 763 | EPH EPH VORTAC | 112.6000 | RX only | AM | - | FL48/Channels |
-| 764 | HUH HUH TACAN | 113.0000 | RX only | AM | - | FL48/Channels |
-| 765 | OLM OLM VORTAC | 113.4000 | RX only | AM | - | FL48/Channels |
-| 766 | PSC VOR DME PSC | 113.7500 | RX only | AM | - | FL48/Channels |
-| 767 | NUW NUW TACAN | 113.8000 | RX only | AM | - | FL48/Channels |
-| 768 | SFF SFF VOT | 114.0000 | RX only | AM | - | FL48/Channels |
-| 769 | EAT EAT VOR DME | 114.3500 | RX only | AM | - | FL48/Channels |
-| 770 | MSS LK VR DM MWH | 115.0000 | RX only | AM | - | FL48/Channels |
-| 771 | GEG GEG VORTAC | 115.5000 | RX only | AM | - | FL48/Channels |
-| 772 | YKM VRTC YKM | 116.0000 | RX only | AM | - | FL48/Channels |
-| 773 | ALW ALW VOR DME | 116.4000 | RX only | AM | - | FL48/Channels |
-| 774 | BTTL GRND VRTC | 116.6000 | RX only | AM | - | FL48/Channels |
-| 775 | SEA SEA VORTAC | 116.8000 | RX only | AM | - | FL48/Channels |
-| 776 | PLLMN VR DM PW | 117.1500 | RX only | AM | - | FL48/Channels |
-| 777 | CVV CVV VOR DME | 117.2000 | RX only | AM | - | FL48/Channels |
-| 778 | SEA SEA VOT | 117.5000 | RX only | AM | - | FL48/Channels |
-| 779 | HQM VRTC HQM | 117.7000 | RX only | AM | - | FL48/Channels |
-| 780 | ELLNSBRG VR DM | 117.9000 | RX only | AM | - | FL48/Channels |
-| 781 | ATIS | 118.0000 | RX only | AM | - | FL46/Channels |
-| 782 | CLS CLS AWOS-3 | 118.0250 | RX only | AM | - | FL48/Channels |
-| 783 | S50 S50 AWOS-3PT | 118.0500 | RX only | AM | - | FL48/Channels |
-| 784 | VUO APCH P | 118.1000 | RX only | AM | - | FL48/Channels |
-| 785 | FCT FCT ASOS | 118.1500 | RX only | AM | - | FL48/Channels |
-| 786 | MCCHORD GND P | 118.1750 | RX only | AM | - | FL48/Channels |
-| 787 | 0S9 APCH P DEP P | 118.2000 | RX only | AM | - | FL48/Channels |
-| 788 | GRANT LCL P | 118.2500 | RX only | AM | - | FL48/Channels |
-| 789 | BOEING LCL P | 118.3000 | RX only | AM | - | FL48/Channels |
-| 790 | NOW NOW AWOS-3P | 118.3250 | RX only | AM | - | FL48/Channels |
-| 791 | ELN ELN ASOS | 118.3750 | RX only | AM | - | FL48/Channels |
-| 792 | S52 S52 AWOS-3 | 118.4250 | RX only | AM | - | FL48/Channels |
-| 793 | ALW CTAF | 118.5000 | RX only | AM | - | FL48/Channels |
-| 794 | 68S 68S AWOS-3PT | 118.5250 | RX only | AM | - | FL48/Channels |
-| 795 | WLLL WLLL RCAG | 118.5500 | RX only | AM | - | FL48/Channels |
-| 796 | VUO CD P | 119.0000 | RX only | AM | - | FL48/Channels |
-| 797 | 0S9 0S9 AWOS-3P | 119.0250 | RX only | AM | - | FL48/Channels |
-| 798 | GRANT ATIS | 119.0500 | RX only | AM | - | FL48/Channels |
-| 799 | ZSE-1191 | 119.1000 | RX only | AM | - | FL48/Channels |
-| 800 | BNG APCH P DEP P | 119.2000 | RX only | AM | - | FL48/Channels |
-| 801 | SPKN SPKN RCAG | 119.2250 | RX only | AM | - | FL48/Channels |
-| 802 | 63S 63S AWOS-3 | 119.2750 | RX only | AM | - | FL48/Channels |
-| 803 | GRAY LCL P | 119.3250 | RX only | AM | - | FL48/Channels |
-| 804 | KSEA Tower | 119.9000 | RX only | AM | - | FL46/Channels |
-| 805 | EAT EAT ASOS | 119.9250 | RX only | AM | - | FL48/Channels |
-| 806 | TRI-CITIES CD P | 120.0000 | RX only | AM | - | FL48/Channels |
-| 807 | BNG APCH P DEP 2 | 120.1000 | RX only | AM | - | FL48/Channels |
-| 808 | PAINE LCL P | 120.2000 | RX only | AM | - | FL48/Channels |
-| 809 | BCN HLL BCN HLL | 120.3000 | RX only | AM | - | FL48/Channels |
-| 810 | FAIRCHILD LCL P | 120.3500 | RX only | AM | - | FL48/Channels |
-| 811 | BNG APCH P DEP 3 | 120.4000 | RX only | AM | - | FL48/Channels |
-| 812 | FELTS ATIS | 120.5500 | RX only | AM | - | FL48/Channels |
-| 813 | BOEING LCL P2 | 120.6000 | RX only | AM | - | FL48/Channels |
-| 814 | BLLNGHM MD RNV | 120.7000 | RX only | AM | - | FL48/Channels |
-| 815 | KSEA Tower 2 | 120.9500 | RX only | AM | - | FL46/Channels |
-| 816 | CLS APCH P | 121.1000 | RX only | AM | - | FL48/Channels |
-| 817 | BVS BVS AWOS-3 | 121.1250 | RX only | AM | - | FL48/Channels |
-| 818 | PWT PWT AWOS-3PT | 121.2000 | RX only | AM | - | FL48/Channels |
-| 819 | BDGR MTN BDGR | 121.5000 | RX only | AM | - | FL48/Channels |
-| 820 | OLYMPIA GND P | 121.6000 | RX only | AM | - | FL48/Channels |
-| 821 | 1W1 CD P | 121.6500 | RX only | AM | - | FL48/Channels |
-| 822 | FELTS CD P | 121.7000 | RX only | AM | - | FL48/Channels |
-| 823 | AWO CD P | 121.7250 | RX only | AM | - | FL48/Channels |
-| 824 | WHIDBEY GND P | 121.7500 | RX only | AM | - | FL48/Channels |
-| 825 | PAINE GND P | 121.8000 | RX only | AM | - | FL48/Channels |
-| 826 | PLU CD P | 121.8500 | RX only | AM | - | FL48/Channels |
-| 827 | BOEING GND P | 121.9000 | RX only | AM | - | FL48/Channels |
-| 828 | BLLNGHM BLLNGHM | 122.1500 | RX only | AM | - | FL48/Channels |
-| 829 | BCKHRN MTN | 122.2000 | RX only | AM | - | FL48/Channels |
-| 830 | SEATTLE RAMP CTL | 122.2750 | RX only | AM | - | FL48/Channels |
-| 831 | BDGR MTN BDGR2 | 122.3000 | RX only | AM | - | FL48/Channels |
-| 832 | JMP-FF-J | 122.4000 | RX only | AM | - | FL48/Channels |
-| 833 | MC PK MC PK RC | 122.5000 | RX only | AM | - | FL48/Channels |
-| 834 | PRT ANGLS PRT | 122.6000 | RX only | AM | - | FL48/Channels |
-| 835 | 1W1 CTAF | 122.7000 | RX only | AM | - | FL48/Channels |
-| 836 | 39WA UNICOM | 122.7250 | RX only | AM | - | FL48/Channels |
-| 837 | 06WN UNICOM | 122.8000 | RX only | AM | - | FL48/Channels |
-| 838 | 00W CTAF | 122.9000 | RX only | AM | - | FL48/Channels |
-| 839 | ALW UNICOM | 122.9500 | RX only | AM | - | FL48/Channels |
-| 840 | CLM CTAF | 122.9750 | RX only | AM | - | FL48/Channels |
-| 841 | 0S9 CTAF | 123.0000 | RX only | AM | - | FL48/Channels |
-| 842 | 07WA UNICOM | 123.0500 | RX only | AM | - | FL48/Channels |
-| 843 | 0WN4 UNICOM | 123.0750 | RX only | AM | - | FL48/Channels |
-| 844 | FAIRCHILD GND P | 123.6000 | RX only | AM | - | FL48/Channels |
-| 845 | 1S5 1S5 AWOS-3PT | 123.6750 | RX only | AM | - | FL48/Channels |
-| 846 | DEW APCH P DEP P | 123.7500 | RX only | AM | - | FL48/Channels |
-| 847 | YKM APCH P DP P | 123.8000 | RX only | AM | - | FL48/Channels |
-| 848 | S50 APCH P DEP P | 123.8500 | RX only | AM | - | FL48/Channels |
-| 849 | BNG GLSR STAR | 123.9000 | RX only | AM | - | FL48/Channels |
-| 850 | PUW CTTNWD RCAG | 123.9500 | RX only | AM | - | FL48/Channels |
-| 851 | TACOMA ATIS | 124.0500 | RX only | AM | - | FL48/Channels |
-| 852 | CLM CD P | 124.1500 | RX only | AM | - | FL48/Channels |
-| 853 | 2S8 2S8 AWOS-2 | 124.1750 | RX only | AM | - | FL48/Channels |
-| 854 | CLS NASSEL RCAG | 124.2000 | RX only | AM | - | FL48/Channels |
-| 855 | SPOKANE ATIS | 124.3250 | RX only | AM | - | FL48/Channels |
-| 856 | VUO APCH P DEP P | 124.3500 | RX only | AM | - | FL48/Channels |
-| 857 | OLM CTAF | 124.4000 | RX only | AM | - | FL48/Channels |
-| 858 | GRAY ATIS | 124.6500 | RX only | AM | - | FL48/Channels |
-| 859 | RENTON LCL P | 124.7000 | RX only | AM | - | FL48/Channels |
-| 860 | MCCHORD LCL P | 124.8000 | RX only | AM | - | FL48/Channels |
-| 861 | ZSE-12485 | 124.8500 | RX only | AM | - | FL48/Channels |
-| 862 | BELLINGHAM LCL P | 124.9000 | RX only | AM | - | FL48/Channels |
-| 863 | TTSH TTSH RCAG | 125.1000 | RX only | AM | - | FL48/Channels |
-| 864 | YAKIMA ATIS | 125.2500 | RX only | AM | - | FL48/Channels |
-| 865 | BNG JWBN STAR | 125.6000 | RX only | AM | - | FL48/Channels |
-| 866 | TRI-CITIES ATIS | 125.6500 | RX only | AM | - | FL48/Channels |
-| 867 | ZSE-1258 | 125.8000 | RX only | AM | - | FL48/Channels |
-| 868 | BNG APCH P DEP 4 | 125.9000 | RX only | AM | - | FL48/Channels |
-| 869 | 2S8 MARLIN RCAG | 126.1000 | RX only | AM | - | FL48/Channels |
-| 870 | FCT CTAF | 126.2000 | RX only | AM | - | FL48/Channels |
-| 871 | SEATTLE RAMP CT2 | 126.2500 | RX only | AM | - | FL48/Channels |
-| 872 | Mt Vernon RCAG | 126.3000 | RX only | AM | - | FL48/Channels |
-| 873 | 2S8 APCH P DP P | 126.4000 | RX only | AM | - | FL48/Channels |
-| 874 | BNG APCH P DEP 5 | 126.5000 | RX only | AM | - | FL48/Channels |
-| 875 | KLCKTT KLCKTT | 126.6000 | RX only | AM | - | FL48/Channels |
-| 876 | SEATTLE RAMP CT3 | 126.8750 | RX only | AM | - | FL48/Channels |
-| 877 | RENTON ATIS | 126.9500 | RX only | AM | - | FL48/Channels |
-| 878 | BDGR MTN BDGR3 | 127.0500 | RX only | AM | - | FL48/Channels |
-| 879 | PWT CD P | 127.1000 | RX only | AM | - | FL48/Channels |
-| 880 | PAINE CD P | 127.1750 | RX only | AM | - | FL48/Channels |
-| 881 | BELLINGHAM GND P | 127.4000 | RX only | AM | - | FL48/Channels |
-| 882 | SPOKANE CD P | 127.5500 | RX only | AM | - | FL48/Channels |
-| 883 | BOEING ATIS | 127.7500 | RX only | AM | - | FL48/Channels |
-| 884 | WHIDBEY LCL P | 127.9000 | RX only | AM | - | FL48/Channels |
-| 885 | GRANT LCL P2 | 128.0000 | RX only | AM | - | FL48/Channels |
-| 886 | 74S CTAF | 128.2500 | RX only | AM | - | FL48/Channels |
-| 887 | HQM HOQUIAM RCAG | 128.3000 | RX only | AM | - | FL48/Channels |
-| 888 | 3W7 3W7 AWOS-3PT | 128.3250 | RX only | AM | - | FL48/Channels |
-| 889 | MHLR MHLR RCAG | 128.4500 | RX only | AM | - | FL48/Channels |
-| 890 | AWO APCH P DEP P | 128.5000 | RX only | AM | - | FL48/Channels |
-| 891 | PLU PLU AWOS-3 | 128.5750 | RX only | AM | - | FL48/Channels |
-| 892 | PAINE ATIS | 128.6500 | RX only | AM | - | FL48/Channels |
-| 893 | RLD APCH P DEP P | 128.7500 | RX only | AM | - | FL48/Channels |
-| 894 | BOEING CD P | 132.4000 | RX only | AM | - | FL48/Channels |
-| 895 | FELTS LCL P | 132.5000 | RX only | AM | - | FL48/Channels |
-| 896 | ELN YAKIMA RCAG | 132.6000 | RX only | AM | - | FL48/Channels |
-| 897 | RLD RLD AWOS-3PT | 132.6750 | RX only | AM | - | FL48/Channels |
-| 898 | BLLNGHM APCH P | 132.7000 | RX only | AM | - | FL48/Channels |
-| 899 | OKH OKH AWOS-3 | 132.7750 | RX only | AM | - | FL48/Channels |
-| 900 | KPAE ATIS | 132.9500 | RX only | AM | - | FL46/Channels |
-| 901 | TR-CTS APCH P DP | 133.1500 | RX only | AM | - | FL48/Channels |
-| 902 | YAKIMA LCL P | 133.2500 | RX only | AM | - | FL48/Channels |
-| 903 | FRCHLD APCH P DP | 133.3500 | RX only | AM | - | FL48/Channels |
-| 904 | STTL APCH P IC | 133.6500 | RX only | AM | - | FL48/Channels |
-| 905 | GRAY PMSV METRO | 134.1000 | RX only | AM | - | FL48/Channels |
-| 906 | WHIDBEY ATIS | 134.1500 | RX only | AM | - | FL48/Channels |
-| 907 | GRNT APCH S DP S | 134.3500 | RX only | AM | - | FL48/Channels |
-| 908 | BELLINGHAM ATIS | 134.4500 | RX only | AM | - | FL48/Channels |
-| 909 | BDGR MTN BDGR4 | 134.9500 | RX only | AM | - | FL48/Channels |
-| 910 | KLS KLS AWOS-3PT | 135.0750 | RX only | AM | - | FL48/Channels |
-| 911 | WHDBY CD PR TX | 135.1000 | RX only | AM | - | FL48/Channels |
-| 912 | VUO VUO ASOS | 135.1250 | RX only | AM | - | FL48/Channels |
-| 913 | KNG MTN KNG MTN | 135.1500 | RX only | AM | - | FL48/Channels |
-| 914 | CLM CLM ASOS | 135.1750 | RX only | AM | - | FL48/Channels |
-| 915 | UIL UIL ASOS | 135.2250 | RX only | AM | - | FL48/Channels |
-| 916 | SMP SMP ASOS | 135.2750 | RX only | AM | - | FL48/Channels |
-| 917 | PSC CTAF | 135.3000 | RX only | AM | - | FL48/Channels |
-| 918 | ORS ORS AWOS-3P | 135.4250 | RX only | AM | - | FL48/Channels |
-| 919 | KLCKTT KLCKTT2 | 135.4500 | RX only | AM | - | FL48/Channels |
-| 920 | AWO AWO AWOS-3PT | 135.6250 | RX only | AM | - | FL48/Channels |
-| 921 | FHR FHR ASOS | 135.6750 | RX only | AM | - | FL48/Channels |
-| 922 | OLYMPIA ATIS | 135.7250 | RX only | AM | - | FL48/Channels |
-| 923 | EPH EPH ASOS | 135.7750 | RX only | AM | - | FL48/Channels |
-| 924 | MCCHORD D-ATIS | 135.8250 | RX only | AM | - | FL48/Channels |
-| 925 | ALW ALW ASOS | 135.8750 | RX only | AM | - | FL48/Channels |
-| 926 | SAR Air | 123.1000 | RX only | AM | - | FL44/Channels |
-| 927 | Arlft NW ar-grnd | 129.8250 | RX only | AM | - | FL55/Channels |
-| 928 | VTAC11 | 151.1375 | RX only | NFM | - | FL02/Channels |
-| 929 | REDNET | 153.8300 | RX only | FM | - | FL01/Channels |
-| 930 | State Fire Tac | 154.2800 | RX only | FM | - | FL01/Channels |
-| 931 | VTAC12 | 154.4525 | RX only | NFM | - | FL02/Channels |
-| 932 | SAR1 | 155.1600 | RX only | FM | - | FL01/Channels |
-| 933 | SAR4 | 155.1675 | RX only | FM | - | FL01/Channels |
-| 934 | SAR5 | 155.1825 | RX only | FM | - | FL01/Channels |
-| 935 | SAR2 | 155.2425 | RX only | FM | - | FL01/Channels |
-| 936 | SAR3 | 155.3025 | RX only | FM | - | FL01/Channels |
-| 937 | HEAR | 155.3400 | RX only | FM | - | FL01/Channels |
-| 938 | LERN | 155.3700 | RX only | FM | - | FL01/Channels |
-| 939 | VCALL10 | 155.7525 | RX only | NFM | - | FL02/Channels |
-| 940 | OSCCR | 156.1350 | RX only | FM | - | FL01/Channels |
-| 941 | VTAC13 | 158.7375 | RX only | NFM | - | FL02/Channels |
-| 942 | VTAC14 | 159.4725 | RX only | NFM | - | FL02/Channels |
-| 943 | UCALL40 | 453.2125 | RX only | NFM | - | FL02/Channels |
-| 944 | UTAC41 | 453.4625 | RX only | NFM | - | FL02/Channels |
-| 945 | UTAC42 | 453.7125 | RX only | NFM | - | FL02/Channels |
-| 946 | UTAC43 | 453.8625 | RX only | NFM | - | FL02/Channels |
-| 947 | AirGround4 | 151.2125 | RX only | FM | - | FL06/Channels |
-| 948 | AirGround6 | 151.2875 | RX only | FM | - | FL06/Channels |
-| 949 | AirGround1 | 151.3100 | RX only | FM | - | FL06/Channels |
-| 950 | AirGround2 | 151.3400 | RX only | FM | - | FL06/Channels |
-| 951 | AirGround3 | 151.3850 | RX only | FM | - | FL06/Channels |
-| 952 | DNR Common | 151.4150 | RX only | FM | - | FL06/Channels |
-| 953 | AirGround7 | 156.0225 | RX only | FM | - | FL06/Channels |
-| 954 | DNR Regional3 | 159.2400 | RX only | FM | - | FL06/Channels |
-| 955 | AirGround5 | 159.2700 | RX only | FM | - | FL06/Channels |
-| 956 | DNR Regional7 | 159.3150 | RX only | FM | - | FL06/Channels |
-| 957 | DNR Regional4 | 159.3300 | RX only | FM | - | FL06/Channels |
-| 958 | DNR Regional10 | 159.3450 | RX only | FM | - | FL06/Channels |
-| 959 | DNR Regional6 | 159.3675 | RX only | FM | - | FL06/Channels |
-| 960 | DNR Regional5 | 159.3750 | RX only | FM | - | FL06/Channels |
-| 961 | DNR Regional1 | 159.4125 | RX only | FM | - | FL06/Channels |
-| 962 | DNR Main | 159.4200 | RX only | FM | - | FL06/Channels |
-| 963 | DNR Regional2 | 159.4275 | RX only | FM | - | FL06/Channels |
-| 964 | DNR Regional8 | 159.4350 | RX only | FM | - | FL06/Channels |
-| 965 | DNR Regional9 | 159.4500 | RX only | FM | - | FL06/Channels |
-| 966 | Air Tac1 | 166.6125 | RX only | FM | - | FL07/Channels |
-| 967 | Air Tac2 | 167.9500 | RX only | FM | - | FL07/Channels |
-| 968 | Air Tac3 | 168.4000 | RX only | FM | - | FL07/Channels |
-| 969 | Command6 | 168.4750 | RX only | FM | - | FL07/Channels |
-| 970 | ICP | 168.5500 | RX only | FM | - | FL07/Channels |
-| 971 | Air Guard | 168.6250 | RX only | FM | - | FL07/Channels |
-| 972 | Flight Following | 168.6500 | RX only | FM | - | FL07/Channels |
-| 973 | Air Tac4 | 169.1500 | RX only | FM | - | FL07/Channels |
-| 974 | Air Tac5 | 169.2000 | RX only | FM | - | FL07/Channels |
-| 975 | Command7 | 169.5375 | RX only | FM | - | FL07/Channels |
-| 976 | Command5 | 169.7500 | RX only | FM | - | FL07/Channels |
-| 977 | Command4 | 170.0000 | RX only | FM | - | FL07/Channels |
-| 978 | Command8 | 170.0125 | RX only | FM | - | FL07/Channels |
-| 979 | 6 Project Fire | 170.1250 | RX only | FM | - | FL07/Channels |
-| 980 | Command3 | 170.4250 | RX only | FM | - | FL07/Channels |
-| 981 | Command2 | 170.4500 | RX only | FM | - | FL07/Channels |
-| 982 | Command1 | 170.9750 | RX only | FM | - | FL07/Channels |
-| 983 | Ch01A | 156.0500 | RX only | FM | - | FL54/Channels |
-| 984 | Ch5A | 156.2500 | RX only | FM | - | FL52/Channels |
-| 985 | Ch6 | 156.3000 | RX only | FM | - | FL52/Channels |
-| 986 | Ch07A | 156.3500 | RX only | FM | - | FL52/Channels |
-| 987 | Ch13 | 156.6500 | RX only | FM | - | FL52/Channels |
-| 988 | Ch14 VTS | 156.7000 | RX only | FM | - | FL52/Channels |
-| 989 | Ch16 | 156.8000 | RX only | FM | - | FL52/Channels |
-| 990 | Ch22A | 157.1000 | RX only | FM | - | FL52/Channels |
-| 991 | Ch67 | 156.3750 | RX only | FM | - | FL52/Channels |
-| 992 | Ch78A | 156.9250 | RX only | FM | - | FL52/Channels |
-| 993 | Ch79A | 156.9750 | RX only | FM | - | FL52/Channels |
-| 994 | Lgcy Telephone1 | 161.9000 | RX only | FM | - | FL54/Channels |
-| 995 | Lgcy Telephone2 | 161.8750 | RX only | FM | - | FL54/Channels |
-| 996 | Marine VHF Ch 08 | 156.4000 | RX only | FM | - | FL52/Channels |
-| 997 | Marine VHF Ch 09 | 156.4500 | RX only | FM | - | FL52/Channels |
-| 998 | Marine VHF Ch 10 | 156.5000 | RX only | FM | - | FL52/Channels |
-| 999 | Marine VHF Ch 11 | 156.5500 | RX only | FM | - | FL52/Channels |
-| 1000 | Marine VHF Ch 12 | 156.6000 | RX only | FM | - | FL52/Channels |
-| 1001 | Marine VHF Ch 17 | 156.8500 | RX only | FM | - | FL52/Channels |
-| 1002 | Marine VHF Ch 20 | 157.0000 | RX only | FM | - | FL52/Channels |
-| 1003 | Marine VHF Ch 24 | 157.2000 | RX only | FM | - | FL52/Channels |
-| 1004 | Marine VHF Ch 25 | 157.2500 | RX only | FM | - | FL52/Channels |
-| 1005 | Marine VHF Ch 26 | 157.3000 | RX only | FM | - | FL52/Channels |
-| 1006 | Marine VHF Ch 27 | 157.3500 | RX only | FM | - | FL52/Channels |
-| 1007 | Marine VHF Ch 28 | 157.4000 | RX only | FM | - | FL52/Channels |
-| 1008 | Marine VHF Ch 68 | 156.4250 | RX only | FM | - | FL52/Channels |
-| 1009 | Marine VHF Ch 69 | 156.4750 | RX only | FM | - | FL52/Channels |
-| 1010 | Marine VHF Ch 70 | 156.5250 | RX only | FM | - | FL52/Channels |
-| 1011 | Marine VHF Ch 71 | 156.5750 | RX only | FM | - | FL52/Channels |
-| 1012 | Marine VHF Ch 72 | 156.6250 | RX only | FM | - | FL52/Channels |
-| 1013 | Marine VHF Ch 73 | 156.6750 | RX only | FM | - | FL52/Channels |
-| 1014 | Marine VHF Ch 74 | 156.7250 | RX only | FM | - | FL52/Channels |
-| 1015 | Marine VHF Ch 77 | 156.8750 | RX only | FM | - | FL52/Channels |
-| 1016 | Marine VHF Ch 84 | 157.2250 | RX only | FM | - | FL52/Channels |
-| 1017 | Marine VHF Ch 85 | 157.2750 | RX only | FM | - | FL52/Channels |
-| 1018 | Marine VHF Ch 86 | 157.3250 | RX only | FM | - | FL52/Channels |
-| 1019 | Marine VHF Ch 87 | 157.3750 | RX only | FM | - | FL52/Channels |
-| 1020 | Marine VHF Ch 88 | 157.4250 | RX only | FM | - | FL52/Channels |
-| 1021 | Mrn VHF 1018 18A | 156.9000 | RX only | FM | - | FL52/Channels |
-| 1022 | Mrn VHF 1019 19A | 156.9500 | RX only | FM | - | FL52/Channels |
-| 1023 | Mrn VHF 1021 21A | 157.0500 | RX only | FM | - | FL52/Channels |
-| 1024 | Mrn VHF 1023 23A | 157.1500 | RX only | FM | - | FL52/Channels |
-| 1025 | Mrn VHF 1063 63A | 156.1750 | RX only | FM | - | FL52/Channels |
-| 1026 | Mrn VHF 1065 65A | 156.2750 | RX only | FM | - | FL52/Channels |
-| 1027 | Mrn VHF 1066 66A | 156.3250 | RX only | FM | - | FL52/Channels |
-| 1028 | Mrn VHF 1080 80A | 157.0250 | RX only | FM | - | FL52/Channels |
-| 1029 | Mrn VHF 1081 81A | 157.0750 | RX only | FM | - | FL52/Channels |
-| 1030 | Mrn VHF 1082 82A | 157.1250 | RX only | FM | - | FL52/Channels |
-| 1031 | Mrn VHF 1083 83A | 157.1750 | RX only | FM | - | FL52/Channels |
-| 1032 | Marine VHF AIS 1 | 161.9750 | RX only | FM | - | FL52/Channels |
-| 1033 | Marine VHF AIS 2 | 162.0250 | RX only | FM | - | FL52/Channels |
-| 1034 | NOAA Weather WX1 | 162.5500 | RX only | FM | - | FL52/Channels |
-| 1035 | NOAA Weather WX2 | 162.4000 | RX only | FM | - | FL52/Channels |
-| 1036 | NOAA Weather WX3 | 162.4750 | RX only | FM | - | FL52/Channels |
-| 1037 | NOAA Weather WX4 | 162.4250 | RX only | FM | - | FL52/Channels |
-| 1038 | NOAA Weather WX5 | 162.4500 | RX only | FM | - | FL52/Channels |
-| 1039 | NOAA Weather WX6 | 162.5000 | RX only | FM | - | FL52/Channels |
-| 1040 | NOAA Weather WX7 | 162.5250 | RX only | FM | - | FL52/Channels |
-| 1041 | USCG Auxiliary1 | 143.4750 | RX only | FM | - | FL52/Channels |
-| 1042 | USCG Auxiliary2 | 150.7000 | RX only | FM | - | FL52/Channels |
-| 1043 | WSDOT V1 | 151.0700 | RX only | FM | - | FL53/Channels |
-| 1044 | WSDOT V2 | 151.0250 | RX only | FM | - | FL53/Channels |
-| 1045 | WSDOT V3 | 156.1200 | RX only | FM | - | FL53/Channels |
-| 1046 | WSF Deck-Shore | 151.0400 | RX only | FM | - | FL53/Channels |
-| 1047 | switching AAR36 | 160.6500 | RX only | NFM | - | FL56/Channels |
-| 1048 | MOW AAR54 | 160.9200 | RX only | NFM | - | FL56/Channels |
-| 1049 | Stacy Yard AAR60 | 161.0100 | RX only | NFM | - | FL56/Channels |
-| 1050 | AAR66 | 161.1000 | RX only | NFM | - | FL56/Channels |
-| 1051 | AAR70 | 161.1600 | RX only | NFM | - | FL56/Channels |
-| 1052 | Blmr Yrd AAR80 | 161.3100 | RX only | NFM | - | FL56/Channels |
-| 1053 | AAR87 | 161.4150 | RX only | NFM | - | FL56/Channels |
-| 1054 | FRS Ch8 | 467.5625 | RX only | FM | - | FL65/Channels |
-| 1055 | FRS Ch9 | 467.5875 | RX only | FM | - | FL65/Channels |
-| 1056 | FRS Ch10 | 467.6125 | RX only | FM | - | FL65/Channels |
-| 1057 | FRS Ch11 | 467.6375 | RX only | FM | - | FL65/Channels |
-| 1058 | FRS Ch12 | 467.6625 | RX only | FM | - | FL65/Channels |
-| 1059 | FRS Ch13 | 467.6875 | RX only | FM | - | FL65/Channels |
-| 1060 | FRS Ch14 | 467.7125 | RX only | FM | - | FL65/Channels |
-| 1061 | FRS GMRS Ch1 | 462.5625 | RX only | FM | - | FL65/Channels |
-| 1062 | FRS GMRS Ch2 | 462.5875 | RX only | FM | - | FL65/Channels |
-| 1063 | FRS GMRS Ch3 | 462.6125 | RX only | FM | - | FL65/Channels |
-| 1064 | FRS GMRS Ch4 | 462.6375 | RX only | FM | - | FL65/Channels |
-| 1065 | FRS GMRS Ch5 | 462.6625 | RX only | FM | - | FL65/Channels |
-| 1066 | FRS GMRS Ch6 | 462.6875 | RX only | FM | - | FL65/Channels |
-| 1067 | GMRS FRS Ch15 | 462.5500 | RX only | FM | - | FL65/Channels |
-| 1068 | GMRS FRS Ch16 | 462.5750 | RX only | FM | - | FL65/Channels |
-| 1069 | GMRS FRS Ch17 | 462.6000 | RX only | FM | - | FL65/Channels |
-| 1070 | GMRS FRS Ch18 | 462.6250 | RX only | FM | - | FL65/Channels |
-| 1071 | GMRS FRS Ch19 | 462.6500 | RX only | FM | - | FL65/Channels |
-| 1072 | GMRS FRS Ch20 | 462.6750 | RX only | FM | - | FL65/Channels |
-| 1073 | GMRS FRS Ch21 | 462.7000 | RX only | FM | - | FL65/Channels |
-| 1074 | GMRS FRS Ch22 | 462.7250 | RX only | FM | - | FL65/Channels |
-| 1075 | MURS Ch1 | 151.8200 | RX only | FM | - | FL66/Channels |
-| 1076 | MURS Ch2 | 151.8800 | RX only | FM | - | FL66/Channels |
-| 1077 | MURS Ch3 | 151.9400 | RX only | FM | - | FL66/Channels |
-| 1078 | NWAC FRS Ch7 | 462.7125 | RX only | FM | - | FL65/Channels |
-| 1079 | WA7UOJ Spkn Spkn | 145.1100 | RX only | FM | - | FL73/Channels |
-| 1080 | WA7DRE Spkn Vlly | 145.1500 | RX only | FM | - | FL73/Channels |
-| 1081 | KC7GKY Spkn Spkn | 145.1700 | RX only | FM | - | FL73/Channels |
-| 1082 | W7TRF Spkn Spkn | 145.2100 | RX only | FM | - | FL73/Channels |
-| 1083 | K7MMA Spkn Spkn | 145.2900 | RX only | FM | - | FL73/Channels |
-| 1084 | N7FM Spkn Vlly | 145.3300 | RX only | FM | - | FL73/Channels |
-| 1085 | K7TJ Spkn Spkn | 145.3700 | RX only | FM | - | FL73/Channels |
-| 1086 | W7UPS Knnwck | 145.3900 | RX only | FM | - | FL73/Channels |
-| 1087 | KI7TRR R Spkn | 146.4750 | RX only | FM | - | FL73/Channels |
-| 1088 | N7FM Spkn Spkn | 146.6600 | RX only | FM | - | FL73/Channels |
-| 1089 | KF7VOC Md Spkn | 146.6800 | RX only | FM | - | FL73/Channels |
-| 1090 | NA7EM Ots | 146.8600 | RX only | FM | - | FL73/Channels |
-| 1091 | WR7VHF Spkn Spkn | 146.8800 | RX only | FM | - | FL73/Channels |
-| 1092 | N7BFS Spkn Spkn | 147.0600 | RX only | FM | - | FL73/Channels |
-| 1093 | KG7SD Spkn Spkn | 147.1000 | RX only | FM | - | FL73/Channels |
-| 1094 | K7SRG Spkn Spkn | 147.1200 | RX only | FM | - | FL73/Channels |
-| 1095 | AD7DD Spkn Vlly | 147.1400 | RX only | FM | - | FL73/Channels |
-| 1096 | W7UPS Spkn Spkn | 147.1600 | RX only | FM | - | FL73/Channels |
-| 1097 | K7SRG Omk Okngn | 147.2000 | RX only | FM | - | FL73/Channels |
-| 1098 | WA7HWD Spkn Spkn | 147.2400 | RX only | FM | - | FL73/Channels |
-| 1099 | W7GBU Spkn Spkn | 147.3000 | RX only | FM | - | FL73/Channels |
-| 1100 | WR7VHF Spkn Spk2 | 147.3400 | RX only | FM | - | FL73/Channels |
-| 1101 | N7WRQ Spkn Spkn | 147.3800 | RX only | FM | - | FL73/Channels |
-| 1102 | WA7DMR Ephrt | 147.4125 | RX only | FM | - | FL73/Channels |
-| 1103 | WA7DMR Spkn Wa | 147.4625 | RX only | FM | - | FL73/Channels |
-| 1104 | Itinerant VHF1 | 151.5050 | RX only | FM | - | FL68/Channels |
-| 1105 | Itinerant VHF2 | 151.5150 | RX only | FM | - | FL68/Channels |
-| 1106 | Red Dot | 151.6250 | RX only | FM | - | FL68/Channels |
-| 1107 | Itinerant VHF3 | 151.7000 | RX only | FM | - | FL68/Channels |
-| 1108 | Itinerant VHF4 | 151.7600 | RX only | FM | - | FL68/Channels |
-| 1109 | Bl Grn Dt als | 154.5700 | RX only | FM | - | FL68/Channels |
-| 1110 | Bl Grn Dt als 2 | 154.6000 | RX only | FM | - | FL68/Channels |
-| 1111 | KE7GII Arwy | 440.5000 | RX only | FM | - | FL73/Channels |
-| 1112 | W7IF Spkn Vlly | 441.1750 | RX only | FM | - | FL73/Channels |
-| 1113 | N7ISP Spkn Spkn | 441.7750 | RX only | FM | - | FL73/Channels |
-| 1114 | W6LNB Spkn Spkn | 442.0250 | RX only | FM | - | FL73/Channels |
-| 1115 | WA7BFN Spkn Spkn | 442.5250 | RX only | FM | - | FL73/Channels |
-| 1116 | W7CDP Spkn Spkn | 442.5750 | RX only | FM | - | FL73/Channels |
-| 1117 | N7FM Spkn Spkn2 | 442.6000 | RX only | FM | - | FL73/Channels |
-| 1118 | K7TMF Spkn Spkn | 442.7000 | RX only | FM | - | FL73/Channels |
-| 1119 | AD7QJ Dr PK Spkn | 442.7500 | RX only | FM | - | FL73/Channels |
-| 1120 | NV2Z Ots Orchrds | 442.9250 | RX only | FM | - | FL73/Channels |
-| 1121 | WA7DRE Spkn Spkn | 443.1250 | RX only | FM | - | FL73/Channels |
-| 1122 | W7GBU Spkn Spkn2 | 443.4000 | RX only | FM | - | FL73/Channels |
-| 1123 | W7TRF Vrdl Spkn | 443.4750 | RX only | FM | - | FL73/Channels |
-| 1124 | WA7DRE Spkn Spk2 | 443.5250 | RX only | FM | - | FL73/Channels |
-| 1125 | W7UPS Nn Ml Flls | 443.7000 | RX only | FM | - | FL73/Channels |
-| 1126 | K7MMA Spkn Spkn2 | 443.9250 | RX only | FM | - | FL73/Channels |
-| 1127 | W7UPS Nn Ml Fll2 | 443.9500 | RX only | FM | - | FL73/Channels |
-| 1128 | WA7BFN Chny Wa | 444.0250 | RX only | FM | - | FL73/Channels |
-| 1129 | KG7SD Spkn Spkn2 | 444.0500 | RX only | FM | - | FL73/Channels |
-| 1130 | K7TJ Spkn Spkn2 | 444.1250 | RX only | FM | - | FL73/Channels |
-| 1131 | KC7AAD Spkn Spkn | 444.1500 | RX only | FM | - | FL73/Channels |
-| 1132 | N7BFS Spkn Spkn2 | 444.1750 | RX only | FM | - | FL73/Channels |
-| 1133 | N1NG Spkn Spkn | 444.3500 | RX only | FM | - | FL73/Channels |
-| 1134 | W7UPS Nn Ml Fll3 | 444.4000 | RX only | FM | - | FL73/Channels |
-| 1135 | N7FM Spkn Spkn3 | 444.4250 | RX only | FM | - | FL73/Channels |
-| 1136 | AE7RJ Spkn Spkn | 444.5000 | RX only | FM | - | FL73/Channels |
-| 1137 | WR7VHF Spkn Spk3 | 444.6000 | RX only | FM | - | FL73/Channels |
-| 1138 | KA7ENA Spkn Spkn | 444.6500 | RX only | FM | - | FL73/Channels |
-| 1139 | K7SRG Spkn Spkn2 | 444.7000 | RX only | FM | - | FL73/Channels |
-| 1140 | WR7VHF Spkn Spk4 | 444.9000 | RX only | FM | - | FL73/Channels |
-| 1141 | WA7UOJ Spkn Spk2 | 444.9500 | RX only | FM | - | FL73/Channels |
-| 1142 | Sfr FCC WRYC378 | 451.4125 | RX only | FM | - | FL73/Channels |
-| 1143 | Sfr WRYC378 2 | 452.0125 | RX only | FM | - | FL73/Channels |
-| 1144 | Sfr WRYC378 5 | 452.3750 | RX only | FM | - | FL73/Channels |
-| 1145 | Sfr WRYC378 3 | 452.6375 | RX only | FM | - | FL73/Channels |
-| 1146 | Sfr WRYC378 4 | 452.9750 | RX only | FM | - | FL73/Channels |
-| 1147 | Sfr WRYC378 6 | 456.4125 | RX only | FM | - | FL73/Channels |
-| 1148 | Sfr WRYC378 7 | 457.0125 | RX only | FM | - | FL73/Channels |
-| 1149 | Sfr WRYC378 8 | 457.1000 | RX only | FM | - | FL73/Channels |
-| 1150 | Sfr WRYC378 9 | 457.3375 | RX only | FM | - | FL73/Channels |
-| 1151 | Sfr WRYC378 10 | 457.3750 | RX only | FM | - | FL73/Channels |
-| 1152 | Sfr WRYC378 11 | 457.9750 | RX only | FM | - | FL73/Channels |
-| 1153 | Sfr WRYC378 12 | 461.6000 | RX only | FM | - | FL73/Channels |
-| 1154 | Sfr WRYC378 13 | 461.6250 | RX only | FM | - | FL73/Channels |
-| 1155 | Sfr WRYC378 14 | 461.7875 | RX only | FM | - | FL73/Channels |
-| 1156 | Sfr WRYC378 15 | 463.3000 | RX only | FM | - | FL73/Channels |
-| 1157 | Sfr WRYC378 16 | 463.3125 | RX only | FM | - | FL73/Channels |
-| 1158 | Brown Dot | 464.5000 | RX only | FM | - | FL68/Channels |
-| 1159 | WA Fair UHF | 464.5000 | RX only | NXDN | NXDN | FL73/Channels |
-| 1160 | WA Fair UHF 2 | 464.5500 | RX only | NXDN | NXDN | FL73/Channels |
-| 1161 | Yellow Dot | 464.5500 | RX only | FM | - | FL68/Channels |
-| 1162 | Itinerant UHF1 | 467.7625 | RX only | FM | - | FL68/Channels |
-| 1163 | Itinerant UHF2 | 467.8125 | RX only | FM | - | FL68/Channels |
-| 1164 | Itinerant UHF3 | 467.8500 | RX only | FM | - | FL68/Channels |
-| 1165 | Itinerant UHF4 | 467.8750 | RX only | FM | - | FL68/Channels |
-| 1166 | Itinerant UHF5 | 467.9000 | RX only | FM | - | FL68/Channels |
-| 1167 | Silver Star | 467.9250 | RX only | FM | - | FL68/Channels |
-| 1168 | AMR NXDN | 152.3375 | RX only | NXDN | NXDN | FL71/Channels |
-| 1169 | AMR NXDN 2 | 152.4425 | RX only | NXDN | NXDN | FL71/Channels |
-| 1170 | Brinnon Fire | 154.0925 | RX only | FM | - | FL14/Channels |
-| 1171 | Mason Fire Dist5 | 154.1900 | RX only | FM | - | FL13/Channels |
-| 1172 | Fire 2 | 154.2650 | RX only | FM | - | FL16/Channels |
-| 1173 | Fire | 154.4300 | RX only | FM | - | FL16/Channels |
-| 1174 | MED-9 | 163.0000 | RX only | FM | - | FL71/Channels |
-| 1175 | Island Sheriff | 453.0500 | RX only | FM | - | FL16/Channels |
-| 1176 | San Juan SJCSO | 453.2500 | RX only | FM | - | FL16/Channels |
-| 1177 | Jefferson SO | 453.5750 | RX only | FM | - | FL14/Channels |
-| 1178 | Mason Sheriff | 460.2250 | RX only | FM | - | FL13/Channels |
-| 1179 | Mason Sheriff 2 | 460.5125 | RX only | FM | - | FL13/Channels |
-| 1180 | Oak Harbor PD | 460.5750 | RX only | FM | - | FL16/Channels |
-| 1181 | OLY Amblnc EMS | 462.9500 | RX only | AM | - | FL14/Channels |
-| 1182 | MED-1 | 463.0000 | RX only | FM | - | FL71/Channels |
-| 1183 | MED-7 | 463.1500 | RX only | FM | - | FL71/Channels |
-| 1184 | MED-1 2 | 468.0000 | RX only | FM | - | FL71/Channels |
-| 1185 | MED-7 2 | 468.1500 | RX only | FM | - | FL71/Channels |
-| 1186 | Atlntc Base DISP | 451.5125 | RX only | FM | - | FL70a/Channels |
-| 1187 | Ch2 | 451.6625 | RX only | FM | - | FL70a/Channels |
-| 1188 | Ch4 | 452.0875 | RX only | FM | - | FL70a/Channels |
-| 1189 | 144.35 K7NHV-10 | 144.3500 | RX only | FM | - | SEAACS/ACS VHF Data |
-| 1190 | 144.39 APRS | 144.3900 | RX only | FM | - | SEAACS/ACS VHF Data |
-| 1191 | 144.63 PKT | 144.6300 | RX only | FM | - | SEAACS/ACS VHF Data |
-| 1192 | 144.87 W7ACS | 144.8700 | RX only | FM | - | SEAACS/ACS VHF Data |
-| 1193 | 144.90 QA DK | 144.9000 | RX only | FM | - | SEAACS/ACS VHF Data |
-| 1194 | 144.91 K7QHG-10 | 144.9100 | RX only | FM | - | SEAACS/ACS VHF Data |
-| 1195 | 144.93 | 144.9300 | RX only | FM | - | SEAACS/ACS VHF Data |
-| 1196 | 144.95 BLV RTN | 144.9500 | RX only | FM | - | SEAACS/ACS VHF Data |
-| 1197 | 144.97 K7IF-10 | 144.9700 | RX only | FM | - | SEAACS/ACS VHF Data |
-| 1198 | 144.975 PtOrchrd | 144.9750 | RX only | FM | - | SEAACS/ACS VHF Data |
-| 1199 | 144.99 | 144.9900 | RX only | FM | - | SEAACS/ACS VHF Data |
-| 1200 | 145.01 NK7N-10 | 145.0100 | RX only | FM | - | SEAACS/ACS VHF Data |
-| 1201 | 145.03 NS7C-10 | 145.0300 | RX only | FM | - | SEAACS/ACS VHF Data |
-| 1202 | 145.05 K7NVH-10 | 145.0500 | RX only | FM | - | SEAACS/ACS VHF Data |
-| 1203 | 145.07 W7VMI-10 | 145.0700 | RX only | FM | - | SEAACS/ACS VHF Data |
-| 1204 | 145.09 Wstcrst | 145.0900 | RX only | FM | - | SEAACS/ACS VHF Data |
-| 1205 | DV Simplex | 145.1000 | RX only | FM | - | SEAACS/ACS VHF Data |
-| 1206 | 145.51 | 145.5100 | RX only | FM | - | SEAACS/ACS VHF Data |
-| 1207 | 145.53 | 145.5300 | RX only | FM | - | SEAACS/ACS VHF Data |
-| 1208 | 145.55 | 145.5500 | RX only | FM | - | SEAACS/ACS VHF Data |
-| 1209 | 145.57 | 145.5700 | RX only | FM | - | SEAACS/ACS VHF Data |
-| 1210 | 145.59 | 145.5900 | RX only | FM | - | SEAACS/ACS VHF Data |
-| 1211 | 145.61 | 145.6100 | RX only | FM | - | SEAACS/ACS VHF Data |
-| 1212 | 145.63 | 145.6300 | RX only | FM | - | SEAACS/ACS VHF Data |
-| 1213 | 145.65 | 145.6500 | RX only | FM | - | SEAACS/ACS VHF Data |
-| 1214 | 145.67 | 145.6700 | RX only | FM | - | SEAACS/ACS VHF Data |
-| 1215 | 145.69 | 145.6900 | RX only | FM | - | SEAACS/ACS VHF Data |
-| 1216 | 145.71 | 145.7100 | RX only | FM | - | SEAACS/ACS VHF Data |
-| 1217 | 145.73 | 145.7300 | RX only | FM | - | SEAACS/ACS VHF Data |
-| 1218 | 145.75 | 145.7500 | RX only | FM | - | SEAACS/ACS VHF Data |
-| 1219 | 145.77 | 145.7700 | RX only | FM | - | SEAACS/ACS VHF Data |
-| 1220 | 430.80 W7ACS-10 | 430.8000 | RX only | FM | - | SEAACS/ACS UHF Data |
-| 1221 | 430.825 Mercer | 430.8250 | RX only | FM | - | SEAACS/ACS UHF Data |
-| 1222 | 430.85 W7ACS-12 | 430.8500 | RX only | FM | - | SEAACS/ACS UHF Data |
-| 1223 | 430.875 W7ACS-9 | 430.8750 | RX only | FM | - | SEAACS/ACS UHF Data |
-| 1224 | 430.9 | 430.9000 | RX only | FM | - | SEAACS/ACS UHF Data |
-| 1225 | 430.925 | 430.9250 | RX only | FM | - | SEAACS/ACS UHF Data |
-| 1226 | 430.95 W7ACS-14 | 430.9500 | RX only | FM | - | SEAACS/ACS UHF Data |
-| 1227 | 430.975 | 430.9750 | RX only | FM | - | SEAACS/ACS UHF Data |
-| 1228 | 439.80 W7ACS-11 | 439.8000 | RX only | FM | - | SEAACS/ACS UHF Data |
-| 1229 | 439.825 NC7G-10 | 439.8250 | RX only | FM | - | SEAACS/ACS UHF Data |
-| 1230 | 439.85 W7AW-10 | 439.8500 | RX only | FM | - | SEAACS/ACS UHF Data |
-| 1231 | 439.875 AC7MD-10 | 439.8750 | RX only | FM | - | SEAACS/ACS UHF Data |
-| 1232 | 439.9 | 439.9000 | RX only | FM | - | SEAACS/ACS UHF Data |
-| 1233 | 439.925 NC7G-10 | 439.9250 | RX only | FM | - | SEAACS/ACS UHF Data |
-| 1234 | 439.95 W7ACS-15 | 439.9500 | RX only | FM | - | SEAACS/ACS UHF Data |
-| 1235 | 439.975 W7ACS-8 | 439.9750 | RX only | FM | - | SEAACS/ACS UHF Data |
-| 1236 | 440.75 | 440.7500 | RX only | FM | - | SEAACS/ACS UHF Data |
-| 1237 | 440.8 | 440.8000 | RX only | FM | - | SEAACS/ACS UHF Data |
-| 1238 | 440.825 | 440.8250 | RX only | FM | - | SEAACS/ACS UHF Data |
-| 1239 | 440.85 W7ACS-13 | 440.8500 | RX only | FM | - | SEAACS/ACS UHF Data |
-| 1240 | 440.875 | 440.8750 | RX only | FM | - | SEAACS/ACS UHF Data |
-| 1241 | 440.90 WA7AUB-10 | 440.9000 | RX only | FM | - | SEAACS/ACS UHF Data |
-| 1242 | 440.925 | 440.9250 | RX only | FM | - | SEAACS/ACS UHF Data |
-| 1243 | 440.95 AC7LW-10 | 440.9500 | RX only | FM | - | SEAACS/ACS UHF Data |
-| 1244 | DigCall 441.0 | 441.0000 | RX only | FM | - | SEAACS/ACS UHF Data |
-| 1245 | KNKX Tacoma | 88.5000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
-| 1246 | KMIH Mrcr Islnd | 88.9000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
-| 1247 | KNHC Seattle | 89.5000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
-| 1248 | KASB Bellevue | 89.9000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
-| 1249 | KUPS Tacoma | 90.1000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
-| 1250 | KEXP-FM Seattle | 90.3000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
-| 1251 | KSER Everett | 90.7000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
-| 1252 | KVTI Tacoma | 90.9000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
-| 1253 | KBCS Bellevue | 91.3000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
-| 1254 | KQXI Grnt Flls | 91.5000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
-| 1255 | KYFQ Tacoma | 91.7000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
-| 1256 | KQMV Bellevue | 92.5000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
-| 1257 | KJR-FM Seattle | 93.3000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
-| 1258 | KSWD Seattle | 94.1000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
-| 1259 | KUOW-FM Seattle | 94.9000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
-| 1260 | KJEB Seattle | 95.7000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
-| 1261 | KJAQ Seattle | 96.5000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
-| 1262 | KIRO-FM Tacoma | 97.3000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
-| 1263 | KING-FM Seattle | 98.1000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
-| 1264 | KPNW-FM Seattle | 98.9000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
-| 1265 | KISW Seattle | 99.9000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
-| 1266 | KKWF Seattle | 100.7000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
-| 1267 | KPLZ-FM Seattle | 101.5000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
-| 1268 | KQES-LP Bellevue | 101.9000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
-| 1269 | KZOK-FM Seattle | 102.5000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
-| 1270 | KHTP Tacoma | 103.7000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
-| 1271 | KLSW Covington | 104.5000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
-| 1272 | KAPY-LP Duvall | 104.9000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
-| 1273 | KCMS Edmonds | 105.3000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
-| 1274 | KBKS-FM Tacoma | 106.1000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
-| 1275 | KRWM Bremerton | 106.9000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
-| 1276 | KNDD Seattle | 107.7000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
+| 758 | ATIS | 118.0000 | RX only | AM | - | FL46/Channels |
+| 759 | KBFI Tower | 118.3000 | RX only | AM | - | FL46/Channels |
+| 760 | ZSE-1191 | 119.1000 | RX only | AM | - | FL48/Channels |
+| 761 | KSEA Tower | 119.9000 | RX only | AM | - | FL46/Channels |
+| 762 | Tower | 120.2000 | RX only | AM | - | FL46/Channels |
+| 763 | ZSE-1203 | 120.3000 | RX only | AM | - | FL48/Channels |
+| 764 | KBFI Tower 2 | 120.6000 | RX only | AM | - | FL46/Channels |
+| 765 | KSEA Tower 2 | 120.9500 | RX only | AM | - | FL46/Channels |
+| 766 | Civil Guard | 121.5000 | RX only | AM | - | FL48/Channels |
+| 767 | Ground | 121.7000 | RX only | AM | - | FL46/Channels |
+| 768 | FSS Seattle | 122.2000 | RX only | AM | - | FL48/Channels |
+| 769 | uncntrlld CTAF | 122.8000 | RX only | AM | - | FL46/Channels |
+| 770 | ZSE-12485 | 124.8500 | RX only | AM | - | FL48/Channels |
+| 771 | ZSE-1258 | 125.8000 | RX only | AM | - | FL48/Channels |
+| 772 | ZSE-1261 | 126.1000 | RX only | AM | - | FL48/Channels |
+| 773 | Mt Vernon RCAG | 126.3000 | RX only | AM | - | FL48/Channels |
+| 774 | ZSE-1283 | 128.3000 | RX only | AM | - | FL48/Channels |
+| 775 | ZSE-1285 | 128.5000 | RX only | AM | - | FL48/Channels |
+| 776 | Yakima RCAG | 132.6000 | RX only | AM | - | FL48/Channels |
+| 777 | KPAE ATIS | 132.9500 | RX only | AM | - | FL46/Channels |
+| 778 | ZSE-13365 | 133.6500 | RX only | AM | - | FL48/Channels |
+| 779 | McChord ATIS | 109.6000 | RX only | AM | - | FL49/Channels |
+| 780 | Approach | 118.2000 | RX only | AM | - | FL49/Channels |
+| 781 | Approach 2 | 120.7000 | RX only | AM | - | FL49/Channels |
+| 782 | SAR Air | 123.1000 | RX only | AM | - | FL44/Channels |
+| 783 | Tower2 | 124.8000 | RX only | AM | - | FL49/Channels |
+| 784 | NAS Whdby Twr | 127.9000 | RX only | AM | - | FL49/Channels |
+| 785 | Arlft NW ar-grnd | 129.8250 | RX only | AM | - | FL55/Channels |
+| 786 | VTAC11 | 151.1375 | RX only | NFM | - | FL02/Channels |
+| 787 | REDNET | 153.8300 | RX only | FM | - | FL01/Channels |
+| 788 | State Fire Tac | 154.2800 | RX only | FM | - | FL01/Channels |
+| 789 | VTAC12 | 154.4525 | RX only | NFM | - | FL02/Channels |
+| 790 | SAR1 | 155.1600 | RX only | FM | - | FL01/Channels |
+| 791 | SAR4 | 155.1675 | RX only | FM | - | FL01/Channels |
+| 792 | SAR5 | 155.1825 | RX only | FM | - | FL01/Channels |
+| 793 | SAR2 | 155.2425 | RX only | FM | - | FL01/Channels |
+| 794 | SAR3 | 155.3025 | RX only | FM | - | FL01/Channels |
+| 795 | HEAR | 155.3400 | RX only | FM | - | FL01/Channels |
+| 796 | LERN | 155.3700 | RX only | FM | - | FL01/Channels |
+| 797 | VCALL10 | 155.7525 | RX only | NFM | - | FL02/Channels |
+| 798 | OSCCR | 156.1350 | RX only | FM | - | FL01/Channels |
+| 799 | VTAC13 | 158.7375 | RX only | NFM | - | FL02/Channels |
+| 800 | VTAC14 | 159.4725 | RX only | NFM | - | FL02/Channels |
+| 801 | UCALL40 | 453.2125 | RX only | NFM | - | FL02/Channels |
+| 802 | UTAC41 | 453.4625 | RX only | NFM | - | FL02/Channels |
+| 803 | UTAC42 | 453.7125 | RX only | NFM | - | FL02/Channels |
+| 804 | UTAC43 | 453.8625 | RX only | NFM | - | FL02/Channels |
+| 805 | AirGround4 | 151.2125 | RX only | FM | - | FL06/Channels |
+| 806 | AirGround6 | 151.2875 | RX only | FM | - | FL06/Channels |
+| 807 | AirGround1 | 151.3100 | RX only | FM | - | FL06/Channels |
+| 808 | AirGround2 | 151.3400 | RX only | FM | - | FL06/Channels |
+| 809 | AirGround3 | 151.3850 | RX only | FM | - | FL06/Channels |
+| 810 | DNR Common | 151.4150 | RX only | FM | - | FL06/Channels |
+| 811 | AirGround7 | 156.0225 | RX only | FM | - | FL06/Channels |
+| 812 | DNR Regional3 | 159.2400 | RX only | FM | - | FL06/Channels |
+| 813 | AirGround5 | 159.2700 | RX only | FM | - | FL06/Channels |
+| 814 | DNR Regional7 | 159.3150 | RX only | FM | - | FL06/Channels |
+| 815 | DNR Regional4 | 159.3300 | RX only | FM | - | FL06/Channels |
+| 816 | DNR Regional10 | 159.3450 | RX only | FM | - | FL06/Channels |
+| 817 | DNR Regional6 | 159.3675 | RX only | FM | - | FL06/Channels |
+| 818 | DNR Regional5 | 159.3750 | RX only | FM | - | FL06/Channels |
+| 819 | DNR Regional1 | 159.4125 | RX only | FM | - | FL06/Channels |
+| 820 | DNR Main | 159.4200 | RX only | FM | - | FL06/Channels |
+| 821 | DNR Regional2 | 159.4275 | RX only | FM | - | FL06/Channels |
+| 822 | DNR Regional8 | 159.4350 | RX only | FM | - | FL06/Channels |
+| 823 | DNR Regional9 | 159.4500 | RX only | FM | - | FL06/Channels |
+| 824 | Air Tac1 | 166.6125 | RX only | FM | - | FL07/Channels |
+| 825 | Air Tac2 | 167.9500 | RX only | FM | - | FL07/Channels |
+| 826 | Air Tac3 | 168.4000 | RX only | FM | - | FL07/Channels |
+| 827 | Command6 | 168.4750 | RX only | FM | - | FL07/Channels |
+| 828 | ICP | 168.5500 | RX only | FM | - | FL07/Channels |
+| 829 | Air Guard | 168.6250 | RX only | FM | - | FL07/Channels |
+| 830 | Flight Following | 168.6500 | RX only | FM | - | FL07/Channels |
+| 831 | Air Tac4 | 169.1500 | RX only | FM | - | FL07/Channels |
+| 832 | Air Tac5 | 169.2000 | RX only | FM | - | FL07/Channels |
+| 833 | Command7 | 169.5375 | RX only | FM | - | FL07/Channels |
+| 834 | Command5 | 169.7500 | RX only | FM | - | FL07/Channels |
+| 835 | Command4 | 170.0000 | RX only | FM | - | FL07/Channels |
+| 836 | Command8 | 170.0125 | RX only | FM | - | FL07/Channels |
+| 837 | 6 Project Fire | 170.1250 | RX only | FM | - | FL07/Channels |
+| 838 | Command3 | 170.4250 | RX only | FM | - | FL07/Channels |
+| 839 | Command2 | 170.4500 | RX only | FM | - | FL07/Channels |
+| 840 | Command1 | 170.9750 | RX only | FM | - | FL07/Channels |
+| 841 | Ch01A | 156.0500 | RX only | FM | - | FL54/Channels |
+| 842 | Ch5A | 156.2500 | RX only | FM | - | FL52/Channels |
+| 843 | Ch6 | 156.3000 | RX only | FM | - | FL52/Channels |
+| 844 | Ch07A | 156.3500 | RX only | FM | - | FL52/Channels |
+| 845 | Ch13 | 156.6500 | RX only | FM | - | FL52/Channels |
+| 846 | Ch14 VTS | 156.7000 | RX only | FM | - | FL52/Channels |
+| 847 | Ch16 | 156.8000 | RX only | FM | - | FL52/Channels |
+| 848 | Ch22A | 157.1000 | RX only | FM | - | FL52/Channels |
+| 849 | Ch67 | 156.3750 | RX only | FM | - | FL52/Channels |
+| 850 | Ch78A | 156.9250 | RX only | FM | - | FL52/Channels |
+| 851 | Ch79A | 156.9750 | RX only | FM | - | FL52/Channels |
+| 852 | Lgcy Telephone1 | 161.9000 | RX only | FM | - | FL54/Channels |
+| 853 | Lgcy Telephone2 | 161.8750 | RX only | FM | - | FL54/Channels |
+| 854 | Marine VHF Ch 08 | 156.4000 | RX only | FM | - | FL52/Channels |
+| 855 | Marine VHF Ch 09 | 156.4500 | RX only | FM | - | FL52/Channels |
+| 856 | Marine VHF Ch 10 | 156.5000 | RX only | FM | - | FL52/Channels |
+| 857 | Marine VHF Ch 11 | 156.5500 | RX only | FM | - | FL52/Channels |
+| 858 | Marine VHF Ch 12 | 156.6000 | RX only | FM | - | FL52/Channels |
+| 859 | Marine VHF Ch 17 | 156.8500 | RX only | FM | - | FL52/Channels |
+| 860 | Marine VHF Ch 20 | 157.0000 | RX only | FM | - | FL52/Channels |
+| 861 | Marine VHF Ch 24 | 157.2000 | RX only | FM | - | FL52/Channels |
+| 862 | Marine VHF Ch 25 | 157.2500 | RX only | FM | - | FL52/Channels |
+| 863 | Marine VHF Ch 26 | 157.3000 | RX only | FM | - | FL52/Channels |
+| 864 | Marine VHF Ch 27 | 157.3500 | RX only | FM | - | FL52/Channels |
+| 865 | Marine VHF Ch 28 | 157.4000 | RX only | FM | - | FL52/Channels |
+| 866 | Marine VHF Ch 68 | 156.4250 | RX only | FM | - | FL52/Channels |
+| 867 | Marine VHF Ch 69 | 156.4750 | RX only | FM | - | FL52/Channels |
+| 868 | Marine VHF Ch 70 | 156.5250 | RX only | FM | - | FL52/Channels |
+| 869 | Marine VHF Ch 71 | 156.5750 | RX only | FM | - | FL52/Channels |
+| 870 | Marine VHF Ch 72 | 156.6250 | RX only | FM | - | FL52/Channels |
+| 871 | Marine VHF Ch 73 | 156.6750 | RX only | FM | - | FL52/Channels |
+| 872 | Marine VHF Ch 74 | 156.7250 | RX only | FM | - | FL52/Channels |
+| 873 | Marine VHF Ch 77 | 156.8750 | RX only | FM | - | FL52/Channels |
+| 874 | Marine VHF Ch 84 | 157.2250 | RX only | FM | - | FL52/Channels |
+| 875 | Marine VHF Ch 85 | 157.2750 | RX only | FM | - | FL52/Channels |
+| 876 | Marine VHF Ch 86 | 157.3250 | RX only | FM | - | FL52/Channels |
+| 877 | Marine VHF Ch 87 | 157.3750 | RX only | FM | - | FL52/Channels |
+| 878 | Marine VHF Ch 88 | 157.4250 | RX only | FM | - | FL52/Channels |
+| 879 | Mrn VHF 1018 18A | 156.9000 | RX only | FM | - | FL52/Channels |
+| 880 | Mrn VHF 1019 19A | 156.9500 | RX only | FM | - | FL52/Channels |
+| 881 | Mrn VHF 1021 21A | 157.0500 | RX only | FM | - | FL52/Channels |
+| 882 | Mrn VHF 1023 23A | 157.1500 | RX only | FM | - | FL52/Channels |
+| 883 | Mrn VHF 1063 63A | 156.1750 | RX only | FM | - | FL52/Channels |
+| 884 | Mrn VHF 1065 65A | 156.2750 | RX only | FM | - | FL52/Channels |
+| 885 | Mrn VHF 1066 66A | 156.3250 | RX only | FM | - | FL52/Channels |
+| 886 | Mrn VHF 1080 80A | 157.0250 | RX only | FM | - | FL52/Channels |
+| 887 | Mrn VHF 1081 81A | 157.0750 | RX only | FM | - | FL52/Channels |
+| 888 | Mrn VHF 1082 82A | 157.1250 | RX only | FM | - | FL52/Channels |
+| 889 | Mrn VHF 1083 83A | 157.1750 | RX only | FM | - | FL52/Channels |
+| 890 | Marine VHF AIS 1 | 161.9750 | RX only | FM | - | FL52/Channels |
+| 891 | Marine VHF AIS 2 | 162.0250 | RX only | FM | - | FL52/Channels |
+| 892 | NOAA Weather WX1 | 162.5500 | RX only | FM | - | FL52/Channels |
+| 893 | NOAA Weather WX2 | 162.4000 | RX only | FM | - | FL52/Channels |
+| 894 | NOAA Weather WX3 | 162.4750 | RX only | FM | - | FL52/Channels |
+| 895 | NOAA Weather WX4 | 162.4250 | RX only | FM | - | FL52/Channels |
+| 896 | NOAA Weather WX5 | 162.4500 | RX only | FM | - | FL52/Channels |
+| 897 | NOAA Weather WX6 | 162.5000 | RX only | FM | - | FL52/Channels |
+| 898 | NOAA Weather WX7 | 162.5250 | RX only | FM | - | FL52/Channels |
+| 899 | USCG Auxiliary1 | 143.4750 | RX only | FM | - | FL52/Channels |
+| 900 | USCG Auxiliary2 | 150.7000 | RX only | FM | - | FL52/Channels |
+| 901 | WSDOT V1 | 151.0700 | RX only | FM | - | FL53/Channels |
+| 902 | WSDOT V2 | 151.0250 | RX only | FM | - | FL53/Channels |
+| 903 | WSDOT V3 | 156.1200 | RX only | FM | - | FL53/Channels |
+| 904 | WSF Deck-Shore | 151.0400 | RX only | FM | - | FL53/Channels |
+| 905 | switching AAR36 | 160.6500 | RX only | NFM | - | FL56/Channels |
+| 906 | MOW AAR54 | 160.9200 | RX only | NFM | - | FL56/Channels |
+| 907 | Stacy Yard AAR60 | 161.0100 | RX only | NFM | - | FL56/Channels |
+| 908 | AAR66 | 161.1000 | RX only | NFM | - | FL56/Channels |
+| 909 | AAR70 | 161.1600 | RX only | NFM | - | FL56/Channels |
+| 910 | Blmr Yrd AAR80 | 161.3100 | RX only | NFM | - | FL56/Channels |
+| 911 | AAR87 | 161.4150 | RX only | NFM | - | FL56/Channels |
+| 912 | FRS Ch8 | 467.5625 | RX only | FM | - | FL65/Channels |
+| 913 | FRS Ch9 | 467.5875 | RX only | FM | - | FL65/Channels |
+| 914 | FRS Ch10 | 467.6125 | RX only | FM | - | FL65/Channels |
+| 915 | FRS Ch11 | 467.6375 | RX only | FM | - | FL65/Channels |
+| 916 | FRS Ch12 | 467.6625 | RX only | FM | - | FL65/Channels |
+| 917 | FRS Ch13 | 467.6875 | RX only | FM | - | FL65/Channels |
+| 918 | FRS Ch14 | 467.7125 | RX only | FM | - | FL65/Channels |
+| 919 | FRS GMRS Ch1 | 462.5625 | RX only | FM | - | FL65/Channels |
+| 920 | FRS GMRS Ch2 | 462.5875 | RX only | FM | - | FL65/Channels |
+| 921 | FRS GMRS Ch3 | 462.6125 | RX only | FM | - | FL65/Channels |
+| 922 | FRS GMRS Ch4 | 462.6375 | RX only | FM | - | FL65/Channels |
+| 923 | FRS GMRS Ch5 | 462.6625 | RX only | FM | - | FL65/Channels |
+| 924 | FRS GMRS Ch6 | 462.6875 | RX only | FM | - | FL65/Channels |
+| 925 | GMRS FRS Ch15 | 462.5500 | RX only | FM | - | FL65/Channels |
+| 926 | GMRS FRS Ch16 | 462.5750 | RX only | FM | - | FL65/Channels |
+| 927 | GMRS FRS Ch17 | 462.6000 | RX only | FM | - | FL65/Channels |
+| 928 | GMRS FRS Ch18 | 462.6250 | RX only | FM | - | FL65/Channels |
+| 929 | GMRS FRS Ch19 | 462.6500 | RX only | FM | - | FL65/Channels |
+| 930 | GMRS FRS Ch20 | 462.6750 | RX only | FM | - | FL65/Channels |
+| 931 | GMRS FRS Ch21 | 462.7000 | RX only | FM | - | FL65/Channels |
+| 932 | GMRS FRS Ch22 | 462.7250 | RX only | FM | - | FL65/Channels |
+| 933 | MURS Ch1 | 151.8200 | RX only | FM | - | FL66/Channels |
+| 934 | MURS Ch2 | 151.8800 | RX only | FM | - | FL66/Channels |
+| 935 | MURS Ch3 | 151.9400 | RX only | FM | - | FL66/Channels |
+| 936 | NWAC FRS Ch7 | 462.7125 | RX only | FM | - | FL65/Channels |
+| 937 | WA7UOJ Spkn Spkn | 145.1100 | RX only | FM | - | FL73/Channels |
+| 938 | WA7DRE Spkn Vlly | 145.1500 | RX only | FM | - | FL73/Channels |
+| 939 | KC7GKY Spkn Spkn | 145.1700 | RX only | FM | - | FL73/Channels |
+| 940 | W7TRF Spkn Spkn | 145.2100 | RX only | FM | - | FL73/Channels |
+| 941 | K7MMA Spkn Spkn | 145.2900 | RX only | FM | - | FL73/Channels |
+| 942 | N7FM Spkn Vlly | 145.3300 | RX only | FM | - | FL73/Channels |
+| 943 | K7TJ Spkn Spkn | 145.3700 | RX only | FM | - | FL73/Channels |
+| 944 | W7UPS Knnwck | 145.3900 | RX only | FM | - | FL73/Channels |
+| 945 | KI7TRR R Spkn | 146.4750 | RX only | FM | - | FL73/Channels |
+| 946 | N7FM Spkn Spkn | 146.6600 | RX only | FM | - | FL73/Channels |
+| 947 | KF7VOC Md Spkn | 146.6800 | RX only | FM | - | FL73/Channels |
+| 948 | NA7EM Ots | 146.8600 | RX only | FM | - | FL73/Channels |
+| 949 | WR7VHF Spkn Spkn | 146.8800 | RX only | FM | - | FL73/Channels |
+| 950 | N7BFS Spkn Spkn | 147.0600 | RX only | FM | - | FL73/Channels |
+| 951 | KG7SD Spkn Spkn | 147.1000 | RX only | FM | - | FL73/Channels |
+| 952 | K7SRG Spkn Spkn | 147.1200 | RX only | FM | - | FL73/Channels |
+| 953 | AD7DD Spkn Vlly | 147.1400 | RX only | FM | - | FL73/Channels |
+| 954 | W7UPS Spkn Spkn | 147.1600 | RX only | FM | - | FL73/Channels |
+| 955 | K7SRG Omk Okngn | 147.2000 | RX only | FM | - | FL73/Channels |
+| 956 | WA7HWD Spkn Spkn | 147.2400 | RX only | FM | - | FL73/Channels |
+| 957 | W7GBU Spkn Spkn | 147.3000 | RX only | FM | - | FL73/Channels |
+| 958 | WR7VHF Spkn Spk2 | 147.3400 | RX only | FM | - | FL73/Channels |
+| 959 | N7WRQ Spkn Spkn | 147.3800 | RX only | FM | - | FL73/Channels |
+| 960 | WA7DMR Ephrt | 147.4125 | RX only | FM | - | FL73/Channels |
+| 961 | WA7DMR Spkn Wa | 147.4625 | RX only | FM | - | FL73/Channels |
+| 962 | Itinerant VHF1 | 151.5050 | RX only | FM | - | FL68/Channels |
+| 963 | Itinerant VHF2 | 151.5150 | RX only | FM | - | FL68/Channels |
+| 964 | Red Dot | 151.6250 | RX only | FM | - | FL68/Channels |
+| 965 | Itinerant VHF3 | 151.7000 | RX only | FM | - | FL68/Channels |
+| 966 | Itinerant VHF4 | 151.7600 | RX only | FM | - | FL68/Channels |
+| 967 | Bl Grn Dt als | 154.5700 | RX only | FM | - | FL68/Channels |
+| 968 | Bl Grn Dt als 2 | 154.6000 | RX only | FM | - | FL68/Channels |
+| 969 | KE7GII Arwy | 440.5000 | RX only | FM | - | FL73/Channels |
+| 970 | W7IF Spkn Vlly | 441.1750 | RX only | FM | - | FL73/Channels |
+| 971 | N7ISP Spkn Spkn | 441.7750 | RX only | FM | - | FL73/Channels |
+| 972 | W6LNB Spkn Spkn | 442.0250 | RX only | FM | - | FL73/Channels |
+| 973 | WA7BFN Spkn Spkn | 442.5250 | RX only | FM | - | FL73/Channels |
+| 974 | W7CDP Spkn Spkn | 442.5750 | RX only | FM | - | FL73/Channels |
+| 975 | N7FM Spkn Spkn2 | 442.6000 | RX only | FM | - | FL73/Channels |
+| 976 | K7TMF Spkn Spkn | 442.7000 | RX only | FM | - | FL73/Channels |
+| 977 | AD7QJ Dr PK Spkn | 442.7500 | RX only | FM | - | FL73/Channels |
+| 978 | NV2Z Ots Orchrds | 442.9250 | RX only | FM | - | FL73/Channels |
+| 979 | WA7DRE Spkn Spkn | 443.1250 | RX only | FM | - | FL73/Channels |
+| 980 | W7GBU Spkn Spkn2 | 443.4000 | RX only | FM | - | FL73/Channels |
+| 981 | W7TRF Vrdl Spkn | 443.4750 | RX only | FM | - | FL73/Channels |
+| 982 | WA7DRE Spkn Spk2 | 443.5250 | RX only | FM | - | FL73/Channels |
+| 983 | W7UPS Nn Ml Flls | 443.7000 | RX only | FM | - | FL73/Channels |
+| 984 | K7MMA Spkn Spkn2 | 443.9250 | RX only | FM | - | FL73/Channels |
+| 985 | W7UPS Nn Ml Fll2 | 443.9500 | RX only | FM | - | FL73/Channels |
+| 986 | WA7BFN Chny Wa | 444.0250 | RX only | FM | - | FL73/Channels |
+| 987 | KG7SD Spkn Spkn2 | 444.0500 | RX only | FM | - | FL73/Channels |
+| 988 | K7TJ Spkn Spkn2 | 444.1250 | RX only | FM | - | FL73/Channels |
+| 989 | KC7AAD Spkn Spkn | 444.1500 | RX only | FM | - | FL73/Channels |
+| 990 | N7BFS Spkn Spkn2 | 444.1750 | RX only | FM | - | FL73/Channels |
+| 991 | N1NG Spkn Spkn | 444.3500 | RX only | FM | - | FL73/Channels |
+| 992 | W7UPS Nn Ml Fll3 | 444.4000 | RX only | FM | - | FL73/Channels |
+| 993 | N7FM Spkn Spkn3 | 444.4250 | RX only | FM | - | FL73/Channels |
+| 994 | AE7RJ Spkn Spkn | 444.5000 | RX only | FM | - | FL73/Channels |
+| 995 | WR7VHF Spkn Spk3 | 444.6000 | RX only | FM | - | FL73/Channels |
+| 996 | KA7ENA Spkn Spkn | 444.6500 | RX only | FM | - | FL73/Channels |
+| 997 | K7SRG Spkn Spkn2 | 444.7000 | RX only | FM | - | FL73/Channels |
+| 998 | WR7VHF Spkn Spk4 | 444.9000 | RX only | FM | - | FL73/Channels |
+| 999 | WA7UOJ Spkn Spk2 | 444.9500 | RX only | FM | - | FL73/Channels |
+| 1000 | Sfr FCC WRYC378 | 451.4125 | RX only | FM | - | FL73/Channels |
+| 1001 | Sfr WRYC378 2 | 452.0125 | RX only | FM | - | FL73/Channels |
+| 1002 | Sfr WRYC378 5 | 452.3750 | RX only | FM | - | FL73/Channels |
+| 1003 | Sfr WRYC378 3 | 452.6375 | RX only | FM | - | FL73/Channels |
+| 1004 | Sfr WRYC378 4 | 452.9750 | RX only | FM | - | FL73/Channels |
+| 1005 | Sfr WRYC378 6 | 456.4125 | RX only | FM | - | FL73/Channels |
+| 1006 | Sfr WRYC378 7 | 457.0125 | RX only | FM | - | FL73/Channels |
+| 1007 | Sfr WRYC378 8 | 457.1000 | RX only | FM | - | FL73/Channels |
+| 1008 | Sfr WRYC378 9 | 457.3375 | RX only | FM | - | FL73/Channels |
+| 1009 | Sfr WRYC378 10 | 457.3750 | RX only | FM | - | FL73/Channels |
+| 1010 | Sfr WRYC378 11 | 457.9750 | RX only | FM | - | FL73/Channels |
+| 1011 | Sfr WRYC378 12 | 461.6000 | RX only | FM | - | FL73/Channels |
+| 1012 | Sfr WRYC378 13 | 461.6250 | RX only | FM | - | FL73/Channels |
+| 1013 | Sfr WRYC378 14 | 461.7875 | RX only | FM | - | FL73/Channels |
+| 1014 | Sfr WRYC378 15 | 463.3000 | RX only | FM | - | FL73/Channels |
+| 1015 | Sfr WRYC378 16 | 463.3125 | RX only | FM | - | FL73/Channels |
+| 1016 | Brown Dot | 464.5000 | RX only | FM | - | FL68/Channels |
+| 1017 | WA Fair UHF | 464.5000 | RX only | NXDN | NXDN | FL73/Channels |
+| 1018 | WA Fair UHF 2 | 464.5500 | RX only | NXDN | NXDN | FL73/Channels |
+| 1019 | Yellow Dot | 464.5500 | RX only | FM | - | FL68/Channels |
+| 1020 | Itinerant UHF1 | 467.7625 | RX only | FM | - | FL68/Channels |
+| 1021 | Itinerant UHF2 | 467.8125 | RX only | FM | - | FL68/Channels |
+| 1022 | Itinerant UHF3 | 467.8500 | RX only | FM | - | FL68/Channels |
+| 1023 | Itinerant UHF4 | 467.8750 | RX only | FM | - | FL68/Channels |
+| 1024 | Itinerant UHF5 | 467.9000 | RX only | FM | - | FL68/Channels |
+| 1025 | Silver Star | 467.9250 | RX only | FM | - | FL68/Channels |
+| 1026 | AMR NXDN | 152.3375 | RX only | NXDN | NXDN | FL71/Channels |
+| 1027 | AMR NXDN 2 | 152.4425 | RX only | NXDN | NXDN | FL71/Channels |
+| 1028 | Brinnon Fire | 154.0925 | RX only | FM | - | FL14/Channels |
+| 1029 | Mason Fire Dist5 | 154.1900 | RX only | FM | - | FL13/Channels |
+| 1030 | Fire 2 | 154.2650 | RX only | FM | - | FL16/Channels |
+| 1031 | Fire | 154.4300 | RX only | FM | - | FL16/Channels |
+| 1032 | MED-9 | 163.0000 | RX only | FM | - | FL71/Channels |
+| 1033 | Island Sheriff | 453.0500 | RX only | FM | - | FL16/Channels |
+| 1034 | San Juan SJCSO | 453.2500 | RX only | FM | - | FL16/Channels |
+| 1035 | Jefferson SO | 453.5750 | RX only | FM | - | FL14/Channels |
+| 1036 | Mason Sheriff | 460.2250 | RX only | FM | - | FL13/Channels |
+| 1037 | Mason Sheriff 2 | 460.5125 | RX only | FM | - | FL13/Channels |
+| 1038 | Oak Harbor PD | 460.5750 | RX only | FM | - | FL16/Channels |
+| 1039 | OLY Amblnc EMS | 462.9500 | RX only | AM | - | FL14/Channels |
+| 1040 | MED-1 | 463.0000 | RX only | FM | - | FL71/Channels |
+| 1041 | MED-7 | 463.1500 | RX only | FM | - | FL71/Channels |
+| 1042 | MED-1 2 | 468.0000 | RX only | FM | - | FL71/Channels |
+| 1043 | MED-7 2 | 468.1500 | RX only | FM | - | FL71/Channels |
+| 1044 | Atlntc Base DISP | 451.5125 | RX only | FM | - | FL70a/Channels |
+| 1045 | Ch2 | 451.6625 | RX only | FM | - | FL70a/Channels |
+| 1046 | Ch4 | 452.0875 | RX only | FM | - | FL70a/Channels |
+| 1047 | 144.35 K7NHV-10 | 144.3500 | RX only | FM | - | SEAACS/ACS VHF Data |
+| 1048 | 144.39 APRS | 144.3900 | RX only | FM | - | SEAACS/ACS VHF Data |
+| 1049 | 144.63 PKT | 144.6300 | RX only | FM | - | SEAACS/ACS VHF Data |
+| 1050 | 144.87 W7ACS | 144.8700 | RX only | FM | - | SEAACS/ACS VHF Data |
+| 1051 | 144.90 QA DK | 144.9000 | RX only | FM | - | SEAACS/ACS VHF Data |
+| 1052 | 144.91 K7QHG-10 | 144.9100 | RX only | FM | - | SEAACS/ACS VHF Data |
+| 1053 | 144.93 | 144.9300 | RX only | FM | - | SEAACS/ACS VHF Data |
+| 1054 | 144.95 BLV RTN | 144.9500 | RX only | FM | - | SEAACS/ACS VHF Data |
+| 1055 | 144.97 K7IF-10 | 144.9700 | RX only | FM | - | SEAACS/ACS VHF Data |
+| 1056 | 144.975 PtOrchrd | 144.9750 | RX only | FM | - | SEAACS/ACS VHF Data |
+| 1057 | 144.99 | 144.9900 | RX only | FM | - | SEAACS/ACS VHF Data |
+| 1058 | 145.01 NK7N-10 | 145.0100 | RX only | FM | - | SEAACS/ACS VHF Data |
+| 1059 | 145.03 NS7C-10 | 145.0300 | RX only | FM | - | SEAACS/ACS VHF Data |
+| 1060 | 145.05 K7NVH-10 | 145.0500 | RX only | FM | - | SEAACS/ACS VHF Data |
+| 1061 | 145.07 W7VMI-10 | 145.0700 | RX only | FM | - | SEAACS/ACS VHF Data |
+| 1062 | 145.09 Wstcrst | 145.0900 | RX only | FM | - | SEAACS/ACS VHF Data |
+| 1063 | DV Simplex | 145.1000 | RX only | FM | - | SEAACS/ACS VHF Data |
+| 1064 | 145.51 | 145.5100 | RX only | FM | - | SEAACS/ACS VHF Data |
+| 1065 | 145.53 | 145.5300 | RX only | FM | - | SEAACS/ACS VHF Data |
+| 1066 | 145.55 | 145.5500 | RX only | FM | - | SEAACS/ACS VHF Data |
+| 1067 | 145.57 | 145.5700 | RX only | FM | - | SEAACS/ACS VHF Data |
+| 1068 | 145.59 | 145.5900 | RX only | FM | - | SEAACS/ACS VHF Data |
+| 1069 | 145.61 | 145.6100 | RX only | FM | - | SEAACS/ACS VHF Data |
+| 1070 | 145.63 | 145.6300 | RX only | FM | - | SEAACS/ACS VHF Data |
+| 1071 | 145.65 | 145.6500 | RX only | FM | - | SEAACS/ACS VHF Data |
+| 1072 | 145.67 | 145.6700 | RX only | FM | - | SEAACS/ACS VHF Data |
+| 1073 | 145.69 | 145.6900 | RX only | FM | - | SEAACS/ACS VHF Data |
+| 1074 | 145.71 | 145.7100 | RX only | FM | - | SEAACS/ACS VHF Data |
+| 1075 | 145.73 | 145.7300 | RX only | FM | - | SEAACS/ACS VHF Data |
+| 1076 | 145.75 | 145.7500 | RX only | FM | - | SEAACS/ACS VHF Data |
+| 1077 | 145.77 | 145.7700 | RX only | FM | - | SEAACS/ACS VHF Data |
+| 1078 | 430.80 W7ACS-10 | 430.8000 | RX only | FM | - | SEAACS/ACS UHF Data |
+| 1079 | 430.825 Mercer | 430.8250 | RX only | FM | - | SEAACS/ACS UHF Data |
+| 1080 | 430.85 W7ACS-12 | 430.8500 | RX only | FM | - | SEAACS/ACS UHF Data |
+| 1081 | 430.875 W7ACS-9 | 430.8750 | RX only | FM | - | SEAACS/ACS UHF Data |
+| 1082 | 430.9 | 430.9000 | RX only | FM | - | SEAACS/ACS UHF Data |
+| 1083 | 430.925 | 430.9250 | RX only | FM | - | SEAACS/ACS UHF Data |
+| 1084 | 430.95 W7ACS-14 | 430.9500 | RX only | FM | - | SEAACS/ACS UHF Data |
+| 1085 | 430.975 | 430.9750 | RX only | FM | - | SEAACS/ACS UHF Data |
+| 1086 | 439.80 W7ACS-11 | 439.8000 | RX only | FM | - | SEAACS/ACS UHF Data |
+| 1087 | 439.825 NC7G-10 | 439.8250 | RX only | FM | - | SEAACS/ACS UHF Data |
+| 1088 | 439.85 W7AW-10 | 439.8500 | RX only | FM | - | SEAACS/ACS UHF Data |
+| 1089 | 439.875 AC7MD-10 | 439.8750 | RX only | FM | - | SEAACS/ACS UHF Data |
+| 1090 | 439.9 | 439.9000 | RX only | FM | - | SEAACS/ACS UHF Data |
+| 1091 | 439.925 NC7G-10 | 439.9250 | RX only | FM | - | SEAACS/ACS UHF Data |
+| 1092 | 439.95 W7ACS-15 | 439.9500 | RX only | FM | - | SEAACS/ACS UHF Data |
+| 1093 | 439.975 W7ACS-8 | 439.9750 | RX only | FM | - | SEAACS/ACS UHF Data |
+| 1094 | 440.75 | 440.7500 | RX only | FM | - | SEAACS/ACS UHF Data |
+| 1095 | 440.8 | 440.8000 | RX only | FM | - | SEAACS/ACS UHF Data |
+| 1096 | 440.825 | 440.8250 | RX only | FM | - | SEAACS/ACS UHF Data |
+| 1097 | 440.85 W7ACS-13 | 440.8500 | RX only | FM | - | SEAACS/ACS UHF Data |
+| 1098 | 440.875 | 440.8750 | RX only | FM | - | SEAACS/ACS UHF Data |
+| 1099 | 440.90 WA7AUB-10 | 440.9000 | RX only | FM | - | SEAACS/ACS UHF Data |
+| 1100 | 440.925 | 440.9250 | RX only | FM | - | SEAACS/ACS UHF Data |
+| 1101 | 440.95 AC7LW-10 | 440.9500 | RX only | FM | - | SEAACS/ACS UHF Data |
+| 1102 | DigCall 441.0 | 441.0000 | RX only | FM | - | SEAACS/ACS UHF Data |
+| 1103 | KNKX Tacoma | 88.5000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
+| 1104 | KMIH Mrcr Islnd | 88.9000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
+| 1105 | KNHC Seattle | 89.5000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
+| 1106 | KASB Bellevue | 89.9000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
+| 1107 | KUPS Tacoma | 90.1000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
+| 1108 | KEXP-FM Seattle | 90.3000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
+| 1109 | KSER Everett | 90.7000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
+| 1110 | KVTI Tacoma | 90.9000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
+| 1111 | KBCS Bellevue | 91.3000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
+| 1112 | KQXI Grnt Flls | 91.5000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
+| 1113 | KYFQ Tacoma | 91.7000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
+| 1114 | KQMV Bellevue | 92.5000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
+| 1115 | KJR-FM Seattle | 93.3000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
+| 1116 | KSWD Seattle | 94.1000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
+| 1117 | KUOW-FM Seattle | 94.9000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
+| 1118 | KJEB Seattle | 95.7000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
+| 1119 | KJAQ Seattle | 96.5000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
+| 1120 | KIRO-FM Tacoma | 97.3000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
+| 1121 | KING-FM Seattle | 98.1000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
+| 1122 | KPNW-FM Seattle | 98.9000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
+| 1123 | KISW Seattle | 99.9000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
+| 1124 | KKWF Seattle | 100.7000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
+| 1125 | KPLZ-FM Seattle | 101.5000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
+| 1126 | KQES-LP Bellevue | 101.9000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
+| 1127 | KZOK-FM Seattle | 102.5000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
+| 1128 | KHTP Tacoma | 103.7000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
+| 1129 | KLSW Covington | 104.5000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
+| 1130 | KAPY-LP Duvall | 104.9000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
+| 1131 | KCMS Edmonds | 105.3000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
+| 1132 | KBKS-FM Tacoma | 106.1000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
+| 1133 | KRWM Bremerton | 106.9000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
+| 1134 | KNDD Seattle | 107.7000 | RX only | WFM | - | THD75BC/FM Broadcast Within 50 Miles |
 
 ## Warnings
 
 - radio profile 'at-d890uv' is unverified; check its capabilities against the manual before programming a radio from this plan
+- talkgroup 3166 is named 'Metro 2' and also 'Local 2'; the CPS files contacts by id, so every channel uses 'Metro 2'
+- 4 NXDN channels written with the RAN in the EnRan/DeRan columns; that column mapping is unverified against a CPS export and the rows are silent until the radio is switched to the NXDN protocol
 
 ## Excluded channels
 
 Every catalog channel this plan matched but could not program, and why.
 
-### duplicate (1886) - the frequency (or talkgroup on it) is already programmed
+### duplicate (255) - the frequency (or talkgroup on it) is already programmed
 
 - WW7MST Seattle [146.9000]
 - WW7MST Seattle [443.5500]
@@ -1328,7 +1188,7 @@ Every catalog channel this plan matched but could not program, and why.
 - BC 1 TAR [440.7250]
 - Bridge 2 TAR [440.7250]
 - California 1 TAR [440.7250]
-- ... and 1878 more
+- ... and 247 more
 
 ### unsupported-mode (2) - the radio cannot demodulate this mode
 
