@@ -623,9 +623,10 @@ _BLOCKS: Tuple[ServiceBlockSpec, ...] = (
     ServiceBlockSpec(
         "murs", "MURS", "GMRS/FRS/MURS",
         lambda k: (_keys("FL66", ranges=_exact(MURS)),),
-        tx=TXK_MURS, limit=5, power=POWER_LOW, tx_probe=_MURS_PROBE,
+        tx=TXK_MURS, limit=5, power=POWER_HIGH, tx_probe=_MURS_PROBE,
         groups=(GROUP_PERSONAL,),
-        notes="47 CFR 95.2767 caps MURS at 2 W.",
+        notes="47 CFR 95.2767 caps MURS at 2 W ERP; the operator's explicit "
+              "choice is the radio's highest step, as on GMRS and FRS.",
     ),
     ServiceBlockSpec(
         "business", "Business and Events", "Business",

@@ -181,13 +181,13 @@ hardware transmits; everything else is receive only.
 |---|---|---|
 | Amateur | General class, WA7DAM | Every amateur block, checked channel by channel against General privileges |
 | GMRS and FRS | WRWH962 | GMRS 1-7, FRS 8-14, GMRS 15-22 and the hand-added open repeaters (each on its input and access tone), all at the radio's highest power, on radios whose hardware covers 462/467 MHz - the TD-H9 at 10 W, and the AT-D890UV once it is in band mode 00014 |
-| MURS | licence-free | Low power, on radios whose hardware covers 151-154 MHz - the TD-H9 and the AT-D890UV |
+| MURS | licence-free | The five MURS channels at the radio's highest power, on radios whose hardware covers 151-154 MHz - the TD-H9 and the AT-D890UV |
 
-Part 95 requires certified GMRS and MURS equipment (95.1761, 95.2761) and
-limits a GMRS station to 5 W ERP on channels 1-7 and 0.5 W ERP on 8-14
-(95.1767). Transmitting from radios that are not certified, and at full power
-on channels 1-14, is the operator's own, explicit choice; the template does
-not cap it. MURS stays at low power, inside its 2 W limit (95.2767).
+Part 95 requires certified GMRS and MURS equipment (95.1761, 95.2761), limits
+a GMRS station to 5 W ERP on channels 1-7 and 0.5 W ERP on 8-14 (95.1767), and
+caps MURS at 2 W ERP (95.2767). Transmitting from radios that are not
+certified, and at the radio's highest power on all of GMRS, FRS and MURS, is
+the operator's own, explicit choice; the template does not cap any of it.
 
 ## Radios
 

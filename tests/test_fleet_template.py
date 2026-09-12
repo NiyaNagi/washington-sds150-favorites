@@ -142,13 +142,12 @@ def test_gmrs_frs_and_murs_transmit_wherever_the_hardware_does():
                 assert block.tx_policy == TX_NONE, (radio_id, block.label)
 
 
-def test_gmrs_and_frs_run_at_full_power_and_murs_stays_low():
-    # The operator's explicit choice: every GMRS and FRS channel at the
-    # radio's highest step, regardless of the 95.1767 ERP limits.
+def test_gmrs_frs_and_murs_all_run_at_full_power():
+    # The operator's explicit choice: every GMRS, FRS and MURS channel at the
+    # radio's highest step, regardless of the 95.1767 and 95.2767 ERP limits.
     powers = {b.label: b.power for b in build_fleet_plan("td-h9").blocks}
-    for label in ("GMRS 1-7", "FRS 8-14", "GMRS 15-22", "GMRS Repeaters"):
+    for label in ("GMRS 1-7", "FRS 8-14", "GMRS 15-22", "GMRS Repeaters", "MURS"):
         assert powers[label] == "10W", label
-    assert powers["MURS"] == "1.0W"
 
 
 def test_no_amateur_transmit_without_a_licence():
