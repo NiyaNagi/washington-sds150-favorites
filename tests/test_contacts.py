@@ -84,14 +84,37 @@ def test_contact_csv_is_private_calls_filled_by_header_name():
     assert reordered[1] == ["KA7XYZ", "3153001"]
 
 
-def test_contact_files_split_at_the_radio_limit_and_flag_the_unverified_format():
+def test_contact_files_split_at_the_radio_limit():
     table = parse_contacts(SAMPLE, "DMR")
     files, warnings = contact_files([table], ContactCapability(protocols=frozenset({"DMR"}), max_contacts=2))
-    assert sorted(files) == ["DigitalContactList.CSV", "DigitalContactList_2.CSV"]
+    assert sorted(files) == ["DMRDigitalContactList.CSV", "DMRDigitalContactList_2.CSV"]
     assert any("exceed" in w for w in warnings)
-    assert any("not yet confirmed" in w for w in warnings)
     none, _ = contact_files([table], ContactCapability(protocols=frozenset({"NXDN"}), max_contacts=10))
     assert none == {}
+
+
+def test_the_two_protocols_get_different_headers():
+    # Captured from a D890UV CPS Export All: NXDN has no No. column, splits the
+    # name, and ends in Attr/TxForbid/Ring instead of Call Type/Call Alert.
+    dmr = parse_contacts(SAMPLE, "DMR")
+    nxdn = parse_contacts(
+        "RADIO_ID,CALLSIGN,FIRST_NAME,LAST_NAME,CITY,STATE,COUNTRY\n"
+        "16240,WA7DAM,Adam,Steenwyk,Redmond,Washington,United States\n",
+        "NXDN",
+    )
+    assert nxdn.rows, "NXDN ids are shorter than DMR ids; the sample must use a real one"
+    capability = ContactCapability(protocols=frozenset({"DMR", "NXDN"}), max_contacts=100)
+    files, warnings = contact_files([dmr, nxdn], capability)
+    assert sorted(files) == ["DMRDigitalContactList.CSV", "NXDigitalContactList.CSV"]
+    assert files["DMRDigitalContactList.CSV"].splitlines()[0] == (
+        '"No.","Radio ID","Callsign","Name","City","State","Country","Remarks","Call Type","Call Alert"'
+    )
+    assert files["NXDigitalContactList.CSV"].splitlines()[0] == (
+        '"RADIO_ID","CALLSIGN","FIRST_NAME","LAST_NAME","CITY","STATE","COUNTRY","Attr","TxForbid","Ring"'
+    )
+    first = files["NXDigitalContactList.CSV"].splitlines()[1].split(",")
+    assert first[-3:] == ['""', '""', '""']  # unconfirmed, deliberately empty
+    assert any("Attr, TxForbid and Ring" in w for w in warnings)
 
 
 def test_radioid_source_fetches_both_lists_and_makes_no_catalog_facts():
@@ -138,7 +161,7 @@ def test_fleet_export_puts_contacts_beside_the_bundle_but_not_in_the_manifest(ct
 
     ContactStore(ctx.config.contacts_dir).save(parse_contacts(SAMPLE, "DMR"))
     export = export_radio(ctx, "at-d890uv", out_dir=tmp_path / "b", copy_to=tmp_path / "copy")
-    contacts = export.path / "DigitalContactList.CSV"
+    contacts = export.path / "DMRDigitalContactList.CSV"
     assert contacts.is_file() and contacts in export.files
     assert "DigitalContactList" not in (export.path / "at-d890uv-fleet.LST").read_text(encoding="ascii")
-    assert (tmp_path / "copy" / "at-d890uv-fleet" / "DigitalContactList.CSV").is_file()
+    assert (tmp_path / "copy" / "at-d890uv-fleet" / "DMRDigitalContactList.CSV").is_file()

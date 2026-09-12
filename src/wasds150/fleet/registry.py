@@ -320,9 +320,10 @@ AT_D890UV = FleetRadio(
         ),
         StepSpec(
             "import-contacts", "Import the contact list",
-            "Tool > Import > Digital Contact List > choose {contacts}, then the NXDN contact list "
-            "(NXDNContactList.CSV in the same folder). A worldwide list takes several minutes. The "
-            "files' columns are not yet confirmed against this CPS, so check a few entries afterwards.",
+            "Tool > Import > DMR Digital Contact List > choose {contacts}, then NX Digital Contact "
+            "List > NXDigitalContactList.CSV in the same folder. A worldwide list takes several "
+            "minutes. The NXDN table's Attr, TxForbid and Ring columns are written empty because the "
+            "captured export had no NXDN contact to copy them from, so check an entry afterwards.",
             optional=True, artifacts=("contacts",),
         ),
         StepSpec(

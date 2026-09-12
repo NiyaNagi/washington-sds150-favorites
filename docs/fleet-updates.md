@@ -42,7 +42,7 @@ is flagged there and blocks that radio until it is filled in.
 | `sds150.sentinel_profile` | `Preset` | The only profile in the Sentinel workspace. Change it if the scanner's lists live in another profile. |
 | `td-h9.com_port` | not set | Plug in the programming cable, find its port in Device Manager (a Prolific USB-to-Serial entry, for example COM7), and enter it. COM3 is an unrelated device. |
 | `th-d75.backup_d75` | newest `radio-backups\th-d75\*.d75` | Read the radio into a fresh backup first; the checklist's first step says how. |
-| `at-d890uv.rdt_base` | not set | Optional. After setting the Optional Settings in the CPS once, save the codeplug and point this at the `.rdt`, so later imports keep them. |
+| `at-d890uv.rdt_base` | `radio-backups\at-d890uv\backup-factory-install 09-11-26 Anytone 890UV-mode14.rdt` | Read before the NXDN flash, so it has band mode 00014 but no NX pages. After setting the Optional Settings in the CPS once, save the codeplug and point this at that `.rdt` instead, so later imports keep them. |
 
 ### The same from a terminal
 
@@ -296,7 +296,7 @@ the operator's own, explicit choice; the template does not cap any of it.
 3. **Open the codeplug** - File > Open <rdt_base> to keep your Optional Settings, or File > New for a first build. Model > Model Information must match the radio's frequency range.
 4. **Set the NXDN unit ID** - NX Setting > Unit ID(Own) = 16240, your radioid.net NXDN ID. It is a radio-wide setting, not in the import bundle; a codeplug opened from <rdt_base> already has it.
 5. **Import the bundle** - Tool > Import > choose <lst> > Import All. A name the CPS cannot resolve means the export is stale: re-export rather than editing in place.
-6. **Import the contact list** _(optional)_ - Tool > Import > Digital Contact List > choose <contacts>, then the NXDN contact list (NXDNContactList.CSV in the same folder). A worldwide list takes several minutes. The files' columns are not yet confirmed against this CPS, so check a few entries afterwards.
+6. **Import the contact list** _(optional)_ - Tool > Import > DMR Digital Contact List > choose <contacts>, then NX Digital Contact List > NXDigitalContactList.CSV in the same folder. A worldwide list takes several minutes. The NXDN table's Attr, TxForbid and Ring columns are written empty because the captured export had no NXDN contact to copy them from, so check an entry afterwards.
 7. **Save and write** - Save the codeplug into radio-backups\at-d890uv\, then Write to radio (Other Data; Digital Contact List only if one was loaded).
 8. **Read back** _(optional)_ - Read from radio, then Tool > Export > Export All into a new radio-backups\at-d890uv\<date>-readback\ folder.
 9. **Compare the read-back** _(automatic, optional)_ - Compare the read-back folder with the generated bundle, table by table.

@@ -85,6 +85,10 @@ and **Reset Digi. Protocol = DMR** keep that default across resets.
 
 ### Is NXDN actually enabled?
 
+**On this radio, yes** - the NX_DMR overlay was flashed on 2026-09-11, and the
+Export All kept alongside it carries `NXSetting.CSV`, `NXTalkGroup.CSV` and the
+rest. So `NX Setting > Unit ID(Own) = 16240` is a real step again.
+
 There is no CPS switch for it: **NXDN exists only when the NX_DMR firmware is
 flashed.** The official 1.05 build is DMR-only, and on it the CPS hides every
 NXDN page. Two ways to tell without guessing:
@@ -156,52 +160,48 @@ Scan groups (composite lists, each chunked at 100 members: `Ham All 01`,
 1. `C:\D890UV\D890UV.exe` > File > New.
 2. Model > Model Information: confirm the frequency range matches the radio
    (read the radio first if unsure; a mismatch produces "Band Error").
-3. Tool > Import. **Do not use Import From File List** - see below. Fill in one
-   table per row with that row's own button, then press **Import**:
-
-   | Import dialog row | File |
-   |---|---|
-   | Channel | `Channel.CSV` |
-   | Radio ID List | `RadioIDList.CSV` |
-   | DMR Zone | `DMRZone.CSV` |
-   | Scan List | `ScanList.CSV` |
-   | DMR Talk Groups | `DMRTalkGroups.CSV` |
-   | DMR Receive Group Call List | `DMRReceiveGroupCallList.CSV` |
-   | FM | `FM.CSV` |
-   | AM Air | `AMAir.CSV` |
-   | AM Zone | `AMZone.CSV` |
-
-   Channel first and the zone and scan lists after the channels they name; the
-   rest in any order. A name that does not resolve (a zone member missing from
+3. Tool > Import > **Import From File List** > choose `at-d890uv-fleet.LST` >
+   **Import All**. A name that does not resolve (a zone member missing from
    `Channel.CSV`) is reported by the CPS - it means the export is stale, so
    re-export rather than editing in place.
-4. Digital > Radio ID List shows `3227807` / `WA7DAM`; nothing to change.
+4. If the manifest is ever refused, every table can be imported on its own from
+   the same dialog, each row with its own button:
 
-### Why not Import From File List
+   | Import dialog row | File | Slot |
+   |---|---|---:|
+   | Channel | `Channel.CSV` | 0 |
+   | Radio ID List | `RadioIDList.CSV` | 1 |
+   | DMR Zone | `DMRZone.CSV` | 2 |
+   | Scan List | `ScanList.CSV` | 3 |
+   | DMR Talk Groups | `DMRTalkGroups.CSV` | 5 |
+   | FM | `FM.CSV` | 7 |
+   | DMR Receive Group Call List | `DMRReceiveGroupCallList.CSV` | 8 |
+   | AM Air | `AMAir.CSV` | 27 |
+   | AM Zone | `AMZone.CSV` | 30 |
 
-`Import From File List` reads the `.LST` manifest, whose every line is
-`<index>,"<file>"`. That index selects one of the CPS's **fixed** import slots,
-in the order its own `english.ini` gives them at string ids 29110 onwards:
+   Channel first and the zone and scan lists after the channels they name.
+5. Digital > Radio ID List shows `3227807` / `WA7DAM`; nothing to change.
 
-```
-0 Channel   1 Radio ID List   2 DMR Zone   3 Scan List
-4 Analog Address Book   5 DMR Talk Groups   6 Prefabricated SMS
-7 FM   8 DMR Receive Group Call List   9 5Tone Encode  ...
-```
+### The manifest index is a slot, not a position
 
-The exporter numbers its nine files `0..8` by position. That matches as far as
-Scan List and then slips: index 4 offers `DMRTalkGroups.CSV` to *Analog Address
-Book*, and the import stops with `ImportFromFileListError` - about halfway
-through, which is exactly where it is seen.
+Every `.LST` line is `<index>,"<file>"`, and the index selects one of the CPS's
+**fixed** import slots - the "Slot" column above. It belongs to the table, not
+to the manifest: a manifest listing nine tables still has to give each file its
+own number. Numbering a nine-file subset `0..8` matches only as far as
+`ScanList.CSV` and then hands `DMRTalkGroups.CSV` to slot 4, *Analog Address
+Book*, which is where Import All stops with `ImportFromFileListError` - about
+halfway through, which is where it was seen.
 
-Fixing it needs the real index of every table, including the ones in the
-dialog's right-hand column (AM Air, AM Zone, Optional Setting, the HotKey
-tables), and the only sound source for those is a `Tool > Export > Export All`
-of this CPS: the `.LST` it writes carries the CPS's own numbering. That capture
-has not been made yet, so `LST_INDEX_VERIFIED` in
-`src/wasds150/export/atd890_cps.py` is `False` and every export carries a
-warning pointing here. Capturing it also yields the `OptionalSetting.CSV` and
-`HotKey_*.CSV` the settings template needs, so it is worth doing once.
+The full table is :data:`LST_INDEX` in `src/wasds150/export/atd890_cps.py`, all
+38 slots, captured from a `Tool > Export > Export All` of CPS 1.05 on firmware
+1.05 + NX_DMR and kept verbatim at
+`radio-backups/at-d890uv/20260911-export-all-fw105-nxdn/export.LST`. Slots are
+stable across firmware: the six NX tables keep their numbers (23-26, 31, 34)
+whether or not the NXDN overlay is flashed, and the Import dialog simply hides
+the rows it cannot use. An export naming a file the table does not know fails
+at export time rather than in the CPS.
+
+Re-capture it if the CPS is ever upgraded, and diff it against that file.
 
 ### Optional Settings to set by hand
 
@@ -262,16 +262,27 @@ export uses the first zone and says so in the report.
 
 `wasds150 fleet update` downloads the worldwide DMR and NXDN ID registry from
 radioid.net, checking with the server on every update (radioid.net republishes
-daily; an unchanged file is not downloaded again), and the fleet
-export writes it next to the bundle as `DigitalContactList.CSV` (and
-`NXDNContactList.CSV`), every entry a Private Call, split into numbered files
-if it ever exceeds the radio's 500,000 contacts. **Its column layout is not yet
-confirmed against this CPS**, so it is deliberately left out of the `.LST`:
-import it on its own (Tool > Import > Digital Contact List), then open a few
-entries. Once an Export All of a codeplug with contacts confirms the header and
-file name, set `CONTACT_FORMAT_VERIFIED` in
-`src/wasds150/export/atd890_contacts.py` and paste the captured header over
-`CONTACT_HEADER`. Importing ~300,000 contacts takes several minutes.
+daily; an unchanged file is not downloaded again), and the fleet export writes
+it next to the bundle, every entry a Private Call, split into numbered files if
+it ever exceeds the radio's 500,000 contacts.
+
+The two protocols do **not** share a format; both headers below are from the
+captured Export All:
+
+| File | Slot | Header |
+|---|---:|---|
+| `DMRDigitalContactList.CSV` | 15 | `No., Radio ID, Callsign, Name, City, State, Country, Remarks, Call Type, Call Alert` |
+| `NXDigitalContactList.CSV` | 31 | `RADIO_ID, CALLSIGN, FIRST_NAME, LAST_NAME, CITY, STATE, COUNTRY, Attr, TxForbid, Ring` |
+
+The NXDN table has no `No.` column, splits the name, and ends in three columns
+of its own. The captured table was empty, so `Attr`, `TxForbid` and `Ring` have
+a confirmed name but no confirmed value and are written empty
+(`NXDN_TRAILING_VERIFIED` is `False`); add one NXDN contact by hand, export
+again, and paste the values in to close that.
+
+Both stay out of the `.LST` and are imported on their own (Tool > Import >
+DMR Digital Contact List, and NX Digital Contact List) because a worldwide list
+takes several minutes and is rarely worth reloading with the rest of a bundle.
 
 ### Using it as a scanner
 

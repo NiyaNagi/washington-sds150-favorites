@@ -299,6 +299,31 @@ class TestBundle:
             build_bundle(resolve_plan(bad, make_catalog(make_channel("X", 146.52, mode="FM"))))
 
 
+def test_lst_index_matches_the_captured_export_all():
+    """LST_INDEX is transcribed from a real CPS manifest; keep them identical.
+
+    ``tests/fixtures/atd890-cps105-export-all.LST`` is a verbatim
+    ``Tool > Export > Export All`` from D890UV CPS 1.05 on firmware 1.05 +
+    NX_DMR. Re-capture it after a CPS upgrade and this test says what moved.
+    """
+    from pathlib import Path
+
+    from wasds150.export.atd890_cps import LST_INDEX
+
+    text = (Path(__file__).parent / "fixtures" / "atd890-cps105-export-all.LST").read_text(encoding="ascii")
+    lines = text.strip().splitlines()
+    captured = {}
+    for line in lines[1:]:
+        index, name = line.split(",", 1)
+        captured[name.strip('"')] = int(index)
+    assert int(lines[0]) == len(captured) == 38
+    assert LST_INDEX == captured
+    # The tables the bundle writes, and the slots the failure was traced to.
+    assert [captured[n] for n in ("Channel.CSV", "RadioIDList.CSV", "DMRZone.CSV", "ScanList.CSV")] == [0, 1, 2, 3]
+    assert captured["AnalogAddressBook.CSV"] == 4 and captured["DMRTalkGroups.CSV"] == 5
+    assert captured["AMAir.CSV"] == 27 and captured["AMZone.CSV"] == 30
+
+
 class TestCpsFiles:
     def test_header_and_template_shape(self):
         assert len(CHANNEL_HEADER) == 77 == len(CHANNEL_DEFAULTS)
@@ -359,8 +384,23 @@ class TestCpsFiles:
         assert rid[1] == ["1", "3227807", "WA7DAM"]
         rgl = list(csv.reader(io.StringIO(files["DMRReceiveGroupCallList.CSV"])))
         assert rgl[1] == ["1", "PNWDigital RX", "Washington 1", "3153"]
+        # Each line carries the CPS's own slot for that table, not its position
+        # in this manifest: DMRTalkGroups is slot 5, FM 7, AMAir 27, AMZone 30.
+        # Numbering them 0..8 puts DMRTalkGroups in Analog Address Book (4) and
+        # Import All stops with ImportFromFileListError.
         manifest = files["atd890-test.LST"].split("\r\n")
-        assert manifest[0] == "9" and manifest[1] == '0,"Channel.CSV"' and manifest[9] == '8,"AMZone.CSV"'
+        assert manifest[0] == "9"
+        assert manifest[1:10] == [
+            '0,"Channel.CSV"',
+            '1,"RadioIDList.CSV"',
+            '2,"DMRZone.CSV"',
+            '3,"ScanList.CSV"',
+            '5,"DMRTalkGroups.CSV"',
+            '7,"FM.CSV"',
+            '8,"DMRReceiveGroupCallList.CSV"',
+            '27,"AMAir.CSV"',
+            '30,"AMZone.CSV"',
+        ]
 
     def test_write_creates_directory_bundle(self, tmp_path):
         result = write_atd890(resolve_plan(_scanner_plan(), _scanner_catalog()), tmp_path / "bundle")

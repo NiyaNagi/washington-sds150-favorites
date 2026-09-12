@@ -31,6 +31,7 @@ from wasds150.export.atd890_bundle import (
     RADIO_ID,
     RADIO_ID_NAME,
     Atd890Bundle,
+    Atd890ExportError,
     build_bundle,
 )
 from wasds150.export.atd890_settings import Atd890Settings, render_settings_files
@@ -93,22 +94,59 @@ AMAIR_HEADER = ("No.", "Frequency[MHz]", "Name")
 AMZONE_HEADER = ("No.", "Zone Name", "Zone Channel Member", "A Channel", "Scan Channel ")
 FM_HEADER = ("No.", "Frequency[MHz]", "Scan", "Name")
 
+#: Every table the CPS knows, and the slot number it gives that table in a
+#: ``.LST`` manifest. Captured from a ``Tool > Export > Export All`` of CPS
+#: 1.05 on firmware 1.05 + NX_DMR, kept in
+#: ``radio-backups/at-d890uv/20260911-export-all-fw105-nxdn/export.LST``.
+#:
+#: The slot is a property of the table, not of the manifest: a manifest that
+#: lists a subset still has to give each file the number below. Numbering a
+#: nine-file subset 0..8 matches only as far as ``ScanList.CSV`` and then
+#: hands ``DMRTalkGroups.CSV`` to slot 4, *Analog Address Book*, which is
+#: where Import All stops with ``ImportFromFileListError``.
+LST_INDEX = {
+    "Channel.CSV": 0,
+    "RadioIDList.CSV": 1,
+    "DMRZone.CSV": 2,
+    "ScanList.CSV": 3,
+    "AnalogAddressBook.CSV": 4,
+    "DMRTalkGroups.CSV": 5,
+    "PrefabricatedSMS.CSV": 6,
+    "FM.CSV": 7,
+    "DMRReceiveGroupCallList.CSV": 8,
+    "5ToneEncode.CSV": 9,
+    "2ToneEncode.CSV": 10,
+    "DTMFEncode.CSV": 11,
+    "HotKey_QuickCall.CSV": 12,
+    "HotKey_State.CSV": 13,
+    "HotKey_HotKey.CSV": 14,
+    "DMRDigitalContactList.CSV": 15,
+    "AutoRepeaterOffsetFrequencys.CSV": 16,
+    "RoamingChannel.CSV": 17,
+    "RoamingZone.CSV": 18,
+    "APRS.CSV": 19,
+    "GPSRoaming.CSV": 20,
+    "OptionalSetting.CSV": 21,
+    "AlertTone.CSV": 22,
+    "NXEncryptionCode.CSV": 23,
+    "NXStateMSG.CSV": 24,
+    "NXReceiveGroupCallList.CSV": 25,
+    "NXTalkGroup.CSV": 26,
+    "AMAir.CSV": 27,
+    "AESEncryptionCode.CSV": 28,
+    "ARC4EncryptionCode.CSV": 29,
+    "AMZone.CSV": 30,
+    "NXDigitalContactList.CSV": 31,
+    "TalkGroupWhitelist(Repeater).CSV": 32,
+    "DigitalContactWhitelist(Repeater).CSV": 33,
+    "NXSetting.CSV": 34,
+    "MDC1200AddressBook.CSV": 35,
+    "MDC1200Encode.CSV": 36,
+    "EncryptionCode.CSV": 37,
+}
+
 #: The tables the bundle writes, in the order the CPS's Import dialog lists
 #: them.
-#:
-#: .. warning::
-#:
-#:    The number each line carries in the ``.LST`` is **not** this position.
-#:    The CPS's import slots are a fixed table - its own string ids 29110
-#:    onwards: Channel, Radio ID List, DMR Zone, Scan List, *Analog Address
-#:    Book*, DMR Talk Groups, *Prefabricated SMS*, FM, DMR Receive Group Call
-#:    List, ... - and the manifest index selects one of those slots. Numbering
-#:    a nine-file subset 0..8 lines up only as far as Scan List; index 4 then
-#:    hands DMRTalkGroups.CSV to Analog Address Book and Import All stops with
-#:    ``ImportFromFileListError``. The real indices come from an ``Export All``
-#:    of this CPS, which has not been captured yet, so
-#:    :data:`LST_INDEX_VERIFIED` is False and the checklist imports each table
-#:    by its own button instead.
 BUNDLE_FILES = (
     "Channel.CSV",
     "RadioIDList.CSV",
@@ -120,10 +158,6 @@ BUNDLE_FILES = (
     "AMAir.CSV",
     "AMZone.CSV",
 )
-
-#: Flip to True once an ``Export All`` has confirmed what index the CPS gives
-#: each table, and put those indices in the manifest instead of the position.
-LST_INDEX_VERIFIED = False
 
 POWER_LEVELS = ("Low", "Mid", "High", "Turbo")
 _POWER_ALIASES = {"0.2W": "Low", "1.0W": "Low", "2.5W": "Mid", "5.0W": "High", "7.0W": "Turbo", "6.0W": "Turbo"}
@@ -328,16 +362,13 @@ def render_files(
         files.update(extra)
         warnings.extend(notes)
         manifest += list(extra)
-    manifest_lines = [str(len(manifest))] + [f'{index},"{name}"' for index, name in enumerate(manifest)]
-    files[f"{resolved.plan.id}.LST"] = "\r\n".join(manifest_lines) + "\r\n"
-    if not LST_INDEX_VERIFIED:
-        warnings.append(
-            "Tool > Import > Import All will fail with ImportFromFileListError: the "
-            "manifest numbers these files 0.. by position, but the CPS's import slots "
-            "are a fixed table and position 4 is Analog Address Book, not DMR Talk "
-            "Groups. Import each table with its own button in the Import dialog "
-            "instead - see docs/at-d890uv-programming.md."
+    unknown = [name for name in manifest if name not in LST_INDEX]
+    if unknown:
+        raise Atd890ExportError(
+            f"no CPS import slot known for {unknown}; add it to LST_INDEX from an Export All manifest"
         )
+    manifest_lines = [str(len(manifest))] + [f'{LST_INDEX[name]},"{name}"' for name in manifest]
+    files[f"{resolved.plan.id}.LST"] = "\r\n".join(manifest_lines) + "\r\n"
     bundle.warnings = warnings
     return files, bundle
 

@@ -87,5 +87,5 @@ def test_settings_files_join_the_bundle_and_manifest_only_with_a_template(templa
     assert plain["atd890-scan.LST"].splitlines()[0] == "9"
     with_settings, _ = render_files(resolved, settings_template=template)
     manifest = with_settings["atd890-scan.LST"].splitlines()
-    assert manifest[0] == "11" and manifest[-1] == '10,"OptionalSetting.CSV"'
+    assert manifest[0] == "11" and manifest[-1] == '21,"OptionalSetting.CSV"'
     assert _rows(with_settings["OptionalSetting.CSV"])[1][2] == "Ham 2m"

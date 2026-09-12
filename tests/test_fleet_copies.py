@@ -27,6 +27,6 @@ def test_anytone_export_keeps_a_standing_copy_of_the_contact_lists(tmp_path):
     export = export_radio(ctx, "at-d890uv", out_dir=tmp_path / "out")
 
     kept = sorted(p.name for p in (tmp_path / "kept").iterdir())
-    assert kept == ["DigitalContactList.CSV", "NXDNContactList.CSV"]
+    assert kept == ["DMRDigitalContactList.CSV", "NXDigitalContactList.CSV"]
     assert all(tmp_path / "kept" / name in export.copies for name in kept)
-    assert "3227807" in (tmp_path / "kept" / "DigitalContactList.CSV").read_text(encoding="ascii")
+    assert "3227807" in (tmp_path / "kept" / "DMRDigitalContactList.CSV").read_text(encoding="ascii")
