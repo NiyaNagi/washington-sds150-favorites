@@ -26,6 +26,8 @@ from collections import OrderedDict
 from dataclasses import dataclass, field
 from typing import Dict, Iterable, List, Optional, Tuple
 
+import dataclasses
+
 from wasds150 import station
 from wasds150.plan.resolve import PlannedChannel, ResolvedPlan
 from wasds150.plan.scanning import group_members
@@ -37,6 +39,15 @@ FM_MAX = 100
 RX_GROUP_MEMBER_MAX = 64
 SCAN_LIST_MAX = 250
 NAME_MAX = 16
+
+#: Where a channel that is programmed but never scanned lives when the rest of
+#: its block is scanned: a zone that names no scan list, so pressing Scan on
+#: it says "Scan List No Select" rather than sweeping something it is not in.
+UNSCANNED_ZONE = "Not Scanned"
+
+#: Marks a channel copied into the first scan group's zone. The CPS resolves
+#: zone and scan-list members by name, so the copy cannot share its original's.
+COPY_SUFFIX = " N"
 
 #: The operator's registered DMR ID and the name the CPS files it under;
 #: every channel row references it (see :mod:`wasds150.station`).
@@ -175,6 +186,17 @@ def _numbered(stem: str, count: int) -> List[str]:
     return names
 
 
+def _copy_name(name: str, taken: Dict[str, str]) -> str:
+    """``K7LED Tgr Mtn E`` -> ``K7LED Tgr Mtn EN``-style: the original's name
+    with the copy suffix, shortened to fit and numbered if that still clashes."""
+    for index in range(1, 100):
+        suffix = COPY_SUFFIX if index == 1 else f"{COPY_SUFFIX}{index}"
+        candidate = name[: NAME_MAX - len(suffix)].rstrip() + suffix
+        if candidate.casefold() not in taken:
+            return candidate
+    raise Atd890ExportError(f"cannot find a free copy name for {name!r}")
+
+
 def _contact_for(channel: PlannedChannel) -> Optional[Contact]:
     spec = channel.digital
     if spec is None or spec.talkgroup is None:
@@ -222,6 +244,36 @@ def build_bundle(resolved: ResolvedPlan) -> Atd890Bundle:
                 "the CPS treats them as one channel"
             )
         seen_names[channel.name.casefold()] = channel.name
+
+    # -- the first scan group, as a zone of its own ----------------------------
+    # The radio has no zone scan and no radio-wide scan list: PF1 sweeps the
+    # list named on the channel under the cursor. A composite list is only
+    # reachable through a zone whose channels name it, and a channel names one
+    # list - its own zone's - so the composite's zone holds copies. Only the
+    # first group, and only one list's worth: the rest could never be swept
+    # whole, and splitting them into arbitrary chunks gave lists no zone led to.
+    near_name = ""
+    if plan.scan_groups:
+        group = plan.scan_groups[0]
+        _validate_name(group.name, "scan group")
+        wanted = group_members(group, channels)
+        cap = profile.scan_list_member_max
+        if cap and len(wanted) > cap:
+            warnings.append(
+                f"scan group {group.name!r} matched {len(wanted)} channels; its zone holds the "
+                f"first {cap}, one scan list's worth"
+            )
+            wanted = wanted[:cap]
+        if wanted:
+            near_name = group.name
+            copies = []
+            for original in wanted:
+                name = _copy_name(original.name, seen_names)
+                seen_names[name.casefold()] = name
+                copies.append(dataclasses.replace(original, name=name, bank=near_name))
+            channels.extend(copies)
+        else:
+            warnings.append(f"scan group {group.name!r} matched no scannable channels")
 
     # -- contacts and receive groups ---------------------------------------
     contacts: "OrderedDict[str, Contact]" = OrderedDict()
@@ -295,66 +347,58 @@ def build_bundle(resolved: ResolvedPlan) -> Atd890Bundle:
         if channel.digital is not None and channel.digital.talkgroup is not None:
             rx_group_by_channel[channel.name] = group_name_by_network.get(channel.digital.network or "Other", "")
 
-    # -- zones ---------------------------------------------------------------
+    # -- zones and scan lists ---------------------------------------------------
+    # One rule: a zone and its scan list are the same thing. Measured on the
+    # radio, PF1 sweeps the scan list named on the channel under the cursor
+    # and answers "Scan List No Select" on a channel naming none - there is no
+    # zone scan. So every zone that scans has exactly one list of the same
+    # name holding exactly its channels, every member names that list, and a
+    # zone either scans all of its channels or none of them.
+    #
+    # A block's scanned channels are zoned at the scan-list ceiling (100)
+    # rather than the zone ceiling (160), because a longer zone would need two
+    # lists and scan only part of itself. Its unscanned channels - the far
+    # fill beyond the radius, label lockouts - leave the block for
+    # UNSCANNED_ZONE rather than sit in a scanned zone that skips them. A block
+    # that scans nothing at all (weather, packet) keeps its own name, with no
+    # list, at the zone ceiling.
     by_bank: "OrderedDict[str, List[PlannedChannel]]" = OrderedDict()
     for channel in channels:
         by_bank.setdefault(channel.bank or channel.block, []).append(channel)
+    if near_name:
+        # The list worth leaving running is the first zone the knob reaches.
+        by_bank.move_to_end(near_name, last=False)
     zones: List[Zone] = []
-    # A zone is split at the scan-list ceiling rather than the zone ceiling
-    # so that every zone's scan list is exactly the zone: the operator sees
-    # one name in both menus and no list ever needs a second split.
-    # A zone holds more than a scan list (160 against 50 here), but they are
-    # deliberately sized together so that every zone has exactly one scan list
-    # of the same name holding exactly its channels - the invariant that makes
-    # the radio legible: what you are looking at is what Scan will sweep.
-    # Letting zones reach 160 splits each into several numbered lists, whose
-    # names collide with the next zone's once truncated to 16 characters
-    # ("Ham DMR Local 01" chunk 2 and the zone "Ham DMR Local 02"), and leaves
-    # a channel scanning a third of the zone it sits in.
-    zone_limit = min(x for x in (profile.zone_member_max, profile.scan_list_member_max) if x) if (
-        profile.zone_member_max or profile.scan_list_member_max
-    ) else None
+    scan_lists: List[ScanList] = []
+    scan_list_by_channel: Dict[str, str] = {}
+    unscanned: List[PlannedChannel] = []
+    limit = profile.scan_list_member_max
     for bank, members in by_bank.items():
         _validate_name(bank, "zone")
-        chunks = _chunk(members, zone_limit)
+        scanned = [m for m in members if not m.skip_scan]
+        quiet = [m for m in members if m.skip_scan]
+        if not scanned:
+            chunks = _chunk(quiet, profile.zone_member_max)
+            for name, chunk in zip(_numbered(bank, len(chunks)), chunks):
+                zones.append(Zone(name=name, members=chunk))
+            continue
+        chunks = _chunk(scanned, limit)
+        kind = "group" if bank == near_name else "zone"
         for name, chunk in zip(_numbered(bank, len(chunks)), chunks):
+            zones.append(Zone(name=name, members=chunk))
+            scan_lists.append(ScanList(name=name, members=chunk, kind=kind))
+            for member in chunk:
+                scan_list_by_channel[member.name] = name
+        unscanned.extend(quiet)
+    if unscanned:
+        chunks = _chunk(unscanned, profile.zone_member_max)
+        for name, chunk in zip(_numbered(UNSCANNED_ZONE, len(chunks)), chunks):
             zones.append(Zone(name=name, members=chunk))
     if profile.zone_max is not None and len(zones) > profile.zone_max:
         raise Atd890ExportError(f"{len(zones)} zones exceed the radio's {profile.zone_max}")
     zone_names = [z.name for z in zones]
     if len(set(zone_names)) != len(zone_names):
         raise Atd890ExportError("zone names collide after splitting")
-
-    # -- scan lists ------------------------------------------------------------
-    scan_lists: List[ScanList] = []
-    scan_list_by_channel: Dict[str, str] = {}
-    limit = profile.scan_list_member_max
-    for zone in zones:
-        members = [m for m in zone.members if not m.skip_scan]
-        chunks = _chunk(members, limit)
-        names = _numbered(zone.name, len(chunks))
-        for name, chunk in zip(names, chunks):
-            scan_lists.append(ScanList(name=name, members=chunk, kind="zone"))
-            # Each channel points at the list it is actually in. Pointing the
-            # whole zone at the first one would leave everything past the first
-            # 50 scanning a list it is not a member of.
-            for member in chunk:
-                scan_list_by_channel.setdefault(member.name, name)
-    for group in plan.scan_groups:
-        quotas = group.quotas
-        members = group_members(group, channels)
-        if not members:
-            warnings.append(f"scan group {group.name!r} matched no scannable channels")
-            continue
-        if quotas and len(members) > limit:
-            warnings.append(
-                f"scan group {group.name!r}: quotas total {len(members)}, over the radio's "
-                f"{limit} per list, so it splits instead of scanning in one pass"
-            )
-        _validate_name(group.name, "scan group")
-        chunks = _chunk(members, limit)
-        for name, chunk in zip(_numbered(group.name, len(chunks)), chunks):
-            scan_lists.append(ScanList(name=name, members=chunk, kind="group"))
     list_names = [s.name for s in scan_lists]
     if len(set(list_names)) != len(list_names):
         dupes = sorted({n for n in list_names if list_names.count(n) > 1})

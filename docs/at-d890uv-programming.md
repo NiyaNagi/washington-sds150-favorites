@@ -123,8 +123,8 @@ and the `Comm Digital` channels simply stay quiet.
 | File | Contents |
 |---|---|
 | `Channel.CSV` | 77-column channel table: every VHF/UHF memory, ordered by zone. Analog rows carry the transmit CTCSS/DCS; DMR rows carry contact, colour code and timeslot; receive-only rows have `PTT Prohibit = On`. |
-| `DMRZone.CSV` | One zone per plan bank, split into `Name 01`, `Name 02` at 100 members. |
-| `ScanList.CSV` | One scan list per zone (same name) plus the composite groups. |
+| `DMRZone.CSV` | The first scan group's zone (`Near Me`, as copies), then one zone per plan bank, split into `Name 01`, `Name 02` at 100 scanned members; never-scanned channels in `Not Scanned 01..` at up to 160. |
+| `ScanList.CSV` | Exactly one scan list per scanned zone, same name, same members. No list exists without a zone. |
 | `DMRTalkGroups.CSV` | Every talkgroup any channel references, with a `Simplex 99` default. |
 | `DMRReceiveGroupCallList.CSV` | One receive group per network (`PNWDigital RX`, `SeattleDMR RX`, ...) so a DMR channel hears every talkgroup carried on its network. |
 | `RadioIDList.CSV` | `3227807, WA7DAM` - the registered DMR ID. |
@@ -146,14 +146,13 @@ Zones, in scan-priority order:
 | `SAR Interop`, `Wildfire`, `Marine`, `Rail`, `GMRS FRS MURS`, `Business`, `Pub Safety`, `Comm Digital` | no | Receive only |
 | `ACS Data`, `NOAA WX`, `FM Bcast` | no | Programmed, never in any scan list |
 
-Scan groups (composite lists, each chunked at 50 members: `Ham All 01`,
-`Ham All 02`, ...):
-
-- **Ham All** - analog repeaters, DMR Puget Sound, simplex, ACS
-- **Ham Analog**, **Ham DMR**
-- **Pub Svc** - SAR/interop, wildfire, public safety, commercial digital
-- **Marine Rail**, **Personal Biz**
-- **Everything** - all scannable zones
+Scan groups: only the plan's **first** group is built, as a zone of copies
+with its own identical list (`Near Me` on the fleet plan, `Ham All` on this
+one, capped at 100). The others - `Ham Analog`, `Ham DMR`, `Pub Svc`,
+`Everything` - are not exported for this radio. PF1 only ever sweeps the list
+named on the channel under the cursor, so a composite list is reachable only
+through a zone of its own, and a group over 100 channels could only become
+arbitrary slices that no zone led to.
 
 ---
 
@@ -369,10 +368,19 @@ takes several minutes and is rarely worth reloading with the rest of a bundle.
 
 ### Using it as a scanner
 
-- Main receiver A: pick a zone with the up/down key; Menu > Scan > Scan List
-  chooses which list a zone scans (`Ham All 01` is the recommended default),
-  then PF1 starts it. Nuisance Delete (PF1 long) drops a busy channel for the
-  session.
+- **A zone and its scan list are the same thing.** Pick a zone with the
+  up/down key and press PF1: it sweeps exactly that zone. The radio has no
+  zone scan and no radio-wide scan list - PF1 sweeps the list named on the
+  channel under the cursor, and answers "Scan List No Select" on a channel
+  naming none (measured on this radio) - so the export makes every scanned
+  zone's channels name one list holding exactly them.
+- `Near Me` is the first zone: copies of the nearest of every local amateur
+  service, named with a trailing ` N`, each naming the `Near Me` list. The
+  originals stay in their own zones and keep scanning those.
+- `Weather`, `Data` and `Not Scanned 01/02` scan nothing on purpose. `Not
+  Scanned` holds the channels beyond the radius and any label lockouts,
+  taken out of their blocks so that no scanned zone quietly skips part of
+  itself. Nuisance Delete (PF1 long) drops a busy channel for the session.
 - Receiver B on AM air: Menu > Settings > Radio Set > Other Func > AM Air/FM
   > AM Air on B, then the AM zone's own scan menu.
 - NOAA, FM broadcast and the packet zone are selected by hand and never

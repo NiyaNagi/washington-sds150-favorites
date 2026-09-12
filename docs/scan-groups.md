@@ -12,7 +12,7 @@ hardware allows, and no further.
 
 | Radio | Mechanism | `Near Me` |
 |---|---|---|
-| AT-D890UV | scan lists, 100 members, any channel in any number of them | **exactly the 100 curated channels**, plus `Ham All`, `Ham Analog`, `Ham DMR`, `Public Svc`, `Rail & Marine`, `Personal`, `Everything` |
+| AT-D890UV | a zone and its identical scan list; PF1 sweeps the list the channel under the cursor names | **its own zone of the 100 curated channels**, as copies naming the `Near Me` list |
 | TH-D75A | Memory Group Link: an ordered list of memory groups scanned as one pass | **the eight groups Near Me draws from, whole** - 275 channels rather than 84 |
 | ID-52A | Group scan, one memory group at a time; a memory belongs to one group | **its own group of 76 copies**, the same channels in the same order |
 | FTX-1 | `M-Grp`, one checkbox per memory: a single subset of the memories | **the 70 curated channels**, flagged in place - no copies, no slots |
@@ -27,9 +27,24 @@ a band or a mode it does not have.
 
 ## AT-D890UV
 
-A scan list names channels, and a channel can be in several. All eight groups
-become scan lists directly; anything over 100 members splits into numbered
-lists. See [at-d890uv-programming.md](at-d890uv-programming.md), including the
+A scan list can name any channels, but that alone reaches nothing: measured on
+the radio, PF1 sweeps the list named on the channel under the cursor and
+answers "Scan List No Select" on a channel naming none. There is no zone scan
+and no radio-wide choice of list. A composite list is therefore only
+reachable through a zone whose channels name it - and a channel names one
+list, its own zone's.
+
+So the export keeps one rule: **a zone and its scan list are the same thing.**
+Every scanned zone has one list of the same name holding exactly its
+channels, and every one of those channels names it. `Near Me` is a zone like
+the rest, first on the knob, holding copies (named with a trailing ` N`) so
+the originals keep scanning their own zones. Only the first scan group is
+built: `Ham All`, `Everything` and the rest are far over 100 and could only
+ever be arbitrary slices no zone led to. Channels that never scan - beyond
+the radius, label lockouts - move to `Not Scanned` zones rather than sit
+unscanned inside a zone that otherwise sweeps.
+
+See [at-d890uv-programming.md](at-d890uv-programming.md), including the
 `.rdt` patch that restores full membership after the CPS's 50-member CSV
 import.
 
