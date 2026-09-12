@@ -64,6 +64,15 @@ EPSG:3857 around a computed centre, so pixel↔ground is defined, not fitted; th
 registration residual to quote. Remember Web Mercator units are metres only at the equator —
 at this latitude 1 real metre = 1.48397 map units.
 
+**Inverted‑L scores come from a hybrid model nobody has checked.** `topology_search.py` scores an
+L's two legs on the §9 slant model and takes their union. Ls top both rankings on it. Never quote
+an L beside a bent-wire number without saying so, and never recommend one before NEC.
+
+**Search optimisers here find model artefacts before they find antennas.** The first topology
+search crowned an "L" with 1 ft of vertical (a sloper scored on the wrong model) and a V with a
+near-vertical first leg. Constrain each family to the regime its model covers, require distinct
+designs, and look at the geometry of every winner before believing its score.
+
 **Tree POSITIONS are known; tree HEIGHTS are not.** Every height in this study is
 operator-supplied (50 ft usable at the apex, 150 ft at the yard corners) and none is
 measured. Four canopy-height sources were tried and all failed — see `imagery/README.md`.
@@ -161,6 +170,8 @@ The operator answered these explicitly. Re-proposing them wastes their time.
 | How tall does the post need to be? | **20 ft is the sweet spot** — matches F10‑A's 47 cells, better worst case, 91 ft from the feed at **101°M**. The whole 10→36 ft range spans only 0.83 dB (~0.32 dB per 10 ft) and the position barely moves. Don't build a tower for it. |
 | Can it be done with no rope throw at all? | **Yes, badly.** RB‑NOTREE: single span to a 30 ft post at 127.6 ft / 102°M. −6.05 dBi, 11/75, 8 of 25 regions. The floor, not a recommendation. |
 | How does what's up now compare? | **Badly, and below the original plan.** CURRENT (operator's GPX, 2026-09-07): straight sloper, feed 10 ft → 45 ft end 120 ft out at 139°T. **−3.70 dBi, 24/75, worst −58.9, rank 29 of 35** vs BASE −2.84 / 35/75 and RB‑POST20 −0.71 / 47/75. Axis nulls land on South America and the Beijing–Shanghai–Vladivostok cluster. GPS sensitivity 24–32 cells, never BASE's 35. Walk direction (started at the high end) and straight run were **confirmed by the operator** — do not re-ask. |
+| Top slopers / V‑or‑L with a 10 ft feed? | Scored 2026-09-12 by `tools/topology_search.py`. Slopers: 50/75 at 107 ft (off the lot), F10‑G, 49/75 at 87 ft. **V‑or‑L: all three are Ls (56–58/75)**, on the new hybrid model — not a recommendation until NEC. Best V 50/75. |
+| Best for 40 + 20 m only? | Ls (42, 40/50) on the same unvalidated model; best sloper 37/50 at 98 ft, off the lot; **best non‑L from 50 ft throws: F10‑A with leg 2 re-aimed to 20°M, 33/50** — the re-aim the study rejected on three bands. RB‑POST20 25/50, F10‑A 27/50. |
 | Feed must stay at 10 ft — what then? | **F10‑A**, which is option A's geometry with the feed lowered. Costs **0.30 dB and 2 cells** against A at 24 ft. The feed is a current null, so its own height barely matters. Only support 3 moves: 83 ft 9 in → **77 ft 2 in**, 102°T → 100°T, because leg 1 lengthens as the feed drops. |
 | Best *sloper* with a 10 ft feed? | F10‑G, 47.2° at 25°T, 105 ft anchor. Wins the primary key 49 vs 47 cells and loses everything else: 2.6 dB, an 18 dB worse null, and a 105 ft throw against 50 ft. **Do not recommend it over F10‑A on the cell count alone.** |
 | Is option A hard to deploy? | **No — it is the easiest thing that works.** Three attachments but the highest is **50 ft**, a routine throw. Every one-support sloper that matches it needs **116–120 ft**. The bend is what buys height in the middle of the wire, where the current maxima are, without any one support being high. |

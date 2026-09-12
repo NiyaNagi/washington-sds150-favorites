@@ -15,6 +15,8 @@ Europe, the continental US, Australia, Japan, China and Russia.
 
 Published field plan: <https://claude.ai/code/artifact/1128955c-5f0e-44c7-82a9-a08a9f9d2fa9>
 Published deployment guide: <https://claude.ai/code/artifact/0a8562b0-04ee-473f-9732-3a079305d96b>
+Published lineup comparison ("Ten Wires on One Lot"): <https://claude.ai/code/artifact/eab86385-ffd8-44a3-b8e2-090b72026cb4>
+(regenerate with `python tools/build_lineup_page.py <out.html>`, then publish to that URL)
 
 ---
 
@@ -100,6 +102,59 @@ height 50 ft instead of 45: −3.20 dBi, 30/75. Full grid in
 > and 49% for RB‑POST20, and no model here charges anything for trees. The real gap is smaller
 > than the table. How much smaller is not something this study can say; an on-air A/B or a
 > NanoVNA sweep of both is.
+
+---
+
+## The lineup, and the best wires for 40 + 20 m
+
+Asked 2026-09-12: draw what's up now, BASE, RB‑POST20, F10‑A, the top three slopers and the top
+three inverted‑V‑or‑L deployments on the property and compare them; then find the best options
+if only 40 m and 20 m mattered. Built by
+[`tools/topology_search.py`](tools/topology_search.py) and
+[`tools/build_lineup_page.py`](tools/build_lineup_page.py); pictures in
+[`imagery/lineup_3band.jpg`](imagery/lineup_3band.jpg) and
+[`imagery/lineup_40_20.jpg`](imagery/lineup_40_20.jpg).
+
+**Limits the operator set:** feed at 10 ft for everything. Slopers may run off the lot (status
+reported). Inverted‑Vs and inverted‑Ls stay on the lot. Ls have the vertical at the *far* end,
+never at the feed.
+
+| Wire | Geometry (bearings magnetic) | 3-band cells | 3-band dBi | Worst | 40+20 cells | Highest |
+|---|---|---|---|---|---|---|
+| Up now | straight, 45 ft end 120 ft @ 124° | 24/75 | −3.70 | −58.9 | 9/50 | 45 ft |
+| BASE | original plan, apex 35 ft | 35/75 | −2.84 | −26.2 | 14/50 | 35 ft |
+| RB‑POST20 | apex 50 ft, 20 ft post | 47/75 | −0.71 | −23.1 | 25/50 | 50 ft |
+| F10‑A | three trees, none above 50 ft | 47/75 | −0.46 | −26.2 | 27/50 | 50 ft |
+| Sloper 1 | 107 ft support 86 ft @ 189° — **15 ft past the south line** | 50/75 | −2.93 | −105.5 | 32/50 | 107 ft |
+| Sloper 2 | = **F10‑G** (the search re-found it), 105 ft, 88 ft @ 10° | 49/75 | −3.05 | −44.9 | 35/50 | 105 ft |
+| Sloper 3 | 87 ft support 105 ft @ 261° | 49/75 | −1.41 | −45.2 | 31/50 | 87 ft |
+| Inverted‑L 1 | up to 53 ft 87 ft @ 256°, 33 ft hanging | **58/75** | −0.59 | −27.2 | 39/50 | 53 ft |
+| Inverted‑L 3 | up to 56 ft 84 ft @ 237°, 34 ft hanging | 57/75 | −1.06 | −30.6 | 42/50 | 56 ft |
+| Inverted‑L 2 | up to 52 ft 76 ft @ 153°, 43 ft hanging — inside setback | 56/75 | −1.19 | −51.8 | 40/50 | 52 ft |
+| *best inverted‑V* | *apex 50 ft 53 ft @ 333°, leg 2 to 21°* | *50/75* | *−0.51* | *−32.3* | *28/50* | *50 ft* |
+
+**All three V‑or‑L picks are inverted‑Ls, and they lead the entire study — which is exactly why
+they are not a recommendation.** No model here could score an L before this search. Both legs
+are scored on the §9 slant model (LOW, wrong once already) and combined as a union that ignores
+leg interaction, at a 90° bend `endpoint_study.py` classes as OVERSTATED. The best V, on the
+steadier bent-wire model, is 50/75. **Run NEC on one L before believing it.** The hanging end is
+the ~1 kV voltage maximum, so an L also puts that end within reach of the ground.
+
+**40 + 20 m only** (50 cells), every family re-searched, near-duplicates dropped:
+
+| Wire | Geometry | 40+20 cells | 40+20 dBi | Worst | 3-band cells | Highest |
+|---|---|---|---|---|---|---|
+| 40/20 L1 | up to 46 ft 89 ft @ 237°, 34 ft hanging | **42/50** | −1.62 | −22.2 | 53/75 | 46 ft |
+| 40/20 L2 | up to 56 ft 85 ft @ 15°, 33 ft hanging | 40/50 | −1.72 | −19.5 | 50/75 | 56 ft |
+| 40/20 L3 | up to 52 ft 75 ft @ 155°, 43 ft hanging — inside setback | 40/50 | −1.46 | −46.6 | 56/75 | 52 ft |
+| 40/20 sloper | 98 ft support 95 ft @ 153° — **17 ft past the south line** | 37/50 | −1.92 | −74.4 | 48/75 | 98 ft |
+| F10‑A, leg 2 re-aimed | leg 2 to 20°M; nothing above 50 ft | 33/50 | −1.30 | −36.6 | 54/75 | 50 ft |
+
+Dropping 15 m costs the recommendations most, because 15 m was their strongest band: RB‑POST20
+25/50, F10‑A 27/50. **The best non‑L that needs only 50 ft throws is F10‑A with leg 2 re-aimed
+north** — the same re-aim the study rejected on three bands for what it costs toward Hawaii and
+VK (see "Moving the far end"). On 40 + 20 m that trade looks better; the region-by-region cost is
+on the comparison page.
 
 ---
 
@@ -720,6 +775,9 @@ the bend and its null-filling — drops support 3, and costs 1.1 dB and two regi
 | [`INSULATORS.md`](INSULATORS.md) | Insulator selection, end-voltage working, specific products |
 | [`tools/site_geometry.py`](tools/site_geometry.py) | Recomputes everything; stdlib only; **authoritative** |
 | [`tools/compare_options.py`](tools/compare_options.py) | Scores 35 topologies × 5 bands, including the as-built CURRENT; writes the CSVs below and the KML |
+| [`tools/topology_search.py`](tools/topology_search.py) | Searches slopers, inverted‑Vs and inverted‑Ls (feed 10 ft) on the 3-band and 40 + 20 m metrics; adds the hybrid L model |
+| [`tools/build_lineup_page.py`](tools/build_lineup_page.py) | Builds the lineup comparison page and the two annotated aerial JPEGs |
+| [`data/topology-search.csv`](data/topology-search.csv) / [`.kml`](data/topology-search.kml) | Search results: geometry, both metrics, every band, model and parcel status (generated) |
 | [`data/current-deployment-sensitivity.csv`](data/current-deployment-sensitivity.csv) | CURRENT's score with the GPS end point rotated/pulled in and the end height varied (generated) |
 | [`tools/endpoint_study.py`](tools/endpoint_study.py) | End height, end azimuth, and roof-support sensitivity — why the end stays where it is |
 | [`data/deployment-options.kml`](data/deployment-options.kml) | **Google Earth overlay** — every option with its per-band table, ordered by 3-band rank; reference points, parcel line, bearing rays |

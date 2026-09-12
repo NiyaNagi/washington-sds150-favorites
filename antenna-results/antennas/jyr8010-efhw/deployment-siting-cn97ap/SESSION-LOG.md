@@ -589,6 +589,44 @@ The handoff said `_sloper()` would derive an end height of ~43.6 ft at a 36.3 m 
 was on the lot inside the setback; that used a single trackpoint, and the 8-point dwell mean is
 0.5 m past the line. Both are within GPS error, and neither changed the scoring, which used 45 ft.
 
+## Phase 14 — 2026-09-12: the lineup, and a 40 + 20 m search
+
+**Operator asked:** overlay what's up now, BASE, RB‑POST20, F10‑A, the top three slopers and the top
+three inverted‑V or L deployments on the property and compare them in the style of the deployment
+guide; then compute the best options for 40 m and 20 m alone.
+
+**Clarified before building:** slopers with a 10 ft feed, parcel not enforced; search new V and L
+shapes (on the lot); one 40 + 20 m ranking with every family re-searched; a new page.
+
+New `tools/topology_search.py`. **The inverted‑L needed a model the study did not have** — nothing
+could score a vertical section. Both legs go on the §9 slant model and are combined as a §3 union.
+New, unvalidated, and at a 90° bend that `endpoint_study.py` classes as OVERSTATED.
+
+**Two search artefacts were caught on the first run, before anything was published:**
+
+1. An "L" with **1 ft** hanging down took first place. It was a 30° sloper whose rising leg had been
+   scored on the horizontal model — so it won on a model choice, not a geometry. Fixed: the rising
+   leg uses the slant model (as every sloper does) and at least 10 m must hang vertically.
+2. The top inverted‑V had its apex **13 ft** from the feed — a near-vertical first leg at the
+   high-voltage end, scored as horizontal. Fixed: V legs capped at 40° (V1/V2 sit at 26–34°), and
+   the three picks must be distinct designs rather than one V slid along its leg.
+
+The page build caught a third: the 40 + 20 m "top five" were two Ls each drawn twice. The page
+now drops near-duplicates.
+
+**Result, 3-band.** Sloper search re-found **F10‑G** exactly — a useful check. Slopers 1 and 3 are
+new: 50/75 at 107 ft (15 ft past the south line) and 49/75 at 87 ft (−1.41 dBi, best aggregate of
+any 10 ft feed sloper). **All three V‑or‑L picks are Ls, at 56–58/75 — the highest cell counts in
+the study**, with 52–56 ft attachments. The best V is 50/75. Given the model behind the Ls, they
+are a reason to run NEC, not a recommendation.
+
+**Result, 40 + 20 m.** Ls again lead (42 and 40/50); best sloper 37/50 at 98 ft, 17 ft past the
+line; the best non‑L built only from 50 ft throws is F10‑A with leg 2 re-aimed to 20°M (33/50, and
+54/75 on 3 bands). RB‑POST20 and F10‑A drop to 25 and 27/50 — 15 m was their strongest band.
+
+Map colours: validated categorical slots 1–3 all-pairs (`validate_palette.js`), orange taken at its
+dark step because the light step sat 0.001 outside the dark lightness band.
+
 ## Corrections summary
 
 | # | Error | Corrected in | Status |
@@ -625,6 +663,8 @@ directory reflect only post-correction values.
 - No post-installation sweep — **no recommended design was built as of 2026-09-12**; the
   as-built sloper (CURRENT) has not been swept either
 - CURRENT's end height (45 ft) and the far-end tree's side of the south line are unmeasured
+- **No NEC run on an inverted‑L.** The Ls top both rankings on a new, unvalidated hybrid model;
+  one NEC run on Inverted‑L 1 would say whether the family is real
 - No canopy-height correction to the bare-earth horizon
 - No live magnetic declination query (15.3°E from general knowledge)
 - Building footprints not retrieved; house outline traced from imagery

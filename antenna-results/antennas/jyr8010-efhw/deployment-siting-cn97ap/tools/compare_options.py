@@ -1129,6 +1129,8 @@ def aggregate_multiband(opt, bands=None):
 # KML colours are aabbggrr, not rrggbb.
 KML_STYLES = [
     ("optC",  "ffb469ff", 9),   # hot pink       - AS BUILT (operator's GPX)
+    ("optX",  "ff00d7ff", 6),   # gold           - topology search, 3-band
+    ("optW",  "ffff9933", 6),   # azure          - topology search, 40+20 m
     ("optR",  "ff2020ff", 7),   # red            - GARDEN-POST options
     ("optF",  "ff40ff80", 6),   # spring green   - 10 FT FEED family
     ("optG",  "ffffffff", 6),   # white          - ONE-SUPPORT slopers, K/C/G/RF
@@ -1147,6 +1149,10 @@ def kml_style_for(key):
     """Style id for an option key. Checked most-specific first."""
     if key == "CURRENT":
         return "optC"
+    if key.startswith("SRCH-"):
+        return "optX"
+    if key.startswith("W-"):
+        return "optW"
     if key.startswith("RB-"):
         return "optR"
     if key.startswith("F10-"):

@@ -141,6 +141,14 @@ Full list in `AGENT_GUIDE.md`. The ones most likely to bite this task:
 - **Tree heights were never measured.** Four canopy-height sources and shadow
   photogrammetry all failed; see `imagery/README.md`.
 
+## Also done 2026-09-12: the lineup and the 40 + 20 m search
+
+`tools/topology_search.py` + `tools/build_lineup_page.py` → a third artifact, "Ten Wires on One
+Lot" — https://claude.ai/code/artifact/eab86385-ffd8-44a3-b8e2-090b72026cb4 — and
+`imagery/lineup_*.jpg`. Inverted‑Ls lead both rankings on a new,
+unvalidated hybrid model — see SESSION-LOG Phase 14 before quoting them. Highest-value next
+step: **one NEC run on Inverted‑L 1**.
+
 ## Environment notes (Windows, PowerShell 5.1)
 
 - Do **not** round-trip markdown through `Get-Content -Raw | Set-Content -Encoding utf8` —
