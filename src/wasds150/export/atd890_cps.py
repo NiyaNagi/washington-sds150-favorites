@@ -93,7 +93,22 @@ AMAIR_HEADER = ("No.", "Frequency[MHz]", "Name")
 AMZONE_HEADER = ("No.", "Zone Name", "Zone Channel Member", "A Channel", "Scan Channel ")
 FM_HEADER = ("No.", "Frequency[MHz]", "Scan", "Name")
 
-#: Order the CPS lists them in its own manifest.
+#: The tables the bundle writes, in the order the CPS's Import dialog lists
+#: them.
+#:
+#: .. warning::
+#:
+#:    The number each line carries in the ``.LST`` is **not** this position.
+#:    The CPS's import slots are a fixed table - its own string ids 29110
+#:    onwards: Channel, Radio ID List, DMR Zone, Scan List, *Analog Address
+#:    Book*, DMR Talk Groups, *Prefabricated SMS*, FM, DMR Receive Group Call
+#:    List, ... - and the manifest index selects one of those slots. Numbering
+#:    a nine-file subset 0..8 lines up only as far as Scan List; index 4 then
+#:    hands DMRTalkGroups.CSV to Analog Address Book and Import All stops with
+#:    ``ImportFromFileListError``. The real indices come from an ``Export All``
+#:    of this CPS, which has not been captured yet, so
+#:    :data:`LST_INDEX_VERIFIED` is False and the checklist imports each table
+#:    by its own button instead.
 BUNDLE_FILES = (
     "Channel.CSV",
     "RadioIDList.CSV",
@@ -105,6 +120,10 @@ BUNDLE_FILES = (
     "AMAir.CSV",
     "AMZone.CSV",
 )
+
+#: Flip to True once an ``Export All`` has confirmed what index the CPS gives
+#: each table, and put those indices in the manifest instead of the position.
+LST_INDEX_VERIFIED = False
 
 POWER_LEVELS = ("Low", "Mid", "High", "Turbo")
 _POWER_ALIASES = {"0.2W": "Low", "1.0W": "Low", "2.5W": "Mid", "5.0W": "High", "7.0W": "Turbo", "6.0W": "Turbo"}
@@ -311,6 +330,14 @@ def render_files(
         manifest += list(extra)
     manifest_lines = [str(len(manifest))] + [f'{index},"{name}"' for index, name in enumerate(manifest)]
     files[f"{resolved.plan.id}.LST"] = "\r\n".join(manifest_lines) + "\r\n"
+    if not LST_INDEX_VERIFIED:
+        warnings.append(
+            "Tool > Import > Import All will fail with ImportFromFileListError: the "
+            "manifest numbers these files 0.. by position, but the CPS's import slots "
+            "are a fixed table and position 4 is Analog Address Book, not DMR Talk "
+            "Groups. Import each table with its own button in the Import dialog "
+            "instead - see docs/at-d890uv-programming.md."
+        )
     bundle.warnings = warnings
     return files, bundle
 

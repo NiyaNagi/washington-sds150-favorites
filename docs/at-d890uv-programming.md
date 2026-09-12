@@ -83,6 +83,31 @@ DMR as the default; the NXDN channels in the `Comm Digital` zone are silent
 until you switch. Optional Setting > Digital Function > **Dig Protocol = DMR**
 and **Reset Digi. Protocol = DMR** keep that default across resets.
 
+### Is NXDN actually enabled?
+
+There is no CPS switch for it: **NXDN exists only when the NX_DMR firmware is
+flashed.** The official 1.05 build is DMR-only, and on it the CPS hides every
+NXDN page. Two ways to tell without guessing:
+
+- **Left-hand tree.** With the overlay, it carries `NX Setting`, `NX Receive
+  Group Call List`, `NX Contact/Talk Group`, `NX Encryption Code`, `NX State
+  MSG` and `NX Digital Contact List`. Without it, none of them appear - the
+  tree jumps from `QDC 1200` straight to `Master ID`.
+- **Tool > Import.** With the overlay the dialog offers NX tables alongside the
+  DMR ones. A dialog whose rows stop at `Encryption Code` with no NX row is a
+  DMR-only radio.
+
+To enable it, flash `nx-dmr-1.05/D890UV_V1.05_NX_DMR_FW/D890UV_V1.05_20260521.spi`
+by the firmware procedure above - official 1.05 first, then the overlay.
+**The MCU reset in that procedure wipes the codeplug**, so decide before
+programming, not after: flashing afterwards means importing the whole bundle
+again.
+
+Nothing in the generated bundle depends on it. The only NXDN content is the
+`Comm Digital` zone - receive only - so the NXDN unit ID, 16240, matters only
+once you intend to transmit NXDN. On a DMR-only radio, skip the unit ID step
+and the `Comm Digital` channels simply stay quiet.
+
 ---
 
 ## What the bundle contains
@@ -131,14 +156,52 @@ Scan groups (composite lists, each chunked at 100 members: `Ham All 01`,
 1. `C:\D890UV\D890UV.exe` > File > New.
 2. Model > Model Information: confirm the frequency range matches the radio
    (read the radio first if unsure; a mismatch produces "Band Error").
-3. Tool > Import > select `atd890-scan.LST` > **Import All**. Each table loads
-   in manifest order; a name that does not resolve (a zone member missing from
+3. Tool > Import. **Do not use Import From File List** - see below. Fill in one
+   table per row with that row's own button, then press **Import**:
+
+   | Import dialog row | File |
+   |---|---|
+   | Channel | `Channel.CSV` |
+   | Radio ID List | `RadioIDList.CSV` |
+   | DMR Zone | `DMRZone.CSV` |
+   | Scan List | `ScanList.CSV` |
+   | DMR Talk Groups | `DMRTalkGroups.CSV` |
+   | DMR Receive Group Call List | `DMRReceiveGroupCallList.CSV` |
+   | FM | `FM.CSV` |
+   | AM Air | `AMAir.CSV` |
+   | AM Zone | `AMZone.CSV` |
+
+   Channel first and the zone and scan lists after the channels they name; the
+   rest in any order. A name that does not resolve (a zone member missing from
    `Channel.CSV`) is reported by the CPS - it means the export is stale, so
    re-export rather than editing in place.
-4. If Import All refuses the manifest, import the files one at a time in the
-   manifest order (Channel, RadioIDList, DMRZone, ScanList, DMRTalkGroups, FM,
-   DMRReceiveGroupCallList, AMAir, AMZone).
-5. Digital > Radio ID List shows `3227807` / `WA7DAM`; nothing to change.
+4. Digital > Radio ID List shows `3227807` / `WA7DAM`; nothing to change.
+
+### Why not Import From File List
+
+`Import From File List` reads the `.LST` manifest, whose every line is
+`<index>,"<file>"`. That index selects one of the CPS's **fixed** import slots,
+in the order its own `english.ini` gives them at string ids 29110 onwards:
+
+```
+0 Channel   1 Radio ID List   2 DMR Zone   3 Scan List
+4 Analog Address Book   5 DMR Talk Groups   6 Prefabricated SMS
+7 FM   8 DMR Receive Group Call List   9 5Tone Encode  ...
+```
+
+The exporter numbers its nine files `0..8` by position. That matches as far as
+Scan List and then slips: index 4 offers `DMRTalkGroups.CSV` to *Analog Address
+Book*, and the import stops with `ImportFromFileListError` - about halfway
+through, which is exactly where it is seen.
+
+Fixing it needs the real index of every table, including the ones in the
+dialog's right-hand column (AM Air, AM Zone, Optional Setting, the HotKey
+tables), and the only sound source for those is a `Tool > Export > Export All`
+of this CPS: the `.LST` it writes carries the CPS's own numbering. That capture
+has not been made yet, so `LST_INDEX_VERIFIED` in
+`src/wasds150/export/atd890_cps.py` is `False` and every export carries a
+warning pointing here. Capturing it also yields the `OptionalSetting.CSV` and
+`HotKey_*.CSV` the settings template needs, so it is worth doing once.
 
 ### Optional Settings to set by hand
 
