@@ -18,7 +18,7 @@ from wasds150.export.id52_csv import (
     render_files,
     write_id52,
 )
-from wasds150.models.plan import ChannelPlan
+from wasds150.models.plan import ChannelPlan, PlanBlock, ScanGroup
 from wasds150.plan.resolve import PlannedChannel, ResolvedPlan
 from wasds150.radios.registry import ID52A
 from wasds150.radios.tones import parse_tone
@@ -31,8 +31,15 @@ def _channel(slot: int, name: str, rx: float, mode: str, block: str, **kw) -> Pl
     )
 
 
-def _resolved(*channels: PlannedChannel) -> ResolvedPlan:
-    plan = ChannelPlan(id="id-52a-test", radio_id="id-52a", label="Test")
+def _resolved(*channels: PlannedChannel, scan_groups=()) -> ResolvedPlan:
+    blocks = tuple(
+        PlanBlock(label=label)
+        for label in dict.fromkeys(channel.block for channel in channels)
+    )
+    plan = ChannelPlan(
+        id="id-52a-test", radio_id="id-52a", label="Test",
+        blocks=blocks, scan_groups=tuple(scan_groups),
+    )
     return ResolvedPlan(plan=plan, profile=ID52A, channels=list(channels))
 
 
@@ -115,6 +122,43 @@ def test_a_block_longer_than_a_group_is_split() -> None:
     assert rows == GROUP_MEMBER_MAX + 5
 
 
+def test_the_first_scan_group_becomes_a_memory_group_of_copies() -> None:
+    channels = [
+        _channel(1, "NET A", 146.96, "NFM", "Nets", bank="Ham Nets"),
+        _channel(2, "NET B", 147.08, "NFM", "Nets", bank="Ham Nets"),
+        _channel(3, "TWO M", 145.49, "NFM", "Ham 2m Repeaters", bank="Ham 2m"),
+        _channel(4, "WX 2", 162.4, "FM", "Weather", bank="Weather", skip_scan=True),
+    ]
+    files, rows, _warnings = render_files(_resolved(*channels, scan_groups=(
+        ScanGroup("Near Me", ("Nets", "Ham 2m Repeaters", "Weather"),
+                  take=(("Nets", 1), ("Ham 2m Repeaters", 1), ("Weather", 1))),
+        # Only the first group is copied; a second would cost another group's
+        # worth of memories for a radio that scans one group at a time anyway.
+        ScanGroup("Everything", ("Nets",)),
+    )))
+    names = sorted(n for n in files if n.startswith("Csv/MemoryCh"))
+    assert names[-1] == "Csv/MemoryCh/04_Near_Me.csv"
+    assert rows == 4 + 2  # the four memories, then two of them copied
+
+    near = _rows(files["Csv/MemoryCh/04_Near_Me.csv"])[1:]
+    # The quota keeps the nearest of each block, and the scan-locked weather
+    # row is not a scan member at all, so its block contributes nothing.
+    assert [row[3] for row in near] == ["NET A", "TWO M"]
+    assert [row[:3] for row in near] == [["04", "Near Me", "00"], ["04", "Near Me", "01"]]
+    # The originals stay where they were; this is a copy, not a move.
+    assert [r[3] for r in _rows(files["Csv/MemoryCh/01_Ham_Nets.csv"])[1:]] == ["NET A", "NET B"]
+
+
+def test_the_scan_group_copy_cannot_overrun_the_radio() -> None:
+    channels = [
+        _channel(i + 1, f"Ch {i}", 150.0 + i * 0.0125, "NFM", "Business", bank="Business")
+        for i in range(1000)
+    ]
+    resolved = _resolved(*channels, scan_groups=(ScanGroup("Near Me", ("Business",)),))
+    with pytest.raises(Id52ExportError, match="exceed the radio's 1000"):
+        render_files(resolved)
+
+
 def test_a_mode_the_radio_cannot_store_is_refused() -> None:
     resolved = _resolved(_channel(1, "P25 talk", 155.1, "P25", "Public Safety", bank="Public Safety"))
     with pytest.raises(Id52ExportError, match="cannot store mode"):
@@ -129,6 +173,14 @@ def test_the_files_land_where_the_radio_reads_them(tmp_path: Path) -> None:
     assert {p.relative_to(out).as_posix() for p in result.files} == {
         "Csv/MemoryCh/01_Marine.csv", "IMPORT.txt"
     }
+    # A file from an earlier export under a number this one no longer uses
+    # would otherwise be imported alongside the current set.
+    stale = out / "Csv" / "MemoryCh" / "02_Marine_Was_Here.csv"
+    stale.write_text("old", encoding="ascii")
+    write_id52(_resolved(_channel(1, "Marine 16", 156.8, "FM", "Marine", bank="Marine")), out)
+    assert not stale.exists()
+    assert (out / "Csv" / "MemoryCh" / "01_Marine.csv").exists()
+
     raw = (out / "Csv" / "MemoryCh" / "01_Marine.csv").read_bytes()
     # CRLF and plain ASCII, as an English-locale CS-52 writes them; a BOM or a
     # bare LF is what makes Icom's importer reject a file.

@@ -248,6 +248,14 @@ scan-list member: rebuilding the second from the first reproduced it byte for
 byte, which is what says there is nothing else to maintain.
 `tests/test_atd890_rdt_patch.py` keeps that check.
 
+### The same lists on the other radios
+
+The Anytone is the only radio in the fleet with real scan lists, so it is the
+only one that holds `Near Me` as exactly its hundred channels. The TH-D75A
+reaches the same ground through Memory Group Link and the ID-52A through a
+copied memory group; the FTX-1 and TD-H9 have nothing to express it with. See
+[scan-groups.md](scan-groups.md).
+
 ### Priority Channel 1/2 must be `Off`
 
 The CPS writes a real channel name and its frequencies into `Priority Channel

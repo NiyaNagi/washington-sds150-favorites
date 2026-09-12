@@ -28,6 +28,7 @@ from typing import Dict, Iterable, List, Optional, Tuple
 
 from wasds150 import station
 from wasds150.plan.resolve import PlannedChannel, ResolvedPlan
+from wasds150.plan.scanning import group_members
 
 AM_AIR_MAX = 256
 AM_ZONE_MAX = 16
@@ -341,12 +342,7 @@ def build_bundle(resolved: ResolvedPlan) -> Atd890Bundle:
                 scan_list_by_channel.setdefault(member.name, name)
     for group in plan.scan_groups:
         quotas = group.quotas
-        members: List[PlannedChannel] = []
-        for block_label in group.blocks:
-            block = [c for c in channels if c.block == block_label and not c.skip_scan]
-            if quotas:
-                block = block[: quotas.get(block_label, 0)]
-            members.extend(block)
+        members = group_members(group, channels)
         if not members:
             warnings.append(f"scan group {group.name!r} matched no scannable channels")
             continue

@@ -12,13 +12,18 @@ from wasds150.catalog.thd75_user import favorite as thd75_user
 from wasds150.catalog.thd75_wwara_snapshot import favorite as thd75_wwara
 from wasds150.export.thd75_target import (
     FILE_SIZE,
+    GROUP_LINK_COUNT,
+    GROUP_LINK_NONE,
+    GROUP_LINK_OFFSET,
+    HEADER_SIZE,
     MODE_CODES,
     RX_ONLY_TX_HZ,
+    inspect_group_link,
     inspect_thd75,
     render_thd75,
     restore_unowned_regions,
 )
-from wasds150.models.plan import ChannelPlan
+from wasds150.models.plan import ChannelPlan, PlanBlock, ScanGroup
 from wasds150.plan.resolve import PlannedChannel, ResolvedPlan, resolve_plan
 from wasds150.plans.thd75_ames_lake import THD75_AMES_LAKE
 from wasds150.radios.registry import TH_D75
@@ -227,3 +232,71 @@ def test_native_export_preserves_settings_and_encodes_modes(tmp_path: Path) -> N
     assert count == 1
     assert restored[unrelated] == original[unrelated]
     assert restored[dstar] == mcp_saved[dstar]
+
+
+def _linkable(block: str, name: str, mhz: float, **kwargs) -> PlannedChannel:
+    return PlannedChannel(
+        slot=0, name=name, label=name, rx_freq_mhz=mhz, transmit=False,
+        mode="FM", block=block, source="test", **kwargs,
+    )
+
+
+def test_group_link_points_at_the_first_scan_group(tmp_path: Path) -> None:
+    template = tmp_path / "radio.d75"
+    original = bytearray(_template(template))
+    # The operator's own radio carries a link table here; a real read has it
+    # non-empty, so the export has to overwrite rather than fill.
+    original[HEADER_SIZE + GROUP_LINK_OFFSET:HEADER_SIZE + GROUP_LINK_OFFSET + GROUP_LINK_COUNT] = (
+        bytes((0, 1, 2, 3)) + bytes([GROUP_LINK_NONE]) * (GROUP_LINK_COUNT - 4)
+    )
+    template.write_bytes(bytes(original))
+
+    plan = ChannelPlan(
+        id="test", radio_id="th-d75", label="Test",
+        blocks=tuple(PlanBlock(label=label) for label in ("Nets", "Ham 2m", "Marine")),
+        scan_groups=(
+            ScanGroup("Near Me", ("Nets", "Ham 2m"), take=(("Nets", 1), ("Ham 2m", 1))),
+            ScanGroup("Everything", ("Nets", "Ham 2m", "Marine")),
+        ),
+    )
+    channels = [
+        _linkable("Nets", "NET1", 146.96),
+        _linkable("Nets", "NET2", 147.08),
+        _linkable("Ham 2m", "TWOM", 145.49),
+        # Skipped rows never pull their group into the link.
+        _linkable("Marine", "MAR16", 156.8, skip_scan=True),
+    ]
+    resolved = ResolvedPlan(plan=plan, profile=TH_D75, channels=channels)
+
+    data, result = render_thd75(resolved, template=template)
+
+    assert result.link_group == "Near Me"
+    # Nets is group 0 and Ham 2m group 1; Marine is group 2 and stays out.
+    assert result.group_links == [0, 1]
+    assert inspect_group_link(data) == [0, 1]
+    tail = data[HEADER_SIZE + GROUP_LINK_OFFSET + 2:HEADER_SIZE + GROUP_LINK_OFFSET + GROUP_LINK_COUNT]
+    assert set(tail) == {GROUP_LINK_NONE}
+
+    # The link is ours, so a later MCP save must not restore the radio's.
+    mcp_saved = bytearray(data)
+    restored, _ = restore_unowned_regions(bytes(mcp_saved), bytes(original))
+    assert inspect_group_link(restored) == [0, 1]
+
+
+def test_group_link_is_left_alone_without_scan_groups(tmp_path: Path) -> None:
+    template = tmp_path / "radio.d75"
+    original = bytearray(_template(template))
+    original[HEADER_SIZE + GROUP_LINK_OFFSET:HEADER_SIZE + GROUP_LINK_OFFSET + GROUP_LINK_COUNT] = (
+        bytes((5, 6)) + bytes([GROUP_LINK_NONE]) * (GROUP_LINK_COUNT - 2)
+    )
+    template.write_bytes(bytes(original))
+
+    plan = ChannelPlan(id="test", radio_id="th-d75", label="Test")
+    resolved = ResolvedPlan(
+        plan=plan, profile=TH_D75, channels=[_linkable("Nets", "NET1", 146.96)]
+    )
+    data, result = render_thd75(resolved, template=template)
+
+    assert result.link_group == ""
+    assert result.group_links == []
+    assert inspect_group_link(data) == [5, 6]

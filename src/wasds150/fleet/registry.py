@@ -210,7 +210,8 @@ TH_D75 = FleetRadio(
         StepSpec(
             "write-radio", "Write the radio",
             "Open {final} in MCP-D75, check the memory count and the local DR list, then write "
-            "it to the radio.",
+            "it to the radio. Memory Group Link is set to the groups Near Me draws from, so "
+            "MENU > Scan > Group Link Scan sweeps every local amateur group in one pass.",
         ),
         StepSpec(
             "readback-save", "Read back for comparison",
@@ -409,7 +410,9 @@ ID52A = FleetRadio(
         StepSpec(
             "confirm-count", "Check the radio",
             "On the radio, open a group near home and check a few memories ({rows} in all), then "
-            "press DR and confirm a local D-STAR repeater is listed.",
+            "press DR and confirm a local D-STAR repeater is listed. The last group is Near Me: "
+            "a second copy of the nearest of every amateur service, so SCAN > Group on it is one "
+            "pass over the list the Anytone holds as a scan list.",
             kind=STEP_CONFIRM, verify=True,
         ),
     ),

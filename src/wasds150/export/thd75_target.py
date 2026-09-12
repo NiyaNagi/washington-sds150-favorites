@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 from wasds150.plan.resolve import PlannedChannel, ResolvedPlan
+from wasds150.plan.scanning import group_banks
 from wasds150.radios.tones import TONE_CTCSS, TONE_DCS
 
 HEADER_SIZE = 0x100
@@ -29,6 +30,14 @@ FLAGS_OFFSET = 0x2000
 DATA_OFFSET = 0x4000
 NAMES_OFFSET = 0x10000
 GROUP_NAME_INDEX = 1152
+#: Memory Group Link: an ordered list of group numbers the radio scans as one
+#: pass, 0xFF for an unused slot. Read from the operator's own radio, where
+#: the four configured links appear here as ``00 01 02 03 FF...``. This is the
+#: TH-D75's only composite scan, and it reaches whole groups - there is no
+#: way to link a subset of a group's memories.
+GROUP_LINK_OFFSET = 0x10A0
+GROUP_LINK_COUNT = 30
+GROUP_LINK_NONE = 0xFF
 FLAG_SIZE = 4
 RECORD_SIZE = 40
 NAME_SIZE = 16
@@ -80,6 +89,10 @@ class Thd75ExportError(RuntimeError):
 class Thd75ExportResult:
     rows: int = 0
     groups: int = 0
+    #: Name of the scan group the memory group link was built from, and the
+    #: group numbers it links. Empty when the plan defines no scan groups.
+    link_group: str = ""
+    group_links: List[int] = field(default_factory=list)
     warnings: List[str] = field(default_factory=list)
 
 
@@ -126,6 +139,42 @@ def _flag_offset(slot: int) -> int:
 
 def _name_offset(slot: int) -> int:
     return HEADER_SIZE + NAMES_OFFSET + slot * NAME_SIZE
+
+
+def _write_group_link(
+    output: bytearray,
+    resolved: ResolvedPlan,
+    group_by_block: Dict[str, int],
+    result: Thd75ExportResult,
+) -> None:
+    """Point Memory Group Link at the plan's first scan group.
+
+    The radio links whole memory groups, so a quota-trimmed group such as
+    ``Near Me`` reaches every memory of each group it draws from - the right
+    stations plus their more distant neighbours, which is the closest the
+    TH-D75 comes to the Anytone's curated list.
+    """
+    base = HEADER_SIZE + GROUP_LINK_OFFSET
+    groups = resolved.plan.scan_groups
+    if not groups:
+        return
+    group = groups[0]
+    links = group_banks(group, resolved.channels, group_by_block)
+    if not links:
+        result.warnings.append(
+            f"scan group {group.name!r} matched no memory group; memory group link left as read"
+        )
+        return
+    if len(links) > GROUP_LINK_COUNT:
+        result.warnings.append(
+            f"scan group {group.name!r} spans {len(links)} memory groups; "
+            f"only the first {GROUP_LINK_COUNT} are linked"
+        )
+        links = links[:GROUP_LINK_COUNT]
+    table = bytes(links) + bytes([GROUP_LINK_NONE]) * (GROUP_LINK_COUNT - len(links))
+    output[base:base + GROUP_LINK_COUNT] = table
+    result.link_group = group.name
+    result.group_links = list(links)
 
 
 def _name_bytes(text: str) -> bytes:
@@ -280,6 +329,8 @@ def render_thd75(
         output[_data_offset(slot):_data_offset(slot) + RECORD_SIZE] = _record(channel, result)
         output[_name_offset(slot):_name_offset(slot) + NAME_SIZE] = _name_bytes(channel.name)
 
+    _write_group_link(output, resolved, group_by_block, result)
+
     result.rows = len(channels)
     result.groups = len(group_by_block)
     _validate_template(bytes(output))
@@ -297,6 +348,12 @@ def write_thd75(
     destination.parent.mkdir(parents=True, exist_ok=True)
     destination.write_bytes(data)
     return result
+
+
+def inspect_group_link(data: bytes) -> List[int]:
+    """The memory groups the image links into one scan pass."""
+    table = data[HEADER_SIZE + GROUP_LINK_OFFSET:HEADER_SIZE + GROUP_LINK_OFFSET + GROUP_LINK_COUNT]
+    return [b for b in table if b != GROUP_LINK_NONE]
 
 
 def inspect_thd75(data: bytes) -> List[Dict[str, object]]:
@@ -350,6 +407,9 @@ def restore_unowned_regions(mcp_saved: bytes, backup: bytes) -> Tuple[bytes, int
         NAMES_OFFSET + GROUP_NAME_INDEX * NAME_SIZE,
         NAMES_OFFSET + (GROUP_NAME_INDEX + GROUP_COUNT) * NAME_SIZE,
     )
+    # The group link names our own groups, so it belongs to the export too;
+    # restoring the radio's old table would link four unrelated groups.
+    mark(GROUP_LINK_OFFSET, GROUP_LINK_OFFSET + GROUP_LINK_COUNT)
     mark(DSTAR_REGION_START, DSTAR_REGION_END)
     for slot in range(MEMORY_COUNT):
         start = DATA_OFFSET + (slot // CHANNELS_PER_PAGE) * PAGE_SIZE + (slot % CHANNELS_PER_PAGE) * RECORD_SIZE

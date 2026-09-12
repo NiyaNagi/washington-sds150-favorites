@@ -980,8 +980,14 @@ _AT_D890UV = RadioKnobs(
 
 #: ID-52A: 1,000 memories in groups of 100, so no block may exceed a group.
 #: No HF and no broadcast receiver; D-STAR, and no DMR.
+#:
+#: The reserve carries the operator's own fifty slots and, on top of them,
+#: the ``Near Me`` group: the radio scans one memory group at a time and a
+#: memory belongs to one group, so that list exists only as a second copy of
+#: its sixty-six channels. They come off the far end of the fill blocks,
+#: which is the most distant thing the radio was holding.
 _ID52A = RadioKnobs(
-    reserve_slots=50,
+    reserve_slots=116,
     include_hf=False,
     include_broadcast=False,
     include_dmr=False,
@@ -992,7 +998,9 @@ _ID52A = RadioKnobs(
         "nets": 44, "ham-2m": 78, "ham-70cm": 78, "dstar": 25, "simplex": 20, "seattle-acs": 50,
         "rail": 15, "marine": 40,
         "gmrs-interstitial": 7, "frs": 7, "gmrs-main": 8, "gmrs-repeaters": 10, "murs": 5,
-        "business": 100, "data": 10, "packs": 60, "other-nearby": 40,
+        # Sixty off the three widest-reaching blocks, which is what the
+        # Near Me copy costs; these are the most distant rows on the radio.
+        "business": 70, "data": 10, "packs": 40, "other-nearby": 30,
     },
 )
 

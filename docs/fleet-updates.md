@@ -251,7 +251,7 @@ the operator's own, explicit choice; the template does not cap any of it.
 4. **Import the D-STAR repeater list** - In MCP-D75, import the filtered official repeater TSV under Repeater List for TH-D75A (K-type/U.S.A. and Canada).
 5. **Save from MCP-D75** - Save the file from MCP-D75 (File > Save As) next to <export>; the next step needs it.
 6. **Restore the preserved regions** _(automatic)_ - Run scripts\radios\finalize_thd75_image.py with <backup_d75> and the MCP-saved file. MCP normalises empty special-memory pages on save; this restores every byte outside ordinary memories, group names and the D-STAR region.
-7. **Write the radio** - Open <final> in MCP-D75, check the memory count and the local DR list, then write it to the radio.
+7. **Write the radio** - Open <final> in MCP-D75, check the memory count and the local DR list, then write it to the radio. Memory Group Link is set to the groups Near Me draws from, so MENU > Scan > Group Link Scan sweeps every local amateur group in one pass.
 8. **Read back for comparison** _(optional)_ - Read the radio again in MCP-D75 and save it into radio-backups\th-d75\ as a read-back, so the written image can be compared byte for byte.
 <!-- fleet:end th-d75 -->
 
@@ -323,5 +323,5 @@ the operator's own, explicit choice; the template does not cap any of it.
 4. **Import each memory group** - Memory CH > right-click the group > Import > Group, and choose the matching file from <export>\Csv\MemoryCh, in file-name order; each file names the group it fills. Answer No when CS-52 asks about USE(FROM). Close the files in any spreadsheet first.
 5. **Import the D-STAR repeater list** _(optional)_ - Digital > Repeater List > right-click a group > Import > Group, and choose <export>\Csv\RptList\DSTAR_Near_Home.csv, so the DR function finds the local repeaters by position.
 6. **Write the radio** - Save the file into radio-backups\id-52a\, then write it to the radio.
-7. **Check the radio** _(confirm)_ - On the radio, open a group near home and check a few memories (<rows> in all), then press DR and confirm a local D-STAR repeater is listed.
+7. **Check the radio** _(confirm)_ - On the radio, open a group near home and check a few memories (<rows> in all), then press DR and confirm a local D-STAR repeater is listed. The last group is Near Me: a second copy of the nearest of every amateur service, so SCAN > Group on it is one pass over the list the Anytone holds as a scan list.
 <!-- fleet:end id-52a -->

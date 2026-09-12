@@ -36,6 +36,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple
 
 from wasds150.plan.resolve import PlannedChannel, ResolvedPlan
+from wasds150.plan.scanning import group_members
 from wasds150.radios.tones import TONE_CTCSS, TONE_DCS
 
 MEMORY_HEADER: Tuple[str, ...] = (
@@ -52,6 +53,8 @@ REPEATER_HEADER: Tuple[str, ...] = (
 #: Memories per group, and groups, as the ID-52A's manual states them.
 GROUP_MEMBER_MAX = 100
 GROUP_MAX = 100
+#: Total memories across every group.
+MEMORY_MAX = 1000
 #: Entries in the DR repeater list.
 REPEATER_MAX = 2500
 NAME_MAX = 16
@@ -120,9 +123,30 @@ def _tones(channel: PlannedChannel) -> Tuple[str, str, str, str]:
     return "OFF", DEFAULT_TONE, DEFAULT_TONE, DEFAULT_DTCS
 
 
+def _scan_groups(resolved: ResolvedPlan) -> List[Tuple[str, List[PlannedChannel]]]:
+    """The plan's first scan group as a memory group of its own.
+
+    The ID-52A scans one memory group at a time and a memory belongs to
+    exactly one group, so a composite list such as ``Near Me`` can only exist
+    as a second copy of each channel. That is what this writes: the same
+    channels, in the same order, in their own group, so the radio's Group
+    scan reaches the curated list the Anytone holds as a scan list.
+
+    Only the first group, and only up to a group's worth: every copy costs a
+    memory, and the radio has a thousand.
+    """
+    groups = resolved.plan.scan_groups
+    if not groups:
+        return []
+    members = group_members(groups[0], resolved.channels)[:GROUP_MEMBER_MAX]
+    if not members:
+        return []
+    return [(groups[0].name[:NAME_MAX], members)]
+
+
 def _group_names(resolved: ResolvedPlan) -> List[Tuple[str, List[PlannedChannel]]]:
     """The plan's blocks as memory groups, in plan order, each within the
-    radio's 100-memory group ceiling."""
+    radio's 100-memory group ceiling, then its first scan group as a copy."""
     ordered: "List[Tuple[str, List[PlannedChannel]]]" = []
     index: Dict[str, int] = {}
     for channel in resolved.channels:
@@ -142,8 +166,15 @@ def _group_names(resolved: ResolvedPlan) -> List[Tuple[str, List[PlannedChannel]
         for number, chunk in enumerate(chunks, start=1):
             suffix = "" if number == 1 else f" {number}"
             groups.append(((name[: NAME_MAX - len(suffix)] + suffix), chunk))
+    groups.extend(_scan_groups(resolved))
     if len(groups) > GROUP_MAX:
         raise Id52ExportError(f"{len(groups)} memory groups exceed the radio's {GROUP_MAX}")
+    total = sum(len(members) for _, members in groups)
+    if total > MEMORY_MAX:
+        raise Id52ExportError(
+            f"{total} memories exceed the radio's {MEMORY_MAX}; the scan-group copy needs "
+            "room, so raise the plan's reserve_slots"
+        )
     return groups
 
 
@@ -240,9 +271,22 @@ def render_id52(resolved: ResolvedPlan) -> Id52ExportResult:
 
 
 def write_id52(resolved: ResolvedPlan, path: Path) -> Id52ExportResult:
-    """Write the CSV tree into directory ``path`` (created if needed)."""
+    """Write the CSV tree into directory ``path`` (created if needed).
+
+    Group files are numbered by position, so a plan that gains or loses a
+    group renumbers the ones after it. Any file left over from an earlier
+    export would then sit in the same folder under a name this one no longer
+    writes, and the operator importing "one file per group, in file order"
+    would import a mixture of the two. So the two directories this exporter
+    owns are cleared of the CSVs it is not about to write.
+    """
     files, rows, warnings = render_files(resolved)
     path = Path(path)
+    keep = {(path / name).resolve() for name in files}
+    for directory in (MEMORY_DIR, REPEATER_DIR):
+        for stale in sorted((path / directory).glob("*.csv")):
+            if stale.resolve() not in keep:
+                stale.unlink()
     written: List[Path] = []
     for name, text in files.items():
         target = path / name
