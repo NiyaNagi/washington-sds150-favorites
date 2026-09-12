@@ -302,6 +302,14 @@ def build_bundle(resolved: ResolvedPlan) -> Atd890Bundle:
     # A zone is split at the scan-list ceiling rather than the zone ceiling
     # so that every zone's scan list is exactly the zone: the operator sees
     # one name in both menus and no list ever needs a second split.
+    # A zone holds more than a scan list (160 against 50 here), but they are
+    # deliberately sized together so that every zone has exactly one scan list
+    # of the same name holding exactly its channels - the invariant that makes
+    # the radio legible: what you are looking at is what Scan will sweep.
+    # Letting zones reach 160 splits each into several numbered lists, whose
+    # names collide with the next zone's once truncated to 16 characters
+    # ("Ham DMR Local 01" chunk 2 and the zone "Ham DMR Local 02"), and leaves
+    # a channel scanning a third of the zone it sits in.
     zone_limit = min(x for x in (profile.zone_member_max, profile.scan_list_member_max) if x) if (
         profile.zone_member_max or profile.scan_list_member_max
     ) else None
@@ -326,8 +334,11 @@ def build_bundle(resolved: ResolvedPlan) -> Atd890Bundle:
         names = _numbered(zone.name, len(chunks))
         for name, chunk in zip(names, chunks):
             scan_lists.append(ScanList(name=name, members=chunk, kind="zone"))
-        for member in members:
-            scan_list_by_channel.setdefault(member.name, names[0] if names else "")
+            # Each channel points at the list it is actually in. Pointing the
+            # whole zone at the first one would leave everything past the first
+            # 50 scanning a list it is not a member of.
+            for member in chunk:
+                scan_list_by_channel.setdefault(member.name, name)
     for group in plan.scan_groups:
         quotas = group.quotas
         members: List[PlannedChannel] = []
