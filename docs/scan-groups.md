@@ -15,7 +15,7 @@ hardware allows, and no further.
 | AT-D890UV | scan lists, 100 members, any channel in any number of them | **exactly the 100 curated channels**, plus `Ham All`, `Ham Analog`, `Ham DMR`, `Public Svc`, `Rail & Marine`, `Personal`, `Everything` |
 | TH-D75A | Memory Group Link: an ordered list of memory groups scanned as one pass | **the six groups Near Me draws from, whole** - 242 channels rather than 70 |
 | ID-52A | Group scan, one memory group at a time; a memory belongs to one group | **its own group of 66 copies**, the same channels in the same order |
-| FTX-1 | banks exist on the radio, but not in a form this project can write | none |
+| FTX-1 | `M-Grp`, one checkbox per memory - a single subset, storage not yet decoded | none yet |
 | TD-H9 | no group or bank concept at all | none |
 
 ## AT-D890UV
@@ -62,29 +62,39 @@ Neither gets a composite list.
 The TD-H9 has nothing to build one with: CHIRP writes memories and a skip
 flag, and the radio scans all of them.
 
-The FTX-1 does have banks. The programmer edits them as a checkbox per bank
-in the memory grid - `Settings > Bank Settings` hides every other column - so
-a memory can be in several at once, which is what would let `Near Me` be a
-bank without the ID-52A's duplicate memories.
+The FTX-1 has **no banks**, which this project assumed for a while and was
+wrong about. The programmer's memory grid has no Bank column and no
+`Settings > Bank Settings` view; the bank symbols in `FTX1_V5.dll` are
+inherited RT Systems framework overrides that this radio's grid never uses.
 
-What is missing is where the file keeps them. An RT Systems `.FTX1` is a flat
-array of 295-byte records with no separate bank table: the blank template and
-a file saved from the programmer differ nowhere outside the records, and the
-header's region table names no such region. So membership is most likely a
-bitmask inside a record, in bytes this project has not decoded.
+What it has is **`M-Grp`**: one checkbox per memory, sitting between `Skip`
+and `Tx DGID`, with `55: MEM Group` as the matching Set Menu item on the
+radio. That is a single subset of the memories - not twenty-four banks, but
+one list, which is exactly the shape of `Near Me`. If it can be written, the
+FTX-1 gets the composite without the ID-52A's duplicate memories and without
+spending a slot.
 
-`scripts/radios/make_ftx1_probe.py` writes `ftx1-banks.FTX1`, twelve memories
-on 146.520 whose Comment column says which boxes to tick - single banks on
-either side of a byte boundary to pin down byte and bit order, then two
-combinations to confirm it is a mask rather than an index - plus
-`ftx1-banks-reference.FTX1`, the same file to re-save unedited. Then:
+Where the file stores it is not yet known, and the guess in
+`radio-templates/README.md` that it is bit 1 of byte `0x00` has never been
+tested: that byte is `0x01` on every in-use record of every file seen,
+including all 553 memories read from the radio. So no observed file has M-Grp
+set on anything.
+
+`scripts/radios/make_ftx1_probe.py` writes `ftx1-mgrp.FTX1` - six memories on
+146.520, alternately `MGRP-OFF-n` and `MGRP-ON-n`, so whichever byte holds
+the flag differs between neighbours that are otherwise identical - plus
+`ftx1-mgrp-reference.FTX1`, the same file to re-save unedited. Then:
 
 ```powershell
 # inside the records
-python scripts\radios\decode_ftx1_probe.py <edited>\ftx1-banks.FTX1
-# anywhere in the file, in case they are not
-python scripts\radios\decode_ftx1_probe.py <edited>\ftx1-banks.FTX1 --against <saved>\ftx1-banks-reference.FTX1
+python scripts\radios\decode_ftx1_probe.py <edited>\ftx1-mgrp.FTX1
+# anywhere in the file, in case it is not
+python scripts\radios\decode_ftx1_probe.py <edited>\ftx1-mgrp.FTX1 --against <saved>\ftx1-mgrp-reference.FTX1
 ```
 
-Until that comes back the FTX-1 gets its memory blocks in plan order and
-nothing else.
+Still open after that: what the radio does with `55: MEM Group` turned on -
+whether it scans only the flagged memories or merely displays them
+separately. The flag is worth writing either way, but which of `Near Me` and
+the wider composites it should carry depends on the answer.
+
+Until then the FTX-1 gets its memory blocks in plan order and nothing else.

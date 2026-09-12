@@ -84,7 +84,7 @@ every memory was identical except one column (see
 
 | Offset | Size | Field | How it was confirmed |
 |---|---|---|---|
-| `0x00` | u8 | In use (bit 1 = M-Grp) | 967/967 vendor records |
+| `0x00` | u8 | In use. Bit 1 was guessed to be M-Grp; **unverified** | 967/967 vendor records, all `0x01` |
 | `0x01` | u32 LE | Receive frequency, Hz | round-trips on every record |
 | `0x05` | u32 LE | Transmit frequency, Hz | round-trips on every record |
 | `0x09` | u32 LE | Offset/shift magnitude, Hz | equals \|tx-rx\| on 963/967 |
@@ -101,6 +101,14 @@ every memory was identical except one column (see
 | `0x4E` | bits | `0x04` SSB Narrow, `0x02` CW Narrow, `0x01` RTTY Narrow | probe file |
 | `0x4F` | u8 | Noise Blanker level | probe file |
 | `0x85` | utf-16 | Comment, 79 characters | vendor records up to 79 chars |
+
+Byte `0x00` is `0x01` on every in-use record of every file seen so far - all
+553 memories of a file read from the radio, and the factory default - so
+nothing observed yet says where `M-Grp` is stored. The programmer offers it
+as a single checkbox per memory (the FTX-1 has no banks: there is no Bank
+column and no Bank Settings view), and the radio's Set Menu item is
+`55: MEM Group`. That makes it the radio's one and only memory subset, which
+is the shape of a `Near Me` list - see `docs/scan-groups.md`.
 
 ### Operating mode codes
 
@@ -146,10 +154,10 @@ python scripts/radios/make_ftx1_probe.py --out "path/to/a/scratch/folder"
 # Read back exactly which byte moved for which value
 python scripts/radios/decode_ftx1_probe.py "path/to/ftx1-modes.FTX1"
 
-# For a field that may not be inside a record at all - bank membership is the
-# open one - diff the whole file against a copy re-saved with nothing changed
-python scripts/radios/decode_ftx1_probe.py "path/to/ftx1-banks.FTX1" \
-    --against "path/to/ftx1-banks-reference.FTX1"
+# For a field that may not be inside a record at all - M-Grp is the open one -
+# diff the whole file against a copy re-saved with nothing changed
+python scripts/radios/decode_ftx1_probe.py "path/to/ftx1-mgrp.FTX1" \
+    --against "path/to/ftx1-mgrp-reference.FTX1"
 ```
 
 Because only one variable changes per row, the offset and its encoding fall
