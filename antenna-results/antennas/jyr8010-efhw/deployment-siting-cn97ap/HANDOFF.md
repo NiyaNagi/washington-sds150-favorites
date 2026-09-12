@@ -36,7 +36,14 @@ Two published artifacts (private, owned by the operator):
 
 ---
 
-## The task that was interrupted — do this first
+## The GPX task — DONE 2026-09-12 (kept below for the record)
+
+Scored as **`CURRENT`**: rank **29 of 35**, −3.70 dBi, 24/75, worst −58.9 — below BASE
+(35/75). The operator confirmed the walk started at the high end and the wire is straight.
+Results in README.md → "What is up now", SESSION-LOG Phase 13. Two figures in the notes below
+were wrong and are corrected there as **error 16**: the taut-wire end height is ~60 ft, not
+43.6, and the 8-point start-dwell mean is 0.5 m *past* the south line. Canopy along the path is
+4–5%, which exposed **error 15** ("no open-ground route exists" was a scan artefact).
 
 The operator paced off **the antenna they actually have up right now** with a Garmin watch
 and asked:

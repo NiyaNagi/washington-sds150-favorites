@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from PIL import Image                                    # noqa: E402
 import compare_options as C                              # noqa: E402
-from site_geometry import polar, mag, to_latlon, dms     # noqa: E402
+from site_geometry import polar, mag, to_latlon, dms, offset  # noqa: E402
 
 FT = 0.3048
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -41,6 +41,37 @@ OPTS = {o.key: o for o in C.build_options()}
 PRIMARY = OPTS["RB-POST20"]
 SECOND = OPTS["F10-A"]
 PLAN24 = OPTS["A"]
+# What is actually up (operator's GPX) and the original plan, for comparison.
+CURRENT = OPTS["CURRENT"]
+BASE = OPTS["BASE"]
+
+
+def ranked():
+    """Same three-band ordering compare_options.py prints."""
+    return sorted(OPTS.values(), key=lambda o: (
+        -C.aggregate_multiband(o)["n_workable"],
+        -C.aggregate_multiband(o)["n_regions_covered"],
+        -C.aggregate_multiband(o)["mean_power_dBi"]))
+
+
+def sg(v, fmt="+.2f"):
+    """Format with a true minus sign."""
+    return format(v, fmt).replace("-", "−")
+
+
+def canopy_fractions(opts):
+    """Share of each option's ground path over canopy, corridor ortho."""
+    import canopy_from_ortho as K
+    im, ppm, centre = K.load("corridor")
+    mask = K.canopy_mask(im)
+    out = {}
+    for o in opts:
+        prof = []
+        for i in range(len(o.supports) - 1):
+            prof += K.profile_along(mask, ppm, centre, im.size,
+                                    o.supports[i][2], o.supports[i + 1][2])
+        out[o.key] = sum(v for _, v in prof) / len(prof)
+    return out
 
 
 def sup3d(opt):
@@ -80,7 +111,7 @@ def embed(fn, max_px, quality=82):
 # Plan view: ortho + overlay, in SVG user units = image pixels
 # ----------------------------------------------------------------------
 
-def plan_svg(capture, size=1400, show24=False):
+def plan_svg(capture, size=1400, show24=False, current=False):
     fn, span, centre = capture
     ppm = size / span
 
@@ -114,6 +145,27 @@ def plan_svg(capture, size=1400, show24=False):
             x, y = P(p[1], p[2])
             o.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="8" fill="none" '
                      f'stroke="#7de2ff" stroke-width="4"/>')
+
+    if current:
+        # The antenna actually up now, from the operator's GPX. Pink, so it
+        # cannot be mistaken for either recommendation.
+        cp = " ".join(f"{P(*en)[0]:.1f},{P(*en)[1]:.1f}"
+                      for _, _, en in CURRENT.supports)
+        o.append(f'<polyline points="{cp}" fill="none" stroke="#000" '
+                 f'stroke-width="11" opacity=".5"/>')
+        o.append(f'<polyline points="{cp}" fill="none" stroke="#ff4fb0" '
+                 f'stroke-width="6" stroke-linecap="round"/>')
+        ce, cn = CURRENT.supports[-1][2]
+        x, y = P(ce, cn)
+        d, b = polar(ce, cn)
+        o.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="11" fill="#0b0d0f" '
+                 f'stroke="#ff4fb0" stroke-width="4"/>')
+        o.append(f'<text x="{x-20:.1f}" y="{y-16:.1f}" class="pl" '
+                 f'text-anchor="end" filter="url(#sh)">up now · end '
+                 f'{CURRENT.supports[-1][1]} ft</text>')
+        o.append(f'<text x="{x-20:.1f}" y="{y+6:.1f}" class="ps" '
+                 f'text-anchor="end" filter="url(#sh)">{d/FT:.0f} ft @ '
+                 f'{b:.0f}°T / {mag(b):.0f}°M</text>')
 
     pts = " ".join(f"{P(p[1], p[2])[0]:.1f},{P(p[1], p[2])[1]:.1f}"
                    for p in PTS)
@@ -362,10 +414,12 @@ def eye_svg(obs_en, look_bearing, title, w=560, h=340, hfov=78.0):
 def main():
     print("Embedding imagery:")
     plan = plan_svg(CORRIDOR, 1400, show24=True)
-    wide = plan_svg(WIDE, 1200)
+    wide = plan_svg(WIDE, 1200, current=True)
+    print("Classifying canopy along each path:")
     out = {
         "plan": plan, "wide": wide, "iso": iso_svg(),
         "profile": profile_svg(),
+        "canopy": canopy_fractions((CURRENT, BASE, PRIMARY, SECOND)),
     }
     # Standpoints follow the PRIMARY deployment, so the last two are computed
     # from the post rather than hard-coded to F10-A's end tie-off.
@@ -394,7 +448,7 @@ CSS = """
   --bg:#f2f0ea; --surf:#ffffff; --surf2:#e9e6dd; --ink:#171b17; --ink2:#3f463e;
   --muted:#6d7568; --rule:#d3cec2; --grid:#c2bcae; --mast:#8d9585;
   --wire:#e0620d; --accent:#c8811a; --alt:#0f7fa6; --alarm:#b3372a;
-  --sky:#dfe6ea; --ground:#dcdccb;
+  --sky:#dfe6ea; --ground:#dcdccb; --now:#c2337a;
   --ff-d:"Archivo",system-ui,sans-serif;
   --ff-b:"IBM Plex Sans",system-ui,sans-serif;
   --ff-m:"IBM Plex Mono",ui-monospace,monospace;
@@ -403,13 +457,13 @@ CSS = """
   --bg:#12150f; --surf:#1a1e17; --surf2:#232820; --ink:#eceadf; --ink2:#c3c6b8;
   --muted:#8d9481; --rule:#333a2e; --grid:#3d4536; --mast:#6d7663;
   --wire:#ff9142; --accent:#e2ab4c; --alt:#5cc4e6; --alarm:#e8705f;
-  --sky:#1d2630; --ground:#242a1e;
+  --sky:#1d2630; --ground:#242a1e; --now:#ff78c0;
 }}
 :root[data-theme="dark"]{
   --bg:#12150f; --surf:#1a1e17; --surf2:#232820; --ink:#eceadf; --ink2:#c3c6b8;
   --muted:#8d9481; --rule:#333a2e; --grid:#3d4536; --mast:#6d7663;
   --wire:#ff9142; --accent:#e2ab4c; --alt:#5cc4e6; --alarm:#e8705f;
-  --sky:#1d2630; --ground:#242a1e;
+  --sky:#1d2630; --ground:#242a1e; --now:#ff78c0;
 }
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--ff-b);
@@ -462,6 +516,9 @@ tr.hi td{background:var(--surf2);font-weight:600;color:var(--ink)}
 .note{border-left:4px solid var(--accent);background:var(--surf);
   padding:14px 17px;border-radius:0 5px 5px 0;font-size:15px;color:var(--ink2)}
 .note.alarm{border-left-color:var(--alarm)}
+.note.now,.sec-head.now{border-left-color:var(--now)}
+th.now,td.now{color:var(--now)}
+tr.hi td.now{color:var(--now)}
 .note b{color:var(--ink)}
 ol.steps{list-style:none;counter-reset:s;padding:0;margin:0;
   display:flex;flex-direction:column;gap:12px}
@@ -505,6 +562,179 @@ def schedule_rows(pts=None, hi_rows=(1, 2)):
     return "\n".join(r)
 
 
+def current_section(parts):
+    """'What is up now' - the operator's as-built sloper against the plans."""
+    cols = (CURRENT, BASE, PRIMARY, SECOND)
+    rk = ranked()
+    n = len(rk)
+    M = {o.key: C.aggregate_multiband(o) for o in cols}
+    R = {o.key: rk.index(o) + 1 for o in cols}
+    cz = parts["canopy"]
+    end_en = CURRENT.supports[-1][2]
+    run, brg = polar(*end_en)
+    back = (brg + 180) % 360
+    rise = CURRENT.top_h - CURRENT.feed_h
+    slack = C.WIRE_M - math.hypot(run, rise)
+
+    shape = {CURRENT.key: "one straight run up to a tree",
+             BASE.key: "bent at a 35 ft apex, down to 10 ft",
+             PRIMARY.key: "50 ft apex tree, then a 20 ft post",
+             SECOND.key: "50 ft apex, 50 ft far tree, 30 ft end"}
+
+    def cell(o, txt):
+        c = " now" if o is CURRENT else ""
+        return f"<td class='n{c}'>{txt}</td>"
+
+    def row(label, fn, hi=False):
+        return (f"<tr{' class=\"hi\"' if hi else ''}><td>{label}</td>"
+                + "".join(cell(o, fn(o)) for o in cols) + "</tr>")
+
+    rows = ["<tr><td>Shape</td>" + "".join(
+        f"<td style='font-size:13.5px'>{shape[o.key]}</td>" for o in cols)
+        + "</tr>"]
+    rows.append(row("Highest attachment", lambda o: f"{o.max_anchor_ft} ft"))
+    rows.append(row(f"Three-band rank, of {n}", lambda o: f"<b>{R[o.key]}</b>",
+                    hi=True))
+    rows.append(row("3-band aggregate",
+                    lambda o: f"{sg(M[o.key]['mean_power_dBi'])} dBi"))
+    rows.append(row("Cells workable",
+                    lambda o: f"{M[o.key]['n_workable']} / 75", hi=True))
+    rows.append(row("Regions", lambda o: f"{M[o.key]['n_regions_covered']} / 25"))
+    rows.append(row("Median cell", lambda o: sg(M[o.key]['median_dBi'], "+.1f")))
+    rows.append(row("Worst region",
+                    lambda o: f"{sg(M[o.key]['worst_dBi'], '+.1f')} dBi"))
+    for b in C.BAND_KEYS:
+        rows.append(row(b.replace("m", " m"), lambda o, b=b: (
+            f"{sg(C.aggregate(o, b)['mean_power_dBi'])} "
+            f"<span style='color:var(--muted)'>"
+            f"({C.aggregate(o, b)['n_workable']}/25)</span>")))
+    rows.append(row("Wire over canopy", lambda o: f"{cz[o.key]*100:.0f}%"))
+
+    # Per-region 3-band mean dBi, CURRENT against the original plan.
+    def mb_region(o):
+        nets = {b: C.band_nets(o, b) for b in C.MULTIBAND}
+        return [10 * math.log10(sum(
+            10 ** ((nets[b][i] + C.BAND[b]["peak_dBi"]) / 10)
+            for b in C.MULTIBAND) / len(C.MULTIBAND))
+            for i in range(len(C.TARGETS))]
+    cur_r, base_r = mb_region(CURRENT), mb_region(BASE)
+    deltas = sorted(((cur_r[i] - base_r[i], C.TARGETS[i][0])
+                     for i in range(len(C.TARGETS))), reverse=True)
+    gains, losses = deltas[:5], deltas[::-1][:5]
+    gl = "".join(
+        f"<tr><td>{gn}</td><td class='n'>{sg(gd, '+.1f')}</td>"
+        f"<td>{ln}</td><td class='n' style='color:var(--alarm)'>"
+        f"{sg(ld, '+.1f')}</td></tr>"
+        for (gd, gn), (ld, ln) in zip(gains, losses))
+
+    # GPS sensitivity: the same construction as compare_options.py.
+    sens = [C.aggregate_multiband(C.current_option(
+        offset((0.0, 0.0), brg + db, run + dr)))
+        for db in (-10, -5, 0, 5, 10) for dr in (-5.0, -2.5, 0.0)]
+    s_cells = [m["n_workable"] for m in sens]
+    s_dbi = [m["mean_power_dBi"] for m in sens]
+
+    t = (end_en[0] - 46.9) / -116.8
+    gap = end_en[1] - (-32.0 + t * 25.2)
+    mc, mb, mp, ms = (M[k] for k in (CURRENT.key, BASE.key, PRIMARY.key,
+                                     SECOND.key))
+    side = "below" if R[CURRENT.key] > R[BASE.key] else "above"
+    avg = {o.key: o.avg_h / FT for o in cols}
+
+    return f"""
+<section>
+  <div class="sec-head now">
+    <div class="eyebrow">What's up now · from your Garmin track</div>
+    <h2>Your 45 ft sloper ranks {R[CURRENT.key]} of {n}</h2>
+  </div>
+  <p>You paced it from the far end back to the transformer: <b>{run/FT:.0f} ft
+  out at {mag(brg):.0f}° magnetic</b> ({brg:.0f}°T), feed at 10 ft, end at
+  about 45 ft, one straight run. That is a <b>{CURRENT.slope_deg:.0f}°
+  sloper</b> with roughly {slack:.1f} m of slack in the wire — a hung wire,
+  not a taut one, which is what the track and the heights together say.</p>
+
+  <div class="tbl"><table>
+    <caption>As built, against your original plan and both recommendations ·
+    40 + 20 + 15 m, 25 regions · feed 10 ft in every column</caption>
+    <thead><tr><th></th><th class="now">Up now</th><th>BASE · original
+    plan</th><th>RB-POST20 · build this</th><th>F10-A · fallback</th></tr>
+    </thead>
+    <tbody>{''.join(rows)}</tbody>
+  </table></div>
+
+  <div class="note alarm">
+    <b>It ranks {side} your original plan, not just below the
+    recommendations.</b> Against BASE it is
+    <b>{sg(mc['mean_power_dBi'] - mb['mean_power_dBi'])} dB and
+    {mc['n_workable'] - mb['n_workable']:+d} cells</b>, with a worst region
+    {abs(mc['worst_dBi'] - mb['worst_dBi']):.0f} dB deeper. Against RB-POST20
+    it is <b>{sg(mc['mean_power_dBi'] - mp['mean_power_dBi'])} dB and
+    {mc['n_workable'] - mp['n_workable']:+d} cells</b>; against F10-A,
+    {sg(mc['mean_power_dBi'] - ms['mean_power_dBi'])} dB and
+    {mc['n_workable'] - ms['n_workable']:+d} cells.
+  </div>
+
+  <p><b>Why a sloper that reaches 45 ft does this badly.</b> Two reasons, and
+  the first one is the big one. A straight 130 ft wire has deep nulls straight
+  off both ends on every band, and this one points <b>{brg:.0f}° / {back:.0f}°
+  true</b>. One end aims at South America ({C.TARGET_BEARINGS['South America']:.0f}°T);
+  the other aims at Beijing, Shanghai and Vladivostok (310–318°T) — the same
+  Asia null that ruled out the driveway layout at the very start of this
+  study. Second, it is low where it matters: the wire averages
+  <b>{avg[CURRENT.key]:.0f} ft</b>, against {avg[SECOND.key]:.0f} ft for
+  F10-A, because the first half of it is still climbing out of a 10 ft
+  feed.</p>
+
+  <div class="tbl"><table>
+    <caption>Region by region against your original plan · 3-band mean dBi
+    change</caption>
+    <thead><tr><th>Better now</th><th>Δ</th><th>Worse now</th><th>Δ</th></tr>
+    </thead>
+    <tbody>{gl}</tbody>
+  </table></div>
+
+  <figure>{parts['wide']}<figcaption><b>Pink</b> is the wire up now, drawn
+  from the surveyed feed to the far end of your Garmin track. <b>Orange</b> is
+  RB-POST20. The track's other end landed 4–8 m from the surveyed transformer,
+  which is ordinary wrist-GPS error, so the feed is drawn at the survey point.
+  90 m across; the driveway, both yard corners and the original end mark are
+  all in frame.</figcaption></figure>
+
+  <p><b>It is the one layout here that mostly stays out of the trees</b> —
+  only {cz[CURRENT.key]*100:.0f}% of its ground path is over canopy, because it
+  runs straight down the lawn along the house, against
+  {cz[SECOND.key]*100:.0f}% for F10-A and {cz[PRIMARY.key]*100:.0f}% for
+  RB-POST20. No model in this study charges anything for canopy, so the real
+  gap between this wire and the recommendations is smaller than the table
+  says. How much smaller is not something the study can tell you; an on-air
+  A/B or a post-install sweep of both is.</p>
+
+  <div class="note now">
+    <b>The GPS point doesn't change the answer.</b> Swinging the far end
+    ±10° and pulling it in up to 5 m moves the score between
+    {sg(min(s_dbi))} and {sg(max(s_dbi))} dBi and {min(s_cells)}–{max(s_cells)}
+    cells. Your original plan is {mb['n_workable']} cells, so
+    {'no' if max(s_cells) < mb['n_workable'] else 'some'} reasonable error in the
+    track closes that gap. (It can't be further out than the track says: at
+    45 ft the wire only reaches {math.sqrt(C.WIRE_M**2 - rise**2)/FT:.0f} ft of
+    ground run.)
+  </div>
+
+  <div class="note">
+    <b>Check the far-end tree against the south line.</b> On the track it
+    sits {abs(gap)/FT:.0f} ft {'inside' if gap > 0 else 'past'} the parcel's
+    south boundary. That is well inside the watch's error, so this is a
+    question for a tape and the property corners, not for the GPX.
+  </div>
+
+  <p style="font-size:14px;color:var(--muted)">Scored with the slant-wire
+  model (METHOD.md §9, the study's lowest-confidence model). The same wire on
+  the horizontal-wire model scores worse still, so the ranking is not an
+  artefact of that choice.</p>
+</section>
+"""
+
+
 def build_html(parts, views):
     vhtml = []
     for nm, cap, en, brg, svg in views:
@@ -522,6 +752,9 @@ def build_html(parts, views):
     pd, pb = polar(post[1], post[2])
     pla, plo = to_latlon(post[1], post[2])
     psa, pso = dms(pla, plo)
+    mP = C.aggregate_multiband(PRIMARY)
+    mS = C.aggregate_multiband(SECOND)
+    now_html = current_section(parts)
     return f"""<title>Threading 130 Feet Into the Woods</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>{CSS}</style>
@@ -559,11 +792,11 @@ def build_html(parts, views):
         <td><b>one 20 ft post</b> in your staked strip</td>
         <td>two more tree attachments, 50 ft and 30 ft</td></tr>
       <tr><td>Rope throws</td><td class="n"><b>1</b></td><td class="n">1, plus two more attachments</td></tr>
-      <tr><td>3-band aggregate</td><td class="n">−0.75 dBi</td><td class="n">−0.46 dBi</td></tr>
-      <tr><td>Cells workable</td><td class="n">46 / 75</td><td class="n">47 / 75</td></tr>
-      <tr><td>Regions</td><td class="n">23 / 25</td><td class="n">24 / 25</td></tr>
-      <tr class="hi"><td><b>Worst region</b></td><td class="n"><b>−23.1 dBi</b></td><td class="n">−26.2 dBi</td></tr>
-      <tr><td>15 m</td><td class="n">+1.88 dBi</td><td class="n">+1.93 dBi</td></tr>
+      <tr><td>3-band aggregate</td><td class="n">{sg(mP['mean_power_dBi'])} dBi</td><td class="n">{sg(mS['mean_power_dBi'])} dBi</td></tr>
+      <tr><td>Cells workable</td><td class="n">{mP['n_workable']} / 75</td><td class="n">{mS['n_workable']} / 75</td></tr>
+      <tr><td>Regions</td><td class="n">{mP['n_regions_covered']} / 25</td><td class="n">{mS['n_regions_covered']} / 25</td></tr>
+      <tr class="hi"><td><b>Worst region</b></td><td class="n"><b>{sg(mP['worst_dBi'], '+.1f')} dBi</b></td><td class="n">{sg(mS['worst_dBi'], '+.1f')} dBi</td></tr>
+      <tr><td>15 m</td><td class="n">{sg(C.aggregate(PRIMARY, '15m')['mean_power_dBi'])} dBi</td><td class="n">{sg(C.aggregate(SECOND, '15m')['mean_power_dBi'])} dBi</td></tr>
       <tr><td>Wire used</td><td class="n">{total_ft:.0f} ft</td><td class="n">{total_b:.0f} ft</td></tr>
     </tbody>
   </table></div>
@@ -575,6 +808,12 @@ def build_html(parts, views):
     stepladder. Build RB-POST20. Keep F10-A for the day you want the last
     region back, or if the post turns out not to stand.
   </div>
+  <div class="note now">
+    <b>Both are a large step up from what is up now.</b> The straight sloper
+    you paced off scores {sg(C.aggregate_multiband(CURRENT)['mean_power_dBi'])}
+    dBi and {C.aggregate_multiband(CURRENT)['n_workable']} / 75 — see the next
+    section for why, and where it lands among all {len(OPTS)} options.
+  </div>
   <div class="note">
     <b>And if you can get 30 ft of post up instead of 20:</b> the same design
     scores −0.40 dBi and 48 / 75, with the post moving out to 95.4 ft at
@@ -583,7 +822,7 @@ def build_html(parts, views):
     windstorm on a garden stake.
   </div>
 </section>
-
+{now_html}
 <section>
   <div class="sec-head">
     <div class="eyebrow">Read this before you buy rope</div>
@@ -609,16 +848,17 @@ def build_html(parts, views):
     </tbody>
   </table></div>
   <div class="note alarm">
-    <b>And there is no way to avoid canopy.</b> The mown lawn measures roughly
-    <b>12 × 19 m (40 × 62 ft)</b>, a 74 ft diagonal. The wire needs
-    <b>110 ft of ground path</b>. It does not fit in the open, at any bearing.
-    A radial scan of open ground from the feed confirms it: the longest clear
-    run in any direction is about 24 ft, at 120°T.
+    <b>A correction to what this page said before.</b> It claimed no layout
+    could avoid canopy, from a radial scan that stopped at the first textured
+    pixel near the house. The straight sloper you have up now proves otherwise:
+    it runs 120 ft down the lawn at only
+    <b>{parts['canopy'][CURRENT.key]*100:.0f}% canopy</b>. What remains true is
+    that both designs recommended here go through the apex tree by
+    construction, so most of their wire is over trees.
     <br><br>
-    So this is not a choice between lawn and forest. Every option in the study
-    — flat-top, inverted-V, sloper, all of them — puts most of the wire in or
-    above canopy. <b>None of the dB figures anywhere in this project include a
-    tree-absorption term.</b> Treat them as an optimistic ceiling, and treat the
+    <b>None of the dB figures anywhere in this project include a
+    tree-absorption term.</b> Treat them as an optimistic ceiling for the
+    recommended designs — less so for the lawn sloper — and treat the
     post-installation sweep as the real measurement.
   </div>
 </section>
@@ -637,9 +877,8 @@ def build_html(parts, views):
   Aerial: King County GIS 2025 orthomosaic (EagleView), 3–6 in/px, requested in
   EPSG:3857 about a computed centre, so the overlay is georeferenced by
   construction rather than fitted to control points.</figcaption></figure>
-  <figure>{parts['wide']}<figcaption>Wider view, 90 m across, showing how
-  little open ground there is. The driveway, both yard corners and the
-  original end mark are all inside this frame.</figcaption></figure>
+  <p>The wider 90 m view is in the section above, with the wire that is up
+  now drawn on it.</p>
 </section>
 
 <section>

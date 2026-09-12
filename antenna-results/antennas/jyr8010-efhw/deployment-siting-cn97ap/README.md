@@ -5,8 +5,10 @@ City, WA (grid **CN97ap**, King County parcel **1117200390**), optimised for DX 
 Europe, the continental US, Australia, Japan, China and Russia.
 
 > **This is analysis and prediction, not measurement.** No NEC model was run, no on-air
-> testing was done, and **the antenna was not built as of 2026-09-05**. Every performance
-> figure is a design prediction. See [`METHOD.md`](METHOD.md) for the confidence attached
+> testing was done, and **none of the recommended designs had been built as of 2026-09-12**.
+> What *is* up is a straight sloper the operator paced off with a GPS watch — scored below as
+> [`CURRENT`](#what-is-up-now--the-as-built-sloper-current). Every performance figure is a
+> design prediction. See [`METHOD.md`](METHOD.md) for the confidence attached
 > to each model.
 
 **Agents: start with [`AGENT_GUIDE.md`](AGENT_GUIDE.md).**
@@ -25,9 +27,13 @@ what the wire actually flies over.
 **62% of the antenna's ground path is over tree canopy** — 46%, 69% and 84% by span. The far
 support and end tie-off are both inside the woods.
 
-**And no open-ground route exists.** The mown lawn measures roughly 12 × 19 m (40 × 62 ft),
-a 74 ft diagonal, against a 110 ft ground path. A radial scan from the feed finds the longest
-clear run at about 24 ft. It does not fit in the open at any bearing, for any topology.
+~~**And no open-ground route exists.**~~ **Corrected 2026-09-12 (correction 15).** That came
+from a radial scan that stops at the first textured pixel, which near the house wall and beds
+happens within a few metres on almost every bearing. The operator's as-built wire runs
+**36.6 m straight down the lawn along the house at 139°T with only 4–5% of its ground path
+over canopy**, in both ortho captures, and the photo agrees. The recommended *bent* designs
+still cannot avoid the trees — they go through the apex tree by construction — but a
+straight run down the lawn can.
 
 > **No model in this study contains a tree-absorption term.** METHOD.md could only say the
 > site was forested; this measures how much of the wire that omission applies to, and the
@@ -36,6 +42,64 @@ clear run at about 24 ft. It does not fit in the open at any bearing, for any to
 
 Tree *positions* are now known from the photograph. Tree *heights* still are not — four
 canopy-height sources were tried and all failed; every height here remains operator-supplied.
+
+---
+
+## What is up now — the as-built sloper (`CURRENT`)
+
+The operator paced the antenna that is actually hung with a Garmin watch on 2026-09-07 and
+confirmed on 2026-09-12 that the walk **started under the elevated end and finished at the
+transformer**, and that the wire is **one straight run**. The track itself
+(`../50ft sloper antenna deployment.gpx`) is not committed.
+
+| | |
+|---|---|
+| Feed | surveyed point, **10 ft** (the track's stop dwell landed 4–8 m away — wrist-GPS error) |
+| Far end | **120 ft / 36.6 m at 138.9°T / 123.6°M**, about **45 ft** up — mean of the 8-point start dwell |
+| Slope | **16.3°**; 38.1 m straight span, so **1.5 m (3.9%) of slack** — a hung wire, not a taut one |
+| Average height | 27.5 ft (F10‑A 37.3 ft) |
+| Over canopy | **4%** — the only scored layout that mostly avoids the trees |
+| Parcel | track puts the end **0.5 m past the south line**; inside GPS error, so **not called either way** |
+
+Scored with the **slant model** (METHOD.md §9, LOW confidence). The horizontal-wire model scores
+the same wire worse (−5.15 dBi, 17/75), so the ranking is not an artefact of that choice.
+
+| | **CURRENT** (up now) | BASE (original plan) | RB‑POST20 | F10‑A |
+|---|---|---|---|---|
+| 3-band rank, of 35 | **29** | 23 | 10 | 9 |
+| 3-band aggregate | **−3.70 dBi** | −2.84 | −0.71 | −0.46 |
+| Cells workable | **24/75** | 35/75 | 47/75 | 47/75 |
+| Regions | 17/25 | 21/25 | 23/25 | 24/25 |
+| Median / worst | −8.8 / **−58.9** | −5.9 / −26.2 | −3.1 / −23.1 | −2.5 / −26.2 |
+| 80 m | −10.05 (0/25) | −12.46 (0) | −9.32 (1) | −8.68 (3) |
+| 40 m | −8.71 (3) | −8.65 (2) | −5.78 (7) | −5.47 (8) |
+| 20 m | −5.02 (6) | −3.74 (12) | −1.30 (18) | −0.67 (19) |
+| 15 m | −0.81 (15) | +0.01 (21) | +1.88 (22) | +1.93 (20) |
+| 10 m | +0.44 (15) | +0.87 (15) | +1.80 (15) | +2.47 (21) |
+
+**It ranks below the original plan, not just below the recommendations**: −0.86 dB and 11 cells
+against BASE, −2.99 dB and 23 cells against RB‑POST20. It sits alone in its tie band.
+
+**Why.** A straight 39.6 m wire nulls off both ends on every band, and this one's axis is
+**139° / 319°T**. One end aims at South America (132°T); the other at Beijing, Shanghai and
+Vladivostok (310–318°T) — the same Asia null that eliminated the driveway layout in Phase 4. And
+the first half of the wire is still climbing out of a 10 ft feed, so it averages 27.5 ft.
+
+Per region, 3-band mean dBi against BASE — **worse:** South America −26.7, Dallas −12.8, Denver
+−9.3, Beijing −5.7, Shanghai −5.1, UK −4.9, Central Europe −4.8. **Better:** Novosibirsk +3.8,
+US Northeast +3.3, India +3.3, Hawaii +2.2, VK2 +2.2.
+
+**GPS sensitivity.** Rotating the end ±10° and pulling it in up to 5 m gives **−3.93 to −2.56
+dBi and 24–32 cells**; BASE's 35 is never reached. It cannot be further out than the track says:
+at 45 ft the wire reaches only 38.1 m. The GPX point happens to be the *worst* cell count in that
+grid, so the real antenna is probably a few cells better — and still in the bottom third. End
+height 50 ft instead of 45: −3.20 dBi, 30/75. Full grid in
+[`data/current-deployment-sensitivity.csv`](data/current-deployment-sensitivity.csv).
+
+> **The canopy caveat cuts in this wire's favour.** It is 4% over canopy against 62% for F10‑A
+> and 49% for RB‑POST20, and no model here charges anything for trees. The real gap is smaller
+> than the table. How much smaller is not something this study can say; an on-air A/B or a
+> NanoVNA sweep of both is.
 
 ---
 
@@ -174,8 +238,10 @@ otherwise be the natural third DX band, and this antenna does not have it.
 
 ## Alternatives scored — three-band ranking
 
-23 topologies × five bands × 25 regions. Generated by
-[`tools/compare_options.py`](tools/compare_options.py).
+23 topologies × five bands × 25 regions, as of Phase 10. Generated by
+[`tools/compare_options.py`](tools/compare_options.py), which now scores **35** — the F10, RB and
+CURRENT classes are tabled in their own sections, and the tool's ranking block has all of them
+in one list.
 
 Ranked on **workable band×region cells first**, regions reachable on at least one band
 second, mean power **last** — for the reason in [`METHOD.md`](METHOD.md) §7. Horizontal
@@ -650,10 +716,11 @@ the bend and its null-filling — drops support 3, and costs 1.1 dB and two regi
 |---|---|
 | [`AGENT_GUIDE.md`](AGENT_GUIDE.md) | **Start here.** Traps, settled questions, open items |
 | [`METHOD.md`](METHOD.md) | Every formula and its confidence |
-| [`SESSION-LOG.md`](SESSION-LOG.md) | Chronology and the fourteen mid-session corrections |
+| [`SESSION-LOG.md`](SESSION-LOG.md) | Chronology and the sixteen corrections |
 | [`INSULATORS.md`](INSULATORS.md) | Insulator selection, end-voltage working, specific products |
 | [`tools/site_geometry.py`](tools/site_geometry.py) | Recomputes everything; stdlib only; **authoritative** |
-| [`tools/compare_options.py`](tools/compare_options.py) | Scores 23 topologies × 5 bands; writes the four CSVs below and the KML |
+| [`tools/compare_options.py`](tools/compare_options.py) | Scores 35 topologies × 5 bands, including the as-built CURRENT; writes the CSVs below and the KML |
+| [`data/current-deployment-sensitivity.csv`](data/current-deployment-sensitivity.csv) | CURRENT's score with the GPS end point rotated/pulled in and the end height varied (generated) |
 | [`tools/endpoint_study.py`](tools/endpoint_study.py) | End height, end azimuth, and roof-support sensitivity — why the end stays where it is |
 | [`data/deployment-options.kml`](data/deployment-options.kml) | **Google Earth overlay** — every option with its per-band table, ordered by 3-band rank; reference points, parcel line, bearing rays |
 | [`data/option-comparison-multiband.csv`](data/option-comparison-multiband.csv) | **Per-region net dB for every band**, long format (generated) |

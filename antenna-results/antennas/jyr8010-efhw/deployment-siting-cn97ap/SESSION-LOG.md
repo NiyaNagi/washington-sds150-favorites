@@ -1,7 +1,7 @@
 # Session log — 2026-09-05
 
 Chronological record of the siting session, including every operator input, every
-external query, and every correction. Kept because **fourteen** corrections were made and
+external query, and every correction. Kept because **sixteen** corrections were made and
 retracted across the session — two of them reversed a headline conclusion outright — and a
 future agent needs to know which conclusions are stale.
 
@@ -537,6 +537,58 @@ wire-length constraints. Not a failure worth chasing; RB‑1TREE dominates it an
 
 KML: 140 placemarks in 35 folders, garden-post options in red.
 
+## Phase 13 — 2026-09-12: scoring what is actually up
+
+**Operator supplied:** a Garmin watch track of the antenna currently hung
+(`../50ft sloper antenna deployment.gpx`, 23 points, 2026-09-07 03:45–03:47 UTC; not
+committed), with the feed "the same height as before" (10 ft) and the end "about 45 ft off the
+ground where the track stops". Asked where it fits among the options and how it compares to the
+previous deployment.
+
+**Direction question, asked before scoring.** Read literally, the high end is where the track
+*stops* — 4–8 m from the transformer, impossible for a 130 ft wire. The track *starts* 36.6 m out
+to the south-east, which a 10 ft → 45 ft wire reaches with ~4% slack. **The operator confirmed
+the walk started at the high end and that the wire is one straight run.**
+
+**Geometry.** End = mean of the 8-point start dwell: **36.58 m / 120.0 ft at 138.9°T / 123.6°M**.
+Slope 16.3°, 38.10 m straight span, 1.50 m (3.9%) slack. The feed stays the surveyed point. New
+`CURRENT` option in `compare_options.py`, built with the stated 45 ft rather than `_sloper()`.
+
+**Result.** Slant model: **−3.70 dBi, 24/75 cells, 17/25 regions, median −8.8, worst −58.9 —
+rank 29 of 35**, alone in its tie band. The original plan (BASE) is −2.84 / 35/75 at rank 23;
+RB‑POST20 −0.71 / 47/75; F10‑A −0.46 / 47/75. The wire axis (139/319°T) puts end-fire nulls on
+South America (−26.7 dB against BASE) and the Beijing/Shanghai/Vladivostok cluster (−4.5 to
+−5.7). It does better than BASE toward Novosibirsk, India, US Northeast, Hawaii and VK2 (+2 to
++4). Horizontal-model cross-check: −5.15 / 17/75.
+
+**GPS sensitivity.** ±10° and up to −5 m of run: −3.93 to −2.56 dBi, 24–32 cells. Longer runs are
+impossible at 45 ft. No perturbation reaches BASE. End at 50 ft: −3.20, 30/75.
+
+**Canopy.** 4% (corridor) / 5% (close capture) — it runs down the open lawn beside the house.
+Checked against the photo with the track overlaid before quoting. This exposed correction 15.
+
+**Parcel.** The dwell mean is 0.5 m **past** the south line. Inside GPS error; not called.
+
+New output `data/current-deployment-sensitivity.csv`; KML gains a pink CURRENT folder. The
+deployment guide gained a "what's up now" section, and its RB‑POST20 figures — hard-coded at
+−0.75 / 46 cells and stale against the tool's −0.71 / 47 — are now computed.
+
+### ⚠️ ERROR 15 — "no open-ground route exists" was a scan artefact
+
+Phase 12's radial scan reported the longest clear run from the feed as ~24 ft and concluded no
+layout could avoid canopy. The scan stops at the first textured pixel; beds, the house edge and
+the patio trip it within a few metres on almost every bearing (at 140°T: 0.2 m on the close
+capture, 5.0 m on the corridor). Sampled as a fraction along the path, the as-built wire at
+139°T is 4–5% canopy over 36.6 m, and the photo shows open lawn. The **62% for F10‑A stands**;
+the generalisation does not.
+
+### ⚠️ ERROR 16 — two figures in HANDOFF.md
+
+The handoff said `_sloper()` would derive an end height of ~43.6 ft at a 36.3 m run. A taut
+39.6 m wire at that run rises 15.2 m, putting the end at **~60 ft**. It also said the GPX start
+was on the lot inside the setback; that used a single trackpoint, and the 8-point dwell mean is
+0.5 m past the line. Both are within GPS error, and neither changed the scoring, which used 45 ft.
+
 ## Corrections summary
 
 | # | Error | Corrected in | Status |
@@ -555,6 +607,8 @@ KML: 140 placemarks in 35 folders, garden-post options in red.
 | 12 | "None of the T options leave the parcel" survived the bearing change that made it false | Phase 9 | ✅ T30 is 39 ft off the lot; dedicated parcel block now printed |
 | 13 | Scored the roof as the HIGH support when the operator meant the roof as the FEED | Phase 9 | ✅ both scored, kept separate |
 | 14 | Compared a 3-anchor flat-top against 1-anchor slopers on gain alone, leaving the operator to believe A was the harder build | Phase 10 | ✅ throw effort scored; A is the *easiest* option that performs |
+| 15 | "No open-ground route exists at any bearing" — radial scan stopped at the first textured pixel | Phase 13 | ✅ as-built wire is 4–5% canopy along 36.6 m of lawn; 62% for F10‑A unchanged |
+| 16 | HANDOFF.md: taut-wire end height (~43.6 ft, actually ~60 ft) and GPX parcel status (dwell mean is 0.5 m past the line) | Phase 13 | ✅ corrected; scoring used the stated 45 ft |
 
 **Anything in the conversation before each correction is stale.** The files in this
 directory reflect only post-correction values.
@@ -568,7 +622,9 @@ directory reflect only post-correction values.
 - No propagation model. The band figures say where the antenna puts power, never whether
   a band is open. 10 m scores best for the flat-top and is also the band most often shut.
 - 30 m / 17 m / 12 m unmodelled — not harmonics of a 39.6 m wire; would need tuner data
-- No post-installation sweep — **the antenna was not built as of 2026-09-05**
+- No post-installation sweep — **no recommended design was built as of 2026-09-12**; the
+  as-built sloper (CURRENT) has not been swept either
+- CURRENT's end height (45 ft) and the far-end tree's side of the south line are unmeasured
 - No canopy-height correction to the bare-earth horizon
 - No live magnetic declination query (15.3°E from general knowledge)
 - Building footprints not retrieved; house outline traced from imagery

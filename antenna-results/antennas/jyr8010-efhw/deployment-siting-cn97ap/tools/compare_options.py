@@ -52,6 +52,26 @@ ROOF_FEED_FT = 25.0
 # Tallest attachment a throw line can reach in the available conifer.
 TREE_MAX_FT = 150.0
 
+# --------------------------------------------------------------------------
+# CURRENT: the antenna the operator actually has up, paced 2026-09-07 with a
+# Garmin watch (file "50ft sloper antenna deployment.gpx" beside this study;
+# not committed). The operator confirmed on 2026-09-12 that the walk STARTED
+# under the elevated end and finished at the transformer, and that the wire is
+# one straight run with no intermediate support.
+#
+# The end is the mean of the 8-point start dwell (trackpoints 0-7). The stop
+# dwell lands 4-8 m from the surveyed feed - wrist-GPS error - so the feed
+# stays the surveyed point rather than the GPX one.
+#
+# Heights are operator-supplied: feed 10 ft, end "about 45 ft". The option is
+# built with the stated 45 ft, NOT via _sloper(), which assumes a taut wire
+# and would put the end at ~60 ft. 45 ft over this run implies ~1.5 m (4%) of
+# slack, which is what a hung wire has.
+# --------------------------------------------------------------------------
+CURRENT_END = (47.63381043, -121.99627173)
+CURRENT_END_FT = 45.0
+CURRENT_FEED_FT = 10.0
+
 
 def sloper_geometry(feed_en, feed_ft, top_en):
     """A straight sloper is fully determined by where its support stands.
@@ -429,6 +449,35 @@ class Option:
                 10 * math.log10(max(hlin, 1e-12)), net)
 
 
+def current_option(end_en=None, end_ft=CURRENT_END_FT, key="CURRENT",
+                   slant=True):
+    """The as-built straight sloper. end_en/end_ft are overridable so the GPS
+    sensitivity scan in main() scores exactly the same construction.
+
+    slant=False scores the same wire with the horizontal-wire model instead,
+    as a cross-check: at ~16 deg this wire sits near the boundary where the
+    choice of model is a judgement call (METHOD.md section 9).
+    """
+    end_en = end_en if end_en is not None else to_enu(CURRENT_END)
+    f, top = CURRENT_FEED_FT * FT, end_ft * FT
+    run, brg = polar(*end_en)
+    slope = math.degrees(math.atan2(top - f, run))
+    slack = WIRE_M - math.hypot(run, top - f)
+    kw = dict(slope_deg=slope, feed_h=f, top_h=top) if slant else {}
+    return Option(
+        key, "AS BUILT - straight sloper, feed 10 ft to a 45 ft end "
+             "(operator's GPX)",
+        [(WIRE_M, (f + top) / 2, brg)],
+        [("feed", int(CURRENT_FEED_FT), (0.0, 0.0)),
+         ("far end", int(round(end_ft)), end_en)],
+        f"Paced 2026-09-07. End {run:.1f} m ({run/FT:.0f} ft) at {brg:.0f}T / "
+        f"{mag(brg):.0f}M, slope {slope:.1f} deg, {slack:.1f} m of slack. End "
+        f"position carries wrist-GPS error of 5-10 m. "
+        + ("Slant model - see METHOD.md section 9." if slant
+           else "Horizontal-wire model (cross-check)."),
+        **kw)
+
+
 def build_options():
     opts = []
     run1 = APEX_DIST
@@ -443,6 +492,9 @@ def build_options():
         [("feed", 10, (0, 0)), ("apex tree", 35, APEX_EN),
          ("end", 10, offset(APEX_EN, 143.1, math.sqrt(max(leg2**2 - (a - e)**2, 0))))],
         "The configuration implied by the operator's first three points."))
+
+    # -- CURRENT. What is actually up, from the operator's GPX track --
+    opts.append(current_option())
 
     # -- A. Recommended bent flat-top --
     f, a, fs, e = 24 * FT, 50 * FT, 50 * FT, 30 * FT
@@ -1076,6 +1128,7 @@ def aggregate_multiband(opt, bands=None):
 
 # KML colours are aabbggrr, not rrggbb.
 KML_STYLES = [
+    ("optC",  "ffb469ff", 9),   # hot pink       - AS BUILT (operator's GPX)
     ("optR",  "ff2020ff", 7),   # red            - GARDEN-POST options
     ("optF",  "ff40ff80", 6),   # spring green   - 10 FT FEED family
     ("optG",  "ffffffff", 6),   # white          - ONE-SUPPORT slopers, K/C/G/RF
@@ -1092,6 +1145,8 @@ KML_STYLES = [
 
 def kml_style_for(key):
     """Style id for an option key. Checked most-specific first."""
+    if key == "CURRENT":
+        return "optC"
     if key.startswith("RB-"):
         return "optR"
     if key.startswith("F10-"):
@@ -1120,6 +1175,8 @@ def write_kml(opts, path, ranked=None):
          '<description>Every candidate deployment for the 39.6 m EFHW, plus '
          'reference points, parcel line and target bearing rays. '
          'Folders are numbered by three-band rank. '
+         'PINK = the antenna actually up now (operator GPX, CURRENT), '
+         'RED = garden-post options, GREEN (spring) = 10 ft feed family, '
          'WHITE = ONE-SUPPORT sloper (K = known tree, C = rotation locked to a '
          'yard corner, G = best found by search, RF = roof feed), '
          'ORANGE = tall sloper (T class), GREEN = recommended flat-top, '
@@ -1440,6 +1497,121 @@ def main():
     print("four 20 m current maxima live.")
 
     data = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data")
+
+    # ------------------------------------------------------------------
+    print("\n" + "=" * 100)
+    print("CURRENT DEPLOYMENT - the antenna actually up, from the operator's GPX")
+    print("=" * 100)
+    cur = [o for o in opts if o.key == "CURRENT"][0]
+    end_en = cur.supports[1][2]
+    run, brg = polar(*end_en)
+    rise = cur.top_h - cur.feed_h
+    span = math.hypot(run, rise)
+    t = (end_en[0] - 46.9) / -116.8
+    gap = end_en[1] - (-32.0 + t * 25.2)
+    print(f"  end {run:.2f} m ({run/FT:.1f} ft) at {brg:.1f}T / {mag(brg):.1f}M, "
+          f"{CURRENT_END_FT:.0f} ft up; slope {cur.slope_deg:.1f} deg")
+    print(f"  straight span {span:.2f} m of {WIRE_M} m wire -> "
+          f"{WIRE_M - span:.2f} m ({(WIRE_M / span - 1) * 100:.1f}%) slack")
+    print(f"  (a TAUT wire at this run would put the end at "
+          f"{CURRENT_FEED_FT + math.sqrt(WIRE_M**2 - run**2) / FT:.0f} ft)")
+    print(f"  south property line: end is {abs(gap):.1f} m "
+          f"{'north of' if gap > 0 else 'PAST'} it. Wrist-GPS error is 5-10 m,")
+    print("  so this is not called either way.")
+    print(f"  wire axis {brg:.0f}/{(brg + 180) % 360:.0f}T - the end-fire nulls "
+          f"point at South America ({TARGET_BEARINGS['South America']:.0f}T) and "
+          f"the East Asia cluster (310-318T)")
+
+    mc = aggregate_multiband(cur)
+    rank = ranked.index(cur) + 1
+    tied = [o.key for o in ranked
+            if aggregate_multiband(o)["n_workable"] == mc["n_workable"]]
+    print(f"\n  3-band rank {rank} of {len(ranked)}; tie band at "
+          f"{mc['n_workable']}/75 holds: {', '.join(tied)}")
+
+    refs = [cur] + [o for k in ("BASE", "RB-POST20", "F10-A")
+                    for o in opts if o.key == k]
+    print(f"\n  {'':8s}" + "".join(f"{o.key:>16s}" for o in refs))
+    for b in BAND_KEYS:
+        print(f"  {b:8s}" + "".join(
+            f"   {aggregate(o, b)['mean_power_dBi']:+6.2f} "
+            f"({aggregate(o, b)['n_workable']:2d})" for o in refs))
+    ms = [aggregate_multiband(o) for o in refs]
+    for lbl, f_ in (
+            ("3-band", lambda m: f"{m['mean_power_dBi']:+6.2f} dBi"),
+            ("cells", lambda m: f"{m['n_workable']:6d}/75 "),
+            ("regions", lambda m: f"{m['n_regions_covered']:6d}/25 "),
+            ("median", lambda m: f"{m['median_dBi']:+6.1f} dBi"),
+            ("worst", lambda m: f"{m['worst_dBi']:+6.1f} dBi"),
+            ("holes", lambda m: f"{m['n_holes']:6d}    ")):
+        print(f"  {lbl:8s}" + "".join(f"{f_(m):>16s}" for m in ms))
+
+    def mb_region(o):
+        nets = {b: band_nets(o, b) for b in MULTIBAND}
+        return [10 * math.log10(sum(
+            10 ** ((nets[b][i] + BAND[b]["peak_dBi"]) / 10) for b in MULTIBAND)
+            / len(MULTIBAND)) for i in range(len(TARGETS))]
+
+    per = {o.key: mb_region(o) for o in refs}
+    print("\n  Per region, 3-band mean dBi (40/20/15 m)")
+    print(f"  {'region':16s} {'brg':>4s}" + "".join(f"{o.key:>11s}" for o in refs)
+          + f"{'vs BASE':>9s}")
+    for i, (name, lat, lon, arr) in enumerate(TARGETS):
+        print(f"  {name:16s} {TARGET_BEARINGS[name]:4.0f}"
+              + "".join(f"{per[o.key][i]:11.1f}" for o in refs)
+              + f"{per['CURRENT'][i] - per['BASE'][i]:+9.1f}")
+
+    h = aggregate_multiband(current_option(slant=False))
+    print(f"\n  Model cross-check: the same wire on the HORIZONTAL model scores "
+          f"{h['mean_power_dBi']:+.2f} dBi, {h['n_workable']}/75, worst "
+          f"{h['worst_dBi']:+.1f}. The slant figures above are the ones used.")
+
+    print("\n  GPS sensitivity: end rotated and pulled in. Pushing it OUT is not")
+    print("  possible - at 45 ft the wire reaches only "
+          f"{math.sqrt(WIRE_M**2 - rise**2):.1f} m.")
+    print(f"  {'dBrg':>5s} {'dRun':>5s} {'run m':>6s} {'brg T':>6s} {'3-band':>7s} "
+          f"{'cells':>6s} {'regs':>5s} {'worst':>7s}  parcel")
+    sens = []
+    for db in (-10, -5, 0, 5, 10):
+        for dr in (-5.0, -2.5, 0.0):
+            te = offset((0.0, 0.0), brg + db, run + dr)
+            m = aggregate_multiband(current_option(te))
+            pc = ("setback ok" if inside_parcel(te) else
+                  "on lot, in setback" if inside_parcel(te, 0.0) else "past line")
+            sens.append((db, dr, run + dr, brg + db, CURRENT_END_FT, m, pc))
+            print(f"  {db:+5d} {dr:+5.1f} {run + dr:6.1f} {brg + db:6.1f} "
+                  f"{m['mean_power_dBi']:+7.2f} {m['n_workable']:4d} "
+                  f"{m['n_regions_covered']:5d} {m['worst_dBi']:+7.1f}  {pc}")
+    for top_ft in (35.0, 40.0, 50.0):
+        m = aggregate_multiband(current_option(end_ft=top_ft))
+        sens.append((0, 0.0, run, brg, top_ft, m,
+                     "on lot" if inside_parcel(end_en, 0.0) else "past line"))
+        print(f"  end at {top_ft:.0f} ft instead of 45: {m['mean_power_dBi']:+.2f} "
+              f"dBi, {m['n_workable']}/75, worst {m['worst_dBi']:+.1f}")
+    cells = [s[5]["n_workable"] for s in sens[:15]]
+    dbi = [s[5]["mean_power_dBi"] for s in sens[:15]]
+    base = aggregate_multiband([o for o in opts if o.key == "BASE"][0])
+    print(f"  Over the +/-10 deg, -5 m grid: {min(dbi):+.2f} to {max(dbi):+.2f} dBi, "
+          f"{min(cells)}-{max(cells)} cells. BASE is {base['n_workable']} cells - "
+          f"{'NO' if max(cells) < base['n_workable'] else 'SOME'} perturbation "
+          f"reaches it.")
+
+    with open(os.path.join(data, "current-deployment-sensitivity.csv"), "w",
+              encoding="utf-8", newline="") as fh:
+        fh.write("# CURRENT (as-built sloper from the operator's GPX): how far the\n")
+        fh.write("# three-band score moves if the wrist-GPS end point is wrong.\n")
+        fh.write("# d_bearing / d_run are offsets from the GPX end; end_ft is the\n")
+        fh.write("# assumed end height. Runs longer than the GPX value are not\n")
+        fh.write("# listed: at 45 ft the wire cannot reach them. Slant model,\n")
+        fh.write("# METHOD.md section 9 - LOW confidence. Generated by\n")
+        fh.write("# tools/compare_options.py.\n")
+        fh.write("d_bearing_deg,d_run_m,run_m,bearing_true_deg,end_ft,"
+                 "mb3_aggregate_dBi,mb3_workable_of_75,mb3_regions_covered,"
+                 "mb3_worst_dBi,parcel\n")
+        for db, dr, r, b, top_ft, m, pc in sens:
+            fh.write(f"{db},{dr:.1f},{r:.2f},{b:.1f},{top_ft:.0f},"
+                     f"{m['mean_power_dBi']:.2f},{m['n_workable']},"
+                     f"{m['n_regions_covered']},{m['worst_dBi']:.1f},{pc}\n")
 
     with open(os.path.join(data, "option-comparison.csv"), "w",
               encoding="utf-8", newline="") as fh:

@@ -11,7 +11,7 @@ deployment study.
    repeating the session's biggest error.
 2. **`README.md`** — findings and the final design.
 3. **`METHOD.md`** — what each number is worth. Several are LOW confidence and labelled.
-4. **`SESSION-LOG.md`** — **fourteen** corrections were made across the session. Know which
+4. **`SESSION-LOG.md`** — **sixteen** corrections were made across the study. Know which
    conclusions are stale. Correction 10 reversed the T class outright; correction 12 put
    T30's support 39 ft off the lot.
 
@@ -20,7 +20,7 @@ Then run the two generators, which need no dependencies:
 ```bash
 D=antenna-results/antennas/jyr8010-efhw/deployment-siting-cn97ap
 python3 $D/tools/site_geometry.py     # geometry, bearings, terrain horizon
-python3 $D/tools/compare_options.py   # 23 topologies x 5 bands; 4 CSVs + KML
+python3 $D/tools/compare_options.py   # 35 topologies x 5 bands; 5 CSVs + KML
 python3 $D/tools/endpoint_study.py    # end height / azimuth / roof sensitivity
 ```
 
@@ -47,11 +47,16 @@ deliberately.
 **Terrain data is bare earth.** The site is surrounded by mature conifer that is not
 modelled. Every horizon angle is optimistic toward forested bearings.
 
-**62% of the wire flies over tree canopy, and there is no way around it.** Measured from
-the 2025 King County ortho by `tools/canopy_from_ortho.py` — 46% / 69% / 84% by span. The
-mown lawn is about 12 × 19 m against a 110 ft ground path, so **no open-ground route exists
-at any bearing.** No model in this study has a tree-absorption term, so every dB figure here
-is an optimistic ceiling for most of the wire's length. Say so whenever you quote one.
+**62% of the recommended wire flies over tree canopy.** Measured from the 2025 King County
+ortho by `tools/canopy_from_ortho.py` — 46% / 69% / 84% by span. No model in this study has a
+tree-absorption term, so every dB figure here is an optimistic ceiling for most of that
+wire's length. Say so whenever you quote one.
+
+**But "no open-ground route exists" was wrong (correction 15).** The radial scan in
+`canopy_from_ortho.py` stops at the *first* textured pixel, and near the house that happens
+within a few metres on nearly every bearing. The operator's as-built wire (CURRENT) runs
+36.6 m down the lawn at 139°T at 4–5% canopy. Measure canopy as a **fraction along a path**
+(`profile_along`), never as a radial reach, and look at the photo before quoting either.
 
 **Imagery exists now — `imagery/kc2025_*.jpg`, georeferenced by construction.** Earlier
 revisions said no imagery could be saved. That is stale. The bboxes were requested in
@@ -155,6 +160,7 @@ The operator answered these explicitly. Re-proposing them wastes their time.
 | Best buildable option overall? | **RB‑1TREE.** Apex tree at 50 ft, then one post in the operator's staked strip. −0.40 dBi, 48/75, **worst −22.5 — the best worst case in the study** — and **two anchors, one of which you walk to.** Beats F10‑A on aggregate, cells and worst case with one fewer rope throw. |
 | How tall does the post need to be? | **20 ft is the sweet spot** — matches F10‑A's 47 cells, better worst case, 91 ft from the feed at **101°M**. The whole 10→36 ft range spans only 0.83 dB (~0.32 dB per 10 ft) and the position barely moves. Don't build a tower for it. |
 | Can it be done with no rope throw at all? | **Yes, badly.** RB‑NOTREE: single span to a 30 ft post at 127.6 ft / 102°M. −6.05 dBi, 11/75, 8 of 25 regions. The floor, not a recommendation. |
+| How does what's up now compare? | **Badly, and below the original plan.** CURRENT (operator's GPX, 2026-09-07): straight sloper, feed 10 ft → 45 ft end 120 ft out at 139°T. **−3.70 dBi, 24/75, worst −58.9, rank 29 of 35** vs BASE −2.84 / 35/75 and RB‑POST20 −0.71 / 47/75. Axis nulls land on South America and the Beijing–Shanghai–Vladivostok cluster. GPS sensitivity 24–32 cells, never BASE's 35. Walk direction (started at the high end) and straight run were **confirmed by the operator** — do not re-ask. |
 | Feed must stay at 10 ft — what then? | **F10‑A**, which is option A's geometry with the feed lowered. Costs **0.30 dB and 2 cells** against A at 24 ft. The feed is a current null, so its own height barely matters. Only support 3 moves: 83 ft 9 in → **77 ft 2 in**, 102°T → 100°T, because leg 1 lengthens as the feed drops. |
 | Best *sloper* with a 10 ft feed? | F10‑G, 47.2° at 25°T, 105 ft anchor. Wins the primary key 49 vs 47 cells and loses everything else: 2.6 dB, an 18 dB worse null, and a 105 ft throw against 50 ft. **Do not recommend it over F10‑A on the cell count alone.** |
 | Is option A hard to deploy? | **No — it is the easiest thing that works.** Three attachments but the highest is **50 ft**, a routine throw. Every one-support sloper that matches it needs **116–120 ft**. The bend is what buys height in the middle of the wire, where the current maxima are, without any one support being high. |
