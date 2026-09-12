@@ -51,6 +51,16 @@ calculator if precision matters.
 
 ## 3. Azimuth pattern — standing-wave long wire
 
+> **⚠️ WRONG FOR 40, 20, 15 AND 10 m — superseded 2026-09-12 (correction 17).** NEC-2 (§11)
+> shows the formula below is the *centre-fed* standing-wave pattern. For an **end-fed** wire
+> carrying an even number of half-waves the pattern is `|sin(n·π/2 · cos θ) / sin θ|`, with main
+> lobes at **54° / 36° / 29° / 25°** from the axis on 40 / 20 / 15 / 10 m — not 89° / 57° / 46° /
+> 39°. NEC's pattern correlates 0.99 with the end-fed form and 0.18–0.25 with this one. 80 m
+> (n = 1) is unaffected. Every analytic azimuth figure in this study for the even bands is
+> therefore wrong, and the study's rankings are now computed by NEC (`tools/nec_search.py`).
+> The "35° is stale" note below was itself the error: 36° is right for a resonant end-fed
+> 2 λ wire, for a different reason than the travelling-wave formula gave it.
+
 A resonant wire of *n* half-waves has far-field amplitude, with θ measured **from the
 wire axis**:
 
@@ -415,3 +425,83 @@ In rough order of value:
 
 Until at least (2) exists, **treat every performance number here as a design prediction,
 not a result.**
+
+---
+
+## 11. NEC-2 validation (2026-09-12)
+
+Done with **PyNEC 2.3.4** (the NEC-2 method-of-moments engine), in
+`tools/nec_engine.py` and `tools/nec_validate.py`; results in `data/nec-validation.json`.
+This validates the *models against physics*. It does not validate anything against the site:
+NEC knows nothing about the trees, the house or the transformer, and only a NanoVNA sweep or an
+on-air test can check the antenna itself.
+
+### Engine benchmarks — does NEC reproduce the textbook?
+
+| Check | NEC | Textbook / §4 |
+|---|---|---|
+| Half-wave dipole resonance | 0.486 λ, 72.3 Ω | 0.47–0.49 λ, ~70 Ω |
+| Exact λ/2 dipole Z | 79.0 + j45.0 Ω | 73 + j42 Ω (thin-wire limit) |
+| Dipole gain | 2.17 dBi | 2.15 dBi |
+| Take-off, perfect ground, h = 0.3 / 0.45 / 0.6 / 1.0 λ | 56.5 / 33.5 / 24.5 / 14.5° | 56.4 / 33.7 / 24.6 / 14.5° |
+
+**§4 (ground-reflection take-off) is confirmed exactly.** The angle convention was checked with
+a dipole along +x: φ = 90° − bearing, θ = 90° − elevation.
+
+### Where the modelled wire is resonant
+
+Peak of R near each harmonic, 39.6 m × 0.89 mm, end-fed. The first search used peak |Z|, which
+runs away to low frequency on an end-fed wire; the second searched too wide and landed on odd
+harmonics. The harmonic is now searched near n × the fundamental.
+
+| Band | Band MHz | NEC bare | NEC with 1 m counterpoise | Ratio to fundamental |
+|---|---|---|---|---|
+| 80m | 3.550 | 3.716 | **3.648** | 1.00 |
+| 40m | 7.100 | 7.526 | 7.388 | 2.03 |
+| 20m | 14.150 | 15.165 | 14.889 | 4.08 |
+| 15m | 21.200 | 22.741 | 22.390 | 6.14 |
+| 10m | 28.500 | 30.298 | 29.900 | 8.20 |
+
+NEC's 80 m resonance with the counterpoise is **within 1.2% of the 3.6056 MHz** the parent report
+measured on the real antenna. Scoring models each band at these frequencies, so the wire carries
+exactly n half-waves.
+
+### The long-wire pattern (§3) — fails on the even bands
+
+| Band | n | NEC lobe | §3 lobe | End-fed form | ARRL | NEC peak dBi | §8 peak dBi | NEC vs §3 | NEC vs end-fed |
+|---|---|---|---|---|---|---|---|---|---|
+| 80m | 1 | 87.5° | 90° | 90° | 90° | 2.13 | 2.15 | 0.998 | 0.998 |
+| 40m | 2 | 53.0° | 89° | 54° | 54° | 2.98 | 3.80 | 0.25 | **0.997** |
+| 20m | 4 | 36.0° | 57° | 36° | 36° | 4.86 | 5.30 | 0.20 | **0.993** |
+| 15m | 6 | 29.0° | 46° | 29° | 29° | 6.14 | 6.40 | 0.18 | **0.991** |
+| 10m | 8 | 25.0° | 39° | 25° | 25° | 7.09 | 7.10 | 0.18 | **0.989** |
+
+(Correlation of the free-space pattern in dB, clipped at −25 dB, over 2–178° from the axis.)
+The §8 peak-directivity table is close except 40 m (0.8 dB high).
+
+### How much NEC's own choices move the NEC ranking
+
+Spearman rank correlation of the 35 `compare_options.py` wires on NEC 40+20+15 m against the
+baseline model (GN 0 reflection-coefficient ground, λ/20 segments, 1 m counterpoise, resonant
+frequencies, workable ≥ +1.02 dBi):
+
+| Variant | Rank ρ | Mean cell change | Workable cells agree |
+|---|---|---|---|
+| Sommerfeld ground (GN 2) | 0.964 | 0.15 dB | 98.9% |
+| λ/40 segments | 0.994 | 0.08 dB | 99.4% |
+| 0.5 m counterpoise | 0.989 | 0.17 dB | 98.6% |
+| 2.0 m counterpoise | 0.985 | 0.16 dB | 99.0% |
+| Band frequencies instead of resonance | 0.900 | 0.77 dB | 96.3% |
+| Workable threshold −2 dB | 0.817 | — | — |
+| Workable threshold +2 dB | 0.867 | — | — |
+
+**The NEC ranking is robust to the modelling choices and sensitive to the workable threshold.**
+That threshold is the study's −5 dBi plus 6.02 dB, because the study's dB scale normalises the
+ground-reflection factor to 0 dB at its peak while a NEC gain includes it. Rows a couple of cells
+apart should be read as ties.
+
+### What NEC still does not know
+
+Trees (62% of the recommended wire's path is over canopy), the house and its wiring, the real
+transformer and coax, terrain other than the arrival-angle shift of §5–6, and whether a band is
+open. Those are the same limits as before; NEC removes the formula errors, not these.

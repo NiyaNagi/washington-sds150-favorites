@@ -150,6 +150,17 @@ height 25 ft is assumed, not measured). Inverted‑Ls lead both rankings on a ne
 unvalidated hybrid model — see SESSION-LOG Phase 14 before quoting them. Highest-value next
 step: **one NEC run on Inverted‑L 1**.
 
+## Also done 2026-09-12: NEC-2 validation — read this before anything above
+
+PyNEC 2.3.4 is installed (user site-packages). The study's §3 pattern formula was wrong on the
+even bands and **every analytic ranking is superseded** (SESSION-LOG Phase 16, corrections
+17–18). Rankings now come from `tools/nec_search.py` (~2 min) → `data/nec-scores.json`; the page
+("Every Wire on One Lot", same URL as the lineup page) from `tools/build_nec_page.py`. Nothing
+above this section that quotes a rank, a cell count or a dB figure should be trusted without
+checking it against `data/nec-ranking.csv`. Open: the roof height is assumed; the recommendation
+itself has not been rewritten into a new deployment guide; the operator has not yet chosen a
+design on the NEC results.
+
 ## Environment notes (Windows, PowerShell 5.1)
 
 - Do **not** round-trip markdown through `Get-Content -Raw | Set-Content -Encoding utf8` —

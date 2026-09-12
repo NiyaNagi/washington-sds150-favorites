@@ -5,6 +5,12 @@ deployment study.
 
 ---
 
+> **2026-09-12 — NEC-2 superseded every analytic ranking in this study (corrections 17–18).**
+> Read `METHOD.md` §11 and the README's "NEC-2 validation" section before anything else. The
+> "Questions with settled answers" table below was settled on the wrong pattern formula: its
+> geometry answers stand, its dB and cell answers are **void until re-checked on NEC**. Rank with
+> `tools/nec_search.py` / `data/nec-scores.json`; the analytic tools are kept for the record.
+
 ## Read these four things, in this order
 
 1. **`data/antenna-spec.json` → `THE_CORRECTION`** — 60 seconds, and it stops you
@@ -35,9 +41,13 @@ with a stored CSV.
 end-fed half-wave design" and `radiating_element_length_m: 40`. That means *40 metres of
 wire*, not the 40 m band. If you find yourself computing a half-wave for 7.15 MHz, stop.
 
-**20 m lobes are at 57.5° from the wire axis, not 35°.** The `1 − 0.371/n` formula is for
-*terminated travelling-wave* long wires. This is a *resonant standing-wave* wire:
-`F(θ) = |[cos(nπ/2·cos θ) − cos(nπ/2)]/sin θ|`.
+**20 m lobes are at 36° from the wire axis — NOT 57.5° (correction 17, NEC-2).** This trap used
+to say the opposite. `F(θ) = |[cos(nπ/2·cos θ) − cos(nπ/2)]/sin θ|` in `site_geometry.py` is the
+*centre-fed* pattern; an **end-fed** wire with even n follows `|sin(nπ/2·cos θ)/sin θ|`, lobes
+54° / 36° / 29° / 25° on 40 / 20 / 15 / 10 m. NEC agrees with that to ρ ≈ 0.99 and with the old
+formula to 0.18–0.25 (`METHOD.md` §11). **Every analytic azimuth figure for the even bands is
+wrong; rank with `tools/nec_search.py`, not `compare_options.py`.** The analytic tools are kept
+for the record and for comparison, not for decisions.
 
 **The feed is the high-voltage end.** On an EFHW both ends are voltage maxima and the
 current maxima are at 9.9 m and 29.7 m of wire. Do not propose an inverted-L with a

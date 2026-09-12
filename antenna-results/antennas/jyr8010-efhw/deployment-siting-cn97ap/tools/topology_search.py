@@ -496,6 +496,10 @@ def tag_existing(o):
     """Family and model labels for the options compare_options.py builds."""
     if o.is_slant:
         o.family, o.model = "sloper", "slant (§9, LOW)"
+    elif o.key[:1] == "S" and o.key[1:].isdigit():
+        # S1-S5 are straight slopers built without slope_deg, so they score on
+        # the horizontal model; they are still slopers, not bent wires.
+        o.family, o.model = "sloper", "horizontal (§3/§4)"
     elif o.key.startswith(("V", "F10-V")):
         o.family, o.model = "inverted-V", "bent wire (§3/§4)"
     elif o.key.startswith("RB-"):

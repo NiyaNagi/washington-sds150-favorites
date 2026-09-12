@@ -654,6 +654,52 @@ This does not contradict the Phase 10 roof-feed "wash" (G‑ROOF vs G‑FEED, 0.
 slopers at matched geometry, and slopers are again a wash here. What the roof point changes is
 where a *V* can put its apex.
 
+## Phase 16 — 2026-09-12: NEC-2 validation, and the rankings reverse
+
+**Operator asked:** validate the model completely; add three more roof variations of each type
+(sloper, L, V); keep everything and re-rank all of it. **Clarified:** install PyNEC (real NEC-2;
+operator approved the download); re-run the search on NEC itself; roof adds = 3 more slopers, 3
+more Ls, 3 Vs; list every scored wire.
+
+**PyNEC 2.3.4** installed from PyPI (built from its 1.5 MB source). New `tools/nec_engine.py`,
+`tools/nec_validate.py`, `tools/nec_search.py`, `tools/build_nec_page.py`.
+
+**Engine checks passed:** half-wave dipole 0.486 λ / 72.3 Ω / 2.17 dBi; take-off over perfect
+ground within 0.2° of §4 at four heights; with a 1 m counterpoise the modelled wire's 80 m
+resonance is 3.648 MHz against 3.6056 MHz measured on the real antenna.
+
+**Two resonance-search errors were caught before any scoring used them:** peak |Z| runs away to
+low frequency on an end-fed wire (gave "resonance ~6% low"), and a ±20% window landed on the odd
+harmonics below 20/15/10 m. Now: peak R, harmonic n searched near n × the fundamental.
+
+### ⚠️ ERROR 17 — the long-wire pattern formula was the centre-fed one
+
+`site_geometry.longwire_field` is `|[cos(nπ/2·cos θ) − cos(nπ/2)]/sin θ|`, the pattern of a
+**centre-fed** wire. This antenna is **end-fed**; for even n the pattern is
+`|sin(nπ/2·cos θ)/sin θ|`. NEC lobes 53° / 36° / 29° / 25° on 40/20/15/10 m match that form
+(pattern correlation 0.99) and ARRL's published angles; the study used 89° / 57° / 46° / 39°
+(correlation 0.18–0.25). **Correction 2 was itself this error**: it rejected ~35° for 57.5°. The
+AGENT_GUIDE trap that enforced 57.5° has been reversed.
+
+### ⚠️ ERROR 18 — every analytic ranking in the study is superseded
+
+NEC re-scored all 103 distinct wires. Old vs NEC rank correlation: **ρ = −0.07** (40/20/15) and
+−0.14 (40/20). Cell agreement r = 0.24 bent-wire, 0.29 slant, 0.07 hybrid L. RB‑POST20 goes from
+#46 to **#74** (20/75), F10‑A #45 → #66 (23/75), what is up now #96 → **#39** (30/75). The
+yesterday-leading inverted-Ls drop to #13 and below. NEC's own choices barely move its ranking
+(ground model ρ 0.96, segmentation 0.99, counterpoise 0.99, band vs resonant frequency 0.90);
+the workable threshold does (±2 dB → 0.82–0.87).
+
+**NEC re-search** (same families and limits, ~20k geometries, 113 s on 32 cores): #1 is a roof
+sloper to a 69 ft support 81 ft past the south line (52/75); best on the lot a roof sloper to
+62 ft at 60°M (49/75); best from the 10 ft transformer on the lot a sloper to 60 ft at 250°M
+(39/75); best with no throw above 55 ft, 10 ft feed, on the lot: a sloper to 47 ft at 270°M
+(38/75) and F10‑A with leg 2 at 60°M (37/75). Roof adds came from this search: roof slopers
+4–6, Ls 4–6 and Vs 1–3.
+
+Search labelling fix: S1–S5 were tagged "bent / flat-top" because they carry no slope angle;
+now "sloper".
+
 ## Corrections summary
 
 | # | Error | Corrected in | Status |
@@ -674,6 +720,8 @@ where a *V* can put its apex.
 | 14 | Compared a 3-anchor flat-top against 1-anchor slopers on gain alone, leaving the operator to believe A was the harder build | Phase 10 | ✅ throw effort scored; A is the *easiest* option that performs |
 | 15 | "No open-ground route exists at any bearing" — radial scan stopped at the first textured pixel | Phase 13 | ✅ as-built wire is 4–5% canopy along 36.6 m of lawn; 62% for F10‑A unchanged |
 | 16 | HANDOFF.md: taut-wire end height (~43.6 ft, actually ~60 ft) and GPX parcel status (dwell mean is 0.5 m past the line) | Phase 13 | ✅ corrected; scoring used the stated 45 ft |
+| 17 | **§3 long-wire formula was the centre-fed pattern; this antenna is end-fed** — lobes wrong on 40/20/15/10 m (and correction 2 was this error) | Phase 16 | ✅ NEC-2; METHOD.md §3 banner, §11 |
+| 18 | **Every analytic ranking superseded** — old vs NEC ρ = −0.07 over 103 wires | Phase 16 | ✅ rankings now from `tools/nec_search.py` |
 
 **Anything in the conversation before each correction is stale.** The files in this
 directory reflect only post-correction values.

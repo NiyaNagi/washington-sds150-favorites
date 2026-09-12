@@ -4,7 +4,8 @@ A site-specific deployment design for the JYR8010-150W at the operator's QTH nea
 City, WA (grid **CN97ap**, King County parcel **1117200390**), optimised for DX to
 Europe, the continental US, Australia, Japan, China and Russia.
 
-> **This is analysis and prediction, not measurement.** No NEC model was run, no on-air
+> **This is analysis and prediction, not measurement.** NEC-2 was run on 2026-09-12 and
+> overturned the analytic rankings — read the NEC section first. No on-air
 > testing was done, and **none of the recommended designs had been built as of 2026-09-12**.
 > What *is* up is a straight sloper the operator paced off with a GPS watch — scored below as
 > [`CURRENT`](#what-is-up-now--the-as-built-sloper-current). Every performance figure is a
@@ -17,6 +18,54 @@ Published field plan: <https://claude.ai/code/artifact/1128955c-5f0e-44c7-82a9-a
 Published deployment guide: <https://claude.ai/code/artifact/0a8562b0-04ee-473f-9732-3a079305d96b>
 Published lineup comparison ("Sixteen Wires on One Lot", including the roof feed): <https://claude.ai/code/artifact/eab86385-ffd8-44a3-b8e2-090b72026cb4>
 (regenerate with `python tools/build_lineup_page.py <out.html>`, then publish to that URL)
+
+---
+
+## NEC-2 validation — every ranking below this section is superseded (2026-09-12)
+
+The study's analytic models were checked against **NEC-2** (PyNEC 2.3.4, method of moments over
+average ground) — `tools/nec_engine.py`, `tools/nec_validate.py`, `tools/nec_search.py`, details in
+[`METHOD.md`](METHOD.md) §11. Published as "Every Wire on One Lot":
+<https://claude.ai/code/artifact/eab86385-ffd8-44a3-b8e2-090b72026cb4>.
+
+**NEC passed its checks** — dipole impedance and gain, take-off angles to 0.2°, and your
+antenna's 80 m resonance within 1.2% of the 3.6056 MHz measured. **The study's long-wire formula
+did not.** It is the centre-fed pattern; this antenna is end-fed, so on 40/20/15/10 m every lobe
+was in the wrong place (20 m: 36° from the wire, not 57.5°). Across all 103 wires ever scored,
+the old and NEC rankings correlate at **ρ = −0.07** — none of the earlier orderings survive.
+Cell by cell the old models agree with NEC at r = 0.24 (bent-wire), 0.29 (slant) and **0.07
+(hybrid L)**.
+
+**NEC 40 + 20 + 15 m** (workable ≥ +1.02 dBi, the study's −5 dBi on NEC's ground-inclusive scale):
+
+| NEC rank | Wire | Cells / 75 | dBi | Highest | Lot | Old rank |
+|---|---|---|---|---|---|---|
+| 1 | Roof feed (25 ft, assumed) up to a 69 ft support 122 ft out @ 150°M | 52 | +2.37 | 69 ft | **81 ft past the south line** | 62 |
+| 2 | Roof feed up to a 62 ft support 125 ft out @ 60°M | 49 | +2.73 | 62 ft | **on the lot** | 82 |
+| 3 | Roof feed up to a 71 ft support 121 ft out @ 260°M | 49 | +2.61 | 71 ft | inside setback | 51 |
+| 9 | Transformer (10 ft) up to a 68 ft support 116 ft @ 145°M | 41 | +1.16 | 68 ft | 29 ft past the line | 71 |
+| 11 | Transformer up to a 60 ft support 120 ft @ 250°M | 39 | +1.25 | 60 ft | on the lot | 76 |
+| 12 | Roof inverted-V, apex 50 ft 57 ft @ 279°M | 38 | +1.05 | 50 ft | on the lot | 65 |
+| 15 | **Transformer up to a 47 ft support 125 ft @ 270°M** | 38 | +1.71 | **47 ft** | on the lot | 93 |
+| 16 | **F10‑A with leg 2 re-aimed to 60°M** | 37 | +1.25 | **50 ft** | on the lot | 85 |
+| 22 | A (flat-top, 24 ft feed) | 35 | +1.58 | 50 ft | on the lot | 33 |
+| 39 | **What is up now** | 30 | +0.66 | 45 ft | 2 ft past the line | 96 |
+| 66 | F10‑A | 23 | +0.85 | 50 ft | on the lot | 45 |
+| 74 | RB‑POST20 | 20 | +0.84 | 50 ft | on the lot | 46 |
+| 91 | BASE | 16 | −0.18 | 35 ft | on the lot | 84 |
+
+**What changed.** Straight wires reaching 45–70 ft now lead; the bent designs fall, because on
+20 m their legs aim their lobes at the Americas and away from Europe and Asia. **The antenna up now
+outscores both earlier recommendations on NEC.** The inverted-Ls that led yesterday drop to
+#13 and below — the hybrid model had inflated them. With the transformer staying at 10 ft and no
+throw above 55 ft, the best on the lot are a **straight sloper to 47 ft, 125 ft out at 270°M
+(38/75)** and **F10‑A with its second leg swung to 60°M (37/75)**. On **40 + 20 m** straight roof
+slopers lead again (35/50); the best easy-throw wires on the lot are S4 (24 ft feed, 26/50) and
+the re-aimed F10‑A (25/50).
+
+**Still true:** NEC models no trees, no house, no transformer, and no terrain beyond the arrival
+angles. Moving the workable line ±2 dB drops rank correlation to ~0.8, so rows a few cells apart
+are ties. The roof height is assumed. Every earlier table in this README is kept for the record.
 
 ---
 
@@ -800,6 +849,10 @@ the bend and its null-filling — drops support 3, and costs 1.1 dB and two regi
 | [`INSULATORS.md`](INSULATORS.md) | Insulator selection, end-voltage working, specific products |
 | [`tools/site_geometry.py`](tools/site_geometry.py) | Recomputes everything; stdlib only; **authoritative** |
 | [`tools/compare_options.py`](tools/compare_options.py) | Scores 35 topologies × 5 bands, including the as-built CURRENT; writes the CSVs below and the KML |
+| [`tools/nec_engine.py`](tools/nec_engine.py) | **NEC-2 scoring** (PyNEC): support points → 39.6 m wire → gain toward every region, ranked the study's way |
+| [`tools/nec_validate.py`](tools/nec_validate.py) | Engine benchmarks, resonances, the pattern-formula check, NEC sensitivity → `data/nec-validation.json`, `data/nec-resonances.json` |
+| [`tools/nec_search.py`](tools/nec_search.py) | **The ranking now in force**: re-runs the searches on NEC and scores all 103 wires → `data/nec-scores.json`, `nec-ranking.csv`, `nec-ranking.kml` |
+| [`tools/build_nec_page.py`](tools/build_nec_page.py) | "Every Wire on One Lot" page and `imagery/nec_*.jpg` |
 | [`tools/topology_search.py`](tools/topology_search.py) | Searches slopers, inverted‑Vs and inverted‑Ls (feed 10 ft) on the 3-band and 40 + 20 m metrics; adds the hybrid L model |
 | [`tools/build_lineup_page.py`](tools/build_lineup_page.py) | Builds the lineup comparison page and the two annotated aerial JPEGs |
 | [`data/topology-search.csv`](data/topology-search.csv) / [`.kml`](data/topology-search.kml) | Search results: geometry, both metrics, every band, model and parcel status (generated) |

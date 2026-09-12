@@ -1,0 +1,246 @@
+{
+ "benchmarks": {
+  "dipole": {
+   "resonance": {
+    "length_lambda": 0.486,
+    "R_ohm": 72.3
+   },
+   "textbook_resonance": "0.47-0.49 lambda, ~70 ohm",
+   "half_wave_Z": [
+    79.0,
+    45.0
+   ],
+   "textbook_Z": [
+    73,
+    42
+   ],
+   "gain_dBi": 2.17,
+   "textbook_gain_dBi": 2.15
+  },
+  "convention": {
+   "x_dipole_gain_phi_0_22_45_67_90": [
+    -1000.0,
+    -8.0,
+    -1.9,
+    1.2,
+    2.2
+   ],
+   "null_at_phi_0": true,
+   "mapping": "phi = 90 - bearing_T, theta = 90 - elevation"
+  },
+  "takeoff_perfect_ground": [
+   {
+    "h_lambda": 0.3,
+    "nec_elev": 56.5,
+    "section4_elev": 56.4
+   },
+   {
+    "h_lambda": 0.45,
+    "nec_elev": 33.5,
+    "section4_elev": 33.7
+   },
+   {
+    "h_lambda": 0.6,
+    "nec_elev": 24.5,
+    "section4_elev": 24.6
+   },
+   {
+    "h_lambda": 1.0,
+    "nec_elev": 14.5,
+    "section4_elev": 14.5
+   }
+  ]
+ },
+ "resonances": {
+  "bare": {
+   "80m": 3.7161,
+   "40m": 7.5262,
+   "20m": 15.1647,
+   "15m": 22.7413,
+   "10m": 30.2982
+  },
+  "with_counterpoise": {
+   "80m": 3.6476,
+   "40m": 7.3875,
+   "20m": 14.8888,
+   "15m": 22.3902,
+   "10m": 29.8995
+  },
+  "R_peak_ohm": {
+   "80m": [
+    5364,
+    5337
+   ],
+   "40m": [
+    3957,
+    3933
+   ],
+   "20m": [
+    3057,
+    3036
+   ],
+   "15m": [
+    2525,
+    2650
+   ],
+   "10m": [
+    2194,
+    2419
+   ]
+  },
+  "edge_hit": {
+   "80m": false,
+   "40m": false,
+   "20m": false,
+   "15m": false,
+   "10m": false
+  },
+  "ratio_to_fundamental": {
+   "80m": [
+    1.0,
+    1.0
+   ],
+   "40m": [
+    2.025,
+    2.025
+   ],
+   "20m": [
+    4.081,
+    4.082
+   ],
+   "15m": [
+    6.12,
+    6.138
+   ],
+   "10m": [
+    8.153,
+    8.197
+   ]
+  },
+  "measured_80m_MHz": 3.6056,
+  "measured_note": "parent report's best 80 m match, Z = 49.8 + 4.3j"
+ },
+ "pattern": [
+  {
+   "band": "80m",
+   "n": 1,
+   "model_MHz": 3.7161,
+   "nec_lobe_deg": 87.5,
+   "section3_lobe_deg": 90,
+   "end_fed_lobe_deg": 90,
+   "arrl_lobe_deg": 90,
+   "nec_peak_dBi": 2.13,
+   "study_peak_dBi": 2.15,
+   "shape_corr_section3": 0.998,
+   "shape_corr_end_fed": 0.998
+  },
+  {
+   "band": "40m",
+   "n": 2,
+   "model_MHz": 7.5262,
+   "nec_lobe_deg": 53.0,
+   "section3_lobe_deg": 89,
+   "end_fed_lobe_deg": 54,
+   "arrl_lobe_deg": 54,
+   "nec_peak_dBi": 2.98,
+   "study_peak_dBi": 3.8,
+   "shape_corr_section3": 0.249,
+   "shape_corr_end_fed": 0.997
+  },
+  {
+   "band": "20m",
+   "n": 4,
+   "model_MHz": 15.1647,
+   "nec_lobe_deg": 36.0,
+   "section3_lobe_deg": 57,
+   "end_fed_lobe_deg": 36,
+   "arrl_lobe_deg": 36,
+   "nec_peak_dBi": 4.86,
+   "study_peak_dBi": 5.3,
+   "shape_corr_section3": 0.195,
+   "shape_corr_end_fed": 0.993
+  },
+  {
+   "band": "15m",
+   "n": 6,
+   "model_MHz": 22.7413,
+   "nec_lobe_deg": 29.0,
+   "section3_lobe_deg": 46,
+   "end_fed_lobe_deg": 29,
+   "arrl_lobe_deg": 29,
+   "nec_peak_dBi": 6.14,
+   "study_peak_dBi": 6.4,
+   "shape_corr_section3": 0.182,
+   "shape_corr_end_fed": 0.991
+  },
+  {
+   "band": "10m",
+   "n": 8,
+   "model_MHz": 30.2982,
+   "nec_lobe_deg": 25.0,
+   "section3_lobe_deg": 39,
+   "end_fed_lobe_deg": 25,
+   "arrl_lobe_deg": 25,
+   "nec_peak_dBi": 7.09,
+   "study_peak_dBi": 7.1,
+   "shape_corr_section3": 0.18,
+   "shape_corr_end_fed": 0.989
+  }
+ ],
+ "sensitivity": {
+  "n_wires": 35,
+  "rows": [
+   {
+    "variant": "band frequencies instead of resonance",
+    "rank_spearman": 0.9,
+    "cell_mean_abs_dB": 0.77,
+    "workable_agreement": 0.963
+   },
+   {
+    "variant": "Sommerfeld ground (GN 2)",
+    "rank_spearman": 0.964,
+    "cell_mean_abs_dB": 0.15,
+    "workable_agreement": 0.989
+   },
+   {
+    "variant": "lambda/40 segments",
+    "rank_spearman": 0.994,
+    "cell_mean_abs_dB": 0.08,
+    "workable_agreement": 0.994
+   },
+   {
+    "variant": "0.5 m counterpoise",
+    "rank_spearman": 0.989,
+    "cell_mean_abs_dB": 0.17,
+    "workable_agreement": 0.986
+   },
+   {
+    "variant": "2.0 m counterpoise",
+    "rank_spearman": 0.985,
+    "cell_mean_abs_dB": 0.16,
+    "workable_agreement": 0.99
+   },
+   {
+    "variant": "workable threshold -2 dB",
+    "rank_spearman": 0.817,
+    "cell_mean_abs_dB": 0.0,
+    "workable_agreement": null
+   },
+   {
+    "variant": "workable threshold +2 dB",
+    "rank_spearman": 0.867,
+    "cell_mean_abs_dB": 0.0,
+    "workable_agreement": null
+   }
+  ]
+ },
+ "workable_nec_dBi": 1.0199999999999996,
+ "model": {
+  "wire_radius_m": 0.00089,
+  "eps_r": 13.0,
+  "sigma": 0.005,
+  "seg_per_lambda": 20,
+  "counterpoise_m": 1.0,
+  "ground_type": 0
+ }
+}
