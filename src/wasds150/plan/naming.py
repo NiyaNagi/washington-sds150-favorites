@@ -249,6 +249,11 @@ class NameAllocator:
     stem to make room.  Because allocation is order-dependent, the first
     channel to claim a name keeps it, which makes a plan's output stable as
     long as the plan's ordering is stable.
+
+    Collision is judged **without case**: the vendor programs resolve a zone or
+    scan-list member by name case-insensitively, so ``Intrgncy lsn`` and
+    ``Intrgncy Lsn`` are one channel to them however distinct they look here,
+    and a list naming both would silently carry the same channel twice.
     """
 
     def __init__(self, max_len: int, *, charset: Optional[str] = None, readable: bool = False) -> None:
@@ -265,14 +270,14 @@ class NameAllocator:
         stem = shorten_name(label, self.max_len, charset=self.charset, readable=self.readable)
         name = stem
         suffix = 1
-        while name in self._taken:
+        while name.casefold() in self._taken:
             suffix += 1
             tag = str(suffix)
             if len(tag) >= self.max_len:
                 raise ValueError(f"cannot make {label!r} unique in {self.max_len} chars")
             name = stem[: self.max_len - len(tag)] + tag
 
-        self._taken.add(name)
+        self._taken.add(name.casefold())
         if key is not None:
             self._assigned[key] = name
         return name

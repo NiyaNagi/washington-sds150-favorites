@@ -209,11 +209,18 @@ def build_bundle(resolved: ResolvedPlan) -> Atd890Bundle:
 
     for channel in channels:
         _validate_name(channel.name, "channel")
-    seen_names = set()
+    # Case-insensitively: the CPS resolves a zone or scan-list member by name
+    # without case, so two channels differing only in case become one member
+    # listed twice and Import All refuses the list.
+    seen_names: Dict[str, str] = {}
     for channel in channels:
-        if channel.name in seen_names:
-            raise Atd890ExportError(f"duplicate channel name {channel.name!r}")
-        seen_names.add(channel.name)
+        clash = seen_names.get(channel.name.casefold())
+        if clash is not None:
+            raise Atd890ExportError(
+                f"channel names {clash!r} and {channel.name!r} differ only in case; "
+                "the CPS treats them as one channel"
+            )
+        seen_names[channel.name.casefold()] = channel.name
 
     # -- contacts and receive groups ---------------------------------------
     contacts: "OrderedDict[str, Contact]" = OrderedDict()

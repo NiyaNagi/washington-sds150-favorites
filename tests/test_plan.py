@@ -128,6 +128,16 @@ class TestNameAllocator:
         assert len(names) == 30
         assert all(len(name) <= 8 for name in names)
 
+    def test_names_are_unique_without_case(self):
+        # The vendor programs resolve zone and scan-list members by name
+        # case-insensitively: "Intrgncy lsn" and "Intrgncy Lsn" are one channel
+        # to the Anytone CPS, and a list naming both carries it twice, which
+        # Import All refuses.
+        allocator = NameAllocator(16, readable=True)
+        first = allocator.allocate("Interagency lsn")
+        second = allocator.allocate("Interagency Lsn")
+        assert first.casefold() != second.casefold(), (first, second)
+
 
 class TestResolveMode:
     def test_supported_mode_is_kept(self):
