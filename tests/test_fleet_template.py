@@ -128,11 +128,15 @@ def test_transmit_only_in_licensed_blocks():
 
 
 def test_gmrs_frs_and_murs_transmit_wherever_the_hardware_does():
-    policies = {b.label: b.tx_policy for b in build_fleet_plan("td-h9").blocks}
-    for label in ("GMRS 1-7", "FRS 8-14", "GMRS 15-22", "GMRS Repeaters"):
-        assert policies[label] == TX_AUTO, label
-    assert policies["MURS"] == TX_SIMPLEX
-    for radio_id in ("ftx1", "th-d75", "at-d890uv", "id-52a"):
+    # The TD-H9 keys 400-590 out of the box; the AT-D890UV reaches 462/467
+    # only in band mode 00014, which the radio is now set to.
+    for radio_id in ("td-h9", "at-d890uv"):
+        policies = {b.label: b.tx_policy for b in build_fleet_plan(radio_id).blocks}
+        for label in ("GMRS 1-7", "FRS 8-14", "GMRS 15-22", "GMRS Repeaters"):
+            assert policies[label] == TX_AUTO, (radio_id, label)
+        assert policies["MURS"] == TX_SIMPLEX, radio_id
+    # The other three cannot key 462/467 at all, so the blocks stay receive only.
+    for radio_id in ("ftx1", "th-d75", "id-52a"):
         for block in build_fleet_plan(radio_id).blocks:
             if block.label.startswith(("GMRS", "FRS", "MURS")):
                 assert block.tx_policy == TX_NONE, (radio_id, block.label)

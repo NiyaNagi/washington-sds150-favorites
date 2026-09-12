@@ -206,16 +206,25 @@ AT_D890UV = RadioProfile(
     id="at-d890uv",
     vendor="Anytone",
     model="AT-D890UV",
+    # Band mode 00014 (radio-tools/anytone-d890uv/options/AT_BANDS.txt):
+    # Rx and Tx 136-174, 220-225 and 400-520. Mode 00007, the factory US
+    # amateur mode, receives only 400-480 and has no 220 MHz at all, so a
+    # radio still in it drops the 1.25m block rather than mis-programming it.
     rx_bands=(
         (87.6, 108.0),
         (108.0, 137.0),
         (136.0, 174.0),
-        (400.0, 480.0),
+        (220.0, 225.0),
+        (400.0, 520.0),
     ),
     modes=frozenset({"AM", "FM", "NFM", "WFM", "FMB", "DMR", "NXDN"}),
+    # What the band mode keys, as the TD-H9's profile is also written: which
+    # of it is actually offered is the plan template's transmit policy, and
+    # every block outside amateur, GMRS/FRS and MURS is receive only.
     tx_bands=(
-        (144.0, 148.0),
-        (420.0, 450.0),
+        (136.0, 174.0),
+        (220.0, 225.0),
+        (400.0, 520.0),
     ),
     max_channels=4000,
     name_max_len=16,
@@ -235,8 +244,11 @@ AT_D890UV = RadioProfile(
     # import is what confirms it.
     contacts=ContactCapability(protocols=frozenset({"DMR", "NXDN"}), max_contacts=500_000),
     notes=(
-        "Dual-band DMR/NXDN/analog handheld with AM air-band and FM broadcast "
-        "receive. Channels live in named zones; scanning uses explicit scan "
+        "Tri-band DMR/NXDN/analog handheld in band mode 00014, with AM "
+        "air-band and FM broadcast receive. 220-225 MHz and 480-520 MHz need "
+        "that mode, set with the AT Options utility rather than the CPS "
+        "dropdown; a radio in the factory US mode 00007 has neither. "
+        "Channels live in named zones; scanning uses explicit scan "
         "lists of up to 100 members (firmware 1.05). AM air channels (108-137 "
         "MHz) and FM broadcast stations are separate CPS lists with their own "
         "zones and scan. DMR Tier I/II conventional only; NXDN conventional "

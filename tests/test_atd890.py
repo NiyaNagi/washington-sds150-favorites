@@ -74,11 +74,12 @@ class TestProfile:
     def test_registered(self):
         assert get_profile("at-d890uv") is AT_D890UV
 
-    @pytest.mark.parametrize("freq", [121.5, 146.52, 162.55, 462.5625, 97.3, 108.0])
+    # Band mode 00014: 136-174, 220-225 and 400-520, receive and transmit.
+    @pytest.mark.parametrize("freq", [121.5, 146.52, 162.55, 223.5, 462.5625, 500.0, 97.3, 108.0])
     def test_receives(self, freq):
         assert AT_D890UV.can_receive(freq)
 
-    @pytest.mark.parametrize("freq", [27.185, 45.2, 223.5, 773.10625, 851.0125])
+    @pytest.mark.parametrize("freq", [27.185, 45.2, 219.5, 530.0, 773.10625, 851.0125])
     def test_does_not_receive(self, freq):
         assert not AT_D890UV.can_receive(freq)
 
@@ -86,10 +87,13 @@ class TestProfile:
         assert not AT_D890UV.supports_mode("P25")
         assert AT_D890UV.supports_mode("DMR") and AT_D890UV.supports_mode("NXDN")
 
-    def test_transmit_is_amateur_only(self):
-        assert AT_D890UV.can_transmit(146.52) and AT_D890UV.can_transmit(446.0)
-        assert not AT_D890UV.can_transmit(462.5625)
-        assert not AT_D890UV.can_transmit(223.5)
+    def test_transmit_covers_the_whole_band_mode(self):
+        # The profile states what mode 00014 keys; which of it is offered is
+        # the plan template's licence policy, not the radio's capability.
+        for freq in (146.52, 223.5, 446.0, 462.5625, 467.6375, 151.88):
+            assert AT_D890UV.can_transmit(freq), freq
+        for freq in (27.185, 45.2, 219.5, 530.0, 851.0125):
+            assert not AT_D890UV.can_transmit(freq), freq
 
     def test_structure_limits(self):
         assert (AT_D890UV.max_channels, AT_D890UV.name_max_len) == (4000, 16)

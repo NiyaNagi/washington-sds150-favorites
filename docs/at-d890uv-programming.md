@@ -18,7 +18,7 @@ has been written to the radio and read back.
 
 | Item | Notes |
 |---|---|
-| Anytone AT-D890UV | US band mode 00007 (Rx 136-174 / 400-480, Tx 144-148 / 420-450). Check **Menu > Settings > Device Info > Frequency Range**. Mode 14 adds 220 MHz but is not assumed by the plan. |
+| Anytone AT-D890UV | Band mode **00014**: Rx and Tx 136-174, 220-225 and 400-520. Check **Menu > Settings > Device Info > Frequency Range**, or the CPS title bar. The plan assumes it - a radio still in the factory US mode 00007 (Rx 136-174 / 400-480, Tx 144-148 / 420-450) has no 220 MHz and cannot key GMRS. Mode 14 is not in the CPS's Model Information dropdown; set it with the AT Options utility, whose band descriptor and password are in `radio-tools/anytone-d890uv/options/AT_BANDS.txt`. |
 | Programming cable | The USB-C to USB-A cable in the box. Windows needs the virtual COM driver from the firmware package (`official-1.05/A READ FIRST - Update Instructions/Virtual Driver Installation.pdf`). |
 | D890UV CPS **1.05** | Installed by this project into `C:\D890UV\D890UV.exe` (Inno Setup, silent). CPS and firmware versions must match exactly. |
 | Firmware **1.05** (2026-05-20) | Official DMR build. Scan lists grew from 50 to 100 members in this release, which the exporter relies on. |
@@ -293,6 +293,8 @@ into.
   picks the chunk. The radio has no group-link scan across lists.
 - **Air band is a separate receiver.** AM channels cannot be mixed into a
   VHF/UHF scan list; they scan from the B receiver's AM zone.
-- **220 MHz** needs band mode 14 and is not programmed.
+- **220 MHz** needs band mode 14, and the plan now assumes it: the `Ham 1.25m`
+  zone is 28 coordinated repeaters within the radius. In mode 00007 the whole
+  block drops out, which is the correct behaviour rather than an error.
 - **Names are 16 characters**; labels are shortened readably
   (`W7JCR Prt Twnsnd`) and made unique per bundle.

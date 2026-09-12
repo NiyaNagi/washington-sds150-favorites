@@ -66,7 +66,7 @@ is [Updating every radio](docs/fleet-updates.md); what still needs doing is in
 | TIDRADIO TD-H9 | Analog handheld transceiver | 199 | 185 memories | Verified against hardware |
 | Kenwood TH-D75A | Tri-band analog/D-STAR and wideband receiver | 1,000 + 1,500 DR | 545 memories + 21 DR repeaters | Verified; current image tracked |
 | Yaesu FTX-1 | HF/VHF/UHF transceiver | 999 | 960 statewide **or** 351 local memories | Profile from documentation, **unverified** |
-| Anytone AT-D890UV | DMR/NXDN/analog handheld, AM air-band and FM receive | 4,000 + 256 air + 100 FM | ~1,400 channels in 23 zones, 57 scan lists (with RadioReference data) | Profile from CPS 1.05 and a real export, **unverified on hardware** |
+| Anytone AT-D890UV | Tri-band DMR/NXDN/analog handheld in band mode 00014, AM air-band and FM receive | 4,000 + 256 air + 100 FM | ~1,800 channels in 28 zones, 55 scan lists (with RadioReference data) | Profile from CPS 1.05 and a real export, **unverified on hardware** |
 | Icom ID-52A | Dual-band analog/D-STAR handheld, AM air-band receive | 1,000 in 100 groups + 2,500 DR | 950 memories in 23 groups + 21 DR repeaters | Profile and CSV layout from documentation, **unverified** |
 
 The FTX-1 has three loadouts, chosen from the same dropdown. `ftx1-wa` is the
