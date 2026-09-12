@@ -327,8 +327,17 @@ AT_D890UV = FleetRadio(
             optional=True, artifacts=("contacts",),
         ),
         StepSpec(
-            "write-radio", "Save and write",
-            "Save the codeplug into radio-backups\\at-d890uv\\, then Write to radio (Other Data; "
+            "patch-scanlists", "Restore the long scan lists",
+            "Save the codeplug into radio-backups\\at-d890uv\\, then run scripts\\radios\\"
+            "patch_atd890_scanlists.py with that .rdt and {sidecar}. The CPS's CSV importer reads "
+            "only 50 scan-list members before it overflows, so the bundle ships the first 50 of "
+            "each and this puts the rest back. Open the patched -full.rdt in the CPS for the next "
+            "step.",
+            artifacts=("sidecar",),
+        ),
+        StepSpec(
+            "write-radio", "Write",
+            "Write to radio from the patched codeplug (Other Data; "
             "Digital Contact List only if one was loaded).",
         ),
         StepSpec(

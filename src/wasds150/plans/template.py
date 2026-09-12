@@ -147,14 +147,14 @@ GROUP_EVERYTHING = "Everything"
 #: carriers), packet and data, HF (a different radio mode) and the air blocks
 #: (a separate AM receiver on the Anytone, which cannot share a VHF/UHF list).
 NEAR_ME_QUOTAS = (
-    ("Nets", 14),
-    ("Ham 2m Repeaters", 7),
-    ("Ham 1.25m Repeaters", 2),
-    ("Ham 70cm Repeaters", 7),
-    ("DMR Core", 10),
-    ("DMR Local", 4),
-    ("Simplex Calling", 3),
-    ("Seattle ACS", 3),
+    ("Nets", 24),
+    ("Ham 2m Repeaters", 14),
+    ("Ham 1.25m Repeaters", 4),
+    ("Ham 70cm Repeaters", 14),
+    ("DMR Core", 20),
+    ("DMR Local", 10),
+    ("Simplex Calling", 6),
+    ("Seattle ACS", 8),
 )
 
 SCAN_GROUP_ORDER = (

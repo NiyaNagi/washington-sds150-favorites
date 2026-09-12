@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import csv
 import io
+import json
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -158,6 +159,13 @@ BUNDLE_FILES = (
     "AMAir.CSV",
     "AMZone.CSV",
 )
+
+#: Members per scan list the CPS's CSV importer can read before its fixed
+#: array overflows (VB6 error 9). The radio itself holds 100.
+CSV_SCANLIST_MAX = 50
+
+#: Full scan-list membership, written beside the bundle for the .rdt patcher.
+SIDECAR_NAME = "scanlists.json"
 
 POWER_LEVELS = ("Low", "Mid", "High", "Turbo")
 _POWER_ALIASES = {"0.2W": "Low", "1.0W": "Low", "2.5W": "Mid", "5.0W": "High", "7.0W": "Turbo", "6.0W": "Turbo"}
@@ -305,10 +313,29 @@ def render_files(
         b_name, b_rx, b_tx = one(zone.b_channel)
         zone_rows.append([str(number), zone.name, names, rx, tx, a_name, a_rx, a_tx, b_name, b_rx, b_tx, "0"])
 
+    # The CPS's CSV importer holds scan-list members in a fixed array of
+    # CSV_SCANLIST_MAX; a longer list raises VB6 error 9 and imports nothing.
+    # Write the first CSV_SCANLIST_MAX here and record the full membership in
+    # the sidecar, which patch_atd890_scanlists.py restores to the saved .rdt.
+    channel_index = {c.name: i for i, c in enumerate(bundle.channels)}
     scan_rows: List[List[str]] = [list(SCANLIST_HEADER)]
+    sidecar_lists: List[Dict[str, object]] = []
+    truncated = 0
     for number, scan in enumerate(bundle.scan_lists, start=1):
-        names, rx, tx = members(scan.members)
+        names, rx, tx = members(scan.members[:CSV_SCANLIST_MAX])
         scan_rows.append([str(number), scan.name, names, rx, tx, *SCANLIST_TAIL])
+        sidecar_lists.append({
+            "name": scan.name,
+            "members": [channel_index[m.name] for m in scan.members],
+        })
+        if len(scan.members) > CSV_SCANLIST_MAX:
+            truncated += 1
+    if truncated:
+        warnings.append(
+            f"{truncated} scan list(s) hold more than {CSV_SCANLIST_MAX} members, which the CPS's "
+            f"CSV importer cannot read. ScanList.CSV carries the first {CSV_SCANLIST_MAX} of each; "
+            "run scripts\\radios\\patch_atd890_scanlists.py on the saved .rdt to restore the rest."
+        )
 
     talkgroup_rows: List[List[str]] = [list(TALKGROUP_HEADER)]
     for number, contact in enumerate(bundle.contacts, start=1):
@@ -352,6 +379,16 @@ def render_files(
         "AMAir.CSV": _csv(am_rows),
         "AMZone.CSV": _csv(am_zone_rows),
     }
+    files[SIDECAR_NAME] = json.dumps(
+        {
+            "radio": "at-d890uv",
+            "plan": resolved.plan.id,
+            "csv_scanlist_max": CSV_SCANLIST_MAX,
+            "channels": [c.name for c in bundle.channels],
+            "scan_lists": sidecar_lists,
+        },
+        indent=2,
+    ) + "\n"
     manifest = list(BUNDLE_FILES)
     if settings_template is not None:
         extra, notes = render_settings_files(

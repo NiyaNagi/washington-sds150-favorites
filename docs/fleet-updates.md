@@ -297,9 +297,10 @@ the operator's own, explicit choice; the template does not cap any of it.
 4. **Set the NXDN unit ID** - NX Setting > Unit ID(Own) = 16240, your radioid.net NXDN ID. It is a radio-wide setting, not in the import bundle; a codeplug opened from <rdt_base> already has it.
 5. **Import the bundle** - Tool > Import > choose <lst> > Import All. A name the CPS cannot resolve means the export is stale: re-export rather than editing in place.
 6. **Import the contact list** _(optional)_ - Tool > Import > DMR Digital Contact List > choose <contacts>, then NX Digital Contact List > NXDigitalContactList.CSV in the same folder. A worldwide list takes several minutes. The NXDN table's Attr, TxForbid and Ring columns are written empty because the captured export had no NXDN contact to copy them from, so check an entry afterwards.
-7. **Save and write** - Save the codeplug into radio-backups\at-d890uv\, then Write to radio (Other Data; Digital Contact List only if one was loaded).
-8. **Read back** _(optional)_ - Read from radio, then Tool > Export > Export All into a new radio-backups\at-d890uv\<date>-readback\ folder.
-9. **Compare the read-back** _(automatic, optional)_ - Compare the read-back folder with the generated bundle, table by table.
+7. **Restore the long scan lists** - Save the codeplug into radio-backups\at-d890uv\, then run scripts\radios\patch_atd890_scanlists.py with that .rdt and <sidecar>. The CPS's CSV importer reads only 50 scan-list members before it overflows, so the bundle ships the first 50 of each and this puts the rest back. Open the patched -full.rdt in the CPS for the next step.
+8. **Write** - Write to radio from the patched codeplug (Other Data; Digital Contact List only if one was loaded).
+9. **Read back** _(optional)_ - Read from radio, then Tool > Export > Export All into a new radio-backups\at-d890uv\<date>-readback\ folder.
+10. **Compare the read-back** _(automatic, optional)_ - Compare the read-back folder with the generated bundle, table by table.
 <!-- fleet:end at-d890uv -->
 
 <!-- fleet:begin id-52a -->

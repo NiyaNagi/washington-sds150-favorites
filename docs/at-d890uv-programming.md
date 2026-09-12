@@ -182,23 +182,30 @@ Scan groups (composite lists, each chunked at 50 members: `Ham All 01`,
    Channel first and the zone and scan lists after the channels they name.
 5. Digital > Radio ID List shows `3227807` / `WA7DAM`; nothing to change.
 
-### Scan lists hold 50, not 100
+### Scan lists hold 100, and the importer only reads 50
 
 Firmware 1.05's change log line 10 reads "Modify the scan groups 50 channels
-limit to 100 channels limit". That is the radio. **The CPS's CSV import still
-refuses 51.** Tested against this radio, one member at a time, a single scan
-list imported alone:
+limit to 100 channels limit". The radio holds 100. **The CPS's CSV importer
+does not**: a 51st member raises
 
-| Members | Import |
-|---:|---|
-| 35 | passes |
-| 50 | passes |
-| 51 | **fails** |
-| 100 | fails |
+    Runtime error 9, subscript out of range
 
-So `scan_list_member_max` on the profile is 50, and the plan chunks both the
-per-zone lists and the composite groups at that. The fleet plan becomes 93 scan
-lists and 43 zones, well inside the 250 the manual gives for each.
+which is Visual Basic 6 for an array index past the end - the CPS is a VB6
+binary (`MSVBVM60.DLL`), and its import routine dimensions the member array at
+fifty. Tested against this radio one member at a time, a single scan list
+imported alone: 35 and 50 pass, 51 and 100 fail, and shortening the names does
+not help, so it is a count and not a string length. The per-table `Scan List`
+button fails the same way; it is the same parser.
+
+Nothing else is affected. The CPS's own editor takes a 51st member happily, and
+saves and reloads it, so only the CSV path is broken.
+
+So the plan is built at the radio's 100, `ScanList.CSV` carries the first
+:data:`~wasds150.export.atd890_cps.CSV_SCANLIST_MAX` of each list, and
+`scanlists.json` beside it records the full membership for
+`scripts/radios/patch_atd890_scanlists.py` to restore afterwards - see
+[Longer scan lists](#longer-scan-lists). The fleet plan is 56 scan lists and
+29 zones, against the 250 of each the manual allows.
 
 This is the failure that looks like something else. `Channel.CSV` is ~1,500
 rows and fills nearly the whole progress bar, so the scan-list table is always
@@ -206,6 +213,38 @@ processed last and a rejection of the *whole table* reads as "failed towards
 the end". Importing fewer lists does not help, because the first oversized list
 kills it whatever its position; importing the scan list on its own with no
 channels in the codeplug fails instantly instead, because no member resolves.
+
+### Longer scan lists
+
+After importing the bundle and saving the codeplug:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\radios\patch_atd890_scanlists.py `
+    --rdt radio-backups\at-d890uv\<saved>.rdt `
+    --sidecar wasds150-output\radios\at-d890uv-fleet\scanlists.json `
+    --output radio-backups\at-d890uv\<saved>-full.rdt
+```
+
+Open the `-full.rdt` in the CPS and write that. The `.rdt` is a plain
+uncompressed container with **no checksum**; its scan-list section is a chain of
+
+    [index:1] [name:16] [settings:10] [count:uint16le] [count x member]
+    member = [channel:uint16le] [sep:1]
+
+where `sep` is zero except on a record's last member, which carries the *next*
+record's index byte - a separator, not a flag. A `uint32le` at offset 5 holds
+the container length, the file size less its fourteen-byte header.
+
+Only member arrays grow. No record is added, removed or renumbered, so nothing
+that refers to a scan list by index - every channel does - is disturbed. The
+patcher refuses a codeplug whose lists are not the head of what the sidecar
+expects, which is what catches a `.rdt` built from a different export, and it
+re-parses its own output before writing.
+
+The format was established from two codeplugs that differed by exactly one
+scan-list member: rebuilding the second from the first reproduced it byte for
+byte, which is what says there is nothing else to maintain.
+`tests/test_atd890_rdt_patch.py` keeps that check.
 
 ### Priority Channel 1/2 must be `Off`
 

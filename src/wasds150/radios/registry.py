@@ -239,11 +239,17 @@ AT_D890UV = RadioProfile(
     zone_max=250,
     # Zones of 100 import cleanly; 160 is from the planning notes, untested.
     zone_member_max=160,
-    # Firmware 1.05 "Modify the scan groups 50 channels limit to 100 channels
-    # limit" describes the *radio*. The CPS's CSV import still refuses a scan
-    # list of 51, tested a member at a time against this radio: 50 imports, 51
-    # fails. Raise this only when a CPS that accepts 51 has been seen.
-    scan_list_member_max=50,
+    # Firmware 1.05: "Modify the scan groups 50 channels limit to 100 channels
+    # limit". The radio holds 100; the CPS's CSV importer does not. Importing a
+    # 51st member raises VB6 runtime error 9, subscript out of range - a fixed
+    # array of 50 in the import routine, not a limit of the radio or the file
+    # format. The CPS's own editor, and its .rdt, carry more than 50 happily.
+    #
+    # So the plan is built at the radio's 100. ScanList.CSV is written
+    # truncated to CSV_SCANLIST_MAX so the importer stays inside its array, and
+    # scripts/radios/patch_atd890_scanlists.py restores full membership to the
+    # saved .rdt afterwards. See docs/at-d890uv-programming.md.
+    scan_list_member_max=100,
     # The 500,000 ceiling comes from the planning notes, not from a CPS
     # capture; the exporter chunks at it and warns, and the first real CPS
     # import is what confirms it.

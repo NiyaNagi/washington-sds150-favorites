@@ -1,4 +1,4 @@
-"""The shipped ``atd890-scan`` plan: structure, transmit policy and export."""
+﻿"""The shipped ``atd890-scan`` plan: structure, transmit policy and export."""
 from __future__ import annotations
 
 import pytest
@@ -61,11 +61,11 @@ def test_resolves_and_exports_against_the_shipped_catalog(real_ctx, tmp_path):
     assert bundle.fm, "expected FM broadcast rows"
     assert any(s.name.startswith("Ham All") for s in bundle.scan_lists)
     export = export_plan(real_ctx, "atd890-scan", target_id="atd890-cps", out_dir=tmp_path)
-    assert export.csv_path.is_dir() and len(export.files) == 10
+    assert export.csv_path.is_dir() and len(export.files) == 11
     assert (export.csv_path / "Channel.CSV").is_file()
     assert export.report_path.is_file()
     payload = export.to_dict()
-    assert len(payload["files"]) == 12
+    assert len(payload["files"]) == 13
 
 
 def test_directory_export_copies_the_whole_bundle(real_ctx, tmp_path):

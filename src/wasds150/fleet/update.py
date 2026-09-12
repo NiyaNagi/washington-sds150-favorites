@@ -1,4 +1,4 @@
-"""The one-click fleet update.
+﻿"""The one-click fleet update.
 
 Refresh the sources that are stale (each one skippable), merge what they
 found into the catalog, then bring every selected radio up to date: resolve
@@ -34,6 +34,7 @@ from wasds150.fleet.service import export_radio, load_settings, record_sync, sca
 from wasds150.jobs.context import JobContext, StepHandle, StepSkipped
 from wasds150.jobs.events import CATALOG_DELTA, DECISION_SKIP, RADIO_DIFF
 from wasds150.jobs.runner import JobCancelled, JobRunner
+from wasds150.export.atd890_cps import SIDECAR_NAME
 from wasds150.plan.service import DEFAULT_OUT_DIR
 
 JOB_KIND = "fleet-update"
@@ -284,7 +285,7 @@ def _checklist_step(job: JobContext, spec: FleetUpdateSpec, prefix: str, step: S
         job.skip(step_id, step.title, "manual steps skipped", optional=step.optional)
         return False
     done = {"ok": False}
-    artifacts = {k: str(context[k]) for k in ("export", "lst", "contacts", "final", "report") if context.get(k)}
+    artifacts = {k: str(context[k]) for k in ("export", "lst", "contacts", "sidecar", "final", "report") if context.get(k)}
     with job.step(step_id, step.title, optional=step.optional) as handle:
         answer = job.wait_for_user(render_instructions(step.instructions, context), kind=step.kind, artifacts=artifacts)
         if answer.decision == DECISION_SKIP:
@@ -557,7 +558,8 @@ def _update_radio(ctx: AppContext, spec: FleetUpdateSpec, job: JobContext, hooks
     if prior and (prior.get("artifacts") or {}).get("export"):
         artifact = prior["artifacts"]["export"]
         context.update(export=artifact["path"], lst=prior.get("lst", ""), rows=prior.get("rows", 0),
-                       report=prior.get("report", ""), contacts=prior.get("contacts", ""))
+                       report=prior.get("report", ""), contacts=prior.get("contacts", ""),
+                       sidecar=prior.get("sidecar", ""))
         export_sha = artifact["sha256"]
         job.skip(export_id, f"{label}: export", f"reused {artifact['path']} from the resumed job")
     else:
@@ -568,12 +570,17 @@ def _update_radio(ctx: AppContext, spec: FleetUpdateSpec, job: JobContext, hooks
                                   include_licensed=spec.include_licensed)
             handle.artifact("export", export.path)
             lst = next((str(f) for f in export.files if f.suffix.upper() == ".LST"), "")
-            contacts = next((str(f) for f in export.files if f.name.upper().startswith("DIGITALCONTACTLIST")), "")
+            # The CPS's own name for the DMR list is DMRDigitalContactList.CSV;
+            # NXDigitalContactList.CSV is the NXDN one and imports separately.
+            contacts = next((str(f) for f in export.files
+                             if "DIGITALCONTACTLIST" in f.name.upper()
+                             and not f.name.upper().startswith("NX")), "")
+            sidecar = next((str(f) for f in export.files if f.name == SIDECAR_NAME), "")
             handle.data.update(rows=export.rows, report=str(export.report_path or ""), lst=lst, contacts=contacts,
-                               copies=len(export.copies), warnings=len(export.warnings))
+                               sidecar=sidecar, copies=len(export.copies), warnings=len(export.warnings))
             handle.message = f"{export.rows} rows -> {export.path}"
             context.update(export=str(export.path), lst=lst, rows=export.rows, report=str(export.report_path or ""),
-                           contacts=contacts)
+                           contacts=contacts, sidecar=sidecar)
         export_sha = job._job.status.step(export_id).data["artifacts"]["export"]["sha256"]
     result["exported"] = context["export"]
 

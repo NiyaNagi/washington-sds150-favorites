@@ -1,7 +1,8 @@
-"""Anytone AT-D890UV: profile, digital identity, bundle derivation and CPS CSV."""
+﻿"""Anytone AT-D890UV: profile, digital identity, bundle derivation and CPS CSV."""
 from __future__ import annotations
 
 import csv
+import json
 import io
 
 import pytest
@@ -97,9 +98,9 @@ class TestProfile:
 
     def test_structure_limits(self):
         assert (AT_D890UV.max_channels, AT_D890UV.name_max_len) == (4000, 16)
-        # 50, not the firmware's 100: the CPS's CSV import refuses a scan list
-        # of 51 members, tested against the radio.
-        assert (AT_D890UV.zone_max, AT_D890UV.zone_member_max, AT_D890UV.scan_list_member_max) == (250, 160, 50)
+        # The radio's 100. The CPS's CSV importer overflows past 50, so the
+        # export truncates and the .rdt patcher restores the rest.
+        assert (AT_D890UV.zone_max, AT_D890UV.zone_member_max, AT_D890UV.scan_list_member_max) == (250, 160, 100)
         assert AT_D890UV.name_style == "readable"
         assert TD_H9.zone_max is None and TD_H9.name_style == "compact"
         assert not AT_D890UV.verified
@@ -339,11 +340,30 @@ class TestCpsFiles:
     def test_every_field_quoted_crlf_ascii(self):
         files, _ = self._files()
         for name, text in files.items():
+            # scanlists.json is for our own patcher, not the CPS: plain JSON.
+            if name.endswith(".json"):
+                json.loads(text)
+                continue
             assert "\r\n" in text and "\n" not in text.replace("\r\n", "")
             text.encode("ascii")
             if name.endswith(".CSV"):
                 for line in text.rstrip("\r\n").split("\r\n"):
                     assert line.startswith('"') and line.endswith('"'), (name, line)
+
+    def test_long_scan_lists_are_truncated_for_the_importer(self):
+        """The CPS's CSV importer overflows past 50; the sidecar keeps the rest."""
+        files, bundle = render_files(resolve_plan(_scanner_plan(), _scanner_catalog(n_ham=300)))
+        side = json.loads(files["scanlists.json"])
+        assert side["csv_scanlist_max"] == 50
+        by_name = {e["name"]: e["members"] for e in side["scan_lists"]}
+        big = [n for n, m in by_name.items() if len(m) > 50]
+        assert big, "expected at least one list over 50 from 300 repeaters"
+        rows = {r[1]: r[2].split("|") for r in list(csv.reader(io.StringIO(files["ScanList.CSV"])))[1:]}
+        for name in big:
+            assert len(rows[name]) == 50, name              # what the CPS reads
+            assert len(by_name[name]) <= 100, name          # what the radio holds
+            names = [bundle.channels[i].name for i in by_name[name][:50]]
+            assert rows[name] == names, name                # CSV is the head of it
 
     def test_channel_rows(self):
         files, _ = self._files()
@@ -407,6 +427,6 @@ class TestCpsFiles:
     def test_write_creates_directory_bundle(self, tmp_path):
         result = write_atd890(resolve_plan(_scanner_plan(), _scanner_catalog()), tmp_path / "bundle")
         assert (tmp_path / "bundle" / "Channel.CSV").is_file()
-        assert len(result.files) == 10 and result.rows == 4 + 3 + 40 + 1 + 1
+        assert len(result.files) == 11 and result.rows == 4 + 3 + 40 + 1 + 1
         target = get_target("atd890-cps")
         assert target.kind == "directory" and target.radio_id == "at-d890uv"
