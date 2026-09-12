@@ -134,28 +134,27 @@ GROUP_PUB_SVC = "Public Svc"
 GROUP_MARINE_RAIL = "Rail & Marine"
 GROUP_PERSONAL = "Personal"
 GROUP_EVERYTHING = "Everything"
-#: The one list worth leaving running: the nearest few of every service worth
-#: hearing, inside a single scan list so it never splits into chunks the radio
-#: cannot scan together. Quotas are nearest-first, because every block is.
-#: Left out on purpose, as noise rather than content: NOAA and the broadcast
-#: bands (continuous carriers), packet and data, the HF blocks (a different
-#: radio mode) and the air blocks (a separate AM receiver on the Anytone).
+#: The one list worth leaving running: every local amateur service, inside a
+#: single scan list so it never splits into chunks the radio cannot scan
+#: together. Quotas are nearest-first, because every block is.
+#:
+#: Amateur only, by choice: the repeaters carrying nets, the nearest analog
+#: machines on all three bands, the DMR core and local talkgroups, simplex
+#: calling and the ACS plan. Public safety, marine, rail and the personal
+#: radio services have their own groups; a list meant to be left running all
+#: day is more useful when everything on it is a conversation you could join.
+#: Never included anywhere: NOAA and the broadcast bands (continuous
+#: carriers), packet and data, HF (a different radio mode) and the air blocks
+#: (a separate AM receiver on the Anytone, which cannot share a VHF/UHF list).
 NEAR_ME_QUOTAS = (
-    ("Nets", 6),
-    ("SAR and Interop", 4),
-    ("Wildfire", 2),
-    ("Public Safety Conventional", 4),
-    ("Ham 2m Repeaters", 5),
+    ("Nets", 14),
+    ("Ham 2m Repeaters", 7),
     ("Ham 1.25m Repeaters", 2),
-    ("Ham 70cm Repeaters", 4),
-    ("DMR Core", 5),
+    ("Ham 70cm Repeaters", 7),
+    ("DMR Core", 10),
+    ("DMR Local", 4),
     ("Simplex Calling", 3),
-    ("Seattle ACS", 2),
-    ("Rail", 1),
-    ("Marine", 2),
-    ("GMRS 15-22", 3),
-    ("GMRS Repeaters", 4),
-    ("MURS", 2),
+    ("Seattle ACS", 3),
 )
 
 SCAN_GROUP_ORDER = (
