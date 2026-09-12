@@ -267,7 +267,11 @@ AT_D890UV = RadioProfile(
         "at the same time. No P25. Programmed with the Anytone D890UV CPS by "
         "importing a CSV bundle (Tool > Import > .LST)."
     ),
-    verified=False,
+    # Verified 2026-09-12: the fleet bundle was written to the radio, read back
+    # and exported, and every channel, zone, scan list, talkgroup, receive
+    # group, AM memory and FM station matched. Bundle SHA-256
+    # EAC0872812F9EFBA2623033C03A6336CA7C33C5AB345381DC92596E850E4592F.
+    verified=True,
 )
 
 #: Icom ID-52A, the US model (not the PLUS).

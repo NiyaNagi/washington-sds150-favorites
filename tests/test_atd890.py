@@ -103,7 +103,7 @@ class TestProfile:
         assert (AT_D890UV.zone_max, AT_D890UV.zone_member_max, AT_D890UV.scan_list_member_max) == (250, 160, 100)
         assert AT_D890UV.name_style == "readable"
         assert TD_H9.zone_max is None and TD_H9.name_style == "compact"
-        assert not AT_D890UV.verified
+        assert AT_D890UV.verified  # round trip clean 2026-09-12
 
 
 class TestDigitalSpec:

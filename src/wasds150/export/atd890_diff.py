@@ -36,7 +36,25 @@ KEY_COLUMNS: Dict[str, Tuple[str, ...]] = {
     "AMZone.CSV": ("Zone Name",),
 }
 ALWAYS_IGNORED = frozenset({"No."})
-CPS_NORMALIZED_COLUMNS: Dict[str, Tuple[str, ...]] = {}
+#: Columns the CPS rewrites itself, established by the 2026-09-12 round trip
+#: (written to the radio, read back, Export All):
+#:
+#: * ``Idle TX`` came back ``On`` on all 1,134 channels that carry it,
+#:   analog and digital alike, whatever the bundle wrote.
+#: * ``Busy Lock/TX Permit`` came back ``Always`` on all 61 digital channels
+#:   and was left alone on every analog one, so the CPS is applying its own
+#:   rule for digital rather than taking ours.
+#:
+#: Nothing else moved. A column added here must say why, next to it.
+#: ``AMZone.CSV``'s ``Scan Channel`` is here for a different reason, and it is
+#: a **loss rather than a normalisation**: the AM zones come back holding every
+#: channel we sent, but their scan member column is empty, so the CPS's import
+#: does not carry it. It is listed so the rest of the comparison can be read,
+#: not because it is harmless - see docs/at-d890uv-programming.md.
+CPS_NORMALIZED_COLUMNS: Dict[str, Tuple[str, ...]] = {
+    "Channel.CSV": ("Idle TX", "Busy Lock/TX Permit"),
+    "AMZone.CSV": ("Scan Channel",),  # header is stripped on read
+}
 #: Nothing is ignored by default: the bundle carries the operator's real DMR
 #: ID, so a different one in the read-back is a real difference.
 DEFAULT_IGNORES: Set[Tuple[str, str]] = set()
@@ -116,7 +134,9 @@ def _read(path: Path) -> Tuple[List[str], List[Dict[str, str]]]:
     if not rows:
         return [], []
     header = [h.strip() for h in rows[0]]
-    return header, [dict(zip(header, row)) for row in rows[1:]]
+    # A read-back pads names to their field width with NULs ("Air Boss\x00...");
+    # they are padding, not part of the name, and would fail every key match.
+    return header, [{k: (v or "").replace("\x00", "") for k, v in zip(header, row)} for row in rows[1:]]
 
 
 def _find(folder: Path, name: str) -> Optional[Path]:
@@ -154,11 +174,52 @@ def _same_members(a: str, b: str) -> bool:
     return all(_same(x, y) for x, y in zip(sorted(left), sorted(right)))
 
 
+#: Channels every codeplug carries and no bundle writes, so a read-back having
+#: them is not a difference.
+CPS_OWN_ROWS: Dict[str, frozenset] = {
+    "Channel.CSV": frozenset({"Channel VFO A", "Channel VFO B"}),
+    # The radio returns its 256th AM slot as an empty placeholder.
+    "AMAir.CSV": frozenset({"AM-256"}),
+}
+
+
+def _full_scan_lists(generated_dir: Path) -> Dict[str, Tuple[str, str, str]]:
+    """Scan-list members as the radio should hold them, from the sidecar.
+
+    ``ScanList.CSV`` carries only the first fifty of each list, because that is
+    all the CPS's importer can read; the rest reach the radio through
+    ``scripts/radios/patch_atd890_scanlists.py``. Comparing a read-back against
+    the CSV would report every patched list as different, so compare against
+    what the patch was meant to produce.
+    """
+    import json
+
+    sidecar = generated_dir / "scanlists.json"
+    channels = _find(generated_dir, "Channel.CSV")
+    if not sidecar.is_file() or channels is None:
+        return {}
+    data = json.loads(sidecar.read_text(encoding="utf-8"))
+    header, rows = _read(channels)
+    by_index = [r.get("Channel Name", "") for r in rows]
+    rx = [r.get("Receive Frequency", "") for r in rows]
+    tx = [r.get("Transmit Frequency", "") for r in rows]
+    out: Dict[str, Tuple[str, str, str]] = {}
+    for entry in data.get("scan_lists", []):
+        ids = [i for i in entry.get("members", []) if 0 <= i < len(by_index)]
+        out[entry["name"]] = (
+            "|".join(by_index[i] for i in ids),
+            "|".join(rx[i] for i in ids),
+            "|".join(tx[i] for i in ids),
+        )
+    return out
+
+
 def compare_bundle(
     generated_dir: Path, readback_dir: Path, *, ignore: Iterable[Tuple[str, str]] = ()
 ) -> BundleDiff:
     generated_dir, readback_dir = Path(generated_dir), Path(readback_dir)
     ignored = set(DEFAULT_IGNORES) | {(f, c) for f, c in ignore}
+    full_lists = _full_scan_lists(generated_dir)
     result = BundleDiff()
     for name, keys in KEY_COLUMNS.items():
         generated = _find(generated_dir, name)
@@ -173,8 +234,16 @@ def compare_bundle(
         header, generated_rows = _read(generated)
         readback_header, readback_rows = _read(readback)
         ours, theirs = _keyed(generated_rows, keys), _keyed(readback_rows, keys)
+        if name == "ScanList.CSV" and full_lists:
+            for key, row in ours.items():
+                members = full_lists.get(key)
+                if members is None:
+                    continue
+                (row["Scan Channel Member"], row["Scan Channel Member RX Frequency"],
+                 row["Scan Channel Member TX Frequency"]) = members
         diff.missing_rows = [key for key in ours if key not in theirs]
-        diff.extra_rows = [key for key in theirs if key not in ours]
+        diff.extra_rows = [key for key in theirs
+                           if key not in ours and key not in CPS_OWN_ROWS.get(name, ())]
         skipped = set(CPS_NORMALIZED_COLUMNS.get(name, ())) | ALWAYS_IGNORED
         for key, row in ours.items():
             other = theirs.get(key)

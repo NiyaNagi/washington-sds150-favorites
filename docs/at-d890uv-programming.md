@@ -1,4 +1,4 @@
-# Programming the Anytone AT-D890UV
+﻿# Programming the Anytone AT-D890UV
 
 The AT-D890UV is a dual-band DMR/analog handheld with NXDN (via a firmware
 overlay), an AM air-band receiver and an FM broadcast receiver. This guide
@@ -7,10 +7,12 @@ this repository's catalog: every conventional channel within 60 miles of home,
 one zone per service, composite scan lists, and transmit enabled only on the
 amateur channels a General-class licence covers.
 
-Everything marked **verified** was checked against the CPS, the firmware
-change logs or a real codeplug export. The radio profile is still marked
-`verified=False` in `src/wasds150/radios/registry.py` until a generated bundle
-has been written to the radio and read back.
+Everything marked **verified** was checked against the CPS, the firmware change
+logs or a real codeplug export. The radio profile is `verified=True` as of
+**2026-09-12**: the fleet bundle was written to the radio, read back and
+exported, and every channel, zone, scan list, talkgroup, receive group, AM
+memory and FM station matched. Bundle SHA-256
+`EAC0872812F9EFBA2623033C03A6336CA7C33C5AB345381DC92596E850E4592F`.
 
 ---
 
@@ -21,7 +23,7 @@ has been written to the radio and read back.
 | Anytone AT-D890UV | Band mode **00014**: Rx and Tx 136-174, 220-225 and 400-520. Check **Menu > Settings > Device Info > Frequency Range**, or the CPS title bar. The plan assumes it - a radio still in the factory US mode 00007 (Rx 136-174 / 400-480, Tx 144-148 / 420-450) has no 220 MHz and cannot key GMRS. Mode 14 is not in the CPS's Model Information dropdown; set it with the AT Options utility, whose band descriptor and password are in `radio-tools/anytone-d890uv/options/AT_BANDS.txt`. |
 | Programming cable | The USB-C to USB-A cable in the box. Windows needs the virtual COM driver from the firmware package (`official-1.05/A READ FIRST - Update Instructions/Virtual Driver Installation.pdf`). |
 | D890UV CPS **1.05** | Installed by this project into `C:\D890UV\D890UV.exe` (Inno Setup, silent). CPS and firmware versions must match exactly. |
-| Firmware **1.05** (2026-05-20) | Official DMR build. Its change log says "Modify the scan groups 50 channels limit to 100 channels limit", but that is the **radio**: the CPS's CSV import still refuses a scan list of 51, so the exporter chunks at 50. See [Scan lists hold 50, not 100](#scan-lists-hold-50-not-100). |
+| Firmware **1.05** (2026-05-20) | Official DMR build. Its change log says "Modify the scan groups 50 channels limit to 100 channels limit", but that is the **radio**: the CPS's CSV importer still refuses a scan list of 51, so the export ships 50 of each and the .rdt patcher restores the rest. See [Scan lists hold 100, and the importer only reads 50](#scan-lists-hold-100-and-the-importer-only-reads-50). |
 | NX_DMR **1.05** overlay | The NXDN+DMR firmware Anytone distributes through dealers (Wouxun.us mirror). Flashed *after* official 1.05. |
 | DMR ID | `3227807`, registered to `WA7DAM` at <https://radioid.net>. Every bundle carries it (`src/wasds150/station.py`). |
 | NXDN ID | `16240`, registered at <https://radioid.net>. Set once in the CPS at NX Setting > Unit ID(Own); the fleet checklist has a step for it (`src/wasds150/station.py`). |
@@ -121,7 +123,7 @@ and the `Comm Digital` channels simply stay quiet.
 | File | Contents |
 |---|---|
 | `Channel.CSV` | 77-column channel table: every VHF/UHF memory, ordered by zone. Analog rows carry the transmit CTCSS/DCS; DMR rows carry contact, colour code and timeslot; receive-only rows have `PTT Prohibit = On`. |
-| `DMRZone.CSV` | One zone per plan bank, split into `Name 01`, `Name 02` at 50 members. |
+| `DMRZone.CSV` | One zone per plan bank, split into `Name 01`, `Name 02` at 100 members. |
 | `ScanList.CSV` | One scan list per zone (same name) plus the composite groups. |
 | `DMRTalkGroups.CSV` | Every talkgroup any channel references, with a `Simplex 99` default. |
 | `DMRReceiveGroupCallList.CSV` | One receive group per network (`PNWDigital RX`, `SeattleDMR RX`, ...) so a DMR channel hears every talkgroup carried on its network. |
@@ -370,6 +372,22 @@ takes several minutes and is rarely worth reloading with the rest of a bundle.
 - Switch Protocol to NXDN (menu item 33) to hear the AMR and other NXDN users
   in `Comm Digital`; DMR is silent while NXDN is selected.
 
+### The AM zones' scan members do not survive the import
+
+The one thing the 2026-09-12 round trip found. Every AM zone came back holding
+all of its channels, and their `A Channel` is right, but the **`Scan Channel`
+column is empty** on every one - the CPS's import does not carry it. It is in
+:data:`~wasds150.export.atd890_diff.CPS_NORMALIZED_COLUMNS` so the rest of the
+comparison can be read, but unlike the entries beside it that is a *loss*, not
+a normalisation.
+
+What it costs is not yet established: the air band may scan the whole AM zone
+regardless of that column, in which case nothing is wrong. Check on the radio -
+Menu > Settings > Radio Set > Other Func > AM Air/FM, pick `Air Local 01` and
+start its scan. If it sweeps the zone, the column is decorative. If it sits on
+one channel, the scan members have to be set on the radio or in the CPS by
+hand, and this is worth solving properly.
+
 ### Read back and verify
 
 After writing: Read from radio, Tool > Export > Export All into
@@ -389,9 +407,7 @@ Any other column the CPS rewrote is a bug in `CHANNEL_DEFAULTS`
 (`src/wasds150/export/atd890_cps.py`), not something to ignore; a column the
 CPS legitimately normalises goes in `CPS_NORMALIZED_COLUMNS`
 (`src/wasds150/export/atd890_diff.py`) with the reason. The fleet update's
-optional **Compare the read-back** step runs the same comparison. Once a round
-trip is clean, flip `verified=True` on the profile and record the printed
-SHA-256 lines here.
+optional **Compare the read-back** step runs the same comparison. That round trip was made on 2026-09-12 and the profile is `verified=True`; the bundle hash is at the top of this page.
 
 ---
 

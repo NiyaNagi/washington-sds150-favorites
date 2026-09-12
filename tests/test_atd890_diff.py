@@ -25,8 +25,39 @@ def bundle(tmp_path_factory):
 
 @pytest.fixture()
 def readback(bundle, tmp_path):
+    """A read-back of a radio this bundle was written to.
+
+    Copying the bundle is not enough: ``ScanList.CSV`` carries only the first
+    fifty members of each list, because that is all the CPS's importer can
+    read, and the rest reach the radio through the ``.rdt`` patcher. A radio
+    read back therefore holds the *full* membership, so the copy is expanded
+    from the sidecar the same way the patcher expands the codeplug.
+    """
+    import json
+
     target = tmp_path / "readback"
     shutil.copytree(bundle, target)
+
+    sidecar = json.loads((target / "scanlists.json").read_text(encoding="utf-8"))
+    channels = list(csv.DictReader((target / "Channel.CSV").read_text(encoding="ascii").splitlines()))
+    full = {
+        e["name"]: (
+            "|".join(channels[i]["Channel Name"] for i in e["members"]),
+            "|".join(channels[i]["Receive Frequency"] for i in e["members"]),
+            "|".join(channels[i]["Transmit Frequency"] for i in e["members"]),
+        )
+        for e in sidecar["scan_lists"]
+    }
+
+    def expand(rows):
+        name, member, rx, tx = (rows[0].index(c) for c in (
+            "Scan List Name", "Scan Channel Member",
+            "Scan Channel Member RX Frequency", "Scan Channel Member TX Frequency"))
+        for row in rows[1:]:
+            if row[name] in full:
+                row[member], row[rx], row[tx] = full[row[name]]
+
+    _edit(target / "ScanList.CSV", expand)
     return target
 
 
