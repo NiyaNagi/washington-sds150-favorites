@@ -46,7 +46,9 @@ def test_psham01_is_a_deterministic_baseline_extension_with_fallback_channels():
     channels = [channel for system in item.systems for department in system.departments for channel in department.channels]
 
     assert len(catalog.favorites) == 143
-    assert len(channels) == 10
+    # Ten operator-published rows from the 2026-08-06 pass, plus the nets
+    # researched on 2026-09-12; every row names its club source in the notes.
+    assert len(channels) == 45
     assert {channel.freq_mhz for channel in channels} >= {52.87, 146.56, 146.82, 440.775}
     assert any("Saturday 20:00" in channel.notes for channel in channels)
     assert any(channel.mode == "DMR" and channel.tone == "ColorCode=2" for channel in channels)

@@ -1,4 +1,4 @@
-"""The fleet plan template: blocks by capability, licensed transmit, budgets."""
+﻿"""The fleet plan template: blocks by capability, licensed transmit, budgets."""
 from __future__ import annotations
 
 import pytest
@@ -39,13 +39,15 @@ from wasds150.radios.registry import get_profile
 #: linked-system block) and h9-ozette (-4 OZ01 repeaters) moved when the
 #: RepeaterBook-derived channels were removed from the catalog.
 LEGACY_SLOTS = {
-    "atd890-scan": 957,
-    "ftx1-local": 188,
+    # 957 before the Nets block: the net rows now carry transmit offsets, so
+    # two that were receive-only duplicates resolve as their own channels.
+    "atd890-scan": 959,
+    "ftx1-local": 192,
     "ftx1-scan": 183,
-    "ftx1-wa": 850,
+    "ftx1-wa": 860,
     "h9-ozette": 137,
-    "thd75-ames-lake": 386,
-    "thd75-scan": 391,
+    "thd75-ames-lake": 388,
+    "thd75-scan": 393,
 }
 
 _PERSONAL_FREQS = set(GMRS_MAIN) | set(GMRS_INTERSTITIAL) | set(FRS_ONLY) | set(MURS)

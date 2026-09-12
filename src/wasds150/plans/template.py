@@ -1,4 +1,4 @@
-"""One channel-plan template for every memory-list radio in the fleet.
+﻿"""One channel-plan template for every memory-list radio in the fleet.
 
 The hand-written plans each chose their own home point, radius, block names
 and favorite keys, so a database refresh reached some radios and not others,
@@ -141,14 +141,15 @@ GROUP_EVERYTHING = "Everything"
 #: bands (continuous carriers), packet and data, the HF blocks (a different
 #: radio mode) and the air blocks (a separate AM receiver on the Anytone).
 NEAR_ME_QUOTAS = (
+    ("Nets", 6),
     ("SAR and Interop", 4),
     ("Wildfire", 2),
-    ("Public Safety Conventional", 5),
-    ("Ham 2m Repeaters", 7),
+    ("Public Safety Conventional", 4),
+    ("Ham 2m Repeaters", 5),
     ("Ham 1.25m Repeaters", 2),
-    ("Ham 70cm Repeaters", 5),
-    ("DMR Core", 6),
-    ("Simplex Calling", 4),
+    ("Ham 70cm Repeaters", 4),
+    ("DMR Core", 5),
+    ("Simplex Calling", 3),
     ("Seattle ACS", 2),
     ("Rail", 1),
     ("Marine", 2),
@@ -463,6 +464,20 @@ _BLOCKS: Tuple[ServiceBlockSpec, ...] = (
         tx_probe=(146.0, 440.0), groups=(GROUP_HAM_ALL, GROUP_HAM_ANALOG),
         notes="Seattle Auxiliary Communications Service repeater plan with its access tones.",
     ),
+    ServiceBlockSpec(
+        "nets", "Nets", "Ham Nets",
+        lambda k: (_keys("PSHAM01", dept=r"Operator-Published"),),
+        # No radius: these rows carry no coordinates of their own, only the
+        # department's fence, so a per-station distance filter drops them all.
+        tx=TXK_HAM_REPEATER, sort=SORT_NATURAL, limit=50,
+        requires=_receives(146.0), tx_probe=(146.0,),
+        groups=(GROUP_HAM_ALL, GROUP_HAM_ANALOG),
+        notes=(
+            "Repeaters and simplex channels that carry a scheduled net, each with its "
+            "day and time in the channel note. One zone and one scan list, so a net "
+            "night is a single list to sit on."
+        ),
+    ),
     # -- HF -------------------------------------------------------------------
     ServiceBlockSpec(
         "hf-nets", "HF Voice Nets", "Ham HF Nets",
@@ -740,6 +755,11 @@ BLOCK_ORDER: Tuple[str, ...] = (
     "noaa",
     "sar", "wildfire", "public-safety",
     "air-towers", "air-local", "air-civil", "air-mil",
+    # Nets comes before the general repeater blocks on purpose. A frequency is
+    # programmed once, by the first block that claims it, and a repeater that
+    # carries a scheduled net is more useful filed under Nets with its day and
+    # time than buried among sixty others in Ham 2m.
+    "nets",
     "ham-6m", "ham-2m", "ham-125", "ham-70cm", "dstar", "dmr-core", "dmr-local", "dmr-wide",
     "simplex", "seattle-acs", "hf-nets", "hf-calling", "hf-digital", "hf-reference",
     "rail", "marine",
@@ -897,7 +917,11 @@ _TD_H9 = RadioKnobs(
     include_trip_packs=False,
     power=("10W", "5.0W", "1.0W"),
     limits={
-        "ham-2m": 38, "ham-125": 4, "ham-70cm": 36, "simplex": 6, "seattle-acs": 0,
+        # Nets takes its twelve from the two repeater blocks, which is where
+        # those repeaters would otherwise have sat: a frequency is programmed
+        # once, and Nets claims it first.
+        "nets": 12,
+        "ham-2m": 32, "ham-125": 4, "ham-70cm": 30, "simplex": 6, "seattle-acs": 0,
         "air-towers": 8, "air-local": 0, "air-civil": 0, "air-mil": 0, "sar": 10, "wildfire": 6, "marine": 12, "rail": 4,
         "gmrs-interstitial": 7, "frs": 7, "gmrs-main": 8, "gmrs-repeaters": 9, "murs": 5, "business": 6,
         "public-safety": 12, "data": 0, "noaa": 7, "other-nearby": 10,
@@ -911,7 +935,8 @@ _FTX1 = RadioKnobs(
     include_dstar=False,
     power=("High", "Mid", "Low"),
     limits={
-        "ham-6m": 20, "ham-2m": 110, "ham-70cm": 150, "simplex": 20, "seattle-acs": 40,
+        "nets": 50,
+        "ham-6m": 20, "ham-2m": 85, "ham-70cm": 125, "simplex": 20, "seattle-acs": 40,
         "hf-nets": 40, "hf-calling": 40, "hf-digital": 40, "hf-reference": 40,
         # VHF airband only: the FTX-1 does not receive 225-400 MHz.
         "air-local": 90, "air-civil": 40, "air-mil": 10, "sar": 40, "wildfire": 40, "marine": 30, "rail": 15,
@@ -925,7 +950,8 @@ _TH_D75 = RadioKnobs(
     reserve_slots=50,
     power=("5.0W", "5.0W", "0.5W"),
     limits={
-        "ham-6m": 20, "ham-2m": 70, "ham-125": 30, "ham-70cm": 125, "dstar": 25,
+        "nets": 50,
+        "ham-6m": 20, "ham-2m": 50, "ham-125": 30, "ham-70cm": 96, "dstar": 25,
         "simplex": 20, "seattle-acs": 50, "hf-nets": 20, "hf-calling": 20, "hf-digital": 10,
         # Band B hears civil VHF and military UHF airband alike.
         "hf-reference": 20, "air-local": 130, "air-civil": 40, "air-mil": 10, "sar": 40, "wildfire": 40,
@@ -940,7 +966,12 @@ _TH_D75 = RadioKnobs(
 _AT_D890UV = RadioKnobs(
     reserve_slots=200,
     power=("High", "Mid", "Low"),
-    limits={"packs": 60, "air-local": 90, "air-civil": 140, "air-mil": 20},
+    # Nets takes its fifty from the two repeater blocks, which is where those
+    # repeaters would otherwise have sat.
+    limits={
+        "nets": 50, "ham-2m": 135, "ham-70cm": 135,
+        "packs": 60, "air-local": 90, "air-civil": 140, "air-mil": 20,
+    },
     # Filling spare slots must not push the air rows past the AM list either.
     fill_limits={"air-local": 200, "air-civil": 36, "air-mil": 20},
     # Its main channel table is analog FM or digital only: AM exists solely
@@ -959,7 +990,7 @@ _ID52A = RadioKnobs(
     limits={
         "noaa": 7, "sar": 40, "wildfire": 60, "public-safety": 100,
         "air-local": 100, "air-civil": 30, "air-mil": 10,
-        "ham-2m": 100, "ham-70cm": 100, "dstar": 25, "simplex": 20, "seattle-acs": 50,
+        "nets": 44, "ham-2m": 78, "ham-70cm": 78, "dstar": 25, "simplex": 20, "seattle-acs": 50,
         "rail": 15, "marine": 40,
         "gmrs-interstitial": 7, "frs": 7, "gmrs-main": 8, "gmrs-repeaters": 10, "murs": 5,
         "business": 100, "data": 10, "packs": 60, "other-nearby": 40,
