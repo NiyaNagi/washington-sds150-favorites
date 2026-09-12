@@ -345,6 +345,18 @@ class TestTransmitPolicy:
         assert result.channels[0].transmit is False
         assert any("receive-only" in w for w in result.warnings)
 
+    def test_a_repeater_input_equal_to_its_output_is_not_a_pair(self):
+        # Some sources publish the output twice. Keying there would go out
+        # simplex on top of the repeater rather than through it.
+        catalog = make_catalog(
+            make_channel("Repeater", 146.96, tx_freq_mhz=146.96, tone="TONE=C103.5")
+        )
+        plan = simple_plan(PlanBlock("Ham", (ALL,), tx_policy=TX_REPEATER))
+        result = resolve_plan(plan, catalog)
+        assert result.channels[0].transmit is False
+        assert result.channels[0].tx_freq_mhz is None
+        assert any("input equals its output" in w for w in result.warnings)
+
     def test_transmit_outside_hardware_coverage_is_refused(self):
         catalog = make_catalog(make_channel("Airband", 121.5, mode="AM"))
         plan = simple_plan(PlanBlock("Air", (ALL,), tx_policy=TX_SIMPLEX))

@@ -431,6 +431,15 @@ def _resolve_once(
                     result.warnings.append(
                         f"{channel.label}: no published repeater input, programmed receive-only"
                     )
+                elif abs(float(channel.tx_freq_mhz) - freq) < 1e-6:
+                    # An input equal to the output is not a repeater pair: the
+                    # source published the output twice. Transmitting there
+                    # would key simplex on top of the repeater rather than
+                    # through it, so it is receive-only like a missing input.
+                    transmit = False
+                    result.warnings.append(
+                        f"{channel.label}: repeater input equals its output, programmed receive-only"
+                    )
                 else:
                     tx_freq = round(float(channel.tx_freq_mhz), 6)
             if transmit and not profile.can_transmit(tx_freq if tx_freq is not None else freq):
