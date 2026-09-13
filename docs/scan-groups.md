@@ -40,9 +40,11 @@ channels, and every one of those channels names it. `Near Me` is a zone like
 the rest, first on the knob, holding copies (named with a trailing ` N`) so
 the originals keep scanning their own zones. Only the first scan group is
 built: `Ham All`, `Everything` and the rest are far over 100 and could only
-ever be arbitrary slices no zone led to. Channels that never scan - beyond
-the radius, label lockouts - move to `Not Scanned` zones rather than sit
-unscanned inside a zone that otherwise sweeps.
+ever be arbitrary slices no zone led to. Stations the fill pass added beyond
+the radius leave their block for `Far Ham Analog`, `Far Ham DMR`, `Far Public
+Svc` and `Far Other` - scannable zones of their own, each with its identical
+list - so the local sweep stays quick; a channel the operator locked out by
+label goes to a `Not Scanned` zone with no list.
 
 See [at-d890uv-programming.md](at-d890uv-programming.md), including the
 `.rdt` patch that restores full membership after the CPS's 50-member CSV

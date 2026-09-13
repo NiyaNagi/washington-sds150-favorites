@@ -1,8 +1,8 @@
 # Updating every radio
 
-Five radios are programmed from one catalog: the Uniden SDS150 scanner, the
-TIDRADIO TD-H9, the Kenwood TH-D75A, the Yaesu FTX-1 and the Anytone
-AT-D890UV. This page is the procedure for bringing all of them up to date
+Six radios are programmed from one catalog: the Uniden SDS150 scanner, the
+TIDRADIO TD-H9, the Kenwood TH-D75A, the Yaesu FTX-1, the Anytone AT-D890UV
+and the Icom ID-52A. This page is the procedure for bringing all of them up to date
 after the catalog changes, and the per-radio checklists below are generated
 from `src/wasds150/fleet/registry.py` (`wasds150 fleet docs`), so the wizard
 and this page cannot drift apart.
@@ -96,20 +96,37 @@ The Near Me lists are rebuilt from the full catalog on every install:
   broadcasts that never stop (ATIS, ASOS/AWOS, NOAA weather) are left out;
   NOAA alerts are the scanner's own weather feature.
 
-At home the three default lists scan about 300 conventional channels and
-the nearby trunked sites: a pass of a few seconds, where the full catalog
-took minutes. Press a quick key to add a list for the drive; the next
-install puts the defaults back. On the scanner, service-type buttons mute
-a kind of traffic (every Near Me channel has a service type), and **Close
-Call** with priority catches strong nearby transmitters the lists do not
-hold.
+At home the three default lists scan about 335 conventional channels (13
+public safety, 95 air, 227 ham) and the nearby trunked sites: a pass of a few
+seconds, where the full catalog took minutes. Press a quick key to add a list
+for the drive; the next install puts the defaults back.
+
+**The scanner profile has to let them through.** The installer writes
+Favorites Lists and never `profile.cfg`, so these are set in Sentinel or on
+the scanner (the checklist's "Set the scanner profile" step):
+
+- **Service Types all on** (FUNCTION then ZIP/SERVICES). A type that is off
+  mutes every channel carrying it: the Preset profile had Aircraft, Business,
+  Railroad, Other, Interop, Federal and Military off, which silenced all of
+  Near Me Air and Business & GMRS and most of Rail & Marine. With them on,
+  the service-type buttons become a way to mute one kind of traffic.
+- **Full Database off** in Select Lists to Monitor, so the scan is the Near
+  Me lists and not the whole database around them.
+- **Weather**: Program SAME = King County 053033, Weather Alert = Named FIPS
+  Code, WX Alt Priority on.
+- **Close Call**: Set CC Mode = CC DND, which catches strong nearby
+  transmitters the lists do not hold without interrupting a transmission.
 
 The handheld plans follow the same idea: every block keeps its nearest
 stations first (a county's rows by the county's fence, dispatch before
 tactical), and once each block has its budget, spare slots go to the
 next-nearest stations wherever they are. Those beyond 60 miles are
-programmed but locked out of the scan, so a fuller radio does not scan
-slower; ATIS and ASOS/AWOS are programmed but not scanned either.
+programmed but kept out of the local scan, so a fuller radio does not scan
+slower: locked out on the memory-list radios, and on the AT-D890UV moved to
+`Far` zones with their own scan lists (a zone and its list are the same
+thing there). ATIS and ASOS/AWOS are programmed but not scanned either. How
+each radio expresses the shared `Near Me` list is in
+[scan-groups.md](scan-groups.md).
 
 Names match from radio to radio. The groups use the same words everywhere
 and in the scanner's order - Weather (never scanned), SAR & Interop,
@@ -207,7 +224,8 @@ the operator's own, explicit choice; the template does not cap any of it.
 
 1. **Close Sentinel** _(confirm)_ - Close Sentinel completely. The installer writes Favorites Lists straight into the workspace and will not run while Sentinel has it open.
 2. **Install the Favorites Lists** _(automatic)_ - Dry-run, then install every enabled, populated list into profile <sentinel_profile>. The workspace is backed up and verified first, and any failure restores the backup.
-3. **Reopen Sentinel and write the scanner** - Reopen Sentinel, open profile <sentinel_profile>, spot-check a few lists, then connect the SDS150 and write it from Sentinel.
+3. **Set the scanner profile** - The installer never writes profile.cfg, so check these in profile <sentinel_profile> before writing, or on the scanner after. Service Types: every one on (on the scanner, FUNCTION then ZIP/SERVICES) - with Aircraft, Business, Railroad, Other, Interop, Federal or Military off, Near Me Air, Business & GMRS and most of Rail & Marine are muted. Select Lists to Monitor: Full Database off, so the scan is the Near Me lists. WX Operation: Program SAME = King County 053033, Weather Alert = Named FIPS Code, WX Alt Priority on. Close Call: Set CC Mode = CC DND.
+4. **Reopen Sentinel and write the scanner** - Reopen Sentinel, open profile <sentinel_profile>, spot-check a few lists, then connect the SDS150 and write it from Sentinel.
 <!-- fleet:end sds150 -->
 
 <!-- fleet:begin td-h9 -->
@@ -271,8 +289,9 @@ the operator's own, explicit choice; the template does not cap any of it.
 
 1. **Export the memory file** _(automatic)_ - Export ftx1-fleet with target ftx1-file (patched onto radio-templates\ftx1-blank.FTX1).
 2. **Open the file in RT Systems** _(automatic)_ - Open <export> in the RT Systems FTX-1 programmer.
-3. **Send to the radio** - Connect the FTX-1 and send the file to the radio from RT Systems' communications menu.
-4. **Check the radio** _(confirm)_ - On the radio, confirm the last used memory matches the export (<rows> channels) and that a repeater near home keys with its tone. The M-Grp column is ticked on the Near Me channels, which Set Menu 55: MEM Group turns into the radio's one memory subset - the FTX-1 has no banks.
+3. **Read the radio first** - Connect the FTX-1, Communications > Get Data From Radio, and save it into radio-backups\ftx1\ with today's date. The programmer will not send a file until it has read the radio once, and this is the backup to return to. Then reopen <export>.
+4. **Send to the radio** - Send <export> to the radio from RT Systems' communications menu.
+5. **Check the radio** _(confirm)_ - On the radio, confirm the last used memory matches the export (<rows> channels) and that a repeater near home keys with its tone. The M-Grp column is ticked on the Near Me channels, which Set Menu 55: MEM Group turns into the radio's one memory subset - the FTX-1 has no banks.
 <!-- fleet:end ftx1 -->
 
 <!-- fleet:begin at-d890uv -->
@@ -294,13 +313,14 @@ the operator's own, explicit choice; the template does not cap any of it.
 1. **Export the CPS bundle** _(automatic)_ - Export at-d890uv-fleet with target atd890-cps.
 2. **Start the CPS** _(automatic)_ - Start the D890UV CPS.
 3. **Open the codeplug** - File > Open <rdt_base> to keep your Optional Settings, or File > New for a first build. Model > Model Information must match the radio's frequency range.
-4. **Set the NXDN unit ID** - NX Setting > Unit ID(Own) = 16240, your radioid.net NXDN ID. It is a radio-wide setting, not in the import bundle; a codeplug opened from <rdt_base> already has it.
-5. **Import the bundle** - Tool > Import > choose <lst> > Import All. A name the CPS cannot resolve means the export is stale: re-export rather than editing in place.
-6. **Import the contact list** _(optional)_ - Tool > Import > DMR Digital Contact List > choose <contacts>, then NX Digital Contact List > NXDigitalContactList.CSV in the same folder. A worldwide list takes several minutes. The NXDN table's Attr, TxForbid and Ring columns are written empty because the captured export had no NXDN contact to copy them from, so check an entry afterwards.
-7. **Restore the long scan lists** - Save the codeplug into radio-backups\at-d890uv\, then run scripts\radios\patch_atd890_scanlists.py with that .rdt and <sidecar>. The CPS's CSV importer reads only 50 scan-list members before it overflows, so the bundle ships the first 50 of each and this puts the rest back. Open the patched -full.rdt in the CPS for the next step.
-8. **Write** - Write to radio from the patched codeplug (Other Data; Digital Contact List only if one was loaded).
-9. **Read back** _(optional)_ - Read from radio, then Tool > Export > Export All into a new radio-backups\at-d890uv\<date>-readback\ folder.
-10. **Compare the read-back** _(automatic, optional)_ - Compare the read-back folder with the generated bundle, table by table.
+4. **Set the NXDN identity** - NX Setting > Unit ID(Own) and Base ID = 16240, your radioid.net NXDN ID, and Air Alias Name = WA7DAM. Radio-wide settings, not in the import bundle: check them even on a codeplug opened from <rdt_base>, since a read-back once showed them still at the factory values.
+5. **Set the Optional Settings** - Digital Function > Digital Monitor = Double Slot, CC = Any, ID = Any: without it a DMR channel opens only for talkgroups in its receive list, and most traffic here is a group that list does not name. Work Mode > MEM Zone A and Other > Priority Zone A = Near Me. Display mode = Channel Name. On the radio afterwards, Menu > Settings > Radio Set > Display > Ch. Name = CH name: on Frequency the radio runs in VFO mode, where a channel's offset and tone do not apply.
+6. **Import the bundle** - Tool > Import > choose <lst> > Import All. A name the CPS cannot resolve means the export is stale: re-export rather than editing in place.
+7. **Import the contact list** _(optional)_ - Tool > Import > DMR Digital Contact List > choose <contacts>, then NX Digital Contact List > NXDigitalContactList.CSV in the same folder. A worldwide list takes several minutes. The NXDN table's Attr, TxForbid and Ring columns are written empty because the captured export had no NXDN contact to copy them from, so check an entry afterwards.
+8. **Restore the long scan lists** - Save the codeplug into radio-backups\at-d890uv\, then run scripts\radios\patch_atd890_scanlists.py with that .rdt and <sidecar>. The CPS's CSV importer reads only 50 scan-list members before it overflows, so the bundle ships the first 50 of each and this puts the rest back. Open the patched -full.rdt in the CPS for the next step.
+9. **Write** - Write to radio from the patched codeplug (Other Data; Digital Contact List only if one was loaded).
+10. **Read back** _(optional)_ - Read from radio, then Tool > Export > Export All into a new radio-backups\at-d890uv\<date>-readback\ folder.
+11. **Compare the read-back** _(automatic, optional)_ - Compare the read-back folder with the generated bundle, table by table.
 <!-- fleet:end at-d890uv -->
 
 <!-- fleet:begin id-52a -->

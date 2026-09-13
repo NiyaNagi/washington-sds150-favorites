@@ -96,6 +96,16 @@ SDS150 = FleetRadio(
             kind=STEP_AUTO, artifacts=("backup",), verify=True,
         ),
         StepSpec(
+            "scanner-profile", "Set the scanner profile",
+            "The installer never writes profile.cfg, so check these in profile {sentinel_profile} "
+            "before writing, or on the scanner after. Service Types: every one on (on the scanner, "
+            "FUNCTION then ZIP/SERVICES) - with Aircraft, Business, Railroad, Other, Interop, "
+            "Federal or Military off, Near Me Air, Business & GMRS and most of Rail & Marine are "
+            "muted. Select Lists to Monitor: Full Database off, so the scan is the Near Me lists. "
+            "WX Operation: Program SAME = King County 053033, Weather Alert = Named FIPS Code, "
+            "WX Alt Priority on. Close Call: Set CC Mode = CC DND.",
+        ),
+        StepSpec(
             "reopen-sentinel", "Reopen Sentinel and write the scanner",
             "Reopen Sentinel, open profile {sentinel_profile}, spot-check a few lists, then connect "
             "the SDS150 and write it from Sentinel.",
@@ -253,8 +263,14 @@ FTX1 = FleetRadio(
             kind=STEP_AUTO,
         ),
         StepSpec(
+            "read-radio", "Read the radio first",
+            "Connect the FTX-1, Communications > Get Data From Radio, and save it into "
+            "radio-backups\\ftx1\\ with today's date. The programmer will not send a file until it "
+            "has read the radio once, and this is the backup to return to. Then reopen {export}.",
+        ),
+        StepSpec(
             "send-to-radio", "Send to the radio",
-            "Connect the FTX-1 and send the file to the radio from RT Systems' communications menu.",
+            "Send {export} to the radio from RT Systems' communications menu.",
         ),
         StepSpec(
             "confirm-count", "Check the radio",
@@ -310,10 +326,20 @@ AT_D890UV = FleetRadio(
             "Model > Model Information must match the radio's frequency range.",
         ),
         StepSpec(
-            "set-nxdn-id", "Set the NXDN unit ID",
-            f"NX Setting > Unit ID(Own) = {station.NXDN_ID}, your radioid.net NXDN ID. It is a "
-            "radio-wide setting, not in the import bundle; a codeplug opened from {rdt_base} "
-            "already has it.",
+            "set-nxdn-id", "Set the NXDN identity",
+            f"NX Setting > Unit ID(Own) and Base ID = {station.NXDN_ID}, your radioid.net NXDN ID, "
+            f"and Air Alias Name = {station.CALLSIGN}. Radio-wide settings, not in the import "
+            "bundle: check them even on a codeplug opened from {rdt_base}, since a read-back "
+            "once showed them still at the factory values.",
+        ),
+        StepSpec(
+            "optional-settings", "Set the Optional Settings",
+            "Digital Function > Digital Monitor = Double Slot, CC = Any, ID = Any: without it a "
+            "DMR channel opens only for talkgroups in its receive list, and most traffic here is "
+            "a group that list does not name. Work Mode > MEM Zone A and Other > Priority Zone A "
+            "= Near Me. Display mode = Channel Name. On the radio afterwards, Menu > Settings > "
+            "Radio Set > Display > Ch. Name = CH name: on Frequency the radio runs in VFO mode, "
+            "where a channel's offset and tone do not apply.",
         ),
         StepSpec(
             "import-all", "Import the bundle",

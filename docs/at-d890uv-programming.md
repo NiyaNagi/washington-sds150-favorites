@@ -123,7 +123,7 @@ and the `Comm Digital` channels simply stay quiet.
 | File | Contents |
 |---|---|
 | `Channel.CSV` | 77-column channel table: every VHF/UHF memory, ordered by zone. Analog rows carry the transmit CTCSS/DCS; DMR rows carry contact, colour code and timeslot; receive-only rows have `PTT Prohibit = On`. |
-| `DMRZone.CSV` | The first scan group's zone (`Near Me`, as copies), then one zone per plan bank, split into `Name 01`, `Name 02` at 100 scanned members; never-scanned channels in `Not Scanned 01..` at up to 160. |
+| `DMRZone.CSV` | The first scan group's zone (`Near Me`, as copies), then one zone per plan bank, split into `Name 01`, `Name 02` at 100 scanned members; beyond-radius fill in `Far Ham Analog`, `Far Ham DMR`, `Far Public Svc`, `Far Other`; blocks that never scan (`Weather`, `Data`) with no list. |
 | `ScanList.CSV` | Exactly one scan list per scanned zone, same name, same members. No list exists without a zone. |
 | `DMRTalkGroups.CSV` | Every talkgroup any channel references, with a `Simplex 99` default. |
 | `DMRReceiveGroupCallList.CSV` | One receive group per network (`PNWDigital RX`, `SeattleDMR RX`, ...) so a DMR channel hears every talkgroup carried on its network. |
@@ -205,8 +205,9 @@ So the plan is built at the radio's 100, `ScanList.CSV` carries the first
 :data:`~wasds150.export.atd890_cps.CSV_SCANLIST_MAX` of each list, and
 `scanlists.json` beside it records the full membership for
 `scripts/radios/patch_atd890_scanlists.py` to restore afterwards - see
-[Longer scan lists](#longer-scan-lists). The fleet plan is 56 scan lists and
-29 zones, against the 250 of each the manual allows.
+[Longer scan lists](#longer-scan-lists). The fleet plan is 31 zones and 29 scan
+lists (every scanned zone is its list), against the 250 of each the manual
+allows; 14 of the lists are over 50 and need the patch.
 
 This is the failure that looks like something else. `Channel.CSV` is ~1,500
 rows and fills nearly the whole progress bar, so the scan-list table is always
@@ -296,13 +297,13 @@ project does not generate. Set them once; they persist in your saved `.rdt`.
 | Digital Function | Digital Monitor CC / ID | **Any / Any** | Promiscuous receive - required for scanner use |
 | Digital Function | Dig Protocol / Reset Digi. Protocol | DMR / DMR | Default protocol |
 | Work Mode | Sub-Channel Mode | **On** | Dual watch |
-| Work Mode | VFO/MEM A, MEM Zone A | MEM, `Ham 2m` | Main receiver on the scan lists |
+| Work Mode | VFO/MEM A, MEM Zone A | MEM, `Near Me` | Main receiver starts on the list worth leaving running |
 | Work Mode | VFO/MEM B | MEM | |
 | AM/FM | AM/FM Function | **AM(B)** | B receiver becomes the air-band receiver |
 | AM/FM | AM Work Zone | `Air Civil 01` | Start zone for the AM scan |
 | AM/FM | AM Squelch Level | 2 (adjust) | |
 | Other | Scan Mode (VFO scan type) | CO | Resume 2 s after the carrier drops |
-| Other | Priority Zone A | `Ham 2m` | "Prior Zone" side key jumps back to it |
+| Other | Priority Zone A | `Near Me` | "Prior Zone" side key jumps back to it |
 | Other | TOT | 180 s | |
 | Key Functions | PF1 short / long | Scan / Nuisance Delete | |
 | Key Functions | PF2 short / long | Sub CH Switch / Main Channel Switch | Toggle dual watch, swap A/B |
