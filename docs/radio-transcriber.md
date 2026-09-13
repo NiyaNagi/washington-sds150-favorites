@@ -24,7 +24,7 @@ lifecycle. That work has not started, and the transcriber does not currently dep
 
 ## What stayed here
 
-The Kenwood TH-D75A reference material in `thd75a programming details/` stays, including
+The Kenwood TH-D75A reference material in `radio-data/th-d75/reference/` stays, including
 `TH_D75_Commands.pdf`. The transcriber needs the *facts* in that document, which are recorded
 in its own `docs/reference/th-d75a-cat.md` with attribution — but the PDF is a third party's
 copyrighted work and the new repository is public, so it was not redistributed.

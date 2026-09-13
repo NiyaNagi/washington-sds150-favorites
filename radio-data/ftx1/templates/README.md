@@ -66,8 +66,8 @@ write if any text survives in the memory area.
 
 ```bash
 python scripts/radios/make_ftx1_template.py \
-    --source radio-templates/ftx1-factory-default.FTX1 \
-    --out radio-templates/ftx1-blank.FTX1
+    --source radio-data/ftx1/templates/ftx1-factory-default.FTX1 \
+    --out radio-data/ftx1/templates/ftx1-blank.FTX1
 ```
 
 Any file saved by the RT Systems programmer works as a source, but the factory

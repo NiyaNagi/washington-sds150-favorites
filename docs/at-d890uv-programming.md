@@ -20,7 +20,7 @@ memory and FM station matched. Bundle SHA-256
 
 | Item | Notes |
 |---|---|
-| Anytone AT-D890UV | Band mode **00014**: Rx and Tx 136-174, 220-225 and 400-520. Check **Menu > Settings > Device Info > Frequency Range**, or the CPS title bar. The plan assumes it - a radio still in the factory US mode 00007 (Rx 136-174 / 400-480, Tx 144-148 / 420-450) has no 220 MHz and cannot key GMRS. Mode 14 is not in the CPS's Model Information dropdown; set it with the AT Options utility, whose band descriptor and password are in `radio-tools/anytone-d890uv/options/AT_BANDS.txt`. |
+| Anytone AT-D890UV | Band mode **00014**: Rx and Tx 136-174, 220-225 and 400-520. Check **Menu > Settings > Device Info > Frequency Range**, or the CPS title bar. The plan assumes it - a radio still in the factory US mode 00007 (Rx 136-174 / 400-480, Tx 144-148 / 420-450) has no 220 MHz and cannot key GMRS. Mode 14 is not in the CPS's Model Information dropdown; set it with the AT Options utility, whose band descriptor and password are in `radio-data/at-d890uv/firmware/options/AT_BANDS.txt`. |
 | Programming cable | The USB-C to USB-A cable in the box. Windows needs the virtual COM driver from the firmware package (`official-1.05/A READ FIRST - Update Instructions/Virtual Driver Installation.pdf`). |
 | D890UV CPS **1.05** | Installed by this project into `C:\D890UV\D890UV.exe` (Inno Setup, silent). CPS and firmware versions must match exactly. |
 | Firmware **1.05** (2026-05-20) | Official DMR build. Its change log says "Modify the scan groups 50 channels limit to 100 channels limit", but that is the **radio**: the CPS's CSV importer still refuses a scan list of 51, so the export ships 50 of each and the .rdt patcher restores the rest. See [Scan lists hold 100, and the importer only reads 50](#scan-lists-hold-100-and-the-importer-only-reads-50). |
@@ -29,8 +29,8 @@ memory and FM station matched. Bundle SHA-256
 | NXDN ID | `16240`, registered at <https://radioid.net>. Set once in the CPS at NX Setting > Unit ID(Own); the fleet checklist has a step for it (`src/wasds150/station.py`). |
 
 All packages, change logs and manuals are fetched by
-`radio-tools/anytone-d890uv/download.ps1` into the git-ignored
-`radio-tools/anytone-d890uv/` folder; `SHA256SUMS.txt` there records what was
+`radio-data/at-d890uv/firmware/download.ps1` into the git-ignored
+`radio-data/at-d890uv/firmware/` folder; `SHA256SUMS.txt` there records what was
 downloaded on 2026-09-10.
 
 ---
@@ -40,19 +40,19 @@ downloaded on 2026-09-10.
 ```powershell
 # 1. Refresh the catalog (RadioReference export + DMR network files), then export
 .\.venv\Scripts\wasds150.exe --home .wasds150-home sources update --only radioreference_premium,seattledmr --apply
-.\.venv\Scripts\wasds150.exe --home .wasds150-home plan export atd890-scan --target atd890-cps --out wasds150-output\radios
+.\.venv\Scripts\wasds150.exe --home .wasds150-home plan export atd890-scan --target atd890-cps
 
 # 2. In the CPS (C:\D890UV\D890UV.exe): File > New, then Tool > Import > choose
-#    wasds150-output\radios\atd890-scan\atd890-scan.LST > Import All
+#    radio-data\at-d890uv\exports\atd890-scan\atd890-scan.LST > Import All
 # 3. Set the handful of Optional Settings listed below, then write.
 ```
 
-The full bundle lands in `wasds150-output/radios/atd890-scan/` (git-ignored
+The full bundle lands in `radio-data/at-d890uv/exports/atd890-scan/` (git-ignored
 because it contains RadioReference rows). A redistributable copy without those
-rows is committed under `radio-configs/atd890-scan/`:
+rows is committed under `radio-data/shared/legacy-plans/atd890-scan/`:
 
 ```powershell
-.\.venv\Scripts\wasds150.exe --home .wasds150-home plan export atd890-scan --target atd890-cps --out radio-configs --exclude-licensed
+.\.venv\Scripts\wasds150.exe --home .wasds150-home plan export atd890-scan --target atd890-cps --out radio-data/shared/legacy-plans --exclude-licensed
 ```
 
 ---
@@ -60,7 +60,7 @@ rows is committed under `radio-configs/atd890-scan/`:
 ## Firmware: official 1.05, then the NXDN overlay
 
 Back up first: **Read from radio** in the CPS, save the `.rdt`, and Tool >
-Export > Export All into `radio-backups/at-d890uv/<date>/`.
+Export > Export All into `radio-data/at-d890uv/readbacks/<date>-export-all/`.
 
 1. Turn GPS and APRS off in the radio menu (the update instructions warn the
    radio can key up when connected otherwise).
@@ -222,9 +222,9 @@ After importing the bundle and saving the codeplug:
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\radios\patch_atd890_scanlists.py `
-    --rdt radio-backups\at-d890uv\<saved>.rdt `
-    --sidecar wasds150-output\radios\at-d890uv-fleet\scanlists.json `
-    --output radio-backups\at-d890uv\<saved>-full.rdt
+    --rdt radio-data\at-d890uv\backups\<saved>.rdt `
+    --sidecar radio-data\at-d890uv\exports\at-d890uv-fleet\scanlists.json `
+    --output radio-data\at-d890uv\backups\<saved>-full.rdt
 ```
 
 Open the `-full.rdt` in the CPS and write that. The `.rdt` is a plain
@@ -278,7 +278,7 @@ halfway through, which is where it was seen.
 The full table is :data:`LST_INDEX` in `src/wasds150/export/atd890_cps.py`, all
 38 slots, captured from a `Tool > Export > Export All` of CPS 1.05 on firmware
 1.05 + NX_DMR and kept verbatim at
-`radio-backups/at-d890uv/20260911-export-all-fw105-nxdn/export.LST`. Slots are
+`radio-data/at-d890uv/readbacks/2026-09-11-export-all-fw105-nxdn/export.LST`. Slots are
 stable across firmware: the six NX tables keep their numbers (23-26, 31, 34)
 whether or not the NXDN overlay is flashed, and the Import dialog simply hides
 the rows it cannot use. An export naming a file the table does not know fails
@@ -313,7 +313,7 @@ project does not generate. Set them once; they persist in your saved `.rdt`.
 | Power On | Power-on Display Char | `WA7DAM` | |
 | GPS/Ranging | Time Zone | UTC-8 (UTC-7 in summer) | |
 
-Save the codeplug (`radio-backups/at-d890uv/atd890-scan-<date>.rdt`), then
+Save the codeplug (`radio-data/at-d890uv/backups/atd890-scan-<date>.rdt`), then
 **Write to radio** (Other Data; Digital Contact List only if you loaded one).
 
 ### Capture the settings once instead
@@ -322,15 +322,15 @@ Setting the table above by hand after every fresh import is error-prone.
 Capture it once and every export carries it:
 
 1. In the CPS: File > New, then Tool > Export > Export All into
-   `radio-backups/at-d890uv/fixtures/fresh/`.
+   `radio-data/at-d890uv/readbacks/settings-fresh/`.
 2. Apply the settings table above, then Export All again into
-   `radio-backups/at-d890uv/fixtures/configured/`.
+   `radio-data/at-d890uv/readbacks/settings-configured/`.
 3. Build the template:
 
    ```powershell
    .\.venv\Scripts\python.exe scripts\radios\build_atd890_settings_template.py `
-       --fresh radio-backups\at-d890uv\fixtures\fresh `
-       --configured radio-backups\at-d890uv\fixtures\configured
+       --fresh radio-data\at-d890uv\readbacks\settings-fresh `
+       --configured radio-data\at-d890uv\readbacks\settings-configured
    ```
 
 This writes `src/wasds150/data/atd890_settings_template.json` - the configured
@@ -420,12 +420,12 @@ hand, and this is worth solving properly.
 ### Read back and verify
 
 After writing: Read from radio, Tool > Export > Export All into
-`radio-backups/at-d890uv/<date>-readback/`, then compare it with the bundle:
+`radio-data/at-d890uv/readbacks/<date>-readback/`, then compare it with the bundle:
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\radios\diff_atd890_export.py `
-    --bundle wasds150-output\radios\at-d890uv-fleet `
-    --readback radio-backups\at-d890uv\<date>-readback
+    --bundle radio-data\at-d890uv\exports\at-d890uv-fleet `
+    --readback radio-data\at-d890uv\readbacks\<date>-readback
 ```
 
 Rows are matched by name (channel, zone, scan list, talkgroup ID), `No.` is

@@ -36,7 +36,7 @@ from wasds150.radios.bandplan import BANDS_BY_ID
 from wasds150.radios.scan_ranges import ranges_by_priority
 
 #: Repository-relative location of the structural template.
-TEMPLATE_RELPATH = Path("radio-templates") / "ftx1-blank.FTX1"
+TEMPLATE_RELPATH = Path("radio-data") / "ftx1" / "templates" / "ftx1-blank.FTX1"
 
 #: The FTX-1 shows twelve characters of a memory tag.
 NAME_LEN = 12

@@ -68,7 +68,7 @@ From the repository root in Windows PowerShell:
 
 .\.venv\Scripts\wasds150.exe --home .wasds150-home preview
 .\.venv\Scripts\wasds150.exe --home .wasds150-home generate `
-  --out wasds150-output
+  --out radio-data/sds150/exports/generate
 ```
 
 Always review preview coverage and conflicts before `--apply`. Do not use
@@ -120,7 +120,7 @@ have both been checked.
 
 1. Close any scanner write operation and back up both the current Sentinel
    profile and the scanner microSD card.
-2. Extract `wasds150-output\sentinel-import-pack.zip` to a temporary folder.
+2. Extract `radio-data\sds150\exports\generate\sentinel-import-pack.zip` to a temporary folder.
 3. In Sentinel, create or open a disposable test profile.
 4. For each file in the extracted `hpe` directory, use Sentinel's
    **File > Import from hpe file (Favorites List)** command. Sentinel imports

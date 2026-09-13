@@ -206,7 +206,7 @@ AT_D890UV = RadioProfile(
     id="at-d890uv",
     vendor="Anytone",
     model="AT-D890UV",
-    # Band mode 00014 (radio-tools/anytone-d890uv/options/AT_BANDS.txt):
+    # Band mode 00014 (radio-data/at-d890uv/firmware/options/AT_BANDS.txt):
     # Rx and Tx 136-174, 220-225 and 400-520. Mode 00007, the factory US
     # amateur mode, receives only 400-480 and has no 220 MHz at all, so a
     # radio still in it drops the 1.25m block rather than mis-programming it.

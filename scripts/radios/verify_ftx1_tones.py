@@ -46,7 +46,7 @@ def wwara_tones(home: pathlib.Path):
 
 def main(argv=None) -> int:
     path = pathlib.Path(argv[0]) if argv else pathlib.Path(
-        r"Z:\Texts\HAM\Radio Programming\FTX1 WA.FTX1"
+        "radio-data/ftx1/source-files/ftx1-wa-radio-read-2026-08-19.FTX1"
     )
     home = pathlib.Path(".wasds150-home")
 

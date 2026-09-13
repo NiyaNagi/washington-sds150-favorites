@@ -69,7 +69,7 @@ def test_committed_radio_configs_cite_no_repeaterbook_data_page():
     needles = (b"repeaterbook.com/repeaters/", b"repeaterbook.com/gmrs/")
     offenders = [
         str(path.relative_to(REPO_ROOT))
-        for path in sorted((REPO_ROOT / "radio-configs").rglob("*"))
+        for path in sorted((REPO_ROOT / "radio-data" / "shared" / "legacy-plans").rglob("*"))
         if path.is_file() and any(needle in path.read_bytes().lower() for needle in needles)
     ]
     assert offenders == []

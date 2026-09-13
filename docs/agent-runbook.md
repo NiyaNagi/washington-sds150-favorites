@@ -44,7 +44,7 @@ are present.
 ## Regenerate a radio programming file
 
 ```powershell
-.venv\Scripts\wasds150.exe --home .wasds150-home plan export h9-ozette --out wasds150-output/radios
+.venv\Scripts\wasds150.exe --home .wasds150-home plan export h9-ozette
 ```
 
 Writes `h9-ozette.csv` (the programming file) and `h9-ozette-report.md` (a
@@ -71,11 +71,11 @@ Full detail and troubleshooting: [TD-H9 programming](td-h9-programming.md).
 
 # 2. Dry run — stages the CSV, writes nothing
 .venv-chirp\Scripts\python.exe scripts\radios\program_tdh9.py `
-    --port COM7 --label radio-a --csv wasds150-output\radios\h9-ozette.csv
+    --port COM7 --label radio-a --csv radio-data\td-h9\exports\h9-ozette.csv
 
 # 3. Program for real
 .venv-chirp\Scripts\python.exe scripts\radios\program_tdh9.py `
-    --port COM7 --label radio-a --csv wasds150-output\radios\h9-ozette.csv --execute
+    --port COM7 --label radio-a --csv radio-data\td-h9\exports\h9-ozette.csv --execute
 ```
 
 **Preconditions:** radio powered **on**, two-pin plug fully seated, cable in
@@ -98,7 +98,7 @@ from program_tdh9 import load_tdh9_module
 load_tdh9_module()
 from chirp import directory
 cls = directory.DRV_TO_RADIO['TIDRADIO_TD-H9']
-r = cls('radio-backups/radio-a-verify-TIMESTAMP.img')
+r = cls('radio-data/td-h9/backups/radio-a-verify-TIMESTAMP.img')
 mem = {}
 for i in range(1, 200):
     m = r.get_memory(i)
@@ -124,7 +124,7 @@ downgraded to Low, and a write that acknowledged nothing. See
 .venv\Scripts\wasds150.exe --home .wasds150-home sources update --apply    # commit
 
 # Re-resolve and rewrite the programming file
-.venv\Scripts\wasds150.exe --home .wasds150-home plan export h9-ozette --out wasds150-output/radios
+.venv\Scripts\wasds150.exe --home .wasds150-home plan export h9-ozette
 ```
 
 Then re-flash. Plans resolve against the *profile-filtered* catalog, so
@@ -170,7 +170,7 @@ The server binds `127.0.0.1` only and rejects unauthenticated requests with
 
 ```json
 { "port": "COM7", "label": "radio-a",
-  "csv": "wasds150-output/radios/h9-ozette.csv",
+  "csv": "radio-data/td-h9/exports/h9-ozette.csv",
   "execute": false, "backup_only": false }
 ```
 
@@ -247,12 +247,12 @@ token into a command line, file in this repository, or the UI.
 .\.venv\Scripts\wasds150.exe --home .wasds150-home repeaterbook refresh --regions WA --center 47.633,-121.966 --radius-mi 60 --bands 2m,70cm --radio th-d75
 .\.venv\Scripts\wasds150.exe --home .wasds150-home repeaterbook review --report md
 .\.venv\Scripts\wasds150.exe --home .wasds150-home repeaterbook apply
-.\.venv\Scripts\wasds150.exe --home .wasds150-home plan export thd75-ames-lake --target thd75-file --out wasds150-output/radios --with-repeaterbook
+.\.venv\Scripts\wasds150.exe --home .wasds150-home plan export thd75-ames-lake --target thd75-file --with-repeaterbook
 .\.venv\Scripts\wasds150.exe --home .wasds150-home repeaterbook delete-all --yes
 ```
 
 `--with-repeaterbook` never combines with `--exclude-licensed`, and its output
-must never be written to `radio-configs/`: `tests/test_no_repeaterbook_data.py`
+must never be written to `radio-data/shared/legacy-plans/`: `tests/test_no_repeaterbook_data.py`
 fails if a committed radio file cites a RepeaterBook data page. Every limit is
 in `src/wasds150/sources/repeaterbook/policy.py`; do not loosen one without
 RepeaterBook's written approval.

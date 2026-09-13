@@ -2,7 +2,7 @@
 
 The two protocols do **not** share a format, which is why they get separate
 headers here. Both were taken from a D890UV CPS 1.05 ``Export All``
-(``radio-backups/at-d890uv/20260911-export-all-fw105-nxdn/``):
+(``radio-data/at-d890uv/readbacks/2026-09-11-export-all-fw105-nxdn/``):
 
 * DMR, ``DMRDigitalContactList.CSV`` - a ``No.`` column, one ``Name``, and a
   ``Call Type``/``Call Alert`` pair, the same shape as the D878UV family.

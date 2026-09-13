@@ -7,8 +7,8 @@ offset and its encoding fall straight out of the comparison.
 
 Usage::
 
-    python scripts/radios/decode_ftx1_probe.py "Z:/path/ftx1-modes.FTX1"
-    python scripts/radios/decode_ftx1_probe.py "Z:/path/ftx1-fields.FTX1"
+    python scripts/radios/decode_ftx1_probe.py radio-data/ftx1/probes/generated/ftx1-modes.FTX1
+    python scripts/radios/decode_ftx1_probe.py radio-data/ftx1/probes/generated/ftx1-fields.FTX1
 """
 from __future__ import annotations
 

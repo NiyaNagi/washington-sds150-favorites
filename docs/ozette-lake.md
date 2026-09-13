@@ -111,7 +111,7 @@ tone added on site.
 ```
 wasds150 --home .wasds150-home sources update --only wwara --apply
 wasds150 --home .wasds150-home plan show h9-ozette
-wasds150 --home .wasds150-home plan export h9-ozette --out wasds150-output/radios
+wasds150 --home .wasds150-home plan export h9-ozette
 ```
 
 Then, in the CHIRP virtual environment:
@@ -120,7 +120,7 @@ Then, in the CHIRP virtual environment:
 python scripts/radios/fetch_chirp_tdh9_module.py
 python scripts/radios/probe_tdh9.py --port COM3
 python scripts/radios/program_tdh9.py --port COM3 --label radio-a --backup-only
-python scripts/radios/program_tdh9.py --port COM3 --csv wasds150-output/radios/h9-ozette.csv --execute
+python scripts/radios/program_tdh9.py --port COM7 --csv radio-data/td-h9/exports/h9-ozette.csv --execute
 ```
 
 The TD-H9 is not supported by any released CHIRP build; support exists only as

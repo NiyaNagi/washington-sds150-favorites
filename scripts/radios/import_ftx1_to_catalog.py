@@ -29,7 +29,7 @@ from wasds150.generate.pipeline import apply_profile
 from wasds150.models.catalog import Catalog
 from wasds150.plan.resolve import iter_catalog_channels
 
-DEFAULT_SOURCE = r"Z:\Texts\HAM\Radio Programming\FTX1 WA.FTX1"
+DEFAULT_SOURCE = "radio-data/ftx1/source-files/ftx1-wa-radio-read-2026-08-19.FTX1"
 DEFAULT_OUT = "src/wasds150/catalog/ftx1_import.py"
 
 CTCSS_TONES = [

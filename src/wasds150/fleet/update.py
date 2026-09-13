@@ -61,7 +61,8 @@ class FleetUpdateSpec:
     #: inputs are still asked for).
     skip_manual: bool = False
     launch_apps: bool = True
-    out_dir: str = DEFAULT_OUT_DIR
+    #: Empty: each radio's own ``radio-data/<radio>/exports`` (:mod:`wasds150.paths`).
+    out_dir: str = ""
     copy_to: Dict[str, str] = field(default_factory=dict)
     #: ``{radio_id: {input_id: value}}`` on top of the saved fleet settings.
     inputs: Dict[str, Dict[str, str]] = field(default_factory=dict)
@@ -565,7 +566,7 @@ def _update_radio(ctx: AppContext, spec: FleetUpdateSpec, job: JobContext, hooks
     else:
         with job.step(export_id, f"{label}: export") as handle:
             copy_to = spec.copy_to.get(radio.radio_id) or values.get("copy_to") or ""
-            export = export_radio(ctx, radio.radio_id, out_dir=Path(spec.out_dir),
+            export = export_radio(ctx, radio.radio_id, out_dir=Path(spec.out_dir) if spec.out_dir else None,
                                   copy_to=Path(copy_to) if copy_to else None,
                                   include_licensed=spec.include_licensed)
             handle.artifact("export", export.path)

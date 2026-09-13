@@ -33,9 +33,9 @@ that refers to a scan list by index - every channel does - is disturbed.
 Usage::
 
     python scripts/radios/patch_atd890_scanlists.py \\
-        --rdt radio-backups/at-d890uv/saved.rdt \\
-        --sidecar wasds150-output/radios/at-d890uv-fleet/scanlists.json \\
-        --output radio-backups/at-d890uv/saved-patched.rdt
+        --rdt radio-data/at-d890uv/backups/at-d890uv-fleet-YYYY-MM-DD.rdt \\
+        --sidecar radio-data/at-d890uv/exports/at-d890uv-fleet/scanlists.json \\
+        --output radio-data/at-d890uv/backups/at-d890uv-fleet-YYYY-MM-DD-full.rdt
 """
 from __future__ import annotations
 

@@ -20,12 +20,14 @@ from wasds150.export.ftx1_file import (
     Ftx1Record,
 )
 
-SOURCE = pathlib.Path(r"Z:\Texts\HAM\Radio Programming\FTX1 WA.FTX1")
+REPO = pathlib.Path(__file__).resolve().parents[1]
+#: The operator's own FTX-1 read, saved from the RT Systems programmer.
+SOURCE = REPO / "radio-data" / "ftx1" / "source-files" / "ftx1-wa-radio-read-2026-08-19.FTX1"
 
 #: The probe that decoded M-Grp: twelve identical memories, six with the box
 #: ticked in the programmer, and its unedited reference re-saved beside it.
-MGRP_PROBE = pathlib.Path(r"Z:\Texts\HAM\Radio Programming\ftx1-banks-mgrp.FTX1")
-MGRP_REFERENCE = pathlib.Path(r"Z:\Texts\HAM\Radio Programming\ftx1-banks-reference.FTX1")
+MGRP_PROBE = REPO / "radio-data" / "ftx1" / "probes" / "ftx1-mgrp-probe-edited-2026-09-12.FTX1"
+MGRP_REFERENCE = REPO / "radio-data" / "ftx1" / "probes" / "ftx1-mgrp-probe-reference-2026-09-12.FTX1"
 
 pytestmark = pytest.mark.skipif(
     not SOURCE.exists(), reason="operator's FTX-1 file is not available"

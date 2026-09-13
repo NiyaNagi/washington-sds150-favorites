@@ -31,6 +31,8 @@ is [Updating every radio](docs/fleet-updates.md); what still needs doing is in
 
 ## Files
 
+- [Step-by-step radio guides](docs/guides/README.md) - one page per radio (SDS150, TD-H9, TH-D75A, FTX-1, AT-D890UV, ID-52A): what to open, what to click, and where every file is saved.
+- [radio-data/](radio-data/README.md) - the single folder for every radio's exports, backups, read-backs, reference files and firmware, one subfolder per radio.
 - [Updating every radio](docs/fleet-updates.md) - the one-step update (`Update Radios.cmd`), first-time settings, what each radio gets, transmit policy and every radio's checklist.
 - [Open items](docs/open-items.md) - what still needs a decision, a radio on the bench, or an API key.
 - [Changelog](CHANGELOG.md) - release history and user-visible changes.
@@ -91,7 +93,7 @@ own AM receiver for dual watch, and NOAA/FM broadcast programmed but never
 scanned. DMR channels carry the PNWDigital and SeattleDMR talkgroup layout,
 one channel per repeater and talkgroup. With the user's own RadioReference
 export imported (`wasds150 sources update`), every conventional channel the
-county lists joins the same zones; the committed copy under `radio-configs/`
+county lists joins the same zones; the committed copy under `radio-data/shared/legacy-plans/`
 is built without that licensed data.
 
 Each radio's current configuration is inspectable in its **own shape**, because
@@ -113,10 +115,10 @@ wasds150 radios list               # capability profiles
 wasds150 plan list                 # registered channel plans
 wasds150 plan show h9-ozette       # resolved memory map, drops, warnings
 wasds150 plan show thd75-ames-lake # 50-mile + wideband memory map
-wasds150 plan export ftx1-wa --target ftx1-file --out radio-configs
-wasds150 plan export ftx1-local --target ftx1-file --out radio-configs
-wasds150 plan export atd890-scan --target atd890-cps --out wasds150-output/radios   # Anytone CPS bundle
-wasds150 plan export thd75-ames-lake --target thd75-file --out radio-configs
+wasds150 plan export ftx1-wa --target ftx1-file --out radio-data/shared/legacy-plans
+wasds150 plan export ftx1-local --target ftx1-file --out radio-data/shared/legacy-plans
+wasds150 plan export atd890-scan --target atd890-cps   # Anytone CPS bundle
+wasds150 plan export thd75-ames-lake --target thd75-file --out radio-data/shared/legacy-plans
 ```
 
 The same thing is in the **Radios** tab of `wasds150 ui`: pick a radio from the
@@ -124,7 +126,7 @@ dropdown to see what is loaded, save a snapshot, ask what changed since the last
 one, export a programming file, or program a connected TD-H9.
 
 Redistributable ready-made outputs and the TH-D75 report are committed in
-[`radio-configs/`](radio-configs/). Native `.d75` files are deliberately
+[`radio-data/shared/legacy-plans/`](radio-data/shared/legacy-plans/). Native `.d75` files are deliberately
 ignored because they preserve operator settings from the attached radio.
 Exporting writes the private working file there; pass `--copy-to` to also drop
 it in the folder the programmer loads from.
@@ -140,7 +142,7 @@ special memories and menu settings remain byte-identical to the backup.
 CTCSS, repeater shift and scan-skip are each written from the catalog, and each
 was established by writing a probe file with one memory per setting, changing
 that single column in the vendor programmer, and diffing the result. The field
-map and the method are in [`radio-templates/`](radio-templates/README.md); the
+map and the method are in [`radio-data/ftx1/templates/`](radio-data/ftx1/templates/README.md); the
 probe tooling is `scripts/radios/make_ftx1_probe.py`. Columns the radio derives
 rather than stores — Width, AGC, IPO, the Narrow flags — are inherited from the
 vendor's own per-band defaults instead of invented.
@@ -199,6 +201,12 @@ Commit only reusable source code, public intent/location metadata, synthetic
 fixtures, tests, and documentation. Before every push, verify that `git status`
 contains no `hpdb.cfg`, `s_*.hpd`, local catalog, generated HPE/HPD, Sentinel
 workspace, scanner backup, or preview JSON artifacts.
+
+Radio files live in [`radio-data/`](radio-data/README.md), one folder per
+radio. `.gitignore` ignores everything there except the READMEs, the FTX-1
+templates, the TH-D75A reference material, the legacy plans and the Anytone
+firmware download script. Backups, read-backs, exports, contact lists and
+licence PDFs stay local.
 
 ## Install and run
 

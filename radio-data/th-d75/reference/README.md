@@ -9,7 +9,7 @@ whether it is worth anything to this project. Verified by reading each file on
 
 | File | What it is | Useful? |
 | --- | --- | --- |
-| `KWD_20240116_E.tsv` | Kenwood worldwide D-STAR repeater list, 1457 rows | **Yes — high.** Upstream source of `radio-backups/th-d75/dstar-within-50.tsv` |
+| `KWD_20240116_E.tsv` | Kenwood worldwide D-STAR repeater list, 1457 rows | **Yes — high.** Upstream source of `radio-data/th-d75/reference/dstar/dstar-within-50mi.tsv` |
 | `Satellite_D75A.d75` | 83 Doppler-split satellite memories, slots 600–744, **US market** | **Yes — high.** Drop-in content for a satellite channel plan |
 | `TH_D75_Commands.pdf` | Third-party serial command reference (KI4LAX) | **Yes — high.** The only doc for CAT/serial control |
 | `TH-D75AE_IDM Operating Tips May_2024.pdf` | Kenwood's 68-page APRS/D-STAR/TNC deep dive | **Yes — medium.** Best APRS/KISS/reflector reference |
@@ -122,11 +122,11 @@ left at `NOCALL`. It does carry the full factory worldwide D-STAR repeater list
 (Japanese repeaters, `JP1YLA`, `JR1VF`, etc.) and the default group names.
 
 **Useful, narrowly.** [thd75_target.py](../src/wasds150/export/thd75_target.py)
-picks the newest `.d75` in `radio-backups/th-d75/` as its template, which means
+picks the newest `.d75` in `radio-data/th-d75/backups/` as its template, which means
 exports inherit whatever personal settings that backup carried. This file is the
 alternative: a known-clean baseline for producing a shareable `.d75` with no
 callsign, APRS identity or Bluetooth pairings in it. Worth keeping as a
-`radio-templates/thd75-factory-default.d75` companion to the FTX-1 templates
+`radio-data/th-d75/reference/images/factory-default-nocall.d75` companion to the FTX-1 templates
 that already live there.
 
 ### `ISS_D75_APRS_Default.d75` — someone else's APRS-via-ISS config
@@ -172,7 +172,7 @@ entries, 99 Japan, 89 Canada, then Europe and Australia. Washington appears
 under group `W7` — Seattle `WA7HJR B` on 444.6375, Bainbridge `W7NPC`, Bellevue
 `K7LWH`, and so on.
 
-**Useful — high, and it is already load-bearing.** `radio-backups/th-d75/dstar-within-50.tsv`
+**Useful — high, and it is already load-bearing.** `radio-data/th-d75/reference/dstar/dstar-within-50mi.tsv`
 (21 repeaters) is a filtered subset of this exact file in this exact format —
 I verified `W7NPC B` and `K7LWH B` match row-for-row. That means this TSV is the
 upstream source for the D-STAR side of your catalog, and it is the file to

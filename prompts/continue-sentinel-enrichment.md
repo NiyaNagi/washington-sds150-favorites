@@ -40,7 +40,7 @@ Work end-to-end rather than only proposing a plan:
    departments while retaining them for change detection.
 9. Apply the merge only after preview conflicts are resolved. Do not use
    --force without explaining each conflict and getting my approval.
-10. Generate wasds150-output/sentinel-import-pack.zip and all loose HPEs.
+10. Generate radio-data/sds150/exports/generate/sentinel-import-pack.zip and all loose HPEs.
 11. Run the complete test suite, artifact validation, manifest/checksum
     validation, deterministic clean-wheel generation, and inspect the final
     warning list.

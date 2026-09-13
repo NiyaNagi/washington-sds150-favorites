@@ -36,7 +36,7 @@ from pathlib import Path
 from typing import Optional
 
 MODULE_DIR = Path(".chirp-modules")
-BACKUP_DIR = Path("radio-backups")
+BACKUP_DIR = Path("radio-data") / "td-h9" / "backups"
 
 #: Pause between writing a block command and reading its reply. Needed only
 #: for counterfeit PL2303 cables, and harmless on a genuine one.

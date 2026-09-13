@@ -23,8 +23,8 @@ survives.  What ships is container structure only.
 Usage::
 
     python scripts/radios/make_ftx1_template.py \
-        --source "Z:\\path\\to\\FTX1 WA.FTX1" \
-        --out radio-templates/ftx1-blank.FTX1
+        --source radio-data/ftx1/source-files/ftx1-wa-radio-read-2026-08-19.FTX1 \
+        --out radio-data/ftx1/templates/ftx1-blank.FTX1
 """
 from __future__ import annotations
 
@@ -38,7 +38,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2] / "src"))
 
 from wasds150.export.ftx1_file import Ftx1File, Ftx1Record  # noqa: E402
 
-DEFAULT_OUT = pathlib.Path("radio-templates") / "ftx1-blank.FTX1"
+DEFAULT_OUT = pathlib.Path("radio-data") / "ftx1" / "templates" / "ftx1-blank.FTX1"
 
 #: How many records at the front of the array are user memories. Everything
 #: after this is scan limits, HOME channels and radio configuration, all of

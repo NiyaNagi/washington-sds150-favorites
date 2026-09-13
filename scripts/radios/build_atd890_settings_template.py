@@ -3,8 +3,8 @@
 Usage::
 
     python scripts/radios/build_atd890_settings_template.py \
-        --fresh radio-backups/at-d890uv/fixtures/fresh \
-        --configured radio-backups/at-d890uv/fixtures/configured
+        --fresh radio-data/at-d890uv/readbacks/settings-fresh \
+        --configured radio-data/at-d890uv/readbacks/settings-configured
 
 ``fresh`` is Export All of File > New; ``configured`` is Export All after the
 settings table in docs/at-d890uv-programming.md was applied. Writes

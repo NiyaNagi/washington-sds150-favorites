@@ -7,6 +7,23 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## Unreleased
 
+### Changed
+
+- **One folder for every radio file: `radio-data/`.** Exports, backups,
+  read-backs, probes, reference material and firmware now sit in one folder
+  per radio (`radio-data/<radio>/{exports,backups,readbacks,probes}`), plus
+  `shared/` (checklists, contacts, licences, legacy plans) and `tools/`. The
+  old folders are gone: `wasds150-output/`, `radio-backups/`,
+  `radio-configs/`, `radio-templates/`, `radio-tools/`,
+  `thd75a programming details/` and `.wasds150-home/state/sdcard-backups/`.
+  Files were renamed to `<radio>-<what>-<date>`, and the unique files from
+  the Z: drive's Radio Programming folder were copied in; Z: is unchanged.
+  `plan export`, `fleet export` and `fleet update` write to each radio's
+  `exports/` folder when `--out` is not given, and the paths live in
+  `wasds150.paths`. Exports are no longer copied to Z:. The layout is in
+  [radio-data/README.md](radio-data/README.md).
+- Step-by-step guides for all six radios in [docs/guides/](docs/guides/README.md).
+
 ### Added
 
 - **Icom ID-52A** as the sixth radio in the fleet (`id-52a`): a radio

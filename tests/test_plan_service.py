@@ -109,7 +109,7 @@ def test_export_to_dict_is_serializable(real_ctx, tmp_path):
 def test_default_out_dir_matches_cli_default():
     # The CLI advertises this path in --help; the UI builds the flash command
     # from it. If they diverge the Flash button points at a stale file.
-    assert DEFAULT_OUT_DIR == "wasds150-output/radios"
+    assert DEFAULT_OUT_DIR == "radio-data"
 
 
 def test_export_can_copy_to_a_second_directory(real_ctx, tmp_path):

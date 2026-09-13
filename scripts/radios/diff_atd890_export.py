@@ -3,8 +3,8 @@
 Usage::
 
     python scripts/radios/diff_atd890_export.py \
-        --bundle wasds150-output/radios/at-d890uv-fleet \
-        --readback radio-backups/at-d890uv/2026-09-12-readback
+        --bundle radio-data/at-d890uv/exports/at-d890uv-fleet \
+        --readback radio-data/at-d890uv/readbacks/2026-09-12-readback
 
 Exits 0 when the read-back matches (member order aside), 1 when it does not,
 2 on bad arguments. Always prints the SHA-256 of the bundle and of each file

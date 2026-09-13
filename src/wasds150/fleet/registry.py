@@ -126,7 +126,7 @@ TD_H9 = FleetRadio(
         InputSpec("com_port", "com_port", "Programming cable port", help="For example COM7."),
         InputSpec(
             "label", "text", "Backup label", required=False, default="td-h9",
-            help="Prefix for the backup images in radio-backups\\ (radio-a, radio-b, ...).",
+            help="Prefix for the backup images in radio-data\\td-h9\\backups\\ (radio-a, radio-b, ...).",
         ),
         InputSpec(
             "copy_to", "dir", "Also copy the file to", required=False,
@@ -143,7 +143,7 @@ TD_H9 = FleetRadio(
         ),
         StepSpec(
             "backup", "Back up and dry-run",
-            "Read the radio on {com_port}, save a timestamped image to radio-backups\\, and stage "
+            "Read the radio on {com_port}, save a timestamped image to radio-data\\td-h9\\backups\\, and stage "
             "{export} into it. Nothing is written to the radio.",
             kind=STEP_AUTO, artifacts=("backup", "export"),
         ),
@@ -172,7 +172,7 @@ TH_D75 = FleetRadio(
     inputs=(
         InputSpec(
             "backup_d75", "file", "Pre-change radio backup", required=False,
-            help="Defaults to the newest radio-backups\\th-d75\\*.d75; the export is built on it.",
+            help="Defaults to the newest radio-data\\th-d75\\backups\\*.d75; the export is built on it.",
         ),
         InputSpec(
             "mcp_app", "app_path", "MCP-D75 program", required=False,
@@ -186,7 +186,7 @@ TH_D75 = FleetRadio(
     steps=(
         StepSpec(
             "read-radio", "Read the radio into a fresh backup",
-            "In MCP-D75, read the radio and save it into radio-backups\\th-d75\\ with today's date. "
+            "In MCP-D75, read the radio and save it into radio-data\\th-d75\\backups\\ with today's date. "
             "The export is patched onto this exact image and the finalize step restores its "
             "settings. Never use COM3 for this radio: it is an unrelated device.",
         ),
@@ -225,7 +225,7 @@ TH_D75 = FleetRadio(
         ),
         StepSpec(
             "readback-save", "Read back for comparison",
-            "Read the radio again in MCP-D75 and save it into radio-backups\\th-d75\\ as a "
+            "Read the radio again in MCP-D75 and save it into radio-data\\th-d75\\backups\\ as a "
             "read-back, so the written image can be compared byte for byte.",
             optional=True, verify=True,
         ),
@@ -254,7 +254,7 @@ FTX1 = FleetRadio(
     steps=(
         StepSpec(
             "export", "Export the memory file",
-            "Export {plan_id} with target ftx1-file (patched onto radio-templates\\ftx1-blank.FTX1).",
+            "Export {plan_id} with target ftx1-file (patched onto radio-data\\ftx1\\templates\\ftx1-blank.FTX1).",
             kind=STEP_AUTO, artifacts=("export",),
         ),
         StepSpec(
@@ -265,7 +265,7 @@ FTX1 = FleetRadio(
         StepSpec(
             "read-radio", "Read the radio first",
             "Connect the FTX-1, Communications > Get Data From Radio, and save it into "
-            "radio-backups\\ftx1\\ with today's date. The programmer will not send a file until it "
+            "radio-data\\ftx1\\backups\\ with today's date. The programmer will not send a file until it "
             "has read the radio once, and this is the backup to return to. Then reopen {export}.",
         ),
         StepSpec(
@@ -306,7 +306,7 @@ AT_D890UV = FleetRadio(
         ),
         InputSpec(
             "contacts_to", "dir", "Also keep the contact lists in", required=False,
-            help="A standing copy of the DMR/NXDN contact lists, for example radio-configs\\contacts in the repository.",
+            help="A standing copy of the DMR/NXDN contact lists, for example radio-data\\shared\\contacts in the repository.",
         ),
     ),
     steps=(
@@ -357,7 +357,7 @@ AT_D890UV = FleetRadio(
         ),
         StepSpec(
             "patch-scanlists", "Restore the long scan lists",
-            "Save the codeplug into radio-backups\\at-d890uv\\, then run scripts\\radios\\"
+            "Save the codeplug into radio-data\\at-d890uv\\backups\\, then run scripts\\radios\\"
             "patch_atd890_scanlists.py with that .rdt and {sidecar}. The CPS's CSV importer reads "
             "only 50 scan-list members before it overflows, so the bundle ships the first 50 of "
             "each and this puts the rest back. Open the patched -full.rdt in the CPS for the next "
@@ -372,7 +372,7 @@ AT_D890UV = FleetRadio(
         StepSpec(
             "export-all-readback", "Read back",
             "Read from radio, then Tool > Export > Export All into a new "
-            "radio-backups\\at-d890uv\\<date>-readback\\ folder.",
+            "radio-data\\at-d890uv\\readbacks\\<date>-readback\\ folder.",
             optional=True, verify=True,
         ),
         StepSpec(
@@ -433,7 +433,7 @@ ID52A = FleetRadio(
         ),
         StepSpec(
             "write-radio", "Write the radio",
-            "Save the file into radio-backups\\id-52a\\, then write it to the radio.",
+            "Save the file into radio-data\\id-52a\\backups\\, then write it to the radio.",
         ),
         StepSpec(
             "confirm-count", "Check the radio",

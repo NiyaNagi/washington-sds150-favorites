@@ -85,7 +85,7 @@ modes.
 ```powershell
 .\.venv\Scripts\wasds150.exe --home .wasds150-home sources fetch wwara
 .\.venv\Scripts\wasds150.exe --home .wasds150-home sources update --only wwara --apply
-.\.venv\Scripts\wasds150.exe --home .wasds150-home generate --out wasds150-output
+.\.venv\Scripts\wasds150.exe --home .wasds150-home generate
 ```
 
 Without a WWARA update, PSHAM01 still generates the ten operator-published net

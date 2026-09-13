@@ -1243,7 +1243,8 @@ def post_plan_export(ctx: AppContext, req: RequestContext) -> Response:
     body = req.json_body() or {}
     plan_id = req.params.get("plan_id", "")
     target_id = body.get("target") or "chirp-csv"
-    out_dir = Path(body.get("out") or DEFAULT_OUT_DIR)
+    # No directory means the plan's radio's own radio-data/<radio>/exports/.
+    out_dir = Path(body["out"]) if body.get("out") else None
 
     try:
         export = export_plan(

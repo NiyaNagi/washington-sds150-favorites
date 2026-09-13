@@ -98,7 +98,7 @@ FM_HEADER = ("No.", "Frequency[MHz]", "Scan", "Name")
 #: Every table the CPS knows, and the slot number it gives that table in a
 #: ``.LST`` manifest. Captured from a ``Tool > Export > Export All`` of CPS
 #: 1.05 on firmware 1.05 + NX_DMR, kept in
-#: ``radio-backups/at-d890uv/20260911-export-all-fw105-nxdn/export.LST``.
+#: ``radio-data/at-d890uv/readbacks/2026-09-11-export-all-fw105-nxdn/export.LST``.
 #:
 #: The slot is a property of the table, not of the manifest: a manifest that
 #: lists a subset still has to give each file the number below. Numbering a

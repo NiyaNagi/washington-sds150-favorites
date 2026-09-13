@@ -480,7 +480,7 @@ def cmd_plans_export(args: argparse.Namespace) -> int:
             ctx,
             args.plan,
             target_id=args.target,
-            out_dir=Path(args.out),
+            out_dir=Path(args.out) if args.out else None,
             copy_to=Path(args.copy_to) if args.copy_to else None,
             include_licensed=not args.exclude_licensed,
             with_repeaterbook=getattr(args, "with_repeaterbook", False),
@@ -1597,7 +1597,7 @@ def cmd_fleet_export(args: argparse.Namespace) -> int:
         exports = export_fleet(
             ctx,
             radio_ids,
-            out_dir=Path(args.out),
+            out_dir=Path(args.out) if args.out else None,
             copy_to=Path(args.copy_to) if args.copy_to else None,
             include_licensed=not args.exclude_licensed,
         )
@@ -1706,7 +1706,7 @@ def cmd_fleet_update(args: argparse.Namespace) -> int:
                 execute=args.execute,
                 skip_manual=args.skip_manual,
                 launch_apps=not args.no_launch,
-                out_dir=args.out,
+                out_dir=args.out or "",
             )
             job_id = start_fleet_update(runner, ctx, spec)
     except JobBusy as exc:
@@ -1895,7 +1895,9 @@ def build_parser() -> argparse.ArgumentParser:
     p_preview.set_defaults(func=cmd_preview)
 
     p_generate = subparsers.add_parser("generate", help="Generate output bundle(s) and commit a snapshot")
-    p_generate.add_argument("--out", default="wasds150-output", help="Output directory")
+    p_generate.add_argument(
+        "--out", default="radio-data/sds150/exports/generate", help="Output directory"
+    )
     p_generate.add_argument(
         "--formats",
         default="csv,md,zip,hpe",
@@ -1958,7 +1960,9 @@ def build_parser() -> argparse.ArgumentParser:
     p_plan_export.add_argument(
         "--target", default="chirp-csv", help="Export target (see 'radios list')"
     )
-    p_plan_export.add_argument("--out", default="wasds150-output/radios", help="Output directory")
+    p_plan_export.add_argument(
+        "--out", help="Output directory (default: radio-data/<radio>/exports)"
+    )
     p_plan_export.add_argument(
         "--copy-to",
         help="Also copy the programming file here, e.g. the folder the vendor "
@@ -2047,7 +2051,9 @@ def build_parser() -> argparse.ArgumentParser:
     which = p_fleet_export.add_mutually_exclusive_group()
     which.add_argument("--all", action="store_true", help="Every radio (the default)")
     which.add_argument("--radios", help="Comma-separated radio ids")
-    p_fleet_export.add_argument("--out", default="wasds150-output/radios", help="Output directory")
+    p_fleet_export.add_argument(
+        "--out", help="Output directory for every radio (default: each radio's radio-data/<radio>/exports)"
+    )
     p_fleet_export.add_argument(
         "--copy-to", help="Also copy each file here (default: each radio's copy_to setting)"
     )
@@ -2081,7 +2087,9 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_fleet_update.add_argument("--no-launch", action="store_true", help="Do not start vendor programs")
     p_fleet_update.add_argument("--exclude-licensed", action="store_true")
-    p_fleet_update.add_argument("--out", default="wasds150-output/radios", help="Output directory")
+    p_fleet_update.add_argument(
+        "--out", help="Output directory for every radio (default: each radio's radio-data/<radio>/exports)"
+    )
     p_fleet_update.add_argument("--resume", metavar="JOB", help="Resume a failed, cancelled or interrupted update")
     p_fleet_update.add_argument("--json", action="store_true", help="One JSON event per line")
     p_fleet_update.set_defaults(func=cmd_fleet_update)

@@ -29,8 +29,12 @@ your RadioReference exports. Then:
    stops the update.
 5. When the job shows finished, close the command window.
 
-Programming files are written to `wasds150-output\radios\`. Radio backups go
-to `radio-backups\`.
+Everything lands in one folder per radio under `radio-data\` (see
+[its README](../radio-data/README.md)): programming files in
+`radio-data\<radio>\exports\`, radio backups in `radio-data\<radio>\backups\`.
+Nothing is copied outside the repository. Step-by-step guides for each radio,
+including the manual steps the wizard asks about, are in
+[docs/guides](guides/README.md).
 
 ### Before the first update
 
@@ -41,8 +45,8 @@ is flagged there and blocks that radio until it is filled in.
 |---|---|---|
 | `sds150.sentinel_profile` | `Preset` | The only profile in the Sentinel workspace. Change it if the scanner's lists live in another profile. |
 | `td-h9.com_port` | not set | Plug in the programming cable, find its port in Device Manager (a Prolific USB-to-Serial entry, for example COM7), and enter it. COM3 is an unrelated device. |
-| `th-d75.backup_d75` | newest `radio-backups\th-d75\*.d75` | Read the radio into a fresh backup first; the checklist's first step says how. |
-| `at-d890uv.rdt_base` | `radio-backups\at-d890uv\backup-factory-install 09-11-26 Anytone 890UV-mode14.rdt` | Read before the NXDN flash, so it has band mode 00014 but no NX pages. After setting the Optional Settings in the CPS once, save the codeplug and point this at that `.rdt` instead, so later imports keep them. |
+| `th-d75.backup_d75` | newest `radio-data\th-d75\backups\*.d75` | Read the radio into a fresh backup first; the checklist's first step says how. |
+| `at-d890uv.rdt_base` | `radio-data\at-d890uv\backups\at-d890uv-factory-mode14-2026-09-11.rdt` | Read before the NXDN flash, so it has band mode 00014 but no NX pages. After setting the Optional Settings in the CPS once, save the codeplug and point this at that `.rdt` instead, so later imports keep them. |
 
 ### The same from a terminal
 
@@ -239,11 +243,11 @@ the operator's own, explicit choice; the template does not cap any of it.
 | Setting | Required | Default | Notes |
 |---|---|---|---|
 | `td-h9.com_port` (Programming cable port) | yes |  | For example COM7. |
-| `td-h9.label` (Backup label) | no | `td-h9` | Prefix for the backup images in radio-backups\ (radio-a, radio-b, ...). |
+| `td-h9.label` (Backup label) | no | `td-h9` | Prefix for the backup images in radio-data\td-h9\backups\ (radio-a, radio-b, ...). |
 | `td-h9.copy_to` (Also copy the file to) | no |  | Where you keep CHIRP files, if not the export folder. |
 
 1. **Connect the radio** _(confirm)_ - Plug the cable into the same USB socket as last time (the Prolific driver binds per socket), seat the two-pin plug fully - it seats about a millimetre after it looks seated - and turn the radio on.
-2. **Back up and dry-run** _(automatic)_ - Read the radio on <com_port>, save a timestamped image to radio-backups\, and stage <export> into it. Nothing is written to the radio.
+2. **Back up and dry-run** _(automatic)_ - Read the radio on <com_port>, save a timestamped image to radio-data\td-h9\backups\, and stage <export> into it. Nothing is written to the radio.
 3. **Write the radio** _(automatic)_ - Write the staged image, then read the radio back and compare every channel with the file.
 4. **Power-cycle the radio** - Turn the radio off and on: it stays in programming mode after a write, and the next handshake fails until it is power-cycled.
 <!-- fleet:end td-h9 -->
@@ -259,18 +263,18 @@ the operator's own, explicit choice; the template does not cap any of it.
 
 | Setting | Required | Default | Notes |
 |---|---|---|---|
-| `th-d75.backup_d75` (Pre-change radio backup) | no |  | Defaults to the newest radio-backups\th-d75\*.d75; the export is built on it. |
+| `th-d75.backup_d75` (Pre-change radio backup) | no |  | Defaults to the newest radio-data\th-d75\backups\*.d75; the export is built on it. |
 | `th-d75.mcp_app` (MCP-D75 program) | no | `C:\Program Files (x86)\Kenwood\MCP-D75\MCP-D75.exe` |  |
 | `th-d75.copy_to` (Also copy the file to) | no |  | The folder you open MCP-D75 files from, if not the export folder. |
 
-1. **Read the radio into a fresh backup** - In MCP-D75, read the radio and save it into radio-backups\th-d75\ with today's date. The export is patched onto this exact image and the finalize step restores its settings. Never use COM3 for this radio: it is an unrelated device.
+1. **Read the radio into a fresh backup** - In MCP-D75, read the radio and save it into radio-data\th-d75\backups\ with today's date. The export is patched onto this exact image and the finalize step restores its settings. Never use COM3 for this radio: it is an unrelated device.
 2. **Export the memory file** _(automatic)_ - Export th-d75-fleet with target thd75-file, based on <backup_d75>.
 3. **Open the file in MCP-D75** _(automatic)_ - Start MCP-D75 with <export>; if it opens empty, use File > Open on that file.
 4. **Import the D-STAR repeater list** - In MCP-D75, import the filtered official repeater TSV under Repeater List for TH-D75A (K-type/U.S.A. and Canada).
 5. **Save from MCP-D75** - Save the file from MCP-D75 (File > Save As) next to <export>; the next step needs it.
 6. **Restore the preserved regions** _(automatic)_ - Run scripts\radios\finalize_thd75_image.py with <backup_d75> and the MCP-saved file. MCP normalises empty special-memory pages on save; this restores every byte outside ordinary memories, group names and the D-STAR region.
 7. **Write the radio** - Open <final> in MCP-D75, check the memory count and the local DR list, then write it to the radio. Memory Group Link is set to the groups Near Me draws from, so MENU > Scan > Group Link Scan sweeps every local amateur group in one pass.
-8. **Read back for comparison** _(optional)_ - Read the radio again in MCP-D75 and save it into radio-backups\th-d75\ as a read-back, so the written image can be compared byte for byte.
+8. **Read back for comparison** _(optional)_ - Read the radio again in MCP-D75 and save it into radio-data\th-d75\backups\ as a read-back, so the written image can be compared byte for byte.
 <!-- fleet:end th-d75 -->
 
 <!-- fleet:begin ftx1 -->
@@ -287,9 +291,9 @@ the operator's own, explicit choice; the template does not cap any of it.
 | `ftx1.rt_app` (RT Systems FTX-1 program) | no | `C:\Program Files\RT Systems V5 - FTX1 Programming\Yaesu\FTX1_V5\RadioEngine_V5.exe` |  |
 | `ftx1.copy_to` (Also copy the file to) | no |  | The folder RT Systems opens files from, if not the export folder. |
 
-1. **Export the memory file** _(automatic)_ - Export ftx1-fleet with target ftx1-file (patched onto radio-templates\ftx1-blank.FTX1).
+1. **Export the memory file** _(automatic)_ - Export ftx1-fleet with target ftx1-file (patched onto radio-data\ftx1\templates\ftx1-blank.FTX1).
 2. **Open the file in RT Systems** _(automatic)_ - Open <export> in the RT Systems FTX-1 programmer.
-3. **Read the radio first** - Connect the FTX-1, Communications > Get Data From Radio, and save it into radio-backups\ftx1\ with today's date. The programmer will not send a file until it has read the radio once, and this is the backup to return to. Then reopen <export>.
+3. **Read the radio first** - Connect the FTX-1, Communications > Get Data From Radio, and save it into radio-data\ftx1\backups\ with today's date. The programmer will not send a file until it has read the radio once, and this is the backup to return to. Then reopen <export>.
 4. **Send to the radio** - Send <export> to the radio from RT Systems' communications menu.
 5. **Check the radio** _(confirm)_ - On the radio, confirm the last used memory matches the export (<rows> channels) and that a repeater near home keys with its tone. The M-Grp column is ticked on the Near Me channels, which Set Menu 55: MEM Group turns into the radio's one memory subset - the FTX-1 has no banks.
 <!-- fleet:end ftx1 -->
@@ -308,7 +312,7 @@ the operator's own, explicit choice; the template does not cap any of it.
 | `at-d890uv.cps_app` (D890UV CPS) | no | `C:\D890UV\D890UV.exe` |  |
 | `at-d890uv.copy_to` (Also copy the bundle to) | no |  | A folder the CPS's import dialog opens easily. |
 | `at-d890uv.rdt_base` (Saved codeplug (.rdt)) | no |  | The .rdt saved after setting the Optional Settings; the bundle is imported into it. |
-| `at-d890uv.contacts_to` (Also keep the contact lists in) | no |  | A standing copy of the DMR/NXDN contact lists, for example radio-configs\contacts in the repository. |
+| `at-d890uv.contacts_to` (Also keep the contact lists in) | no |  | A standing copy of the DMR/NXDN contact lists, for example radio-data\shared\contacts in the repository. |
 
 1. **Export the CPS bundle** _(automatic)_ - Export at-d890uv-fleet with target atd890-cps.
 2. **Start the CPS** _(automatic)_ - Start the D890UV CPS.
@@ -317,9 +321,9 @@ the operator's own, explicit choice; the template does not cap any of it.
 5. **Set the Optional Settings** - Digital Function > Digital Monitor = Double Slot, CC = Any, ID = Any: without it a DMR channel opens only for talkgroups in its receive list, and most traffic here is a group that list does not name. Work Mode > MEM Zone A and Other > Priority Zone A = Near Me. Display mode = Channel Name. On the radio afterwards, Menu > Settings > Radio Set > Display > Ch. Name = CH name: on Frequency the radio runs in VFO mode, where a channel's offset and tone do not apply.
 6. **Import the bundle** - Tool > Import > choose <lst> > Import All. A name the CPS cannot resolve means the export is stale: re-export rather than editing in place.
 7. **Import the contact list** _(optional)_ - Tool > Import > DMR Digital Contact List > choose <contacts>, then NX Digital Contact List > NXDigitalContactList.CSV in the same folder. A worldwide list takes several minutes. The NXDN table's Attr, TxForbid and Ring columns are written empty because the captured export had no NXDN contact to copy them from, so check an entry afterwards.
-8. **Restore the long scan lists** - Save the codeplug into radio-backups\at-d890uv\, then run scripts\radios\patch_atd890_scanlists.py with that .rdt and <sidecar>. The CPS's CSV importer reads only 50 scan-list members before it overflows, so the bundle ships the first 50 of each and this puts the rest back. Open the patched -full.rdt in the CPS for the next step.
+8. **Restore the long scan lists** - Save the codeplug into radio-data\at-d890uv\backups\, then run scripts\radios\patch_atd890_scanlists.py with that .rdt and <sidecar>. The CPS's CSV importer reads only 50 scan-list members before it overflows, so the bundle ships the first 50 of each and this puts the rest back. Open the patched -full.rdt in the CPS for the next step.
 9. **Write** - Write to radio from the patched codeplug (Other Data; Digital Contact List only if one was loaded).
-10. **Read back** _(optional)_ - Read from radio, then Tool > Export > Export All into a new radio-backups\at-d890uv\<date>-readback\ folder.
+10. **Read back** _(optional)_ - Read from radio, then Tool > Export > Export All into a new radio-data\at-d890uv\readbacks\<date>-readback\ folder.
 11. **Compare the read-back** _(automatic, optional)_ - Compare the read-back folder with the generated bundle, table by table.
 <!-- fleet:end at-d890uv -->
 
@@ -342,6 +346,6 @@ the operator's own, explicit choice; the template does not cap any of it.
 3. **Read the radio first** - Read the radio into CS-52 before importing anything, so the memories land on top of your own settings - call sign, GPS and APRS - rather than on a blank file.
 4. **Import each memory group** - Memory CH > right-click the group > Import > Group, and choose the matching file from <export>\Csv\MemoryCh, in file-name order; each file names the group it fills. Answer No when CS-52 asks about USE(FROM). Close the files in any spreadsheet first.
 5. **Import the D-STAR repeater list** _(optional)_ - Digital > Repeater List > right-click a group > Import > Group, and choose <export>\Csv\RptList\DSTAR_Near_Home.csv, so the DR function finds the local repeaters by position.
-6. **Write the radio** - Save the file into radio-backups\id-52a\, then write it to the radio.
+6. **Write the radio** - Save the file into radio-data\id-52a\backups\, then write it to the radio.
 7. **Check the radio** _(confirm)_ - On the radio, open a group near home and check a few memories (<rows> in all), then press DR and confirm a local D-STAR repeater is listed. The last group is Near Me: a second copy of the nearest of every amateur service, so SCAN > Group on it is one pass over the list the Anytone holds as a scan list.
 <!-- fleet:end id-52a -->

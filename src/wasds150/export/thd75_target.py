@@ -106,7 +106,7 @@ def template_path(root: Optional[Path] = None) -> Path:
                 break
         else:
             root = Path.cwd()
-    backup_dir = Path(root) / "radio-backups" / "th-d75"
+    backup_dir = Path(root) / "radio-data" / "th-d75" / "backups"
     candidates = sorted(backup_dir.glob("*.d75"), key=lambda p: p.stat().st_mtime, reverse=True)
     if not candidates:
         raise Thd75ExportError(

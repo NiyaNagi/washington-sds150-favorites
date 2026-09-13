@@ -23,7 +23,7 @@ from wasds150.models.catalog import Catalog
 from wasds150.plan.resolve import iter_catalog_channels
 from wasds150.radios.registry import FTX1
 
-DEFAULT_FTX1 = r"Z:\Texts\HAM\Radio Programming\FTX1 WA.FTX1"
+DEFAULT_FTX1 = "radio-data/ftx1/source-files/ftx1-wa-radio-read-2026-08-19.FTX1"
 
 
 def band_of(mhz: float) -> str:

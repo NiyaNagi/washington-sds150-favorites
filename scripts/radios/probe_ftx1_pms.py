@@ -19,7 +19,7 @@ import sys
 
 from wasds150.export.ftx1_file import Ftx1File
 
-DEFAULT_SOURCE = r"Z:\Texts\HAM\Radio Programming\FTX1 WA.FTX1"
+DEFAULT_SOURCE = "radio-data/ftx1/source-files/ftx1-wa-radio-read-2026-08-19.FTX1"
 
 #: Deliberately absurd frequencies, so a marker cannot be confused with real
 #: data and is obvious wherever it surfaces in the programmer.
@@ -37,7 +37,7 @@ MARKERS = (
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", default=DEFAULT_SOURCE)
-    parser.add_argument("--out", default="wasds150-output/radios/FTX1-PMS-PROBE.FTX1")
+    parser.add_argument("--out", default="radio-data/ftx1/probes/ftx1-pms-probe.FTX1")
     args = parser.parse_args(argv)
 
     source = pathlib.Path(args.source)

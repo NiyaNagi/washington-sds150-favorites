@@ -22,7 +22,7 @@ from wasds150.models.profile import Profile
 from wasds150.plan.resolve import iter_catalog_channels
 from wasds150.radios.registry import FTX1
 
-DEFAULT_SOURCE = r"Z:\Texts\HAM\Radio Programming\FTX1 WA.FTX1"
+DEFAULT_SOURCE = "radio-data/ftx1/source-files/ftx1-wa-radio-read-2026-08-19.FTX1"
 
 #: Lists the operator chose to leave out: a different trip, or seasonal.
 DROP_LISTS = frozenset({"FL73", "UL00", "UL01", "UL02", "UL03"})

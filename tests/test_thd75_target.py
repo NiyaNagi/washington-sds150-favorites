@@ -44,9 +44,10 @@ def _repo_root() -> Path:
 
 def test_current_operator_artifacts_are_complete_and_consistent() -> None:
     root = _repo_root()
-    image_path = root / "radio-configs" / "thd75-current.d75"
-    settings_path = root / "radio-configs" / "thd75-current-settings.json"
-    bitmap_path = root / "radio-configs" / "thd75-power-on-KM7HKM.bmp"
+    current = root / "radio-data" / "th-d75" / "reference" / "current"
+    image_path = current / "thd75-current.d75"
+    settings_path = current / "thd75-current-settings.json"
+    bitmap_path = current / "thd75-power-on-KM7HKM.bmp"
 
     image = image_path.read_bytes()
     digest = hashlib.sha256(image).hexdigest().upper()

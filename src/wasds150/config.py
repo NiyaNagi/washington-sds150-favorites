@@ -34,10 +34,18 @@ class AppConfig:
         return self.home / "catalog.json"
 
     @property
+    def data_root(self) -> Path:
+        """The ``radio-data`` folder: beside a home kept inside the repository
+        (``.wasds150-home``) when the repository has one, otherwise inside the
+        home, so a temporary home never writes into the working tree."""
+        beside = self.home.parent / "radio-data"
+        return beside if beside.is_dir() else self.home / "radio-data"
+
+    @property
     def backup_dir(self) -> Path:
-        """Where the experimental SD-card installer stores its mandatory
-        pre-write backups (see :mod:`wasds150.installer.backup`)."""
-        return self.state_dir / "sdcard-backups"
+        """Where the SD-card and Sentinel workspace installers store their
+        mandatory pre-write backups (see :mod:`wasds150.installer.backup`)."""
+        return self.data_root / "sds150" / "backups"
 
     @property
     def cache_dir(self) -> Path:

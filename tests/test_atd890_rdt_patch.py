@@ -1,7 +1,8 @@
 ﻿"""Restoring full scan-list membership to a saved .rdt.
 
 The format was decoded from two real codeplugs that differed by exactly one
-scan-list member (radio-backups/at-d890uv/rdt-a.rdt and rdt-b.rdt): rebuilding
+scan-list member (radio-data/at-d890uv/probes/scanlist-probe-50-members.rdt and
+-51-members.rdt): rebuilding
 one from the other reproduced it byte for byte, which is what says there is no
 checksum to maintain.
 """
@@ -127,8 +128,8 @@ def test_more_than_the_radio_holds_is_refused():
 
 def test_the_real_codeplugs_confirm_the_format():
     """rdt-b is rdt-a with one more member in Wildfire 01, and nothing else."""
-    a = Path("radio-backups/at-d890uv/rdt-a.rdt")
-    b = Path("radio-backups/at-d890uv/rdt-b.rdt")
+    a = Path("radio-data/at-d890uv/probes/scanlist-probe-50-members.rdt")
+    b = Path("radio-data/at-d890uv/probes/scanlist-probe-51-members.rdt")
     if not (a.exists() and b.exists()):
         pytest.skip("the captured codeplugs are not in this checkout")
     da, db = a.read_bytes(), b.read_bytes()

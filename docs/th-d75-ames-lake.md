@@ -4,11 +4,11 @@
 
 The connected North American TH-D75A was identified on COM11 and read with
 Kenwood MCP-D75 1.00 before any write. Its firmware is 1.03. The exact
-pre-change file is private under `radio-backups/th-d75/`; its SHA-256 is:
+pre-change file is private under `radio-data/th-d75/backups/`; its SHA-256 is:
 
 `B9AEFA8D9F5C153149059D98464E5EA05A64BB95A938B4D9FE8E55C35BFE0886`
 
-The initial final file was `radio-configs/thd75-ames-lake.d75`. It contains 538 ordinary
+The initial final file was `radio-data/shared/legacy-plans/thd75-ames-lake.d75`. It contains 538 ordinary
 memories in 21 named groups and 21 nearby entries in the radio's separate
 native D-STAR repeater list. Final SHA-256:
 
@@ -101,7 +101,7 @@ licensed callsign on the radio.
 ## Regeneration workflow
 
 1. Read the radio with MCP-D75 and place the private backup in
-   `radio-backups/th-d75/`.
+   `radio-data/th-d75/backups/`.
 2. Export the plan with target `thd75-file`.
 3. In MCP-D75, open the generated file and import the filtered official TSV
    under **Repeater List** for **TH-D75A (K-type/U.S.A. and Canada)**.

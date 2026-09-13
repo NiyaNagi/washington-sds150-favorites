@@ -142,13 +142,17 @@ def _copy_into(source: Path, destination: Path) -> List[Path]:
 
 
 def _export_scanner(
-    ctx: AppContext, directory: Path, copy_to: Optional[Path], include_licensed: bool
+    ctx: AppContext,
+    directory: Path,
+    copy_to: Optional[Path],
+    include_licensed: bool,
+    bundle: Optional[Path] = None,
 ) -> FleetExport:
     from wasds150.bundle.hpe_export import build_per_list_hpe
     from wasds150.bundle.markdown_export import export_markdown
 
     favorites = scanner_favorites(ctx, include_licensed=include_licensed)
-    bundle = directory / "sds150"
+    bundle = Path(bundle) if bundle is not None else directory / "sds150"
     hpe_dir = bundle / "hpe"
     hpe_dir.mkdir(parents=True, exist_ok=True)
     for stale in hpe_dir.glob("*.hpe"):
@@ -224,13 +228,22 @@ def export_radio(
     ``copy_to`` falls back to the radio's ``copy_to`` fleet setting, so the
     file lands where the vendor program opens files from.
     """
+    from wasds150.paths import exports_dir
+
     radio = get_fleet_radio(radio_id)
-    directory = Path(out_dir) if out_dir is not None else Path(DEFAULT_OUT_DIR)
+    if out_dir is not None:
+        # An explicit directory keeps the flat layout: every radio's file side
+        # by side, the scanner's bundle in its own "sds150" folder.
+        directory = Path(out_dir)
+        scanner_bundle = directory / "sds150"
+    else:
+        directory = exports_dir(radio.radio_id)
+        scanner_bundle = directory
     if copy_to is None:
         saved = load_settings(ctx).get(radio.radio_id, "copy_to")
         copy_to = Path(saved) if saved else None
     if not radio.plan_id:
-        return _export_scanner(ctx, directory, copy_to, include_licensed)
+        return _export_scanner(ctx, directory, copy_to, include_licensed, bundle=scanner_bundle)
     export = export_plan(
         ctx,
         radio.plan_id,

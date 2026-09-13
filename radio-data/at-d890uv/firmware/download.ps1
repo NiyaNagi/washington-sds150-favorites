@@ -1,6 +1,6 @@
 # Downloads the Anytone AT-D890UV CPS/firmware packages referenced in
 # docs/at-d890uv-programming.md. Run from the repository root:
-#   powershell -ExecutionPolicy Bypass -File radio-tools\anytone-d890uv\download.ps1
+#   powershell -ExecutionPolicy Bypass -File radio-data\at-d890uv\firmware\download.ps1
 $ErrorActionPreference = "Stop"
 $dest = Join-Path $PSScriptRoot "."
 $items = @(

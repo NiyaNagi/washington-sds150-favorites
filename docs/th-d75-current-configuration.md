@@ -9,9 +9,9 @@ from the supplied file.
 
 | Artifact | Purpose | SHA-256 |
 |---|---|---|
-| `radio-configs/thd75-current.d75` | Complete 500,736-byte MCP-D75 image, including every menu setting and memory region | `03BC9BA3ED4F94F9A3BE68D14ED9245CC1F5EB0C17C61637304F6EFBF4193F07` |
-| `radio-configs/thd75-current-settings.json` | All 400 settings decoded by the pinned firmware-1.03 schema | Source hash embedded in the file |
-| `radio-configs/thd75-power-on-KM7HKM.bmp` | 240x180, 16-bit RGB565 power-on image | `D299694C49260914F8BCE8D6A9E6836D07991A0975158DC8B66F3FA05375C785` |
+| `radio-data/th-d75/reference/current/thd75-current.d75` | Complete 500,736-byte MCP-D75 image, including every menu setting and memory region | `03BC9BA3ED4F94F9A3BE68D14ED9245CC1F5EB0C17C61637304F6EFBF4193F07` |
+| `radio-data/th-d75/reference/current/thd75-current-settings.json` | All 400 settings decoded by the pinned firmware-1.03 schema | Source hash embedded in the file |
+| `radio-data/th-d75/reference/current/thd75-power-on-KM7HKM.bmp` | 240x180, 16-bit RGB565 power-on image | `D299694C49260914F8BCE8D6A9E6836D07991A0975158DC8B66F3FA05375C785` |
 
 The native image is intentionally tracked because the operator explicitly
 requested a complete repository backup. It contains personal radio settings,

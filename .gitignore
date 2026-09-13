@@ -7,8 +7,7 @@ dist/
 .pytest_cache/
 .venv/
 
-# wasds150 generated/output artifacts
-wasds150-output/
+# wasds150 working home (catalog, source caches, jobs)
 .wasds150-home/
 out/
 generated/
@@ -34,21 +33,32 @@ local-sentinel/
 .venv-chirp/
 .venv-cad/
 
-# Radio images and backups read off a user's own hardware.
+# Radio images read off a user's own hardware.
 *.img
 *.d75
-!radio-configs/thd75-current.d75
-radio-backups/
+
+# radio-data/: the one root for every radio's exports, backups, readbacks,
+# probes, contact lists, licences and vendor tools (see radio-data/README.md).
+# Personal or regenerable, so ignored - except what is worth versioning: the
+# READMEs, the FTX-1 structural templates, the TH-D75 reference folder (the
+# operator's tracked current image, manuals, satellite images), the committed
+# legacy plan exports and the firmware download script.
+radio-data/**
+!radio-data/**/
+!radio-data/**/README.md
+!radio-data/ftx1/templates/**
+!radio-data/th-d75/reference/**
+!radio-data/shared/legacy-plans/**
+!radio-data/at-d890uv/firmware/download.ps1
+# ...but never another operator's configuration, or native TH-D75 images the
+# legacy exports write locally.
+radio-data/th-d75/reference/images/iss-aprs-other-operator.d75
+radio-data/shared/legacy-plans/*.d75
+radio-data/th-d75/reference/dstar/dstar-within-50mi.tsv
 
 # Third-party USB serial drivers fetched for programming cables.
 .drivers/
 
-# Vendor programming software and firmware packages (downloaded by
-# radio-tools/anytone-d890uv/download.ps1); only the script is tracked.
-radio-tools/**
-!radio-tools/**/
-!radio-tools/**/*.ps1
-!radio-tools/**/*.md
 
 # Scratch files from interactive debugging sessions.
 .tmp-*

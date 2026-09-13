@@ -22,9 +22,10 @@ from wasds150.models.plan import ChannelPlan
 from wasds150.plan.resolve import ResolvedPlan, resolve_plan
 from wasds150.plans import get_plan, list_plans
 
-#: Where plan exports land when no directory is given.  Matches the CLI
-#: default so the UI and the terminal write to the same place.
-DEFAULT_OUT_DIR = "wasds150-output/radios"
+#: The root plan exports land under when no directory is given: each lands in
+#: ``radio-data/<radio>/exports/`` (see :mod:`wasds150.paths`), the same place
+#: for the UI and the terminal.
+DEFAULT_OUT_DIR = "radio-data"
 
 
 def _extra_favorites(radio_id: str) -> List[FavoritesList]:
@@ -231,7 +232,9 @@ def export_plan(
     target = get_target(target_id)
     target.check_radio(resolved)
 
-    directory = Path(out_dir) if out_dir is not None else Path(DEFAULT_OUT_DIR)
+    from wasds150.paths import exports_dir
+
+    directory = Path(out_dir) if out_dir is not None else exports_dir(plan.radio_id)
     directory.mkdir(parents=True, exist_ok=True)
 
     csv_path = directory / f"{plan.id}{target.extension}"

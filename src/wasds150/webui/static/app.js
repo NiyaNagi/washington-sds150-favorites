@@ -2576,7 +2576,7 @@
     if (lastExport && lastExport.plan === planId && /\.csv$/i.test(lastExport.csv_path || "")) {
       return lastExport.csv_path;
     }
-    return planId ? `wasds150-output/radios/${planId}.csv` : "";
+    return planId ? `radio-data/td-h9/exports/${planId}.csv` : "";
   }
 
   function updateProgrammerCommand() {

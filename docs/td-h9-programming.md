@@ -46,20 +46,20 @@ The driver comes from the CHIRP issue tracker (issue #12216) and lands in
 
 ```bash
 # Generate the programming file from the catalog
-wasds150 --home .wasds150-home plan export h9-ozette --out wasds150-output/radios
+wasds150 --home .wasds150-home plan export h9-ozette
 
 # Back up the radio and dry-run (writes nothing)
 .venv-chirp/Scripts/python.exe scripts/radios/program_tdh9.py \
-    --port COM7 --label radio-a --csv wasds150-output/radios/h9-ozette.csv
+    --port COM7 --label radio-a --csv radio-data/td-h9/exports/h9-ozette.csv
 
 # Program it for real
 .venv-chirp/Scripts/python.exe scripts/radios/program_tdh9.py \
-    --port COM7 --label radio-a --csv wasds150-output/radios/h9-ozette.csv --execute
+    --port COM7 --label radio-a --csv radio-data/td-h9/exports/h9-ozette.csv --execute
 ```
 
 Or do all of it from the browser: `wasds150 ui` → **Radios** tab.
 
-Every run reads the radio and saves a timestamped image to `radio-backups/`
+Every run reads the radio and saves a timestamped image to `radio-data/td-h9/backups/`
 *before* anything is written. `--execute` is required to modify the radio; the
 default is always a dry run.
 
@@ -254,11 +254,11 @@ The catalog is the source of truth, so refreshing is just re-exporting:
 wasds150 --home .wasds150-home sources update --apply
 
 # Re-resolve the plan and rewrite the CSV
-wasds150 --home .wasds150-home plan export h9-ozette --out wasds150-output/radios
+wasds150 --home .wasds150-home plan export h9-ozette
 
 # Re-flash
 .venv-chirp/Scripts/python.exe scripts/radios/program_tdh9.py \
-    --port COM7 --label radio-a --csv wasds150-output/radios/h9-ozette.csv --execute
+    --port COM7 --label radio-a --csv radio-data/td-h9/exports/h9-ozette.csv --execute
 ```
 
 In the browser, that is **Refresh from catalog** → **Export** → **Write to
@@ -278,7 +278,7 @@ from every plan, because plans resolve against the profile-filtered catalog.
 - Attempt 1 of both read and write routinely fails. Retries are built in.
 - The radio must be **powered on** with the plug fully seated. The two-pin
   connector seats about a millimetre *after* it looks seated.
-- Backups accumulate in `radio-backups/` (git-ignored) as
+- Backups accumulate in `radio-data/td-h9/backups/` (git-ignored) as
   `<label>-<timestamp>.img`, plus a `-verify-` image after each write.
 
 ---
@@ -290,11 +290,11 @@ Backups are full CHIRP images and can be written straight back:
 ```bash
 # Dry run first — reads the radio, saves its current contents, changes nothing
 .venv-chirp/Scripts/python.exe scripts/radios/program_tdh9.py \
-    --port COM7 --restore radio-backups/radio-a-20260819-101713.img
+    --port COM7 --restore radio-data/td-h9/backups/radio-a-20260819-101713.img
 
 # Restore for real
 .venv-chirp/Scripts/python.exe scripts/radios/program_tdh9.py \
-    --port COM7 --restore radio-backups/radio-a-20260819-101713.img --execute
+    --port COM7 --restore radio-data/td-h9/backups/radio-a-20260819-101713.img --execute
 ```
 
 The radio's current contents are backed up as `<label>-pre-restore-<stamp>.img`

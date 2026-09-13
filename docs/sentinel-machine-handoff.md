@@ -205,13 +205,13 @@ licensed user-local data and must not be committed.
 ```powershell
 .\.venv\Scripts\wasds150.exe --home .wasds150-home preview
 .\.venv\Scripts\wasds150.exe --home .wasds150-home generate `
-  --out wasds150-output
+  --out radio-data/sds150/exports/generate
 ```
 
 The final bulk artifact is:
 
 ```text
-wasds150-output\sentinel-import-pack.zip
+radio-data\sds150\exports\generate\sentinel-import-pack.zip
 ```
 
 Its `hpe\` directory contains the individual Sentinel-importable files.

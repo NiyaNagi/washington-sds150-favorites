@@ -6,9 +6,9 @@ layout is not documented. Rather than guess it, the operator captures it
 once:
 
 1. CPS: File > New, then Tool > Export > Export All into
-   ``radio-backups/at-d890uv/fixtures/fresh/``.
+   ``radio-data/at-d890uv/readbacks/settings-fresh/``.
 2. Apply the settings table from ``docs/at-d890uv-programming.md``, then
-   Export All again into ``radio-backups/at-d890uv/fixtures/configured/``.
+   Export All again into ``radio-data/at-d890uv/readbacks/settings-configured/``.
 3. ``python scripts/radios/build_atd890_settings_template.py`` diffs the two
    and writes :data:`TEMPLATE_PATH`.
 

@@ -36,8 +36,8 @@ from wasds150.radios.tones import parse_tone
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from plan_ftx1_merge import candidates  # noqa: E402
 
-DEFAULT_SOURCE = r"Z:\Texts\HAM\Radio Programming\FTX1 WA.FTX1"
-DEFAULT_OUT = r"Z:\Texts\HAM\Radio Programming\FTX1 WA MERGED.FTX1"
+DEFAULT_SOURCE = "radio-data/ftx1/source-files/ftx1-wa-radio-read-2026-08-19.FTX1"
+DEFAULT_OUT = "radio-data/ftx1/source-files/ftx1-wa-merged.FTX1"
 
 #: The FTX-1 shows twelve characters of a memory tag.
 NAME_LEN = 12

@@ -8,7 +8,7 @@ is changing one column per row and saving.
 
 Usage::
 
-    python scripts/radios/make_ftx1_probe.py --out "Z:/path/to/folder"
+    python scripts/radios/make_ftx1_probe.py --out radio-data/ftx1/probes/generated
 
 Then, in the RT Systems programmer:
 
@@ -189,7 +189,7 @@ def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--out",
-        default="radio-configs/probes",
+        default="radio-data/ftx1/probes/generated",
         help="Directory to write the probe files into",
     )
     parser.add_argument("--template", help="Override the .FTX1 template")
