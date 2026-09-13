@@ -99,6 +99,27 @@ already found this wire (NR‑SL2, 49/75), so the search was not missing a bette
 **Sloping down off the roof does not work** — the best "down" wire is effectively level at 25 ft.
 The support position is a computed point; no tree there has been checked for a 55–67 ft limb.
 
+### Deployment 1 — the build guide for the #1 wire
+
+The operator chose the scan's overall winner to build. [`tools/deployment1.py`](tools/deployment1.py)
+computes its setting-out, heights, current and voltage maxima, slack, canopy, NEC patterns and
+expected resonances, and draws `imagery/deployment1_*.png`. The build guide is the
+"Deployment 1" section of the published page; the numbers are in
+[`data/deployment1.json`](data/deployment1.json).
+
+| | |
+|---|---|
+| Feed | roof point 49 ft from the transformer at 210°M, **25 ft (assumed)** |
+| Wire | 130 ft straight, **148.45°M** (163.75°T), 18.7° up |
+| Support | **123 ft 0 in** horizontally from the feed, attach **66.7 ft** — 47°38'01.10"N 121°59'47.74"W |
+| Set out from the transformer | **152 ft 7 in at 165.0°M** (check: 117 ft 5 in at 173.4°M from the backyard corner) |
+| Property line | wire crosses the south line 33 ft out at **36 ft up**; support **79 ft beyond the line** — **on the neighbour's land** |
+| NEC | #1 of 103 · 54/75 · 24/25 regions · +2.49 dBi · 40+20 m 35/50 |
+| Expected resonances | ≈3.556 / 7.275 / 14.717 / 22.132 / 29.518 MHz (NEC scaled to the measured 80 m) |
+| Tension | 10 lb counterweight ≈ 4 ft mid-span sag — do not build in slack (1% slack ≈ 8 ft sag) |
+
+**Before building:** the neighbour's permission, the real roof height, and a sound limb at ~67 ft.
+
 ---
 
 ## The aerial photograph changed the picture
@@ -885,6 +906,7 @@ the bend and its null-filling — drops support 3, and costs 1.1 dB and two regi
 | [`tools/nec_validate.py`](tools/nec_validate.py) | Engine benchmarks, resonances, the pattern-formula check, NEC sensitivity → `data/nec-validation.json`, `data/nec-resonances.json` |
 | [`tools/nec_search.py`](tools/nec_search.py) | **The ranking now in force**: re-runs the searches on NEC and scores all 103 wires → `data/nec-scores.json`, `nec-ranking.csv`, `nec-ranking.kml` |
 | [`tools/nec_roof_sloper_scan.py`](tools/nec_roof_sloper_scan.py) | **Exhaustive** NEC scan of every straight sloper off the roof point, with robustness, stress test and 20/30 ft roof heights |
+| [`tools/deployment1.py`](tools/deployment1.py) | Deployment 1 build detail: setting-out, heights, maxima, slack, NEC patterns and resonances, seven diagrams → `data/deployment1.json`, `imagery/deployment1_*.png` |
 | [`tools/build_nec_page.py`](tools/build_nec_page.py) | "Every Wire on One Lot" page and `imagery/nec_*.jpg` |
 | [`tools/topology_search.py`](tools/topology_search.py) | Searches slopers, inverted‑Vs and inverted‑Ls (feed 10 ft) on the 3-band and 40 + 20 m metrics; adds the hybrid L model |
 | [`tools/build_lineup_page.py`](tools/build_lineup_page.py) | Builds the lineup comparison page and the two annotated aerial JPEGs |

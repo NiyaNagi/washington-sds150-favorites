@@ -719,6 +719,27 @@ a stress test of the winners against 45 rivals under Sommerfeld ground, λ/40 se
 same bearing. Best downward wire effectively level, 35/75. The earlier NEC search's NR‑SL2
 (49/75) was already this wire, which is the check that the search had not missed a better one.
 
+## Phase 18 — 2026-09-12: Deployment 1 build guide
+
+**Operator asked:** detailed diagrams from all angles and precise deployment measurements for
+"deployment 1", in a separate section. **Clarified:** the #1 overall wire (148.5°M, support on the
+neighbouring parcel), chosen knowingly over the on-lot winners.
+
+`tools/deployment1.py`: geometry from the scan winner. The wire crosses the south line 33.1 ft out
+at 36.2 ft up, and the support is 79.1 ft beyond the line measured square to it. Setting-out marks
+come from the transformer, the backyard corner, the apex tree and the front-yard corner. The tool
+also produces heights at 10 ft stations, current and voltage maxima on all five bands, a slack
+table, canopy along the track (22% of the sampled 117 ft, trees from 94 ft out), per-band and
+per-region NEC gains, and NEC azimuth and elevation patterns. Resonances were computed on the
+exact geometry over ground: 3.597 / 7.360 / 14.889 / 22.390 / 29.862 MHz, or 3.556 / 7.275 /
+14.717 / 22.132 / 29.518 scaled to the measured 80 m. Seven matplotlib plates were drawn; the page
+gained a "Deployment 1" section.
+
+**Caught on the first draft:** "1–2% slack" was bad advice. Free slack becomes sag fast (1% ≈ 8 ft
+mid-span on this span), so the guide now tells the builder to let a 10 lb counterweight set the
+tension (≈ 4 ft sag). Three diagram faults were also fixed before publishing: eye-level labels
+drawn off-frame, a wrap-around line in the bearing-tolerance plot, and label collisions.
+
 ## Corrections summary
 
 | # | Error | Corrected in | Status |

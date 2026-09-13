@@ -644,6 +644,9 @@ svg.chart g.pt:hover .dot{stroke:var(--ink)}
 .keyrow span{display:inline-flex;align-items:center;gap:6px}
 .keyrow i{width:10px;height:10px;border-radius:50%;display:inline-block}
 details.all summary{cursor:pointer;font-weight:600;color:var(--ink);padding:10px 0}
+figure.plate{background:#fcfcfb;border:1px solid var(--rule)}
+figure.plate img{display:block;width:100%;height:auto}
+.jump{font-family:var(--ff-m);font-size:13px}
 details.all summary:focus-visible{outline:2px solid var(--wire);outline-offset:2px}
 """
 
@@ -1018,6 +1021,278 @@ def scan_section():
     return html, items
 
 
+DEPLOY_PATH = os.path.join(DATA, "deployment1.json")
+
+
+def _png(name):
+    with open(os.path.join(IMGDIR, name), "rb") as fh:
+        return "data:image/png;base64," + base64.b64encode(fh.read()).decode()
+
+
+def deploy_section():
+    if not os.path.exists(DEPLOY_PATH):
+        return ""
+    with open(DEPLOY_PATH, encoding="utf-8") as fh:
+        D = json.load(fh)
+    g, cr = D["geometry"], D["geometry"]["crossing"]
+    nb, st = D["nec_bands"], D["stress"]
+
+    def plate(fname, alt, cap):
+        return (f'<figure class="plate"><img src="{_png(fname)}" alt="{esc(alt)}" '
+                f'loading="lazy"><figcaption>{cap}</figcaption></figure>')
+
+    spec = [
+        ("Wire", f'{g["wire_ft"]:.0f} ft ({g["wire_m"]:.1f} m), one straight run'),
+        ("Feed point", f'on the roof, <b>{g["feed_ft"]:.0f} ft up (assumed — measure it)</b>, '
+                       f'{g["feed_from_transformer"]["ft"]:.0f} ft from the transformer\'s '
+                       f'current spot at {g["feed_from_transformer"]["mag"]:.0f}°M · '
+                       f'{g["feed"]["dms"]}'),
+        ("Direction", f'<b>{g["bearing_mag"]:.1f}° magnetic</b> ({g["bearing_true"]:.1f}° true); '
+                      f'back-bearing {g["back_bearing_mag"]:.1f}°M'),
+        ("Support", f'<b>{g["run_ftin"]}</b> horizontally from the roof feed, attach at '
+                    f'<b>{g["end_ft"]:.1f} ft</b> · {g["end"]["dms"]}'),
+        ("Rise / slope", f'{g["rise_ft"]:.1f} ft over the run · <b>{g["slope_deg"]:.1f}°</b>'),
+        ("Property line", (f'wire crosses it {cr["horizontal_ft_from_feed"]:.0f} ft out, '
+                           f'<b>{cr["wire_height_ft"]:.0f} ft up</b>; support '
+                           f'{g["support_perp_past_line_ft"]:.0f} ft beyond the line '
+                           f'(square to it)' if cr else "—")),
+        ("Canopy", f'{D["canopy"]["fraction"]*100:.0f}% of the ground track over trees '
+                   f'(first {D["canopy"]["sampled_ft"]:.0f} ft of {D["canopy"]["track_ft"]:.0f} '
+                   f'ft sampled)'),
+        ("NEC 40/20/15 m", f'<b>#{D["rank_among_103"]} of 103 · {D["nec_3band"]["n_workable"]} / 75'
+                           f'</b> · {D["nec_3band"]["n_regions_covered"]} / 25 regions · '
+                           f'{sg(D["nec_3band"]["mean_power_dBi"])} dBi · worst '
+                           f'{sg(D["nec_3band"]["worst_dBi"], "+.1f")}'),
+        ("NEC 40 + 20 m", f'{D["nec_40_20"]["n_workable"]} / 50 · '
+                          f'{sg(D["nec_40_20"]["mean_power_dBi"])} dBi'),
+    ]
+    spec_rows = "".join(f"<tr><td class='nm'>{k}</td><td>{v}</td></tr>" for k, v in spec)
+    marks = "".join(
+        f"<tr><td>{esc(m['from'])}</td><td>{esc(m['to'])}</td>"
+        f"<td class='n'><b>{m['ftin']}</b></td><td class='n'><b>{m['mag']:.1f}°M</b> "
+        f"({m['true']:.1f}°T)</td></tr>" for m in g["marks"])
+    stations = "".join(
+        f"<tr><td class='n'>{s['horizontal_ft']:.0f} ft</td><td class='n'>{s['wire_ft']:.0f} ft</td>"
+        f"<td class='n'><b>{s['height_ft']:.0f} ft</b></td>"
+        f"<td class='n'>{s['from_transformer_ft']:.0f} ft @ {s['from_transformer_mag']:.0f}°M</td>"
+        f"<td>{'neighbour' if s['past_line'] else 'your lot'}</td></tr>" for s in D["stations"])
+    maxrows = []
+    for b in C.BAND_KEYS:
+        mx = D["maxima"][b]
+        cur = " · ".join(f"{r['wire_ft']:.0f} ft of wire, {r['height_ft']:.0f} ft up"
+                         + (" (neighbour)" if r["past_line"] else "") for r in mx["current_max"])
+        vol = " · ".join(f"{r['wire_ft']:.0f} ft" for r in mx["voltage_max"])
+        maxrows.append(f"<tr><td class='n'><b>{b.replace('m', ' m')}</b></td>"
+                       f"<td class='n'>{mx['n']}</td><td>{cur}</td><td>{vol}</td></tr>")
+    slack = "".join(
+        f"<tr><td class='n'>{s['slack_pct']:.0f}% ({s['slack_ft']:.1f} ft)</td>"
+        f"<td class='n'><b>{s['run_ft']:.1f} ft</b></td><td class='n'>{s['moves_in_ft']:.1f} ft</td>"
+        f"<td class='n'>{s['mid_sag_ft']:.1f} ft</td>"
+        f"<td class='n'>{s['support_from_transformer_ft']:.1f} ft @ "
+        f"{s['support_from_transformer_mag']:.1f}°M</td></tr>" for s in D["slack"])
+    band_rows = "".join(
+        f"<tr><td class='n'><b>{b.replace('m', ' m')}</b></td>"
+        f"<td class='n'><b>{nb[b]['cells']}</b> / 25</td><td class='n'>{sg(nb[b]['mean_dBi'])}</td>"
+        f"<td class='n'>{sg(nb[b]['median'], '+.1f')}</td><td class='n'>{sg(nb[b]['worst'], '+.1f')}</td>"
+        f"<td class='n'>{D['resonance'][b]['model_MHz']:.3f}</td>"
+        f"<td class='n'><b>{D['resonance'][b]['scaled_to_measured_MHz']:.3f}</b></td>"
+        f"<td class='n'>{C.BAND[b]['f']:.3f}</td>"
+        f"<td class='n'>{D['impedance'][b][0]} {'+' if D['impedance'][b][1] >= 0 else '−'} "
+        f"j{abs(D['impedance'][b][1])}</td></tr>" for b in C.BAND_KEYS)
+    reg_rows = []
+    for r in D["regions"]:
+        cells = []
+        for b in C.BAND_KEYS:
+            v = r[b]
+            c, t = heat(v, "light")
+            cd, td = heat(v, "dark")
+            cells.append(f'<td class="h" style="--c:{c};--t:{t};--cd:{cd};--td:{td}">'
+                         f'{sg(v, "+.0f")}</td>')
+        reg_rows.append(f"<tr><td style='white-space:nowrap'>{esc(r['name'])}</td>"
+                        f"<td class='n' style='color:var(--muted)'>{r['bearing_mag']:.0f}°M</td>"
+                        f"{''.join(cells)}</tr>")
+    stress = "".join(f"<td class='n'>#{v['rank']} · {v['cells']}</td>"
+                     for k, v in st.items() if k != "category")
+    stress_head = "".join(f"<th>{esc(k)}</th>" for k in st if k != "category")
+    halyard = 2 * g["end_ft"] + 40
+
+    return f"""
+<section id="deploy1">
+  <div class="sec-head">
+    <div class="eyebrow">Deployment 1 · build guide</div>
+    <h2>Roof feed to a {g["end_ft"]:.0f} ft support at {g["bearing_mag"]:.1f}° magnetic</h2>
+  </div>
+  <p>The best wire in the whole study on NEC — #1 of 103 and the winner of the exhaustive roof
+  scan. Everything below is computed from its exact geometry; diagrams are true to scale unless
+  marked.</p>
+  <div class="note alarm">
+    <b>Settle three things before buying anything.</b>
+    <b>1 · The support tree is on your neighbour's land</b> — the wire crosses the south property
+    line {cr["horizontal_ft_from_feed"]:.0f} ft out at {cr["wire_height_ft"]:.0f} ft up, and the
+    support is {g["support_perp_past_line_ft"]:.0f} ft beyond it. You need their permission for the
+    attachment, the rope, the counterweight and access to maintain it — in writing is better — and
+    it is worth confirming where the line really runs from the property corners.
+    <b>2 · The roof height at the feed is assumed</b> at {g["feed_ft"]:.0f} ft; measure it.
+    <b>3 · No one has checked for a limb</b> at {g["end_ft"]:.0f} ft at that spot.
+  </div>
+
+  <div class="tbl"><table><caption>The numbers you take outside</caption>
+    <tbody>{spec_rows}</tbody></table></div>
+
+  {plate("deployment1_plan.png", "Plan view on the aerial photo",
+         "<b>Plan.</b> Orange is the wire's ground track from the roof feed (white square) to the "
+         "support tree. Blue dots are the four 20 m current maxima with their heights. The "
+         "white X is where the wire crosses the south property line. Dotted white: coax from the "
+         "transformer's current spot to the roof feed. Both true and magnetic north are drawn.")}
+
+  <h3>Setting out the ground marks</h3>
+  <p>You cannot stand at the roof feed, so the support tree is set out from points you can stand
+  on. Use a 150 ft tape and a compass set to <b>magnetic</b> (declination +15.3° E, already
+  applied). Mark the tree from two of these; where the marks disagree by more than a couple of feet,
+  re-measure.</p>
+  <div class="tbl"><table><caption>Tape and compass · from a point you can stand on</caption>
+    <thead><tr><th>Stand at</th><th>Mark</th><th>Distance</th><th>Bearing</th></tr></thead>
+    <tbody>{marks}</tbody></table></div>
+
+  {plate("deployment1_elevation.png", "Side elevation and end view",
+         "<b>Elevation, true scale.</b> The wire climbs " + f"{g['slope_deg']:.1f}° from "
+         f"{g['feed_ft']:.0f} ft to {g['end_ft']:.0f} ft. Blue and aqua dots are the 20 m and 15 m "
+         "current maxima — the parts that radiate — and the numbers under the blue dots are their "
+         "heights. The halyard runs over a pulley at the limb to a counterweight. The end view shows "
+         "the wire as it looks sighting along it from behind the feed.")}
+
+  <div class="tbl"><table><caption>Height of the wire along its run</caption>
+    <thead><tr><th>Out from feed</th><th>Wire from feed</th><th>Height</th>
+      <th>Ground point from the transformer</th><th>Over</th></tr></thead>
+    <tbody>{stations}</tbody></table></div>
+
+  <div class="grid2">
+  {plate("deployment1_iso.png", "Two three-dimensional views",
+         "<b>3-D, true scale</b>, from the south-west and the north-east. Dotted blue drops mark "
+         "the 20 m current maxima; the dashed ground line is the property line.")}
+  </div>
+  {plate("deployment1_eyelevel.png", "Three eye-level views",
+         "<b>From where you will stand</b> — beside the house, at the property line and at the "
+         "tree. Wire geometry only: no trees or house are drawn, so use these to know where to "
+         "look, not to judge clearance.")}
+
+  {plate("deployment1_currents.png", "Current and voltage along the wire, every band",
+         "<b>Where it radiates, band by band.</b> Blue is current (radiation), orange dashed is "
+         "voltage (insulate and keep clear). Labels are the height of each current maximum. The "
+         "dotted line is the property-line crossing.")}
+  <div class="tbl"><table><caption>Current and voltage maxima</caption>
+    <thead><tr><th>Band</th><th>Half-waves</th><th>Current maxima — keep these clear of branches</th>
+      <th>Voltage maxima (wire ft from feed)</th></tr></thead>
+    <tbody>{"".join(maxrows)}</tbody></table></div>
+
+  <h3>Slack — and what it does to the support point</h3>
+  <p>The model is a straight, taut wire. A real wire needs a little slack so the tree can move. If
+  you keep the attachment at {g["end_ft"]:.0f} ft, every bit of slack pulls the support point
+  in along the same bearing:</p>
+  <div class="tbl"><table><caption>Slack against support position · attachment held at {g["end_ft"]:.0f} ft</caption>
+    <thead><tr><th>Slack</th><th>Support out from feed</th><th>Moves in</th><th>Mid-span sag</th>
+      <th>Support from the transformer</th></tr></thead>
+    <tbody>{slack}</tbody></table></div>
+  <p><b>Do not build slack in — let the counterweight set it.</b> The table shows how fast free
+  slack turns into sag: 1% of slack is already ~8 ft mid-span. A counterweight holds the wire at a
+  tension instead: for this wire (≈0.03 kg/m, {g["run_ft"]:.0f} ft span) a <b>10 lb</b>
+  counterweight gives about <b>4 ft</b> of mid-span sag and 5 lb about 8 ft, while still letting
+  the tree sway. Aim the support at the zero-slack position; the tolerance plot below shows a few
+  feet either way along the bearing costs nothing.</p>
+
+  {plate("deployment1_patterns.png", "NEC azimuth and elevation patterns",
+         "<b>NEC-2 patterns on the exact geometry.</b> Top: gain around the compass at 10° and 25° "
+         "elevation, true bearings, with region call areas on the rim and the wire axis dotted. "
+         "Bottom: gain against elevation toward the strongest bearing and along the wire.")}
+  <div class="tbl"><table><caption>Band by band on NEC · and what a NanoVNA should show</caption>
+    <thead><tr><th>Band</th><th>Regions workable</th><th>Mean dBi</th><th>Median</th><th>Worst</th>
+      <th>Model resonance MHz</th><th>Expected on your antenna</th><th>Band centre</th>
+      <th>Model Z at resonance</th></tr></thead>
+    <tbody>{band_rows}</tbody></table></div>
+  <p style="font-size:14px;color:var(--muted)">"Expected on your antenna" scales the model by the
+  ratio between your measured 80 m resonance (3.6056 MHz) and the model's. Treat it as a guide to
+  where to look on the sweep, not a prediction to the kHz.</p>
+  <div class="tbl"><table class="heat"><caption>NEC gain toward every region, dBi · grey = workable line</caption>
+    <thead><tr><th>Region</th><th>Brg</th>{"".join(f"<th class='o'>{b.replace('m', ' m')}</th>" for b in C.BAND_KEYS)}</tr></thead>
+    <tbody>{"".join(reg_rows)}</tbody></table></div>
+
+  {plate("deployment1_tolerance.png", "Score against attachment height and bearing",
+         "<b>How exact do you need to be?</b> Left: score if the support is higher or lower "
+         "(moving along the bearing). Right: score if the bearing is off (shaded ±2°).")}
+  <div class="tbl"><table><caption>Stress test · rank among {SCAN["stress"]["n_candidates"] if SCAN else "the"} best rival wires, and cells</caption>
+    <thead><tr>{stress_head}</tr></thead><tbody><tr>{stress}</tr></tbody></table></div>
+  <p>Every support position within ±2° and ±0.5 m keeps <b>{D["robust"]["nbr_min"]:.0f}–
+  {D["robust"]["nbr_mean"]:.0f}+ cells</b>. A roof of 20 ft instead of 25 costs about 6 cells; 30 ft
+  costs 1. The one thing that moves the number a lot is the workable threshold itself
+  ({D["robust"]["thr_minus2"]} cells at −2 dB, {D["robust"]["thr_plus2"]} at +2 dB).</p>
+
+  <h3>Materials</h3>
+  <ul class="tight">
+    <li><b>Throw kit</b>: big-shot slingshot or arborist launcher, 250 ft of throw line, 12 oz throw
+      weight — {g["end_ft"]:.0f} ft is a <b>hard</b> throw.</li>
+    <li><b>Halyard</b>: ≈{halyard:.0f} ft of 3/16–1/4 in UV-stable Dacron/polyester (twice the
+      attachment height plus a tie-off run), a small rope pulley at the limb, and a 10 lb
+      counterweight.</li>
+    <li><b>Far-end insulators</b>: two glazed ceramic eggs in series (e.g. MFJ-16A01). The far end
+      runs about 1 kV RMS at 150 W.</li>
+    <li><b>Roof feed</b>: weatherproof mount for the JYR8010 transformer, the 1 m counterpoise the
+      model assumes, stainless hardware, and a drip loop on the coax.</li>
+    <li><b>Coax</b>: an extension from the transformer's current spot to the roof feed — about
+      {g["feed_from_transformer"]["ft"]:.0f} ft horizontal plus {g["feed_ft"] - 10:.0f} ft up plus
+      service loops, so budget <b>~80–100 ft</b> of RG-8X or LMR-240 with weatherproofed
+      connectors.</li>
+    <li><b>Choking and protection</b>: a common-mode choke at the feed (about 10 turns of RG-8X on an
+      FT240-31) and another at the shack entry; a lightning arrestor bonded to the station ground
+      where the coax enters.</li>
+  </ul>
+
+  <h3>Sequence</h3>
+  <ol class="steps">
+    <li><h3>Get permission, then confirm the property line</h3><p>Ask the neighbour, show them this
+      page, and agree on access. Find the property corners and confirm the line where the wire
+      crosses it ({cr["horizontal_ft_from_feed"]:.0f} ft out along the bearing).</p></li>
+    <li><h3>Measure the roof at the feed point</h3><p>Height from the ground to where the transformer
+      will sit. Within 20–30 ft the design holds; outside that, re-run the scan.</p></li>
+    <li><h3>Set out the support</h3><p>From the transformer, tape
+      <b>{g["marks"][0]["ftin"]} at {g["marks"][0]["mag"]:.1f}°M</b>; check it from the backyard corner
+      and the apex tree using the table above. Flag it. Then flag the line crossing.</p></li>
+    <li><h3>Find the limb</h3><p>Pick the tree within a few feet of the flag with a sound limb at
+      {g["end_ft"]:.0f} ft or a little higher. A phone clinometer from a measured distance is
+      enough: at 67 ft back from the trunk, a limb at eye height + 67 ft sits at 45°.</p></li>
+    <li><h3>Mount the roof feed</h3><p>Transformer, counterpoise, choke, and the coax run with a
+      drip loop, all before any wire is in the air. Work with fall protection.</p></li>
+    <li><h3>Throw the line, pull the halyard, hang the pulley</h3><p>Tie off the halyard before the
+      antenna comes out of its bag.</p></li>
+    <li><h3>Lay the wire out on the ground along the bearing</h3><p>From below the feed toward the
+      tree, so it does not twist or cross itself. Two eggs in series at the far end, into the
+      halyard.</p></li>
+    <li><h3>Hoist and set the counterweight</h3><p>Raise to {g["end_ft"]:.0f} ft and hang a
+      10 lb counterweight on the halyard — about 4 ft of sag mid-span.
+      Walk the run and check the 20 m current maxima — at {", ".join(f"{r['height_ft']:.0f}" for r in D["maxima"]["20m"]["current_max"])} ft
+      — are clear of branches.</p></li>
+    <li><h3>Sweep it</h3><p>NanoVNA at the feed. Look near the expected resonances in the table
+      above.</p></li>
+    <li><h3>A/B it against what is up now</h3><p>NEC predicts {D["nec_3band"]["n_workable"]} / 75
+      against 30 / 75 for the current sloper; an evening of FT8 on both is the real
+      test.</p></li>
+  </ol>
+
+  <div class="note">
+    <b>Safety.</b> Roof work needs fall protection. Look for overhead power lines before throwing —
+    keep the whole antenna and halyard well clear. Both ends of the wire carry high voltage in
+    transmit: the feed at the roof and the far end at the tree must be out of reach of people and
+    pets. With the feed on the house, do an RF-exposure evaluation for the rooms nearest the roof
+    feed at your operating power. Disconnect and ground the coax in storms.
+  </div>
+  <div class="note">
+    <b>Not verified:</b> the roof height, the limb, the true line of the property boundary, the
+    house (NEC does not model it), the trees along the path, and the real transformer. The NEC
+    figures are a simulation of this wire over average ground and nothing else.
+  </div>
+</section>
+"""
+
+
 def build():
     import build_deployment_guide as G
 
@@ -1184,6 +1459,7 @@ def build():
 
     word = lambda a, b: ("better" if b > a else "worse" if b < a else "tied")  # noqa: E731
     scan_html, scan_items = scan_section()
+    deploy_html = deploy_section()
 
     return f"""<title>Every Wire on One Lot</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
@@ -1205,6 +1481,7 @@ def build():
     <span>Workable <b>≥ {THR:+.1f} dBi</b></span>
     <span>Imagery <b>King County 2025</b></span>
   </div>
+  {'<p class="jump"><a href="#deploy1">→ Jump to the Deployment 1 build guide</a></p>' if deploy_html else ''}
 </header>
 
 <section>
@@ -1327,6 +1604,7 @@ def build():
 </section>
 
 {scan_html}
+{deploy_html}
 <section>
   <div class="sec-head">
     <div class="eyebrow">Scorecard</div>

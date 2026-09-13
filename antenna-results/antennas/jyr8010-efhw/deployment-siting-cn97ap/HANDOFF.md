@@ -158,7 +158,10 @@ even bands and **every analytic ranking is superseded** (SESSION-LOG Phase 16, c
 ("Every Wire on One Lot", same URL as the lineup page) from `tools/build_nec_page.py`. Nothing
 above this section that quotes a rank, a cell count or a dB figure should be trusted without
 checking it against `data/nec-ranking.csv`. The roof-sloper space has also been scanned
-exhaustively (`tools/nec_roof_sloper_scan.py`, SESSION-LOG Phase 17): best on the lot is toward
+exhaustively (`tools/nec_roof_sloper_scan.py`, SESSION-LOG Phase 17). **The operator chose to
+build Deployment 1** — the overall winner, roof feed to a 66.7 ft support 123 ft out at 148.45°M,
+on the neighbour's land (build guide: `tools/deployment1.py`, page section "Deployment 1", Phase
+18). Best on the lot, for reference, is toward
 ~59°M, support ~125 ft out at 55–67 ft, 47–49/75. Open: the roof height is assumed; no tree at
 that support position has been checked for a usable limb; the recommendation
 itself has not been rewritten into a new deployment guide; the operator has not yet chosen a
