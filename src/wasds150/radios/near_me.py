@@ -139,6 +139,11 @@ def _live(channel: Channel) -> bool:
 
 
 def _placement(spec: NearMeList, favorite_key: str, department: Department, channel: Channel) -> Optional[tuple]:
+    # A national calling frequency is worth hearing wherever the car is, even
+    # when the copy that reaches us sits in a trip list fenced to somewhere
+    # else: that fence once won 146.520 and silenced it everywhere but there.
+    if spec is HAM and any(abs((channel.freq_mhz or 0.0) - calling) < 0.0006 for calling in _HAM_CALLING):
+        return ("anywhere",)
     located = channel.lat is not None and channel.lon is not None
     if _fenced(department) and (department.range_miles <= _TIGHT_FENCE_MILES or not located):
         return ("fence", favorite_key, department.id)
@@ -195,6 +200,22 @@ def _area(entry: _Entry) -> Optional[Tuple[float, float, float]]:
     return None
 
 
+def _same_station(a: Optional[Tuple[float, float, float]], b: Optional[Tuple[float, float, float]]) -> bool:
+    """Whether two copies of a frequency are one station, not merely two
+    areas that touch.
+
+    "Anywhere" is the same station as everything. Otherwise each copy's
+    centre has to fall inside the other's area - the tighter of the two
+    radii. Touching is not enough: a regional list fences its repeaters at
+    120 miles, so by overlap alone KC7BAE on East Tiger (tone 103.5) became
+    the Kitsap County list's Bremerton machine on the same frequency, took
+    its 11-mile fence, and went silent everywhere but Bremerton.
+    """
+    if a is None or b is None:
+        return True
+    return haversine_miles(a[0], a[1], b[0], b[1]) <= min(a[2], b[2])
+
+
 def _better(a: _Entry, b: _Entry) -> bool:
     """True when ``a`` should keep a frequency ``b`` also wants."""
     def rank(entry: _Entry) -> tuple:
@@ -229,7 +250,7 @@ def _conventional(favorites: Sequence[FavoritesList], home: Optional[Tuple[float
                     entry = _Entry(spec, place, favorite, department, channel, order, [channel.label], {channel.tone or ""})
                     rivals = kept.setdefault(key, [])
                     for index, rival in enumerate(rivals):
-                        if areas_overlap(_area(rival), _area(entry)):
+                        if _same_station(_area(rival), _area(entry)):
                             rival.labels.append(channel.label)
                             rival.tones.add(channel.tone or "")
                             if _better(entry, rival):

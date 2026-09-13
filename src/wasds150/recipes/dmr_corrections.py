@@ -20,7 +20,7 @@ from __future__ import annotations
 import copy
 import dataclasses
 from dataclasses import dataclass
-from typing import Dict, Iterable, List, Tuple
+from typing import Dict, Iterable, List, Optional, Tuple
 
 from wasds150.models.catalog import Channel, Department, FavoritesList
 from wasds150.util.hashing import stable_id
@@ -149,5 +149,57 @@ def correct_network_list(fl: FavoritesList) -> FavoritesList:
     return fl
 
 
+#: DMR colour codes the coordinator's record gets wrong, keyed by (callsign,
+#: output MHz). Every copy of these rows in the catalog descends from one
+#: coordination entry, so fixing the catalog would mean fixing every list
+#: that repeats it; the correction is applied to every list instead. A
+#: colour code matters: a scanner or radio set to the wrong one decodes
+#: nothing from the repeater.
+COLOR_CODES: Dict[Tuple[str, float], Tuple[int, str]] = {
+    ("N7QT", 442.325): (
+        1,
+        "N7QT Redmond reports colour code 1 to BrandMeister (api.brandmeister.network/v2/"
+        f"device/311757, last seen {RETRIEVED}, both slots linked); the coordination record "
+        "every other list copies says 2.",
+    ),
+}
+
+
+def _color_fix(channel: Channel) -> Optional[int]:
+    if not _is_dmr(channel) or channel.freq_mhz is None:
+        return None
+    label = (channel.label or "").upper()
+    for (call, mhz), (color, _why) in COLOR_CODES.items():
+        if abs(channel.freq_mhz - mhz) < 5e-4 and call in label:
+            current = channel.dmr_color_code
+            tone = channel.tone or ""
+            if current is None and tone.startswith("ColorCode="):
+                try:
+                    current = int(tone.split("=", 1)[1])
+                except ValueError:
+                    current = None
+            return color if current != color else None
+    return None
+
+
+def correct_color_codes(fl: FavoritesList) -> FavoritesList:
+    """``fl`` with :data:`COLOR_CODES` applied; the same object when nothing matches."""
+    if not any(_color_fix(c) is not None for d in _departments(fl) for c in d.channels):
+        return fl
+    fl = copy.deepcopy(fl)
+    for department in _departments(fl):
+        for index, channel in enumerate(department.channels):
+            color = _color_fix(channel)
+            if color is None:
+                continue
+            tone = channel.tone or ""
+            department.channels[index] = dataclasses.replace(
+                channel,
+                dmr_color_code=color,
+                tone=f"ColorCode={color}" if (not tone or tone.startswith("ColorCode=")) else tone,
+            )
+    return fl
+
+
 def correct_network_lists(favorites: Iterable[FavoritesList]) -> List[FavoritesList]:
-    return [correct_network_list(fl) for fl in favorites]
+    return [correct_color_codes(correct_network_list(fl)) for fl in favorites]

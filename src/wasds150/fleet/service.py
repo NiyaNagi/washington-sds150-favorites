@@ -101,10 +101,14 @@ def scanner_favorites(ctx: AppContext, *, include_licensed: bool = True, near_me
     from wasds150.radios.projection import project_favorites
     from wasds150.radios.registry import SDS150
 
+    from wasds150.recipes.dmr_corrections import correct_network_lists
+
     generated = apply_profile(ctx.catalog, ctx.load_profile())
+    # The DMR network list in the catalog predates any correction to it; the
+    # scanner gets the same corrected layout the radio plans do.
     chosen = [
         favorite
-        for favorite in generated.enabled_favorites
+        for favorite in correct_network_lists(generated.enabled_favorites)
         if favorite.systems and (include_licensed or not favorite.licensed)
     ]
     favorites = [favorite for favorite in project_favorites(chosen, SDS150).favorites if favorite.systems]

@@ -114,6 +114,35 @@ def test_the_same_frequency_in_another_county_is_another_station():
     assert sorted(c.label for c in _conventional(lists["NM-PS"]) if c.freq_mhz == 155.55) == ["KCSO Dispatch", "Spokane SO"]
 
 
+def test_a_regional_repeater_is_not_absorbed_by_a_county_copy_elsewhere():
+    """Two fences that merely touch are not one station. KC7BAE on East Tiger
+    (tone 103.5) sits in a 120-mile regional list; Kitsap County's list has a
+    Bremerton machine on the same frequency with an 11-mile fence. By overlap
+    alone the Kitsap copy won and KC7BAE went silent everywhere else."""
+    from wasds150.util.geo import haversine_miles
+
+    kitsap = Department(id="kit", label="Kitsap County Amateur Radio 70 Centimeters",
+                        channels=[_ch("N7MTR-R Linked", 443.05, mode="FM", service_type=13)],
+                        lat=47.64, lon=-122.65, range_miles=11.2)
+    nets = Department(id="nets", label="Operator-Published Repeaters & Nets",
+                      channels=[_ch("KC7BAE E Tiger", 443.05, mode="FM", service_type=13, tone="TONE=C103.5")],
+                      lat=47.62, lon=-122.33, range_miles=120.0)
+    catalog = [_fl("RRC-KITSAP", _conv("Kitsap", kitsap)), _fl("PSHAM01", _conv("Nets", nets))]
+    lists = {fl.favorite_key: fl for fl in build_near_me_lists(catalog, home=HOME)}
+    copies = [(d, c) for s in lists["NM-HAM"].systems for d in s.departments for c in d.channels if c.freq_mhz == 443.05]
+    assert len(copies) == 2
+    assert any(haversine_miles(HOME[0], HOME[1], d.lat, d.lon) <= d.range_miles for d, _c in copies)
+
+
+def test_a_calling_frequency_scans_anywhere_even_from_a_fenced_trip_list():
+    trip = Department(id="trip", label="Channels", channels=[_ch("national calling", 146.52, mode="FM", service_type=13)],
+                      lat=47.63, lon=-123.21, range_miles=45.0)
+    lists = {fl.favorite_key: fl for fl in build_near_me_lists([_fl("UL01", _conv("Upper Lena", trip))], home=HOME)}
+    [department] = [d for s in lists["NM-HAM"].systems for d in s.departments if any(c.freq_mhz == 146.52 for c in d.channels)]
+    assert department.lat is None and department.range_miles in (None, 0, 0.0)
+    assert department.label == "Ham - Anywhere"
+
+
 def test_copies_with_different_tones_get_open_squelch():
     a = Department(id="a", label="A", channels=[_ch("Agency A", 155.1, mode="FM", service_type=2, tone="TONE=C103.5")], **KING)
     b = Department(id="b", label="B", channels=[_ch("Agency B", 155.1, mode="FM", service_type=2, tone="TONE=C123.0")], **KING)

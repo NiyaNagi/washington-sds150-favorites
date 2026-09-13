@@ -2,7 +2,13 @@
 from __future__ import annotations
 
 from wasds150.models.catalog import Channel, Department, FavoritesList, System
-from wasds150.recipes.dmr_corrections import ADDED, SUPERSEDED, correct_network_list
+from wasds150.recipes.dmr_corrections import (
+    ADDED,
+    SUPERSEDED,
+    correct_color_codes,
+    correct_network_list,
+    correct_network_lists,
+)
 
 
 def _dmr(label: str, mhz: float, tg: int, ts: int, cc: int = 2, name: str = "") -> Channel:
@@ -68,6 +74,26 @@ def test_corrections_are_idempotent_and_leave_a_present_repeater_alone():
 def test_other_lists_are_untouched():
     other = _list("BMNET", [_dmr("King County BWT", 442.075, 333153, 2)])
     assert correct_network_list(other) is other
+
+
+def test_a_coordinated_colour_code_is_corrected_in_any_list():
+    wrong = Channel(id="n7qt", label="N7QT - Redmond", freq_mhz=442.325, tx_freq_mhz=447.325,
+                    mode="DMR", tone="ColorCode=2")
+    analog = Channel(id="fm", label="N7QT", freq_mhz=442.325, mode="FM", tone="TONE=C103.5")
+    source = _list("PSHAM01", [wrong, analog])
+
+    fixed = correct_color_codes(source)
+
+    dmr, fm = _channels(fixed)
+    assert dmr.tone == "ColorCode=1" and dmr.dmr_color_code == 1
+    assert fm.tone == "TONE=C103.5"  # only the DMR row
+    assert _channels(source)[0].tone == "ColorCode=2"  # input untouched
+    # Already right, or not the station: the same object comes back.
+    assert correct_color_codes(fixed) is fixed
+    other = _list("PSHAM01", [Channel(id="x", label="K7XX", freq_mhz=442.325, mode="DMR", tone="ColorCode=2")])
+    assert correct_color_codes(other) is other
+    # The combined entry point applies both kinds of correction.
+    assert _channels(correct_network_lists([source])[0])[0].tone == "ColorCode=1"
 
 
 def test_an_analog_channel_on_the_same_frequency_survives():
