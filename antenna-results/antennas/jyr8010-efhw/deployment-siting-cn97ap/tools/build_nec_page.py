@@ -416,6 +416,7 @@ def render_jpeg(items, faded, crop, title, rows, path, out_px=1600):
             (255, 255, 255, 200), 4, (18, 12))
     for fo in faded:
         d.line([Q(en) for _, _, en in fo.supports], fill=(255, 255, 255, 110), width=3)
+    placed = []
     for lab, ob, col, dash in items:
         rgb = tuple(int(col[i:i + 2], 16) for i in (1, 3, 5))
         pts = [Q(en) for _, _, en in ob.supports]
@@ -429,8 +430,13 @@ def render_jpeg(items, faded, crop, title, rows, path, out_px=1600):
         ex, ey = Q(end)
         qx, qy = Q(prev)
         L = math.hypot(ex - qx, ey - qy) or 1
-        bx = min(max(ex + (ex - qx) / L * 34, 24), out_px - 24)
-        by = min(max(ey + (ey - qy) / L * 34, 24), out_px - 24)
+        bx, by = ex + (ex - qx) / L * 34, ey + (ey - qy) / L * 34
+        for _ in range(10):                  # nudge sideways off earlier badges
+            if not [p for p in placed if math.dist(p, (bx, by)) < 44]:
+                break
+            bx, by = bx - (ey - qy) / L * 44, by + (ex - qx) / L * 44
+        bx, by = min(max(bx, 24), out_px - 24), min(max(by, 24), out_px - 24)
+        placed.append((bx, by))
         d.ellipse([bx - 21, by - 21, bx + 21, by + 21], fill=rgb + (255,),
                   outline=(11, 13, 15), width=4)
         d.text((bx, by), lab, fill=(255, 255, 255) if INK.get(col) else (11, 13, 15),
@@ -685,7 +691,9 @@ def legend(items, map_id, metric="3"):
         rows.append(f'<li tabindex="0" data-hl="{o.key}" data-map="{map_id}">'
                     f'{badge(lab, col)}{swatch(col, dash)}<div><div class="nm">'
                     f'{esc(name_of(o))}</div><div class="sub">NEC #{r} of {N_ALL} · '
-                    f'{m["n_workable"]}/{m["n_cells"]} · was #{old}</div></div></li>')
+                    f'{m["n_workable"]}/{m["n_cells"]} · '
+                    + (f'was #{old}' if old else "; ".join(getattr(o, "cats", [])) or "new")
+                    + '</div></div></li>')
     return f'<ul class="legend">{"".join(rows)}</ul>'
 
 
@@ -790,6 +798,224 @@ def heat_table(opts, labels_cols):
     return (f'<div class="tbl"><table class="heat"><caption>NEC 40/20/15 m mean dBi per '
             f'region · columns match the map badges</caption><thead><tr><th>Region</th>'
             f'<th>Brg T</th>{head}</tr></thead><tbody>{"".join(rows)}</tbody></table></div>')
+
+
+SCAN_PATH = os.path.join(DATA, "nec-roof-sloper-scan.json")
+SCAN = None
+if os.path.exists(SCAN_PATH):
+    with open(SCAN_PATH, encoding="utf-8") as fh:
+        SCAN = json.load(fh)
+
+
+def _scan_wire(key, d, cats):
+    o = SimpleNamespace()
+    o.key, o.family, o.model, o.bend, o.groups, o.aliases = key, "sloper", "NEC scan", 0.0, ["scan"], []
+    o.feed = ((d["poly"][0][0], d["poly"][0][1]), d["fft"])
+    o.supports = [("roof feed", int(round(d["fft"])), o.feed[0]),
+                  ("support" if d["dir"] == "up" else "low end", int(round(d["end_ft"])),
+                   (d["end_en"][0], d["end_en"][1]))]
+    o.parcel, o.nec, o.nec3, o.nec2 = d["parcel"], d["g"], d["m3"], d["m2"]
+    o.nec_rank3 = d.get("rank_among_103") or 0
+    o.nec_rank2, o.ana_rank3, o.ana_rank2 = 0, 0, 0
+    o.d, o.cats = d, cats
+    o.label = f"Roof sloper {d['dir']} to {d['end_ft']:.0f} ft at {d['brg_mag']:.0f}°M"
+    return o
+
+
+def scan_objects():
+    """Distinct 3-band winning wires, each with the categories it wins."""
+    objs = []
+    for w in SCAN["winners"]:
+        if w["metric"] != "3band":
+            continue
+        d = w["wire"]
+        hit = next((o for o in objs if o.d["poly"] == d["poly"]), None)
+        if hit:
+            hit.cats.append(w["category"])
+        else:
+            objs.append(_scan_wire(f"SCAN-{len(objs) + 1}", d, [w["category"]]))
+    for o in objs:
+        prof = []
+        a, b = o.supports[0][2], o.supports[1][2]
+        prof += K.profile_along(_mask, _ppm, _cen, _im.size, a, b)
+        CANOPY[o.key] = sum(v for _, v in prof) / max(len(prof), 1)
+    return objs
+
+
+def scan_section():
+    if not SCAN:
+        return "", []
+    objs = scan_objects()
+    labels = [chr(ord("A") + i) for i in range(len(objs))]
+    items = items_for(objs, labels)
+    for it in items:                         # all scan wires are slopers: vary dash only
+        pass
+    smap = map_svg(items, [o for o in REFS], crop_for(objs + REFS),
+                   "Winning roof slopers from the exhaustive NEC scan", "mscan")
+    by_poly = {tuple(map(tuple, o.d["poly"])): (lab, col) for lab, o, col, _ in items}
+
+    land = SCAN["landscape"]
+    with open(os.path.join(IMGDIR, "nec_roof_sloper_landscape.png"), "rb") as fh:
+        png = base64.b64encode(fh.read()).decode()
+    rows_ft, rows_m = land["rows_attach_ft"], land["rows_runs_m"]
+    nr = len(rows_ft)
+    Lm, Tm, Bm = 64, 14, 46
+    iw, ih = 360 * land["px_per_deg"], nr * land["px_per_run_step"]
+    vw, vh = Lm + iw + 20, Tm + ih + Bm
+    s = [f'<svg viewBox="0 0 {vw} {vh}" xmlns="http://www.w3.org/2000/svg" class="chart" '
+         f'role="img" aria-label="Workable cells for every roof sloper by bearing and '
+         f'attachment height"><image x="{Lm}" y="{Tm}" width="{iw}" height="{ih}" '
+         f'href="data:image/png;base64,{png}" preserveAspectRatio="none"/>']
+    for m in range(0, 361, 45):
+        x = Lm + m * land["px_per_deg"]
+        s.append(f'<line x1="{x}" y1="{Tm + ih}" x2="{x}" y2="{Tm + ih + 5}" class="gl"/>'
+                 f'<text x="{x}" y="{Tm + ih + 18}" class="ax" text-anchor="middle">{m}°</text>')
+    s.append(f'<text x="{Lm + iw / 2}" y="{vh - 6}" class="ax" text-anchor="middle">bearing '
+             f'from the roof feed · degrees magnetic</text>')
+    for ft_ in (40, 60, 80, 100, 120, 140):
+        j = min(range(nr), key=lambda k: abs(rows_ft[k] - ft_))
+        if abs(rows_ft[j] - ft_) > 3:
+            continue
+        y = Tm + j * land["px_per_run_step"] + land["px_per_run_step"] / 2
+        s.append(f'<line x1="{Lm - 5}" y1="{y:.1f}" x2="{Lm}" y2="{y:.1f}" class="gl"/>'
+                 f'<text x="{Lm - 8}" y="{y + 4:.1f}" class="ax" text-anchor="end">{ft_} ft'
+                 f'</text>')
+    s.append(f'<text x="14" y="{Tm + ih / 2}" class="ax" text-anchor="middle" '
+             f'transform="rotate(-90 14 {Tm + ih / 2})">attachment height</text>')
+    for lab, o, col, _ in items:
+        d = o.d
+        if d["dir"] != "up":
+            continue
+        x = Lm + d["brg_mag"] * land["px_per_deg"]
+        j = min(range(nr), key=lambda k: abs(rows_m[k] - d["run"]))
+        y = Tm + j * land["px_per_run_step"] + land["px_per_run_step"] / 2
+        s.append(f'<g><title>{esc(", ".join(o.cats))}</title><circle cx="{x:.1f}" '
+                 f'cy="{y:.1f}" r="9" fill="none" stroke="#0b0d0f" stroke-width="3"/>'
+                 f'<circle cx="{x:.1f}" cy="{y:.1f}" r="9" fill="none" stroke="#fff" '
+                 f'stroke-width="1.5"/><text x="{x + 12:.1f}" y="{y - 8:.1f}" '
+                 f'font-family="IBM Plex Mono, monospace" font-size="13" font-weight="700" '
+                 f'fill="#0b0d0f" stroke="#fff" stroke-width="3" paint-order="stroke">{lab}'
+                 f'</text></g>')
+    s.append("</svg>")
+    landscape_svg = "".join(s)
+    ramp = ", ".join(land["ramp"])
+
+    def wrow(w):
+        d = w["wire"]
+        m = d["m3"] if w["metric"] == "3band" else d["m2"]
+        lab, col = by_poly.get(tuple(map(tuple, d["poly"])), ("", COL["sloper"]))
+        attach = (f'{d["end_ft"]:.0f} ft' if d["dir"] == "up"
+                  else f'roof {d["fft"]:.0f} ft → end {d["end_ft"]:.0f} ft')
+        nb = ("—" if d.get("nbr_mean") is None
+              else f'{d["nbr_mean"]:.1f} (min {d["nbr_min"]:.0f})')
+        return (f'<tr><td>{esc(w["category"])}</td><td class="nm">'
+                f'{badge(lab, col) if lab else ""}</td>'
+                f'<td class="n"><b>{d["brg_mag"]:.1f}°M</b></td>'
+                f'<td class="n">{d["run_ft"]:.0f} ft</td><td class="n">{attach}</td>'
+                f'<td class="n">{d["slope"]:.0f}° {"up" if d["dir"] == "up" else "down"}</td>'
+                f'<td class="n"><b>{m["n_workable"]}</b> / {m["n_cells"]}</td>'
+                f'<td class="n">{sg(m["mean_power_dBi"])}</td>'
+                f'<td class="n">{sg(m["worst_dBi"], "+.1f")}</td>'
+                f'<td class="n">{d["c3_lo"]} / {d["c3_hi"]}</td><td class="n">{nb}</td>'
+                f'<td class="n">{d.get("rank_among_103", "—")}</td>'
+                f'<td>{esc(d["parcel"])}</td></tr>')
+
+    win3 = "".join(wrow(w) for w in SCAN["winners"] if w["metric"] == "3band")
+    win2 = "".join(wrow(w) for w in SCAN["winners"] if w["metric"] == "40+20")
+    rob = "".join(
+        f'<tr><td>{esc(r["category"])}</td><td class="n">{r["wire"]["brg_mag"]:.0f}°M</td>'
+        f'<td class="n">{r["wire"]["run_ft"]:.0f} ft</td>'
+        f'<td class="n">{r["wire"]["end_ft"]:.0f} ft</td>'
+        f'<td class="n"><b>{r["wire"]["nbr_mean"]:.1f}</b> (min {r["wire"]["nbr_min"]:.0f})</td>'
+        f'<td class="n">{r["wire"]["m3"]["n_workable"]} / 75</td>'
+        f'<td>{esc(r["wire"]["parcel"])}</td></tr>' for r in SCAN["robust"])
+    vnames = [k for k in SCAN["stress"]["rows"][0] if k != "category"] if SCAN["stress"]["rows"] else []
+    stress_rows = "".join(
+        f'<tr><td>{esc(r["category"])}</td>' + "".join(
+            f'<td class="n">#{r[v]["rank"]} · {r[v]["cells"]}</td>' for v in vnames) + "</tr>"
+        for r in SCAN["stress"]["rows"])
+    hcats = [k for k in SCAN["heights"][0] if isinstance(SCAN["heights"][0][k], (dict, type(None)))]
+    h_rows = "".join(
+        f'<tr><td class="n"><b>{h["roof_ft"]:.0f} ft</b></td>' + "".join(
+            (f'<td class="n">{h[k]["m3"]["n_workable"]} / 75 · {h[k]["brg_mag"]:.0f}°M · end '
+             f'{h[k]["end_ft"]:.0f} ft</td>' if h.get(k) else '<td class="n">—</td>')
+            for k in hcats) + "</tr>" for h in SCAN["heights"])
+
+    wmap = {w["category"]: w["wire"] for w in SCAN["winners"] if w["metric"] == "3band"}
+    best, lot, clear = wmap.get("overall"), wmap.get("on the lot"), wmap.get(
+        "on the lot, clear of the setback")
+    ref = SCAN["references"]
+    g = SCAN["grid"]
+    verdict = (
+        f'The best roof sloper anywhere scores <b>{best["m3"]["n_workable"]} / 75</b> '
+        f'({best["brg_mag"]:.1f}°M, support {best["run_ft"]:.0f} ft out at '
+        f'{best["end_ft"]:.0f} ft; {esc(best["parcel"])}), against '
+        f'{ref["NR-SL1"]["n_workable"]} / 75 for the best from the earlier search. '
+        f'<b>On the lot</b> the best is <b>{lot["m3"]["n_workable"]} / 75</b> at '
+        f'{lot["brg_mag"]:.1f}°M, support {lot["run_ft"]:.0f} ft out at {lot["end_ft"]:.0f} ft '
+        f'(earlier best on the lot: {ref["NR-SL2"]["n_workable"]} / 75)'
+        + (f'; clear of the setback, <b>{clear["m3"]["n_workable"]} / 75</b> at '
+           f'{clear["brg_mag"]:.1f}°M to {clear["end_ft"]:.0f} ft' if clear else "")
+        + ". For comparison, what is up now is "
+        f'{ref["CURRENT"]["n_workable"]} / 75.') if best and lot else ""
+
+    html = f"""
+<section>
+  <div class="sec-head">
+    <div class="eyebrow">Exhaustive NEC scan · roof feed at {SCAN["roof_feed"][1]:.0f} ft</div>
+    <h2>Every straight sloper off the roof, simulated</h2>
+  </div>
+  <p>A straight 130 ft sloper from a fixed feed has only two free choices — which way it
+  points and how far out its support stands; the wire length fixes the height. So the whole
+  space was simulated: <b>{g["wires"]:,} slopers</b> at every 1° of bearing and every 0.25 m of
+  run, up to the 150 ft tree cap and down to an 8 ft end, then the best of every category
+  refined to 0.25° × 0.05 m ({g["refined_total"]:,} wires in all), stress-tested, and repeated at
+  20 and 30 ft of roof height.</p>
+  <div class="note">{verdict}</div>
+  <figure>{landscape_svg}<figcaption>Every upward roof sloper at {SCAN["roof_feed"][1]:.0f} ft.
+  Darker blue = more workable 40/20/15 m cells ({land.get("cells_min", 0):.0f} to {land["cells_max"]:.0f}). <b>Paler</b> squares
+  are wires whose support lands off the lot; the thin dark line is the lot boundary. Lettered
+  rings are the category winners below. The broad dark bands, not the single darkest square,
+  are the safe places to build — the neighbourhood column in the table measures exactly that.
+  <div style="margin-top:8px;height:10px;max-width:320px;border-radius:3px;background:linear-gradient(90deg,{ramp})"></div>
+  </figcaption></figure>
+  <div class="lay">
+    <figure>{smap}<figcaption>The winning wires on the aerial, from the roof feed (white
+    square). Earlier recommendations faint.</figcaption></figure>
+    {legend(items, "mscan")}
+  </div>
+  <div class="tbl"><table>
+    <caption>Best roof sloper in each category · NEC 40 + 20 + 15 m</caption>
+    <thead><tr><th>Category</th><th></th><th>Bearing</th><th>Support out</th><th>Height</th>
+      <th>Slope</th><th>Cells</th><th>dBi</th><th>Worst</th><th>Cells if threshold −2 / +2 dB</th>
+      <th>Neighbourhood ±2° ±0.5 m</th><th>Rank among the 103</th><th>Lot</th></tr></thead>
+    <tbody>{win3}</tbody>
+  </table></div>
+  <div class="tbl"><table>
+    <caption>Best roof sloper in each category · NEC 40 + 20 m</caption>
+    <thead><tr><th>Category</th><th></th><th>Bearing</th><th>Support out</th><th>Height</th>
+      <th>Slope</th><th>Cells</th><th>dBi</th><th>Worst</th><th>3-band cells −2 / +2 dB</th>
+      <th>Neighbourhood</th><th>3-band rank</th><th>Lot</th></tr></thead>
+    <tbody>{win2}</tbody>
+  </table></div>
+  <div class="tri">
+    <div class="tbl"><table><caption>Most robust point per category (grid, 3-band)</caption>
+      <thead><tr><th>Category</th><th>Bearing</th><th>Out</th><th>Height</th>
+        <th>Neighbourhood mean</th><th>Cells</th><th>Lot</th></tr></thead>
+      <tbody>{rob}</tbody></table></div>
+    <div class="tbl"><table><caption>Roof height · best at 2° × 0.5 m</caption>
+      <thead><tr><th>Roof</th>{"".join(f"<th>{esc(k)}</th>" for k in hcats)}</tr></thead>
+      <tbody>{h_rows}</tbody></table></div>
+  </div>
+  <div class="tbl"><table>
+    <caption>Stress test · each winner's rank among the {SCAN["stress"]["n_candidates"]} best
+    distinct candidates, and its cells, under every modelling change</caption>
+    <thead><tr><th>Winner</th>{"".join(f"<th>{esc(v)}</th>" for v in vnames)}</tr></thead>
+    <tbody>{stress_rows}</tbody>
+  </table></div>
+</section>
+"""
+    return html, items
 
 
 def build():
@@ -957,6 +1183,7 @@ def build():
         f'{legend(its, mid)}</div>' for title, its, svg, mid in roof_maps)
 
     word = lambda a, b: ("better" if b > a else "worse" if b < a else "tied")  # noqa: E731
+    scan_html, scan_items = scan_section()
 
     return f"""<title>Every Wire on One Lot</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
@@ -1099,6 +1326,7 @@ def build():
   </div>
 </section>
 
+{scan_html}
 <section>
   <div class="sec-head">
     <div class="eyebrow">Scorecard</div>
@@ -1198,11 +1426,19 @@ def build():
 </footer>
 </div>
 {JS}
-""", (top_items + ref_items, [x for _, x, _, _ in roof_maps], w2_items)
+""", (top_items + ref_items, [x for _, x, _, _ in roof_maps], w2_items, scan_items)
 
 
 if __name__ == "__main__":
-    html, (top_items, roof_item_groups, w2_items) = build()
+    html, (top_items, roof_item_groups, w2_items, scan_items) = build()
+    if scan_items:
+        render_jpeg(scan_items, REFS, crop_for([o for _, o, _, _ in scan_items] + REFS),
+                    "Exhaustive NEC scan · best roof sloper per category",
+                    [(lab, col, f"{name_of(o) if False else o.label}  ·  "
+                                f"{o.nec3['n_workable']}/75  ·  {o.nec3['mean_power_dBi']:+.2f} dBi  ·  "
+                                f"{'; '.join(c.replace('on the lot, ', '') for c in o.cats)[:95]}")
+                     for lab, o, col, _ in scan_items],
+                    os.path.join(IMGDIR, "nec_roof_sloper_best.jpg"))
     tops = [o for _, o, _, _ in top_items]
     render_jpeg(top_items, (), crop_for(tops), "Best wires on NEC-2 · 40 + 20 + 15 m",
                 jpeg_rows(top_items), os.path.join(IMGDIR, "nec_top.jpg"))

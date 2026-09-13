@@ -67,6 +67,38 @@ the re-aimed F10‑A (25/50).
 angles. Moving the workable line ±2 dB drops rank correlation to ~0.8, so rows a few cells apart
 are ties. The roof height is assumed. Every earlier table in this README is kept for the record.
 
+### Every straight sloper off the roof — exhaustive NEC scan
+
+A straight 39.6 m sloper from a fixed feed has two free parameters, bearing and run; the run fixes
+the height. So the roof point was covered completely by
+[`tools/nec_roof_sloper_scan.py`](tools/nec_roof_sloper_scan.py): **43,560 slopers** at every 1° ×
+0.25 m (up to the 150 ft cap, down to an 8 ft end), 5,842 more refining the best of each category
+to 0.25° × 0.05 m, the winners stress-tested against 45 rivals under 10 modelling changes, and
+full grids repeated at 20 and 30 ft of roof height. 91 s on 32 cores. Results in
+[`data/nec-roof-sloper-scan.json`](data/nec-roof-sloper-scan.json) and
+[`data/nec-roof-sloper-grid.csv`](data/nec-roof-sloper-grid.csv); landscape in
+[`imagery/nec_roof_sloper_landscape.png`](imagery/nec_roof_sloper_landscape.png).
+
+| NEC 40+20+15 m, roof 25 ft | Bearing | Support out | Attach | Cells | dBi | Neighbours ±2° ±0.5 m | Lot |
+|---|---|---|---|---|---|---|---|
+| Best anywhere | 148.5°M | 123 ft | 67 ft | **54/75** | +2.49 | 50.2 (min 47) | 81 ft past the south line |
+| **Best on the lot** (also clear of setback, ≤70 and ≤90 ft) | **59.2°M** | 125 ft | 60 ft | **49/75** | +2.73 | 47.0 (min 43) | clear of the setback |
+| **Most robust on the lot** | **58.7°M** | 123 ft | 67 ft | 48/75 | +2.71 | **47.5 (min 46)** | clear of the setback |
+| On the lot, easy throw (≤55 ft) | 59.0°M | 126 ft | 55 ft | 47/75 | +2.73 | 44.2 (min 38) | clear of the setback |
+| Sloping down | 308.2°M | 130 ft | level at 25 ft | 35/75 | +1.90 | — | clear |
+
+On **40 + 20 m** the best on the lot is 254.7°M, support 122 ft out at 70 ft (35/50, inside the
+setback); clear of the setback, 71.7°M to 77 ft (33/50); easy-throw, 73.7°M to 55 ft (29/50).
+
+**The answer for the roof is a sloper toward about 59° magnetic** — east-north-east over the house
+and lawn to a support about 123–126 ft out, 55–67 ft up. It is not a spike: every neighbour within
+±2° and ±0.5 m keeps 43–46+ cells; the same bearing wins at 20, 25 and 30 ft of roof (47 / 49 /
+51 cells); and it stays in the top handful of rivals under every NEC modelling change. It moves if
+the workable threshold moves (28 cells at +2 dB), like everything else. The earlier NEC search had
+already found this wire (NR‑SL2, 49/75), so the search was not missing a better on-lot sloper.
+**Sloping down off the roof does not work** — the best "down" wire is effectively level at 25 ft.
+The support position is a computed point; no tree there has been checked for a 55–67 ft limb.
+
 ---
 
 ## The aerial photograph changed the picture
@@ -852,6 +884,7 @@ the bend and its null-filling — drops support 3, and costs 1.1 dB and two regi
 | [`tools/nec_engine.py`](tools/nec_engine.py) | **NEC-2 scoring** (PyNEC): support points → 39.6 m wire → gain toward every region, ranked the study's way |
 | [`tools/nec_validate.py`](tools/nec_validate.py) | Engine benchmarks, resonances, the pattern-formula check, NEC sensitivity → `data/nec-validation.json`, `data/nec-resonances.json` |
 | [`tools/nec_search.py`](tools/nec_search.py) | **The ranking now in force**: re-runs the searches on NEC and scores all 103 wires → `data/nec-scores.json`, `nec-ranking.csv`, `nec-ranking.kml` |
+| [`tools/nec_roof_sloper_scan.py`](tools/nec_roof_sloper_scan.py) | **Exhaustive** NEC scan of every straight sloper off the roof point, with robustness, stress test and 20/30 ft roof heights |
 | [`tools/build_nec_page.py`](tools/build_nec_page.py) | "Every Wire on One Lot" page and `imagery/nec_*.jpg` |
 | [`tools/topology_search.py`](tools/topology_search.py) | Searches slopers, inverted‑Vs and inverted‑Ls (feed 10 ft) on the 3-band and 40 + 20 m metrics; adds the hybrid L model |
 | [`tools/build_lineup_page.py`](tools/build_lineup_page.py) | Builds the lineup comparison page and the two annotated aerial JPEGs |

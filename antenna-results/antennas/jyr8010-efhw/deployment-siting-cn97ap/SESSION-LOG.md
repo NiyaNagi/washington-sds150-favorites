@@ -700,6 +700,25 @@ sloper to a 69 ft support 81 ft past the south line (52/75); best on the lot a r
 Search labelling fix: S1–S5 were tagged "bent / flat-top" because they carry no slope angle;
 now "sloper".
 
+## Phase 17 — 2026-09-12: every roof sloper, exhaustively
+
+**Operator asked:** run more NEC simulations of slopers off the roof and find the best one,
+efficiently but completely.
+
+A straight sloper from a fixed feed has two free parameters (bearing, run), so the space was
+covered rather than sampled: `tools/nec_roof_sloper_scan.py` — 43,560 wires at 1° × 0.25 m up and
+down from the 25 ft roof point, 5,842 refinements at 0.25° × 0.05 m around the best seeds of seven
+categories on both rankings, a neighbourhood robustness score (mean and minimum over ±2°, ±0.5 m),
+a stress test of the winners against 45 rivals under Sommerfeld ground, λ/40 segments, 0.5 and
+2 m counterpoises, band frequencies, 20 and 30 ft roofs and the threshold ±2 dB, and full grids at
+20 and 30 ft. 91 s total.
+
+**Result.** Best on the lot: **59.2°M, support 125 ft out at 60 ft, 49/75**; most robust on the lot
+58.7°M, 123 ft at 67 ft, 48/75 with every neighbour ≥ 46. Same bearing wins at every roof height
+(47/49/51). Best anywhere 54/75 at 148.5°M, 81 ft past the south line. Easy-throw (≤ 55 ft) 47/75,
+same bearing. Best downward wire effectively level, 35/75. The earlier NEC search's NR‑SL2
+(49/75) was already this wire, which is the check that the search had not missed a better one.
+
 ## Corrections summary
 
 | # | Error | Corrected in | Status |
