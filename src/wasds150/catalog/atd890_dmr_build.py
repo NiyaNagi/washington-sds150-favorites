@@ -17,7 +17,6 @@ from wasds150.sources.k7abd import AnalogDef, RepeaterDef, TalkgroupDef, facts_f
 RepeaterRow = Tuple[str, str, float, float, int, Optional[float], Optional[float], Dict[str, int]]
 AnalogRow = Tuple[str, str, str, str, float, float, str, str, bool]
 
-
 def favorites_from_snapshot(
     talkgroups: Dict[str, int],
     repeaters: Sequence[RepeaterRow],

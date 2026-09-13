@@ -377,10 +377,22 @@ takes several minutes and is rarely worth reloading with the rest of a bundle.
 - `Near Me` is the first zone: copies of the nearest of every local amateur
   service, named with a trailing ` N`, each naming the `Near Me` list. The
   originals stay in their own zones and keep scanning those.
-- `Weather`, `Data` and `Not Scanned 01/02` scan nothing on purpose. `Not
-  Scanned` holds the channels beyond the radius and any label lockouts,
-  taken out of their blocks so that no scanned zone quietly skips part of
-  itself. Nuisance Delete (PF1 long) drops a busy channel for the session.
+- `Far Ham Analog`, `Far Ham DMR`, `Far Public Svc` and `Far Other` hold the
+  stations the fill pass found beyond the radius: out of their own blocks so
+  the local sweep stays quick, but scannable in zones of their own, each
+  named for the narrowest scan group its block is in (a service with fewer
+  than ten such stations joins `Far Other`).
+- `Weather` and `Data` scan nothing on purpose (continuous carriers, packet).
+  A channel the operator locked out by label would land in `Not Scanned`,
+  also with no list; the fleet plan currently has none. Nuisance Delete
+  (PF1 long) drops a busy channel for the session.
+- **Digital Monitor must be on to hear DMR.** Optional Settings > Digital
+  Function > Digital Monitor = Double Slot, CC = Any, ID = Any. With it off
+  (`DigiMoni 0` - how the radio came from the factory, and still how it read
+  back after the 2026-09-12 write), a DMR channel opens only for talkgroups in
+  its receive group list on its own timeslot, and most traffic on these
+  networks is someone keying a talkgroup that list does not name. It is an
+  Optional Setting, not an import table, so the bundle cannot set it.
 - Receiver B on AM air: Menu > Settings > Radio Set > Other Func > AM Air/FM
   > AM Air on B, then the AM zone's own scan menu.
 - NOAA, FM broadcast and the packet zone are selected by hand and never

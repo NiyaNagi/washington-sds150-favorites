@@ -27,9 +27,11 @@ from dataclasses import dataclass, field
 from typing import Dict, Iterable, List, Optional, Tuple
 
 import dataclasses
+import re
 
 from wasds150 import station
 from wasds150.plan.resolve import PlannedChannel, ResolvedPlan
+from wasds150.plan.naming import shorten_name
 from wasds150.plan.scanning import group_members
 
 AM_AIR_MAX = 256
@@ -40,10 +42,19 @@ RX_GROUP_MEMBER_MAX = 64
 SCAN_LIST_MAX = 250
 NAME_MAX = 16
 
-#: Where a channel that is programmed but never scanned lives when the rest of
+#: Where a channel the operator locked out of scanning lives when the rest of
 #: its block is scanned: a zone that names no scan list, so pressing Scan on
 #: it says "Scan List No Select" rather than sweeping something it is not in.
 UNSCANNED_ZONE = "Not Scanned"
+
+#: Stations the fill pass added from beyond the plan's radius are left out of
+#: their own block's zones - they would slow the local sweep - but they are
+#: still worth a scan of their own. They are zoned by the service they belong
+#: to, "Far Public Svc", "Far Ham DMR", each with its identical scan list; a
+#: service with fewer than FAR_MIN of them joins "Far Other" instead.
+FAR_PREFIX = "Far "
+FAR_OTHER = "Other"
+FAR_MIN = 10
 
 #: Marks a channel copied into the first scan group's zone. The CPS resolves
 #: zone and scan-list members by name, so the copy cannot share its original's.
@@ -187,12 +198,26 @@ def _numbered(stem: str, count: int) -> List[str]:
 
 
 def _copy_name(name: str, taken: Dict[str, str]) -> str:
-    """``K7LED Tgr Mtn E`` -> ``K7LED Tgr Mtn EN``-style: the original's name
-    with the copy suffix, shortened to fit and numbered if that still clashes."""
+    """The original's name with the copy suffix, numbered if that clashes.
+
+    When it has to shrink, the shrinking comes out of everything before the
+    last word, which is kept whole: DMR channels end in the repeater's site
+    code ("Washington 1 BVC"), and a plain truncation left copies that named
+    the talkgroup but not the machine ("Washington 1 N2"). The front is
+    shortened the way every channel name is (vowels first, digits never), so
+    "Washington 1" and "Washington 2" stay apart.
+    """
+    head, _, tail = name.rpartition(" ")
     for index in range(1, 100):
         suffix = COPY_SUFFIX if index == 1 else f"{COPY_SUFFIX}{index}"
-        candidate = name[: NAME_MAX - len(suffix)].rstrip() + suffix
-        if candidate.casefold() not in taken:
+        room = NAME_MAX - len(suffix) - len(tail) - 1
+        if len(name) + len(suffix) <= NAME_MAX:
+            candidate = name + suffix
+        elif head and room >= 3:
+            candidate = f"{shorten_name(head, room, readable=True).rstrip()} {tail}{suffix}"
+        else:
+            candidate = name[: NAME_MAX - len(suffix)].rstrip() + suffix
+        if len(candidate) <= NAME_MAX and candidate.casefold() not in taken:
             return candidate
     raise Atd890ExportError(f"cannot find a free copy name for {name!r}")
 
@@ -372,24 +397,63 @@ def build_bundle(resolved: ResolvedPlan) -> Atd890Bundle:
     scan_lists: List[ScanList] = []
     scan_list_by_channel: Dict[str, str] = {}
     unscanned: List[PlannedChannel] = []
+    far: List[PlannedChannel] = []
     limit = profile.scan_list_member_max
-    for bank, members in by_bank.items():
-        _validate_name(bank, "zone")
-        scanned = [m for m in members if not m.skip_scan]
-        quiet = [m for m in members if m.skip_scan]
-        if not scanned:
-            chunks = _chunk(quiet, profile.zone_member_max)
-            for name, chunk in zip(_numbered(bank, len(chunks)), chunks):
-                zones.append(Zone(name=name, members=chunk))
-            continue
-        chunks = _chunk(scanned, limit)
-        kind = "group" if bank == near_name else "zone"
-        for name, chunk in zip(_numbered(bank, len(chunks)), chunks):
+    blocks_by_label = {block.label: block for block in plan.blocks}
+
+    def is_far(member: PlannedChannel) -> bool:
+        """Unscanned only because the fill pass found it beyond the radius -
+        not a block that never scans, and not a lockout the operator chose."""
+        block = blocks_by_label.get(member.block)
+        if block is None or block.skip_scan:
+            return False
+        if block.skip_label_pattern and re.search(block.skip_label_pattern, member.label, re.IGNORECASE):
+            return False
+        return (plan.radius_miles is not None and member.distance_miles is not None
+                and member.distance_miles > plan.radius_miles)
+
+    def add_scanned(stem: str, members: List[PlannedChannel], kind: str) -> None:
+        chunks = _chunk(members, limit)
+        for name, chunk in zip(_numbered(stem, len(chunks)), chunks):
             zones.append(Zone(name=name, members=chunk))
             scan_lists.append(ScanList(name=name, members=chunk, kind=kind))
             for member in chunk:
                 scan_list_by_channel[member.name] = name
-        unscanned.extend(quiet)
+
+    for bank, members in by_bank.items():
+        _validate_name(bank, "zone")
+        scanned = [m for m in members if not m.skip_scan]
+        far.extend(m for m in members if m.skip_scan and is_far(m))
+        quiet = [m for m in members if m.skip_scan and not is_far(m)]
+        if scanned:
+            add_scanned(bank, scanned, "group" if bank == near_name else "zone")
+            unscanned.extend(quiet)
+        elif quiet:
+            chunks = _chunk(quiet, profile.zone_member_max)
+            for name, chunk in zip(_numbered(bank, len(chunks)), chunks):
+                zones.append(Zone(name=name, members=chunk))
+
+    if far:
+        # A far station takes the name of the narrowest scan group its block is
+        # in - "Ham DMR" before "Ham All" - never the first group (that is the
+        # near list) and never the catch-all that holds every block.
+        themes = [g for g in plan.scan_groups[1:]]
+        catch_all = max(plan.scan_groups, key=lambda g: len(g.blocks)) if plan.scan_groups else None
+        narrowest = sorted((g for g in themes if g is not catch_all), key=lambda g: len(g.blocks))
+        by_theme: "OrderedDict[str, List[PlannedChannel]]" = OrderedDict(
+            (g.name, []) for g in themes if g is not catch_all
+        )
+        by_theme[FAR_OTHER] = []
+        for member in far:
+            theme = next((g.name for g in narrowest if member.block in g.blocks), FAR_OTHER)
+            by_theme[theme].append(member)
+        for theme in list(by_theme):
+            if theme != FAR_OTHER and 0 < len(by_theme[theme]) < FAR_MIN:
+                by_theme[FAR_OTHER].extend(by_theme.pop(theme))
+        for theme, members in by_theme.items():
+            if members:
+                add_scanned(f"{FAR_PREFIX}{theme}"[:NAME_MAX].rstrip(), members, "far")
+
     if unscanned:
         chunks = _chunk(unscanned, profile.zone_member_max)
         for name, chunk in zip(_numbered(UNSCANNED_ZONE, len(chunks)), chunks):

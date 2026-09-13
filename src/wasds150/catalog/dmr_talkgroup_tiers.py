@@ -34,23 +34,35 @@ _REGIONAL = TIER_REGIONAL
 _TEST = TIER_TEST
 
 TIER_TABLE: Dict[Tuple[str, str], int] = {
-    # PNWDigital: statewide/regional calling and the Puget Sound local groups.
+    # PNWDigital. Core is what is on the air here without anyone keying it up:
+    # the groups https://pnwdigital.net/talkgroups/ lists as full-time on all
+    # or most Washington repeaters (Washington 1/2, PNW 1/2), the single-site
+    # and regional-cluster full-time groups (Local 1, Metro 2), and PNW
+    # Regional 2, which carries the network's two weekly nets (PNWDigital
+    # Gathering, Wed 19:00, and the PNW Regional EmComm Net, Sun 19:30;
+    # https://pnwdigital.net/nets/) and is bridged to BrandMeister 31771.
+    # Retrieved 2026-09-13.
     ("PNWDigital", "Washington 1"): _CORE,
     ("PNWDigital", "Washington 2"): _CORE,
     ("PNWDigital", "PNW 1"): _CORE,
     ("PNWDigital", "PNW 2"): _CORE,
     ("PNWDigital", "Local 1"): _CORE,
     ("PNWDigital", "Metro 2"): _CORE,
-    ("PNWDigital", "TAC 310"): _CORE,
-    ("PNWDigital", "TAC 311"): _CORE,
-    ("PNWDigital", "TAC 312"): _CORE,
-    ("PNWDigital", "Cascades 1"): _CORE,
-    ("PNWDigital", "I-5 1"): _CORE,
+    ("PNWDigital", "PNW Rgnl 2"): _CORE,
+    # Not core, although earlier tables had them there. TAC 310-312 are
+    # push-to-talk: silent until someone keys them, then held 15 minutes.
+    # Cascades 1 is full-time only on repeaters east of the Cascades (its
+    # Coffee Net, Mon/Wed/Fri 08:00, is worth hearing, which keeps it
+    # regional rather than wide). I-5 is for travellers on the corridor.
+    ("PNWDigital", "TAC 310"): _REGIONAL,
+    ("PNWDigital", "TAC 311"): _REGIONAL,
+    ("PNWDigital", "TAC 312"): _REGIONAL,
+    ("PNWDigital", "Cascades 1"): _REGIONAL,
+    ("PNWDigital", "I-5 1"): _REGIONAL,
     ("PNWDigital", "Oregon 1"): _REGIONAL,
     ("PNWDigital", "BC 1"): _REGIONAL,
     ("PNWDigital", "BC 2"): _REGIONAL,
     ("PNWDigital", "Net 2"): _REGIONAL,
-    ("PNWDigital", "PNW Rgnl 2"): _REGIONAL,
     ("PNWDigital", "TAC 1"): _REGIONAL,
     ("PNWDigital", "TAC 2"): _REGIONAL,
     ("PNWDigital", "TAC 3"): _REGIONAL,
@@ -75,18 +87,24 @@ TIER_TABLE: Dict[Tuple[str, str], int] = {
     ("SeattleDMR", "Link 4"): _REGIONAL,
     ("SeattleDMR", "Link 5"): _REGIONAL,
     ("SeattleDMR", "Link 6"): _REGIONAL,
-    ("SeattleDMR", "PNW Rgnl 2"): _REGIONAL,
+    # The same bridged group, and the same two nets, as PNWDigital's.
+    ("SeattleDMR", "PNW Rgnl 2"): _CORE,
     ("SeattleDMR", "TAC 313"): _REGIONAL,
     ("SeattleDMR", "BEARS 1"): _REGIONAL,
     ("SeattleDMR", "BEARS 2"): _REGIONAL,
     ("SeattleDMR", "Parrot 1"): _TEST,
     ("SeattleDMR", "Audio Test 2"): _TEST,
     # BrandMeister: the statewide group first, then the Pacific Northwest and
-    # emergency groups the local repeaters carry statically.
+    # emergency groups the local repeaters carry statically. PNWR is the
+    # bridged end of PNW Regional 2 and its nets. N7QT Local is the talkgroup
+    # of N7QT Redmond, the nearest BrandMeister machine to home, whose static
+    # layout (api.brandmeister.network/v2/device/311757/talkgroup, retrieved
+    # 2026-09-13) matches the snapshot.
     ("BrandMeister", "Washington - 10 Minute Limit"): _CORE,
+    ("BrandMeister", "PNWR"): _CORE,
+    ("BrandMeister", "N7QT Local"): _CORE,
     ("BrandMeister", "Olympic Peninsula"): _REGIONAL,
     ("BrandMeister", "PNW-West"): _REGIONAL,
-    ("BrandMeister", "PNWR"): _REGIONAL,
     ("BrandMeister", "Washington TAC"): _REGIONAL,
     ("BrandMeister", "Washington State ARES"): _REGIONAL,
     ("BrandMeister", "Washington State ARES TAC"): _REGIONAL,

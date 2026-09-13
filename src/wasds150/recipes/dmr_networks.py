@@ -224,4 +224,7 @@ def build_network_favorites(
                 provenance=[Provenance(source_adapter="seattledmr", source_url=provenance_url or SEATTLEDMR_INFO_URL, fetched_at=retrieved_at or None, confidence="community")],
             )
         )
-    return favorites
+    # Where a network's own site contradicts the Config Builder file.
+    from wasds150.recipes.dmr_corrections import correct_network_lists
+
+    return correct_network_lists(favorites)

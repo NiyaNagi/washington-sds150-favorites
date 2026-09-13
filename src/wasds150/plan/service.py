@@ -72,6 +72,11 @@ def resolve_named_plan(
     # a refreshed copy under the same key (``wasds150 sources update``).
     present = {fl.favorite_key.upper() for fl in favorites}
     favorites.extend(fl for fl in _extra_favorites(plan.radio_id) if fl.favorite_key.upper() not in present)
+    # A DMR network list already in the catalog was built before any later
+    # correction; apply them here so a plan never waits on a source refresh.
+    from wasds150.recipes.dmr_corrections import correct_network_lists
+
+    favorites = correct_network_lists(favorites)
     if with_repeaterbook:
         from wasds150.sources.repeaterbook.catalog import plan_block
         from wasds150.sources.repeaterbook.service import RepeaterBookService

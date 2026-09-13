@@ -41,7 +41,10 @@ from wasds150.radios.registry import get_profile
 LEGACY_SLOTS = {
     # 957 before the Nets block: the net rows now carry transmit offsets, so
     # two that were receive-only duplicates resolve as their own channels.
-    "atd890-scan": 959,
+    # 959 -> 938 when the 21 'BEARS W.Tiger' DMR channels on 442.075 were
+    # dropped as superseded (see wasds150.recipes.dmr_corrections); the West
+    # Tiger layout added in their place does not fit this plan's DMR block.
+    "atd890-scan": 938,
     "ftx1-local": 192,
     "ftx1-scan": 183,
     "ftx1-wa": 860,

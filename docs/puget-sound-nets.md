@@ -112,11 +112,29 @@ and rarely date their pages.
 
 ## DMR nets
 
-| Day | Time | Net | Talkgroup |
-|---|---|---|---|
-| Mon/Wed/Fri | 08:00 | Cascades Coffee | PNWDigital TG 3191, TS1 |
-| Sun | 19:30 | PNW Regional EmComm | PNWDigital TG 31771, TS2 |
-| Wed | 19:00 | PNWDigital Gathering | PNWDigital TG 31771, TS2 |
+From [PNWDigital's net page](https://pnwdigital.net/nets/), rechecked
+2026-09-13. PNW Regional 2 (31771) is bridged to BrandMeister, so its two nets
+reach all three networks near home.
+
+| Day | Time | Net | Talkgroup | Nearest machines carrying it |
+|---|---|---|---|---|
+| Mon/Wed/Fri | 08:00 | Cascades Coffee | PNWDigital TG 3191, TS1 | Bellevue/Cougar `BVV` 147.020, `BVC` 441.2875 (part-time here; full-time east of the Cascades) |
+| Sun | 19:30 | PNW Regional EmComm | TG 31771 - PNWDigital/SeattleDMR TS2, BrandMeister N7QT **TS1** | `PNW Rgnl 2 BVV`/`BVC`, `PNW Rgnl 2 KNW` (K7NWS West Tiger 440.3375 CC2), `N7QT PNWR` (Redmond 442.325 CC1) |
+| Wed | 19:00 | PNWDigital Gathering | as above | as above |
+
+N7QT carries 31771 statically on timeslot 1, where PNWDigital and SeattleDMR
+use timeslot 2; the BrandMeister channel follows N7QT's own layout
+(api.brandmeister.network/v2/device/311757/talkgroup).
+
+**Hearing them needs Digital Monitor on** (see `docs/at-d890uv-programming.md`).
+Outside a net, the groups on the air without anyone keying them are the
+full-time ones: Washington 1/2 (3153 TS1, 103153 TS2) and PNW 1/2 (3187 TS1,
+103187 TS2) on PNWDigital, King County, Seattle 1/2 and Puget Sound on
+SeattleDMR, and N7QT's static set on BrandMeister. Most others are
+push-to-talk: silent until someone keys them, then held for 15 minutes
+([PNWDigital talkgroups](https://pnwdigital.net/talkgroups/)). BrandMeister's
+per-talkgroup last-heard activity is a live dashboard only, so activity was
+judged from the networks' published full-time groups and nets, not measured.
 
 ## Not confirmed, and deliberately not programmed
 

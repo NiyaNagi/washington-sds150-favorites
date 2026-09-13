@@ -287,6 +287,64 @@ class TestBundle:
         assert [m.label for m in bundle.zones[-1].members] == ["Rptr 1"]
         assert [z.name for z in bundle.zones if z.name.startswith("NOAA")] == ["NOAA WX"]
 
+    def test_far_stations_get_scannable_zones_named_by_service(self):
+        """Beyond-radius fill leaves its block's zone for a "Far" zone of its
+        service, with its identical list; a lockout stays unscanned; a thin
+        service joins "Far Other"."""
+        from wasds150.plan.resolve import PlannedChannel, ResolvedPlan
+        from wasds150.radios.registry import AT_D890UV
+
+        def ch(name, block, mhz, miles, *, skip=True, label=None):
+            return PlannedChannel(slot=0, name=name, label=label or name, rx_freq_mhz=mhz, mode="NFM",
+                                  block=block, bank=block, source="t", skip_scan=skip, distance_miles=miles)
+
+        blocks = (
+            PlanBlock("Ham 2m", tx_policy=TX_NONE, bank="Ham 2m", skip_label_pattern=r"^Locked$"),
+            PlanBlock("Public Safety", tx_policy=TX_NONE, bank="Public Safety"),
+            PlanBlock("Rail", tx_policy=TX_NONE, bank="Rail"),
+        )
+        test_plan = ChannelPlan(
+            id="t", radio_id="at-d890uv", label="T", blocks=blocks, radius_miles=60.0,
+            scan_groups=(ScanGroup("Near Me", ("Ham 2m",), take=(("Ham 2m", 1),)),
+                         ScanGroup("Ham Analog", ("Ham 2m",)),
+                         ScanGroup("Public Svc", ("Public Safety",)),
+                         ScanGroup("Everything", ("Ham 2m", "Public Safety", "Rail"))),
+        )
+        channels = [ch("Near 2m", "Ham 2m", 146.96, 5.0, skip=False),
+                    ch("Locked", "Ham 2m", 147.00, 5.0)]
+        channels += [ch(f"Far 2m {i}", "Ham 2m", 145.1 + i * 0.02, 70.0) for i in range(12)]
+        channels += [ch(f"Far PD {i}", "Public Safety", 155.0 + i * 0.0125, 65.0) for i in range(3)]
+        channels += [ch("Far Rail", "Rail", 160.8, 80.0)]
+        bundle = build_bundle(ResolvedPlan(plan=test_plan, profile=AT_D890UV, channels=channels))
+
+        names = [z.name for z in bundle.zones]
+        assert names == ["Near Me", "Ham 2m", "Far Ham Analog", "Far Other", "Not Scanned"]
+        far_other = next(z for z in bundle.zones if z.name == "Far Other")
+        # Public Svc had only 3 and Rail had no group of its own: both join Far Other.
+        assert sorted(m.name for m in far_other.members) == ["Far PD 0", "Far PD 1", "Far PD 2", "Far Rail"]
+        lists = {s.name: [m.name for m in s.members] for s in bundle.scan_lists}
+        for zone in bundle.zones:
+            if zone.name == "Not Scanned":
+                assert zone.name not in lists and [m.name for m in zone.members] == ["Locked"]
+            else:
+                assert lists[zone.name] == [m.name for m in zone.members]
+                assert {bundle.scan_list_by_channel[m.name] for m in zone.members} == {zone.name}
+
+    def test_copy_names_keep_the_repeater_code(self):
+        """A copy has to say which machine it is: the site code stays whole and
+        the talkgroup part shrinks, without losing its digits."""
+        from wasds150.export.atd890_bundle import _copy_name
+
+        taken = {}
+        first = _copy_name("Washington 1 BVC", taken)
+        taken[first.casefold()] = first
+        second = _copy_name("Washington 2 BVC", taken)
+        assert first.endswith(" BVC N") and second.endswith(" BVC N")
+        assert first != second and "1" in first and "2" in second
+        assert len(first) <= 16 and len(second) <= 16
+        # A name with room just gains the suffix.
+        assert _copy_name("Cougar WA1", {}) == "Cougar WA1 N"
+
     def test_contacts_and_receive_groups(self):
         bundle = build_bundle(resolve_plan(_scanner_plan(), _scanner_catalog()))
         ids = {c.name: c.dmr_id for c in bundle.contacts}
