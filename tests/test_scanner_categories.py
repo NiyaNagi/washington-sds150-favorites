@@ -75,6 +75,18 @@ def test_only_names_an_earlier_install_generated_are_retired():
     assert not is_retired_name("My own list")
 
 
+def test_the_ftx1_import_is_spread_by_service_and_its_old_list_is_retired():
+    ftx = _fl("FTX01", _conv("Mixed", 146.96, 156.75, 464.825))
+    lists = {f.favorite_key: f for f in compact_lists([ftx])}
+
+    def freqs(key):
+        return sorted(c.freq_mhz for s in lists[key].systems for d in s.departments for c in d.channels)
+
+    assert (freqs("HAM-RPT"), freqs("MAR"), freqs("BIZ")) == ([146.96], [156.75], [464.825])
+    assert "HAM-FTX" not in lists and all(c.name != "HAM FTX-1 Import" for c in CATEGORIES)
+    assert is_retired_name("HAM FTX-1 Import")
+
+
 def test_every_list_the_scanner_is_loaded_with_has_a_category(tmp_path):
     config = AppConfig(home=tmp_path)
     config.ensure_dirs()

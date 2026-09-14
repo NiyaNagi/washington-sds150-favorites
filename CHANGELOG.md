@@ -9,6 +9,14 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Changed
 
+- **The SDS150 no longer carries an "HAM FTX-1 Import" list.** 710 of its 731
+  channels were already in other lists. The import is split by service
+  (`SPLIT_BY_SERVICE`): amateur rows join HAM Repeaters, marine rows MAR Marine
+  & USCG, the rest BIZ Business/Util, and the merge keeps only the 21 those
+  lists lacked (ten 70 cm repeaters, eight marine public-correspondence
+  channels, three UHF itinerant). The install removes the old list
+  (`RETIRED_NAMES`); quick key 55 is free.
+
 - **Near Me holds the repeaters the operator uses and can reach.** KC7BAE East
   Tiger (443.050) and WW7PSR (146.960) are pinned (`NEAR_ME_PINNED`); each
   quota then takes stations within 35 miles (`NEAR_ME_REACH_MILES`), nearest

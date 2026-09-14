@@ -25,6 +25,12 @@ conventional frequency already in the category is not repeated. A list no
 category names is installed as it is, so a new catalog list never goes
 missing. The catalog keeps its own keys: only what reaches the scanner
 changes.
+
+A list that mixes services is split by service first (:data:`SPLIT_BY_SERVICE`):
+the operator's FTX-1 import is 731 channels of which all but 21 are already
+in other lists, so it has no list of its own - its amateur rows join HAM
+Repeaters, its marine rows MAR Marine & USCG and the rest BIZ Business/Util,
+where the merge keeps only what those lists lack.
 """
 from __future__ import annotations
 
@@ -38,6 +44,7 @@ from wasds150.models.catalog import ORIGIN_LOCAL, Channel, Department, Favorites
 from wasds150.models.provenance import Provenance
 from wasds150.radios.near_me import NEAR_ME
 from wasds150.radios.near_me import list_settings as near_me_list_settings
+from wasds150.radios.services import AMATEUR, service_for
 from wasds150.util.hashing import stable_id
 
 #: How many characters of a list name the scanner's list view shows.
@@ -99,19 +106,33 @@ CATEGORIES: Tuple[Category, ...] = (
     Category("RAIL", "RAIL Freight Rail", 42, ("FL56", "FL57", "BAND05")),
     Category("TRAN", "TRAN Transit", 43, ("FL58", "FL70a")),
     Category("TRAN-ROAD", "TRAN Roads & WSDOT", 44, ("FL05", "FL74b", "BAND11")),
-    # Amateur.
-    Category("HAM-RPT", "HAM Repeaters", 50, ("PSHAM01", "PSHAM02", "FL60", "BAND03")),
+    # Amateur. FTX01 is split by service (SPLIT_BY_SERVICE); it is listed
+    # here so its amateur rows rank after the coordinated lists'.
+    Category("HAM-RPT", "HAM Repeaters", 50, ("PSHAM01", "PSHAM02", "FL60", "BAND03", "FTX01")),
     Category("HAM-DMR", "HAM DMR Networks", 51, ("DMRNET", "BMNET")),
     Category("HAM-NETS", "HAM ARES & Nets", 52, ("FL61", "FL62", "SEAACS")),
     Category("HAM-CALL", "HAM Simplex & Sats", 53, ("FL63", "HAM01", "FL51")),
     Category("HAM-HF", "HAM HF Nets", 54, ("HFNET01",)),
-    Category("HAM-FTX", "HAM FTX-1 Import", 55, ("FTX01",)),
     # Personal radio, business and events.
     Category("BIZ-PERS", "BIZ GMRS FRS MURS", 60, ("GMRS01", "FL65", "FL66", "BAND06")),
     Category("BIZ", "BIZ Business/Util", 61, ("FL68", "FL69", "FL15", "BAND12", "FCCDIG")),
     Category("BIZ-EVENT", "BIZ Events & Media", 62, ("FL73", "FL74a")),
 )
 CATEGORY_BY_KEY: Dict[str, Category] = {category.key: category for category in CATEGORIES}
+
+#: Lists that mix services, split channel by channel before merging:
+#: list key -> ((service, category key), ...). A service is ``amateur``,
+#: ``marine`` or ``other``.
+SPLIT_BY_SERVICE: Dict[str, Tuple[Tuple[str, str], ...]] = {
+    "FTX01": (("amateur", "HAM-RPT"), ("marine", "MAR"), ("other", "BIZ")),
+}
+
+#: Names of category lists an earlier install wrote that no longer exist, so
+#: the install removes them.
+RETIRED_NAMES = frozenset({"HAM FTX-1 Import"})
+
+#: Marine VHF, ship and shore channels (MHz).
+_MARINE = (156.0, 162.1)
 
 
 def _norm(text: str) -> str:
@@ -124,7 +145,8 @@ _RADIOREFERENCE_COUNTY = re.compile(r"^RR[CT]-(.+)$", re.IGNORECASE)
 
 
 def category_for(favorite_key: str) -> Optional[Category]:
-    """The category a catalog list is merged into, or ``None``."""
+    """The category a catalog list is merged into, or ``None``. A list split
+    by service answers with the category its amateur rows go to."""
     key = favorite_key.strip()
     found = _BY_MEMBER.get(key.casefold())
     if found is not None:
@@ -134,11 +156,40 @@ def category_for(favorite_key: str) -> Optional[Category]:
 
 
 def is_retired_name(user_name: str) -> bool:
-    """Whether an installed list is one an earlier install wrote under a
-    catalog key (``"FL01 - WA SAR & Mutual Aid"``) that a category now
-    holds. Lists the operator named themselves never match."""
+    """Whether an installed list is one an earlier install wrote that this
+    one supersedes: under a catalog key a category now holds (``"FL01 - WA
+    SAR & Mutual Aid"``), or a category list that no longer exists. Lists
+    the operator named themselves never match."""
+    if user_name in RETIRED_NAMES:
+        return True
     key, separator, _rest = user_name.partition(" - ")
     return bool(separator) and category_for(key) is not None
+
+
+def _service_kind(channel: Channel) -> str:
+    freq = channel.freq_mhz
+    if freq is None:
+        return "other"
+    if service_for(freq) == AMATEUR:
+        return "amateur"
+    if _MARINE[0] <= freq <= _MARINE[1]:
+        return "marine"
+    return "other"
+
+
+def _split_by_service(favorite: FavoritesList) -> List[Tuple[Category, FavoritesList]]:
+    parts: List[Tuple[Category, FavoritesList]] = []
+    for kind, category_key in SPLIT_BY_SERVICE[favorite.favorite_key.upper()]:
+        part = copy.deepcopy(favorite)
+        for system in part.systems:
+            for department in system.departments:
+                department.channels = [c for c in department.channels if _service_kind(c) == kind]
+            system.departments = [d for d in system.departments if d.channels]
+            system.sites = [] if kind != "other" else system.sites
+        part.systems = [s for s in part.systems if s.departments or s.sites]
+        if part.systems:
+            parts.append((CATEGORY_BY_KEY[category_key], part))
+    return parts
 
 
 def compact_lists(favorites: Sequence[FavoritesList]) -> List[FavoritesList]:
@@ -149,6 +200,10 @@ def compact_lists(favorites: Sequence[FavoritesList]) -> List[FavoritesList]:
     passthrough: List[FavoritesList] = []
     for favorite in favorites:
         if favorite.favorite_key in NEAR_ME_NAMES:
+            continue
+        if favorite.favorite_key.upper() in SPLIT_BY_SERVICE:
+            for category, part in _split_by_service(favorite):
+                grouped.setdefault(category.key, []).append(part)
             continue
         category = category_for(favorite.favorite_key)
         if category is None:

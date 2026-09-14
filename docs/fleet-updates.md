@@ -73,7 +73,7 @@ What is still unfinished is listed in [Open items](open-items.md).
 
 ## In the car (SDS150)
 
-The scanner is loaded with 40 short-named lists: six **Near Me** lists at the
+The scanner is loaded with 39 short-named lists: six **Near Me** lists at the
 top, on quick keys 1-6, then the whole catalog merged into categories, each on
 its own quick key and installed but not monitored. With GPS connected, turn
 the scanner on and it is already scanning what is around the car:
@@ -97,7 +97,7 @@ scan:
 | 20-26 | OUT Wildfire, OUT West Mountains, OUT East Mountains, OUT WA Safety All, OUT Upper Lena, OUT Lake Ozette, OUT Weather/SAR |
 | 30-33 | AIR Civil & ATC, AIR SAR & Medevac, MIL Air & Ground, MED EMS & Hospital |
 | 40-44 | MAR Marine & USCG, MAR Ferries & VTS, RAIL Freight Rail, TRAN Transit, TRAN Roads & WSDOT |
-| 50-55 | HAM Repeaters, HAM DMR Networks, HAM ARES & Nets, HAM Simplex & Sats, HAM HF Nets, HAM FTX-1 Import |
+| 50-54 | HAM Repeaters, HAM DMR Networks, HAM ARES & Nets, HAM Simplex & Sats, HAM HF Nets |
 | 60-62 | BIZ GMRS FRS MURS, BIZ Business/Util, BIZ Events & Media |
 
 Each category merges catalog lists and keeps every station once: the 39 King
