@@ -75,6 +75,21 @@ def test_only_names_an_earlier_install_generated_are_retired():
     assert not is_retired_name("My own list")
 
 
+def test_analog_copies_of_a_frequency_are_one_channel_and_digital_ones_are_not():
+    toned = Channel(id="a", label="W7AW West Seattle", freq_mhz=145.13, mode="FM", tone="TONE=C103.5")
+    bare = Channel(id="b", label="W7GHJ", freq_mhz=145.13, mode="NFM", tone="")
+    cc1 = Channel(id="c", label="DMR CC1", freq_mhz=442.325, mode="DMR", tone="ColorCode=1")
+    cc2 = Channel(id="d", label="DMR CC2", freq_mhz=442.325, mode="DMR", tone="ColorCode=2")
+    first = System(id="s1", label="A", departments=[Department(id="d1", label="A", channels=[toned, cc1])])
+    second = System(id="s2", label="B", departments=[Department(id="d2", label="B", channels=[bare, cc2])])
+    [ham] = compact_lists([_fl("PSHAM01", first), _fl("FL60", second)])
+    channels = [c for s in ham.systems for d in s.departments for c in d.channels]
+    analog = [c for c in channels if c.mode != "DMR"]
+    # One 145.13, named by the first list, and open squelch because the copies disagree.
+    assert [(c.label, c.tone) for c in analog] == [("W7AW West Seattle", "")]
+    assert sorted(c.label for c in channels if c.mode == "DMR") == ["DMR CC1", "DMR CC2"]
+
+
 def test_the_ftx1_import_is_spread_by_service_and_its_old_list_is_retired():
     ftx = _fl("FTX01", _conv("Mixed", 146.96, 156.75, 464.825))
     lists = {f.favorite_key: f for f in compact_lists([ftx])}

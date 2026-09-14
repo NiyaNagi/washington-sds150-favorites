@@ -334,28 +334,50 @@ def systems_from_flat_facts(fl: FavoritesList, facts: List[NormalizedFact]) -> L
     from wasds150.hpe.validation import tone_is_valid
 
     channels: List[Channel] = []
+    coordinated: List[Channel] = []
     for fact in facts:
         if fact.source_id == "sentinel_local" or fact.freq_mhz is None:
             continue
-        channels.append(
-            Channel(
-                id=stable_id(f"{fl.slug}:{fact.source_id}:{fact.entity_key}", kind="channel"),
-                label=fact.name or fact.entity_key,
-                freq_mhz=fact.freq_mhz,
-                mode=fact.mode,
-                tone=fact.tone if fact.tone and tone_is_valid(fact.tone) else "",
-            )
+        home = COORDINATOR_HOMES.get(fact.source_id)
+        if home is not None and fl.favorite_key.upper() != home:
+            # A repeater coordinator's records belong in its own list, not in
+            # every list whose text mentions "amateur" (strip_coordinator_copies).
+            continue
+        channel = Channel(
+            id=stable_id(f"{fl.slug}:{fact.source_id}:{fact.entity_key}", kind="channel"),
+            label=fact.name or fact.entity_key,
+            freq_mhz=fact.freq_mhz,
+            mode=fact.mode,
+            tone=fact.tone if fact.tone and tone_is_valid(fact.tone) else "",
         )
+        (coordinated if home is not None else channels).append(channel)
+    systems: List[System] = []
     channels = dedupe_channels(channels)
-    if not channels:
-        return []
-    department = Department(id=stable_id(f"{fl.slug}:public-facts:channels", kind="department"), label="Channels", channels=channels)
-    system = System(
-        id=stable_id(f"{fl.slug}:public-facts", kind="system"),
-        label=fl.favorite_name,
-        departments=[department],
-    )
-    return [system]
+    if channels:
+        department = Department(id=stable_id(f"{fl.slug}:public-facts:channels", kind="department"), label="Channels", channels=channels)
+        systems.append(System(
+            id=stable_id(f"{fl.slug}:public-facts", kind="system"),
+            label=fl.favorite_name,
+            departments=[department],
+        ))
+    coordinated = dedupe_channels(coordinated)
+    if coordinated:
+        department = Department(
+            id=stable_id(f"{fl.slug}:coordination:channels", kind="department"),
+            label="Coordinated Repeaters", channels=coordinated,
+        )
+        systems.append(System(
+            id=stable_id(f"{fl.slug}:coordination", kind="system"),
+            label=f"{fl.favorite_name} - Coordinated",
+            departments=[department],
+        ))
+    return systems
+
+
+#: Repeater-coordination sources and the one list each belongs in. WWARA's is
+#: PSHAM01, which rebuilds from it directly; IACC's eastern Washington
+#: repeaters go to the statewide repeater list, in a system of their own.
+COORDINATOR_HOMES: Dict[str, str] = {"wwara": "PSHAM01", "iacc": "FL60"}
 
 
 # ---------------------------------------------------------------------------
@@ -577,6 +599,48 @@ def systems_defined_in_code(fl: FavoritesList) -> bool:
     a withdrawn channel would never reach a catalog saved before the fix.
     """
     return fl.favorite_key == "OZ01"
+
+
+#: A repeater-coordination record's name: ``CALL (City)`` - WWARA's and
+#: IACC's facts are both named this way.
+_COORDINATION_NAME = re.compile(r"^(?:[KNW][A-Z]?|A[A-L])\d[A-Z]{1,3}\b.*\)\s*$")
+
+
+def strip_coordinator_copies(catalog) -> int:
+    """Remove the repeater-coordination copies aggregate public-facts systems
+    picked up.
+
+    Tier B used to turn every WWARA and IACC record into a channel of any
+    list whose text said "amateur", "ham" or "IACC": the whole WWARA list
+    inside the satellite, simplex, HF, DMR and FTX-1 lists, eastern repeaters
+    inside county public-safety and mountain lists, and every rollup copied
+    them again - 11,288 channels in one working catalog, filed where nobody
+    would look for a repeater. The coordinated repeaters have their own
+    lists (PSHAM01 from WWARA; FL60's coordination system from IACC), so an
+    amateur-band ``CALL (City)`` channel in any public-facts system is one
+    of those copies. Returns how many channels were removed."""
+    from wasds150.radios.services import AMATEUR, service_for
+
+    aggregate = {stable_id(f"{favorite.slug}:public-facts", kind="system") for favorite in catalog.favorites}
+    removed = 0
+    for favorite in catalog.favorites:
+        kept: List[System] = []
+        for system in favorite.systems:
+            if system.id in aggregate:
+                for department in system.departments:
+                    before = len(department.channels)
+                    department.channels = [
+                        c for c in department.channels
+                        if not (c.freq_mhz is not None and service_for(c.freq_mhz) == AMATEUR
+                                and _COORDINATION_NAME.match(c.label or ""))
+                    ]
+                    removed += before - len(department.channels)
+                system.departments = [d for d in system.departments if d.channels]
+                if not system.departments and not system.sites:
+                    continue
+            kept.append(system)
+        favorite.systems = kept
+    return removed
 
 
 def code_defined_system_ids(fl: FavoritesList) -> frozenset:

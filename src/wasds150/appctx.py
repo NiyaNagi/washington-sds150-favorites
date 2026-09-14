@@ -84,6 +84,12 @@ def _append_local_area_extension(catalog: Catalog) -> None:
         elif favorite.favorite_key.startswith(("KC", "LA", "OUT", "BAND", "UL", "PSHAM", "GMRS", "OZ", "HAM", "FTX", "HFNET")):
             catalog.favorites.append(copy.deepcopy(favorite))
 
+    # Repeater-coordination records an earlier enrichment copied into lists
+    # that are not repeater lists (and every rollup of them) come out again.
+    from wasds150.recipes.systems import strip_coordinator_copies
+
+    strip_coordinator_copies(catalog)
+
 
 @dataclass
 class AppContext:

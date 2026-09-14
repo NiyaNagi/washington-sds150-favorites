@@ -166,6 +166,10 @@ def build_default_recipes(catalog: Catalog) -> List[Recipe]:
             source_ids = ("wwara",)
             counties = ()
             name_hint = None
+        if fl.favorite_key == "FL60":
+            # The statewide repeater list is IACC's home
+            # (wasds150.recipes.systems.COORDINATOR_HOMES).
+            source_ids = tuple(sorted(set(source_ids) | {"iacc"}))
         if is_discovery_target or is_rollup:
             source_ids = ()
             sids = ()

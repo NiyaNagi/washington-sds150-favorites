@@ -7,7 +7,21 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## Unreleased
 
-### Changed
+### Fixed
+
+- **Repeater-coordination records no longer fill lists that are not repeater
+  lists.** Enrichment turned every WWARA and IACC record into a "Channels"
+  department of any list whose text said "amateur", "ham" or "IACC": the whole
+  WWARA list inside the satellite, simplex, HF, DMR and FTX-1 lists, eastern
+  repeaters inside county public-safety and mountain lists, and every rollup
+  (Outdoor Safety, the band packs, Upper Lena) copied them again - 11,288
+  channels in the working catalog. Coordinators now feed only their home
+  list (`COORDINATOR_HOMES`: WWARA -> PSHAM01, IACC -> FL60 in a system of its
+  own), and `strip_coordinator_copies` removes the old copies whenever a
+  catalog is loaded or saved.
+- The SDS150's merged lists treat analog copies of one frequency as one
+  channel whatever mode or tone text a list gave them, with open squelch when
+  the copies disagree; digital copies stay apart by colour code, NAC or RAN.
 
 - **The SDS150 no longer carries an "HAM FTX-1 Import" list.** 710 of its 731
   channels were already in other lists. The import is split by service

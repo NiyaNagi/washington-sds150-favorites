@@ -239,23 +239,38 @@ def _in_priority_order(category: Category, lists: List[FavoritesList]) -> List[F
     return sorted(lists, key=lambda f: rank.get(f.favorite_key.casefold(), len(rank)))
 
 
+#: Modes a scanner demodulates the same way; copies in any of them are one channel.
+_ANALOG_FM = frozenset({"", "FM", "NFM", "FMN", "AUTO", "ALL"})
+
+
 def _channel_key(channel: Channel) -> tuple:
+    """One scanner channel. Analog FM copies of a frequency are the same
+    channel whatever mode or tone text a list gave them - the scanner hears
+    the frequency either way; a digital channel's colour code, NAC, RAN or
+    talkgroup does tell two apart."""
     if channel.freq_mhz is None:
         return ("id", channel.id)
+    mode = (channel.mode or "").upper()
+    if mode in _ANALOG_FM and channel.dmr_talkgroup is None and channel.nxdn_ran is None:
+        return (round(channel.freq_mhz, 5), "FM")
     return (
-        round(channel.freq_mhz, 5), (channel.mode or "").upper(), channel.tone or "",
+        round(channel.freq_mhz, 5), mode, channel.tone or "",
         channel.dmr_talkgroup, channel.dmr_timeslot, channel.nxdn_ran,
     )
 
 
-def _drop_repeats(departments: List[Department], seen: Set[tuple]) -> None:
+def _drop_repeats(departments: List[Department], seen: Dict[tuple, Channel]) -> None:
     for department in departments:
         kept = []
         for channel in department.channels:
             key = _channel_key(channel)
-            if key not in seen:
-                seen.add(key)
+            first = seen.get(key)
+            if first is None:
+                seen[key] = channel
                 kept.append(channel)
+            elif len(key) == 2 and (first.tone or "") != (channel.tone or ""):
+                # Copies disagree on the tone: open squelch hears every machine.
+                first.tone = ""
         department.channels = kept
     departments[:] = [d for d in departments if d.channels]
 
@@ -310,7 +325,7 @@ def _joined(values: Iterable[str]) -> str:
 
 
 def _merge(category: Category, lists: List[FavoritesList]) -> FavoritesList:
-    seen: Set[tuple] = set()
+    seen: Dict[tuple, Channel] = {}
     trunks: Dict[tuple, System] = {}
     systems: List[System] = []
     for favorite in lists:

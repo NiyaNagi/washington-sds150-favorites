@@ -31,7 +31,8 @@ def test_flat_facts_never_carry_an_unparseable_tone_into_the_catalog():
     from wasds150.sources.facts import NormalizedFact
 
     row = {name: "" for name in CSV_FIELDS}
-    row.update(favorite_key="FLX", favorite_name="Test")
+    # FL60 is IACC's home list; any other list no longer takes IACC records.
+    row.update(favorite_key="FL60", favorite_name="Test")
     fl = FavoritesList.from_csv_row(row)
     facts = [
         NormalizedFact(entity_key="a", fact_type="coordination", name="Good", freq_mhz=146.9,
