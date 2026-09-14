@@ -25,7 +25,7 @@ from typing import Dict, Type, Union
 from wasds150.contacts.radioid import RadioIdSource
 from wasds150.sources.amsat import AmsatSource
 from wasds150.sources.base import OnlineSourceAdapter, SourceAdapter
-from wasds150.sources.dstarinfo import DStarInfoSource
+from wasds150.sources.dstarinfo import DStarInfoFmSource, DStarInfoSource
 from wasds150.sources.faa_nasr import FaaNasrSource
 from wasds150.sources.fcc_uls import FccUlsSource
 from wasds150.sources.iacc import IaccSource
@@ -65,6 +65,8 @@ _REGISTRY: Dict[str, AnySourceClass] = {
     SeattleDmrSource.name: SeattleDmrSource,
     # D-STAR repeater directory (personal use only; cached, never committed).
     DStarInfoSource.name: DStarInfoSource,
+    # Opt-in: its FM repeater list, RepeaterBook's data, for personal use.
+    DStarInfoFmSource.name: DStarInfoFmSource,
     # Licensed live web service; needs the operator's RadioReference login.
     RadioReferenceApiSource.name: RadioReferenceApiSource,
     # Online change-detection-only sources (PDF/image landing pages).

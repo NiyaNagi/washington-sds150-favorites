@@ -126,10 +126,13 @@ def runnable_source_names(
     always behaved. Contact directories (``kind="contacts"``) are never
     part of a catalog update, and an ``explicit_only`` adapter (RepeaterBook)
     is never included, even when ``only`` names it -- see
-    :func:`explicit_only_names`."""
+    :func:`explicit_only_names`. An ``opt_in`` adapter is included only when
+    ``only`` names it."""
     names = []
     for name, cls in list_sources().items():
         if not issubclass(cls, OnlineSourceAdapter) or not cls.available or cls.explicit_only:
+            continue
+        if getattr(cls, "opt_in", False) and (only is None or name not in only):
             continue
         if getattr(cls, "kind", "facts") == "contacts":
             continue

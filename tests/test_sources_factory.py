@@ -49,9 +49,10 @@ def test_runnable_names_are_available_online_adapters_in_registry_order():
         name
         for name, cls in list_sources().items()
         if issubclass(cls, OnlineSourceAdapter) and cls.available
-        and cls.kind != "contacts" and not cls.explicit_only
+        and cls.kind != "contacts" and not cls.explicit_only and not cls.opt_in
     ]
     assert runnable_source_names() == expected
+    assert "dstarinfo_fm" not in expected  # opt-in: runs only when named
     assert "static_pack" not in expected
     assert "radioid" not in expected and "radioid" in list_sources()
     assert "repeaterbook" not in expected  # explicit-only: its own guarded command runs it

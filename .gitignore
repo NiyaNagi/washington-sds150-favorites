@@ -9,6 +9,11 @@ dist/
 
 # wasds150 working home (catalog, source caches, jobs)
 .wasds150-home/
+# DSTARInfo downloads saved by hand: personal use only, and the FM rows are
+# RepeaterBook's data. The dstarinfo sources cache theirs in .wasds150-home.
+IRNA*.csv
+IMRA*.csv
+**/dstarinfo/
 out/
 generated/
 *.hpe

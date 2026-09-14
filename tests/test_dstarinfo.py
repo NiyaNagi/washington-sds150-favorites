@@ -118,7 +118,11 @@ def form_server():
             self.server.posted = (posted, self.headers.get("Cookie"))
             self.send_response(200)
             self.end_headers()
-            self.wfile.write(b"answer for " + posted["Countries1"][0].encode())
+            if "Countries1" in posted or "bDownload" in posted:
+                chosen = posted.get("Countries1", posted.get("bDownload"))[0]
+                self.wfile.write(b"answer for " + chosen.encode())
+            else:  # an intermediate postback: the next page, with fresh state
+                self.wfile.write(b'<input type="hidden" name="__VIEWSTATE" value="step2" />')
 
     server = HTTPServer(("127.0.0.1", 0), Handler)
     server.requests = []
@@ -139,3 +143,62 @@ def test_a_form_postback_sends_the_page_state_and_caches_the_answer(tmp_path, fo
     assert posted["__VIEWSTATE"] == ["a&b"] and posted["__EVENTTARGET"] == ["Countries1"] and cookie == "session=1"
     assert client.fetch_form(url, **kwargs).status == "cached-fresh"
     assert form_server.requests == ["GET", "POST"]
+
+
+def test_a_multi_step_form_posts_each_answers_state_back(tmp_path, form_server):
+    client = CachedHttpClient(HttpCacheStore(tmp_path / "cache"), rate_limiter=RateLimiter(min_interval_seconds=0))
+    url = f"http://127.0.0.1:{form_server.server_port}/nearest.aspx"
+    result = client.fetch_form(
+        url, fields={"TextBox2": "47.6"}, steps=(("", {"bGeoLocate": "Lookup"}), ("", {"bDownload": "Download"})),
+        cache_key=url + "#fm", ttl_seconds=3600, source_id="dstarinfo_fm",
+    )
+    posted, _cookie = form_server.posted
+    assert result.content == b"answer for Download"
+    assert posted["__VIEWSTATE"] == ["step2"] and posted["TextBox2"] == ["47.6"]  # fields resent each step
+    assert form_server.requests == ["GET", "POST", "POST"]
+
+
+DR_LIST = (
+    "Group No,Group Name,Name,Sub Name,Repeater Call Sign,Gateway Call Sign,Frequency,Dup,Offset,Mode,TONE,"
+    "Repeater Tone,RPT1USE,Position,Latitude,Longitude,UTC Offset\n"
+    "3,USA West,Redmond,Washington,K7XYZ,,442.3250,DUP+,5,FM,TSQL,103.5Hz,Yes,Approximate,47.67,-122.12,-08:00\n"
+    "3,USA West,Carnation,Washington,W7ABC,,145.5900,DUP-,0.6,FM,TONE,162.2Hz,Yes,Approximate,47.64,-121.91,-08:00\n"
+    "3,USA West,Carnation,Washington,W7ABC,,145.5900,DUP-,0.6,FM,TONE,162.2Hz,Yes,Approximate,47.64,-121.91,-08:00\n"
+    "2,Asia,Shenyang,China,BR2XX  B,BR2XX  G,439.3750,DUP-,7.6,DV,OFF,82.5Hz,Yes,Approximate,123.51,41.78,+08:00\n"
+    "4,Canada,Nowhere,BC,VE7ZZZ,,146.9400,DUP-,0.6,FM,DTCS,88.5Hz,Yes,Approximate,123.1,49.2,-08:00\n"
+)
+
+
+def test_the_fm_list_gives_one_fact_per_fm_repeater():
+    from wasds150.sources.dstarinfo import DStarInfoFmSource
+
+    raw = RawDoc("dstarinfo_fm", {"files": {"47.6351,-121.9954": DR_LIST}, "errors": []}, "2026-09-13")
+    facts = {f.entity_key: f for f in DStarInfoFmSource(points=((47.6351, -121.9954),)).normalize(raw).facts}
+    assert sorted(facts) == ["dstarinfo_fm:K7XYZ:442.3250", "dstarinfo_fm:VE7ZZZ:146.9400", "dstarinfo_fm:W7ABC:145.5900"]
+    tsql, tone, dcs = facts["dstarinfo_fm:K7XYZ:442.3250"], facts["dstarinfo_fm:W7ABC:145.5900"], facts["dstarinfo_fm:VE7ZZZ:146.9400"]
+    assert (tsql.tx_freq_mhz, tsql.tone, tsql.raw["tx_tone"], tsql.lat) == (447.325, "TONE=C103.5", "TONE=C103.5", 47.67)
+    assert (tone.tx_freq_mhz, tone.tone, tone.raw["tx_tone"]) == (144.99, None, "TONE=C162.2")
+    assert dcs.lat is None and dcs.raw["tone_note"]  # swapped position dropped; DCS without a code not guessed
+    assert "RepeaterBook" in tsql.raw["data_origin"]
+
+
+def test_the_fm_download_walks_the_form_and_runs_only_when_named():
+    from wasds150.sources.dstarinfo import DStarInfoFmSource
+    from wasds150.sources.factory import runnable_source_names
+
+    calls = []
+
+    class Http:
+        def fetch_form(self, url, **kwargs):
+            calls.append(kwargs)
+            return type("R", (), {"content": DR_LIST.encode()})
+
+    raw = DStarInfoFmSource(points=((47.6351, -121.9954),)).fetch(Http())
+    [call] = calls
+    assert [target for target, _extra in call["steps"]] == ["", "ddlRadio", ""]
+    assert call["steps"][0][1]["ddlRadio"] == " Select Radio"
+    assert call["steps"][-1][1] == {"ddlRadio": "ID-52A", "tbPercent": "100", "bDownload": "Download"}
+    assert call["cache_key"].endswith("#47.6351,-121.9954:ID-52A:fm100")
+    assert list(raw.payload["files"]) == ["47.6351,-121.9954"]
+    assert "dstarinfo_fm" not in runnable_source_names() and "dstarinfo" in runnable_source_names()
+    assert runnable_source_names(only={"dstarinfo_fm"}) == ["dstarinfo_fm"]

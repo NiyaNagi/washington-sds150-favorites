@@ -13,11 +13,15 @@ around ASP.NET WebForms applications; nothing there is a static file:
 * ``apps.dstarinfo.com/Repeater.aspx?Repeater=<call>`` - one repeater's site
   and coverage descriptions, sponsor, URLs, time zone and created/updated
   dates. No coordinates.
-* ``appserver.dstarinfo.com/downloads/`` - radio import files built from the
-  same directory (memories by region or by location, and the DR repeater
-  list). The DR list mixes in RepeaterBook's FM repeaters, which this project
-  takes only through the RepeaterBook API (:mod:`wasds150.sources.repeaterbook`),
-  so none of these are fetched here.
+* ``appserver.dstarinfo.com/downloads/nearest.aspx`` - the repeater list for a
+  DR-mode radio: the repeaters nearest a point, FM and D-STAR, with position,
+  duplex, offset and tone. Its FM rows are RepeaterBook's data ("US, Canada,
+  and Mexico FM Repeater Data is compliments of RepeaterBook").
+  :class:`DStarInfoFmSource` downloads it with "Percent FM" at 100 - the 2,500
+  FM repeaters nearest home, out to about 730 miles - for the operator's
+  personal use. It is opt-in (it runs only when named), its data stays in the
+  ignored local cache, and it is not the RepeaterBook API path
+  (:mod:`wasds150.sources.repeaterbook`).
 
 Every page carries DSTARInfo's terms: "Information provided for personal use
 only. Commerical use is prohibited. Compilation Copyright DSTARInfo." The pages
@@ -25,14 +29,17 @@ are cached locally for the operator's own radios and never committed or
 republished; the owner email on a detail page is not kept.
 
 Facts are one per module with a frequency (``station``), keyed
-``dstarinfo:<call>:<module>``. No list consumes them yet
+``dstarinfo:<call>:<module>``, and one per FM repeater, keyed
+``dstarinfo_fm:<call>:<output>``. No list consumes either yet
 (:data:`wasds150.recipes.systems.SOURCE_HOMES`): they are the reference the
 TH-D75 and ID-52A D-STAR lists are checked against.
 """
 from __future__ import annotations
 
+import csv
 import datetime
 import html
+import io
 import re
 import urllib.parse
 from typing import Any, Dict, List, Optional, Tuple
@@ -228,4 +235,151 @@ class DStarInfoSource(OnlineSourceAdapter):
                             "details": detail,
                         },
                     ))
+        return NormalizeResult(facts=facts, warnings=warnings)
+
+
+NEAREST_URL = "http://appserver.dstarinfo.com/downloads/nearest.aspx"
+#: A radio whose DR list holds 2,500 entries (the TH-D74's holds 1,500).
+DR_RADIO = "ID-52A"
+FM_TTL_SECONDS = 7 * 24 * 3600
+#: The DR list's ``TONE`` column -> (the tone is sent, the tone is required to hear).
+_TONE_MODES = {"TONE": (True, False), "TSQL": (True, True)}
+DR_HEADER = "Group No,"
+
+
+def _signed_offset(dup: str, offset: str) -> Optional[float]:
+    try:
+        value = float(offset)
+    except ValueError:
+        return None
+    direction = dup.strip().upper()
+    if direction == "DUP+":
+        return value
+    if direction == "DUP-":
+        return -value
+    return 0.0
+
+
+def _position(row: Dict[str, str]) -> Tuple[Optional[float], Optional[float]]:
+    try:
+        lat, lon = float(row.get("Latitude") or ""), float(row.get("Longitude") or "")
+    except ValueError:
+        return None, None
+    if not (-90.0 <= lat <= 90.0 and -180.0 <= lon <= 180.0):
+        return None, None  # some rows have the two swapped
+    return lat, lon
+
+
+class DStarInfoFmSource(OnlineSourceAdapter):
+    """The FM repeaters nearest home, from DSTARInfo's DR repeater list.
+
+    The rows are RepeaterBook's data, passed on by DSTARInfo for radio
+    programming; kept for the operator's personal use only. Opt-in: fetched
+    only when named, never by an update of every source."""
+
+    name = "dstarinfo_fm"
+    available = True
+    kind = "facts"
+    opt_in = True
+
+    def __init__(
+        self,
+        points: Optional[Tuple[Tuple[float, float], ...]] = None,
+        radio: str = DR_RADIO,
+        ttl_seconds: int = FM_TTL_SECONDS,
+    ):
+        if points is None:
+            from wasds150.plans.template import HOME
+
+            points = (HOME,)
+        self.points = points
+        self.radio = radio
+        self.ttl_seconds = ttl_seconds
+
+    def fetch(self, http_client: Optional[Any] = None) -> RawDoc:
+        if http_client is None:
+            raise ValueError(f"{self.name} requires an http_client")
+        files: Dict[str, str] = {}
+        errors: List[str] = []
+        for lat, lon in self.points:
+            point = f"{lat:.4f},{lon:.4f}"
+            try:
+                result = http_client.fetch_form(
+                    NEAREST_URL,
+                    fields={"TextBox2": f"{lat:.4f}", "TextBox3": f"{lon:.4f}", "tbEmptySlots": "0"},
+                    steps=(
+                        # The placeholder's value starts with a space; anything
+                        # else fails the page's event validation.
+                        ("", {"bGeoLocate": "Lookup Location", "ddlRadio": " Select Radio"}),
+                        ("ddlRadio", {"ddlRadio": self.radio}),
+                        ("", {"ddlRadio": self.radio, "tbPercent": "100", "bDownload": "Download"}),
+                    ),
+                    cache_key=f"{NEAREST_URL}#{point}:{self.radio}:fm100",
+                    ttl_seconds=self.ttl_seconds,
+                    source_id=self.name,
+                )
+            except (FetchError, OSError) as exc:
+                errors.append(f"{point}: {exc}")
+                continue
+            files[point] = result.content.decode("utf-8", errors="replace")
+        if not files:
+            raise RuntimeError("no DSTARInfo repeater list could be downloaded: " + "; ".join(errors))
+        return RawDoc(
+            source_adapter=self.name,
+            payload={"files": files, "errors": errors},
+            fetched_at=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        )
+
+    def normalize(self, raw: RawDoc) -> NormalizeResult:
+        payload = raw.payload if isinstance(raw.payload, dict) else {}
+        facts: List[NormalizedFact] = []
+        warnings: List[str] = list(payload.get("errors") or [])
+        seen = set()
+        for point, text in (payload.get("files") or {}).items():
+            if not text.lstrip("﻿").startswith(DR_HEADER):
+                warnings.append(f"{point}: the download is not a repeater list")
+                continue
+            for row in csv.DictReader(io.StringIO(text.lstrip("﻿"))):
+                if (row.get("Mode") or "").strip().upper() != "FM":
+                    continue  # the D-STAR rows come from the directory itself
+                call = (row.get("Repeater Call Sign") or "").strip().upper()
+                try:
+                    frequency = float(row.get("Frequency") or "")
+                except ValueError:
+                    warnings.append(f"{call}: unreadable frequency {row.get('Frequency')!r}")
+                    continue
+                key = f"dstarinfo_fm:{call}:{frequency:.4f}"
+                if key in seen:
+                    continue
+                seen.add(key)
+                offset = _signed_offset(row.get("Dup") or "", row.get("Offset") or "")
+                tone_mode = (row.get("TONE") or "").strip().upper()
+                sends, required = _TONE_MODES.get(tone_mode, (False, False))
+                hertz = re.sub(r"[^\d.]", "", row.get("Repeater Tone") or "")
+                access = f"TONE=C{float(hertz):g}" if sends and hertz else ""
+                lat, lon = _position(row)
+                place = ", ".join(part for part in ((row.get("Name") or "").strip(), (row.get("Sub Name") or "").strip()) if part)
+                facts.append(NormalizedFact(
+                    entity_key=key,
+                    fact_type="station",
+                    name=f"{call} ({place})" if place else call,
+                    freq_mhz=frequency,
+                    offset_mhz=offset,
+                    tx_freq_mhz=round(frequency + offset, 6) if offset is not None else None,
+                    tone=access if required else None,
+                    mode="FM",
+                    lat=lat,
+                    lon=lon,
+                    location_precision="fuzzed" if lat is not None else "unknown",
+                    source_id=self.name,
+                    source_url=NEAREST_URL,
+                    retrieved_at=raw.fetched_at,
+                    raw={
+                        **{column: value for column, value in row.items() if column},
+                        "tx_tone": access,
+                        "tone_note": "DCS with no code in the download" if tone_mode in ("DTCS", "**DCOD") else "",
+                        "point": point,
+                        "data_origin": "RepeaterBook, via DSTARInfo's DR repeater list (personal use only)",
+                    },
+                ))
         return NormalizeResult(facts=facts, warnings=warnings)

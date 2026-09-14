@@ -19,7 +19,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from dataclasses import dataclass
-from typing import Dict, Optional
+from typing import Dict, Optional, Sequence, Tuple
 from urllib.parse import urlsplit
 
 from wasds150.cache.store import CacheEntry, HttpCacheStore
@@ -183,6 +183,7 @@ class CachedHttpClient:
         ttl_seconds: int,
         source_id: str,
         event_target: str = "",
+        steps: Sequence[Tuple[str, Dict[str, str]]] = (),
         force: bool = False,
         max_bytes: Optional[int] = None,
     ) -> FetchResult:
@@ -191,10 +192,13 @@ class CachedHttpClient:
         GET ``url`` for its hidden state (``__VIEWSTATE``, ``__EVENTVALIDATION``
         and the rest), POST it back with ``fields`` - a dropdown's postback
         names the control in ``event_target`` - and store the response under
-        ``cache_key``, since a URL alone does not say which form was sent. The
-        state is single-use, so only the answer is cached. TTL, offline mode,
-        the per-host rate limit and the size limit apply as for :meth:`fetch`;
-        there is no conditional revalidation."""
+        ``cache_key``, since a URL alone does not say which form was sent. A
+        form that takes several postbacks (look up a location, pick a radio,
+        download) gives them as ``steps``, ``(event target, extra fields)``
+        each, every one posting the state the previous answer carried with
+        ``fields`` resent. The state is single-use, so only the last answer is
+        cached. TTL, offline mode, the per-host rate limit and the size limit
+        apply as for :meth:`fetch`; there is no conditional revalidation."""
         entry = self.store.get(cache_key)
         if entry is not None and not force and entry.is_fresh():
             return FetchResult(status="cached-fresh", content=self.store.read_blob(entry), entry=entry)
@@ -210,23 +214,27 @@ class CachedHttpClient:
         self.rate_limiter.wait_if_needed(host)
         with opener.open(urllib.request.Request(url, headers={"User-Agent": self.user_agent}), timeout=self.timeout_seconds) as response:
             page = _read_with_limit(response, limit).decode("utf-8", errors="replace")
-        body = hidden_fields(page)
-        body.update({"__EVENTTARGET": event_target, "__EVENTARGUMENT": ""})
-        body.update(fields)
-        self.rate_limiter.wait_if_needed(host)
-        request = urllib.request.Request(
-            url,
-            data=urllib.parse.urlencode(body).encode("ascii"),
-            headers={"User-Agent": self.user_agent, "Content-Type": "application/x-www-form-urlencoded"},
-        )
-        with opener.open(request, timeout=self.timeout_seconds) as response:
-            content = _read_with_limit(response, limit)
-            new_entry = self.store.put(
-                cache_key,
-                content=content,
-                ttl_seconds=ttl_seconds,
-                status=response.status,
-                content_type=response.headers.get("Content-Type"),
-                source_id=source_id,
+        postbacks = list(steps) or [(event_target, {})]
+        for number, (target, extra) in enumerate(postbacks, start=1):
+            body = hidden_fields(page)
+            body.update({"__EVENTTARGET": target, "__EVENTARGUMENT": ""})
+            body.update(fields)
+            body.update(extra)
+            self.rate_limiter.wait_if_needed(host)
+            request = urllib.request.Request(
+                url,
+                data=urllib.parse.urlencode(body).encode("utf-8"),
+                headers={"User-Agent": self.user_agent, "Content-Type": "application/x-www-form-urlencoded"},
             )
+            with opener.open(request, timeout=self.timeout_seconds) as response:
+                content = _read_with_limit(response, limit)
+                status = response.status
+                content_type = response.headers.get("Content-Type")
+            if number < len(postbacks):
+                # Each answer is the next page, carrying the state to post back.
+                page = content.decode("utf-8", errors="replace")
+        new_entry = self.store.put(
+            cache_key, content=content, ttl_seconds=ttl_seconds, status=status,
+            content_type=content_type, source_id=source_id,
+        )
         return FetchResult(status="fetched", content=content, entry=new_entry)

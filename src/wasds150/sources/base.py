@@ -79,6 +79,11 @@ class OnlineSourceAdapter(ABC):
     #: refuses it. It runs only from its own guarded action (RepeaterBook:
     #: ``wasds150 repeaterbook refresh``).
     explicit_only: bool = False
+    #: True for a source that runs only when named - ``sources fetch``,
+    #: ``sources update --only`` - and never in an update of everything: a
+    #: personal download the operator asks for deliberately (DSTARInfo's FM
+    #: repeater list).
+    opt_in: bool = False
 
     @abstractmethod
     def fetch(self, http_client: Optional[Any] = None) -> RawDoc:

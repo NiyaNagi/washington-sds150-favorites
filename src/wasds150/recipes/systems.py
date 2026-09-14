@@ -411,6 +411,7 @@ SOURCE_HOMES: Dict[str, str] = {
     "wwara": "PSHAM01", "iacc": "FL60", "uscg_navcen": "FL52", "noaa_nwr": "FL75", "faa_nasr": "FAAAIR",
     # A reference cache for the D-STAR lists: no list takes its records yet.
     "dstarinfo": "DSTARINFO",
+    "dstarinfo_fm": "DSTARINFO",
 }
 #: Repeater coordinators, whose records get a "Coordinated" system of their own.
 COORDINATORS = frozenset({"wwara", "iacc"})

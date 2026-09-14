@@ -17,6 +17,12 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   ASP.NET form, so the cached HTTP client gained `fetch_form` (page state
   posted back, answer cached under its own key). No list consumes the records
   yet.
+- **DSTARInfo FM repeater list (`dstarinfo_fm`), opt-in.** The 2,500 FM
+  repeaters nearest home from DSTARInfo's DR-radio download (location lookup,
+  radio, "Percent FM" 100, download: `fetch_form` now takes several
+  postbacks). The rows are RepeaterBook's data, for personal use: the source
+  runs only when named (the new `opt_in` flag), stays in the ignored cache, and
+  `.gitignore` also covers DSTARInfo files saved by hand.
 
 - **Every WWARA repeater is in the catalog.** PSHAM01 kept only records inside a
   Puget Sound box, so 62 Southwest Washington and coast machines (Pacific,

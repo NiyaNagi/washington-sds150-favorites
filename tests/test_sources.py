@@ -34,6 +34,7 @@ def test_implemented_sources_marked_available():
         "wwara",
         "iacc",
         "dstarinfo",
+        "dstarinfo_fm",
         "faa_nasr",
         "fcc_uls",
         "nwac",
