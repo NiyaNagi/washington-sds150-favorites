@@ -153,7 +153,7 @@ def test_refresh_stores_what_the_fleet_can_hold(ctx):
     assert ContactStore(ctx.config.contacts_dir).load("NXDN").rows[0].callsign == "KB7NXD"
 
 
-def test_fleet_export_puts_contacts_beside_the_bundle_but_not_in_the_manifest(ctx, tmp_path):
+def test_fleet_export_puts_contacts_in_the_bundle_and_its_manifest(ctx, tmp_path):
     from wasds150.fleet.service import export_radio
 
     without = export_radio(ctx, "at-d890uv", out_dir=tmp_path / "a")
@@ -163,5 +163,11 @@ def test_fleet_export_puts_contacts_beside_the_bundle_but_not_in_the_manifest(ct
     export = export_radio(ctx, "at-d890uv", out_dir=tmp_path / "b", copy_to=tmp_path / "copy")
     contacts = export.path / "DMRDigitalContactList.CSV"
     assert contacts.is_file() and contacts in export.files
-    assert "DigitalContactList" not in (export.path / "at-d890uv-fleet.LST").read_text(encoding="ascii")
+    manifest = (export.path / "at-d890uv-fleet.LST").read_text(encoding="ascii").splitlines()
+    # Import All loads the contact list with every other table, at its CPS slot.
+    assert manifest[0] == str(len(manifest) - 1)
+    assert manifest[-1] == '15,"DMRDigitalContactList.CSV"'
     assert (tmp_path / "copy" / "at-d890uv-fleet" / "DMRDigitalContactList.CSV").is_file()
+    copied = tmp_path / "copy" / "at-d890uv-fleet" / "at-d890uv-fleet.LST"
+    if copied.is_file():
+        assert copied.read_text(encoding="ascii").splitlines() == manifest

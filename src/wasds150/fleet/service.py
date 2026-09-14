@@ -230,7 +230,39 @@ def _write_contacts(
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(path, target)
             copies.append(target)
+    _list_in_manifest(bundle_dir, [path.name for path in written], copy_to, warnings)
     return written, copies, warnings
+
+
+def _list_in_manifest(bundle_dir: Path, names: List[str], copy_to: Optional[Path], warnings: List[str]) -> None:
+    """Add the contact lists to the bundle's ``.LST``, so Import All loads them
+    with every other table. The CPS has one import slot per contact table: a
+    list split into numbered files lists its first file, and the rest are
+    imported on their own."""
+    import re
+
+    from wasds150.export.atd890_cps import LST_INDEX, lst_text
+
+    manifests = sorted(bundle_dir.glob("*.LST"))
+    if not manifests:
+        return
+    manifest = manifests[0]
+    listed = [
+        match.group(1)
+        for match in (re.search(r'"(.+)"', line) for line in manifest.read_text(encoding="ascii").splitlines()[1:])
+        if match
+    ]
+    for name in names:
+        if name not in LST_INDEX:
+            warnings.append(f"{name}: the CPS has one slot per contact table; import this file on its own after Import All")
+        elif name not in listed:
+            listed.append(name)
+    text = lst_text(listed).encode("ascii")
+    manifest.write_bytes(text)
+    if copy_to is not None:
+        copy = Path(copy_to) / bundle_dir.name / manifest.name
+        if copy.is_file():
+            copy.write_bytes(text)
 
 
 def export_radio(

@@ -133,7 +133,8 @@ step and those channels simply stay quiet.
 | (none) | The NXDN unit ID, **16240**, is a radio-wide setting rather than an import table: CPS **NX Setting > Unit ID(Own)**. The fleet checklist has a step for it; a codeplug opened from your saved `.rdt` already carries it. |
 | `AMAir.CSV`, `AMZone.CSV` | Air-band memories and zones (`Air Civil 01..`, `Air Mil SAR`); the zone's scan member list is the whole zone. |
 | `FM.CSV` | FM broadcast stations, all with `Scan = Del`. |
-| `atd890-scan.LST` | Manifest for Tool > Import > Import All. |
+| `DMRDigitalContactList.CSV`, `NXDigitalContactList.CSV` | Fleet export only: the radioid.net DMR and NXDN contact lists (see [Contact list](#contact-list)), listed in the `.LST` at slots 15 and 31. |
+| `atd890-scan.LST` | Manifest for Tool > Import > Import All, naming every CSV in the bundle. |
 
 Zones, in scan-priority order:
 
@@ -181,6 +182,8 @@ arbitrary slices that no zone led to.
    | DMR Receive Group Call List | `DMRReceiveGroupCallList.CSV` | 8 |
    | AM Air | `AMAir.CSV` | 27 |
    | AM Zone | `AMZone.CSV` | 30 |
+   | DMR Digital Contact List | `DMRDigitalContactList.CSV` | 15 |
+   | NX Digital Contact List | `NXDigitalContactList.CSV` | 31 |
 
    Channel first and the zone and scan lists after the channels they name.
 5. Digital > Radio ID List shows `3227807` / `WA7DAM`; nothing to change.
@@ -349,7 +352,7 @@ export uses the first zone and says so in the report.
 `wasds150 fleet update` downloads the worldwide DMR and NXDN ID registry from
 radioid.net, checking with the server on every update (radioid.net republishes
 daily; an unchanged file is not downloaded again), and the fleet export writes
-it next to the bundle, every entry a Private Call, split into numbered files if
+it into the bundle and its `.LST`, every entry a Private Call, split into numbered files if
 it ever exceeds the radio's 500,000 contacts.
 
 The two protocols do **not** share a format; both headers below are from the
@@ -366,9 +369,10 @@ a confirmed name but no confirmed value and are written empty
 (`NXDN_TRAILING_VERIFIED` is `False`); add one NXDN contact by hand, export
 again, and paste the values in to close that.
 
-Both stay out of the `.LST` and are imported on their own (Tool > Import >
-DMR Digital Contact List, and NX Digital Contact List) because a worldwide list
-takes several minutes and is rarely worth reloading with the rest of a bundle.
+Both are listed in the fleet bundle's `.LST` at those slots, so Import All
+loads them with every other table; a worldwide list makes the import take
+several minutes. A list split into numbered files lists only its first file;
+import the others on their own (Tool > Import > DMR Digital Contact List).
 
 ### Using it as a scanner
 

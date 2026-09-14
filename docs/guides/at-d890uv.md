@@ -24,7 +24,7 @@ covered in [at-d890uv-programming.md](../at-d890uv-programming.md). The files ar
 | `radio-data\at-d890uv\backups\at-d890uv-factory-mode14-2026-09-11.rdt` | The base codeplug: band mode 00014, before any import |
 | `radio-data\at-d890uv\backups\at-d890uv-fleet-YYYY-MM-DD.rdt` | Your saved import (step 7) |
 | `radio-data\at-d890uv\backups\at-d890uv-fleet-YYYY-MM-DD-full.rdt` | The patched codeplug you write (step 8) |
-| `radio-data\shared\contacts\` | radioid.net DMR and NXDN contact lists |
+| `radio-data\at-d890uv\exports\at-d890uv-fleet\*ContactList.CSV` | radioid.net DMR and NXDN contact lists, listed in the `.LST` (a standing copy is kept in `radio-data\shared\contacts\`) |
 | `radio-data\at-d890uv\readbacks\YYYY-MM-DD-readback\` | Export All after writing (step 11) |
 
 ## Steps
@@ -40,7 +40,8 @@ covered in [at-d890uv-programming.md](../at-d890uv-programming.md). The files ar
    last saved codeplug if it has your settings. Model Information must read
    `UHF{400-520} MHF{220-225} VHF{136-174}`.
 3. **Import.** Tool > Import > Import From File List, choose
-   `at-d890uv-fleet.LST`, then **Import All**. Scan lists show at most 50 members
+   `at-d890uv-fleet.LST`, then **Import All**. The file list includes the DMR and
+   NXDN contact lists, so the import takes several minutes. Scan lists show at most 50 members
    for now. That is expected, and step 8 fixes it. If the CPS cannot resolve a
    name, the export is stale: export again instead of editing.
 4. **Identity.**
@@ -58,10 +59,9 @@ covered in [at-d890uv-programming.md](../at-d890uv-programming.md). The files ar
    - AM/FM: AM(B), AM Work Zone `Air Local 01`.
    - Keys: PF1 Scan / Nuisance Delete, PF2 Digital Monitor / Monitor, PF3 AM/FM /
      Alarm, P1 Sub CH Switch / Main Channel Switch, P2 Priority Zone / V/M.
-6. **Contacts (optional).** Tool > Import > DMR Digital Contact List >
-   `radio-data\shared\contacts\DMRDigitalContactList.CSV`, then NX Digital
-   Contact List > `NXDigitalContactList.CSV` from the same folder. It takes
-   several minutes.
+6. **Contacts.** Import All loaded the DMR and NXDN contact lists. Check that
+   Digital > DMR Digital Contact List and NX Digital Contact List are filled, and
+   open one NXDN entry: its Attr, TxForbid and Ring columns are written empty.
 7. **Save** As `radio-data\at-d890uv\backups\at-d890uv-fleet-YYYY-MM-DD.rdt`.
 8. **Restore the long scan lists.** The CPS importer stops at 50 members, so
    this puts the rest back:
@@ -74,8 +74,8 @@ covered in [at-d890uv-programming.md](../at-d890uv-programming.md). The files ar
    ```
 
 9. **Write.** Open the `-full.rdt`. Check that Near Me has 100 members and
-   that the other lists match the report. Then Write to radio: Other Data, plus
-   Digital Contact List if you loaded one.
+   that the other lists match the report. Then Write to radio: Other Data and
+   Digital Contact List.
 10. **On the radio:** Menu > Settings > Radio Set > Display > **Ch. Name = CH
     name**. On Frequency the radio runs in VFO mode, where a channel's offset
     and tone do not apply.

@@ -579,7 +579,7 @@ def _update_radio(ctx: AppContext, spec: FleetUpdateSpec, job: JobContext, hooks
             handle.artifact("export", export.path)
             lst = next((str(f) for f in export.files if f.suffix.upper() == ".LST"), "")
             # The CPS's own name for the DMR list is DMRDigitalContactList.CSV;
-            # NXDigitalContactList.CSV is the NXDN one and imports separately.
+            # NXDigitalContactList.CSV is the NXDN one. Both are in the .LST.
             contacts = next((str(f) for f in export.files
                              if "DIGITALCONTACTLIST" in f.name.upper()
                              and not f.name.upper().startswith("NX")), "")

@@ -346,17 +346,13 @@ AT_D890UV = FleetRadio(
         ),
         StepSpec(
             "import-all", "Import the bundle",
-            "Tool > Import > choose {lst} > Import All. A name the CPS cannot resolve means the "
-            "export is stale: re-export rather than editing in place.",
-            artifacts=("lst",),
-        ),
-        StepSpec(
-            "import-contacts", "Import the contact list",
-            "Tool > Import > DMR Digital Contact List > choose {contacts}, then NX Digital Contact "
-            "List > NXDigitalContactList.CSV in the same folder. A worldwide list takes several "
-            "minutes. The NXDN table's Attr, TxForbid and Ring columns are written empty because the "
-            "captured export had no NXDN contact to copy them from, so check an entry afterwards.",
-            optional=True, artifacts=("contacts",),
+            "Tool > Import > choose {lst} > Import All. The file list names every table in the "
+            "bundle, the DMR and NXDN contact lists included, so a worldwide list makes the import "
+            "take several minutes. A name the CPS cannot resolve means the export is stale: "
+            "re-export rather than editing in place. The NXDN contact table's Attr, TxForbid and "
+            "Ring columns are written empty because the captured export had no NXDN contact to copy "
+            "them from, so check an entry afterwards.",
+            artifacts=("lst", "contacts"),
         ),
         StepSpec(
             "patch-scanlists", "Restore the long scan lists",
@@ -369,8 +365,7 @@ AT_D890UV = FleetRadio(
         ),
         StepSpec(
             "write-radio", "Write",
-            "Write to radio from the patched codeplug (Other Data; "
-            "Digital Contact List only if one was loaded).",
+            "Write to radio from the patched codeplug (Other Data and Digital Contact List).",
         ),
         StepSpec(
             "export-all-readback", "Read back",

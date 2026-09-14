@@ -146,6 +146,17 @@ LST_INDEX = {
     "EncryptionCode.CSV": 37,
 }
 
+def lst_text(names: "List[str]") -> str:
+    """A ``.LST`` manifest for Import All listing ``names`` in order, each at
+    the slot the CPS gives its table."""
+    unknown = [name for name in names if name not in LST_INDEX]
+    if unknown:
+        raise Atd890ExportError(
+            f"no CPS import slot known for {unknown}; add it to LST_INDEX from an Export All manifest"
+        )
+    return "\r\n".join([str(len(names))] + [f'{LST_INDEX[name]},"{name}"' for name in names]) + "\r\n"
+
+
 #: The tables the bundle writes, in the order the CPS's Import dialog lists
 #: them.
 BUNDLE_FILES = (
@@ -399,13 +410,7 @@ def render_files(
         files.update(extra)
         warnings.extend(notes)
         manifest += list(extra)
-    unknown = [name for name in manifest if name not in LST_INDEX]
-    if unknown:
-        raise Atd890ExportError(
-            f"no CPS import slot known for {unknown}; add it to LST_INDEX from an Export All manifest"
-        )
-    manifest_lines = [str(len(manifest))] + [f'{LST_INDEX[name]},"{name}"' for name in manifest]
-    files[f"{resolved.plan.id}.LST"] = "\r\n".join(manifest_lines) + "\r\n"
+    files[f"{resolved.plan.id}.LST"] = lst_text(manifest)
     bundle.warnings = warnings
     return files, bundle
 
