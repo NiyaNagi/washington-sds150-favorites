@@ -54,7 +54,7 @@
       [-121.99587936533280, 47.634950561639947],
       [-121.99587928348613, 47.634950531891356]
     ]],
-    "ring_note": "28 vertices. The long tail of closely-spaced points is a rounded corner. One value (-121.99598227484377, 47.634001300802720) was transcribed from a summarised tool response and looks anomalous against its neighbours - re-query the service if exact boundary geometry matters."
+    "ring_note": "28 vertices. The long tail of closely-spaced points is a rounded corner. One value (-121.99598227484377, 47.634001300802720) was transcribed from a summarised tool response and looks anomalous against its neighbours - re-query the service if exact boundary geometry matters. RESOLVED 2026-09-13: the live service returns 47.63500130080272; the value above is a transcription slip. Use parcel-live-2026-09-13.json. Note the ring's second vertex is a real notch in the east line that principal_corners_local_enu_m (and inside_parcel) omit."
   },
 
   "principal_corners_local_enu_m": {

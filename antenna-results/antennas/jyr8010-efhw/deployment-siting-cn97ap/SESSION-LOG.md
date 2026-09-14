@@ -740,6 +740,24 @@ mid-span on this span), so the guide now tells the builder to let a 10 lb counte
 tension (≈ 4 ft sag). Three diagram faults were also fixed before publishing: eye-level labels
 drawn off-frame, a wrap-around line in the bearing-tolerance plot, and label collisions.
 
+## Phase 19 — 2026-09-13: the parcel line, pulled live
+
+**Operator asked:** pull the parcel information and overlay the property line on the study's
+aerial. `tools/parcel_overlay.py` queries King County GIS live (KingCo_Parcels layer 0 for the
+ring and the neighbours; KingCo_PropertyInfo layer 2 for address, plat, zoning, lot size) and
+draws `imagery/parcel_overlay.jpg` on `kc2025_wide.jpg`. The ring's shoelace area is 103,394 ft²
+against the county's 103,388 ft², so the ENU conversion is sound. The stored ring's "anomalous"
+vertex 10 was a transcription slip (47.634001 for 47.635001), and the study never used the ring.
+
+### ⚠️ ERROR 19 — the east property line has a notch the parcel test cut straight across
+
+`inside_parcel()` was hand-built from two edges, SE→SW and SE→NE. The real east boundary goes
+SE (46.9, −32.1) → (−0.3, 61.4) → NE (53.5, 99.2); dropping the middle vertex adds ~36,700 ft²
+(140,096 vs 103,394). Re-checked against the true ring, 5 of 103 NEC wires change from on the
+lot to off: S4, N‑F10A, W‑F10A, S5, N2‑V2 (supports 10–39 ft over). All roof-sloper scan winners,
+robust picks and height-sensitivity picks keep their verdicts; so do RB‑POST20, F10‑A, BASE and
+Deployment 1. The tool and the stored `parcel` strings are not yet regenerated.
+
 ## Corrections summary
 
 | # | Error | Corrected in | Status |
@@ -762,6 +780,7 @@ drawn off-frame, a wrap-around line in the bearing-tolerance plot, and label col
 | 16 | HANDOFF.md: taut-wire end height (~43.6 ft, actually ~60 ft) and GPX parcel status (dwell mean is 0.5 m past the line) | Phase 13 | ✅ corrected; scoring used the stated 45 ft |
 | 17 | **§3 long-wire formula was the centre-fed pattern; this antenna is end-fed** — lobes wrong on 40/20/15/10 m (and correction 2 was this error) | Phase 16 | ✅ NEC-2; METHOD.md §3 banner, §11 |
 | 18 | **Every analytic ranking superseded** — old vs NEC ρ = −0.07 over 103 wires | Phase 16 | ✅ rankings now from `tools/nec_search.py` |
+| 19 | `inside_parcel()` took the east line as straight; the real line has a notch to 61 m north of the transformer | Phase 19 | ⚠️ found; 5 of 103 verdicts wrong (S4, N‑F10A, W‑F10A, S5, N2‑V2); tool not yet fixed |
 
 **Anything in the conversation before each correction is stale.** The files in this
 directory reflect only post-correction values.

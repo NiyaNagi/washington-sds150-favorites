@@ -13,6 +13,7 @@ problem it described is gone.
 | `kc2025_close.jpg` | 90 m | (0, 0) | 4.4 cm/px | 987 KB |
 | `kc2025_corridor.jpg` | 55 m | (14.6, −4.5) | 2.7 cm/px | 685 KB |
 | `corridor_canopy.jpg` | 55 m | (14.6, −4.5) | 2.7 cm/px | generated overlay |
+| `parcel_overlay.jpg` | 200 m | (0, 0) | 12.5 cm/px | generated overlay: live King County parcel lines on `kc2025_wide.jpg` (`../tools/parcel_overlay.py`) |
 
 **Source.** `BaseMaps/KingCo_Aerial_2025` MapServer, a tile cache built from a
 natural-colour orthomosaic flown by **EagleView Technologies** for King County.

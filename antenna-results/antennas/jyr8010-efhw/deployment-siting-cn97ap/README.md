@@ -120,6 +120,29 @@ expected resonances, and draws `imagery/deployment1_*.png`. The build guide is t
 
 **Before building:** the neighbour's permission, the real roof height, and a sound limb at ~67 ft.
 
+### The parcel line, pulled live (2026-09-13)
+
+[`tools/parcel_overlay.py`](tools/parcel_overlay.py) fetches parcel 1117200390 from King County GIS
+and writes [`data/parcel-live-2026-09-13.json`](data/parcel-live-2026-09-13.json) and
+`imagery/parcel_overlay.jpg`, which shows the lot, the neighbours' outlines and Deployment 1 on
+the wide 2025 aerial.
+
+| | |
+|---|---|
+| Address | 25823 NE 30th Ct, Redmond 98053 · plat Broadhurst |
+| Lot | 103,388 ft² (2.37 ac) · zoned RA-5 · single family |
+| Edges | S 392 ft · W 154 ft · NW 244 ft · N 216 ft · **E 344 ft, diagonally to a notch** |
+
+**The east line is not straight.** From the SE corner it runs NNW 344 ft to a vertex 61 m due
+north of the transformer, then NE to the north corner. `compare_options.inside_parcel()` took
+the east edge as a straight SE→NE line, so it counted a ~36,700 ft² wedge of the neighbour's
+land as on the lot. Re-checking all 103 NEC wires against the real ring: **5 verdicts change,
+all to off the lot** — S4 (#10, support 30 ft over), N‑F10A (#16, 15 ft), W‑F10A (#30, 10 ft),
+S5 (#38, 39 ft), N2‑V2 (#44, 12 ft). Every other verdict holds, including RB‑POST20, F10‑A,
+BASE, NR‑SL2 and every on-lot category winner of the roof-sloper scan (57–59°M and 255°M ends
+are inside). Deployment 1 is unaffected: it crosses the south edge, which was right.
+`inside_parcel()` itself and the stored `parcel` strings have **not** been changed yet.
+
 ---
 
 ## The aerial photograph changed the picture
@@ -907,6 +930,7 @@ the bend and its null-filling — drops support 3, and costs 1.1 dB and two regi
 | [`tools/nec_search.py`](tools/nec_search.py) | **The ranking now in force**: re-runs the searches on NEC and scores all 103 wires → `data/nec-scores.json`, `nec-ranking.csv`, `nec-ranking.kml` |
 | [`tools/nec_roof_sloper_scan.py`](tools/nec_roof_sloper_scan.py) | **Exhaustive** NEC scan of every straight sloper off the roof point, with robustness, stress test and 20/30 ft roof heights |
 | [`tools/deployment1.py`](tools/deployment1.py) | Deployment 1 build detail: setting-out, heights, maxima, slack, NEC patterns and resonances, seven diagrams → `data/deployment1.json`, `imagery/deployment1_*.png` |
+| [`tools/parcel_overlay.py`](tools/parcel_overlay.py) | Live King County parcel pull (address, zoning, ring, neighbours) → `data/parcel-live-2026-09-13.json`, `imagery/parcel_overlay.jpg` |
 | [`tools/build_nec_page.py`](tools/build_nec_page.py) | "Every Wire on One Lot" page and `imagery/nec_*.jpg` |
 | [`tools/topology_search.py`](tools/topology_search.py) | Searches slopers, inverted‑Vs and inverted‑Ls (feed 10 ft) on the 3-band and 40 + 20 m metrics; adds the hybrid L model |
 | [`tools/build_lineup_page.py`](tools/build_lineup_page.py) | Builds the lineup comparison page and the two annotated aerial JPEGs |

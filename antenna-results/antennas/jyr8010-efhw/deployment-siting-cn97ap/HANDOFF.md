@@ -167,6 +167,15 @@ that support position has been checked for a usable limb; the recommendation
 itself has not been rewritten into a new deployment guide; the operator has not yet chosen a
 design on the NEC results.
 
+## Also done 2026-09-13: the parcel line, and correction 19
+
+`tools/parcel_overlay.py` pulls the parcel live from King County and draws
+`imagery/parcel_overlay.jpg`. **The east property line has a notch** (to a vertex 61 m due north
+of the transformer) that `compare_options.inside_parcel()` never modelled. Five wires it called on
+the lot are off it: S4, N‑F10A, W‑F10A, S5, N2‑V2. Nothing the operator is weighing changes. Open:
+rewrite `inside_parcel()` on the ring in `data/parcel-live-2026-09-13.json` and regenerate the
+`parcel` strings (SESSION-LOG Phase 19).
+
 ## Environment notes (Windows, PowerShell 5.1)
 
 - Do **not** round-trip markdown through `Get-Content -Raw | Set-Content -Encoding utf8` —
