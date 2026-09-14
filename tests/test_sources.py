@@ -33,6 +33,7 @@ def test_implemented_sources_marked_available():
         "amsat",
         "wwara",
         "iacc",
+        "dstarinfo",
         "faa_nasr",
         "fcc_uls",
         "nwac",

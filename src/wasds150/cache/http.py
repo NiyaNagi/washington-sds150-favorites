@@ -10,12 +10,16 @@ behavior is uniform and only needs testing once.
 """
 from __future__ import annotations
 
+import html
+import http.cookiejar
+import re
 import threading
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from dataclasses import dataclass
-from typing import Optional
+from typing import Dict, Optional
 from urllib.parse import urlsplit
 
 from wasds150.cache.store import CacheEntry, HttpCacheStore
@@ -90,6 +94,20 @@ def _read_with_limit(response, max_bytes: int) -> bytes:
     return b"".join(chunks)
 
 
+_INPUT_TAG = re.compile(r"<input\b[^>]*>", re.IGNORECASE)
+_ATTRIBUTE = re.compile(r'(\w+)\s*=\s*"([^"]*)"')
+
+
+def hidden_fields(page: str) -> Dict[str, str]:
+    """The ``type="hidden"`` inputs of a page, name -> unescaped value."""
+    fields: Dict[str, str] = {}
+    for tag in _INPUT_TAG.findall(page):
+        attributes = {name.lower(): value for name, value in _ATTRIBUTE.findall(tag)}
+        if attributes.get("type", "").lower() == "hidden" and attributes.get("name"):
+            fields[attributes["name"]] = html.unescape(attributes.get("value", ""))
+    return fields
+
+
 class CachedHttpClient:
     def __init__(
         self,
@@ -155,3 +173,60 @@ class CachedHttpClient:
                 touched = self.store.touch(url, ttl_seconds=ttl_seconds)
                 return FetchResult(status="not-modified", content=self.store.read_blob(touched), entry=touched)
             raise
+
+    def fetch_form(
+        self,
+        url: str,
+        *,
+        fields: Dict[str, str],
+        cache_key: str,
+        ttl_seconds: int,
+        source_id: str,
+        event_target: str = "",
+        force: bool = False,
+        max_bytes: Optional[int] = None,
+    ) -> FetchResult:
+        """Submit an ASP.NET WebForms page and cache the answer.
+
+        GET ``url`` for its hidden state (``__VIEWSTATE``, ``__EVENTVALIDATION``
+        and the rest), POST it back with ``fields`` - a dropdown's postback
+        names the control in ``event_target`` - and store the response under
+        ``cache_key``, since a URL alone does not say which form was sent. The
+        state is single-use, so only the answer is cached. TTL, offline mode,
+        the per-host rate limit and the size limit apply as for :meth:`fetch`;
+        there is no conditional revalidation."""
+        entry = self.store.get(cache_key)
+        if entry is not None and not force and entry.is_fresh():
+            return FetchResult(status="cached-fresh", content=self.store.read_blob(entry), entry=entry)
+        if self.offline:
+            if entry is not None:
+                return FetchResult(status="cached-stale-offline", content=self.store.read_blob(entry), entry=entry)
+            raise OfflineModeError(f"offline mode is on and there is no cached copy of {cache_key}")
+
+        limit = max_bytes if max_bytes is not None else self.max_bytes
+        # The server may tie the state to a session cookie.
+        opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
+        host = urlsplit(url).netloc
+        self.rate_limiter.wait_if_needed(host)
+        with opener.open(urllib.request.Request(url, headers={"User-Agent": self.user_agent}), timeout=self.timeout_seconds) as response:
+            page = _read_with_limit(response, limit).decode("utf-8", errors="replace")
+        body = hidden_fields(page)
+        body.update({"__EVENTTARGET": event_target, "__EVENTARGUMENT": ""})
+        body.update(fields)
+        self.rate_limiter.wait_if_needed(host)
+        request = urllib.request.Request(
+            url,
+            data=urllib.parse.urlencode(body).encode("ascii"),
+            headers={"User-Agent": self.user_agent, "Content-Type": "application/x-www-form-urlencoded"},
+        )
+        with opener.open(request, timeout=self.timeout_seconds) as response:
+            content = _read_with_limit(response, limit)
+            new_entry = self.store.put(
+                cache_key,
+                content=content,
+                ttl_seconds=ttl_seconds,
+                status=response.status,
+                content_type=response.headers.get("Content-Type"),
+                source_id=source_id,
+            )
+        return FetchResult(status="fetched", content=content, entry=new_entry)

@@ -9,6 +9,15 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Added
 
+- **DSTARInfo D-STAR directory source (`dstarinfo`).** Every area of the
+  dstarinfo.com repeater directory - callsign, city, gateway directory and each
+  module's output and offset - plus the detail page (site, coverage, sponsor,
+  URLs, dates) of every repeater in Washington, Oregon, Idaho and British
+  Columbia, cached locally for weekly/monthly refresh. The directory is an
+  ASP.NET form, so the cached HTTP client gained `fetch_form` (page state
+  posted back, answer cached under its own key). No list consumes the records
+  yet.
+
 - **Every WWARA repeater is in the catalog.** PSHAM01 kept only records inside a
   Puget Sound box, so 62 Southwest Washington and coast machines (Pacific,
   Grays Harbor, Wahkiakum, Cowlitz, Randle, Forks) were missing from every
