@@ -51,6 +51,32 @@ def render_plan_report(
     lines.append(f"- Coverage: {profile.rx_coverage_summary()}")
     lines.append("")
 
+    if plan.scan_groups:
+        from wasds150.plan.scanning import group_members, is_pinned
+
+        group = plan.scan_groups[0]
+        near = group_members(group, resolved.channels)
+        lines.append(f"## {group.name} ({len(near)} channels)")
+        lines.append("")
+        lines.append(
+            "The scan list to leave running: pinned repeaters, then the nearest reachable stations of "
+            "each amateur service, in frequency order (see docs/scan-groups.md). The AT-D890UV holds it "
+            "as a zone and scan list, the TH-D75A and ID-52A as a memory group of copies - on top of the "
+            "channels counted above - and the FTX-1 as M-Grp flags."
+        )
+        lines.append("")
+        lines.append("| Receive | Transmit | Tone | Miles | Name | Block |")
+        lines.append("| ---: | --- | --- | ---: | --- | --- |")
+        for channel in near:
+            tx = f"{channel.tx_freq_mhz:.4f}" if channel.tx_freq_mhz is not None else ("simplex" if channel.transmit else "RX only")
+            tone = channel.tx_tone.raw or (channel.digital.protocol if channel.digital is not None else "-")
+            miles = f"{channel.distance_miles:.0f}" if channel.distance_miles is not None else "-"
+            pin = " (pinned)" if is_pinned(channel, group.pinned) else ""
+            lines.append(
+                f"| {channel.rx_freq_mhz:.4f} | {tx} | {tone} | {miles} | {channel.name}{pin} | {channel.block} |"
+            )
+        lines.append("")
+
     lines.append("## Memory map")
     lines.append("")
     lines.append("| Slots | Block | Channels | Transmit |")

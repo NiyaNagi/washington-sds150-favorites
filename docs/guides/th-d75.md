@@ -57,8 +57,10 @@ this radio.
    check that My Callsign (D-STAR) and the APRS My Callsign are **WA7DAM**. The
    file keeps your radio's own settings, and reads from before the call change
    still hold KM7HKM.
-8. **Write.** Check that the memory count matches the report and that the DR
-   repeater list is filled, then write it to the radio on COM14.
+8. **Write.** Check the memory count: the report's "Channels programmed" plus
+   the Near Me copies (the report's **Near Me** section gives the number - 850
+   and 84, 934 memories, as of 2026-09-13). Check the DR repeater list is
+   filled, then write it to the radio on COM14.
 9. **Read back (optional).** Read the radio again and save it as
    `radio-data\th-d75\backups\th-d75-readback-YYYY-MM-DD-HHMM.d75`, so the
    written image can be compared byte for byte.
