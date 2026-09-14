@@ -250,11 +250,12 @@ byte, which is what says there is nothing else to maintain.
 
 ### The same lists on the other radios
 
-The Anytone is the only radio in the fleet with real scan lists, so it is the
-only one that holds `Near Me` as exactly its hundred channels. The TH-D75A
-reaches the same ground through Memory Group Link and the ID-52A through a
-copied memory group; the FTX-1 and TD-H9 have nothing to express it with. See
-[scan-groups.md](scan-groups.md).
+The Anytone is the only radio in the fleet with real scan lists, so it holds
+`Near Me` as a scan list of up to a hundred channels. The TH-D75A and ID-52A
+hold it as a memory group of copies (the D75's Memory Group Link names that
+group alone), the FTX-1 flags its memories with M-Grp, and the TD-H9 has
+nothing to express it with. See [scan-groups.md](scan-groups.md) for how the
+list is filled.
 
 ### Priority Channel 1/2 must be `Off`
 

@@ -47,7 +47,9 @@ LEGACY_SLOTS = {
     "atd890-scan": 938,
     "ftx1-local": 192,
     "ftx1-scan": 183,
-    "ftx1-wa": 860,
+    # 860 -> 856 when duplicates began comparing the access tone by value:
+    # four rows differed only as "TONE=C100" against "TONE=C100.0".
+    "ftx1-wa": 856,
     "h9-ozette": 137,
     "thd75-ames-lake": 388,
     "thd75-scan": 393,

@@ -271,6 +271,10 @@ def _merge(category: Category, lists: List[FavoritesList]) -> FavoritesList:
             elif not system.departments:
                 continue
             systems.append(system)
+    # Every list reads in frequency order within each department.
+    for system in systems:
+        for department in system.departments:
+            department.channels.sort(key=lambda c: (c.freq_mhz if c.freq_mhz is not None else 0.0, c.label))
     channels = sum(len(d.channels) for s in systems for d in s.departments)
     talkgroups = sum(len(d.channels) for s in systems for site in s.sites for d in site.departments)
     return FavoritesList(

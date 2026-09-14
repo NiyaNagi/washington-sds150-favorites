@@ -220,8 +220,9 @@ TH_D75 = FleetRadio(
         StepSpec(
             "write-radio", "Write the radio",
             "Open {final} in MCP-D75, check the memory count and the local DR list, then write "
-            "it to the radio. Memory Group Link is set to the groups Near Me draws from, so "
-            "MENU > Scan > Group Link Scan sweeps every local amateur group in one pass.",
+            "it to the radio. The last memory group is Near Me - copies of the pinned and nearest "
+            "reachable repeaters, in frequency order - and Memory Group Link names it alone, so "
+            "MENU > Scan > Group Link Scan sweeps exactly that list.",
         ),
         StepSpec(
             "readback-save", "Read back for comparison",

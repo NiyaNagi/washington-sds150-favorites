@@ -71,8 +71,9 @@ this radio.
   2026-09-13, when catch-all groups were programmed receive only: write the
   current export.
 - Your call sign, APRS and GPS settings are unchanged.
-- **Menu > Scan > Group Link Scan** sweeps every Near Me amateur group in one
-  pass. Memory Group Link is already set to those groups.
+- **Menu > Scan > Group Link Scan** sweeps the **Near Me** memory group, the last
+  group: KC7BAE E Tiger, WW7PSR, then the nearest reachable repeaters, in
+  frequency order. Memory Group Link is already set to that group alone.
 - DR shows a local D-STAR repeater.
 
 ## Undo

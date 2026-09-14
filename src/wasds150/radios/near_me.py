@@ -270,7 +270,8 @@ def _conventional(favorites: Sequence[FavoritesList], home: Optional[Tuple[float
         spec = members[0][1].spec
         place = group_key[1:]
         channels = []
-        for key, entry in sorted(members, key=lambda item: (service_rank(item[1].channel.service_type), item[1].channel.freq_mhz)):
+        # Frequency order within each fenced group, as every list reads.
+        for key, entry in sorted(members, key=lambda item: (item[1].channel.freq_mhz, service_rank(item[1].channel.service_type))):
             channel = copy.deepcopy(entry.channel)
             if len(entry.labels) > 1 and (channel.mode or "").upper() == "DMR":
                 # One entry per DMR repeater: name it for the repeater, not a talkgroup.

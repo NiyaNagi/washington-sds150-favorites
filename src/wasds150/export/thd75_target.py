@@ -282,6 +282,56 @@ def _record(channel: PlannedChannel, result: Thd75ExportResult) -> bytes:
     return bytes(record)
 
 
+def _write_near_me_group(
+    output: bytearray,
+    resolved: ResolvedPlan,
+    first_free: int,
+    group_by_block: Dict[str, int],
+    result: Thd75ExportResult,
+) -> int:
+    """Copy the plan's first scan group into a memory group of its own and
+    point Memory Group Link at that group alone.
+
+    A memory belongs to one group and Group Link reaches whole groups, so
+    linking the groups ``Near Me`` draws from scanned every memory in them -
+    275 channels, not the curated list. A group of copies, as on the ID-52A,
+    is exactly the list: Group Link Scan sweeps those channels and nothing
+    else. Returns how many memories it wrote.
+    """
+    from wasds150.plan.scanning import group_members
+
+    groups = resolved.plan.scan_groups
+    if not groups:
+        return 0
+    group = groups[0]
+    members = group_members(group, resolved.channels)
+    if not members:
+        result.warnings.append(f"scan group {group.name!r} is empty; memory group link left as read")
+        return 0
+    if len(group_by_block) >= GROUP_COUNT:
+        raise Thd75ExportError(f"no memory group left for {group.name!r}: the plan uses all {GROUP_COUNT}")
+    if first_free + len(members) > MEMORY_COUNT:
+        raise Thd75ExportError(
+            f"{first_free + len(members)} memories exceed the radio's {MEMORY_COUNT}; the "
+            f"{group.name} copy needs room, so raise the plan's reserve_slots"
+        )
+    number = len(group_by_block)
+    offset = HEADER_SIZE + NAMES_OFFSET + (GROUP_NAME_INDEX + number) * NAME_SIZE
+    output[offset:offset + NAME_SIZE] = _name_bytes(group.name)
+    for index, channel in enumerate(members):
+        slot = first_free + index
+        output[_flag_offset(slot):_flag_offset(slot) + FLAG_SIZE] = bytes((
+            _band_code(channel.rx_freq_mhz), 0, number, 0xFF,
+        ))
+        output[_data_offset(slot):_data_offset(slot) + RECORD_SIZE] = _record(channel, result)
+        output[_name_offset(slot):_name_offset(slot) + NAME_SIZE] = _name_bytes(channel.name)
+    base = HEADER_SIZE + GROUP_LINK_OFFSET
+    output[base:base + GROUP_LINK_COUNT] = bytes([number]) + bytes([GROUP_LINK_NONE]) * (GROUP_LINK_COUNT - 1)
+    result.link_group = group.name
+    result.group_links = [number]
+    return len(members)
+
+
 def render_thd75(
     resolved: ResolvedPlan,
     *,
@@ -329,10 +379,10 @@ def render_thd75(
         output[_data_offset(slot):_data_offset(slot) + RECORD_SIZE] = _record(channel, result)
         output[_name_offset(slot):_name_offset(slot) + NAME_SIZE] = _name_bytes(channel.name)
 
-    _write_group_link(output, resolved, group_by_block, result)
+    copies = _write_near_me_group(output, resolved, len(channels), group_by_block, result)
 
     result.rows = len(channels)
-    result.groups = len(group_by_block)
+    result.groups = len(group_by_block) + (1 if copies else 0)
     _validate_template(bytes(output))
     return bytes(output), result
 

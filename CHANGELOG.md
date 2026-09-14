@@ -7,6 +7,22 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## Unreleased
 
+### Changed
+
+- **Near Me holds the repeaters the operator uses and can reach.** KC7BAE East
+  Tiger (443.050) and WW7PSR (146.960) are pinned (`NEAR_ME_PINNED`); each
+  quota then takes stations within 35 miles (`NEAR_ME_REACH_MILES`), nearest
+  first by the repeater's own WWARA site (`locate_channels` - the nets list
+  fenced every row at Seattle, so its order fell back to the alphabet and
+  WW7PSR missed the cut), DMR by talkgroup tier, lapsed coordinations last,
+  and never a station known to be farther away.
+- **Every list is in frequency order**: each block's memories, zones, memory
+  groups and scan lists, and the SDS150's lists within each department. Which
+  stations a block holds is still chosen nearest first (`PlannedChannel.rank`).
+- **TH-D75A Near Me is a memory group of copies**, and Memory Group Link names
+  it alone; linking the groups Near Me drew from swept 275 channels. Its
+  reserve rises by 100 for the copies.
+
 ### Fixed
 
 - **No licensed channel is blocked for transmit on any radio.** Fleet plans

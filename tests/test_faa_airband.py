@@ -197,13 +197,16 @@ def _block(resolved, label):
 def test_airports_near_home_come_first_nearest_first_within_the_radius():
     resolved = _resolved("th-d75")
     local = _block(resolved, "Airports Near Home")
-    assert local[0].label == "RNT TWR"  # Renton is the nearest field
+    # Chosen nearest first (the rank), listed by frequency (the memory order).
+    chosen = sorted(local, key=lambda c: c.rank)
+    assert chosen[0].label == "RNT TWR"  # Renton is the nearest field
+    assert [c.rx_freq_mhz for c in local] == sorted(c.rx_freq_mhz for c in local)
     near = [c for c in local if c.distance_miles <= 60]
     assert {c.rx_freq_mhz for c in near} == {118.3, 120.6, 121.9, 127.75, 257.8, 124.7, 126.95, 119.2, 128.5, 120.3, 122.9}
     # Broadcasts that never stop are programmed but kept out of the scan.
     assert {c.label for c in near if c.skip_scan} == {"BFI ATIS", "RNT ASOS"}
-    # Spokane comes last, from the spare slots, programmed but not scanned.
-    assert (local[-1].rx_freq_mhz, local[-1].skip_scan) == (132.1, True)
+    # Spokane is chosen last, from the spare slots, programmed but not scanned.
+    assert (chosen[-1].rx_freq_mhz, chosen[-1].skip_scan) == (132.1, True)
     assert [c.label for c in _block(resolved, "Airband Civil")] == ["Far outlet"]
     assert not _block(resolved, "Airport Towers")
 
@@ -216,7 +219,8 @@ def test_a_radio_without_uhf_airband_keeps_the_vhf_rows():
 def test_the_td_h9_gets_the_nearest_towers_and_atis_in_its_few_slots():
     resolved = _resolved("td-h9")
     towers = _block(resolved, "Airport Towers")
-    assert [c.label for c in towers] == ["RNT TWR", "BFI TWR 14L/32R", "BFI TWR 14R/32L", "BFI ATIS"]
+    assert [c.label for c in sorted(towers, key=lambda c: c.rank)] == ["RNT TWR", "BFI TWR 14L/32R", "BFI TWR 14R/32L", "BFI ATIS"]
+    assert [c.rx_freq_mhz for c in towers] == sorted(c.rx_freq_mhz for c in towers)
     assert not _block(resolved, "Airports Near Home") and not _block(resolved, "Airband Civil")
 
 

@@ -288,6 +288,14 @@ class ScanGroup:
     notes: str = ""
     #: block label -> how many of its channels to keep, nearest first
     take: Tuple[Tuple[str, int], ...] = ()
+    #: (output MHz, call in the memory's name) of repeaters a quota always
+    #: takes first (see :func:`wasds150.plan.scanning.quota_rank`).
+    pinned: Tuple[Tuple[float, str], ...] = ()
+    #: A quota takes only stations within this many miles of home, or of
+    #: unknown distance; ``None`` takes the nearest regardless of distance.
+    reach_miles: Optional[float] = None
+    #: List the chosen channels in frequency order rather than block order.
+    frequency_order: bool = False
 
     def __post_init__(self) -> None:
         if not self.name.strip():
@@ -352,6 +360,9 @@ class ChannelPlan:
     transmit_by_service: bool = False
     gmrs_licensed: bool = False
     murs_transmit: bool = False
+    #: Put each block's memories in frequency order once they are chosen
+    #: (nearest first still decides *which*; see ``PlannedChannel.rank``).
+    frequency_order: bool = False
 
     def __post_init__(self) -> None:
         if self.reserve_slots < 0:
@@ -389,6 +400,7 @@ class ChannelPlan:
             "transmit_by_service": self.transmit_by_service,
             "gmrs_licensed": self.gmrs_licensed,
             "murs_transmit": self.murs_transmit,
+            "frequency_order": self.frequency_order,
             "scan_groups": [
                 {"name": group.name, "blocks": list(group.blocks), "notes": group.notes}
                 for group in self.scan_groups

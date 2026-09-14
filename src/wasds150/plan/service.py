@@ -89,10 +89,13 @@ def resolve_named_plan(
     catalog = Catalog(favorites=favorites)
     resolved = resolve_plan(plan, catalog)
     if plan.transmit_by_service:
-        # A repeater copy whose source gave no access tone gets WWARA's.
-        from wasds150.plan.coordination import fill_access_tones, load_coordination
+        # A repeater copy whose source gave no access tone gets WWARA's, and
+        # one whose source gave no site gets WWARA's site and distance.
+        from wasds150.plan.coordination import fill_access_tones, load_coordination, locate_channels
 
-        fill_access_tones(resolved, load_coordination(ctx.config))
+        coordination = load_coordination(ctx.config)
+        fill_access_tones(resolved, coordination)
+        locate_channels(resolved, coordination, plan.home)
     return plan, resolved
 
 

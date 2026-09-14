@@ -93,6 +93,15 @@ class PlannedChannel:
     #: that write a located table (the ID-52A's DR repeater list) need it.
     lat: Optional[float] = None
     lon: Optional[float] = None
+    #: The channel's place in its block's selection order (0 = chosen first:
+    #: nearest, or the block's own sort). A scan group's quota still picks by
+    #: it after the memories are put in frequency order.
+    rank: int = 0
+    #: DMR talkgroup tier (0 = calling and local groups first); 0 for analog.
+    tier: int = 0
+    #: Every WWARA coordination on this repeater pair has expired, so the
+    #: machine may be gone (set by :func:`wasds150.plan.coordination.locate_channels`).
+    lapsed: bool = False
 
 
 @dataclass
@@ -506,11 +515,14 @@ def _resolve_once(
             # access tones, so the receive frequency alone is not an identity.
             # Two talkgroups on one DMR repeater are likewise two memories.
             identity = digital_identity(spec)
+            # The tone by value, not by text: one list writes "TONE=C100.0" and
+            # another "TONE=C100" for the same repeater.
+            tone_value = (tx_tone.kind, tx_tone.ctcss_hz, tx_tone.dcs_code) if transmit else ()
             tuning_key = (
                 freq,
                 tx_freq if transmit else None,
                 transmit,
-                tx_tone.raw if transmit else "",
+                tone_value,
                 mode if spec is not None else "",
                 identity,
             )
@@ -607,6 +619,8 @@ def _resolve_once(
                 distance_miles=round(distance, 1) if distance is not None else None,
                 lat=channel.lat,
                 lon=channel.lon,
+                rank=taken - 1,
+                tier=channel_tier(channel) if spec is not None else 0,
             )
             result.channels.append(planned)
             seen_frequencies[tuning_key] = planned
@@ -665,7 +679,24 @@ def resolve_plan(
     result = _resolve_once(plan, profile, candidates, cache=cache, labels=labels)
     if plan.fill_to_capacity and result.capacity is not None:
         result = _fill_spare_capacity(plan, profile, candidates, result, cache, labels)
+    if plan.frequency_order:
+        _order_by_frequency(result)
     return result
+
+
+def _order_by_frequency(result: ResolvedPlan) -> None:
+    """Put each block's memories in frequency order, blocks in plan order,
+    and number the slots again.
+
+    Selection is untouched - each channel keeps its selection ``rank``, so a
+    block holds the same stations and a scan group's quota still takes the
+    nearest - only where each memory sits changes. A fill pass appends its
+    far stations after every block, so this is also what makes each block one
+    contiguous run of memories."""
+    order = {block.label: index for index, block in enumerate(result.plan.blocks)}
+    result.channels.sort(key=lambda c: (order.get(c.block, len(order)), c.rx_freq_mhz, c.name))
+    for slot, channel in enumerate(result.channels, start=1):
+        channel.slot = slot
 
 
 def _widened(block: PlanBlock, limit: Optional[int]) -> PlanBlock:

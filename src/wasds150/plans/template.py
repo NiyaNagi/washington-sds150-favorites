@@ -171,6 +171,17 @@ NEAR_ME_QUOTAS = (
     ("Seattle ACS", 8),
 )
 
+#: Repeaters Near Me always holds, ahead of the quotas' own choice:
+#: (output MHz, call in the memory's name). The operator's daily machines.
+NEAR_ME_PINNED = (
+    (443.050, "KC7BAE"),  # East Tiger Mountain
+    (146.960, "WW7PSR"),  # Puget Sound Repeater Group, Seattle: the PSRG nets
+)
+#: How far from home a handheld reaches a repeater. A quota takes stations
+#: within it, nearest first, then those whose distance is unknown (simplex
+#: frequencies), and never one known to be farther unless it is pinned.
+NEAR_ME_REACH_MILES = 35.0
+
 SCAN_GROUP_ORDER = (
     GROUP_NEAR_ME,
     GROUP_HAM_ALL,
@@ -834,7 +845,13 @@ def _scan_groups(specs: List[ServiceBlockSpec]) -> Tuple[ScanGroup, ...]:
                 GROUP_NEAR_ME,
                 tuple(label for label, _ in near),
                 take=near,
-                notes="The nearest few of every service worth hearing, in one list.",
+                notes=(
+                    "The pinned repeaters, then the nearest reachable few of every amateur service, "
+                    "in one list in frequency order."
+                ),
+                pinned=NEAR_ME_PINNED,
+                reach_miles=NEAR_ME_REACH_MILES,
+                frequency_order=True,
             )
         )
     for name in SCAN_GROUP_ORDER:
@@ -842,14 +859,14 @@ def _scan_groups(specs: List[ServiceBlockSpec]) -> Tuple[ScanGroup, ...]:
             continue
         members = tuple(s.label for s in specs if name in s.groups and not s.skip_scan)
         if members:
-            groups.append(ScanGroup(name, members))
+            groups.append(ScanGroup(name, members, frequency_order=True))
     # Air rows live in a separate list on the Anytone and HF is a different
     # radio mode everywhere, so "Everything" is every other scannable block.
     everything = tuple(
         s.label for s in specs if not s.skip_scan and not s.id.startswith(("air-", "hf-"))
     )
     if everything:
-        groups.append(ScanGroup(GROUP_EVERYTHING, everything))
+        groups.append(ScanGroup(GROUP_EVERYTHING, everything, frequency_order=True))
     return tuple(groups)
 
 
@@ -916,6 +933,8 @@ def build_fleet_plan(radio_id: str, knobs: Optional[RadioKnobs] = None) -> Chann
         transmit_by_service=True,
         gmrs_licensed=knobs.gmrs_licensed,
         murs_transmit=knobs.murs_tx,
+        # Stations are chosen nearest first; every list then reads low to high.
+        frequency_order=True,
     )
 
 
@@ -965,17 +984,22 @@ _FTX1 = RadioKnobs(
 )
 
 #: TH-D75: 1,000 memories in 30 groups; transmit on 2 m, 1.25 m and 70 cm.
+#: The reserve is the operator's fifty free slots plus a hundred for the Near
+#: Me group of copies (see docs/scan-groups.md): Group Link reaches whole
+#: groups, so the curated list has to be a group of its own.
 _TH_D75 = RadioKnobs(
-    reserve_slots=50,
+    reserve_slots=150,
     power=("5.0W", "5.0W", "0.5W"),
     limits={
         "nets": 50,
-        "ham-6m": 20, "ham-2m": 50, "ham-125": 30, "ham-70cm": 96, "dstar": 25,
-        "simplex": 20, "seattle-acs": 50, "hf-nets": 20, "hf-calling": 20, "hf-digital": 10,
+        # A hundred fewer than before, for the Near Me group of copies: off
+        # the least-scanned blocks (distant airports, broadcast, beacons).
+        "ham-6m": 20, "ham-2m": 50, "ham-125": 20, "ham-70cm": 96, "dstar": 25,
+        "simplex": 20, "seattle-acs": 30, "hf-nets": 20, "hf-calling": 20, "hf-digital": 10,
         # Band B hears civil VHF and military UHF airband alike.
-        "hf-reference": 20, "air-local": 130, "air-civil": 40, "air-mil": 10, "sar": 40, "wildfire": 40,
+        "hf-reference": 10, "air-local": 90, "air-civil": 40, "air-mil": 10, "sar": 40, "wildfire": 40,
         "marine": 30, "rail": 15, "business": 30, "public-safety": 50, "data": 10,
-        "broadcast-fm": 40, "broadcast-am": 20, "packs": 20, "gmrs-repeaters": 10, "other-nearby": 20,
+        "broadcast-fm": 20, "broadcast-am": 20, "packs": 20, "gmrs-repeaters": 10, "other-nearby": 20,
     },
 )
 

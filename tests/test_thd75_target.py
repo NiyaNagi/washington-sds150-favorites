@@ -272,16 +272,21 @@ def test_group_link_points_at_the_first_scan_group(tmp_path: Path) -> None:
     data, result = render_thd75(resolved, template=template)
 
     assert result.link_group == "Near Me"
-    # Nets is group 0 and Ham 2m group 1; Marine is group 2 and stays out.
-    assert result.group_links == [0, 1]
-    assert inspect_group_link(data) == [0, 1]
-    tail = data[HEADER_SIZE + GROUP_LINK_OFFSET + 2:HEADER_SIZE + GROUP_LINK_OFFSET + GROUP_LINK_COUNT]
+    # Linking whole groups swept every memory in them. Near Me is now a memory
+    # group of its own - group 3, after Nets, Ham 2m and Marine - holding
+    # copies of the quota's choice, and Group Link names it alone.
+    assert result.group_links == [3]
+    assert inspect_group_link(data) == [3]
+    tail = data[HEADER_SIZE + GROUP_LINK_OFFSET + 1:HEADER_SIZE + GROUP_LINK_OFFSET + GROUP_LINK_COUNT]
     assert set(tail) == {GROUP_LINK_NONE}
+    copies = [row for row in inspect_thd75(data) if row["group"] == 3]
+    assert [(row["slot"], row["name"]) for row in copies] == [(4, "NET1"), (5, "TWOM")]
+    assert result.groups == 4
 
-    # The link is ours, so a later MCP save must not restore the radio's.
+    # The link and the copies are ours, so a later MCP save must not restore the radio's.
     mcp_saved = bytearray(data)
     restored, _ = restore_unowned_regions(bytes(mcp_saved), bytes(original))
-    assert inspect_group_link(restored) == [0, 1]
+    assert inspect_group_link(restored) == [3]
 
 
 def test_group_link_is_left_alone_without_scan_groups(tmp_path: Path) -> None:

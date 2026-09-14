@@ -309,7 +309,7 @@ the operator's own, explicit choice; the template does not cap any of it.
 4. **Import the D-STAR repeater list** - In MCP-D75, import the filtered official repeater TSV under Repeater List for TH-D75A (K-type/U.S.A. and Canada).
 5. **Save from MCP-D75** - Save the file from MCP-D75 (File > Save As) next to <export>; the next step needs it.
 6. **Restore the preserved regions** _(automatic)_ - Run scripts\radios\finalize_thd75_image.py with <backup_d75> and the MCP-saved file. MCP normalises empty special-memory pages on save; this restores every byte outside ordinary memories, group names and the D-STAR region.
-7. **Write the radio** - Open <final> in MCP-D75, check the memory count and the local DR list, then write it to the radio. Memory Group Link is set to the groups Near Me draws from, so MENU > Scan > Group Link Scan sweeps every local amateur group in one pass.
+7. **Write the radio** - Open <final> in MCP-D75, check the memory count and the local DR list, then write it to the radio. The last memory group is Near Me - copies of the pinned and nearest reachable repeaters, in frequency order - and Memory Group Link names it alone, so MENU > Scan > Group Link Scan sweeps exactly that list.
 8. **Read back for comparison** _(optional)_ - Read the radio again in MCP-D75 and save it into radio-data\th-d75\backups\ as a read-back, so the written image can be compared byte for byte.
 <!-- fleet:end th-d75 -->
 

@@ -1,4 +1,5 @@
-"""Repeater coordination records, for checking what a radio is programmed with.
+"""Repeater coordination records, for checking and completing what a radio is
+programmed with.
 
 WWARA's extract holds four lists: current, pending, about to expire and
 expired. Plans are built from the current list (:mod:`wasds150.sources.wwara`);
@@ -17,7 +18,7 @@ import re
 import zipfile
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Dict, Iterable, List, Optional
+from typing import Dict, Iterable, List, Optional, Tuple
 
 STATUS_CURRENT = "current"
 STATUS_PENDING = "pending"
@@ -48,6 +49,9 @@ class Coordination:
     digital: str
     status: str
     expires: str
+    #: The site WWARA publishes; owners may fuzz it by tens of miles.
+    lat: Optional[float] = None
+    lon: Optional[float] = None
 
     @property
     def live(self) -> bool:
@@ -129,8 +133,18 @@ def index_from_zip(data: bytes, today: Optional[datetime.date] = None) -> Coordi
                         digital=_digital(row),
                         status=STATUS_EXPIRED if expires and _expired(expires, today) else status,
                         expires=expires,
+                        lat=_float(row.get("LATITUDE")),
+                        lon=_float(row.get("LONGITUDE")),
                     )
     return CoordinationIndex(chosen.values(), source_date)
+
+
+def _paired(index: CoordinationIndex, channel) -> List[Coordination]:
+    """The live records on a memory's output and input."""
+    return [
+        record for record in index.on_output(channel.rx_freq_mhz)
+        if record.live and record.input_mhz is not None and abs(record.input_mhz - channel.tx_freq_mhz) < 0.0005
+    ]
 
 
 def fill_access_tones(resolved, index: Optional[CoordinationIndex]) -> int:
@@ -153,18 +167,56 @@ def fill_access_tones(resolved, index: Optional[CoordinationIndex]) -> int:
             and service_for(channel.rx_freq_mhz) == AMATEUR
         ):
             continue
-        tones = {
-            record.ctcss_in
-            for record in index.on_output(channel.rx_freq_mhz)
-            if record.live and record.ctcss_in is not None and record.input_mhz is not None
-            and abs(record.input_mhz - channel.tx_freq_mhz) < 0.0005
-        }
+        tones = {record.ctcss_in for record in _paired(index, channel) if record.ctcss_in is not None}
         if len(tones) == 1:
             tone = tones.pop()
             channel.tx_tone = parse_tone(f"TONE=C{tone:g}")
             resolved.warnings.append(f"{channel.label}: access tone {tone:g} Hz from WWARA's coordination (the source had none)")
             filled += 1
     return filled
+
+
+def locate_channels(resolved, index: Optional[CoordinationIndex], home: Optional[Tuple[float, float]]) -> int:
+    """Give a repeater memory whose source published no site of its own the
+    site WWARA publishes for its pair, and its distance from home.
+
+    Without it a list that fences every row at one point - the operator-
+    published nets all sit on Seattle - makes every one of its repeaters
+    equally near, so "nearest" and "within reach" cannot tell East Tiger from
+    Shelton. A pair two machines share takes the one whose tone the memory
+    carries; if that still leaves more than one site, the memory keeps what it
+    had. Returns how many memories were located."""
+    if index is None or home is None:
+        return 0
+    from wasds150.radios.tones import TONE_CTCSS
+    from wasds150.util.geo import haversine_miles
+
+    located = 0
+    for channel in resolved.channels:
+        if channel.tx_freq_mhz is None:
+            continue
+        on_pair = [
+            r for r in index.on_output(channel.rx_freq_mhz)
+            if r.input_mhz is not None and abs(r.input_mhz - channel.tx_freq_mhz) < 0.0005
+        ]
+        if on_pair and not any(r.live for r in on_pair):
+            # Every coordination on the pair has lapsed: probably off the air.
+            channel.lapsed = True
+        if channel.lat is not None:
+            continue
+        records = [r for r in _paired(index, channel) if r.lat is not None and r.lon is not None]
+        if not records:
+            continue
+        hz = channel.tx_tone.ctcss_hz if channel.tx_tone.kind == TONE_CTCSS else None
+        toned = [r for r in records if hz is not None and r.ctcss_in is not None and abs(r.ctcss_in - hz) < 0.05]
+        chosen = toned or records
+        if len({(round(r.lat, 3), round(r.lon, 3)) for r in chosen}) != 1:
+            continue
+        record = chosen[0]
+        channel.lat, channel.lon = record.lat, record.lon
+        channel.distance_miles = round(haversine_miles(home[0], home[1], record.lat, record.lon), 1)
+        located += 1
+    return located
 
 
 def load_coordination(config) -> Optional[CoordinationIndex]:
