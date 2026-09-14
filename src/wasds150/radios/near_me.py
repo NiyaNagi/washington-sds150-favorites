@@ -231,10 +231,17 @@ def _conventional(favorites: Sequence[FavoritesList], home: Optional[Tuple[float
     )
     # A frequency is a duplicate only where two copies would be scanned at
     # the same time: the same frequency in two counties is two stations.
+    from wasds150.catalog.wwara_coverage import COVERAGE_SYSTEM_LABEL
+
     kept: "OrderedDict[tuple, List[_Entry]]" = OrderedDict()
     order = 0
     for favorite in favorites:
         for system in favorite.systems:
+            if system.label == COVERAGE_SYSTEM_LABEL:
+                # A county list's copy of a WWARA machine PSHAM01 already
+                # places at its own position; under the county fence it would
+                # be listed a second time.
+                continue
             for department in system.departments:
                 for channel in department.channels:
                     order += 1

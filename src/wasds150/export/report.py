@@ -18,6 +18,7 @@ _REASON_EXPLANATIONS = {
     "duplicate": "the frequency (or talkgroup on it) is already programmed",
     "capacity": "the radio ran out of memory slots",
     "block-limit": "the plan capped this block",
+    "no-talkgroup": "an amateur DMR machine with no talkgroup cannot be keyed",
 }
 
 

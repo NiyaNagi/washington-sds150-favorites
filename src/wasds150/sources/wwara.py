@@ -33,6 +33,7 @@ data it cannot itself verify is unfuzzed.
 from __future__ import annotations
 
 import csv
+import dataclasses
 import datetime
 import io
 import re
@@ -48,6 +49,10 @@ DEFAULT_TTL_SECONDS = 24 * 3600
 ASSUME_LOCATION_PRECISION = "unknown"
 
 _MAIN_CSV_RE = re.compile(r"^WWARA-rptrlist-(\d{8})\.csv$")
+_PENDING_CSV_RE = re.compile(r"^WWARA-pending-rptrlist-(\d{8})\.csv$")
+#: Added to a row read from the pending list.
+LIST_FIELD = "WWARA_LIST"
+LIST_PENDING = "pending"
 
 
 def parse_wwara_zip(data: bytes):
@@ -60,13 +65,41 @@ def parse_wwara_zip(data: bytes):
             raise ValueError("could not find a WWARA-rptrlist-<date>.csv entry in the zip")
         date_str = _MAIN_CSV_RE.match(main_name).group(1)
         source_updated = f"{date_str[0:4]}-{date_str[4:6]}-{date_str[6:8]}"
-        with zf.open(main_name) as f:
-            text = io.TextIOWrapper(f, encoding="utf-8-sig")
-            lines = text.readlines()
+        rows = _read_rows(zf, main_name)
+        seen = {row.get("FC_RECORD_ID", "").strip() for row in rows}
+        # A pending coordination is a machine being built or moved, often one an
+        # operator already uses (KC7BAE on 443.050, the only record publishing
+        # NXDN). Kept and flagged in the channel note, not dropped.
+        for name in zf.namelist():
+            if not _PENDING_CSV_RE.match(name):
+                continue
+            for row in _read_rows(zf, name):
+                record = row.get("FC_RECORD_ID", "").strip()
+                if record and record in seen:
+                    continue
+                row[LIST_FIELD] = LIST_PENDING
+                rows.append(row)
+    return rows, source_updated
+
+
+def _read_rows(zf: zipfile.ZipFile, name: str) -> List[Dict[str, str]]:
+    with zf.open(name) as f:
+        lines = io.TextIOWrapper(f, encoding="utf-8-sig").readlines()
     # First line is "DATA_SPEC_VERSION=...", not the header.
     body = lines[1:] if lines and lines[0].startswith("DATA_SPEC_VERSION") else lines
-    reader = csv.DictReader(body)
-    return list(reader), source_updated
+    return list(csv.DictReader(body))
+
+
+def nxdn_fact_from_row(row: Dict[str, str], fact: NormalizedFact) -> Optional[NormalizedFact]:
+    """The NXDN side of a record that publishes one, as a fact of its own.
+    WWARA lists a dual-mode machine as one record (KC7BAE on 443.050: FM with
+    tone 103.5, and NXDN on RAN 5); a radio needs one memory per mode."""
+    if "Y" not in (row.get("NXDN_DIGITAL"), row.get("NXDN_MIXED")):
+        return None
+    ran = re.sub(r"\D", "", row.get("NXDN_RAN", "") or "")
+    return dataclasses.replace(
+        fact, entity_key=f"{fact.entity_key}:nxdn", mode="NXDN", tone=None, nxdn_ran=int(ran) if ran else None,
+    )
 
 
 def fact_from_row(
@@ -171,13 +204,15 @@ class WwaraSource(OnlineSourceAdapter):
         for row in rows:
             if row.get("STATE", "").strip() != self.state:
                 continue
-            facts.append(
-                fact_from_row(
-                    row,
-                    source_updated=source_updated,
-                    retrieved_at=raw.fetched_at,
-                    url=self.url,
-                    warnings=warnings,
-                )
+            fact = fact_from_row(
+                row,
+                source_updated=source_updated,
+                retrieved_at=raw.fetched_at,
+                url=self.url,
+                warnings=warnings,
             )
+            nxdn = nxdn_fact_from_row(row, fact)
+            if nxdn is not None and fact.mode == "AUTO" and "Y" not in (row.get("DSTAR_DV"), row.get("FUSION")):
+                fact = None  # an NXDN-only machine is not an unsupported carrier
+            facts.extend(item for item in (fact, nxdn) if item is not None)
         return NormalizeResult(facts=facts, warnings=warnings)

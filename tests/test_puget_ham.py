@@ -70,7 +70,9 @@ def test_wwara_curation_filters_geography_frequency_and_duplicates_and_groups_mo
     assert system is not None
     departments = system.departments
     channels = [channel for department in departments for channel in department.channels]
-    assert {channel.freq_mhz for channel in channels} == {146.96, 440.775, 442.1, 443.5}
+    # Every WWARA record is kept; one south of the Puget Sound box is filed by region.
+    assert {channel.freq_mhz for channel in channels} == {146.96, 147.0, 440.775, 442.1, 443.5}
+    assert any(d.label.startswith("Southwest & Coast") and d.channels[0].freq_mhz == 147.0 for d in departments)
     assert len([channel for channel in channels if channel.freq_mhz == 146.96]) == 1
     assert any(department.label.endswith("P25 Digital") for department in departments)
     assert any(department.label.endswith("DMR (Upgrade Required)") for department in departments)

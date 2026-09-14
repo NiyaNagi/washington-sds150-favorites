@@ -23,16 +23,23 @@ MIKE_KEY_URL = "https://mikeandkey.org/repeaters.php"
 MIKE_KEY_NETS_URL = "https://mikeandkey.org/nets.php"
 MASON_NETS_URL = "https://mc-arc.org/nets/"
 ISLAND_REPEATER_URL = "https://www.w7avm.org/repeater-system"
+#: How a WWARA channel's note records its coverage (the extract's LOCALE).
+COVERAGE_NOTE = "coverage "
+#: The system a WWARA refresh builds.
+WWARA_SYSTEM_ID = stable_id("puget-ham:wwara-current", kind="system")
 
 # Broad Puget Sound / eastern Olympic / Cascade-crest listening region.
 #
 # The east and south edges are drawn wide enough to contain a 75-mile radius
 # from the Redmond / Union Hill area, so the I-90 (Cle Elum), US-2
-# (Leavenworth) and Centralia corridors are inside the box rather than clipped
-# just outside it. The per-plan ``within_miles`` filter still does the real
-# circular cut; this box is only a cheap prefilter.
+# (Leavenworth) and Centralia corridors are inside the box. WWARA coordinates
+# all of western Washington and every record is kept: one outside the box is
+# filed by region (the Olympic coast, or Southwest & Coast for Grays Harbor,
+# Pacific, Wahkiakum and Cowlitz). The per-plan ``within_miles`` filter does
+# the real circular cut.
 PUGET_BOUNDS = (46.5, 49.1, -123.7, -120.3)
 _REGION_SPECS = {
+    "Southwest & Coast": (46.55, -123.45, 90.0),
     "North Sound & Islands": (48.45, -122.55, 80.0),
     "Olympic & Kitsap": (47.75, -122.95, 90.0),
     "South Sound": (47.15, -122.65, 90.0),
@@ -224,11 +231,8 @@ def favorite() -> FavoritesList:
     )
 
 
-def _inside_puget(fact: NormalizedFact) -> bool:
-    if fact.source_id != "wwara" or fact.freq_mhz is None or fact.lat is None or fact.lon is None:
-        return False
-    south, north, west, east = PUGET_BOUNDS
-    return south <= fact.lat <= north and west <= fact.lon <= east
+def _wwara_located(fact: NormalizedFact) -> bool:
+    return fact.source_id == "wwara" and fact.freq_mhz is not None and fact.lat is not None and fact.lon is not None
 
 
 def _scanner_frequency(frequency: float) -> bool:
@@ -238,6 +242,11 @@ def _scanner_frequency(frequency: float) -> bool:
 
 
 def _region(fact: NormalizedFact) -> str:
+    south, north, west, east = PUGET_BOUNDS
+    if fact.lon > east:
+        return "Eastside & Cascades"
+    if not (south <= fact.lat <= north and west <= fact.lon):
+        return "Olympic & Kitsap" if fact.lat >= 47.6 else "Southwest & Coast"
     if fact.lat >= 48.10:
         return "North Sound & Islands"
     if fact.lon <= -122.75:
@@ -252,6 +261,12 @@ def _region(fact: NormalizedFact) -> str:
 def _mode_group(fact: NormalizedFact) -> str:
     raw = fact.raw if isinstance(fact.raw, dict) else {}
     linked = bool((raw.get("LINK") or "").strip())
+    if (raw.get("LOCALE") or "").strip().upper() == "LINK":
+        # A link between repeaters, not a machine anyone accesses: a scanner
+        # may listen, and no transceiver plan selects this department.
+        return "Link Frequencies"
+    if fact.mode == "NXDN":
+        return "NXDN Digital"
     if fact.mode == "DMR":
         return "DMR (Upgrade Required)"
     if fact.mode == "P25":
@@ -305,8 +320,18 @@ def _fact_channel(fact: NormalizedFact) -> Channel:
     city = _ascii((raw.get("CITY") or "").strip())
     call = _ascii((raw.get("CALL") or fact.name or "Repeater").strip())
     offset = f"{fact.offset_mhz:+.4f} MHz" if fact.offset_mhz is not None else "offset unknown"
-    modes = [label for label, field in (("FM", "FM_WIDE"), ("NFM", "FM_NARROW"), ("P25", "P25_PHASE_1"), ("DMR", "DMR"), ("D-Star", "DSTAR_DV"), ("Fusion", "FUSION")) if raw.get(field) == "Y"]
-    details = [f"input {(raw.get('INPUT_FREQ') or '').strip()}", offset, "/".join(modes), (raw.get("LINK") or "").strip(), (raw.get("SPONSOR") or "").strip(), (raw.get("COMMENT") or "").strip(), fact.source_url]
+    modes = [label for label, field in (("FM", "FM_WIDE"), ("NFM", "FM_NARROW"), ("P25", "P25_PHASE_1"), ("DMR", "DMR"), ("NXDN", "NXDN_DIGITAL"), ("D-Star", "DSTAR_DV"), ("Fusion", "FUSION")) if raw.get(field) == "Y"]
+    locale = _ascii((raw.get("LOCALE") or "").strip())
+    details = [
+        f"input {(raw.get('INPUT_FREQ') or '').strip()}", offset, "/".join(modes),
+        f"RAN {fact.nxdn_ran}" if fact.mode == "NXDN" and fact.nxdn_ran is not None else "",
+        (raw.get("LINK") or "").strip(), (raw.get("SPONSOR") or "").strip(), (raw.get("COMMENT") or "").strip(),
+        # WWARA's coverage: wasds150.catalog.wwara_coverage files the machine
+        # into the county or city list it names.
+        f"{COVERAGE_NOTE}{locale}" if locale else "",
+        "coordination pending" if raw.get("WWARA_LIST") == "pending" else "",
+        fact.source_url,
+    ]
     # WWARA publishes the repeater input and its access tone, which a scanner
     # ignores but a transceiver needs.  Record them structurally so a channel
     # plan never has to re-derive a shift from a band-plan convention.
@@ -322,9 +347,12 @@ def _fact_channel(fact: NormalizedFact) -> Channel:
     expired = coordination_expired(raw)
     if expired:
         details.append("coordination expired")
+    link = locale.upper() == "LINK"
+    label = f"{call} - {city}" if city else call
     return Channel(
         id=stable_id(f"puget-ham:wwara:{fact.entity_key}", kind="channel"),
-        label=f"{call} - {city}" if city else call,
+        # The NXDN side of a dual-mode machine shares its FM memory's output.
+        label=f"{label} NXDN" if fact.mode == "NXDN" else label,
         freq_mhz=fact.freq_mhz,
         mode=fact.mode or "AUTO",
         tone=fact.tone or "",
@@ -333,7 +361,8 @@ def _fact_channel(fact: NormalizedFact) -> Channel:
         # the coordination has lapsed and the machine is probably not there.
         # Marking rather than dropping keeps the record visible for anyone
         # who wants to look, while keeping it out of a generated channel list.
-        avoid=fact.mode == "AUTO" or expired,
+        # A link frequency joins two repeaters; no radio should key on it.
+        avoid=fact.mode == "AUTO" or expired or link,
         notes=_ascii("; ".join(value for value in details if value)),
         tx_freq_mhz=input_freq,
         tx_tone=tx_tone,
@@ -343,6 +372,7 @@ def _fact_channel(fact: NormalizedFact) -> Channel:
         lat=fact.lat,
         lon=fact.lon,
         location_precision=fact.location_precision or "",
+        nxdn_ran=fact.nxdn_ran,
     )
 
 
@@ -350,7 +380,7 @@ def system_from_wwara_facts(favorite: FavoritesList, facts: Iterable[NormalizedF
     grouped: Dict[Tuple[str, str], List[Channel]] = defaultdict(list)
     seen = set()
     for fact in facts:
-        if not _inside_puget(fact) or not _scanner_frequency(fact.freq_mhz):
+        if not _wwara_located(fact) or not _scanner_frequency(fact.freq_mhz):
             continue
         channel = _fact_channel(fact)
         key = (round(channel.freq_mhz, 6), channel.mode, channel.label.casefold())
@@ -375,7 +405,7 @@ def system_from_wwara_facts(favorite: FavoritesList, facts: Iterable[NormalizedF
             avoid=mode_group.startswith("Unsupported Digital"),
         ))
     return System(
-        id=stable_id("puget-ham:wwara-current", kind="system"),
+        id=WWARA_SYSTEM_ID,
         label="WWARA Current Puget Sound Coordinated Repeaters",
         departments=departments,
     )

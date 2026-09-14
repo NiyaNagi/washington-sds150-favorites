@@ -492,6 +492,17 @@ def _resolve_once(
                     licence_blocked += 1
 
             spec = digital_spec(channel, mode)
+            if plan.transmit_by_service and mode == "DMR" and (spec is None or not spec.has_contact):
+                if service_for(freq) == AMATEUR:
+                    # It cannot be keyed, and the machines worth keying are in
+                    # the DMR network lists with their talkgroups.
+                    result.dropped.append(
+                        DroppedChannel(
+                            channel.label, freq, block.label, "no-talkgroup",
+                            "an amateur DMR memory with no talkgroup cannot be keyed",
+                        )
+                    )
+                    continue
             if transmit and mode == "DMR" and (spec is None or not spec.has_contact):
                 transmit = False
                 tx_freq = None

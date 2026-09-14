@@ -467,7 +467,18 @@ _BLOCKS: Tuple[ServiceBlockSpec, ...] = (
         tx=TXK_HAM_REPEATER, sort=SORT_TIER_DISTANCE, limit=800, radius=True, fill=True,
         requires=_all(_demodulates("DMR"), _knob("include_dmr")), tx_probe=(146.0, 440.0),
         groups=(GROUP_HAM_DMR,),
-        notes="Wide-area and test talkgroups (tiers 2-3), and coordinated DMR machines with no published layout.",
+        notes="Wide-area and test talkgroups (tiers 2-3).",
+    ),
+    ServiceBlockSpec(
+        "ham-nxdn", "Ham NXDN", "Ham NXDN",
+        lambda k: (_near(k, "PSHAM01", dept=r"NXDN", ranges=_VHF_UHF_HAM),),
+        tx=TXK_HAM_REPEATER, sort=SORT_NEAREST, limit=6, radius=True,
+        requires=_demodulates("NXDN"), tx_probe=(146.0, 440.0),
+        groups=(GROUP_HAM_ALL,),
+        notes=(
+            "Coordinated NXDN machines on their published RAN (KC7BAE on 443.050, RAN 5). "
+            "Receive only: WWARA publishes no NXDN group ID to key up with."
+        ),
     ),
     ServiceBlockSpec(
         "simplex", "Simplex Calling", "Ham Simplex",
@@ -784,7 +795,7 @@ BLOCK_ORDER: Tuple[str, ...] = (
     # carries a scheduled net is more useful filed under Nets with its day and
     # time than buried among sixty others in Ham 2m.
     "nets",
-    "ham-6m", "ham-2m", "ham-125", "ham-70cm", "dstar", "dmr-core", "dmr-local", "dmr-wide",
+    "ham-6m", "ham-2m", "ham-125", "ham-70cm", "dstar", "dmr-core", "dmr-local", "dmr-wide", "ham-nxdn",
     "simplex", "seattle-acs", "hf-nets", "hf-calling", "hf-digital", "hf-reference",
     "rail", "marine",
     "gmrs-interstitial", "frs", "gmrs-main", "gmrs-repeaters", "murs",

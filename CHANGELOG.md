@@ -7,7 +7,32 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## Unreleased
 
+### Added
+
+- **Every WWARA repeater is in the catalog.** PSHAM01 kept only records inside a
+  Puget Sound box, so 62 Southwest Washington and coast machines (Pacific,
+  Grays Harbor, Wahkiakum, Cowlitz, Randle, Forks) were missing from every
+  list; they are now filed under the Olympic & Kitsap or a new Southwest &
+  Coast region. WWARA's pending list is read too (31 records, flagged
+  "coordination pending" in the note).
+- **Coverage files repeaters into county and city lists.** Each WWARA machine
+  whose coverage names a county or a city is copied into that county's
+  RadioReference list and, for a King County city, its `KC` local list
+  (`wasds150.catalog.wwara_coverage`), rebuilt on every load. Regional
+  machines stay in PSHAM01.
+- **NXDN from WWARA.** A record that publishes NXDN gets an NXDN channel with
+  its RAN beside the FM one: KC7BAE on 443.050 (RAN 5) is on the SDS150 and
+  in a Ham NXDN zone on the AT-D890UV, receive only until a group ID is known.
+
 ### Fixed
+
+- **Link frequencies are never programmed on a transceiver.** WWARA's
+  repeater-to-repeater links (coverage LINK, 14 records) sat among the 70 cm
+  repeaters, so the AT-D890UV, FTX-1 and ID-52A could transmit on them; they
+  are now a department of their own, avoided.
+- **Amateur DMR memories with no talkgroup are dropped** from transceiver plans
+  rather than programmed receive only: they cannot be keyed, and the machines
+  worth keying are in the DMR network lists with their talkgroups.
 
 - **Whole-plan sources no longer fill lists that are not theirs.** Enrichment
   turned every record of a matched source into a "Channels" department of any

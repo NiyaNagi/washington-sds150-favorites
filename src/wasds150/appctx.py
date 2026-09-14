@@ -90,6 +90,10 @@ def _append_local_area_extension(catalog: Catalog) -> None:
     from wasds150.recipes.systems import strip_misfiled_source_copies
 
     strip_misfiled_source_copies(catalog)
+    # WWARA repeaters join the county and city lists their coverage names.
+    from wasds150.catalog.wwara_coverage import place_wwara_repeaters
+
+    place_wwara_repeaters(catalog)
 
 
 @dataclass
