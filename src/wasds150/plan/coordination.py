@@ -167,7 +167,17 @@ def fill_access_tones(resolved, index: Optional[CoordinationIndex]) -> int:
             and service_for(channel.rx_freq_mhz) == AMATEUR
         ):
             continue
-        tones = {record.ctcss_in for record in _paired(index, channel) if record.ctcss_in is not None}
+        on_pair = [
+            record for record in index.on_output(channel.rx_freq_mhz)
+            if record.input_mhz is not None and abs(record.input_mhz - channel.tx_freq_mhz) < 0.0005
+        ]
+        # A memory named for one of the pair's machines takes that machine's
+        # tone, even when its coordination has lapsed (WA7ZUS Lyman Mtn, still
+        # listed on the air): the name says which machine it keys.
+        label = (channel.label or "").upper()
+        named = [r for r in on_pair if r.call and re.search(rf"\b{re.escape(r.call.upper())}\b", label)]
+        chosen = named or [r for r in on_pair if r.live]
+        tones = {record.ctcss_in for record in chosen if record.ctcss_in is not None}
         if len(tones) == 1:
             tone = tones.pop()
             channel.tx_tone = parse_tone(f"TONE=C{tone:g}")

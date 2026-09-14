@@ -202,8 +202,9 @@ TH_D75 = FleetRadio(
         ),
         StepSpec(
             "import-dstar-tsv", "Import the D-STAR repeater list",
-            "In MCP-D75, import the filtered official repeater TSV under Repeater List for "
-            "TH-D75A (K-type/U.S.A. and Canada).",
+            "In MCP-D75, import radio-data\\th-d75\\exports\\th-d75-dstar-repeaters.tsv under Repeater "
+            "List for TH-D75A (K-type/U.S.A. and Canada). The export writes it from the same "
+            "registry records as the D-STAR memories.",
         ),
         StepSpec(
             "save", "Save from MCP-D75",

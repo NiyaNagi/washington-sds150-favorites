@@ -16,7 +16,7 @@ this radio.
 | `radio-data\th-d75\backups\th-d75-before-YYYY-MM-DD-HHMM.d75` | Your read of the radio (step 1); the export is built on the newest file here |
 | `radio-data\th-d75\exports\th-d75-fleet.d75` | The export |
 | `radio-data\th-d75\exports\th-d75-fleet-report.md` | Memory map, groups, the memory count to check |
-| `radio-data\th-d75\reference\dstar\dstar-within-50mi.tsv` | D-STAR repeaters within 50 miles, for MCP-D75's import |
+| `radio-data\th-d75\exports\th-d75-dstar-repeaters.tsv` | The DR repeater list for MCP-D75's import, written with the export from the same repeater registry records as the D-STAR memories |
 | `radio-data\th-d75\exports\th-d75-fleet-mcp.d75` | What MCP-D75 saves after the import (step 5) |
 | `radio-data\th-d75\exports\th-d75-fleet-final.d75` | The file you write to the radio (step 6) |
 
@@ -38,7 +38,7 @@ this radio.
    `radio-data\th-d75\exports\th-d75-fleet.d75`.
 4. **Import the D-STAR list.** Under Repeater List for TH-D75A (K-type /
    U.S.A. and Canada), import
-   `radio-data\th-d75\reference\dstar\dstar-within-50mi.tsv`.
+   `radio-data\th-d75\exports\th-d75-dstar-repeaters.tsv`.
 5. **Save.** File > Save As
    `radio-data\th-d75\exports\th-d75-fleet-mcp.d75`.
 6. **Finalize.** MCP-D75 rewrites empty special-memory pages when it saves. This

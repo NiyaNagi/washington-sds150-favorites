@@ -322,7 +322,12 @@ def enrich_catalog(
     from wasds150.recipes.faa_airband import build_faa_airband_favorite
 
     faa_airband = build_faa_airband_favorite(facts, home=(AMES_LAKE_LAT, AMES_LAKE_LON))
+    # DSTARInfo's D-STAR directory and FM download become the registry's
+    # reference lists, rebuilt the same way.
+    from wasds150.recipes.dstarinfo_lists import build_dstarinfo_favorites
+
     rebuilt = rr_lists + network_lists + [fl for fl in (fcc_digital, faa_airband) if fl is not None]
+    rebuilt += build_dstarinfo_favorites(facts)
     if rebuilt:
         replaced = {fl.slug for fl in rebuilt}
         previous_enabled = {fl.slug: fl.enabled for fl in base_catalog.favorites if fl.origin == "local"}

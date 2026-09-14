@@ -142,7 +142,7 @@ def test_legacy_statewide_merged_catalog_gets_local_area_extension(wasds_home):
     ctx = build_context(config)
 
     assert ctx.catalog_source == "merged"
-    assert len(ctx.catalog.favorites) == 143
+    assert len(ctx.catalog.favorites) == 144  # 143 lists and the repeater registry built from them
     assert len([favorite for favorite in ctx.catalog.favorites if favorite.favorite_key.startswith("KC")]) == 39
 
 

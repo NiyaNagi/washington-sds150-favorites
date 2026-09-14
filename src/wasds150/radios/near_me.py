@@ -70,7 +70,7 @@ _DISPATCH = frozenset({1, 2, 3, 4, 11, 29})
 _TACTICAL = frozenset({6, 7, 8, 9, 12, 16, 22, 23, 24, 25, 30, 37})
 _RAIL = frozenset({20, 26})
 _BUSINESS = frozenset({14, 17, 21, 31, 32, 33, 34})
-_HAM_LISTS = frozenset({"PSHAM01", "PSHAM02", "DMRNET", "BMNET", "SEAACS", "FL60", "FL61", "FL62", "FL63", "HAM01"})
+_HAM_LISTS = frozenset({"HAMREG", "PSHAM01", "PSHAM02", "DMRNET", "BMNET", "SEAACS", "FL60", "FL61", "FL62", "FL63", "HAM01"})
 #: Lists whose unlocated channels are worth scanning anywhere: the marine
 #: and rail channel plans and itinerant business channels (opt-in lists).
 _ANYWHERE_LISTS = {
@@ -133,6 +133,8 @@ def _talkgroup_class(channel: Channel) -> NearMeList:
 def _live(channel: Channel) -> bool:
     if channel.avoid or channel.freq_mhz is None or channel.tgid is not None:
         return False
+    if (channel.mode or "").upper() == "DV":
+        return False  # D-STAR: the scanner cannot decode it (the registry carries these)
     if _NOAA[0] <= channel.freq_mhz <= _NOAA[1]:
         return False
     return not (_CONTINUOUS.search(channel.label or "") or _DATA.search(channel.label or ""))
@@ -243,6 +245,8 @@ def _conventional(favorites: Sequence[FavoritesList], home: Optional[Tuple[float
                 # be listed a second time.
                 continue
             for department in system.departments:
+                if favorite.favorite_key == "HAMREG" and not department.label.startswith("Washington - "):
+                    continue  # the registry's other states are there to pick from, not to scan
                 for channel in department.channels:
                     order += 1
                     if not _live(channel):
@@ -277,8 +281,12 @@ def _conventional(favorites: Sequence[FavoritesList], home: Optional[Tuple[float
         spec = members[0][1].spec
         place = group_key[1:]
         channels = []
-        # Frequency order within each fenced group, as every list reads.
-        for key, entry in sorted(members, key=lambda item: (item[1].channel.freq_mhz, service_rank(item[1].channel.service_type))):
+        listed = set()
+        # Frequency order within each fenced group, as every list reads; the
+        # registry's copy of a station after the list that names it.
+        for key, entry in sorted(members, key=lambda item: (
+            item[1].channel.freq_mhz, item[1].favorite.favorite_key == "HAMREG", service_rank(item[1].channel.service_type)
+        )):
             channel = copy.deepcopy(entry.channel)
             if len(entry.labels) > 1 and (channel.mode or "").upper() == "DMR":
                 # One entry per DMR repeater: name it for the repeater, not a talkgroup.
@@ -286,6 +294,11 @@ def _conventional(favorites: Sequence[FavoritesList], home: Optional[Tuple[float
             else:
                 # The name every radio uses for this station.
                 channel.label = names.label(entry.department, entry.channel)[:64]
+            if (channel.label, round(channel.freq_mhz, 5)) in listed:
+                # A mixed FM/P25 machine: WWARA's P25 record and the registry's
+                # analog one are one station under one name.
+                continue
+            listed.add((channel.label, round(channel.freq_mhz, 5)))
             if len(entry.tones) > 1 and key[2] == "":
                 # Two agencies' copies with different tones: open squelch hears both.
                 channel.tone = ""

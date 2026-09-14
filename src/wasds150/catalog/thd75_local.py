@@ -23,7 +23,8 @@ _DSTAR = (
     # 146.4875; Kenwood's list had 146.875 +1.0, which is WW7STR's DMR pair.
     ("N7IH   C", "N7IH   G", "Kirkland", 147.4875, -1.0000, 47.631000, -122.184500),
     ("N7IH   B", "N7IH   G", "Kirkland", 443.5750, 5.0000, 47.631000, -122.184500),
-    ("K7LWH  C", "K7LWH  G", "Bellevue", 146.1250, 1.0000, 47.616500, -122.201667),
+    # WWARA and DSTARInfo both list 146.4125, input 147.4125; Kenwood's had 146.125.
+    ("K7LWH  C", "K7LWH  G", "Bellevue", 146.4125, 1.0000, 47.616500, -122.201667),
     ("K7LWH  B", "K7LWH  G", "Bellevue", 443.0625, 5.0000, 47.616500, -122.201667),
     ("N7SNO  B", "N7SNO  G", "Snoqualmie", 442.7000, 5.0000, 47.468500, -121.822333),
     ("KF7UUY B", "KF7UUY G", "Lake Stevens", 441.2625, 5.0000, 47.789000, -122.236000),

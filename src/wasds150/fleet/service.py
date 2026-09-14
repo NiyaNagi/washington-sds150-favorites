@@ -303,6 +303,9 @@ def export_radio(
         include_licensed=include_licensed,
     )
     contact_paths, contact_copies, contact_warnings = _write_contacts(ctx, radio.radio_id, export.csv_path, copy_to)
+    dstar_paths, dstar_copies = (
+        _write_dstar_tsv(ctx, radio, export.csv_path.parent, copy_to, include_licensed) if radio.radio_id == "th-d75" else ([], [])
+    )
     return FleetExport(
         radio_id=radio.radio_id,
         plan_id=radio.plan_id,
@@ -311,10 +314,31 @@ def export_radio(
         report_path=export.report_path,
         rows=export.rows,
         sha256=sha256_of_path(export.csv_path),
-        files=[Path(p) for p in export.files] + contact_paths,
-        copies=[Path(p) for p in export.copies] + contact_copies,
+        files=[Path(p) for p in export.files] + contact_paths + dstar_paths,
+        copies=[Path(p) for p in export.copies] + contact_copies + dstar_copies,
         warnings=list(export.warnings) + contact_warnings,
     )
+
+
+def _write_dstar_tsv(
+    ctx: AppContext, radio: Any, directory: Path, copy_to: Optional[Path], include_licensed: bool
+) -> Tuple[List[Path], List[Path]]:
+    """The TH-D75's DR repeater list, beside its export, from the same plan's
+    D-STAR memories (:mod:`wasds150.export.thd75_dstar_tsv`)."""
+    from wasds150.export.thd75_dstar_tsv import FILENAME, render_dstar_tsv
+    from wasds150.plan.service import resolve_named_plan
+
+    _plan, resolved = resolve_named_plan(ctx, radio.plan_id, include_licensed=include_licensed)
+    text = render_dstar_tsv(resolved.channels).encode("ascii", errors="replace")
+    path = directory / FILENAME
+    path.write_bytes(text)
+    copies: List[Path] = []
+    if copy_to is not None:
+        target = Path(copy_to) / FILENAME
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(text)
+        copies.append(target)
+    return [path], copies
 
 
 def export_fleet(

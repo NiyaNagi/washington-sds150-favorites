@@ -398,14 +398,16 @@ _BLOCKS: Tuple[ServiceBlockSpec, ...] = (
     # -- amateur, transmit where licensed ------------------------------------
     ServiceBlockSpec(
         "ham-6m", "Ham 6m Repeaters", "Ham 6m",
-        lambda k: (_near(k, "PSHAM01", "PSHAM02", dept=r"Analog 6 Meter|Linked Analog", ranges=((50.0, 54.0),)),),
+        # HAMREG: the amateur repeater registry (wasds150.catalog.repeater_registry).
+        # Its Washington departments: the other states are there to pick from.
+        lambda k: (_near(k, "HAMREG", dept=r"^Washington - Analog 6 Meter", ranges=((50.0, 54.0),)),),
         tx=TXK_HAM_REPEATER, sort=SORT_NEAREST, limit=40, radius=True, fill=True, requires=_receives(52.0), tx_probe=(52.0,),
         groups=(GROUP_HAM_ALL, GROUP_HAM_ANALOG),
     ),
     ServiceBlockSpec(
         "ham-2m", "Ham 2m Repeaters", "Ham 2m",
         lambda k: (
-            _near(k, "PSHAM01", dept=r"Analog 2 Meter|Linked Analog", ranges=((144.0, 148.0),)),
+            _near(k, "HAMREG", dept=r"^Washington - Analog 2 Meter", ranges=((144.0, 148.0),)),
             _near(k, "THD75WWARA", dept=r"2 Meter", ranges=((144.0, 148.0),)),
         ),
         tx=TXK_HAM_REPEATER, sort=SORT_NEAREST, limit=160, radius=True, fill=True, requires=_receives(146.0),
@@ -418,7 +420,7 @@ _BLOCKS: Tuple[ServiceBlockSpec, ...] = (
     ServiceBlockSpec(
         "ham-125", "Ham 1.25m Repeaters", "Ham 1.25m",
         lambda k: (
-            _near(k, "PSHAM01", "PSHAM02", dept=r"Analog 1\.25 Meter|Linked Analog", ranges=((222.0, 225.0),)),
+            _near(k, "HAMREG", dept=r"^Washington - Analog 1\.25 Meter", ranges=((222.0, 225.0),)),
             _near(k, "THD75WWARA", dept=r"1\.25 Meter", ranges=((222.0, 225.0),)),
         ),
         tx=TXK_HAM_REPEATER, sort=SORT_NEAREST, limit=30, radius=True, fill=True, requires=_receives(223.5),
@@ -427,7 +429,7 @@ _BLOCKS: Tuple[ServiceBlockSpec, ...] = (
     ServiceBlockSpec(
         "ham-70cm", "Ham 70cm Repeaters", "Ham 70cm",
         lambda k: (
-            _near(k, "PSHAM01", dept=r"Analog 70 Centimeter|Linked Analog", ranges=((420.0, 450.0),)),
+            _near(k, "HAMREG", dept=r"^Washington - Analog 70 Centimeter", ranges=((420.0, 450.0),)),
             _near(k, "THD75WWARA", dept=r"70 Centimeter", ranges=((420.0, 450.0),)),
             _keys("THD75USER"),
         ),
@@ -436,7 +438,7 @@ _BLOCKS: Tuple[ServiceBlockSpec, ...] = (
     ),
     ServiceBlockSpec(
         "dstar", "D-STAR Repeaters", "Ham D-STAR",
-        lambda k: (_near(k, "THD75LOCAL", dept=r"D-STAR", ranges=_VHF_UHF_HAM),),
+        lambda k: (_near(k, "HAMREG", dept=r"^Washington - D-STAR", ranges=_VHF_UHF_HAM),),
         tx=TXK_HAM_REPEATER, sort=SORT_NEAREST, limit=60, radius=True, fill=True,
         requires=_all(_demodulates("DV"), _knob("include_dstar")), tx_probe=(146.0, 440.0),
         groups=(GROUP_HAM_ALL,),
@@ -471,7 +473,7 @@ _BLOCKS: Tuple[ServiceBlockSpec, ...] = (
     ),
     ServiceBlockSpec(
         "ham-nxdn", "Ham NXDN", "Ham NXDN",
-        lambda k: (_near(k, "PSHAM01", dept=r"NXDN", ranges=_VHF_UHF_HAM),),
+        lambda k: (_near(k, "HAMREG", dept=r"^Washington - NXDN", ranges=_VHF_UHF_HAM),),
         tx=TXK_HAM_REPEATER, sort=SORT_NEAREST, limit=6, radius=True,
         requires=_demodulates("NXDN"), tx_probe=(146.0, 440.0),
         groups=(GROUP_HAM_ALL,),
@@ -773,7 +775,9 @@ _BLOCKS: Tuple[ServiceBlockSpec, ...] = (
         "other-nearby", "Other Nearby", "Other Nearby",
         # Not FAAAIR: airband has its own budgeted blocks, and on the Anytone
         # every air row lands in the 256-entry AM air list.
-        lambda k: (ChannelSelector(favorite_key_pattern=r"^(?!FAAAIR$).*", within_miles=k.within, geo_fallback=GEO_EITHER),),
+        # Nor HAMREG: its repeaters are the ham blocks' to budget, and an
+        # unplaced record would otherwise ride in on its department's fence.
+        lambda k: (ChannelSelector(favorite_key_pattern=r"^(?!FAAAIR$|HAMREG$).*", within_miles=k.within, geo_fallback=GEO_EITHER),),
         sort=SORT_NEAREST, limit=60, radius=True, fill=True, requires=_knob("catch_all"),
         notes="Anything located within range that no other block claimed, airband aside.",
     ),

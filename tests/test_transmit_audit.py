@@ -191,6 +191,22 @@ def test_a_shared_pair_note_and_a_filled_tone_are_not_findings():
     assert audit_plan("th-d75", resolved, _coordination()) == []
 
 
+def test_a_memory_named_for_one_machine_on_a_shared_pair_takes_its_tone():
+    from wasds150.plan.audit import audit_plan
+    from wasds150.plan.coordination import fill_access_tones
+
+    chehalis = _planned(1, "K7PG Chehalis", 147.06, tx=147.66)
+    unnamed = _planned(2, "Lewis County row", 147.06, tx=147.66)
+    lapsed = _planned(3, "N7MTC Bremerton", 443.05, tx=448.05)
+    resolved = _resolved(chehalis, unnamed, lapsed)
+    # K7PG and W7FEL share the pair on different tones: only the named memory is
+    # filled. N7MTC's coordination lapsed, but the memory is named for it.
+    assert fill_access_tones(resolved, _coordination()) == 2
+    assert chehalis.tx_tone.ctcss_hz == 110.9 and unnamed.tx_tone.ctcss_hz is None and lapsed.tx_tone.ctcss_hz == 100
+    findings = audit_plan("th-d75", resolved, _coordination())
+    assert not [f for f in findings if f.name == "K7PG Chehalis" or f.code == "coordination-tone"]
+
+
 def test_the_exported_th_d75_file_is_checked_for_the_ptt_inhibit_split(tmp_path):
     from pathlib import Path
 

@@ -9,6 +9,34 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Added
 
+- **Amateur repeater registry (`HAMREG`).** One record per repeater, merged on
+  every catalog load from WWARA, IACC, the operator-published lists, DSTARInfo's
+  D-STAR directory (`DSTARINFO`), Seattle ACS, the RadioReference county lists,
+  RepeaterBook's FM data through DSTARInfo (`DSTARFM`) and the FTX-1 import.
+  Coordination decides identity: WWARA and IACC records are machines (two merge
+  only on the same mode, call, input and tone), and every other copy joins one -
+  by its call within 120 miles, or on a coordinated pair nearby under another
+  call (RepeaterBook's N6OBY is WWARA's KJ7JNK Redmond); a copy that fits no one
+  machine on a coordinated pair is left out. WWARA's mixed FM/P25 and NFM/DMR
+  machines become analog records with WWARA's access tone, and a DMR-only
+  machine keeps its pair. A D-STAR module merges by call and module. Each field
+  comes from the best source that has it, and a position only from a source
+  that publishes one (WWARA, then DSTARInfo's and RepeaterBook's approximate
+  ones) - so IACC, FTX-1 and county-list repeaters gain positions. Every
+  record's note names its sources. Departments are `<State> - <band or mode>`;
+  the fleet template's ham, D-STAR and NXDN blocks, the SDS150's HAM Repeaters
+  list and Near Me read the Washington ones.
+- **A memory named for one machine on a shared pair takes that machine's
+  tone.** WWARA's tone fills a toneless repeater memory from the record its
+  name calls for, even a lapsed one (WA7ZUS Lyman Mtn), instead of only when
+  every live machine on the pair agrees.
+- **D-STAR positions and the TH-D75 DR list from the registry.** The `dstarinfo`
+  source also downloads DSTARInfo's D-STAR-only DR list for each module's
+  approximate position, and the TH-D75 export writes
+  `th-d75-dstar-repeaters.tsv` (Kenwood's repeater-list format) from the same
+  records as its D-STAR memories, replacing the older Kenwood file that had
+  K7LWH C on 146.125.
+
 - **DSTARInfo D-STAR directory source (`dstarinfo`).** Every area of the
   dstarinfo.com repeater directory - callsign, city, gateway directory and each
   module's output and offset - plus the detail page (site, coverage, sponsor,

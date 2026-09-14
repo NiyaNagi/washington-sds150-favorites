@@ -164,6 +164,15 @@ class DStarInfoSource(OnlineSourceAdapter):
             areas[area] = result.content.decode("utf-8", errors="replace")
         if not areas:
             raise RuntimeError("no DSTARInfo area could be fetched: " + "; ".join(errors))
+        # The directory has no coordinates; DSTARInfo's DR-radio download with
+        # "Percent FM" at 0 lists every D-STAR module with its approximate one.
+        positions = ""
+        try:
+            positions = dr_repeater_list(
+                http_client, _home(), percent_fm="0", ttl_seconds=self.list_ttl_seconds, source_id=self.name
+            )
+        except (FetchError, OSError) as exc:
+            errors.append(f"D-STAR positions: {exc}")
         calls = sorted({
             row["call"] for page in areas.values() for row in parse_directory(page)
             if row["country_state"] in self.detail_regions
@@ -180,13 +189,14 @@ class DStarInfoSource(OnlineSourceAdapter):
             details[call] = result.content.decode("utf-8", errors="replace")
         return RawDoc(
             source_adapter=self.name,
-            payload={"areas": areas, "details": details, "errors": errors},
+            payload={"areas": areas, "details": details, "positions": positions, "errors": errors},
             fetched_at=datetime.datetime.now(datetime.timezone.utc).isoformat(),
         )
 
     def normalize(self, raw: RawDoc) -> NormalizeResult:
         payload = raw.payload if isinstance(raw.payload, dict) else {}
         details = payload.get("details") or {}
+        positions = dv_positions(payload.get("positions") or "")
         facts: List[NormalizedFact] = []
         warnings: List[str] = list(payload.get("errors") or [])
         seen = set()
@@ -207,6 +217,7 @@ class DStarInfoSource(OnlineSourceAdapter):
                         continue  # the directory lists some repeaters twice
                     seen.add(key)
                     frequency, offset, note = parsed
+                    lat, lon = positions.get((call, module), (None, None))
                     facts.append(NormalizedFact(
                         entity_key=key,
                         fact_type="station",
@@ -215,6 +226,9 @@ class DStarInfoSource(OnlineSourceAdapter):
                         offset_mhz=offset,
                         tx_freq_mhz=round(frequency + offset, 6) if offset is not None else None,
                         mode=mode,
+                        lat=lat,
+                        lon=lon,
+                        location_precision="fuzzed" if lat is not None else "unknown",
                         source_id=self.name,
                         source_url=DETAIL_URL.format(call=urllib.parse.quote(call)),
                         retrieved_at=raw.fetched_at,
@@ -245,6 +259,53 @@ FM_TTL_SECONDS = 7 * 24 * 3600
 #: The DR list's ``TONE`` column -> (the tone is sent, the tone is required to hear).
 _TONE_MODES = {"TONE": (True, False), "TSQL": (True, True)}
 DR_HEADER = "Group No,"
+
+
+def _home() -> Tuple[float, float]:
+    from wasds150.plans.template import HOME
+
+    return HOME
+
+
+def dr_repeater_list(
+    http_client: Any, point: Tuple[float, float], *, percent_fm: str, ttl_seconds: int, source_id: str, radio: str = DR_RADIO,
+) -> str:
+    """DSTARInfo's repeater list for a DR-mode radio, nearest ``point``:
+    ``percent_fm`` "0" is D-STAR only, "100" FM only (RepeaterBook's)."""
+    lat, lon = point
+    key = f"{lat:.4f},{lon:.4f}"
+    result = http_client.fetch_form(
+        NEAREST_URL,
+        fields={"TextBox2": f"{lat:.4f}", "TextBox3": f"{lon:.4f}", "tbEmptySlots": "0"},
+        steps=(
+            # The placeholder's value starts with a space; anything else fails
+            # the page's event validation.
+            ("", {"bGeoLocate": "Lookup Location", "ddlRadio": " Select Radio"}),
+            ("ddlRadio", {"ddlRadio": radio}),
+            ("", {"ddlRadio": radio, "tbPercent": percent_fm, "bDownload": "Download"}),
+        ),
+        cache_key=f"{NEAREST_URL}#{key}:{radio}:" + ("fm100" if percent_fm == "100" else f"fm{percent_fm}"),
+        ttl_seconds=ttl_seconds,
+        source_id=source_id,
+    )
+    return result.content.decode("utf-8", errors="replace")
+
+
+def dv_positions(text: str) -> Dict[Tuple[str, str], Tuple[float, float]]:
+    """``(call, module) -> (lat, lon)`` from a D-STAR repeater list download."""
+    text = (text or "").lstrip("﻿")
+    if not text.startswith(DR_HEADER):
+        return {}
+    positions: Dict[Tuple[str, str], Tuple[float, float]] = {}
+    for row in csv.DictReader(io.StringIO(text)):
+        if (row.get("Mode") or "").strip().upper() != "DV":
+            continue
+        routing = row.get("Repeater Call Sign") or ""
+        lat, lon = _position(row)
+        if lat is None or len(routing) < 8:
+            continue
+        positions[(routing[:7].strip().upper(), routing[7:8].strip().upper())] = (lat, lon)
+    return positions
 
 
 def _signed_offset(dup: str, offset: str) -> Optional[float]:
@@ -288,11 +349,7 @@ class DStarInfoFmSource(OnlineSourceAdapter):
         radio: str = DR_RADIO,
         ttl_seconds: int = FM_TTL_SECONDS,
     ):
-        if points is None:
-            from wasds150.plans.template import HOME
-
-            points = (HOME,)
-        self.points = points
+        self.points = points if points is not None else (_home(),)
         self.radio = radio
         self.ttl_seconds = ttl_seconds
 
@@ -304,24 +361,12 @@ class DStarInfoFmSource(OnlineSourceAdapter):
         for lat, lon in self.points:
             point = f"{lat:.4f},{lon:.4f}"
             try:
-                result = http_client.fetch_form(
-                    NEAREST_URL,
-                    fields={"TextBox2": f"{lat:.4f}", "TextBox3": f"{lon:.4f}", "tbEmptySlots": "0"},
-                    steps=(
-                        # The placeholder's value starts with a space; anything
-                        # else fails the page's event validation.
-                        ("", {"bGeoLocate": "Lookup Location", "ddlRadio": " Select Radio"}),
-                        ("ddlRadio", {"ddlRadio": self.radio}),
-                        ("", {"ddlRadio": self.radio, "tbPercent": "100", "bDownload": "Download"}),
-                    ),
-                    cache_key=f"{NEAREST_URL}#{point}:{self.radio}:fm100",
-                    ttl_seconds=self.ttl_seconds,
-                    source_id=self.name,
+                files[point] = dr_repeater_list(
+                    http_client, (lat, lon), percent_fm="100", ttl_seconds=self.ttl_seconds,
+                    source_id=self.name, radio=self.radio,
                 )
             except (FetchError, OSError) as exc:
                 errors.append(f"{point}: {exc}")
-                continue
-            files[point] = result.content.decode("utf-8", errors="replace")
         if not files:
             raise RuntimeError("no DSTARInfo repeater list could be downloaded: " + "; ".join(errors))
         return RawDoc(

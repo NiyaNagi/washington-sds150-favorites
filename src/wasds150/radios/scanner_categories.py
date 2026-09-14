@@ -108,7 +108,8 @@ CATEGORIES: Tuple[Category, ...] = (
     Category("TRAN-ROAD", "TRAN Roads & WSDOT", 44, ("FL05", "FL74b", "BAND11")),
     # Amateur. FTX01 is split by service (SPLIT_BY_SERVICE); it is listed
     # here so its amateur rows rank after the coordinated lists'.
-    Category("HAM-RPT", "HAM Repeaters", 50, ("PSHAM01", "PSHAM02", "FL60", "BAND03", "FTX01")),
+    # The registry leads: first to carry a station names it.
+    Category("HAM-RPT", "HAM Repeaters", 50, ("HAMREG", "PSHAM01", "PSHAM02", "FL60", "BAND03", "FTX01")),
     Category("HAM-DMR", "HAM DMR Networks", 51, ("DMRNET", "BMNET")),
     Category("HAM-NETS", "HAM ARES & Nets", 52, ("FL61", "FL62", "SEAACS")),
     Category("HAM-CALL", "HAM Simplex & Sats", 53, ("FL63", "HAM01", "FL51")),
@@ -263,6 +264,8 @@ def _drop_repeats(departments: List[Department], seen: Dict[tuple, Channel]) -> 
     for department in departments:
         kept = []
         for channel in department.channels:
+            if (channel.mode or "").upper() == "DV":
+                continue  # D-STAR: the scanner cannot decode it (the registry carries these)
             key = _channel_key(channel)
             first = seen.get(key)
             if first is None:

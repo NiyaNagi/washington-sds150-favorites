@@ -34,6 +34,11 @@ LIST = "<table><tr><th>Callsign</th></tr>" + "".join((
     _row(3, "K7XMP", "Salem", "United States, Oregon", c="147.0400 0.6"),  # listed twice
     _row(4, "N6DST", "Phoenix", "United States, Arizona", b="444.1000 +5.0000"),
 )) + "</table>"
+POSITIONS = (
+    "Group No,Group Name,Name,Sub Name,Repeater Call Sign,Gateway Call Sign,Frequency,Dup,Offset,Mode,TONE,"
+    "Repeater Tone,RPT1USE,Position,Latitude,Longitude,UTC Offset\n"
+    "4,USA West,Bellevue,Washington,W7TST  C,W7TST  G,146.4125,DUP+,1,DV,OFF,82.5Hz,Yes,Approximate,47.61,-122.20,-08:00\n"
+)
 DETAIL = """<span id="DataList1_CallsignLabel_0">W7TST</span>
 <span id="DataList1_SponsorLabel_0">Test Radio Club</span>
 <span id="DataList1_Coverage_DescriptionLabel_0">Puget Sound</span>
@@ -69,7 +74,10 @@ class _Http:
     def __init__(self):
         self.forms, self.pages = [], []
 
-    def fetch_form(self, url, *, fields, cache_key, ttl_seconds, source_id, event_target=""):
+    def fetch_form(self, url, *, fields, cache_key, ttl_seconds, source_id, event_target="", steps=()):
+        if "Countries1" not in fields:  # the D-STAR positions download
+            self.positions = steps[-1][1]["tbPercent"]
+            return type("R", (), {"content": POSITIONS.encode()})
         self.forms.append((fields["Countries1"], event_target, cache_key))
         return type("R", (), {"content": (LIST if fields["Countries1"] == "USA West" else "<p>No data was returned.</p>").encode()})
 
@@ -85,6 +93,11 @@ def test_every_area_is_fetched_and_details_only_near_home():
     assert all(target == "Countries1" and key.endswith(f"#Countries1={area}") for area, target, key in http.forms)
     assert sorted(url.rsplit("=", 1)[1] for url in http.pages) == ["K7XMP", "W7TST"]  # not Arizona
     assert set(raw.payload["details"]) == {"K7XMP", "W7TST"}
+    # The positions come from the DR download with no FM rows: DSTARInfo's own data only.
+    assert http.positions == "0"
+    facts = {f.entity_key: f for f in DStarInfoSource().normalize(raw).facts}
+    assert (facts["dstarinfo:W7TST:C"].lat, facts["dstarinfo:W7TST:C"].location_precision) == (47.61, "fuzzed")
+    assert facts["dstarinfo:K7XMP:C"].lat is None  # not in the positions download
 
 
 def test_a_dstarinfo_record_reaches_no_list():

@@ -94,6 +94,10 @@ def _append_local_area_extension(catalog: Catalog) -> None:
     from wasds150.catalog.wwara_coverage import place_wwara_repeaters
 
     place_wwara_repeaters(catalog)
+    # One record per amateur repeater, merged from every source above.
+    from wasds150.catalog.repeater_registry import place_registry
+
+    place_registry(catalog)
 
 
 @dataclass
