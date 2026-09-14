@@ -38,12 +38,14 @@ class ListSettings:
     ``location_control`` are written only when the list's entry is created:
     an existing entry keeps whatever the operator set (see
     :func:`patch_entry`). ``lead`` lists are moved to the top of the index,
-    in quick-key order."""
+    in quick-key order. ``name`` replaces the default ``"KEY - Name"`` the
+    list is installed under."""
 
     monitor: bool = True
     quick_key: Optional[int] = None
     location_control: bool = False
     lead: bool = False
+    name: Optional[str] = None
 
 
 def parse_f_list(text: str) -> RecordDocument:

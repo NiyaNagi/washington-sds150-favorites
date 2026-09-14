@@ -72,7 +72,7 @@ def test_the_scanner_is_handed_only_what_it_can_tune(tmp_path):
     config.ensure_dirs()
     favorites = scanner_favorites(build_context(config))
     keys = {favorite.favorite_key for favorite in favorites}
-    assert {"HAM01", "HFNET01"} <= keys
+    assert {"HAM-CALL", "HAM-HF"} <= keys  # HAM01 and HFNET01, merged for the scanner
     for favorite in favorites:
         for system in favorite.systems:
             for department in system.departments:

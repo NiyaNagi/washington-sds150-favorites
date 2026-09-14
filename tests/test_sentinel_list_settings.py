@@ -70,3 +70,62 @@ def test_an_existing_entry_changes_only_its_monitor_state(tmp_path):
     # The operator may have moved it; a later install must not reset that.
     _install(workspace, tmp_path, favorites, {"NM-PS": ListSettings(monitor=False, quick_key=5, location_control=False, lead=True)})
     assert _rows(workspace)[0] == ("NM-PS - NM-PS Test", "Off", "1", "On")
+
+
+def test_short_names_take_over_old_entries_and_superseded_lists_are_removed(tmp_path):
+    from wasds150.radios.scanner_categories import is_retired_name
+
+    workspace = _workspace(tmp_path)
+    old = [_favorite("NM-PS", 155.55), _favorite("FL01", 155.16), _favorite("KC29", 155.2)]
+    _install(workspace, tmp_path, old, {"NM-PS": ListSettings(monitor=True, quick_key=1, location_control=True, lead=True)})
+    old_files = {row[0]: row for row in _rows(workspace)}
+    assert {"FL01 - FL01 Test", "KC29 - KC29 Test"} <= set(old_files)
+
+    new = [_favorite("NM-PS", 155.55), _favorite("PS-STATE", 155.16)]
+    settings = {
+        "NM-PS": ListSettings(monitor=True, quick_key=1, location_control=True, lead=True, name="NM Public Safety"),
+        "PS-STATE": ListSettings(monitor=False, quick_key=17, lead=True, name="PS Statewide"),
+    }
+    plan = install_selected_favorites(workspace, "Preset", new, backup_dir=tmp_path / "backups",
+                                      allow_replacements=True, list_settings=settings, retire=is_retired_name)
+    assert plan.retired == ["FL01 - FL01 Test", "KC29 - KC29 Test"] and len(plan.planned_deletes) == 2
+    done = install_selected_favorites(workspace, "Preset", new, backup_dir=tmp_path / "backups", execute=True,
+                                      confirm=confirmation_phrase("Preset"), expected_plan_id=plan.plan_id,
+                                      allow_replacements=True, list_settings=settings, retire=is_retired_name)
+    assert done.outcome == "committed"
+    rows = _rows(workspace)
+    # Near Me keeps its entry (and so its file and quick key) under the new name.
+    assert rows[0] == ("NM Public Safety", "On", "1", "On")
+    assert rows[1] == ("PS Statewide", "Off", "17", "Off")
+    assert ("Existing", "On", "7", "Off") in rows  # not ours: untouched
+    assert not [row for row in rows if " - " in row[0]]
+    for relative in plan.planned_deletes:
+        assert not (workspace / relative).exists()
+    assert (workspace / "FavoriteLists" / "f_000001.hpd").exists()
+
+
+def test_a_list_another_profile_uses_is_only_taken_out_of_this_profile(tmp_path):
+    from wasds150.radios.scanner_categories import is_retired_name
+
+    workspace = _workspace(tmp_path)
+    _install(workspace, tmp_path, [_favorite("FL01", 155.16)], {"FL01": ListSettings(monitor=False)})
+    other = workspace / "Profile" / "Trip"
+    other.mkdir()
+    (other / "profile.cfg").write_bytes(b"profile")
+    (other / "f_list.cfg").write_bytes((workspace / "Profile" / "Preset" / "f_list.cfg").read_bytes())
+
+    new = [_favorite("PS-STATE", 155.16)]
+    settings = {"PS-STATE": ListSettings(monitor=False, quick_key=17, lead=True, name="PS Statewide")}
+    done = _install_retiring(workspace, tmp_path, new, settings, is_retired_name)
+    assert done.outcome == "committed" and done.planned_deletes == []
+    assert "FL01 - FL01 Test" not in [row[0] for row in _rows(workspace)]
+    global_doc = parse_f_list((workspace / "FavoriteLists" / "f_list.cfg").read_bytes().decode("ascii"))
+    assert "FL01 - FL01 Test" in [r.get(F_LIST_SCHEMA.field_by_name("user_name").index - 1) for r in entries(global_doc)]
+
+
+def _install_retiring(workspace, tmp_path, favorites, settings, retire):
+    plan = install_selected_favorites(workspace, "Preset", favorites, backup_dir=tmp_path / "backups",
+                                      allow_replacements=True, list_settings=settings, retire=retire)
+    return install_selected_favorites(workspace, "Preset", favorites, backup_dir=tmp_path / "backups", execute=True,
+                                      confirm=confirmation_phrase("Preset"), expected_plan_id=plan.plan_id,
+                                      allow_replacements=True, list_settings=settings, retire=retire)

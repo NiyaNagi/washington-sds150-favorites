@@ -9,6 +9,22 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Changed
 
+- **The SDS150 gets 40 short-named category lists instead of 169.** The
+  scanner shows 18 characters of a list's name, so `FL01 - WA SAR & Mutual
+  Aid` read `FL01 - WA SAR & Mu`. After the Near Me lists are built, every
+  other list is merged into a category (`wasds150.radios.scanner_categories`):
+  PS by region plus Statewide and Encrypted (quick keys 10-18), OUT (20s), AIR,
+  MIL and MED (30s), MAR, RAIL and TRAN (40s), HAM (50s) and BIZ (60s). Near Me
+  becomes `NM Public Safety` and so on. Merging keeps every station once: a
+  trunked system carried by several lists becomes one system with the union of
+  their sites and talkgroups, so the 39 King County city lists, PSERN and the
+  county RadioReference lists are one `PS King County`. A list no category
+  names is installed unchanged. The Sentinel installer takes a name per list
+  (`ListSettings.name`), keeps an existing entry when its name changes, and
+  removes lists an earlier install wrote under a catalog key that a category
+  now holds (`retire`). A list another profile still uses is only taken out of
+  this profile.
+
 - **One folder for every radio file: `radio-data/`.** Exports, backups,
   read-backs, probes, reference material and firmware now sit in one folder
   per radio (`radio-data/<radio>/{exports,backups,readbacks,probes}`), plus

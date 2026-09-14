@@ -17,7 +17,7 @@ import tempfile
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Mapping, Optional, Sequence, Tuple
+from typing import Callable, Dict, List, Mapping, Optional, Sequence, Set, Tuple
 
 from wasds150.hpe.builders import build_favorites_document
 from wasds150.hpe.flist import (
@@ -66,6 +66,10 @@ class WorkspaceInstallResult:
     profile_name: str
     assignments: List[WorkspaceAssignment] = field(default_factory=list)
     planned_writes: List[str] = field(default_factory=list)
+    #: List files removed because the lists they held are retired.
+    planned_deletes: List[str] = field(default_factory=list)
+    #: Names of the retired lists taken out of the profile.
+    retired: List[str] = field(default_factory=list)
     backup_path: Optional[Path] = None
     written_files: List[str] = field(default_factory=list)
     outcome: str = "planned"
@@ -80,6 +84,8 @@ class WorkspaceInstallResult:
             "profile_name": self.profile_name,
             "assignments": [assignment.to_dict() for assignment in self.assignments],
             "planned_writes": list(self.planned_writes),
+            "planned_deletes": list(self.planned_deletes),
+            "retired": list(self.retired),
             "backup_path": str(self.backup_path) if self.backup_path else None,
             "written_files": list(self.written_files),
             "outcome": self.outcome,
@@ -154,19 +160,32 @@ def _index_from_filename(filename: str) -> Optional[int]:
     return int(match.group(1)) if match else None
 
 
-def _display_name(favorite: FavoritesList) -> str:
+def _display_name(favorite: FavoritesList, settings: Optional[ListSettings] = None) -> str:
+    if settings is not None and settings.name:
+        return settings.name
     return f"{favorite.favorite_key} - {favorite.favorite_name}"
 
 
-def _find_existing_generated(doc: RecordDocument, favorite_key: str) -> Optional[Record]:
+def _find_existing_generated(doc: RecordDocument, favorite_key: str, user_name: str) -> Optional[Record]:
+    """The entry an earlier install made for this list: the same name, or
+    the ``"KEY - "`` name it had before it was given a short one."""
+    name = user_name.casefold()
     prefix = favorite_key.casefold() + " - "
-    return next((record for record in entries(doc) if _field(record, "user_name").casefold().startswith(prefix)), None)
+    return next(
+        (
+            record for record in entries(doc)
+            if _field(record, "user_name").casefold() == name
+            or _field(record, "user_name").casefold().startswith(prefix)
+        ),
+        None,
+    )
 
 
 def _allocate_assignments(
     favorites: Sequence[FavoritesList],
     global_doc: RecordDocument,
     favorites_dir: Path,
+    settings: Optional[Mapping[str, ListSettings]] = None,
 ) -> List[WorkspaceAssignment]:
     used = {
         index
@@ -183,7 +202,8 @@ def _allocate_assignments(
     assignments: List[WorkspaceAssignment] = []
     assigned_indices = set()
     for favorite in sorted(favorites, key=lambda item: item.favorite_key.casefold()):
-        existing = _find_existing_generated(global_doc, favorite.favorite_key)
+        user_name = _display_name(favorite, (settings or {}).get(favorite.favorite_key))
+        existing = _find_existing_generated(global_doc, favorite.favorite_key, user_name)
         index = _index_from_filename(_field(existing, "filename")) if existing is not None else None
         replacing = index is not None
         if index is None:
@@ -195,12 +215,46 @@ def _allocate_assignments(
         assignments.append(WorkspaceAssignment(
             slug=favorite.slug,
             favorite_key=favorite.favorite_key,
-            user_name=_display_name(favorite),
+            user_name=user_name,
             index=index,
             filename=f"f_{index:06d}.hpd",
             replacing=replacing,
         ))
     return assignments
+
+
+def _without_retired(
+    doc: RecordDocument, keep: Set[str], retire: Callable[[str], bool]
+) -> Tuple[RecordDocument, List[Tuple[str, str]]]:
+    """``doc`` without the entries ``retire`` names, other than those in
+    ``keep``, and the ``(filename, name)`` of each entry taken out."""
+    records: List[Record] = []
+    endings: List[str] = []
+    dropped: List[Tuple[str, str]] = []
+    for index, record in enumerate(doc.records):
+        ending = doc.line_endings[index] if index < len(doc.line_endings) else None
+        if record.tag == FLIST_TAG:
+            filename, name = _field(record, "filename"), _field(record, "user_name")
+            if filename not in keep and retire(name):
+                dropped.append((filename, name))
+                continue
+        records.append(record)
+        if ending is not None:
+            endings.append(ending)
+    endings.extend(doc.line_endings[len(doc.records):])
+    return RecordDocument(records=records, line_endings=endings), dropped
+
+
+def _filenames_in_other_profiles(workspace: Path, profile_name: str) -> Set[str]:
+    """List files another profile still uses, which a retirement in this
+    profile must leave in place."""
+    used: Set[str] = set()
+    for index in (Path(workspace) / "Profile").glob("*/f_list.cfg"):
+        if index.parent.name == profile_name:
+            continue
+        doc = parse_f_list(index.read_bytes().decode("ascii", errors="replace"))
+        used.update(_field(record, "filename") for record in entries(doc))
+    return used
 
 
 def _patch_index(
@@ -265,13 +319,23 @@ def _prepare_install(
     profile_name: str,
     favorites: Sequence[FavoritesList],
     list_settings: Optional[Mapping[str, ListSettings]] = None,
+    retire: Optional[Callable[[str], bool]] = None,
 ) -> Tuple[WorkspaceInstallResult, Dict[Path, bytes]]:
     favorites_dir, global_index, profile_index = _validate_workspace(workspace, profile_name)
     global_bytes = global_index.read_bytes()
     profile_bytes = profile_index.read_bytes()
     global_doc = parse_f_list(global_bytes.decode("ascii"))
     profile_doc = parse_f_list(profile_bytes.decode("ascii"))
-    assignments = _allocate_assignments(favorites, global_doc, favorites_dir)
+    assignments = _allocate_assignments(favorites, global_doc, favorites_dir, list_settings)
+    retired: List[str] = []
+    deletes: List[Path] = []
+    if retire is not None:
+        keep = {assignment.filename for assignment in assignments}
+        shared = _filenames_in_other_profiles(workspace, profile_name)
+        profile_doc, from_profile = _without_retired(profile_doc, keep, retire)
+        global_doc, from_global = _without_retired(global_doc, keep | shared, retire)
+        retired = sorted({name for _filename, name in from_profile + from_global})
+        deletes = sorted({favorites_dir / filename for filename, _name in from_global if (favorites_dir / filename).is_file()})
     by_slug = {favorite.slug: favorite for favorite in favorites}
     payloads: Dict[Path, bytes] = {
         favorites_dir / assignment.filename: _workspace_hpd_bytes(by_slug[assignment.slug])
@@ -295,16 +359,25 @@ def _prepare_install(
             )
             for path in payloads
         ],
+        "deletes": [
+            (path.relative_to(workspace).as_posix(), hashlib.sha256(path.read_bytes()).hexdigest())
+            for path in deletes
+        ],
     }
     plan_id = hashlib.sha256(json.dumps(fingerprint, sort_keys=True).encode("utf-8")).hexdigest()
+    warnings = ["Close Sentinel before executing; reopen it only after the transaction completes."]
+    if retired:
+        warnings.append(f"{len(retired)} superseded list(s) are removed from {profile_name}; the backup keeps them.")
     result = WorkspaceInstallResult(
         dry_run=True,
         workspace=workspace,
         profile_name=profile_name,
         assignments=assignments,
         planned_writes=[path.relative_to(workspace).as_posix() for path in payloads],
+        planned_deletes=[path.relative_to(workspace).as_posix() for path in deletes],
+        retired=retired,
         plan_id=plan_id,
-        warnings=["Close Sentinel before executing; reopen it only after the transaction completes."],
+        warnings=warnings,
     )
     return result, payloads
 
@@ -320,6 +393,7 @@ def install_selected_favorites(
     expected_plan_id: str = "",
     allow_replacements: bool = False,
     list_settings: Optional[Mapping[str, ListSettings]] = None,
+    retire: Optional[Callable[[str], bool]] = None,
 ) -> WorkspaceInstallResult:
     """Plan or install selected generated lists into one Sentinel profile.
 
@@ -327,9 +401,13 @@ def install_selected_favorites(
     verified workspace backup. Detected failures trigger restoration from
     that backup. Sentinel must be closed while executing.
 
-    ``list_settings`` (by favorite key) sets each list's monitor state and,
-    for a list installed for the first time, its quick key and location
-    control; lists without an entry are monitored, as before.
+    ``list_settings`` (by favorite key) sets each list's name and monitor
+    state and, for a list installed for the first time, its quick key and
+    location control; lists without an entry are monitored, as before.
+
+    ``retire`` names lists an earlier install made that this one supersedes:
+    each entry whose name it accepts is taken out of the profile, and out of
+    the workspace with its file unless another profile still uses it.
     """
     if not favorites:
         raise InstallerError("select at least one populated Favorites List")
@@ -348,7 +426,7 @@ def install_selected_favorites(
     else:
         raise InstallerError("backup directory must be outside the Sentinel workspace")
     if not execute:
-        result, _ = _prepare_install(workspace, profile_name, favorites, list_settings)
+        result, _ = _prepare_install(workspace, profile_name, favorites, list_settings, retire)
         return result
     if confirm != confirmation_phrase(profile_name):
         raise InstallerError(f"confirmation phrase mismatch; expected {confirmation_phrase(profile_name)!r}")
@@ -356,7 +434,7 @@ def install_selected_favorites(
         raise InstallerError("execute requires the plan_id returned by a fresh dry run")
 
     with _workspace_lock(workspace):
-        result, payloads = _prepare_install(workspace, profile_name, favorites, list_settings)
+        result, payloads = _prepare_install(workspace, profile_name, favorites, list_settings, retire)
         if result.plan_id != expected_plan_id:
             raise InstallerError("Sentinel workspace or selection changed after planning; run Plan again")
         replacement_count = sum(assignment.replacing for assignment in result.assignments)
@@ -377,9 +455,16 @@ def install_selected_favorites(
                     raise InstallerError(f"refusing symlinked write target: {path}")
                 _write_synced(path, payload)
                 result.written_files.append(path.relative_to(workspace).as_posix())
-            mismatches = [path for path, payload in payloads.items() if path.read_bytes() != payload]
+            for relative in result.planned_deletes:
+                path = workspace / relative
+                if path.is_symlink():
+                    raise InstallerError(f"refusing symlinked delete target: {path}")
+                if path.exists():
+                    path.unlink()
+            mismatches = [str(path) for path, payload in payloads.items() if path.read_bytes() != payload]
+            mismatches += [relative for relative in result.planned_deletes if (workspace / relative).exists()]
             if mismatches:
-                raise InstallerError("post-write verification failed: " + ", ".join(str(path) for path in mismatches))
+                raise InstallerError("post-write verification failed: " + ", ".join(mismatches))
             result.outcome = "committed"
             result.verified = True
             result.dry_run = False

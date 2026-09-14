@@ -73,20 +73,39 @@ What is still unfinished is listed in [Open items](open-items.md).
 
 ## In the car (SDS150)
 
-The scanner is loaded with six **Near Me** lists at the top, on quick keys
-1-6, and every other list below them, installed but not monitored. With GPS
-connected, turn the scanner on and it is already scanning what is around the
-car:
+The scanner is loaded with 40 short-named lists: six **Near Me** lists at the
+top, on quick keys 1-6, then the whole catalog merged into categories, each on
+its own quick key and installed but not monitored. With GPS connected, turn
+the scanner on and it is already scanning what is around the car:
 
 | Quick key | List | At startup |
 |---|---|---|
-| 1 | Near Me - Public Safety: police, fire and EMS dispatch, interop and emergency operations; the trunked systems' dispatch talkgroups | on |
-| 2 | Near Me - Tactical: tactical, hospital and talk-around channels and talkgroups | off |
-| 3 | Near Me - Air: towers, approach, Seattle Center, CTAF/UNICOM | on |
-| 4 | Near Me - Ham: repeaters around you (one entry per DMR repeater) and the national calling channels | on |
-| 5 | Near Me - Rail & Marine: railroads and marine working channels | off |
-| 6 | Near Me - Business & GMRS: business, utilities, media, FCC-licensed digital, GMRS repeaters | off |
-| 0 | every other list (the full catalog), for trips and browsing | off |
+| 1 | NM Public Safety: police, fire and EMS dispatch, interop and emergency operations; the trunked systems' dispatch talkgroups | on |
+| 2 | NM Tactical: tactical, hospital and talk-around channels and talkgroups | off |
+| 3 | NM Air: towers, approach, Seattle Center, CTAF/UNICOM | on |
+| 4 | NM Ham: repeaters around you (one entry per DMR repeater) and the national calling channels | on |
+| 5 | NM Rail & Marine: railroads and marine working channels | off |
+| 6 | NM Business & GMRS: business, utilities, media, FCC-licensed digital, GMRS repeaters | off |
+
+Everything else is a category list, named to fit the scanner's 18-character
+display and numbered by category. Press a quick key to add a list to the
+scan:
+
+| Quick keys | Category lists |
+|---|---|
+| 10-18 | PS King County, PS Snohomish, PS Pierce, PS South Sound, PS Kitsap/Olympic, PS North Sound, PS Eastern WA, PS Statewide, PS Encrypted |
+| 20-26 | OUT Wildfire, OUT West Mountains, OUT East Mountains, OUT WA Safety All, OUT Upper Lena, OUT Lake Ozette, OUT Weather/SAR |
+| 30-33 | AIR Civil & ATC, AIR SAR & Medevac, MIL Air & Ground, MED EMS & Hospital |
+| 40-44 | MAR Marine & USCG, MAR Ferries & VTS, RAIL Freight Rail, TRAN Transit, TRAN Roads & WSDOT |
+| 50-55 | HAM Repeaters, HAM DMR Networks, HAM ARES & Nets, HAM Simplex & Sats, HAM HF Nets, HAM FTX-1 Import |
+| 60-62 | BIZ GMRS FRS MURS, BIZ Business/Util, BIZ Events & Media |
+
+Each category merges catalog lists and keeps every station once: the 39 King
+County city lists, the PSERN list and the county RadioReference lists are one
+**PS King County**. Which catalog lists go where is in
+`src/wasds150/radios/scanner_categories.py`. The install removes the lists an
+earlier install wrote under catalog keys (`FL01 - ...`, `KC29 - ...`); the
+workspace backup keeps them.
 
 The Near Me lists are rebuilt from the full catalog on every install:
 

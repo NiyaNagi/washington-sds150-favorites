@@ -89,10 +89,15 @@ def fleet_status(ctx: AppContext) -> List[RadioStatus]:
     ]
 
 
-def scanner_favorites(ctx: AppContext, *, include_licensed: bool = True, near_me: bool = True) -> List[FavoritesList]:
+def scanner_favorites(
+    ctx: AppContext, *, include_licensed: bool = True, near_me: bool = True, compact: bool = True
+) -> List[FavoritesList]:
     """The lists the SDS150 is loaded with: enabled, populated, and - for a
     copy meant to be shared - not built from licensed data. The Near Me lists
-    built from them come first (``near_me=False`` leaves them out).
+    built from them come first (``near_me=False`` leaves them out), then the
+    catalog's lists merged into short-named categories (``compact=False``
+    keeps the catalog's own lists; see
+    :mod:`wasds150.radios.scanner_categories`).
 
     Projected onto the SDS150 exactly as the ``.hpe`` export is, so the
     workspace installer never sees what the scanner cannot tune - the HF and
@@ -117,16 +122,29 @@ def scanner_favorites(ctx: AppContext, *, include_licensed: bool = True, near_me
         from wasds150.radios.near_me import build_near_me_lists
 
         favorites = build_near_me_lists(favorites, home=HOME) + favorites
+    if compact:
+        from wasds150.radios.scanner_categories import compact_lists
+
+        favorites = compact_lists(favorites)
     return favorites
 
 
 def scanner_list_settings(favorites: List[FavoritesList]) -> Dict[str, Any]:
-    """How each installed list appears on the scanner: the Near Me lists
-    lead on quick keys 1-6, location-controlled; everything else is
-    installed but not monitored (see :mod:`wasds150.radios.near_me`)."""
-    from wasds150.radios.near_me import list_settings
+    """How each installed list appears on the scanner: short names, the Near
+    Me lists leading on quick keys 1-6, location-controlled, then each
+    category on its quick key, installed but not monitored (see
+    :mod:`wasds150.radios.scanner_categories`)."""
+    from wasds150.radios.scanner_categories import list_settings
 
     return list_settings(favorites)
+
+
+def scanner_retired_list(user_name: str) -> bool:
+    """Whether an installed list is one an earlier install wrote under a
+    catalog key that a category now holds; the install removes it."""
+    from wasds150.radios.scanner_categories import is_retired_name
+
+    return is_retired_name(user_name)
 
 
 def _copy_into(source: Path, destination: Path) -> List[Path]:
