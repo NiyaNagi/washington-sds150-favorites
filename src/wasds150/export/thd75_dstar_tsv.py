@@ -8,6 +8,7 @@ that had, for one, K7LWH C on 146.125.
 """
 from __future__ import annotations
 
+import codecs
 from typing import Iterable, Tuple
 
 HEADER = (
@@ -50,3 +51,10 @@ def render_dstar_tsv(channels: Iterable) -> str:
             "-08:00", "On", "Off", "On", "USA", "W7", "",
         )))
     return "\r\n".join(rows) + "\r\n"
+
+
+def encode_dstar_tsv(text: str) -> bytes:
+    """The bytes MCP-D75 accepts: UTF-16 LE with a byte-order mark, as
+    Kenwood's own lists are. An ASCII file is refused with "the language of
+    the selected repeater list differs from the language setting"."""
+    return codecs.BOM_UTF16_LE + text.encode("utf-16-le")
