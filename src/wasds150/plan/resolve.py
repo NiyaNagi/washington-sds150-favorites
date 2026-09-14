@@ -31,6 +31,7 @@ from wasds150.models.plan import (
     natural_key,
 )
 from wasds150.radios.bandplan import band_for, may_transmit
+from wasds150.radios.services import AMATEUR, FRS, GMRS, MURS_SERVICE, service_for
 from wasds150.util.geo import haversine_miles
 from wasds150.plan.naming import NameAllocator
 from wasds150.radios.digital import DIGITAL_MODES, DigitalSpec, digital_identity, digital_spec
@@ -277,6 +278,20 @@ def _select_for_block(
     ]
 
 
+def _service_policy(freq: float, plan: ChannelPlan) -> str:
+    """Transmit policy a channel earns by its service alone (see
+    :mod:`wasds150.radios.services`): amateur and GMRS/FRS take a published
+    input when there is one and are simplex otherwise; MURS is simplex."""
+    service = service_for(freq)
+    if service == AMATEUR:
+        return TX_AUTO if plan.license_class else TX_NONE
+    if service in (GMRS, FRS):
+        return TX_AUTO if plan.gmrs_licensed else TX_NONE
+    if service == MURS_SERVICE:
+        return TX_SIMPLEX if plan.murs_transmit else TX_NONE
+    return TX_NONE
+
+
 def _resolve_tones(
     channel: Channel, transmit: bool, mode: str = ""
 ) -> Tuple[ToneSpec, ToneSpec, List[str]]:
@@ -415,31 +430,42 @@ def _resolve_once(
                 )
                 continue
 
-            transmit = block.tx_policy != TX_NONE
+            # A plan that decides transmit by service ignores which block holds
+            # the channel: a ham repeater in a catch-all block is still a ham
+            # repeater (see wasds150.radios.services).
+            policy = block.tx_policy
+            by_service = plan.transmit_by_service and _service_policy(freq, plan) != TX_NONE
+            if policy == TX_NONE and by_service:
+                policy = _service_policy(freq, plan)
+            transmit = policy != TX_NONE
             tx_freq: Optional[float] = None
 
-            if transmit and mode == "AM":
+            if transmit and mode == "AM" and not (by_service and service_for(freq) == AMATEUR):
                 transmit = False
                 result.warnings.append(
                     f"{channel.label}: AM channels are receive-only; transmit disabled"
                 )
-            if transmit and block.tx_policy == TX_AUTO and channel.tx_freq_mhz is not None:
+            if (
+                transmit and policy == TX_AUTO and channel.tx_freq_mhz is not None
+                and abs(float(channel.tx_freq_mhz) - freq) >= 1e-6
+            ):
                 tx_freq = round(float(channel.tx_freq_mhz), 6)
-            if transmit and block.tx_policy == TX_REPEATER:
-                if channel.tx_freq_mhz is None:
-                    transmit = False
-                    result.warnings.append(
-                        f"{channel.label}: no published repeater input, programmed receive-only"
+            if transmit and policy == TX_REPEATER:
+                if channel.tx_freq_mhz is None or abs(float(channel.tx_freq_mhz) - freq) < 1e-6:
+                    why = (
+                        "no published repeater input" if channel.tx_freq_mhz is None
+                        else "repeater input equals its output"
                     )
-                elif abs(float(channel.tx_freq_mhz) - freq) < 1e-6:
-                    # An input equal to the output is not a repeater pair: the
-                    # source published the output twice. Transmitting there
-                    # would key simplex on top of the repeater rather than
-                    # through it, so it is receive-only like a missing input.
-                    transmit = False
-                    result.warnings.append(
-                        f"{channel.label}: repeater input equals its output, programmed receive-only"
-                    )
+                    if by_service:
+                        # The operator may transmit here. Without a usable pair
+                        # the memory is simplex on the output - never blocked.
+                        result.warnings.append(f"{channel.label}: {why}; transmits simplex")
+                    else:
+                        # An input equal to the output is not a repeater pair:
+                        # the source published the output twice. A hand-written
+                        # plan keeps it receive-only like a missing input.
+                        transmit = False
+                        result.warnings.append(f"{channel.label}: {why}, programmed receive-only")
                 else:
                     tx_freq = round(float(channel.tx_freq_mhz), 6)
             if transmit and not profile.can_transmit(tx_freq if tx_freq is not None else freq):
@@ -504,6 +530,19 @@ def _resolve_once(
                     DroppedChannel(
                         channel.label, freq, block.label, "duplicate",
                         f"already received in slot {receiving.slot} as {receiving.label!r}",
+                    )
+                )
+                continue
+            # A copy of a repeater with no access tone adds nothing once the
+            # pair is programmed with its tone, and would not open it. The
+            # pair is registered below under a key of its own.
+            pair_key = ("keyed pair", freq, tx_freq)
+            keyed = seen_frequencies.get(pair_key) if transmit and tx_freq is not None and spec is None else None
+            if plan.transmit_by_service and keyed is not None and tx_tone.kind == NO_TONE.kind:
+                result.dropped.append(
+                    DroppedChannel(
+                        channel.label, freq, block.label, "duplicate",
+                        f"repeater already programmed with its access tone in slot {keyed.slot} as {keyed.label!r}",
                     )
                 )
                 continue
@@ -572,6 +611,8 @@ def _resolve_once(
             result.channels.append(planned)
             seen_frequencies[tuning_key] = planned
             seen_receive.setdefault(receive_key, planned)
+            if transmit and tx_freq is not None and spec is None and tx_tone.kind != NO_TONE.kind:
+                seen_frequencies.setdefault(pair_key, planned)
             if spec is not None and spec.has_contact:
                 seen_digital_identity.setdefault((freq, mode), planned)
 

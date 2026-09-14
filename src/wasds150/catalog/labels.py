@@ -17,18 +17,25 @@ catalog, and every memory plan and the SDS150's Near Me lists read it:
   descriptions - RadioReference, the FCC; then a radio's own local lists),
   and within a source from the copy nearest home. A copy with no position
   counts toward the area nearest home.
-* FM and narrow FM, and an analog channel's tone, do not make two
+* FM and narrow FM, and a monitoring channel's tone, do not make two
   stations: lists disagree on both for the same transmitter, and a
   monitoring radio opens for either.
+* An amateur repeater's **access tone** does: two machines can share one
+  pair and differ only by tone (K7PG and W7FEL on 147.06/147.66), and a
+  memory must carry the name of the machine whose tone it transmits. A copy
+  with no tone takes the name of the one toned machine on its pair, when
+  there is only one.
 * A DMR or NXDN talkgroup channel keeps its own name: two talkgroups on one
   repeater share a frequency but are two memories.
 """
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, Iterable, List, Optional, Tuple
+from typing import Dict, Iterable, List, Optional, Set, Tuple
 
 from wasds150.models.catalog import Channel, Department
+from wasds150.radios.services import AMATEUR, service_for
+from wasds150.radios.tones import TONE_CTCSS, TONE_DCS, parse_tone
 from wasds150.util.geo import haversine_miles
 
 #: How far around its own site a located station counts as "here".
@@ -70,6 +77,28 @@ def station_key(channel: Channel) -> Optional[Key]:
     return (round(channel.freq_mhz, 5), family, (channel.tone or "") if family in _DIGITAL else "")
 
 
+def access_tone(channel: Channel) -> str:
+    """An analog amateur repeater's access tone as text - ``103.5`` for
+    CTCSS, ``D172`` for DCS - and empty for anything else. A DCS machine is
+    not a copy with no tone: V71 Lynnwood's DCS 172 on 146.78 is not WW7CH
+    Ashford's 103.5."""
+    if channel.freq_mhz is None or channel.tx_freq_mhz is None or service_for(channel.freq_mhz) != AMATEUR:
+        return ""
+    tone = parse_tone(channel.tx_tone or channel.tone)
+    if tone.kind == TONE_CTCSS and tone.ctcss_hz:
+        return f"{tone.ctcss_hz:g}"
+    if tone.kind == TONE_DCS and tone.dcs_code:
+        return f"D{tone.dcs_code}"
+    return ""
+
+
+def _label_key(channel: Channel) -> Optional[Key]:
+    key = station_key(channel)
+    if key is None or key[1] in _DIGITAL:
+        return key
+    return (key[0], key[1], access_tone(channel))
+
+
 def station_area(department: Optional[Department], channel: Channel) -> Optional[Area]:
     if channel.lat is not None and channel.lon is not None:
         return (channel.lat, channel.lon, LOCATED_REACH_MILES)
@@ -101,10 +130,14 @@ class StationLabels:
         self.home = home
         located: Dict[Key, List[tuple]] = {}
         unlocated: Dict[Key, tuple] = {}
+        #: The access tones seen on each (frequency, family).
+        self._tones: Dict[Tuple[float, str], Set[str]] = {}
         for order, (favorite_key, department, channel) in enumerate(rows):
-            key = station_key(channel)
+            key = _label_key(channel)
             if key is None or not channel.label:
                 continue
+            if key[2] and key[1] not in _DIGITAL:
+                self._tones.setdefault(key[:2], set()).add(key[2])
             rank = source_rank(favorite_key)
             area = station_area(department, channel)
             if area is None:
@@ -135,8 +168,16 @@ class StationLabels:
     def _miles(self, area: Area) -> float:
         return haversine_miles(self.home[0], self.home[1], area[0], area[1]) if self.home else 0.0
 
+    def _key_for(self, channel: Channel) -> Optional[Key]:
+        key = _label_key(channel)
+        if key is None or key[2] or key[1] in _DIGITAL:
+            return key
+        # A copy with no tone is named for the one toned machine on its pair.
+        tones = self._tones.get(key[:2], set())
+        return (key[0], key[1], next(iter(tones))) if len(tones) == 1 else key
+
     def label(self, department: Optional[Department], channel: Channel) -> str:
-        key = station_key(channel)
+        key = self._key_for(channel)
         if key is None:
             return channel.label
         stations = self._stations.get(key)

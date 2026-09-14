@@ -203,7 +203,8 @@ ANALOG: List[Tuple[str, str, str, str, float, float, str, str, bool]] = [
     ('ACS UHF', 'U65 Burien', '25K', 'High', 441.1250, 446.1250, 'TONE=C103.5', 'TONE=C103.5', False),
     ('ACS UHF', 'U66 Shoreline 2', '25K', 'High', 442.8250, 447.8250, '', 'TONE=C103.5', False),
     ('ACS UHF', 'U67 Northshore', '25K', 'High', 442.0000, 447.0000, '', 'TONE=C141.3', False),
-    ('ACS UHF', 'U71 Mountlake', '12.5K', 'High', 443.7250, 448.7250, 'TONE=C103.5', 'TONE=C103.5', False),
+    # WA7DEM Mountlake Terrace: WWARA and WA7DEM's own net listing give 156.7.
+    ('ACS UHF', 'U71 Mountlake', '12.5K', 'High', 443.7250, 448.7250, 'TONE=C156.7', 'TONE=C156.7', False),
     ('ACS UHF', 'U72 Bainbridg', '12.5K', 'High', 444.4750, 449.4750, 'TONE=C103.5', 'TONE=C103.5', False),
     ('ACS UHF', 'U81 PSE RTL', '25K', 'High', 441.7750, 446.7750, 'TONE=C103.5', 'TONE=C103.5', False),
     ('ACS UHF', 'U82 PSE Baldi', '25K', 'High', 441.7000, 446.7000, '', 'TONE=C103.5', False),

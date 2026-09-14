@@ -36,5 +36,19 @@ steps and does the automatic ones for you. The checklist text it shows is in
    Manager.
 5. **Check the report.** Next to each export is a `-report.md` with the memory
    map, what was dropped and why, and the counts to check on the radio.
+6. **Audit before you write.**
+
+   ```powershell
+   .venv\Scripts\wasds150.exe --home .wasds150-home fleet audit
+   ```
+
+   Every transmitting radio must show **0 error(s)**. The audit checks that
+   every amateur, GMRS/FRS and MURS memory can transmit, that nothing else can,
+   and that each repeater's call, input and access tone match WWARA. Add
+   `--warnings` to see the items that need a look rather than a fix.
+7. **Your call sign is WA7DAM.** The radios keep their own identity settings
+   (TH-D75 My Callsign and APRS call, ID-52A MY call, FTX-1 call), and older
+   reads of the TH-D75 still hold the previous call, KM7HKM. Check it in the
+   vendor program before writing.
 
 The folder layout is described in [radio-data/README.md](../../radio-data/README.md).

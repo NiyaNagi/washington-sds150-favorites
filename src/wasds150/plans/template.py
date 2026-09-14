@@ -108,10 +108,8 @@ CONTINUOUS = r"\b(ATIS|D-ATIS|ASOS|AWOS|METRO|VOLMET)\b"
 #: public safety in parts of Washington; AIS is excluded by label.
 MARINE = ((156.2475, 157.4250), (161.7750, 161.9625))
 
-GMRS_MAIN = (462.550, 462.575, 462.600, 462.625, 462.650, 462.675, 462.700, 462.725)
-GMRS_INTERSTITIAL = (462.5625, 462.5875, 462.6125, 462.6375, 462.6625, 462.6875, 462.7125)
-FRS_ONLY = (467.5625, 467.5875, 467.6125, 467.6375, 467.6625, 467.6875, 467.7125)
-MURS = (151.820, 151.880, 151.940, 154.570, 154.600)
+# The personal-radio channel plans live with the service rules that use them.
+from wasds150.radios.services import FRS_ONLY, GMRS_INTERSTITIAL, GMRS_MAIN, MURS  # noqa: E402
 NOAA = (162.400, 162.425, 162.450, 162.475, 162.500, 162.525, 162.550)
 
 #: Statewide RadioReference departments that are really somewhere else.
@@ -912,6 +910,12 @@ def build_fleet_plan(radio_id: str, knobs: Optional[RadioKnobs] = None) -> Chann
         radius_miles=knobs.radius_miles,
         fill_to_capacity=knobs.fill_to_capacity,
         canonical_labels=True,
+        # Transmit follows the service, not the block: a ham repeater the
+        # catch-all block picks up is keyable like any other (see
+        # wasds150.radios.services and docs/fleet-updates.md).
+        transmit_by_service=True,
+        gmrs_licensed=knobs.gmrs_licensed,
+        murs_transmit=knobs.murs_tx,
     )
 
 

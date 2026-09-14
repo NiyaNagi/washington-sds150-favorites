@@ -7,6 +7,34 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## Unreleased
 
+### Fixed
+
+- **No licensed channel is blocked for transmit on any radio.** Fleet plans
+  decided transmit per block, so a ham repeater in Other Nearby, Local and Trip
+  Packs or Packet and Data, and a simplex net or repeater with no published
+  input, was programmed receive only - on the TH-D75 that is an out-of-band
+  split, and 443.050 beeped and refused PTT. Transmit now follows the service
+  (`wasds150.radios.services`, `ChannelPlan.transmit_by_service`): amateur
+  inside General privileges, GMRS/FRS and MURS transmit wherever the hardware
+  can, on the published input or simplex; nothing else transmits.
+- Station names no longer cross between two repeaters sharing a pair: an
+  amateur repeater's access tone is part of its identity
+  (`wasds150.catalog.labels`), and a copy with no tone of a pair already
+  programmed with its tone is dropped.
+- N7IH's 2 m D-STAR memory is 147.4875 (input 146.4875), not 146.875 +1.0;
+  147.32 Kent is named N7RHE and 146.62 Gold Mtn KC7Z, the calls WWARA
+  coordinates them to.
+
+### Added
+
+- **Radio audit** (`wasds150 fleet audit`, `wasds150.plan.audit`), run on every
+  fleet export with its findings in the report: licensed memories programmed
+  receive only, transmit outside the licences, unusual repeater splits, and
+  each analog repeater's call, input and access tone against WWARA's current,
+  pending, about-to-expire and expired lists (`wasds150.plan.coordination`). The
+  exported TH-D75, TD-H9 and Anytone files are checked for transmit blocks too.
+  `tests/test_transmit_audit.py` and `CLAUDE.md` make it standing practice.
+
 ### Changed
 
 - **The SDS150 gets 40 short-named category lists instead of 169.** The

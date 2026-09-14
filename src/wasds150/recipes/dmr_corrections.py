@@ -201,5 +201,44 @@ def correct_color_codes(fl: FavoritesList) -> FavoritesList:
     return fl
 
 
+#: Analog access tones a list's source gets wrong, keyed by (list key, channel
+#: label, output MHz). The Seattle ACS channel plan is rebuilt from the
+#: SeattleDMR source, so the correction has to follow every rebuild.
+ANALOG_TONES: Dict[Tuple[str, str, float], Tuple[str, str]] = {
+    ("SEAACS", "U71 Mountlake", 443.725): (
+        "TONE=C156.7",
+        "WA7DEM Mountlake Terrace, 443.725 +5 MHz: WWARA's coordination (CTCSS_IN 156.7, extract "
+        f"{RETRIEVED}) and WA7DEM's own net listing agree; the ACS plan's copy carries 103.5.",
+    ),
+}
+
+
+def correct_analog_tones(fl: FavoritesList) -> FavoritesList:
+    """``fl`` with :data:`ANALOG_TONES` applied; the same object when nothing matches."""
+    key = (fl.favorite_key or "").upper()
+    wanted = {(label.casefold(), mhz): tone for (list_key, label, mhz), (tone, _why) in ANALOG_TONES.items()
+              if list_key == key}
+    if not wanted:
+        return fl
+
+    def fix(channel: Channel) -> Optional[str]:
+        if channel.freq_mhz is None:
+            return None
+        for (label, mhz), tone in wanted.items():
+            if abs(channel.freq_mhz - mhz) < 5e-4 and (channel.label or "").casefold() == label:
+                return tone if (channel.tx_tone or channel.tone) != tone else None
+        return None
+
+    if not any(fix(c) for d in _departments(fl) for c in d.channels):
+        return fl
+    fl = copy.deepcopy(fl)
+    for department in _departments(fl):
+        department.channels = [
+            dataclasses.replace(channel, tone=tone, tx_tone=tone) if (tone := fix(channel)) else channel
+            for channel in department.channels
+        ]
+    return fl
+
+
 def correct_network_lists(favorites: Iterable[FavoritesList]) -> List[FavoritesList]:
-    return [correct_color_codes(correct_network_list(fl)) for fl in favorites]
+    return [correct_analog_tones(correct_color_codes(correct_network_list(fl))) for fl in favorites]

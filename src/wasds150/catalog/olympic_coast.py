@@ -202,7 +202,7 @@ AMATEUR: Sequence[ChannelRow] = (
     ("Gunderson Mtn W7FEL", 145.210, "TONE=C100", "FM", _ST_HAM, 144.610, "TONE=C100", f"Forks, Gunderson Mountain, W7FEL; {_WAFOG}"),
     ("Mt Octopus K7PP", 147.280, "TONE=C151.4", "FM", _ST_HAM, 147.880, "TONE=C123", f"Mt Octopus, Clallam County, K7PP; WWARA record 3015; {_WWARA}"),
     ("Striped Peak W7FEL", 146.760, "TONE=C100", "FM", _ST_HAM, 146.160, "TONE=C100", f"Port Angeles, Striped Peak, W7FEL, EchoLink; {_WAFOG}"),
-    ("Carlsborg W7FEL", 146.760, "TONE=C77", "FM", _ST_HAM, 146.160, "TONE=C77", f"Carlsborg repeater sharing the Striped Peak pair on a different tone; {_WAFOG}"),
+    ("Carlsborg W7FEL", 146.760, "TONE=C77", "FM", _ST_HAM, 146.160, "TONE=C77", f"Carlsborg repeater on a shared pair with Striped Peak, on a different tone; {_WAFOG}"),
     ("Port Angeles 220 W6MPD", 224.060, "TONE=C107.2", "FM", _ST_HAM, 222.460, "TONE=C107.2", f"Port Angeles, W6MPD, 1.25 m; WWARA record 4100, coordination expired 2026-01-21; {_WWARA}"),
     ("Sequim KO6I", 442.050, "TONE=C103.5", "NFM", _ST_HAM, 447.050, "TONE=C103.5", f"Sequim, KO6I, narrow FM; WWARA record 5342; {_WWARA}"),
     ("Forks Simplex", 147.500, "", "FM", _ST_HAM, None, "", f"Clallam County AUXCOMM 2 m simplex, Forks; {_WAFOG}"),

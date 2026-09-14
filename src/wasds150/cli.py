@@ -1588,6 +1588,33 @@ def cmd_fleet_status(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_fleet_audit(args: argparse.Namespace) -> int:
+    from wasds150.fleet.audit import audit_fleet
+
+    ctx = _build_ctx(args)
+    try:
+        audit = audit_fleet(ctx, _fleet_radio_ids(args), include_licensed=not args.exclude_licensed)
+    except (KeyError, NotImplementedError, ValueError, OSError) as exc:
+        print(f"error: {exc.args[0] if exc.args else exc}", file=sys.stderr)
+        return 1
+    if args.report:
+        report = Path(args.report)
+        report.parent.mkdir(parents=True, exist_ok=True)
+        report.write_text(audit.to_markdown(), encoding="utf-8")
+    if args.json:
+        _print_json(audit.to_dict())
+    else:
+        for line in audit.summary_lines():
+            print(line)
+        for finding in audit.errors() + (audit.warnings() if args.warnings else []):
+            print(f"  {finding.line()}")
+        if audit.warnings() and not args.warnings:
+            print(f"  ({len(audit.warnings())} warning(s) not shown; add --warnings or --report)")
+        if args.report:
+            print(f"report {args.report}")
+    return 1 if audit.errors() else 0
+
+
 def cmd_fleet_export(args: argparse.Namespace) -> int:
     from wasds150.fleet.service import export_fleet
 
@@ -2063,6 +2090,18 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_fleet_export.add_argument("--json", action="store_true")
     p_fleet_export.set_defaults(func=cmd_fleet_export)
+
+    p_fleet_audit = fleet_sub.add_parser(
+        "audit", help="Check every transmitting radio's plan and exported file: transmit, calls, inputs, tones"
+    )
+    audit_which = p_fleet_audit.add_mutually_exclusive_group()
+    audit_which.add_argument("--all", action="store_true", help="Every radio (the default)")
+    audit_which.add_argument("--radios", help="Comma-separated radio ids")
+    p_fleet_audit.add_argument("--warnings", action="store_true", help="List warnings as well as errors")
+    p_fleet_audit.add_argument("--report", help="Also write the findings as Markdown to this file")
+    p_fleet_audit.add_argument("--exclude-licensed", action="store_true")
+    p_fleet_audit.add_argument("--json", action="store_true")
+    p_fleet_audit.set_defaults(func=cmd_fleet_audit)
 
     p_fleet_update = fleet_sub.add_parser(
         "update", help="Refresh stale sources, then export and load every selected radio"

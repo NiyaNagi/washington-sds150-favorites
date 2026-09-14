@@ -19,7 +19,9 @@ AMES_LAKE_LON = -121.960584
 _DSTAR = (
     ("W7RNK  C", "W7RNK  G", "Newcastle", 147.9950, -0.6000, 47.542000, -122.108833),
     ("WA7HJR B", "WA7HJR G", "Seattle", 444.6375, 5.0000, 47.490500, -121.947167),
-    ("N7IH   C", "N7IH   G", "Kirkland", 146.8750, 1.0000, 47.631000, -122.184500),
+    # WWARA coordinates N7IH's 2 m D-STAR machine on 147.4875, input
+    # 146.4875; Kenwood's list had 146.875 +1.0, which is WW7STR's DMR pair.
+    ("N7IH   C", "N7IH   G", "Kirkland", 147.4875, -1.0000, 47.631000, -122.184500),
     ("N7IH   B", "N7IH   G", "Kirkland", 443.5750, 5.0000, 47.631000, -122.184500),
     ("K7LWH  C", "K7LWH  G", "Bellevue", 146.1250, 1.0000, 47.616500, -122.201667),
     ("K7LWH  B", "K7LWH  G", "Bellevue", 443.0625, 5.0000, 47.616500, -122.201667),

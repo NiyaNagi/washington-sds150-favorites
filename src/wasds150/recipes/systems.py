@@ -579,6 +579,18 @@ def systems_defined_in_code(fl: FavoritesList) -> bool:
     return fl.favorite_key == "OZ01"
 
 
+def code_defined_system_ids(fl: FavoritesList) -> frozenset:
+    """Ids of the systems in a source-rebuilt row that are nonetheless written
+    by hand in code - PSHAM01's operator-published net channels
+    (:mod:`wasds150.catalog.puget_ham`) - so a corrected call or tone there
+    reaches a catalog saved before the correction."""
+    if fl.favorite_key == "PSHAM01":
+        from wasds150.util.hashing import stable_id
+
+        return frozenset({stable_id("puget-ham:official-nets", kind="system")})
+    return frozenset()
+
+
 def systems_from_matched_facts(fl: FavoritesList, matched_facts: List[NormalizedFact]) -> List[System]:
     """Tiers A + B together, as used by
     :func:`wasds150.recipes.engine.enrich_catalog`: every HPDB system

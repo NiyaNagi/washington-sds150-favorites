@@ -31,6 +31,22 @@ and tested.
 | TH-D75 tracked image | `radio-data/th-d75/reference/current/thd75-current.d75` and its power-on bitmap still carry the earlier callsign KM7HKM. Replace them after the next write and read-back. |
 | GMRS repeater tones | The 17 repeaters in `GMRS01` (`src/wasds150/catalog/gmrs_repeaters.py`) were added by hand, and their access tones are not yet confirmed on the air. Key each one up and fix any that do not open. Auburn (WRBQ486, 254.1) and Gig Harbor (WRPR468, 173.8, possibly 141.3) are the doubtful ones. |
 
+## Radio audit: reprogram and review
+
+`wasds150 --home .wasds150-home fleet audit` reports **0 errors** on every
+radio as of 2026-09-13; the full list is in
+`radio-data\shared\checklists\radio-audit-2026-09-13.md`. The warnings below
+need a human, not a code change.
+
+| Item | Detail |
+|---|---|
+| TH-D75 on the radio | The image written on 2026-09-11 has about 22 amateur memories programmed receive only with the out-of-band split - 443.050 (slot 943, then named N7MTC Bremerton) among them - so PTT beeps. Write the current export (`docs/guides/th-d75.md`); every other radio should be rewritten from its current export too. |
+| Lapsed coordinations | WWARA lists these as expired: W7PSE 441.700 Baldi Mtn, 441.725 Anacortes, 441.775 North Bend, 443.625 Sumner (2024-08-17); K7FDF Renton 443.600 (2026-06-05); W7SKY Sultan 444.125 (2026-07-11); W6MPD Port Angeles 224.060 (2026-01-21). Key each up; drop any that no longer answer. W7PSE North Bend, K7FDF and W7SKY carry scheduled nets. |
+| Seattle ACS tones WWARA does not confirm | V42 SARRTL 145.110 (127.3), V71 Lynwood 146.780 (DCS 172), V73 Kitsap 145.430 (88.5), V78 Kittitas 147.360 (131.8), V84 Stampede 147.360 (141.3), V85 Ellensburg 146.720 (131.8). Most are east of the Cascades, outside WWARA's area, where the pair belongs to another machine. Check each against the current Seattle ACS channel plan; a confirmed wrong tone goes in `ANALOG_TONES` (`src/wasds150/recipes/dmr_corrections.py`), as U71 Mountlake did. |
+| RadioReference rows WWARA contradicts | W6TQF 440.325 (WWARA: NR7SS Granite Falls); KC7VCR Wenatchee Mtn 444.450 (same pair and tone as KD7HTE Baw Faw - fine if it is the eastern machine); W7UDI Whiskey Dick 441.750 with a 446.775 input (WWARA: W7PSE on 446.750); Myrtle Reservoir 6 m 53.290 at 103.5 (WWARA: W7AW, access tone 100, output tone 103.5); Evergreen Intertie 147.260 (156.7) and Upper Kittitas Co 147.160 (131.8), both eastern. These come from your RadioReference export, so they are fixed there or accepted. |
+| Anytone DMR rows with no talkgroup | 11 DMR copies (Upper Lena list and PSHAM01's coordinated DMR machines without a published layout - WW7STR 146.875, NB7AT 442.850, N7ER 440.700, K7TGU 442.5875, and others) are programmed but cannot be keyed. Where the machine is in the DMR network lists, the talkgroup channels transmit; add a talkgroup to the rest only if you want to key them. |
+| D-STAR routing calls | The TH-D75/ID-52A D-STAR memories use Kenwood's routing calls, which the audit deliberately does not compare with the licensee. Four differ from WWARA's licensee on the same output - KF7CLD 443.425 (KI7PCT), NR7SS 440.350 (WA7DEM), K7GKR 444.725 (NW7DR/W7MSH), WA7DR 442.925 (WA7FW) - and K7LWH C 146.125 +1.0 and KK7PPV 443.000 have no WWARA record. Confirm them on dstarinfo.com before relying on DR routing. N7IH C was corrected to 147.4875. |
+
 ## Needs an API key or an outside approval
 
 | Item | Detail |

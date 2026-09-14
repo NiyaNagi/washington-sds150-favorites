@@ -146,8 +146,10 @@ def favorite() -> FavoritesList:
                  "Highline ARC Net Tue 19:00", tx=146.060),
         _channel("W7AW West Seattle", 145.130, "TONE=C103.5", "FM",
                  "West Seattle ARC weekly net Mon 18:30", tx=144.530),
-        _channel("K7CST Kent", 147.320, "TONE=C103.5", "FM",
-                 "Puget Sound Fire Communications Support Team Mon 19:00", tx=147.920),
+        # Named by the call WWARA coordinates the pair to; the club that runs
+        # the net is in the note.
+        _channel("N7RHE Kent", 147.320, "TONE=C103.5", "FM",
+                 "Puget Sound Fire Communications Support Team (K7CST) Mon 19:00", tx=147.920),
         _channel("W7PSE Rattlesnake", 441.775, "TONE=C103.5", "FM",
                  "Puget Sound Energy ARG net Tue 12:30", tx=446.775),
         _channel("W7FLY Lynnwood", 443.925, "TONE=C100.0", "FM",
@@ -158,8 +160,8 @@ def favorite() -> FavoritesList:
                  "Vashon-Maury ARC ARES net Sun 19:30", tx=448.500),
         _channel("K7SYE Auburn", 147.240, "TONE=C123.0", "FM",
                  "Auburn Area Emergency Communications Team Sun 19:00", tx=147.840),
-        _channel("WW7RA Gold Mtn", 146.620, "TONE=C103.5", "FM",
-                 "Kitsap County ARC Wed 19:00; Greater Kingston RC Tue 19:00 (clubs disagree on the day)",
+        _channel("KC7Z Gold Mtn", 146.620, "TONE=C103.5", "FM",
+                 "Kitsap County ARC (WW7RA) Wed 19:00; Greater Kingston RC Tue 19:00 (clubs disagree on the day)",
                  tx=146.020),
         _channel("KD7WDG Silverdale", 145.425, "TONE=C88.5", "FM",
                  "Kitsap County Emergency Comms Sun 19:30; West Sound ARC 2m Tue 19:00", tx=144.825),

@@ -87,7 +87,13 @@ def resolve_named_plan(
             favorites.append(reviewed)
             plan = dataclasses.replace(plan, blocks=tuple(plan.blocks) + (plan_block(),))
     catalog = Catalog(favorites=favorites)
-    return plan, resolve_plan(plan, catalog)
+    resolved = resolve_plan(plan, catalog)
+    if plan.transmit_by_service:
+        # A repeater copy whose source gave no access tone gets WWARA's.
+        from wasds150.plan.coordination import fill_access_tones, load_coordination
+
+        fill_access_tones(resolved, load_coordination(ctx.config))
+    return plan, resolved
 
 
 def plan_index() -> List[Dict[str, Any]]:
@@ -184,6 +190,8 @@ class PlanExport:
     copies: List[Path] = field(default_factory=list)
     #: Individual files inside a directory bundle (empty for file targets).
     files: List[Path] = field(default_factory=list)
+    #: What the radio audit found (:mod:`wasds150.plan.audit`); fleet plans only.
+    findings: List[Any] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -240,9 +248,19 @@ def export_plan(
     csv_path = directory / f"{plan.id}{target.extension}"
     result = target.write(resolved, csv_path)
     files = [Path(p) for p in getattr(result, "files", [])]
+    # Every fleet export is audited, and the findings are in its report: see
+    # wasds150.plan.audit and CLAUDE.md.
+    findings: List[Any] = []
+    if plan.transmit_by_service:
+        from wasds150.plan.audit import audit_export, audit_plan
+        from wasds150.plan.coordination import load_coordination
+
+        findings = audit_plan(plan.radio_id, resolved, load_coordination(ctx.config))
+        findings += audit_export(plan.radio_id, resolved, csv_path)
+    audit_lines = [f"Audit: {finding.line()}" for finding in findings]
     report_path = directory / f"{plan.id}-report.md"
     report_path.write_text(
-        render_plan_report(resolved, extra_warnings=list(getattr(result, "warnings", []))),
+        render_plan_report(resolved, extra_warnings=list(getattr(result, "warnings", [])) + audit_lines),
         encoding="utf-8",
     )
 
@@ -279,5 +297,6 @@ def export_plan(
         report_path=report_path,
         copies=copies,
         files=files,
-        warnings=list(resolved.warnings) + list(result.warnings),
+        warnings=list(resolved.warnings) + list(result.warnings) + audit_lines,
+        findings=findings,
     )

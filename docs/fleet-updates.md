@@ -214,14 +214,31 @@ DMR channels are ordered by talkgroup tier and then distance
 
 ## Transmit
 
-Transmit is enabled only where the operator is licensed and the radio's
-hardware transmits; everything else is receive only.
+Transmit follows the channel's **service**, not the block or zone it is in
+(`src/wasds150/radios/services.py`). A memory transmits when the operator is
+licensed for its service and the radio's hardware transmits there; everything
+else is receive only, wherever it sits.
 
-| Service | Licence | Where it transmits |
+| Service | Licence | Transmits |
 |---|---|---|
-| Amateur | General class, WA7DAM | Every amateur block, checked channel by channel against General privileges |
-| GMRS and FRS | WRWH962 | GMRS 1-7, FRS 8-14, GMRS 15-22 and the hand-added open repeaters (each on its input and access tone), all at the radio's highest power, on radios whose hardware covers 462/467 MHz - the TD-H9 at 10 W, and the AT-D890UV once it is in band mode 00014 |
-| MURS | licence-free | The five MURS channels at the radio's highest power, on radios whose hardware covers 151-154 MHz - the TD-H9 and the AT-D890UV |
+| Amateur | General class, WA7DAM | Every amateur memory inside General privileges, in any block - Nets, Other Nearby, Local Packs, Packet and Data included: on the published repeater input when there is one, simplex otherwise |
+| GMRS and FRS | WRWH962 | The 22 channels and the GMRS repeater inputs, at the radio's highest power, on radios whose hardware covers 462/467 MHz - the TD-H9 at 10 W, and the AT-D890UV once it is in band mode 00014 |
+| MURS | licence-free | The five MURS channels at the radio's highest power, on the TD-H9 and the AT-D890UV |
+
+Public safety, business (MedNet and the color-dot channels included), marine,
+air, rail, weather and broadcast channels are receive only. So are the few
+amateur memories a radio cannot key: Extra-class HF segments, a DMR row with
+no talkgroup, and NXDN.
+
+**Every export is audited.** `wasds150 --home .wasds150-home fleet audit`
+(and the `Audit:` lines in each export report) lists a licensed memory
+programmed receive only, a transmit memory outside the licences, an unusual
+repeater split, and every analog repeater whose call, input or access tone
+differs from WWARA's current, pending, about-to-expire or expired lists.
+Receive-only on a licensed channel is never intended: on the TH-D75 it is an
+out-of-band split, and the radio beeps and refuses PTT. A repeater is named by
+the call WWARA coordinates its pair to, with WWARA's input tone (`CTCSS_IN`);
+two machines on one pair with different tones keep their own names.
 
 Part 95 requires certified GMRS and MURS equipment (95.1761, 95.2761), limits
 a GMRS station to 5 W ERP on channels 1-7 and 0.5 W ERP on 8-14 (95.1767), and

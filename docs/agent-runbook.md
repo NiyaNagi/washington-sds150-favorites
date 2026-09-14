@@ -272,6 +272,9 @@ The CLI and the Radios tab both pick all three up automatically via
 | Every catalog channel carries a **source URL** in `notes` | Claims must be checkable |
 | Dropped channels are **reported, never coerced** | Silently rewriting a P25 talkgroup as analog FM makes dead channels that look programmed |
 | Writing to hardware **requires an explicit flag** | Dry run is always the default |
+| **Transmit follows the service**, never the block: amateur (General privileges), GMRS/FRS and MURS channels transmit wherever the radio can; nothing else transmits | A receive-only licensed channel is a radio that beeps and refuses PTT (the TH-D75's out-of-band split); `tests/test_transmit_audit.py` and `wasds150 fleet audit` enforce it |
+| Every change that can reach a radio is **audited** before export: `wasds150 --home .wasds150-home fleet audit` must report no errors | It checks transmit, repeater splits, and each repeater's call, input and access tone against WWARA's four coordination lists |
+| A repeater is **named by its coordinated call** and uses WWARA's `CTCSS_IN` access tone; D-STAR names stay routing calls | Two machines on one pair differ only by tone; the name must match the record whose tone the memory carries |
 
 ---
 

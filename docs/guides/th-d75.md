@@ -52,16 +52,24 @@ this radio.
        --output radio-data\th-d75\exports\th-d75-fleet-final.d75
    ```
 
-7. **Write.** Open `th-d75-fleet-final.d75` in MCP-D75. Check that the memory
-   count matches the report and that the DR repeater list is filled, then
-   write it to the radio on COM14.
-8. **Read back (optional).** Read the radio again and save it as
+7. **Audit and check the call sign.** Run `fleet audit --radios th-d75` and
+   confirm **0 error(s)**. Then open `th-d75-fleet-final.d75` in MCP-D75 and
+   check that My Callsign (D-STAR) and the APRS My Callsign are **WA7DAM**. The
+   file keeps your radio's own settings, and reads from before the call change
+   still hold KM7HKM.
+8. **Write.** Check that the memory count matches the report and that the DR
+   repeater list is filled, then write it to the radio on COM14.
+9. **Read back (optional).** Read the radio again and save it as
    `radio-data\th-d75\backups\th-d75-readback-YYYY-MM-DD-HHMM.d75`, so the
    written image can be compared byte for byte.
 
 ## Check on the radio
 
 - A few memories from the report have the right frequency, offset and tone.
+- PTT on any amateur memory keys up, for example 443.050 KC7BAE E Tiger (+5,
+  103.5). A memory that beeps and refuses to transmit is an image from before
+  2026-09-13, when catch-all groups were programmed receive only: write the
+  current export.
 - Your call sign, APRS and GPS settings are unchanged.
 - **Menu > Scan > Group Link Scan** sweeps every Near Me amateur group in one
   pass. Memory Group Link is already set to those groups.

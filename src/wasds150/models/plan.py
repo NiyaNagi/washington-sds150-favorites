@@ -343,6 +343,15 @@ class ChannelPlan:
     #: :mod:`wasds150.catalog.labels`) rather than as the copy this plan
     #: happened to reach first, so it reads the same on every radio.
     canonical_labels: bool = False
+    #: Decide transmit by what a channel is, not by which block holds it: an
+    #: amateur frequency inside ``license_class``'s privileges, or a GMRS/FRS
+    #: (``gmrs_licensed``) or MURS (``murs_transmit``) channel, transmits in
+    #: any block the radio can transmit on, and a repeater with no usable
+    #: input transmits simplex rather than being blocked (see
+    #: :mod:`wasds150.radios.services`). Generated fleet plans turn it on.
+    transmit_by_service: bool = False
+    gmrs_licensed: bool = False
+    murs_transmit: bool = False
 
     def __post_init__(self) -> None:
         if self.reserve_slots < 0:
@@ -377,6 +386,9 @@ class ChannelPlan:
             "radius_miles": self.radius_miles,
             "fill_to_capacity": self.fill_to_capacity,
             "canonical_labels": self.canonical_labels,
+            "transmit_by_service": self.transmit_by_service,
+            "gmrs_licensed": self.gmrs_licensed,
+            "murs_transmit": self.murs_transmit,
             "scan_groups": [
                 {"name": group.name, "blocks": list(group.blocks), "notes": group.notes}
                 for group in self.scan_groups
