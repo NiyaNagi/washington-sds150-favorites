@@ -29,7 +29,8 @@ def _channel(row: RepeaterRow, talkgroup: int, slot: int, name: str) -> Channel:
     bm_id, call, site, output, input_, color, lat, lon, seen, _statics = row
     return Channel(
         id=stable_id(f"bmnet:{bm_id}:{talkgroup}:{slot}", kind="channel"),
-        label=f"{call} {name}"[:64],
+        # A repeater's own local talkgroup is often named for it ("N7QT Local").
+        label=(name if name.upper().startswith(call.upper()) else f"{call} {name}")[:64],
         freq_mhz=round(output, 6),
         tx_freq_mhz=round(input_, 6),
         mode="DMR",

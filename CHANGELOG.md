@@ -9,16 +9,36 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Fixed
 
-- **Repeater-coordination records no longer fill lists that are not repeater
-  lists.** Enrichment turned every WWARA and IACC record into a "Channels"
-  department of any list whose text said "amateur", "ham" or "IACC": the whole
-  WWARA list inside the satellite, simplex, HF, DMR and FTX-1 lists, eastern
-  repeaters inside county public-safety and mountain lists, and every rollup
-  (Outdoor Safety, the band packs, Upper Lena) copied them again - 11,288
-  channels in the working catalog. Coordinators now feed only their home
-  list (`COORDINATOR_HOMES`: WWARA -> PSHAM01, IACC -> FL60 in a system of its
-  own), and `strip_coordinator_copies` removes the old copies whenever a
-  catalog is loaded or saved.
+- **Whole-plan sources no longer fill lists that are not theirs.** Enrichment
+  turned every record of a matched source into a "Channels" department of any
+  list whose text named its keyword: the whole WWARA list inside the
+  satellite, simplex, HF, DMR and FTX-1 lists, eastern repeaters inside county
+  public-safety and mountain lists, the 57-channel USCG marine plan inside the
+  SAR aviation and ferry lists, NOAA transmitters inside the events list - and
+  every rollup (Outdoor Safety, the band packs, Upper Lena) copied them again,
+  11,288 repeater channels alone. Each source now feeds only its home list
+  (`SOURCE_HOMES`: WWARA -> PSHAM01, IACC -> FL60 in a system of its own,
+  USCG -> FL52, NOAA -> FL75, FAA -> FAAAIR), and
+  `strip_misfiled_source_copies` removes the old copies whenever a catalog is
+  loaded or saved. The aggregate systems a refresh builds now replace the
+  previous run's by id instead of sitting behind them.
+- **Four FAA NDB beacons are gone from the TH-D75 and ID-52A.** An old FAA
+  extract read their kilohertz frequencies as MHz (AL NDB at "353.0 MHz" AM)
+  and the saved catalog kept them after the adapter was fixed.
+- **A rollup no longer copies a coordinator's repeaters.** The Upper Lena lists
+  carried IACC's 237 statewide repeaters to the Anytone - Kennewick and East
+  Wenatchee in a Lena Lake trip list - with no input, so they would have
+  transmitted simplex on each repeater's output.
+- **IACC records carry their coordinated input and access tone**, and two
+  records under one key (W7UPS on 145.39 in Kennewick and in Spokane) are two
+  channels, not one id with one memory name.
+- **Station names stay in their own area.** A toneless copy takes the name of
+  a toned machine on its pair only where a located copy puts one, and never
+  from a radio's own import list; a copy with no position renames only the
+  station around home. The FTX-1 import's "W6TQF" (a Skamania County call) had
+  named the Snohomish County ARES channel on 440.325 on three radios.
+- BrandMeister channels no longer repeat the call when a repeater's local
+  talkgroup is named for it ("N7QT N7QT Local").
 - The SDS150's merged lists treat analog copies of one frequency as one
   channel whatever mode or tone text a list gave them, with open squelch when
   the copies disagree; digital copies stay apart by colour code, NAC or RAN.

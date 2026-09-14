@@ -136,10 +136,13 @@ def populate_rollups(catalog: Catalog) -> Dict[str, tuple]:
         ]
         if not components or any(component is None or not component.systems for component in components):
             continue
+        # A coordinator's full repeater set stays in its home list: a trip or
+        # region rollup of FL60 wants its curated repeaters, not Kennewick's.
         favorite.systems = dedupe_systems([
             copy.deepcopy(system)
             for component in components
             for system in component.systems
+            if system.id != stable_id(f"{component.slug}:coordination", kind="system")
         ])
         favorite.provenance.extend(
             Provenance(
@@ -335,22 +338,44 @@ def systems_from_flat_facts(fl: FavoritesList, facts: List[NormalizedFact]) -> L
 
     channels: List[Channel] = []
     coordinated: List[Channel] = []
+    ids = set()
     for fact in facts:
         if fact.source_id == "sentinel_local" or fact.freq_mhz is None:
             continue
-        home = COORDINATOR_HOMES.get(fact.source_id)
+        home = SOURCE_HOMES.get(fact.source_id)
         if home is not None and fl.favorite_key.upper() != home:
-            # A repeater coordinator's records belong in its own list, not in
-            # every list whose text mentions "amateur" (strip_coordinator_copies).
+            # A whole-plan source belongs in its own list, not in every list
+            # whose text mentions "amateur", "marine" or "weather"
+            # (strip_misfiled_source_copies).
             continue
+        channel_id = stable_id(f"{fl.slug}:{fact.source_id}:{fact.entity_key}", kind="channel")
+        if channel_id in ids:
+            # Two records under one key (IACC keys by call and output; W7UPS
+            # holds 145.39 in Kennewick and in Spokane) are two stations, and a
+            # shared id would give their memories one name.
+            channel_id = stable_id(f"{fl.slug}:{fact.source_id}:{fact.entity_key}:{fact.name}", kind="channel")
+        ids.add(channel_id)
         channel = Channel(
-            id=stable_id(f"{fl.slug}:{fact.source_id}:{fact.entity_key}", kind="channel"),
+            id=channel_id,
             label=fact.name or fact.entity_key,
             freq_mhz=fact.freq_mhz,
             mode=fact.mode,
             tone=fact.tone if fact.tone and tone_is_valid(fact.tone) else "",
         )
-        (coordinated if home is not None else channels).append(channel)
+        if fact.source_id in COORDINATORS:
+            # The coordinated input and access tone: without them a memory
+            # radio would transmit simplex on the repeater's output.
+            if fact.tx_freq_mhz is not None:
+                channel.tx_freq_mhz = fact.tx_freq_mhz
+            elif fact.offset_mhz:
+                channel.tx_freq_mhz = round(fact.freq_mhz + fact.offset_mhz, 6)
+            raw = fact.raw if isinstance(fact.raw, dict) else {}
+            access = str(raw.get("tx_tone") or "")
+            if access and tone_is_valid(access):
+                channel.tx_tone = access
+            coordinated.append(channel)
+        else:
+            channels.append(channel)
     systems: List[System] = []
     channels = dedupe_channels(channels)
     if channels:
@@ -362,9 +387,11 @@ def systems_from_flat_facts(fl: FavoritesList, facts: List[NormalizedFact]) -> L
         ))
     coordinated = dedupe_channels(coordinated)
     if coordinated:
+        from wasds150.catalog.labels import COORDINATED_DEPARTMENT
+
         department = Department(
             id=stable_id(f"{fl.slug}:coordination:channels", kind="department"),
-            label="Coordinated Repeaters", channels=coordinated,
+            label=COORDINATED_DEPARTMENT, channels=coordinated,
         )
         systems.append(System(
             id=stable_id(f"{fl.slug}:coordination", kind="system"),
@@ -374,10 +401,17 @@ def systems_from_flat_facts(fl: FavoritesList, facts: List[NormalizedFact]) -> L
     return systems
 
 
-#: Repeater-coordination sources and the one list each belongs in. WWARA's is
-#: PSHAM01, which rebuilds from it directly; IACC's eastern Washington
-#: repeaters go to the statewide repeater list, in a system of their own.
-COORDINATOR_HOMES: Dict[str, str] = {"wwara": "PSHAM01", "iacc": "FL60"}
+#: Sources that publish a whole plan, and the one list each belongs in. WWARA's
+#: is PSHAM01, which rebuilds from it directly; IACC's eastern Washington
+#: repeaters go to the statewide repeater list, in a system of their own; the
+#: USCG marine channel plan to the marine list; NOAA's transmitters to the
+#: weather list; the FAA's facilities to FAAAIR, built by
+#: :mod:`wasds150.recipes.faa_airband` with their positions.
+SOURCE_HOMES: Dict[str, str] = {
+    "wwara": "PSHAM01", "iacc": "FL60", "uscg_navcen": "FL52", "noaa_nwr": "FL75", "faa_nasr": "FAAAIR",
+}
+#: Repeater coordinators, whose records get a "Coordinated" system of their own.
+COORDINATORS = frozenset({"wwara", "iacc"})
 
 
 # ---------------------------------------------------------------------------
@@ -606,33 +640,60 @@ def systems_defined_in_code(fl: FavoritesList) -> bool:
 _COORDINATION_NAME = re.compile(r"^(?:[KNW][A-Z]?|A[A-L])\d[A-Z]{1,3}\b.*\)\s*$")
 
 
-def strip_coordinator_copies(catalog) -> int:
-    """Remove the repeater-coordination copies aggregate public-facts systems
-    picked up.
+#: An NDB's frequency is in kilohertz; an old FAA extract read it as MHz.
+_NDB_NAME = re.compile(r"\bNDB\s*$")
 
-    Tier B used to turn every WWARA and IACC record into a channel of any
-    list whose text said "amateur", "ham" or "IACC": the whole WWARA list
-    inside the satellite, simplex, HF, DMR and FTX-1 lists, eastern repeaters
-    inside county public-safety and mountain lists, and every rollup copied
-    them again - 11,288 channels in one working catalog, filed where nobody
-    would look for a repeater. The coordinated repeaters have their own
-    lists (PSHAM01 from WWARA; FL60's coordination system from IACC), so an
-    amateur-band ``CALL (City)`` channel in any public-facts system is one
-    of those copies. Returns how many channels were removed."""
+
+def strip_misfiled_source_copies(catalog) -> int:
+    """Remove the whole-plan source records aggregate public-facts systems
+    picked up outside their home lists (:data:`SOURCE_HOMES`).
+
+    Tier B used to turn every record of a matched source into a channel of any
+    list whose text named its keyword: the whole WWARA list inside the
+    satellite, simplex, HF, DMR and FTX-1 lists, IACC's eastern repeaters
+    inside county and mountain lists, the USCG marine plan inside the SAR
+    aviation and ferry lists, a NOAA transmitter inside the events list - and
+    every rollup copied them again. A persisted catalog keeps systems by id,
+    so those copies stayed after the fix. Each is recognised by the name its
+    adapter gives it, and kept only in its home list's own system (a rollup's
+    copy of that system carries the home's id). Also removed everywhere: FAA
+    NDB beacons an old extract listed at their kilohertz figure as MHz, and a
+    coordinator's system anywhere but its home list. Returns how many
+    channels were removed."""
     from wasds150.radios.services import AMATEUR, service_for
 
+    slug_by_key = {favorite.favorite_key.upper(): favorite.slug for favorite in catalog.favorites}
+
+    def home_system(source: str) -> str:
+        slug = slug_by_key.get(SOURCE_HOMES[source])
+        return stable_id(f"{slug}:public-facts", kind="system") if slug else ""
+
+    # (matches, the systems allowed to keep it). The USCG plan carries the
+    # NOAA weather channels too ("NOAA Weather WX1"); NOAA's own are
+    # "NOAA Weather Radio <site>".
+    signatures = (
+        (lambda c: c.freq_mhz is not None and service_for(c.freq_mhz) == AMATEUR
+         and bool(_COORDINATION_NAME.match(c.label or "")), ()),
+        (lambda c: (c.label or "").startswith("Marine VHF Ch"), (home_system("uscg_navcen"),)),
+        (lambda c: (c.label or "").startswith("NOAA Weather "), (home_system("noaa_nwr"), home_system("uscg_navcen"))),
+        (lambda c: (c.mode or "").upper() == "AM" and bool(_NDB_NAME.search(c.label or "")), ()),
+    )
     aggregate = {stable_id(f"{favorite.slug}:public-facts", kind="system") for favorite in catalog.favorites}
+    coordination = {stable_id(f"{favorite.slug}:coordination", kind="system") for favorite in catalog.favorites}
     removed = 0
     for favorite in catalog.favorites:
         kept: List[System] = []
+        own_coordination = stable_id(f"{favorite.slug}:coordination", kind="system")
         for system in favorite.systems:
+            if system.id in coordination and system.id != own_coordination:
+                removed += sum(len(d.channels) for d in system.departments)
+                continue
             if system.id in aggregate:
                 for department in system.departments:
                     before = len(department.channels)
                     department.channels = [
                         c for c in department.channels
-                        if not (c.freq_mhz is not None and service_for(c.freq_mhz) == AMATEUR
-                                and _COORDINATION_NAME.match(c.label or ""))
+                        if not any(matches(c) and system.id not in homes for matches, homes in signatures)
                     ]
                     removed += before - len(department.channels)
                 system.departments = [d for d in system.departments if d.channels]

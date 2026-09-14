@@ -269,7 +269,18 @@ def enrich_catalog(
                     # channels, for instance) is preserved.
                     new_fl.systems = systems_mod.dedupe_systems(new_systems + new_fl.systems)
                 else:
-                    new_fl.systems = systems_mod.dedupe_systems(new_fl.systems + new_systems)
+                    # The aggregate systems Tier B builds are wholly the facts'
+                    # and win by id too, so a record a source stopped
+                    # publishing (or a fixed adapter stopped producing) goes.
+                    from wasds150.util.hashing import stable_id
+
+                    derived = {
+                        stable_id(f"{new_fl.slug}:public-facts", kind="system"),
+                        stable_id(f"{new_fl.slug}:coordination", kind="system"),
+                    }
+                    new_fl.systems = systems_mod.dedupe_systems(
+                        [s for s in new_systems if s.id in derived] + new_fl.systems + new_systems
+                    )
             if policy.mode == systems_mod.REPLACE_TRUNK_FREQUENCIES:
                 _refresh_trunk_sites(new_fl, recipe, cov, facts)
         new_favorites.append(new_fl)

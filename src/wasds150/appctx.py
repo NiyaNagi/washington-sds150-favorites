@@ -84,11 +84,12 @@ def _append_local_area_extension(catalog: Catalog) -> None:
         elif favorite.favorite_key.startswith(("KC", "LA", "OUT", "BAND", "UL", "PSHAM", "GMRS", "OZ", "HAM", "FTX", "HFNET")):
             catalog.favorites.append(copy.deepcopy(favorite))
 
-    # Repeater-coordination records an earlier enrichment copied into lists
-    # that are not repeater lists (and every rollup of them) come out again.
-    from wasds150.recipes.systems import strip_coordinator_copies
+    # Whole-plan source records (repeater coordinators, the marine plan, NOAA)
+    # an earlier enrichment copied outside their home lists, and every rollup
+    # of them, come out again.
+    from wasds150.recipes.systems import strip_misfiled_source_copies
 
-    strip_coordinator_copies(catalog)
+    strip_misfiled_source_copies(catalog)
 
 
 @dataclass

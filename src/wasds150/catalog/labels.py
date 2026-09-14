@@ -16,7 +16,10 @@ catalog, and every memory plan and the SDS150's Near Me lists read it:
   the other coordinated amateur and GMRS lists, NOAA; then the database
   descriptions - RadioReference, the FCC; then a radio's own local lists),
   and within a source from the copy nearest home. A copy with no position
-  counts toward the area nearest home.
+  is named by a station whose source ranks better, or equal when its access
+  tone confirms the machine, and renames a station whose source ranks worse.
+  Without an access tone either happens only for the station around home;
+  anywhere else the copy keeps its own list's name.
 * FM and narrow FM, and a monitoring channel's tone, do not make two
   stations: lists disagree on both for the same transmitter, and a
   monitoring radio opens for either.
@@ -40,6 +43,11 @@ from wasds150.util.geo import haversine_miles
 
 #: How far around its own site a located station counts as "here".
 LOCATED_REACH_MILES = 30.0
+#: The department a coordinator's statewide records sit in
+#: (:func:`wasds150.recipes.systems.systems_from_flat_facts`). They carry no
+#: position, so they rank as descriptions: IACC's N7KGS Ellensburg would
+#: otherwise rename Seattle ACS's V85 on the same pair and tone.
+COORDINATED_DEPARTMENT = "Coordinated Repeaters"
 _DESCRIPTIONS = frozenset({"RRWA", "FCCDIG"})
 _RADIO_LOCAL = ("THD75", "ATD890", "FTX0", "NM-")
 _ANALOG_FM = frozenset({"", "FM", "NFM", "FMN", "AUTO", "ALL"})
@@ -130,16 +138,23 @@ class StationLabels:
         self.home = home
         located: Dict[Key, List[tuple]] = {}
         unlocated: Dict[Key, tuple] = {}
-        #: The access tones seen on each (frequency, family).
-        self._tones: Dict[Tuple[float, str], Set[str]] = {}
+        #: The access tones seen on each (frequency, family), and where.
+        self._tones: Dict[Tuple[float, str], List[Tuple[str, Optional[Area]]]] = {}
+        #: Each channel's best source rank, by channel id.
+        self._ranks: Dict[str, int] = {}
         for order, (favorite_key, department, channel) in enumerate(rows):
             key = _label_key(channel)
             if key is None or not channel.label:
                 continue
-            if key[2] and key[1] not in _DIGITAL:
-                self._tones.setdefault(key[:2], set()).add(key[2])
             rank = source_rank(favorite_key)
+            if department is not None and department.label == COORDINATED_DEPARTMENT:
+                rank = max(rank, 2)
+            self._ranks[channel.id] = min(rank, self._ranks.get(channel.id, rank))
             area = station_area(department, channel)
+            # Which machine holds a pair is known only where a copy says where it
+            # is; a radio's own list is no authority on it at all.
+            if key[2] and key[1] not in _DIGITAL and rank < 3 and area is not None:
+                self._tones.setdefault(key[:2], []).append((key[2], area))
             if area is None:
                 candidate = (rank, order, channel.label)
                 if key not in unlocated or candidate < unlocated[key]:
@@ -157,35 +172,56 @@ class StationLabels:
             self._stations[key] = stations
         self._unlocated: Dict[Key, str] = {}
         for key, (rank, _order, label) in unlocated.items():
+            self._unlocated[key] = label
             stations = self._stations.get(key)
             if not stations:
-                self._unlocated[key] = label
                 continue
             nearest = min(stations, key=lambda station: self._miles(station.area))
-            if rank < nearest.rank:
+            # Without an access tone to say which machine it is, it counts toward
+            # the area around home and nowhere else: Snohomish County's SAR
+            # repeater input was once named "Douglas law disp".
+            anywhere = self.home is None or bool(key[2])
+            if rank < nearest.rank and (anywhere or areas_overlap(nearest.area, (self.home[0], self.home[1], 0.0))):
                 nearest.label, nearest.rank = label, rank
 
     def _miles(self, area: Area) -> float:
         return haversine_miles(self.home[0], self.home[1], area[0], area[1]) if self.home else 0.0
 
-    def _key_for(self, channel: Channel) -> Optional[Key]:
+    def _key_for(self, channel: Channel, area: Optional[Area]) -> Optional[Key]:
         key = _label_key(channel)
         if key is None or key[2] or key[1] in _DIGITAL:
             return key
-        # A copy with no tone is named for the one toned machine on its pair.
-        tones = self._tones.get(key[:2], set())
+        # A copy with no tone is named for the one toned machine on its pair in
+        # its area. The FTX-1 import's "W6TQF" on 440.325 (a Skamania County
+        # call) once named Snohomish County's toneless copies.
+        tones = {tone for tone, where in self._tones.get(key[:2], []) if areas_overlap(where, area)}
         return (key[0], key[1], next(iter(tones))) if len(tones) == 1 else key
 
     def label(self, department: Optional[Department], channel: Channel) -> str:
-        key = self._key_for(channel)
+        area = station_area(department, channel)
+        key = self._key_for(channel, area)
         if key is None:
             return channel.label
         stations = self._stations.get(key)
+        unlocated = self._unlocated.get(key, channel.label)
         if not stations:
-            return self._unlocated.get(key, channel.label)
-        area = station_area(department, channel)
+            return unlocated
         if area is None:
-            return min(stations, key=lambda station: self._miles(station.area)).label
+            if self.home is None:
+                return min(stations, key=lambda station: self._miles(station.area)).label
+            # A station names it from a better source, or from an equal one when
+            # the access tone says it is that machine (Seattle ACS's V01 is
+            # WW7PSR, V75 is K7CPR Olympia). Without a tone only a station around
+            # home counts: toneless "V86 Larch Mt" is not WA7FW Federal Way's
+            # machine. "U92 Buck Mt" is not renamed from a Jefferson County list.
+            here = (self.home[0], self.home[1], 0.0)
+            own = self._ranks.get(channel.id, 1)
+            toned = bool(key[2])
+            local = [
+                s for s in stations
+                if (s.rank < own or (s.rank == own and toned)) and (toned or areas_overlap(s.area, here))
+            ]
+            return min(local, key=lambda station: self._miles(station.area)).label if local else unlocated
         for station in stations:
             if areas_overlap(station.area, area):
                 return station.label

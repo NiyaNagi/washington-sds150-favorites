@@ -213,13 +213,14 @@ def test_system_from_hpdb_fact_converts_real_record_tree(synthetic_hpdb_state_pa
 def test_systems_from_flat_facts_builds_one_system_with_one_channel_per_fact():
     fl = _fl()
     facts = [
-        NormalizedFact(entity_key="noaa:1", fact_type="station", name="NOAA WX Seattle", freq_mhz=162.55, source_id="noaa_nwr"),
-        NormalizedFact(entity_key="noaa:2", fact_type="station", name="NOAA WX Yakima", freq_mhz=162.4, source_id="noaa_nwr"),
+        # A source with no home list (SOURCE_HOMES) feeds any list it matches.
+        NormalizedFact(entity_key="nifc:1", fact_type="station", name="NIFC Air Guard", freq_mhz=168.625, source_id="nifc"),
+        NormalizedFact(entity_key="nifc:2", fact_type="station", name="NIFC Command", freq_mhz=168.05, source_id="nifc"),
     ]
     systems = systems_from_flat_facts(fl, facts)
     assert len(systems) == 1
     channels = systems[0].departments[0].channels
-    assert {c.freq_mhz for c in channels} == {162.55, 162.4}
+    assert {c.freq_mhz for c in channels} == {168.625, 168.05}
 
 
 def test_systems_from_flat_facts_excludes_facts_without_frequency():
@@ -245,8 +246,8 @@ def test_systems_from_matched_facts_combines_tier_a_and_tier_b(synthetic_hpdb_st
         entity_key="hpdb:CountyId:5301", fact_type="system", source_id="sentinel_local",
         raw={"records": hpdb.serialize_system_slice(conv_slice)},
     )
-    flat_fact = NormalizedFact(entity_key="noaa:1", fact_type="station", name="NOAA WX", freq_mhz=162.55, source_id="noaa_nwr")
+    flat_fact = NormalizedFact(entity_key="nifc:1", fact_type="station", name="NIFC Air Guard", freq_mhz=168.625, source_id="nifc")
     systems = systems_from_matched_facts(fl, [hpdb_fact, flat_fact])
     assert len(systems) == 2
     assert systems[0].label == "King County Public Safety"  # Tier A first
-    assert systems[1].departments[0].channels[0].freq_mhz == 162.55  # Tier B
+    assert systems[1].departments[0].channels[0].freq_mhz == 168.625  # Tier B

@@ -174,7 +174,8 @@ def test_frequencies_an_earlier_keyword_match_left_in_a_row_are_removed():
     catalog = enrich_catalog(Catalog(favorites=[row]), washington(), []).catalog
     cleaned = next(fl for fl in catalog.favorites if fl.favorite_key == "FL48")
     freqs = [c.freq_mhz for s in cleaned.systems for d in s.departments for c in d.channels]
-    assert freqs == [119.9, 156.8]  # the baseline and the marine row survive
+    # The baseline survives; the marine plan belongs to FL52 alone (SOURCE_HOMES).
+    assert freqs == [119.9]
     assert "faa_nasr" not in {p.source_adapter for p in cleaned.provenance}
     assert FAA_AIRBAND_KEY in {fl.favorite_key for fl in catalog.favorites}
 
