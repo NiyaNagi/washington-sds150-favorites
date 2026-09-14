@@ -95,6 +95,12 @@ covered in [at-d890uv-programming.md](../at-d890uv-programming.md). The files ar
 - A DMR repeater near home, on its main talkgroup, opens when the group is
   active. Digital Monitor on means you also hear groups not in the list.
 - The AM air band watches `Air Local 01` on the B side.
+- `Ham NXDN` holds KC7BAE on 443.050 (RAN 5), receive only. Check in the CPS
+  that the channel shows RAN 5 after import, then set Menu > Settings > Radio
+  Set > Other Func > Protocol = NXDN to hear it; DMR is silent until you set it
+  back to DMR.
+- No DMR memory is programmed without a talkgroup: those could not be keyed,
+  and the machines worth keying are in the DMR zones with their talkgroups.
 
 ## Undo
 

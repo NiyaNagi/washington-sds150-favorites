@@ -81,8 +81,8 @@ Export > Export All into `radio-data/at-d890uv/readbacks/<date>-export-all/`.
 
 The radio runs **one digital protocol at a time**: Menu > Settings > Radio Set
 > Other Func > Protocol (item 33) switches DMR and NXDN. The plan ships with
-DMR as the default; the NXDN channels in the `Comm Digital` zone are silent
-until you switch. Optional Setting > Digital Function > **Dig Protocol = DMR**
+DMR as the default; the NXDN channels - `Business Digital` and `Ham NXDN` on the
+fleet plan, `Comm Digital` on `atd890-scan` - are silent until you switch. Optional Setting > Digital Function > **Dig Protocol = DMR**
 and **Reset Digi. Protocol = DMR** keep that default across resets.
 
 ### Is NXDN actually enabled?
@@ -109,10 +109,12 @@ by the firmware procedure above - official 1.05 first, then the overlay.
 programming, not after: flashing afterwards means importing the whole bundle
 again.
 
-Nothing in the generated bundle depends on it. The only NXDN content is the
-`Comm Digital` zone - receive only - so the NXDN unit ID, 16240, matters only
-once you intend to transmit NXDN. On a DMR-only radio, skip the unit ID step
-and the `Comm Digital` channels simply stay quiet.
+Nothing in the generated bundle depends on it. All NXDN content is receive
+only: `Business Digital` (hospital, school and event users) and `Ham NXDN` -
+KC7BAE on 443.050, RAN 5, from WWARA's pending coordination, which publishes
+no group ID to key up with. The NXDN unit ID, 16240, matters once that group
+is known and the memory can transmit. On a DMR-only radio, skip the unit ID
+step and those channels simply stay quiet.
 
 ---
 
@@ -205,7 +207,7 @@ So the plan is built at the radio's 100, `ScanList.CSV` carries the first
 :data:`~wasds150.export.atd890_cps.CSV_SCANLIST_MAX` of each list, and
 `scanlists.json` beside it records the full membership for
 `scripts/radios/patch_atd890_scanlists.py` to restore afterwards - see
-[Longer scan lists](#longer-scan-lists). The fleet plan is 31 zones and 29 scan
+[Longer scan lists](#longer-scan-lists). The fleet plan is 32 zones and 30 scan
 lists (every scanned zone is its list), against the 250 of each the manual
 allows; 14 of the lists are over 50 and need the patch.
 
@@ -399,8 +401,9 @@ takes several minutes and is rarely worth reloading with the rest of a bundle.
   > AM Air on B, then the AM zone's own scan menu.
 - NOAA, FM broadcast and the packet zone are selected by hand and never
   interrupt a scan.
-- Switch Protocol to NXDN (menu item 33) to hear the AMR and other NXDN users
-  in `Comm Digital`; DMR is silent while NXDN is selected.
+- Switch Protocol to NXDN (menu item 33) to hear the NXDN users in `Business
+  Digital` (`Comm Digital` on `atd890-scan`) and KC7BAE in `Ham NXDN`; DMR is
+  silent while NXDN is selected.
 
 ### The AM zones' scan members do not survive the import
 

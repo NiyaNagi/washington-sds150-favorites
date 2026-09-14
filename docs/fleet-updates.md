@@ -227,8 +227,9 @@ else is receive only, wherever it sits.
 
 Public safety, business (MedNet and the color-dot channels included), marine,
 air, rail, weather and broadcast channels are receive only. So are the few
-amateur memories a radio cannot key: Extra-class HF segments, a DMR row with
-no talkgroup, and NXDN.
+amateur memories a radio cannot key: Extra-class HF segments and NXDN (no
+group ID is published). An amateur DMR row with no talkgroup is not programmed
+at all, and WWARA link frequencies are never selected.
 
 **Every export is audited.** `wasds150 --home .wasds150-home fleet audit`
 (and the `Audit:` lines in each export report) lists a licensed memory
@@ -354,7 +355,7 @@ the operator's own, explicit choice; the template does not cap any of it.
 2. **Start the CPS** _(automatic)_ - Start the D890UV CPS.
 3. **Open the codeplug** - File > Open <rdt_base> to keep your Optional Settings, or File > New for a first build. Model > Model Information must match the radio's frequency range.
 4. **Set the NXDN identity** - NX Setting > Unit ID(Own) and Base ID = 16240, your radioid.net NXDN ID, and Air Alias Name = WA7DAM. Radio-wide settings, not in the import bundle: check them even on a codeplug opened from <rdt_base>, since a read-back once showed them still at the factory values.
-5. **Set the Optional Settings** - Digital Function > Digital Monitor = Double Slot, CC = Any, ID = Any: without it a DMR channel opens only for talkgroups in its receive list, and most traffic here is a group that list does not name. Work Mode > MEM Zone A and Other > Priority Zone A = Near Me. Display mode = Channel Name. On the radio afterwards, Menu > Settings > Radio Set > Display > Ch. Name = CH name: on Frequency the radio runs in VFO mode, where a channel's offset and tone do not apply.
+5. **Set the Optional Settings** - Digital Function > Digital Monitor = Double Slot, CC = Any, ID = Any: without it a DMR channel opens only for talkgroups in its receive list, and most traffic here is a group that list does not name. Work Mode > MEM Zone A and Other > Priority Zone A = Near Me. Display mode = Channel Name. On the radio afterwards, Menu > Settings > Radio Set > Display > Ch. Name = CH name: on Frequency the radio runs in VFO mode, where a channel's offset and tone do not apply. The Ham NXDN and Business Digital zones are NXDN: silent until Other Func > Protocol (menu item 33) = NXDN, and DMR is silent while it is.
 6. **Import the bundle** - Tool > Import > choose <lst> > Import All. A name the CPS cannot resolve means the export is stale: re-export rather than editing in place.
 7. **Import the contact list** _(optional)_ - Tool > Import > DMR Digital Contact List > choose <contacts>, then NX Digital Contact List > NXDigitalContactList.CSV in the same folder. A worldwide list takes several minutes. The NXDN table's Attr, TxForbid and Ring columns are written empty because the captured export had no NXDN contact to copy them from, so check an entry afterwards.
 8. **Restore the long scan lists** - Save the codeplug into radio-data\at-d890uv\backups\, then run scripts\radios\patch_atd890_scanlists.py with that .rdt and <sidecar>. The CPS's CSV importer reads only 50 scan-list members before it overflows, so the bundle ships the first 50 of each and this puts the rest back. Open the patched -full.rdt in the CPS for the next step.

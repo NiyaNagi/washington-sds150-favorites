@@ -340,7 +340,9 @@ AT_D890UV = FleetRadio(
             "a group that list does not name. Work Mode > MEM Zone A and Other > Priority Zone A "
             "= Near Me. Display mode = Channel Name. On the radio afterwards, Menu > Settings > "
             "Radio Set > Display > Ch. Name = CH name: on Frequency the radio runs in VFO mode, "
-            "where a channel's offset and tone do not apply.",
+            "where a channel's offset and tone do not apply. The Ham NXDN and Business Digital "
+            "zones are NXDN: silent until Other Func > Protocol (menu item 33) = NXDN, and DMR is "
+            "silent while it is.",
         ),
         StepSpec(
             "import-all", "Import the bundle",
