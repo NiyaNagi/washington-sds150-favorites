@@ -35,7 +35,10 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   approximate position, and the TH-D75 export writes
   `th-d75-dstar-repeaters.tsv` (Kenwood's repeater-list format) from the same
   records as its D-STAR memories, replacing the older Kenwood file that had
-  K7LWH C on 146.125.
+  K7LWH C on 146.125. The file is UTF-16, as MCP-D75 requires, and carries
+  every entry of the radio's existing list (decoded from the backup the export
+  is built on) for a repeater the memories do not program, since the import
+  replaces the whole list.
 
 - **DSTARInfo D-STAR directory source (`dstarinfo`).** Every area of the
   dstarinfo.com repeater directory - callsign, city, gateway directory and each

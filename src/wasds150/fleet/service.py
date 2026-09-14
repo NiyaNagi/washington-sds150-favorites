@@ -325,11 +325,15 @@ def _write_dstar_tsv(
 ) -> Tuple[List[Path], List[Path]]:
     """The TH-D75's DR repeater list, beside its export, from the same plan's
     D-STAR memories (:mod:`wasds150.export.thd75_dstar_tsv`)."""
-    from wasds150.export.thd75_dstar_tsv import FILENAME, encode_dstar_tsv, render_dstar_tsv
+    from wasds150.export.thd75_dstar_tsv import FILENAME, encode_dstar_tsv, read_repeater_list, render_dstar_tsv
+    from wasds150.export.thd75_target import template_path
     from wasds150.plan.service import resolve_named_plan
 
     _plan, resolved = resolve_named_plan(ctx, radio.plan_id, include_licensed=include_licensed)
-    text = encode_dstar_tsv(render_dstar_tsv(resolved.channels))
+    # MCP-D75's import replaces the radio's whole list: keep what the read the
+    # memory export is built on already holds.
+    existing = read_repeater_list(template_path().read_bytes())
+    text = encode_dstar_tsv(render_dstar_tsv(resolved.channels, existing))
     path = directory / FILENAME
     path.write_bytes(text)
     copies: List[Path] = []

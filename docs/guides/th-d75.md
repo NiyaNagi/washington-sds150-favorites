@@ -16,7 +16,7 @@ this radio.
 | `radio-data\th-d75\backups\th-d75-before-YYYY-MM-DD-HHMM.d75` | Your read of the radio (step 1); the export is built on the newest file here |
 | `radio-data\th-d75\exports\th-d75-fleet.d75` | The export |
 | `radio-data\th-d75\exports\th-d75-fleet-report.md` | Memory map, groups, the memory count to check |
-| `radio-data\th-d75\exports\th-d75-dstar-repeaters.tsv` | The DR repeater list for MCP-D75's import, written with the export from the same repeater registry records as the D-STAR memories |
+| `radio-data\th-d75\exports\th-d75-dstar-repeaters.tsv` | The DR repeater list for MCP-D75's import: the radio's own list from the backup the export is built on, with the repeater registry's record replacing any entry the D-STAR memories also program. The import replaces the whole list, so nothing already on the radio is lost |
 | `radio-data\th-d75\exports\th-d75-fleet-mcp.d75` | What MCP-D75 saves after the import (step 5) |
 | `radio-data\th-d75\exports\th-d75-fleet-final.d75` | The file you write to the radio (step 6) |
 
