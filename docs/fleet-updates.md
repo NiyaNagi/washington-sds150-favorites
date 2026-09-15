@@ -380,8 +380,8 @@ the operator's own, explicit choice; the template does not cap any of it.
 1. **Export the CSV set** _(automatic)_ - Export id-52a-fleet with target id52-csv: one CSV per memory group under Csv\MemoryCh, plus the D-STAR repeater list under Csv\RptList.
 2. **Start CS-52** _(automatic)_ - Start Icom CS-52.
 3. **Read the radio first** - Read the radio into CS-52 before importing anything, so the memories land on top of your own settings - call sign, GPS and APRS - rather than on a blank file.
-4. **Import each memory group** - Memory CH > right-click the group > Import > Group, and choose the matching file from <export>\Csv\MemoryCh, in file-name order; each file names the group it fills. Answer No when CS-52 asks about USE(FROM). Close the files in any spreadsheet first.
-5. **Import the D-STAR repeater list** _(optional)_ - Digital > Repeater List > right-click a group > Import > Group, and choose <export>\Csv\RptList\DSTAR_Near_Home.csv, so the DR function finds the local repeaters by position.
+4. **Import every memory group at once** - Select Memory CH, then File > Import > All, and choose <export>\CS-52_All_Memory.csv: CS-52 sorts its rows into groups by Group No. Import > Group fills only the selected group whatever the file names, so group files imported one after another overwrite each other. Close the files in any spreadsheet first.
+5. **Import the D-STAR repeater list** _(optional)_ - Select Digital > Repeater List, then File > Import > All, and choose <export>\Csv\RptList\DSTAR_Near_Home.csv: it fills group 01 by its Group No, so the DR function finds the local repeaters by position. Answer No when asked about USE(FROM).
 6. **Write the radio** - Save the file into radio-data\id-52a\backups\, then write it to the radio.
 7. **Check the radio** _(confirm)_ - On the radio, open a group near home and check a few memories (<rows> in all), then press DR and confirm a local D-STAR repeater is listed. The last group is Near Me: a second copy of the nearest of every amateur service, so SCAN > Group on it is one pass over the list the Anytone holds as a scan list.
 <!-- fleet:end id-52a -->

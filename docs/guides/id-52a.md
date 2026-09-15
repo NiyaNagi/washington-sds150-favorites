@@ -33,12 +33,17 @@ writing.
    `radio-data\id-52a\backups\id-52a-before-YYYY-MM-DD.icf`. The memories then
    land on top of your call sign, GPS and APRS settings instead of a blank
    file.
-4. **Import each memory group.** Memory CH > right-click the group > Import >
-   Group, and choose the matching file from `Csv\MemoryCh\`. Go in file-name
-   order, because each file names the group it fills. Answer **No** when CS-52
-   asks about USE(FROM). The last file is Near Me.
-5. **Import the D-STAR list.** Digital > Repeater List > right-click a group >
-   Import > Group, and choose `Csv\RptList\DSTAR_Near_Home.csv`.
+4. **Import every memory group at once.** Select Memory CH in the tree, then
+   File > Import > **All**, and choose `CS-52_All_Memory.csv` from the export
+   folder. CS-52 sorts its rows into groups by their Group No, so all 22
+   groups, Near Me last, fill in one import. Do not use Import > Group for
+   this: it fills whichever group you selected, whatever group the file
+   names, so a second group file overwrites the first. The per-group files
+   in `Csv\MemoryCh\` are still there for replacing a single group.
+5. **Import the D-STAR list the same way.** Select Digital > Repeater List,
+   then File > Import > **All**, and choose `Csv\RptList\DSTAR_Near_Home.csv`.
+   It fills group 01 (Near Home) by its Group No. Answer **No** when CS-52 asks
+   about USE(FROM).
 6. **Save** As `radio-data\id-52a\backups\id-52a-fleet-YYYY-MM-DD.icf`, then
    **write** it to the radio.
 

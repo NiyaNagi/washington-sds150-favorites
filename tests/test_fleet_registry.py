@@ -80,11 +80,13 @@ def test_the_id52a_checklist_reads_the_radio_before_it_imports():
     text = render_markdown(get_fleet_radio("id-52a"))
     steps = [line for line in text.splitlines() if re.match(r"\d+\. \*\*", line)]
     order = [next(i for i, line in enumerate(steps) if fragment in line)
-             for fragment in ("Read the radio", "Import each memory group", "Write the radio")]
+             for fragment in ("Read the radio", "Import every memory group", "Write the radio")]
     # Reading the radio first is what keeps the operator's call sign, GPS and
     # APRS settings: the import replaces memories only.
     assert order == sorted(order)
-    assert any("Import > Group" in line for line in steps)
+    # One Import > All of the combined file: Import > Group fills only the
+    # selected group, so group files imported in turn overwrite each other.
+    assert any("Import > All" in line and "CS-52_All_Memory.csv" in line for line in steps)
     assert "microSD" in text  # the no-PC path is documented alongside CS-52
 
 

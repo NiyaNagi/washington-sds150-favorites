@@ -155,10 +155,10 @@ ID52_CSV = ExportTarget(
     extension="",
     kind="directory",
     description=(
-        "Directory holding Csv/MemoryCh/<group>.csv (one per memory group) "
-        "and Csv/RptList/DSTAR_Near_Home.csv. Import each group in CS-52 "
-        "(Memory CH > right-click a group > Import > Group), or copy the Csv "
-        "folder into ID-52\\ on the radio's microSD card."
+        "Directory holding Csv/MemoryCh/<group>.csv (one per memory group), "
+        "Csv/RptList/DSTAR_Near_Home.csv and CS-52_All_Memory.csv (every group). "
+        "In CS-52 import all groups at once (Memory CH, File > Import > All), or "
+        "copy the Csv folder into ID-52\\ on the radio's microSD card."
     ),
     render=render_id52,
     write=write_id52,

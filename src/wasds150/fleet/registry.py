@@ -418,16 +418,17 @@ ID52A = FleetRadio(
             "your own settings - call sign, GPS and APRS - rather than on a blank file.",
         ),
         StepSpec(
-            "import-groups", "Import each memory group",
-            "Memory CH > right-click the group > Import > Group, and choose the matching file from "
-            "{export}\\Csv\\MemoryCh, in file-name order; each file names the group it fills. Answer "
-            "No when CS-52 asks about USE(FROM). Close the files in any spreadsheet first.",
+            "import-groups", "Import every memory group at once",
+            "Select Memory CH, then File > Import > All, and choose {export}\\CS-52_All_Memory.csv: "
+            "CS-52 sorts its rows into groups by Group No. Import > Group fills only the selected "
+            "group whatever the file names, so group files imported one after another overwrite "
+            "each other. Close the files in any spreadsheet first.",
         ),
         StepSpec(
             "import-repeaters", "Import the D-STAR repeater list",
-            "Digital > Repeater List > right-click a group > Import > Group, and choose "
-            "{export}\\Csv\\RptList\\DSTAR_Near_Home.csv, so the DR function finds the local "
-            "repeaters by position.",
+            "Select Digital > Repeater List, then File > Import > All, and choose "
+            "{export}\\Csv\\RptList\\DSTAR_Near_Home.csv: it fills group 01 by its Group No, so the "
+            "DR function finds the local repeaters by position. Answer No when asked about USE(FROM).",
             optional=True,
         ),
         StepSpec(

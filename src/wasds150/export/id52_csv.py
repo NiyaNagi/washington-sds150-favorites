@@ -61,6 +61,8 @@ NAME_MAX = 16
 SUB_NAME_MAX = 8
 MEMORY_DIR = "Csv/MemoryCh"
 REPEATER_DIR = "Csv/RptList"
+#: Every group in one file, for CS-52's File > Import > All.
+ALL_MEMORY_FILE = "CS-52_All_Memory.csv"
 #: Icom's defaults for fields a monitoring catalog does not carry.
 DEFAULT_TONE = "88.5Hz"
 DEFAULT_DTCS = "23"
@@ -240,19 +242,30 @@ def render_files(resolved: ResolvedPlan) -> Tuple[Dict[str, str], int, List[str]
     warnings: List[str] = []
     files: Dict[str, str] = {}
     written = 0
+    every_group = [list(MEMORY_HEADER)]
     for number, (name, members) in enumerate(_group_names(resolved), start=1):
-        files[f"{MEMORY_DIR}/{_filename(number, name)}"] = _csv(_memory_rows(number, name, members))
+        rows = _memory_rows(number, name, members)
+        files[f"{MEMORY_DIR}/{_filename(number, name)}"] = _csv(rows)
+        every_group.extend(rows[1:])
         written += len(members)
+    # CS-52's File > Import > All sorts rows into groups by Group No, so one
+    # file fills every group in a single import; Import > Group fills only
+    # the selected group whatever the file says. It sits outside Csv/, which
+    # the radio's own SD-card import reads in full.
+    files[ALL_MEMORY_FILE] = _csv(every_group)
     repeaters = _repeater_rows(resolved, warnings)
     if len(repeaters) > 1:
         files[f"{REPEATER_DIR}/DSTAR_Near_Home.csv"] = _csv(repeaters)
     files["IMPORT.txt"] = (
         "Icom ID-52A\r\n"
         "\r\n"
-        "CS-52: Memory CH > right-click the group you want to fill > Import > Group,\r\n"
-        f"and choose one file from {MEMORY_DIR}. Repeat per group, in file order.\r\n"
-        f"The D-STAR list: Digital > Repeater List > right-click a group > Import > Group,\r\n"
-        f"and choose {REPEATER_DIR}/DSTAR_Near_Home.csv. Answer No when asked about USE(FROM).\r\n"
+        f"CS-52, all groups at once: select Memory CH, then File > Import > All, and choose\r\n"
+        f"{ALL_MEMORY_FILE}. Every group is filled by its Group No, replacing what CS-52 held.\r\n"
+        "One group only: right-click that group > Import > Group, and choose its file from\r\n"
+        f"{MEMORY_DIR}. Import > Group fills the selected group, whatever group the file names.\r\n"
+        f"The D-STAR list, the same way: select Digital > Repeater List, then File > Import > All,\r\n"
+        f"and choose {REPEATER_DIR}/DSTAR_Near_Home.csv; it fills group 01 by its Group No.\r\n"
+        "Answer No when asked about USE(FROM).\r\n"
         "\r\n"
         "microSD card: copy the Csv folder into ID-52\\ on the card, then on the radio\r\n"
         "MENU > SD Card > Import/Export > Import.\r\n"

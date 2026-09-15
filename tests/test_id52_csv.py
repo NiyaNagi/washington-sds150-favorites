@@ -11,6 +11,7 @@ from pathlib import Path
 import pytest
 
 from wasds150.export.id52_csv import (
+    ALL_MEMORY_FILE,
     GROUP_MEMBER_MAX,
     MEMORY_HEADER,
     REPEATER_HEADER,
@@ -45,6 +46,24 @@ def _resolved(*channels: PlannedChannel, scan_groups=()) -> ResolvedPlan:
 
 def _rows(text: str):
     return [line.split(",") for line in text.rstrip("\r\n").split("\r\n")]
+
+
+def test_one_file_holds_every_group_for_cs52_import_all() -> None:
+    files, rows, _warnings = render_files(_resolved(
+        _channel(1, "NOAA WX2", 162.4, "FM", "Weather", bank="Weather"),
+        _channel(2, "VTAC11", 151.1375, "NFM", "SAR", bank="SAR"),
+        _channel(3, "VTAC12", 154.4525, "NFM", "SAR", bank="SAR"),
+    ))
+    every = _rows(files[ALL_MEMORY_FILE])
+    # One header, then each group's rows under its own Group No: Import > All
+    # sorts them into groups, where Import > Group would put all three in one.
+    assert every[0] == list(MEMORY_HEADER) and rows == 3
+    assert [(r[0], r[1], r[2], r[3]) for r in every[1:]] == [
+        ("01", "Weather", "00", "NOAA WX2"), ("02", "SAR", "00", "VTAC11"), ("02", "SAR", "01", "VTAC12"),
+    ]
+    group_rows = [r for name, text in files.items() if name.startswith("Csv/MemoryCh") for r in _rows(text)[1:]]
+    assert sorted(every[1:]) == sorted(group_rows)
+    assert not ALL_MEMORY_FILE.startswith("Csv/")  # the radio's SD import reads all of Csv/
 
 
 def test_a_memory_group_carries_icoms_own_columns() -> None:
@@ -171,7 +190,7 @@ def test_the_files_land_where_the_radio_reads_them(tmp_path: Path) -> None:
         _channel(1, "Marine 16", 156.8, "FM", "Marine", bank="Marine"),
     ), out)
     assert {p.relative_to(out).as_posix() for p in result.files} == {
-        "Csv/MemoryCh/01_Marine.csv", "IMPORT.txt"
+        "Csv/MemoryCh/01_Marine.csv", "CS-52_All_Memory.csv", "IMPORT.txt"
     }
     # A file from an earlier export under a number this one no longer uses
     # would otherwise be imported alongside the current set.
