@@ -83,6 +83,9 @@ class RadioProfile:
     rx_bands: BandRanges
     modes: FrozenSet[str]
     tx_bands: BandRanges = ()
+    #: ``(mode, bands)`` pairs for a mode the radio demodulates only on part
+    #: of its receive coverage. A mode not listed works everywhere it receives.
+    mode_bands: Tuple[Tuple[str, BandRanges], ...] = ()
     #: ``None`` means "no fixed ceiling this project needs to enforce".
     max_channels: Optional[int] = None
     name_max_len: Optional[int] = None
@@ -121,6 +124,9 @@ class RadioProfile:
         object.__setattr__(self, "rx_bands", _normalize_bands(self.rx_bands))
         object.__setattr__(self, "tx_bands", _normalize_bands(self.tx_bands))
         object.__setattr__(self, "modes", frozenset(m.upper() for m in self.modes))
+        object.__setattr__(
+            self, "mode_bands", tuple((mode.upper(), _normalize_bands(bands)) for mode, bands in self.mode_bands)
+        )
         if self.max_channels is not None and self.max_channels <= 0:
             raise ValueError(f"{self.id}: max_channels must be positive")
         if self.name_max_len is not None and self.name_max_len <= 0:
@@ -150,10 +156,17 @@ class RadioProfile:
             return False
         return _in_bands(freq_mhz, self.tx_bands)
 
-    def supports_mode(self, mode: Optional[str]) -> bool:
+    def supports_mode(self, mode: Optional[str], freq_mhz: Optional[float] = None) -> bool:
+        """Whether the radio demodulates ``mode`` - at ``freq_mhz`` when given."""
         if not mode:
             return True
-        return mode.upper() in self.modes
+        mode = mode.upper()
+        if mode not in self.modes:
+            return False
+        if freq_mhz is None:
+            return True
+        limits = [bands for listed, bands in self.mode_bands if listed == mode]
+        return not limits or any(_in_bands(freq_mhz, bands) for bands in limits)
 
     def rx_coverage_summary(self) -> str:
         return ", ".join(f"{low:g}-{high:g}" for low, high in self.rx_bands) + " MHz"

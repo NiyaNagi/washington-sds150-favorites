@@ -174,9 +174,12 @@ def resolve_mode(channel: Channel, profile: RadioProfile) -> Optional[str]:
     demodulate, which is the signal to drop the channel rather than guess.
     """
     stated = (channel.mode or "").strip().upper()
+    freq = channel.freq_mhz
 
-    # A mode the radio supports outright is always honoured.
-    if stated and profile.supports_mode(stated):
+    # A mode the radio supports at this frequency is always honoured. Some
+    # radios demodulate a mode on only part of their coverage: the ID-52A
+    # has no AM above 375 MHz, where the military air band continues.
+    if stated and profile.supports_mode(stated, freq):
         return stated
 
     # "AUTO"/"ALL" are scanner instructions meaning "work it out", and an
@@ -184,17 +187,16 @@ def resolve_mode(channel: Channel, profile: RadioProfile) -> Optional[str]:
     if stated and stated not in {"AUTO", "ALL", ""}:
         return None
 
-    freq = channel.freq_mhz
     if freq is None:
         return None
 
-    if _in_any(freq, _AM_BANDS) and profile.supports_mode("AM"):
+    if _in_any(freq, _AM_BANDS) and profile.supports_mode("AM", freq):
         return "AM"
-    if _in_any(freq, _WIDE_FM_BANDS) and profile.supports_mode("FM"):
+    if _in_any(freq, _WIDE_FM_BANDS) and profile.supports_mode("FM", freq):
         return "FM"
-    if profile.supports_mode("NFM"):
+    if profile.supports_mode("NFM", freq):
         return "NFM"
-    if profile.supports_mode("FM"):
+    if profile.supports_mode("FM", freq):
         return "FM"
     return None
 
@@ -434,7 +436,7 @@ def _resolve_once(
                 result.dropped.append(
                     DroppedChannel(
                         channel.label, freq, block.label, "unsupported-mode",
-                        f"{profile.model} cannot demodulate {channel.mode!r}",
+                        f"{profile.model} cannot demodulate {channel.mode!r} at {freq:g} MHz",
                     )
                 )
                 continue

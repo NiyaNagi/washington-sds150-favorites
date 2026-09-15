@@ -34,7 +34,7 @@ def _channel_is_usable(channel, profile: RadioProfile) -> bool:
         return False
     if not profile.can_receive(channel.freq_mhz):
         return False
-    return profile.supports_mode(channel.mode)
+    return profile.supports_mode(channel.mode, channel.freq_mhz)
 
 
 def _project_department(department: Department, profile: RadioProfile) -> Tuple[Department, int]:

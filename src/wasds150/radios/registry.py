@@ -303,6 +303,10 @@ ID52A = RadioProfile(
         (144.0, 148.0),
         (430.0, 450.0),
     ),
+    #: CS-52 refuses AM above 375 MHz: Seattle Approach 377.150 and USCG
+    #: 379.050 were dropped on import (2026-09-14) while 225-375 MHz AM
+    #: and the VHF air band imported.
+    mode_bands=(("AM", ((108.0, 174.0), (225.0, 374.995))),),
     max_channels=1000,
     name_max_len=16,
     name_style="readable",
