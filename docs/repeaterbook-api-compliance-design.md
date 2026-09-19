@@ -21,6 +21,7 @@ https://github.com/NiyaNagi/washington-sds150-favorites/blob/main/docs/repeaterb
 | Geographic scope | Washington only, one request per refresh. | An allowlist of regions (Washington, Oregon, Idaho enabled; British Columbia listed but disabled), with a per-token budget counted in HTTP requests. **Proposed; needs RepeaterBook's approval.** See [Regions and request limits](#regions-and-request-limits-proposed). |
 | Use cases | Programming radios for the home area. | Also travel, and pulling repeaters from surrounding regions such as Oregon and British Columbia. See [Use cases](#use-cases). |
 | Endpoint and token scopes | Requested `api.export` and `api.export_row`. | Only `api.export` is needed. The documentation's example `export.php?country=United%20States&country=Canada` shows the North America endpoint serves Canada too, so the rest-of-world endpoint is never called and `api.export_row` is withdrawn. The province identifier is an open question (below). |
+| Operator identity | Request #229 and the request after it named KM7HKM, the operator's previous call sign. | WA7DAM, the operator's current (vanity) call sign, everywhere: this document, the request form, and the RepeaterBook account the request comes from. KM7HKM is no longer used. |
 | RepeaterBook-derived data in the repository | Seven Clallam County repeaters and a statewide sample row cited RepeaterBook listing pages as their source, contradicting this document. | Removed. Each value was re-sourced from the WWARA coordination database or deleted. `tests/test_no_repeaterbook_data.py` now fails if any committed catalog row, channel or radio file cites a RepeaterBook repeater data page. The removed rows remain in git history. |
 
 These are hard application limits, not estimates. If RepeaterBook approves a
@@ -51,8 +52,12 @@ called. No RepeaterBook data is committed here.
 | Repository | https://github.com/NiyaNagi/washington-sds150-favorites |
 | User-Agent | `SignalWA/1.0 (+https://github.com/NiyaNagi/washington-sds150-favorites; ajamess@gmail.com)` |
 | Contact | ajamess@gmail.com |
-| Operator | WA7DAM, a General-class amateur radio operator, programming their own radios only |
+| Operator | WA7DAM, a General-class amateur radio operator, programming their own radios only (formerly KM7HKM) |
+| Token scope requested | `api.export` only. `api.export_row` is not requested. |
+| Deployment model | Distributed (installed local copy); one user |
 | API documentation followed | https://www.repeaterbook.com/wiki/doku.php?id=api |
+
+The access request submitted to RepeaterBook uses exactly these values.
 
 ## Purpose and scope
 
@@ -64,6 +69,7 @@ programming files for personally owned radios:
 - TIDRADIO TD-H9
 - Yaesu FTX-1
 - Anytone AT-D890UV
+- Icom ID-52A
 
 RepeaterBook is used only to select currently listed amateur repeaters near a
 chosen point so the operator can program their own radios. The fields used,
