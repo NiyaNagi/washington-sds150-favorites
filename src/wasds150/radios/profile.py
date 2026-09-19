@@ -119,6 +119,11 @@ class RadioProfile:
     #: False when the profile is derived from documentation that has not been
     #: confirmed against hardware.  Consumers may warn rather than fail.
     verified: bool = True
+    #: Where each capability came from: manuals, specification pages, a CPS or
+    #: a read of the radio. Rendered into docs/radio-capabilities.md.
+    sources: Tuple[str, ...] = ()
+    #: When the profile was last checked against those sources (YYYY-MM-DD).
+    verified_on: str = ""
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "rx_bands", _normalize_bands(self.rx_bands))

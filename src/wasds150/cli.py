@@ -1601,6 +1601,15 @@ def cmd_fleet_audit(args: argparse.Namespace) -> int:
         report = Path(args.report)
         report.parent.mkdir(parents=True, exist_ok=True)
         report.write_text(audit.to_markdown(), encoding="utf-8")
+    by_radio = None
+    if getattr(args, "by_radio", None) is not None:
+        import datetime
+
+        by_radio = Path(args.by_radio) if args.by_radio else (
+            Path("radio-data") / "shared" / "checklists" / f"radio-audit-{datetime.date.today().isoformat()}.md"
+        )
+        by_radio.parent.mkdir(parents=True, exist_ok=True)
+        by_radio.write_text(audit.to_radio_markdown(), encoding="utf-8")
     if args.json:
         _print_json(audit.to_dict())
     else:
@@ -1612,6 +1621,8 @@ def cmd_fleet_audit(args: argparse.Namespace) -> int:
             print(f"  ({len(audit.warnings())} warning(s) not shown; add --warnings or --report)")
         if args.report:
             print(f"report {args.report}")
+        if by_radio is not None:
+            print(f"corrections by radio {by_radio}")
     return 1 if audit.errors() else 0
 
 
@@ -2099,6 +2110,11 @@ def build_parser() -> argparse.ArgumentParser:
     audit_which.add_argument("--radios", help="Comma-separated radio ids")
     p_fleet_audit.add_argument("--warnings", action="store_true", help="List warnings as well as errors")
     p_fleet_audit.add_argument("--report", help="Also write the findings as Markdown to this file")
+    p_fleet_audit.add_argument(
+        "--by-radio", nargs="?", const="", metavar="PATH",
+        help="Also write every finding as a corrections table per radio "
+        "(default radio-data/shared/checklists/radio-audit-<date>.md)",
+    )
     p_fleet_audit.add_argument("--exclude-licensed", action="store_true")
     p_fleet_audit.add_argument("--json", action="store_true")
     p_fleet_audit.set_defaults(func=cmd_fleet_audit)

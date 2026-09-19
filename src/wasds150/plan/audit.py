@@ -91,6 +91,10 @@ class Finding:
     freq_mhz: float
     detail: str
     source: str = ""
+    #: The memory's mode as planned (FM, NFM, DV, ...), when known.
+    mode: str = ""
+    #: What to change, for the per-radio corrections table.
+    correction: str = ""
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -98,7 +102,8 @@ class Finding:
     def line(self) -> str:
         where = f"slot {self.slot} {self.name} {self.freq_mhz:.4f}" if self.slot else self.name
         source = f" ({self.source})" if self.source else ""
-        return f"{self.severity.upper()} {self.code} [{self.radio_id}] {where}: {self.detail}{source}"
+        fix = f" -> {self.correction}" if self.correction else ""
+        return f"{self.severity.upper()} {self.code} [{self.radio_id}] {where}: {self.detail}{fix}{source}"
 
 
 def _splits(freq: float) -> Tuple[float, ...]:

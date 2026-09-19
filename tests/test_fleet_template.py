@@ -44,13 +44,17 @@ LEGACY_SLOTS = {
     # 959 -> 938 when the 21 'BEARS W.Tiger' DMR channels on 442.075 were
     # dropped as superseded (see wasds150.recipes.dmr_corrections); the West
     # Tiger layout added in their place does not fit this plan's DMR block.
-    "atd890-scan": 938,
+    # 938 -> 937 when the profile limited AM to the air-band list: the
+    # catalog's 'Olympic Ambulance EMS' 462.95 MHz AM row cannot be stored.
+    "atd890-scan": 937,
     "ftx1-local": 192,
     "ftx1-scan": 183,
     # 860 -> 856 when duplicates began comparing the access tone by value:
     # four rows differed only as "TONE=C100" against "TONE=C100.0".
     "ftx1-wa": 856,
-    "h9-ozette": 137,
+    # 137 -> 135 when the profile limited AM to the 108-136 MHz air band
+    # (TIDRADIO's specification): CG Air-Ground 379.05 and CGAS 381.8 MHz AM.
+    "h9-ozette": 135,
     "thd75-ames-lake": 388,
     "thd75-scan": 393,
 }

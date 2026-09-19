@@ -44,8 +44,16 @@ SDS150 = RadioProfile(
     notes=(
         "Receive-only scanner. P25 Phase I/II native; DMR and NXDN require a "
         "paid upgrade keyed to the scanner serial. Organizes channels into "
-        "Favorites Lists, systems, sites and departments."
+        "Favorites Lists, systems, sites and departments. No D-STAR, Fusion "
+        "or other amateur digital voice: those channels are left off it."
     ),
+    sources=(
+        "Uniden SDS150 product page, https://uniden.com/products/sds150 (coverage 25-512, "
+        "758-824, 849-869, 894-960, 1240-1300 MHz; P25 Phase I/II; DMR, NXDN and ProVoice "
+        "as paid upgrades)",
+        "docs/washington-sds150-favorites-master.md section 1.2",
+    ),
+    verified_on="2026-09-19",
 )
 
 #: TIDRADIO TD-H9.
@@ -67,17 +75,19 @@ TD_H9 = RadioProfile(
         (76.0, 108.0),
         (108.0, 136.0),
         (136.0, 174.0),
-        (220.0, 230.0),
+        (220.0, 260.0),
         (350.0, 390.0),
         (400.0, 520.0),
     ),
     modes=frozenset({"AM", "FM", "NFM"}),
     tx_bands=(
         (136.0, 174.0),
-        (220.0, 259.0),
-        (300.0, 390.0),
-        (400.0, 590.0),
+        (220.0, 260.0),
+        (350.0, 390.0),
+        (400.0, 520.0),
     ),
+    #: TIDRADIO's specification lists AM receive for the air band only.
+    mode_bands=(("AM", ((108.0, 136.0),)),),
     max_channels=199,
     name_max_len=8,
     name_charset=_TDH9_CHARSET,
@@ -94,6 +104,15 @@ TD_H9 = RadioProfile(
         "walks the list. GNSS, APRS and SMS settings cannot be written by any "
         "current tool including the factory CPS."
     ),
+    sources=(
+        "TIDRADIO TD-H9 product page, https://tidradio.com/products/td-h9-10w-bluetooth-aprs-radio-handheld "
+        "(transmit 136-174, 220-260, 350-390, 400-520 MHz; receive FM 87-108, AM 108-136, 136-174, "
+        "220-260, 350-390, 400-520 MHz; 199 memories)",
+        "TD-H9 user manual",
+        "CHIRP test driver, https://chirpmyradio.com/issues/12216 (memory layout, 8-character names, no banks)",
+        "Hardware: written and read back through CHIRP on COM16, 2026-09-14",
+    ),
+    verified_on="2026-09-19",
 )
 
 #: Yaesu FTX-1 (Field / optima).  Scaffolding for a later export target.
@@ -110,7 +129,8 @@ FTX1 = RadioProfile(
         (0.03, 174.0),
         (400.0, 470.0),
     ),
-    modes=frozenset({"AM", "FM", "NFM", "USB", "LSB", "CW", "DV"}),
+    # Its digital voice is Yaesu's C4FM (System Fusion), not D-STAR.
+    modes=frozenset({"AM", "FM", "NFM", "USB", "LSB", "CW", "C4FM"}),
     tx_bands=(
         (1.8, 2.0),
         (3.5, 4.0),
@@ -132,11 +152,21 @@ FTX1 = RadioProfile(
     supports_talkgroups=False,
     supports_banks=True,
     notes=(
-        "HF/50/144/430 MHz all-mode SDR transceiver. Amateur transmit only. "
+        "HF/50/144/430 MHz all-mode SDR transceiver: SSB, CW, AM, FM and C4FM "
+        "digital. No D-STAR, DMR, NXDN or P25. Amateur transmit only. "
         "Programmed with RT Systems YPS-FTX1; CHIRP does not support it. "
         "PRELIMINARY: per-channel fields not yet confirmed against the manual."
     ),
     verified=False,
+    sources=(
+        "Yaesu FTX-1 series product page, https://yaesu.com/product-detail.aspx?Model=FTX-1+Series "
+        "(receive 30 kHz-174 MHz and 400-470 MHz; SSB, CW, AM, FM and C4FM digital; "
+        "transmit HF/50/144/430 MHz)",
+        "FTX-1 series operation manual, https://www.yaesu.com/Files/4CB893D7-1018-01AF-FA97E9E9AD48B50C/"
+        "FTX-1_OM_ENG_EH084M201_2506E-DS.pdf",
+        "RT Systems FTX-1 Programmer file layout (radio-data/ftx1/templates/README.md)",
+    ),
+    verified_on="2026-09-19",
 )
 
 #: Kenwood TH-D75A, North American model, firmware 1.03.
@@ -175,6 +205,12 @@ TH_D75 = RadioProfile(
         "from the radio rather than synthesized."
     ),
     verified=True,
+    sources=(
+        "Kenwood TH-D75A user manual B5A-4505-00 (radio-data/th-d75/reference/manuals/)",
+        "Kenwood TH-D75 user guide parts 1 and 2, operating tips 2024-05 (same folder)",
+        "MCP-D75 1.00, and a TH-D75A on firmware 1.03 read and written through it",
+    ),
+    verified_on="2026-09-19",
 )
 
 #: Characters the Anytone CPS accepts in a channel, zone or scan-list name.
@@ -218,6 +254,9 @@ AT_D890UV = RadioProfile(
         (400.0, 520.0),
     ),
     modes=frozenset({"AM", "FM", "NFM", "WFM", "FMB", "DMR", "NXDN"}),
+    # AM exists only in the separate air-band list (KD0PNQ programming guide):
+    # the main channel table is FM or digital, so 138.6 MHz AM cannot be stored.
+    mode_bands=(("AM", ((108.0, 137.0),)),),
     # What the band mode keys, as the TD-H9's profile is also written: which
     # of it is actually offered is the plan template's transmit policy, and
     # every block outside amateur, GMRS/FRS and MURS is receive only.
@@ -272,6 +311,14 @@ AT_D890UV = RadioProfile(
     # group, AM memory and FM station matched. Bundle SHA-256
     # EAC0872812F9EFBA2623033C03A6336CA7C33C5AB345381DC92596E850E4592F.
     verified=True,
+    sources=(
+        "Anytone AT-D890UV user manual (radio-data/at-d890uv/firmware/manuals/)",
+        "AT-D890UV firmware 1.05 change log (radio-data/at-d890uv/firmware/Change-Log-D890UV-FW-v1.05.pdf)",
+        "KD0PNQ AT-D890UV Programming Guide rev 2026-04-07 (AM air band and FM broadcast lists)",
+        "radio-data/at-d890uv/firmware/options/AT_BANDS.txt (band mode 00014)",
+        "Hardware: bundle written, read back and exported, 2026-09-12",
+    ),
+    verified_on="2026-09-19",
 )
 
 #: Icom ID-52A, the US model (not the PLUS).
@@ -329,6 +376,15 @@ ID52A = RadioProfile(
         "real ID-52 CSV files, not yet confirmed against CS-52 or the radio."
     ),
     verified=False,
+    sources=(
+        "Icom ID-52A specifications, https://www.gpscentral.ca/wp-content/uploads/Icom_ID-52A_Specifications.pdf "
+        "(receive A band 108-174 and 225-479 MHz, B band 137-174 and 375-479 MHz; transmit 144-148 "
+        "and 430-450 MHz; broadcast receiver separate)",
+        "Icom ID-52A product page, https://www.icomjapan.com/lineup/products/ID-52A/",
+        "CS-52 1.23 help (Program Scan Edge, Group Link, CSV import) and a CS-52 import "
+        "on 2026-09-14 that refused AM above 375 MHz",
+    ),
+    verified_on="2026-09-19",
 )
 
 _REGISTRY: Dict[str, RadioProfile] = {

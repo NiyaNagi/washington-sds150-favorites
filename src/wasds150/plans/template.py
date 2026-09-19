@@ -981,11 +981,11 @@ _TD_H9 = RadioKnobs(
     },
 )
 
-#: FTX-1: 999 memories, HF included; digital voice is C4FM, so no D-STAR.
+#: FTX-1: 999 memories, HF included. Its digital voice is C4FM, so its
+#: profile has no D-STAR and the D-STAR block leaves itself out.
 _FTX1 = RadioKnobs(
     reserve_slots=40,
     include_dmr=False,
-    include_dstar=False,
     power=("High", "Mid", "Low"),
     limits={
         "nets": 50,

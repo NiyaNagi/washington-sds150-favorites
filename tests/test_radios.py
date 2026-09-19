@@ -87,6 +87,11 @@ class TestTdH9Profile:
     def test_cannot_transmit_outside_its_hardware_range(self):
         assert not TD_H9.can_transmit(121.5)
         assert not TD_H9.can_transmit(600.0)
+        # TIDRADIO's specification: 350-390 and 400-520, not 300 or 590.
+        assert not TD_H9.can_transmit(320.0) and not TD_H9.can_transmit(540.0)
+
+    def test_am_is_the_air_band_only(self):
+        assert TD_H9.supports_mode("AM", 121.5) and not TD_H9.supports_mode("AM", 146.52)
 
     def test_profile_describes_hardware_not_permission(self):
         # The unlocked H9 can physically key up on NOAA weather and marine
@@ -99,6 +104,15 @@ class TestTdH9Profile:
 class TestFtx1Profile:
     def test_is_marked_unverified_until_checked_against_the_manual(self):
         assert not FTX1.verified
+
+    def test_digital_voice_is_c4fm_not_d_star(self):
+        assert FTX1.supports_mode("C4FM") and not FTX1.supports_mode("DV")
+
+    def test_every_profile_cites_its_sources(self):
+        from wasds150.radios.registry import list_profiles
+
+        for profile in list_profiles().values():
+            assert profile.sources and profile.verified_on, profile.id
 
     def test_covers_hf_which_no_other_profile_does(self):
         assert FTX1.can_receive(14.2)
