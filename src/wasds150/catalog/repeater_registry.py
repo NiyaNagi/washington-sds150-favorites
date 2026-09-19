@@ -86,6 +86,8 @@ REACH_MILES = 750.0
 
 _CALL = re.compile(r"\b((?:[AKNW][A-Z]?|A[A-L]|V[A-GEOY])\d[A-Z]{1,3})\b")
 _RR_CALL = re.compile(r"\bcallsign: ([A-Z0-9]+)")
+#: RadioReference's alpha tag, which starts with the repeater's own call.
+_ALPHA_CALL = re.compile(r"\balpha: ((?:[AKNW][A-Z]?|A[A-L]|V[A-GEOY])\d[A-Z]{1,3})\b", re.IGNORECASE)
 _INPUT_TOLERANCE_MHZ = 0.0015
 _BANDS = (
     (50.0, 54.0, "Analog 6 Meter"), (144.0, 148.0, "Analog 2 Meter"), (219.0, 225.0, "Analog 1.25 Meter"),
@@ -95,6 +97,10 @@ _MODULES = ((144.0, 148.0, "C"), (420.0, 450.0, "B"), (1240.0, 1300.0, "A"))
 _IACC_PLACE = re.compile(r"\(([^,()]+), ([^()]+?) Co\.\)")
 #: WWARA's mode for a machine that repeats analog as well as a digital mode.
 _MIXED = re.compile(r"\b(N?FM)/(?:P25|DMR|NXDN)\b")
+#: WWARA's mode for a machine that repeats analog as well as D-STAR: both
+#: sides are programmed, the analog one everywhere and the D-STAR one on the
+#: radios that have it.
+_MIXED_DSTAR = re.compile(r"\bN?FM/D-?Star\b", re.IGNORECASE)
 _DROP = object()
 
 
@@ -204,7 +210,14 @@ def _copies(catalog: Catalog) -> Iterable[_Copy]:
                     if family == "DV" and channel.dv_rpt1.strip():
                         call, module = channel.dv_rpt1[:7].strip().upper(), channel.dv_rpt1[7:8].strip().upper()
                     else:
-                        found = _CALL.search(label.upper()) or _RR_CALL.search(channel.notes or "")
+                        # RadioReference's "alpha" is the repeater's own tag
+                        # ("KF7BFS DSTAR"); its "callsign" is the licensee, who
+                        # is often somebody else, so the alpha is read first.
+                        found = (
+                            (_ALPHA_CALL.search(channel.notes or "") if family == "DV" else None)
+                            or _CALL.search(label.upper())
+                            or _RR_CALL.search(channel.notes or "")
+                        )
                         call, module = (found.group(1).upper() if found else ""), ""
                     if family == "DV" and not module:
                         module = _band_value(freq, _MODULES)
@@ -278,18 +291,25 @@ def _target(found: List[List[_Copy]], copy: _Copy):
                 for c in m
             )
         ), None)
+    # A D-STAR copy is only ever the D-STAR machine: a repeater WWARA lists as
+    # mixed FM/D-Star is one machine with two sides, and each side is its own
+    # record. An analog copy, finding no analog machine, joins the D-STAR one -
+    # a county list's FM row for a D-STAR-only repeater is that repeater.
+    def usable(machines: List[List[_Copy]]) -> List[List[_Copy]]:
+        same = [m for m in machines if m[0].family == copy.family]
+        return same if copy.family == "DV" else (same or machines)
+
     if copy.call:
-        same_call = [
+        same_call = usable([
             m for m in found
             if copy.call in {c.call for c in m if c.call} and _within(m, copy, SAME_CALL_MILES)
-        ]
+        ])
         if same_call:
-            pool = [m for m in same_call if m[0].family == copy.family] or same_call
-            pool = [m for m in pool if not _tone_conflict(m, copy)] or pool
+            pool = [m for m in same_call if not _tone_conflict(m, copy)] or same_call
             return _nearest(pool, copy) or pool[0]
-    coordinated = [
+    coordinated = usable([
         m for m in found if any(c.source in COORDINATORS for c in m) and _same_input(m, copy) and _here(m, copy)
-    ]
+    ])
     if coordinated:
         agreeing = [m for m in coordinated if not _tone_conflict(m, copy)]
         # A placed copy nearby is that machine whatever tone it wrote; an
@@ -297,11 +317,11 @@ def _target(found: List[List[_Copy]], copy: _Copy):
         pool = agreeing or (coordinated if copy.located else [])
         target = _nearest(pool, copy) if pool else None
         return target if target is not None else _DROP
-    uncalled = [
+    uncalled = usable([
         m for m in found
         if _same_input(m, copy) and _within(m, copy, SAME_PLACE_MILES)
         and not any(c.call for c in m) and not _tone_conflict(m, copy)
-    ]
+    ])
     return uncalled[0] if len(uncalled) == 1 else None
 
 
@@ -309,9 +329,9 @@ def _machines(copies: Iterable[_Copy]) -> List[List[_Copy]]:
     groups: "OrderedDict[tuple, List[_Copy]]" = OrderedDict()
     for copy in sorted(copies, key=lambda c: (c.rank, c.favorite_key, c.channel.freq_mhz)):
         # Every mode on an output is one group: WWARA lists a mixed FM/P25
-        # machine as P25, and RepeaterBook the same machine as FM.
-        key = ("DV", copy.call, copy.module) if copy.family == "DV" and copy.call else ("RPT", round(copy.channel.freq_mhz, 4))
-        groups.setdefault(key, []).append(copy)
+        # machine as P25 and RepeaterBook the same machine as FM, and a county
+        # list's FM row for a D-STAR repeater has to meet that repeater.
+        groups.setdefault(("RPT", round(copy.channel.freq_mhz, 4)), []).append(copy)
     machines: List[List[_Copy]] = []
     for group in groups.values():
         found: List[List[_Copy]] = []
@@ -423,17 +443,76 @@ def build_registry(catalog: Catalog, home: Optional[Tuple[float, float]] = None)
         home = HOME
     grouped: "OrderedDict[Tuple[str, str], List[Channel]]" = OrderedDict()
     ids = set()
-    for machine in _machines(_copies(catalog)):
-        record = _record(machine)
-        if record is None:
-            continue
-        state, group, channel = record
+    machines = _machines(_copies(catalog))
+    dstar_sides = {
+        (m[0].call, round(m[0].channel.freq_mhz, 4)) for m in machines if m[0].family == "DV" and m[0].call
+    }
+
+    routed: Dict[str, Tuple[bool, Tuple[str, str], Channel]] = {}
+
+    def keep(state: str, group: str, channel: Channel) -> None:
         if channel.lat is not None and haversine_miles(home[0], home[1], channel.lat, channel.lon) > REACH_MILES:
-            continue
+            return
+        routing = channel.dv_rpt1.strip()
+        if routing:
+            # One module, one machine: a D-STAR list that still carries a
+            # repeater's old pair is not a second module (DSTARInfo's W7RNK C
+            # on 147.950 against WWARA's 147.995). The coordinated pair wins.
+            notes = channel.notes or ""
+            coordinated = "registry: WWARA" in notes or notes.startswith("input ")
+            previous = routed.get(routing)
+            if previous is not None:
+                if previous[0] or not coordinated:
+                    return
+                grouped[previous[1]].remove(previous[2])
+            routed[routing] = (coordinated, (state, group), channel)
         while channel.id in ids:  # the same call and output in two places
             channel.id = stable_id(channel.id + ":again", kind="channel")
         ids.add(channel.id)
         grouped.setdefault((state, group), []).append(channel)
+
+    for machine in machines:
+        record = _record(machine)
+        if record is None:
+            continue
+        state, group, channel = record
+        lead = sorted(machine, key=lambda c: c.rank)[0]
+        if lead.family == "DV":
+            if not channel.dv_rpt1.strip():
+                # A county row calling itself D-STAR with no routing call is
+                # not programmable; the machine is whatever else lists it.
+                continue
+            # Its analog copies are copies of a D-STAR machine: no radio keys
+            # them in FM, and the scanner cannot decode them.
+            for copy in machine:
+                if copy.family == "DV" or copy.source in COORDINATORS:
+                    continue
+                copy.channel.avoid = True
+                note = f"D-STAR only: {channel.dv_rpt1.strip()} (repeater registry)"
+                if note not in (copy.channel.notes or ""):
+                    copy.channel.notes = "; ".join(part for part in (copy.channel.notes, note) if part)
+        keep(state, group, channel)
+        # WWARA's mixed FM/D-Star machines: the analog record above, and the
+        # D-STAR side here when no D-STAR source already lists it.
+        mixed = next((c for c in machine if c.source == WWARA and _MIXED_DSTAR.search(c.channel.notes or "")), None)
+        call = next((c.call for c in sorted(machine, key=lambda c: c.rank) if c.call and c.source in NAMING), "")
+        if mixed is None or not call or (call, round(channel.freq_mhz, 4)) in dstar_sides:
+            continue
+        module = _band_value(channel.freq_mhz, _MODULES)
+        if not module:
+            continue
+        side = Channel(
+            id=stable_id(f"hamreg:DV:{call} {module}:{channel.freq_mhz:.4f}", kind="channel"),
+            label=f"{call} {module} - {channel.label.split(' - ', 1)[1]}"[:64] if " - " in channel.label
+            else f"{call} {module}",
+            freq_mhz=channel.freq_mhz, tx_freq_mhz=channel.tx_freq_mhz, mode="DV", service_type=13,
+            avoid=channel.avoid, lat=channel.lat, lon=channel.lon,
+            location_precision=channel.location_precision,
+            notes=f"{channel.notes}; D-STAR side of a WWARA FM/D-Star machine; module {module} from the band",
+            dv_urcall="CQCQCQ", dv_rpt1=f"{call:<7}{module}", dv_rpt2=f"{call:<7}G",
+        )
+        dstar_sides.add((call, round(channel.freq_mhz, 4)))
+        keep(state, "D-STAR", side)
     if not grouped:
         return None
     departments = []

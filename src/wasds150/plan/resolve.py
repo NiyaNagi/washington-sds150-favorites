@@ -440,6 +440,17 @@ def _resolve_once(
                     )
                 )
                 continue
+            if mode == "DV" and not getattr(channel, "dv_rpt1", "").strip():
+                # A D-STAR memory routes through the repeater's own call; a
+                # copy without one cannot be keyed, and the repeater registry
+                # holds the routed record of the same machine.
+                result.dropped.append(
+                    DroppedChannel(
+                        channel.label, freq, block.label, "no-dstar-routing",
+                        "D-STAR channel with no repeater call to route through",
+                    )
+                )
+                continue
 
             # A plan that decides transmit by service ignores which block holds
             # the channel: a ham repeater in a catch-all block is still a ham
@@ -531,12 +542,18 @@ def _resolve_once(
             # The tone by value, not by text: one list writes "TONE=C100.0" and
             # another "TONE=C100" for the same repeater.
             tone_value = (tx_tone.kind, tx_tone.ctcss_hz, tx_tone.dcs_code) if transmit else ()
+            # A D-STAR memory is not a copy of the FM memory on its pair: a
+            # mixed FM/D-Star machine is keyed both ways, and the routing call
+            # is what tells its modules apart.
+            mode_key = mode if spec is not None else (
+                f"DV {getattr(channel, 'dv_rpt1', '').strip().upper()}" if mode == "DV" else ""
+            )
             tuning_key = (
                 freq,
                 tx_freq if transmit else None,
                 transmit,
                 tone_value,
-                mode if spec is not None else "",
+                mode_key,
                 identity,
             )
             existing = seen_frequencies.get(tuning_key)
@@ -548,7 +565,7 @@ def _resolve_once(
                     )
                 )
                 continue
-            receive_key = (freq, mode if spec is not None else "", identity)
+            receive_key = (freq, mode_key, identity)
             receiving = seen_receive.get(receive_key)
             if plan.skip_receive_duplicates and not transmit and receiving is not None:
                 result.dropped.append(
@@ -562,7 +579,10 @@ def _resolve_once(
             # pair is programmed with its tone, and would not open it. The
             # pair is registered below under a key of its own.
             pair_key = ("keyed pair", freq, tx_freq)
-            keyed = seen_frequencies.get(pair_key) if transmit and tx_freq is not None and spec is None else None
+            keyed = (
+                seen_frequencies.get(pair_key)
+                if transmit and tx_freq is not None and spec is None and mode != "DV" else None
+            )
             if plan.transmit_by_service and keyed is not None and tx_tone.kind == NO_TONE.kind:
                 result.dropped.append(
                     DroppedChannel(
@@ -638,7 +658,7 @@ def _resolve_once(
             result.channels.append(planned)
             seen_frequencies[tuning_key] = planned
             seen_receive.setdefault(receive_key, planned)
-            if transmit and tx_freq is not None and spec is None and tx_tone.kind != NO_TONE.kind:
+            if transmit and tx_freq is not None and spec is None and mode != "DV" and tx_tone.kind != NO_TONE.kind:
                 seen_frequencies.setdefault(pair_key, planned)
             if spec is not None and spec.has_contact:
                 seen_digital_identity.setdefault((freq, mode), planned)

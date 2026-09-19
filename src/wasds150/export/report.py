@@ -19,6 +19,7 @@ _REASON_EXPLANATIONS = {
     "capacity": "the radio ran out of memory slots",
     "block-limit": "the plan capped this block",
     "no-talkgroup": "an amateur DMR machine with no talkgroup cannot be keyed",
+    "no-dstar-routing": "a D-STAR channel with no repeater call to route through",
 }
 
 

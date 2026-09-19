@@ -9,6 +9,21 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Added
 
+- **Every radio's capability, researched and written down.** Each profile now
+  cites its sources and the date it was checked, and `wasds150 fleet docs`
+  writes `docs/radio-capabilities.md` from them (`--check` fails when it
+  drifts). Corrected against the manufacturers' specifications: the FTX-1's
+  digital voice is C4FM, not D-STAR; the TD-H9 covers 220-260 and 350-390 MHz
+  and hears AM on the air band only; the AT-D890UV stores AM only in its
+  air-band list.
+- **Fleet-wide audit (`wasds150.plan.consistency`).** `fleet audit` now checks
+  every plan against its radio's capability and the fleet against itself:
+  `capability-violation`, `dstar-as-analog`, `dstar-unsupported`,
+  `dstar-name`, `dstar-missing`, `mixed-missing-dv`, `station-mismatch`
+  (one repeater keyed with different tones on different radios),
+  `pinned-missing` (KC7BAE 443.050 and WW7PSR 146.960 in each radio's first
+  scan group) and, for the SDS150's lists, `dstar-hint`. `--by-radio` writes
+  every finding as a corrections table per radio.
 - **Amateur repeater registry (`HAMREG`).** One record per repeater, merged on
   every catalog load from WWARA, IACC, the operator-published lists, DSTARInfo's
   D-STAR directory (`DSTARINFO`), Seattle ACS, the RadioReference county lists,
@@ -72,6 +87,28 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Fixed
 
+- **D-STAR repeaters are programmed as D-STAR, and only where they can be.**
+  A county list's FM row for a D-STAR machine is now that machine: the
+  registry merges D-STAR and analog copies of one output, so an FM copy of a
+  D-STAR-only repeater (WA7HJR B on 444.6375, "Puget Sound RTTY Repeater
+  Group") no longer becomes its own FM record, and the copies it absorbs are
+  kept off every radio. RadioReference's D-STAR mode is read as D-STAR - its
+  alpha tag carries the routing call, its callsign field the licensee - and a
+  D-STAR row with no routing call is dropped rather than programmed. The
+  radios without D-STAR (AT-D890UV, FTX-1, TD-H9) and the SDS150 no longer
+  carry any of them; the TH-D75 and ID-52A carry them as D-STAR memories, 22
+  and 23 of them.
+- **A D-STAR memory is named for its routing call**, never for a club's name
+  in a county list ("NRTHWSTDGTLCLBGR" was WA7VC B, "TUKWILAFIREHAMS" was
+  KF7BFS B), and a D-STAR record no longer names the analog machine that
+  shares its pair. A registry record with no position no longer names
+  stations through its state-wide department fence, which had put
+  "KI7KYL Kennewick" on a King County repeater.
+- **A D-STAR memory is no longer dropped as a copy of the FM memory on its
+  pair.** The routing call is part of a memory's identity, so a mixed
+  FM/D-Star machine is keyed both ways; WWARA's mixed machines (KG7QPU 443.900,
+  NW7DR 441.675 and 1290.3, WA7FW 442.925) now have their D-STAR side, with
+  the module from DSTARInfo or from the band.
 - **Link frequencies are never programmed on a transceiver.** WWARA's
   repeater-to-repeater links (coverage LINK, 14 records) sat among the 70 cm
   repeaters, so the AT-D890UV, FTX-1 and ID-52A could transmit on them; they

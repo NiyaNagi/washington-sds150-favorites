@@ -89,6 +89,29 @@ def fleet_status(ctx: AppContext) -> List[RadioStatus]:
     ]
 
 
+def _without_undecodable(favorite: FavoritesList, profile) -> FavoritesList:
+    """``favorite`` without the channels this radio cannot demodulate.
+
+    The catalog records what a station is: a county list carries a D-STAR
+    repeater as D-STAR. The scanner has no D-STAR, so those rows would be
+    noise on a scan and are left out of its lists rather than coerced to FM.
+    """
+    import copy as _copy
+
+    def usable(channel) -> bool:
+        return channel.tgid is not None or profile.supports_mode(channel.mode, channel.freq_mhz)
+
+    if all(usable(c) for s in favorite.systems for d in s.departments for c in d.channels):
+        return favorite
+    trimmed = _copy.deepcopy(favorite)
+    for system in trimmed.systems:
+        for department in system.departments:
+            department.channels = [c for c in department.channels if usable(c)]
+        system.departments = [d for d in system.departments if d.channels]
+    trimmed.systems = [s for s in trimmed.systems if s.departments]
+    return trimmed
+
+
 def scanner_favorites(
     ctx: AppContext, *, include_licensed: bool = True, near_me: bool = True, compact: bool = True
 ) -> List[FavoritesList]:
@@ -116,6 +139,7 @@ def scanner_favorites(
         for favorite in correct_network_lists(generated.enabled_favorites)
         if favorite.systems and (include_licensed or not favorite.licensed)
     ]
+    chosen = [_without_undecodable(favorite, SDS150) for favorite in chosen]
     favorites = [favorite for favorite in project_favorites(chosen, SDS150).favorites if favorite.systems]
     if near_me:
         from wasds150.plans.template import HOME

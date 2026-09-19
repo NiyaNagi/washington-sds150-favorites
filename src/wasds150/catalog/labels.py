@@ -33,6 +33,7 @@ catalog, and every memory plan and the SDS150's Near Me lists read it:
 """
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from typing import Dict, Iterable, List, Optional, Set, Tuple
 
@@ -73,6 +74,20 @@ def source_rank(favorite_key: str) -> int:
 def mode_family(mode: Optional[str]) -> str:
     text = (mode or "").upper()
     return "FM" if text in _ANALOG_FM else text
+
+
+#: WWARA writes a D-STAR machine's mode into its note ("...; D-Star; club"),
+#: and the catalog keeps the channel as ``AUTO`` when no radio here decodes it.
+#: A mixed FM/D-Star machine is not this: its analog side is a real FM
+#: station, and it names the copies of itself like any other.
+_DSTAR_NOTE = re.compile(r";\s*D-?Star\s*;", re.IGNORECASE)
+
+
+def is_dstar(channel: Channel) -> bool:
+    """Whether this copy is a D-STAR machine's, by mode or by its source's note."""
+    if mode_family(channel.mode) == "DV":
+        return True
+    return bool((channel.mode or "").upper() in _ANALOG_FM and _DSTAR_NOTE.search(channel.notes or ""))
 
 
 def station_key(channel: Channel) -> Optional[Key]:
@@ -150,6 +165,18 @@ class StationLabels:
             if department is not None and department.label == COORDINATED_DEPARTMENT:
                 rank = max(rank, 2)
             self._ranks[channel.id] = min(rank, self._ranks.get(channel.id, rank))
+            if is_dstar(channel):
+                # A D-STAR record names itself, by its routing call; it is not
+                # the analog machine on its pair ("K7LL Pullman" on 146.4125
+                # is not K7LWH's D-STAR module in Bellevue).
+                continue
+            if favorite_key.upper() == "HAMREG" and channel.lat is None:
+                # A registry record with no position takes its department's
+                # state-wide fence, which is not a place: it would name a
+                # station three counties away ("KI7KYL Kennewick" on a King
+                # County row). Its own name still comes from the lists it
+                # merged.
+                continue
             area = station_area(department, channel)
             # Which machine holds a pair is known only where a copy says where it
             # is; a radio's own list is no authority on it at all.
@@ -198,6 +225,10 @@ class StationLabels:
         return (key[0], key[1], next(iter(tones))) if len(tones) == 1 else key
 
     def label(self, department: Optional[Department], channel: Channel) -> str:
+        if is_dstar(channel):
+            # A D-STAR memory is named for the routing call the radio's DR
+            # screens show, never for a club's name in a county list.
+            return channel.label
         area = station_area(department, channel)
         key = self._key_for(channel, area)
         if key is None:

@@ -138,6 +138,7 @@ def test_a_dstar_module_merges_by_call_and_keeps_wwaras_pair():
     assert department == "Washington - D-STAR"
     assert (k7xyz.mode, k7xyz.dv_rpt1, k7xyz.dv_rpt2, k7xyz.avoid) == ("DV", "K7XYZ  C", "K7XYZ  G", False)
     _dept, w7qrs = records["W7QRS C - Issaquah"]
-    # DSTARInfo's stale pair loses to WWARA's; WWARA's lapsed coordination is kept out of radios.
+    # One module is one machine: DSTARInfo's stale pair loses to WWARA's
+    # coordinated one, and WWARA's lapsed coordination is kept out of radios.
     assert (w7qrs.freq_mhz, w7qrs.tx_freq_mhz, w7qrs.avoid) == (147.995, 147.395, True)
     assert len(records) == 2

@@ -369,8 +369,8 @@ def audit_scanner(favorites: Iterable[FavoritesList], machines: Sequence[DStarMa
         for system in favorite.systems:
             for department in system.departments:
                 for c in department.channels:
-                    if c.freq_mhz is None or c.tgid is not None:
-                        continue
+                    if c.freq_mhz is None or c.tgid is not None or c.avoid:
+                        continue  # an avoided channel is locked out: never scanned
                     mode = (c.mode or "").upper()
                     if favorite.favorite_key == "NM-HAM":
                         near_me_ham.append(c)

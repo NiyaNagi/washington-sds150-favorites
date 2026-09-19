@@ -83,7 +83,8 @@ class TestModeAndCounty:
         [
             ("FM", "FM"), ("FMN", "NFM"), ("AM", "AM"), ("DMR", "DMR"), ("NXDN48", "NXDN"),
             ("NXDN", "NXDN"), ("P25", "P25"), ("Project 25", "P25"), ("P25E", "P25"),
-            ("D-STAR", "AUTO"), ("MPT-1327", "AUTO"), ("", "AUTO"),
+            # D-STAR is the catalog's DV: no analog radio keys such a repeater.
+            ("D-STAR", "DV"), ("DSTAR", "DV"), ("MPT-1327", "AUTO"), ("", "AUTO"),
         ],
     )
     def test_modes_map_to_catalog_vocabulary(self, text, mode):
@@ -160,7 +161,8 @@ class TestCountyLists:
         assert channels["Cougar Mtn DMR"].tx_freq_mhz == pytest.approx(147.62)
         assert channels["AMR Ambulance Ch 1"].nxdn_ran == 37
         assert channels["Dispatch"].tx_tone == "D023"
-        assert channels["Lake Washington Ham Club"].mode == "AUTO"
+        # RadioReference tags this one D-STAR; no analog radio keys it.
+        assert channels["Lake Washington Ham Club"].mode == "DV"
         # Trunked site rows never become channels.
         assert "Site 018 Cougar Mtn, WA" not in channels
         dept = king.systems[0].departments[0]
@@ -192,7 +194,12 @@ class TestCountyLists:
         assert len(third.favorites) == 3
 
     def test_rr_lists_validate_for_the_scanner(self, export_dir):
+        """A county list holds what the county has, including D-STAR
+        repeaters the scanner cannot decode. Those rows are dropped on the way
+        to the SDS150 (wasds150.fleet.service), and what is left validates."""
+        from wasds150.fleet.service import _without_undecodable
         from wasds150.hpe.validation import validate_favorites_list
+        from wasds150.radios.registry import SDS150
 
         for fl in build_rr_favorites(self._facts(export_dir)):
-            assert validate_favorites_list(fl) == []
+            assert validate_favorites_list(_without_undecodable(fl, SDS150)) == []

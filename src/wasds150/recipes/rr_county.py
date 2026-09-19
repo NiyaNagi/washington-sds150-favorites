@@ -22,6 +22,7 @@ memory-list transceiver cannot use them at all.
 """
 from __future__ import annotations
 
+import re
 from collections import OrderedDict
 from typing import Dict, Iterable, List, Optional, Tuple
 
@@ -67,6 +68,10 @@ def _service_type(tag: str) -> Optional[int]:
     return _SERVICE_TYPE_BY_TAG.get(tag.strip().lower())
 
 
+#: How RadioReference marks a D-STAR repeater in its alpha tag or mode.
+_DSTAR_TAG = re.compile(r"\bD-?STAR\b", re.IGNORECASE)
+
+
 def _channel_from_fact(fact: NormalizedFact, county: str) -> Optional[Channel]:
     freq = fact.freq_mhz
     if freq is None or not frequency_is_scannable(freq):
@@ -95,11 +100,18 @@ def _channel_from_fact(fact: NormalizedFact, county: str) -> Optional[Channel]:
         )
         if part
     )
+    mode = fact.mode or "AUTO"
+    if mode in ("AUTO", "FM", "NFM") and _DSTAR_TAG.search(f"{raw.get('rr_alpha') or ''} {raw.get('rr_mode') or ''} {label}"):
+        # RadioReference tags a D-STAR repeater in its alpha ("KF7BFS DSTAR")
+        # and sometimes gives its mode as FM. It is a D-STAR machine either
+        # way: no analog radio keys it, and the repeater registry pairs it
+        # with the routed record that carries its module.
+        mode = "DV"
     return Channel(
         id=stable_id(f"rr:{county}:{fact.entity_key}", kind="channel"),
         label=label[:64],
         freq_mhz=round(freq, 6),
-        mode=fact.mode or "AUTO",
+        mode=mode,
         notes=notes,
         tone=tone,
         service_type=_service_type(raw.get("rr_tag", "")),

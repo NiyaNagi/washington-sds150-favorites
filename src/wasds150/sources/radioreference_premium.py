@@ -107,6 +107,10 @@ _MODE_MAP = {
     "P25": "P25",
     "P25E": "P25",
     "PROJECT 25": "P25",
+    # D-STAR, which the catalog and the radios call DV.
+    "D-STAR": "DV",
+    "DSTAR": "DV",
+    "DV": "DV",
 }
 
 _PL_RE = re.compile(r"^(\d{2,3}(?:\.\d)?)\s*PL$", re.IGNORECASE)
