@@ -182,6 +182,47 @@ def _name_bytes(text: str) -> bytes:
     return encoded.ljust(NAME_SIZE, b"\x00")
 
 
+def _group_name_at(data: bytes, number: int) -> str:
+    offset = HEADER_SIZE + NAMES_OFFSET + (GROUP_NAME_INDEX + number) * NAME_SIZE
+    return data[offset:offset + NAME_SIZE].split(b"\x00")[0].decode("ascii", "replace").strip()
+
+
+def _kept_group_link(original: bytes, output: bytes, result: "Thd75ExportResult") -> List[int]:
+    """The radio's own Memory Group Link, minus any entry that no longer means
+    what it did.
+
+    Group Link is set on the radio, in Menu 203, and it is the TH-D75's only
+    composite scan - an operator who has built a link set has said exactly
+    which groups they sweep. The export used to replace it with the scan
+    group alone, which threw that away on every write.
+
+    It cannot be copied blindly, because the table holds group *numbers* and
+    the export assigns those by plan order: a block added or removed shifts
+    every group after it, and the old table would then link whatever landed on
+    those numbers. So an entry is kept only when the group at that number has
+    the same name in the radio's image and in this export, and dropped with a
+    warning when it does not.
+    """
+    base = HEADER_SIZE + GROUP_LINK_OFFSET
+    kept: List[int] = []
+    dropped: List[str] = []
+    for number in original[base:base + GROUP_LINK_COUNT]:
+        if number == GROUP_LINK_NONE or number >= GROUP_COUNT or number in kept:
+            continue
+        was, now = _group_name_at(original, number), _group_name_at(output, number)
+        if was and was == now:
+            kept.append(number)
+        else:
+            dropped.append(f"GRP-{number} was {was or 'unnamed'!r}, now {now or 'unnamed'!r}")
+    if dropped:
+        result.warnings.append(
+            "memory group link: dropped "
+            + "; ".join(dropped)
+            + " - the group at that number is not the one the radio linked"
+        )
+    return kept
+
+
 def _flash_call(text: str) -> bytes:
     encoded = text.encode("ascii", "strict")
     if len(encoded) > 8:
@@ -288,15 +329,20 @@ def _write_near_me_group(
     first_free: int,
     group_by_block: Dict[str, int],
     result: Thd75ExportResult,
+    original: bytes,
 ) -> int:
-    """Copy the plan's first scan group into a memory group of its own and
-    point Memory Group Link at that group alone.
+    """Copy the plan's first scan group into a memory group of its own, and
+    set Memory Group Link.
 
     A memory belongs to one group and Group Link reaches whole groups, so
     linking the groups ``Near Me`` draws from scanned every memory in them -
     275 channels, not the curated list. A group of copies, as on the ID-52A,
     is exactly the list: Group Link Scan sweeps those channels and nothing
-    else. Returns how many memories it wrote.
+    else.
+
+    The link itself is the operator's, not the export's: see
+    :func:`_kept_group_link`. This group is only what a radio with no link set
+    of its own gets. Returns how many memories it wrote.
     """
     from wasds150.plan.scanning import group_members
 
@@ -325,10 +371,13 @@ def _write_near_me_group(
         ))
         output[_data_offset(slot):_data_offset(slot) + RECORD_SIZE] = _record(channel, result)
         output[_name_offset(slot):_name_offset(slot) + NAME_SIZE] = _name_bytes(channel.name)
+    # The radio's own link set wins where it still resolves to the same
+    # groups; the scan group alone is the fallback for a radio that has none.
+    links = _kept_group_link(original, bytes(output), result) or [number]
     base = HEADER_SIZE + GROUP_LINK_OFFSET
-    output[base:base + GROUP_LINK_COUNT] = bytes([number]) + bytes([GROUP_LINK_NONE]) * (GROUP_LINK_COUNT - 1)
-    result.link_group = group.name
-    result.group_links = [number]
+    output[base:base + GROUP_LINK_COUNT] = bytes(links) + bytes([GROUP_LINK_NONE]) * (GROUP_LINK_COUNT - len(links))
+    result.link_group = group.name if links == [number] else ""
+    result.group_links = list(links)
     return len(members)
 
 
@@ -379,7 +428,7 @@ def render_thd75(
         output[_data_offset(slot):_data_offset(slot) + RECORD_SIZE] = _record(channel, result)
         output[_name_offset(slot):_name_offset(slot) + NAME_SIZE] = _name_bytes(channel.name)
 
-    copies = _write_near_me_group(output, resolved, len(channels), group_by_block, result)
+    copies = _write_near_me_group(output, resolved, len(channels), group_by_block, result, original)
 
     result.rows = len(channels)
     result.groups = len(group_by_block) + (1 if copies else 0)

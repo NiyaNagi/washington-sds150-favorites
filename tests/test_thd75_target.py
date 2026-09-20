@@ -15,7 +15,10 @@ from wasds150.export.thd75_target import (
     GROUP_LINK_COUNT,
     GROUP_LINK_NONE,
     GROUP_LINK_OFFSET,
+    GROUP_NAME_INDEX,
     HEADER_SIZE,
+    NAME_SIZE,
+    NAMES_OFFSET,
     MODE_CODES,
     RX_ONLY_TX_HZ,
     inspect_group_link,
@@ -242,11 +245,85 @@ def _linkable(block: str, name: str, mhz: float, **kwargs) -> PlannedChannel:
     )
 
 
+def _link_plan() -> ChannelPlan:
+    return ChannelPlan(
+        id="test", radio_id="th-d75", label="Test",
+        blocks=tuple(PlanBlock(label=label) for label in ("Nets", "Ham 2m", "Marine")),
+        scan_groups=(
+            ScanGroup("Near Me", ("Nets", "Ham 2m"), take=(("Nets", 1), ("Ham 2m", 1))),
+            ScanGroup("Everything", ("Nets", "Ham 2m", "Marine")),
+        ),
+    )
+
+
+def _link_channels() -> list:
+    return [
+        _linkable("Nets", "NET1", 146.96),
+        _linkable("Nets", "NET2", 147.08),
+        _linkable("Ham 2m", "TWOM", 145.49),
+        _linkable("Marine", "MAR16", 156.8, skip_scan=True),
+    ]
+
+
+def _set_group_name(image: bytearray, number: int, name: str) -> None:
+    at = HEADER_SIZE + NAMES_OFFSET + (GROUP_NAME_INDEX + number) * NAME_SIZE
+    image[at:at + NAME_SIZE] = name.encode("ascii").ljust(NAME_SIZE, b"\x00")
+
+
+def _set_group_link(image: bytearray, numbers: tuple) -> None:
+    at = HEADER_SIZE + GROUP_LINK_OFFSET
+    image[at:at + GROUP_LINK_COUNT] = (
+        bytes(numbers) + bytes([GROUP_LINK_NONE]) * (GROUP_LINK_COUNT - len(numbers))
+    )
+
+
+def test_a_radios_own_group_link_survives_the_export(tmp_path: Path) -> None:
+    """Group Link is set on the radio, in Menu 203, and it is the TH-D75's
+    only composite scan. An operator who has built one has said exactly which
+    groups they sweep, so the export keeps it."""
+    template = tmp_path / "radio.d75"
+    original = bytearray(_template(template))
+    # The radio was written by an earlier export, so its group names match the
+    # ones this plan produces: Nets 0, Ham 2m 1, Marine 2, Near Me 3.
+    for number, name in enumerate(("Nets", "Ham 2m", "Marine", "Near Me")):
+        _set_group_name(original, number, name)
+    _set_group_link(original, (3, 0, 2))
+    template.write_bytes(bytes(original))
+
+    data, result = render_thd75(
+        ResolvedPlan(plan=_link_plan(), profile=TH_D75, channels=_link_channels()), template=template
+    )
+
+    assert inspect_group_link(data) == [3, 0, 2]
+    assert result.group_links == [3, 0, 2]
+    assert not [w for w in result.warnings if "memory group link" in w]
+
+
+def test_a_link_entry_whose_group_moved_is_dropped(tmp_path: Path) -> None:
+    """The table holds group numbers and the export assigns those by plan
+    order, so a block added or removed shifts them. An entry is kept only when
+    the group at that number is still the one the radio linked."""
+    template = tmp_path / "radio.d75"
+    original = bytearray(_template(template))
+    _set_group_name(original, 0, "Nets")
+    _set_group_name(original, 1, "Wildfire")   # this plan puts Ham 2m at 1
+    _set_group_link(original, (0, 1))
+    template.write_bytes(bytes(original))
+
+    data, result = render_thd75(
+        ResolvedPlan(plan=_link_plan(), profile=TH_D75, channels=_link_channels()), template=template
+    )
+
+    assert inspect_group_link(data) == [0]
+    assert any("GRP-1 was 'Wildfire', now 'Ham 2m'" in w for w in result.warnings)
+
+
 def test_group_link_points_at_the_first_scan_group(tmp_path: Path) -> None:
     template = tmp_path / "radio.d75"
     original = bytearray(_template(template))
-    # The operator's own radio carries a link table here; a real read has it
-    # non-empty, so the export has to overwrite rather than fill.
+    # A radio with no link set of its own: the numbers are there but the groups
+    # they name are unnamed, so none of them survives and the scan group is the
+    # fallback.
     original[HEADER_SIZE + GROUP_LINK_OFFSET:HEADER_SIZE + GROUP_LINK_OFFSET + GROUP_LINK_COUNT] = (
         bytes((0, 1, 2, 3)) + bytes([GROUP_LINK_NONE]) * (GROUP_LINK_COUNT - 4)
     )

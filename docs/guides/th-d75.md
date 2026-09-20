@@ -73,9 +73,14 @@ this radio.
   2026-09-13, when catch-all groups were programmed receive only: write the
   current export.
 - Your call sign, APRS and GPS settings are unchanged.
-- **Menu > Scan > Group Link Scan** sweeps the **Near Me** memory group, the last
-  group: KC7BAE E Tiger, WW7PSR, then the nearest reachable repeaters, in
-  frequency order. Memory Group Link is already set to that group alone.
+- **Menu > Scan > Group Link Scan** sweeps whatever **Memory Group Link** names.
+  The export keeps the link set the radio already had, because that is a Menu
+  203 setting you make on the radio and the export has no business replacing
+  it. An entry is dropped only when the group at that number is no longer the
+  one you linked - the table holds numbers, and a block added or removed
+  shifts them - and the report says so when it happens. A radio with no link
+  set of its own gets the **Near Me** group alone: KC7BAE E Tiger, WW7PSR,
+  then the nearest reachable repeaters, in frequency order.
 - DR shows a local D-STAR repeater.
 
 ## Undo
