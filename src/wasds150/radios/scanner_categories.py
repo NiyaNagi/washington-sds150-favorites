@@ -224,6 +224,8 @@ def list_settings(favorites: Sequence[FavoritesList]) -> Dict[str, ListSettings]
     :func:`wasds150.radios.near_me.list_settings` has it, under its short
     name; each category after it on its quick key, unmonitored; anything
     else unmonitored under its catalog name."""
+    from wasds150.radios.near_me import NEVER_MONITOR
+
     settings = near_me_list_settings(favorites)
     for favorite in favorites:
         key = favorite.favorite_key
@@ -231,7 +233,15 @@ def list_settings(favorites: Sequence[FavoritesList]) -> Dict[str, ListSettings]
             settings[key] = replace(settings[key], name=NEAR_ME_NAMES[key])
         elif key in CATEGORY_BY_KEY:
             category = CATEGORY_BY_KEY[key]
-            settings[key] = ListSettings(monitor=False, quick_key=category.quick_key, lead=True, name=category.name)
+            # Monitored, because Select Lists to Monitor is the gate a quick
+            # key cannot open: installed with it off, this category's quick
+            # key does nothing but beep. See near_me.list_settings.
+            settings[key] = ListSettings(
+                monitor=key not in NEVER_MONITOR,
+                quick_key=category.quick_key,
+                lead=True,
+                name=category.name,
+            )
     return settings
 
 

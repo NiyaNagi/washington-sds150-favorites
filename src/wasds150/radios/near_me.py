@@ -46,7 +46,10 @@ class NearMeList:
     key: str
     name: str
     quick_key: int
-    monitor: bool
+    #: Whether this list is in the sweep the scanner comes up with. Every list
+    #: is *monitored* - see :func:`list_settings` - because that is the gate a
+    #: quick key cannot open; this decides which ones start switched on.
+    at_startup: bool
     #: How far a cluster of located stations is worth hearing.
     reach_miles: float
     #: Service type for rows that arrive without one, so the scanner's
@@ -436,7 +439,7 @@ def build_near_me_lists(
             favorite_name=spec.name,
             region="Around the scanner (location control)",
             counties="Wherever the scanner is",
-            scenario="In the car: " + ("on at startup" if spec.monitor else f"quick key {spec.quick_key}"),
+            scenario="In the car: " + ("on at startup" if spec.at_startup else f"quick key {spec.quick_key}"),
             source_type="Built from the installed lists",
             system_or_category=f"{len(systems) - (1 if departments else 0)} trunked systems, {len(departments)} fenced groups",
             sites_or_coverage="Every department and site location-fenced",
@@ -455,17 +458,37 @@ def build_near_me_lists(
     return lists
 
 
+#: Lists that stay behind the Select Lists to Monitor gate, because there is
+#: no position from which they are worth sweeping. ``PS-ENC`` is the whole of
+#: it: several hundred talkgroups the project itself identified as encrypted,
+#: which cost sweep time and produce no audio by definition.
+NEVER_MONITOR = frozenset({"PS-ENC"})
+
+
 def list_settings(favorites: Sequence[FavoritesList]) -> Dict[str, ListSettings]:
-    """Scanner settings for every list being installed: the Near Me lists
-    lead, location-controlled, on quick keys 1-6 and monitored as their spec
-    says; every other list is installed but not monitored."""
+    """Scanner settings for every list being installed.
+
+    **Monitor is the gate, not the switch.** Uniden's *Select Lists to
+    Monitor* decides which lists the quick keys can reach at all - "if the
+    item is set to No, it cannot be turned on for scanning using quick keys"
+    (SDS150 manual, p.29) - and the quick key then toggles it in and out of
+    the sweep while scanning. Installing the category lists with Monitor off
+    therefore did not make them "off until you press the key": it made all
+    thirty-four of their quick keys inert, and the scanner answers a keypress
+    on one with a double beep.
+
+    So every list is monitored except :data:`NEVER_MONITOR`, and the Near Me
+    lists additionally lead the index, are location-controlled and take quick
+    keys 1-6.
+    """
     specs = {spec.key: spec for spec in NEAR_ME}
     settings: Dict[str, ListSettings] = {}
     for favorite in favorites:
         spec = specs.get(favorite.favorite_key)
+        monitor = favorite.favorite_key not in NEVER_MONITOR
         settings[favorite.favorite_key] = (
-            ListSettings(monitor=spec.monitor, quick_key=spec.quick_key, location_control=True, lead=True)
+            ListSettings(monitor=monitor, quick_key=spec.quick_key, location_control=True, lead=True)
             if spec is not None
-            else ListSettings(monitor=False)
+            else ListSettings(monitor=monitor)
         )
     return settings

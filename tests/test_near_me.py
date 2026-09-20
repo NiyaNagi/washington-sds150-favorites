@@ -175,10 +175,21 @@ def test_copies_of_a_trunked_system_merge_and_split_by_service():
     assert system.sid == 11628 and [site.label for site in system.sites] == ["Tiger"]
 
 
-def test_near_me_lists_lead_on_quick_keys_and_everything_else_stays_quiet():
+def test_near_me_lists_lead_on_quick_keys_and_every_list_is_reachable():
+    """Select Lists to Monitor is the gate a quick key cannot open: a list
+    installed with it off answers its own quick key with a double beep. So
+    every list is monitored, and the quick key is what switches it."""
     favorites = build_near_me_lists(_catalog(), home=HOME) + _catalog()
     settings = list_settings(favorites)
     ps, tac, old = settings["NM-PS"], settings["NM-TAC"], settings["RRC-KING"]
     assert (ps.monitor, ps.quick_key, ps.location_control, ps.lead) == (True, 1, True, True)
-    assert (tac.monitor, tac.quick_key) == (False, 2)
-    assert (old.monitor, old.location_control, old.lead) == (False, False, False)
+    assert (tac.monitor, tac.quick_key) == (True, 2)
+    assert (old.monitor, old.location_control, old.lead) == (True, False, False)
+
+
+def test_the_encrypted_list_stays_behind_the_gate():
+    """Several hundred talkgroups that produce no audio by definition: sweep
+    time for guaranteed silence, so its quick key stays inert on purpose."""
+    from wasds150.radios.near_me import NEVER_MONITOR
+
+    assert "PS-ENC" in NEVER_MONITOR

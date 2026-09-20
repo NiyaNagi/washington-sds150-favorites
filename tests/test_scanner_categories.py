@@ -62,8 +62,11 @@ def test_near_me_leads_categories_follow_and_unknown_lists_pass_through():
     settings = list_settings(lists)
     assert (settings["NM-PS"].name, settings["NM-PS"].quick_key, settings["NM-PS"].monitor) == ("NM Public Safety", 1, True)
     state = settings["PS-STATE"]
-    assert (state.name, state.quick_key, state.monitor, state.lead) == ("PS Statewide", 17, False, True)
-    assert settings["ZZ99"].name is None and not settings["ZZ99"].monitor
+    # Monitored, so quick key 17 can actually reach it: Select Lists to
+    # Monitor is a gate, not a switch, and a list behind it answers its own
+    # quick key with a double beep.
+    assert (state.name, state.quick_key, state.monitor, state.lead) == ("PS Statewide", 17, True, True)
+    assert settings["ZZ99"].name is None and settings["ZZ99"].monitor
 
 
 def test_only_names_an_earlier_install_generated_are_retired():
