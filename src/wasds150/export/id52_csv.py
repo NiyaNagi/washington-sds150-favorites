@@ -53,6 +53,10 @@ REPEATER_HEADER: Tuple[str, ...] = (
 #: Memories per group, and groups, as the ID-52A's manual states them.
 GROUP_MEMBER_MAX = 100
 GROUP_MAX = 100
+#: Where the scan-group copy lives, always. High enough that the blocks never
+#: reach it, so its number survives a block being added, removed or split.
+#: See :func:`_group_names`.
+SCAN_GROUP_NUMBER = 99
 #: Total memories across every group.
 MEMORY_MAX = 1000
 #: Entries in the DR repeater list.
@@ -146,9 +150,33 @@ def _scan_groups(resolved: ResolvedPlan) -> List[Tuple[str, List[PlannedChannel]
     return [(groups[0].name[:NAME_MAX], members)]
 
 
-def _group_names(resolved: ResolvedPlan) -> List[Tuple[str, List[PlannedChannel]]]:
-    """The plan's blocks as memory groups, in plan order, each within the
-    radio's 100-memory group ceiling, then its first scan group as a copy."""
+def _even_chunks(members: List[PlannedChannel]) -> List[List[PlannedChannel]]:
+    """``members`` split into as few groups as the ceiling allows, evenly.
+
+    Filling to exactly 100 and letting the remainder fall into the next group
+    produced "Ham 70cm" with 100 and "Ham 70cm 2" with five - a whole memory
+    group for five channels, and a group number that moves the moment the
+    block gains one row. Even chunks put the boundary in the middle of the
+    block, where one more channel does not create a group.
+    """
+    count = -(-len(members) // GROUP_MEMBER_MAX)
+    if count <= 1:
+        return [members]
+    size = -(-len(members) // count)
+    return [members[i:i + size] for i in range(0, len(members), size)]
+
+
+def _group_names(resolved: ResolvedPlan) -> List[Tuple[int, str, List[PlannedChannel]]]:
+    """``(group number, name, members)`` for every memory group.
+
+    Blocks are numbered in plan order from 1. The scan-group copy is pinned to
+    :data:`SCAN_GROUP_NUMBER` instead, because its number is the one the
+    operator uses: Group Link and the per-band scan settings name a group by
+    number, are set by hand on the radio, and are not carried by a memory CSV
+    import. Numbering it positionally moved ``Near Me`` from 22 to 23 the week
+    the 70 cm block crossed a hundred channels, pointing the operator's own
+    settings at "Other Nearby".
+    """
     ordered: "List[Tuple[str, List[PlannedChannel]]]" = []
     index: Dict[str, int] = {}
     for channel in resolved.channels:
@@ -159,19 +187,20 @@ def _group_names(resolved: ResolvedPlan) -> List[Tuple[str, List[PlannedChannel]
             ordered.append((name, [channel]))
         else:
             ordered[position][1].append(channel)
-    groups: List[Tuple[str, List[PlannedChannel]]] = []
+    groups: List[Tuple[int, str, List[PlannedChannel]]] = []
     for name, members in ordered:
-        if len(members) <= GROUP_MEMBER_MAX:
-            groups.append((name, members))
-            continue
-        chunks = [members[i:i + GROUP_MEMBER_MAX] for i in range(0, len(members), GROUP_MEMBER_MAX)]
+        chunks = _even_chunks(members)
         for number, chunk in enumerate(chunks, start=1):
             suffix = "" if number == 1 else f" {number}"
-            groups.append(((name[: NAME_MAX - len(suffix)] + suffix), chunk))
-    groups.extend(_scan_groups(resolved))
+            groups.append((len(groups) + 1, (name[: NAME_MAX - len(suffix)] + suffix), chunk))
+    if len(groups) >= SCAN_GROUP_NUMBER:
+        raise Id52ExportError(
+            f"{len(groups)} block groups reach the pinned scan group at {SCAN_GROUP_NUMBER}"
+        )
+    groups.extend((SCAN_GROUP_NUMBER, name, members) for name, members in _scan_groups(resolved))
     if len(groups) > GROUP_MAX:
         raise Id52ExportError(f"{len(groups)} memory groups exceed the radio's {GROUP_MAX}")
-    total = sum(len(members) for _, members in groups)
+    total = sum(len(members) for _, _, members in groups)
     if total > MEMORY_MAX:
         raise Id52ExportError(
             f"{total} memories exceed the radio's {MEMORY_MAX}; the scan-group copy needs "
@@ -243,7 +272,7 @@ def render_files(resolved: ResolvedPlan) -> Tuple[Dict[str, str], int, List[str]
     files: Dict[str, str] = {}
     written = 0
     every_group = [list(MEMORY_HEADER)]
-    for number, (name, members) in enumerate(_group_names(resolved), start=1):
+    for number, name, members in _group_names(resolved):
         rows = _memory_rows(number, name, members)
         files[f"{MEMORY_DIR}/{_filename(number, name)}"] = _csv(rows)
         every_group.extend(rows[1:])
@@ -269,6 +298,12 @@ def render_files(resolved: ResolvedPlan) -> Tuple[Dict[str, str], int, List[str]
         "\r\n"
         "microSD card: copy the Csv folder into ID-52\\ on the card, then on the radio\r\n"
         "MENU > SD Card > Import/Export > Import.\r\n"
+        "\r\n"
+        f"On the radio: the scan group is always group {SCAN_GROUP_NUMBER}, whatever the blocks\r\n"
+        "before it do. Group Link and the per-band scan settings name a group by number, are\r\n"
+        "set by hand, and are not carried by a memory import, so they would otherwise point\r\n"
+        f"somewhere else every time a block split. Point Group Link at {SCAN_GROUP_NUMBER} once -\r\n"
+        "MENU > SET > Scan > Group Link, separately for A band and B band - and it stays right.\r\n"
         "\r\n"
         "Close the files in any spreadsheet before importing; Excel keeps them locked.\r\n"
     )

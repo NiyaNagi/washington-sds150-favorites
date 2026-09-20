@@ -15,6 +15,7 @@ from wasds150.export.id52_csv import (
     GROUP_MEMBER_MAX,
     MEMORY_HEADER,
     REPEATER_HEADER,
+    SCAN_GROUP_NUMBER,
     Id52ExportError,
     render_files,
     write_id52,
@@ -135,7 +136,10 @@ def test_a_block_longer_than_a_group_is_split() -> None:
     files, rows, _warnings = render_files(_resolved(*channels))
     names = sorted(n for n in files if n.startswith("Csv/MemoryCh"))
     assert names == ["Csv/MemoryCh/01_Business.csv", "Csv/MemoryCh/02_Business_2.csv"]
-    assert [len(_rows(files[n])) - 1 for n in names] == [GROUP_MEMBER_MAX, 5]
+    # Split evenly rather than filled to the ceiling: 100 and 5 would spend a
+    # whole memory group on five channels, and the boundary would move to a
+    # new group the moment the block gained one more row.
+    assert [len(_rows(files[n])) - 1 for n in names] == [53, 52]
     # The overflow group names itself, and its members number from zero again.
     assert _rows(files[names[1]])[1][:3] == ["02", "Business 2", "00"]
     assert rows == GROUP_MEMBER_MAX + 5
@@ -156,14 +160,18 @@ def test_the_first_scan_group_becomes_a_memory_group_of_copies() -> None:
         ScanGroup("Everything", ("Nets",)),
     )))
     names = sorted(n for n in files if n.startswith("Csv/MemoryCh"))
-    assert names[-1] == "Csv/MemoryCh/04_Near_Me.csv"
+    # Pinned high, not numbered after the blocks: Group Link names a group by
+    # number and is set by hand, so the copy's number must not move when a
+    # block is added, removed or split.
+    assert names[-1] == f"Csv/MemoryCh/{SCAN_GROUP_NUMBER}_Near_Me.csv"
     assert rows == 4 + 2  # the four memories, then two of them copied
 
-    near = _rows(files["Csv/MemoryCh/04_Near_Me.csv"])[1:]
+    near = _rows(files[f"Csv/MemoryCh/{SCAN_GROUP_NUMBER}_Near_Me.csv"])[1:]
     # The quota keeps the nearest of each block, and the scan-locked weather
     # row is not a scan member at all, so its block contributes nothing.
     assert [row[3] for row in near] == ["NET A", "TWO M"]
-    assert [row[:3] for row in near] == [["04", "Near Me", "00"], ["04", "Near Me", "01"]]
+    assert [row[:3] for row in near] == [[str(SCAN_GROUP_NUMBER), "Near Me", "00"],
+                                         [str(SCAN_GROUP_NUMBER), "Near Me", "01"]]
     # The originals stay where they were; this is a copy, not a move.
     assert [r[3] for r in _rows(files["Csv/MemoryCh/01_Ham_Nets.csv"])[1:]] == ["NET A", "NET B"]
 

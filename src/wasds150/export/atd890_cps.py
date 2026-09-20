@@ -331,7 +331,7 @@ def render_files(
     channel_index = {c.name: i for i, c in enumerate(bundle.channels)}
     scan_rows: List[List[str]] = [list(SCANLIST_HEADER)]
     sidecar_lists: List[Dict[str, object]] = []
-    truncated = 0
+    truncated: List[Tuple[str, int]] = []
     for number, scan in enumerate(bundle.scan_lists, start=1):
         names, rx, tx = members(scan.members[:CSV_SCANLIST_MAX])
         scan_rows.append([str(number), scan.name, names, rx, tx, *SCANLIST_TAIL])
@@ -340,12 +340,17 @@ def render_files(
             "members": [channel_index[m.name] for m in scan.members],
         })
         if len(scan.members) > CSV_SCANLIST_MAX:
-            truncated += 1
+            truncated.append((scan.name, len(scan.members)))
     if truncated:
+        # Naming the lists and the losses, because the failure is silent on the
+        # radio: import the CSV without the patch and the sweep simply runs
+        # short, with no error anywhere and nothing on screen to say so.
+        losses = ", ".join(f"{name} keeps {CSV_SCANLIST_MAX} of {count}" for name, count in truncated)
         warnings.append(
-            f"{truncated} scan list(s) hold more than {CSV_SCANLIST_MAX} members, which the CPS's "
-            f"CSV importer cannot read. ScanList.CSV carries the first {CSV_SCANLIST_MAX} of each; "
-            "run scripts\\radios\\patch_atd890_scanlists.py on the saved .rdt to restore the rest."
+            f"{len(truncated)} scan list(s) hold more than the {CSV_SCANLIST_MAX} members the CPS's "
+            f"CSV importer can read, so ScanList.CSV carries the first {CSV_SCANLIST_MAX} of each: "
+            f"{losses}. Run scripts\\radios\\patch_atd890_scanlists.py on the saved .rdt to restore "
+            "the rest - without it these lists scan short and say nothing."
         )
 
     talkgroup_rows: List[List[str]] = [list(TALKGROUP_HEADER)]
