@@ -152,6 +152,12 @@ class Department:
     range_miles: Optional[float] = None
     shape: str = ""
     avoid: bool = False
+    #: Set when :mod:`wasds150.catalog.locate` derived the geo-fence above
+    #: rather than a source publishing it, and which rule derived it. A
+    #: derived fence says where a *list* applies; it is not evidence of where
+    #: a *station* is, so station naming ignores it
+    #: (:func:`wasds150.catalog.labels.station_area`).
+    fence_source: str = ""
 
     def to_dict(self) -> Dict[str, Any]:
         d = asdict(self)

@@ -342,6 +342,13 @@ ANALOG_TONES: Dict[Tuple[str, str, float], Tuple[str, str]] = {
         "WA7DEM Mountlake Terrace, 443.725 +5 MHz: WWARA's coordination (CTCSS_IN 156.7, extract "
         f"{RETRIEVED}) and WA7DEM's own net listing agree; the ACS plan's copy carries 103.5.",
     ),
+    ("SEAACS", "U04N Beacon2", 442.3): (
+        "TONE=C141.3",
+        "W7ACS Beacon Hill, 442.300 +5 MHz: WWARA coordinates the pair at CTCSS_IN 141.3, and the "
+        "ACS plan's own 'U04 Beacon2' on the same pair carries 141.3. Only the 'U04N' row carries "
+        "123, which matches no coordinated machine on the pair - the project's rule is that a "
+        "memory transmits the access tone of the machine it names (CLAUDE.md).",
+    ),
 }
 
 

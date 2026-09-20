@@ -78,6 +78,14 @@ def resolve_named_plan(
     from wasds150.recipes.dmr_corrections import correct_network_lists
 
     favorites = correct_network_lists(favorites)
+    # A department the catalog never placed is either "here" or infinitely far
+    # to the distance filter, with nothing in between; fences derived from
+    # what the catalog does know let it rank them properly. Not the statewide
+    # ones - see wasds150.catalog.locate.fence_for - which the plan already
+    # expresses as ``ChannelSelector.anywhere``.
+    from wasds150.catalog.locate import locate_departments
+
+    favorites, _filled = locate_departments(favorites, statewide=False)
     if with_repeaterbook:
         from wasds150.sources.repeaterbook.catalog import plan_block
         from wasds150.sources.repeaterbook.service import RepeaterBookService

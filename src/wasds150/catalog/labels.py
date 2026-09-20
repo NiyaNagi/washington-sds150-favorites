@@ -126,6 +126,13 @@ def station_area(department: Optional[Department], channel: Channel) -> Optional
     if channel.lat is not None and channel.lon is not None:
         return (channel.lat, channel.lon, LOCATED_REACH_MILES)
     if department is not None and department.lat is not None and department.lon is not None and department.range_miles:
+        # A fence :mod:`wasds150.catalog.locate` derived says where this list
+        # applies, not where this transmitter is, and naming takes the nearest
+        # copy: fencing the Seattle ACS plan to its own counties made its
+        # channel designator "V01 PSRG" the nearest copy of 146.960 and
+        # renamed WW7PSR, the call WWARA coordinates the pair to.
+        if getattr(department, "fence_source", ""):
+            return None
         return (department.lat, department.lon, float(department.range_miles))
     return None
 

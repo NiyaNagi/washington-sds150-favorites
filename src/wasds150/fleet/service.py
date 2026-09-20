@@ -140,6 +140,12 @@ def scanner_favorites(
         if favorite.systems and (include_licensed or not favorite.licensed)
     ]
     chosen = [_without_undecodable(favorite, SDS150) for favorite in chosen]
+    # Before Near Me is built from them, so the composite inherits the fences
+    # rather than the holes: a department with no position is one the
+    # scanner's location control can never exclude.
+    from wasds150.catalog.locate import locate_departments
+
+    chosen, _filled = locate_departments(chosen)
     favorites = [favorite for favorite in project_favorites(chosen, SDS150).favorites if favorite.systems]
     if near_me:
         from wasds150.plans.template import HOME
