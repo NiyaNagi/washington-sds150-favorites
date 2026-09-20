@@ -46,7 +46,12 @@ LEGACY_SLOTS = {
     # Tiger layout added in their place does not fit this plan's DMR block.
     # 938 -> 937 when the profile limited AM to the air-band list: the
     # catalog's 'Olympic Ambulance EMS' 462.95 MHz AM row cannot be stored.
-    "atd890-scan": 937,
+    # 937 -> 943 when PNWDigital's own site records replaced the Config
+    # Builder file's stale Puget Sound rows: Shoreline 440.125 left (off the
+    # air since 2026-07-09), K7NWS West Tiger UHF changed from SeattleDMR CC2
+    # to PNWDigital CC1 with the deck its operator publishes, and West Tiger
+    # VHF 146.500 arrived - a machine installed after the snapshot was taken.
+    "atd890-scan": 943,
     "ftx1-local": 192,
     "ftx1-scan": 183,
     # 860 -> 856 when duplicates began comparing the access tone by value:

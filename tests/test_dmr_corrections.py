@@ -4,18 +4,23 @@ from __future__ import annotations
 from wasds150.models.catalog import Channel, Department, FavoritesList, System
 from wasds150.recipes.dmr_corrections import (
     ADDED,
+    PAIRS,
     SUPERSEDED,
     correct_color_codes,
     correct_network_list,
     correct_network_lists,
+    correct_pairs,
 )
 
 
-def _dmr(label: str, mhz: float, tg: int, ts: int, cc: int = 2, name: str = "") -> Channel:
+def _dmr(
+    label: str, mhz: float, tg: int, ts: int, cc: int = 2, name: str = "",
+    network: str = "SeattleDMR",
+) -> Channel:
     return Channel(
         id=f"{label}-{mhz}", label=label, freq_mhz=mhz, tx_freq_mhz=mhz + 5.0, mode="DMR",
         tone=f"ColorCode={cc}", dmr_color_code=cc, dmr_timeslot=ts, dmr_talkgroup=tg,
-        dmr_talkgroup_name=name or label.rsplit(" ", 1)[0], network="SeattleDMR",
+        dmr_talkgroup_name=name or label.rsplit(" ", 1)[0], network=network,
     )
 
 
@@ -34,12 +39,20 @@ def _channels(fl: FavoritesList):
     return fl.systems[0].departments[0].channels
 
 
-def test_the_stale_west_tiger_row_goes_and_the_real_one_arrives():
+def _pnw(label: str, tg: int, ts: int, name: str = "") -> Channel:
+    """A Cougar UHF row: the PNWDigital layout both West Tiger sites copy."""
+    return _dmr(label, 441.2875, tg, ts, cc=1, name=name, network="PNWDigital")
+
+
+def test_west_tiger_is_the_pnwdigital_machine_its_operator_publishes():
     assert ("BWT", 442.075) in SUPERSEDED
-    knw = next(a for a in ADDED if a.code == "KNW")
+    stu = next(a for a in ADDED if a.code == "STU")
+    stv = next(a for a in ADDED if a.code == "STV")
     source = _list("DMRNET", [
-        _dmr("Washington 1 SCE", 440.775, 3153, 1),
-        _dmr("King County SCE", 440.775, 333153, 2),
+        _pnw("Washington 1 BVC", 3153, 1),
+        _pnw("Metro 2 BVC", 3166, 2),
+        # On Cougar's deck but not on either West Tiger deck.
+        _pnw("Hawaii 1 BVC", 3115, 2),
         _dmr("King County BWT", 442.075, 333153, 2),
     ])
 
@@ -47,28 +60,68 @@ def test_the_stale_west_tiger_row_goes_and_the_real_one_arrives():
 
     labels = [c.label for c in _channels(fixed)]
     assert "King County BWT" not in labels
-    added = [c for c in _channels(fixed) if c.label.endswith(" KNW")]
-    assert [c.label for c in added] == ["Washington 1 KNW", "King County KNW"]
-    for channel in added:
-        assert channel.freq_mhz == knw.rx_mhz and channel.tx_freq_mhz == knw.tx_mhz
-        assert channel.dmr_color_code == 2 and channel.tone == "ColorCode=2"
-        assert (channel.lat, channel.lon) == (knw.lat, knw.lon)
-        assert "seattledmr.org" in channel.notes
-    # Talkgroup and timeslot come from the layout it copies.
-    assert [(c.dmr_talkgroup, c.dmr_timeslot) for c in added] == [(3153, 1), (333153, 2)]
+    # Colour code 1, not the 2 that SeattleDMR and WWARA's extract carry.
+    for code, added in (("STU", stu), ("STV", stv)):
+        rows = [c for c in _channels(fixed) if c.label.endswith(f" {code}")]
+        assert [c.label for c in rows] == [f"Washington 1 {code}", f"Metro 2 {code}"]
+        assert [(c.dmr_talkgroup, c.dmr_timeslot) for c in rows] == [(3153, 1), (3166, 2)]
+        for channel in rows:
+            assert channel.freq_mhz == added.rx_mhz and channel.tx_freq_mhz == added.tx_mhz
+            assert channel.dmr_color_code == 1 and channel.tone == "ColorCode=1"
+            assert (channel.lat, channel.lon) == (added.lat, added.lon)
+            assert channel.network == "PNWDigital"
+            assert "pnwdigital.net" in channel.notes
+    # A talkgroup the machine's own deck does not list is never invented onto it.
+    assert not [c for c in _channels(fixed) if c.dmr_talkgroup == 3115 and c.label.endswith(("STU", "STV"))]
     # The input is not modified in place.
     assert "King County BWT" in [c.label for c in _channels(source)]
 
 
+def test_an_off_air_repeater_leaves_the_layout():
+    assert ("SHR", 440.125) in SUPERSEDED
+    source = _list("DMRNET", [
+        _pnw("Washington 1 BVC", 3153, 1),
+        _dmr("Washington 1 SHR", 440.125, 3153, 1, cc=1, network="PNWDigital"),
+    ])
+    assert "Washington 1 SHR" not in [c.label for c in _channels(correct_network_list(source))]
+
+
 def test_corrections_are_idempotent_and_leave_a_present_repeater_alone():
     source = _list("DMRNET", [
-        _dmr("Washington 1 SCE", 440.775, 3153, 1),
-        _dmr("Washington 1 KNW", 440.3375, 3153, 1),
+        _pnw("Washington 1 BVC", 3153, 1),
+        _dmr("Washington 1 STU", 440.3375, 3153, 1, cc=1, network="PNWDigital"),
+        _dmr("Washington 1 STV", 146.5, 3153, 1, cc=1, network="PNWDigital"),
     ])
     once = correct_network_list(source)
     twice = correct_network_list(once)
-    assert [c.label for c in _channels(once)] == ["Washington 1 SCE", "Washington 1 KNW"]
+    assert [c.label for c in _channels(once)] == [
+        "Washington 1 BVC", "Washington 1 STU", "Washington 1 STV",
+    ]
     assert [c.label for c in _channels(twice)] == [c.label for c in _channels(once)]
+
+
+def test_a_repeater_that_moved_takes_its_new_pair_in_any_list():
+    assert ("BVV", 147.02) in PAIRS and ("WA7DMR", 147.02) in PAIRS
+    network = _dmr("Washington 1 BVV", 147.02, 3153, 1, cc=1, network="PNWDigital")
+    coordinated = Channel(id="w", label="WA7DMR - Cougar Mtn", freq_mhz=147.02,
+                          tx_freq_mhz=147.62, mode="DMR", tone="ColorCode=1")
+    elsewhere = Channel(id="o", label="NM7R - Cathlamet", freq_mhz=147.02,
+                        tx_freq_mhz=147.62, mode="FM", tone="TONE=C118.8")
+    source = _list("PSHAM01", [network, coordinated, elsewhere])
+
+    moved, also, untouched = _channels(correct_pairs(source))
+
+    for channel in (moved, also):
+        assert (channel.freq_mhz, channel.tx_freq_mhz) == (147.025, 147.625)
+        assert "147.0250/147.6250" in channel.notes
+    # Another machine on the pair the repeater left keeps it.
+    assert (untouched.freq_mhz, untouched.tx_freq_mhz) == (147.02, 147.62)
+    assert _channels(source)[0].freq_mhz == 147.02  # input untouched
+    # Already moved, or nothing on the pair: the same object comes back.
+    once = correct_pairs(source)
+    assert correct_pairs(once) is once
+    nothing = _list("PSHAM01", [elsewhere])
+    assert correct_pairs(nothing) is nothing
 
 
 def test_other_lists_are_untouched():

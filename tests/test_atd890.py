@@ -330,6 +330,51 @@ class TestBundle:
                 assert lists[zone.name] == [m.name for m in zone.members]
                 assert {bundle.scan_list_by_channel[m.name] for m in zone.members} == {zone.name}
 
+    def test_a_dmr_scan_list_holds_one_channel_per_repeater_timeslot(self):
+        """Several talkgroups on one repeater timeslot are one RF channel, so
+        the list keeps one of each while the zone keeps them all."""
+        from wasds150.plan.resolve import PlannedChannel, ResolvedPlan
+        from wasds150.radios.digital import DigitalSpec
+        from wasds150.radios.registry import AT_D890UV
+
+        def dmr(name, mhz, tg, slot, tier, *, cc=1, network="PNWDigital"):
+            return PlannedChannel(
+                slot=0, name=name, label=name, rx_freq_mhz=mhz, mode="DMR", block="DMR Core",
+                bank="Ham DMR Core", source="t", distance_miles=8.0, tier=tier,
+                digital=DigitalSpec(protocol="DMR", color_code=cc, timeslot=slot,
+                                    talkgroup=tg, talkgroup_name=name, network=network),
+            )
+
+        channels = [
+            # The parrot comes first but the calling group outranks it, so the
+            # sweep stops on something worth answering.
+            dmr("Parrot 1 BVC", 441.2875, 9998, 1, tier=3),
+            dmr("Oregon 1 BVC", 441.2875, 3141, 1, tier=1),
+            dmr("Washington 1 BVC", 441.2875, 3153, 1, tier=0),
+            dmr("PNW 1 BVC", 441.2875, 3187, 1, tier=0),
+            dmr("Metro 2 BVC", 441.2875, 3166, 2, tier=0),
+            # Another machine, and the same pair on a different colour code.
+            dmr("Washington 1 STU", 440.3375, 3153, 1, tier=0),
+            dmr("Local 1 SHL", 441.2875, 3181, 1, tier=0, cc=2),
+            PlannedChannel(slot=0, name="Cougar FM", label="Cougar FM", rx_freq_mhz=147.08,
+                           mode="NFM", block="DMR Core", bank="Ham DMR Core", source="t",
+                           distance_miles=8.0),
+        ]
+        test_plan = ChannelPlan(id="t", radio_id="at-d890uv", label="T",
+                                blocks=(PlanBlock("DMR Core", tx_policy=TX_NONE, bank="Ham DMR Core"),))
+        bundle = build_bundle(ResolvedPlan(plan=test_plan, profile=AT_D890UV, channels=channels))
+
+        zone = next(z for z in bundle.zones if z.name == "Ham DMR Core")
+        scan = next(s for s in bundle.scan_lists if s.name == "Ham DMR Core")
+        assert len(zone.members) == 8
+        # One per (frequency, colour code, timeslot), plus the analog row.
+        assert [m.name for m in scan.members] == [
+            "Washington 1 BVC", "Metro 2 BVC", "Washington 1 STU", "Local 1 SHL", "Cougar FM",
+        ]
+        # The talkgroups the list leaves out still name it, so a sweep started
+        # from any of them runs the same list.
+        assert {bundle.scan_list_by_channel[m.name] for m in zone.members} == {"Ham DMR Core"}
+
     def test_copy_names_keep_the_repeater_code(self):
         """A copy has to say which machine it is: the site code stays whole and
         the talkgroup part shrinks, without losing its digits."""

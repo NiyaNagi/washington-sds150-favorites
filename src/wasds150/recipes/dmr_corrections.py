@@ -30,6 +30,14 @@ DMRNET_KEY = "DMRNET"
 SEATTLEDMR_REPEATERS_URL = "https://seattledmr.org/"
 RETRIEVED = "2026-09-13"
 
+#: PNWDigital's own live records: the repeater roster, and one talkgroup deck
+#: per site reached by clicking a frequency on it. These are the network
+#: operator writing down what its machines are doing right now, so where they
+#: contradict the Config Builder file or a coordination extract, they win.
+PNWDIGITAL_REPEATERS_URL = "https://pnwdigital.net/services/repeaters.php"
+PNWDIGITAL_SITE_URL = "https://pnwdigital.net/sv/siteinfo2.php?site={site}"
+PNW_RETRIEVED = "2026-09-19"
+
 #: Repeater rows to leave out, keyed by (site code, output MHz).
 SUPERSEDED: Dict[Tuple[str, float], str] = {
     ("BWT", 442.075): (
@@ -38,6 +46,37 @@ SUPERSEDED: Dict[Tuple[str, float], str] = {
         "Tiger Mountain on 440.3375, CC2, and nothing on 442.075 - which the coordinated "
         "catalog holds as K7NWS's analog repeater, CTCSS 110.9."
     ),
+    ("KNW", 440.3375): (
+        "'Seattle/East' as a SeattleDMR repeater on 440.3375, CC2, carrying the SeattleDMR "
+        "deck. The machine is K7NWS West Tiger Mtn 2 UHF and PNWDigital runs it as site STU "
+        "on colour code 1 with its own deck, which holds none of those talkgroups; it is "
+        "re-added below from the network's live record."
+    ),
+    ("SHR", 440.125): (
+        "Shoreline, K7LFP 440.125. PNWDigital took the repeater off the air on 2026-07-09 "
+        "and is looking for a new site (https://pnwdigital.net/shoreline-repeater/); it is "
+        f"gone from the roster ({PNWDIGITAL_REPEATERS_URL}, retrieved {PNW_RETRIEVED}) "
+        "although RepeaterBook still shows it. Twenty-three dead channels, seven of them in "
+        "the first DMR scan list, were costing scan time on a machine that cannot answer."
+    ),
+}
+
+#: Output/input pairs a list's source has stale, keyed by (site code or
+#: callsign, the output MHz it currently carries). A repeater that moved keeps
+#: its old pair in both the Config Builder file and, until the coordinator
+#: catches up, in WWARA's extract - and a radio 5 kHz off hears nothing at all.
+PAIRS: Dict[Tuple[str, float], Tuple[float, float, str]] = {
+    key: (
+        147.025,
+        147.625,
+        "WA7DMR Cougar Mtn (PNWDigital 'Cougar VHF', RID 312947) moved to 147.0250 +0.600 "
+        "when the repeater was replaced on 2025-06-22. PNWDigital's roster "
+        f"({PNWDIGITAL_REPEATERS_URL}, 'New Rptr installed 6-22-25') and its site deck "
+        f"({PNWDIGITAL_SITE_URL.format(site=2)}) both say 147.0250/147.6250 CC1, retrieved "
+        f"{PNW_RETRIEVED}. The Config Builder file and WWARA's extract both still carry "
+        "147.0200, the pair the machine no longer uses.",
+    )
+    for key in (("BVV", 147.02), ("WA7DMR", 147.02))
 }
 
 
@@ -47,7 +86,11 @@ class AddedRepeater:
 
     ``layout_from`` names a repeater on the same network whose talkgroups and
     timeslots it carries; that is only sound where the network publishes one
-    talkgroup table for all of its machines, as SeattleDMR does.
+    talkgroup table for all of its machines, as SeattleDMR does. Where the
+    network publishes a deck for this machine, ``deck`` lists the talkgroup
+    ids on it, and only those are copied - so a repeater is never given a
+    talkgroup its own operator does not show. A deck entry the template
+    repeater lacks is simply absent rather than invented.
     """
 
     code: str
@@ -60,24 +103,67 @@ class AddedRepeater:
     layout_from: str
     department: str
     citation: str
+    deck: Tuple[int, ...] = ()
 
+
+#: The talkgroup ids on both West Tiger decks, which are identical
+#: (``siteinfo2.php?site=312488`` and ``?site=314972``, retrieved 2026-09-19).
+#: Cougar UHF, the layout template, does not carry TAC 3 (8953), Montana 2
+#: (3130), N.America 2 (3163), Utah 2 (3149) or Worldwide 2 (3161), so those
+#: five wide-area groups are left off rather than guessed onto the machine.
+_WEST_TIGER_DECK: Tuple[int, ...] = (
+    3153, 103153, 3187, 103187, 31771, 3181, 3166, 3168, 3191, 3141, 3027, 3106, 3116,
+    3100, 302, 3130, 3163, 3177, 3149, 3161, 31002, 8951, 8952, 8953, 310, 311, 312,
+    1776, 9998, 9999,
+)
 
 ADDED: Tuple[AddedRepeater, ...] = (
     AddedRepeater(
-        code="KNW",
-        site="K7NWS West Tiger Mountain",
+        code="STU",
+        site="K7NWS West Tiger Mtn 2 UHF",
         rx_mhz=440.3375,
         tx_mhz=445.3375,
-        color_code=2,
+        # CC1, not the CC2 that SeattleDMR and WWARA's extract carry.
+        color_code=1,
         # West Tiger Mountain, as the checked-in snapshot's Seattle/East row gives it.
         lat=47.50875,
         lon=-121.98519,
-        layout_from="SCE",
+        layout_from="BVC",
         department="Puget Sound",
+        deck=_WEST_TIGER_DECK,
         citation=(
-            f"SeattleDMR lists K7NWS West Tiger Mountain, 440.3375 +5 MHz CC2, as one of its "
-            f"four repeaters, with one talkgroup table for all of them ({SEATTLEDMR_REPEATERS_URL}, "
-            f"retrieved {RETRIEVED}); layout copied from Seattle/Central, which carries that table."
+            "PNWDigital runs K7NWS West Tiger Mtn 2 UHF, 440.3375 +5 MHz, as site STU "
+            f"(RID 312488) on colour code 1: {PNWDIGITAL_REPEATERS_URL} and its deck at "
+            f"{PNWDIGITAL_SITE_URL.format(site=312488)}, both retrieved {PNW_RETRIEVED}, and "
+            "RadioID and the owner (Boeing Employees ARS) agree. SeattleDMR lists the same "
+            f"machine as one of its four repeaters on CC2 ({SEATTLEDMR_REPEATERS_URL}, "
+            f"retrieved {RETRIEVED}), and WWARA's extract also says CC2; a radio on the wrong "
+            "colour code decodes nothing, and the SeattleDMR talkgroups (King County, Seattle "
+            "1/2, Puget Sound, BEARS, Link 1-6, TAC 313) are not on this deck at all."
+        ),
+    ),
+    AddedRepeater(
+        code="STV",
+        site="K7NWS West Tiger Mtn 2 VHF",
+        # WWARA coordinates K7NWS Tiger Mtn West as 146.500 out, 147.500 in,
+        # +1.0 MHz, which is how the roster reads it; the site page prints the
+        # pair the other way round.
+        rx_mhz=146.5,
+        tx_mhz=147.5,
+        color_code=1,
+        lat=47.50875,
+        lon=-121.98519,
+        layout_from="BVC",
+        department="Puget Sound",
+        deck=_WEST_TIGER_DECK,
+        citation=(
+            "PNWDigital installed K7NWS West Tiger Mtn 2 VHF, 146.500 +1.000 MHz CC1, as site "
+            f"STV (RID 314972) on 2026-05-06 - after the Config Builder snapshot, so no row "
+            f"for it exists ({PNWDIGITAL_REPEATERS_URL} and "
+            f"{PNWDIGITAL_SITE_URL.format(site=314972)}, retrieved {PNW_RETRIEVED}; WWARA "
+            "coordinates the pair to K7NWS). It is deliberately co-channel with Bellingham "
+            "and BawFaw for single-channel I-5 coverage, so its rows carry the local site: "
+            "nine miles from home against Bellingham's seventy-five."
         ),
     ),
 )
@@ -121,6 +207,9 @@ def correct_network_list(fl: FavoritesList) -> FavoritesList:
                and abs(c.freq_mhz - added.rx_mhz) < 5e-4 for c in channels):
             continue
         template = [c for c in channels if _site_code(c) == added.layout_from]
+        if added.deck:
+            wanted = set(added.deck)
+            template = [c for c in template if c.dmr_talkgroup in wanted]
         if not template:
             continue
         target = next((d for d in departments if d.label == added.department), None)
@@ -201,6 +290,49 @@ def correct_color_codes(fl: FavoritesList) -> FavoritesList:
     return fl
 
 
+def _pair_fix(channel: Channel) -> Optional[Tuple[float, float]]:
+    """The pair :data:`PAIRS` moves this channel to, or ``None``.
+
+    A row is matched by its site code (the Config Builder layout names
+    channels ``"<talkgroup> <code>"``) or by a callsign in its label, so one
+    entry corrects the network list and the coordination record together.
+    """
+    if not _is_dmr(channel) or channel.freq_mhz is None:
+        return None
+    freq = round(channel.freq_mhz, 4)
+    label = (channel.label or "").upper()
+    for (name, mhz), (rx, tx, _why) in PAIRS.items():
+        if abs(freq - mhz) > 5e-4:
+            continue
+        if _site_code(channel) == name or name.upper() in label:
+            return (rx, tx)
+    return None
+
+
+def correct_pairs(fl: FavoritesList) -> FavoritesList:
+    """``fl`` with :data:`PAIRS` applied; the same object when nothing matches."""
+    if not any(_pair_fix(c) for d in _departments(fl) for c in d.channels):
+        return fl
+    fl = copy.deepcopy(fl)
+    for department in _departments(fl):
+        for index, channel in enumerate(department.channels):
+            pair = _pair_fix(channel)
+            if pair is None:
+                continue
+            rx, tx = pair
+            notes = channel.notes or ""
+            # The note spells out the input the coordinator published; leaving
+            # the old pair in it would contradict the row it now describes.
+            moved = f"moved to {rx:.4f}/{tx:.4f} (repeater registry: PNWDigital site record)"
+            department.channels[index] = dataclasses.replace(
+                channel,
+                freq_mhz=rx,
+                tx_freq_mhz=tx,
+                notes=f"{notes}; {moved}" if notes else moved,
+            )
+    return fl
+
+
 #: Analog access tones a list's source gets wrong, keyed by (list key, channel
 #: label, output MHz). The Seattle ACS channel plan is rebuilt from the
 #: SeattleDMR source, so the correction has to follow every rebuild.
@@ -241,4 +373,7 @@ def correct_analog_tones(fl: FavoritesList) -> FavoritesList:
 
 
 def correct_network_lists(favorites: Iterable[FavoritesList]) -> List[FavoritesList]:
-    return [correct_analog_tones(correct_color_codes(correct_network_list(fl))) for fl in favorites]
+    return [
+        correct_analog_tones(correct_pairs(correct_color_codes(correct_network_list(fl))))
+        for fl in favorites
+    ]

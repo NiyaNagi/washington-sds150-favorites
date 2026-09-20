@@ -87,6 +87,35 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Fixed
 
+- **The DMR repeaters nearest home, from their operator's live records.** The
+  Config Builder snapshot had gone stale in four ways that each cost receive,
+  so `wasds150.recipes.dmr_corrections` now takes PNWDigital's own roster and
+  per-site talkgroup decks over it and over a coordination extract that has
+  not caught up (all retrieved 2026-09-19):
+  - **Cougar VHF moved to 147.025 / 147.625** when the repeater was replaced
+    on 2025-06-22. Both the network list and WWARA's extract still carried
+    147.020, five kilohertz off the nearest VHF DMR machine to home; a new
+    `PAIRS` correction moves every copy, whichever list it is in.
+  - **K7NWS West Tiger UHF 440.3375 is a PNWDigital machine on colour code 1**,
+    not the SeattleDMR CC2 machine the layout had, and it carries PNWDigital's
+    deck rather than King County, Seattle 1/2, Puget Sound, BEARS and Link
+    1-6 - talkgroups that are not on it at all. Wrong colour code, wrong
+    talkgroups and the wrong receive group list, nine miles from home.
+  - **West Tiger VHF 146.500 arrived**, installed 2026-05-06, after the
+    snapshot was taken. It is deliberately co-channel with Bellingham, so its
+    rows carry the local site and now reach the Near Me and DMR Core lists.
+  - **Shoreline 440.125 left**: off the air since 2026-07-09, still green on
+    RepeaterBook, and twenty-three dead channels deep in the scan lists.
+  An added repeater may now name the talkgroup ids on its own published deck,
+  so a layout copied from another machine never invents a talkgroup onto it.
+- **DMR scan lists hold one channel per repeater timeslot.** Every talkgroup
+  on a timeslot is the same RF channel and the receive group list already
+  carries the whole deck, so scanning each of them swept the same signal over
+  and over: the first DMR list held a hundred members for twenty-eight
+  repeater/timeslot pairs, long enough for a short over to start and finish
+  elsewhere in the sweep. The zones are unchanged - every talkgroup is still
+  one dial turn away to transmit on, and still names its list - and the five
+  DMR lists now fit the CPS importer's fifty-member array without patching.
 - **D-STAR repeaters are programmed as D-STAR, and only where they can be.**
   A county list's FM row for a D-STAR machine is now that machine: the
   registry merges D-STAR and analog copies of one output, so an FM copy of a

@@ -113,18 +113,27 @@ and rarely date their pages.
 ## DMR nets
 
 From [PNWDigital's net page](https://pnwdigital.net/nets/), rechecked
-2026-09-13. PNW Regional 2 (31771) is bridged to BrandMeister, so its two nets
-reach all three networks near home.
+2026-09-19 against each machine's own talkgroup deck
+(`pnwdigital.net/sv/siteinfo2.php?site=<N>`, reached by clicking a frequency on
+[the roster](https://pnwdigital.net/services/repeaters.php)). PNW Regional 2
+(31771) is bridged to BrandMeister, so its two nets reach all three networks
+near home.
 
 | Day | Time | Net | Talkgroup | Nearest machines carrying it |
 |---|---|---|---|---|
-| Mon/Wed/Fri | 08:00 | Cascades Coffee | PNWDigital TG 3191, TS1 | Bellevue/Cougar `BVV` 147.020, `BVC` 441.2875 (part-time here; full-time east of the Cascades) |
-| Sun | 19:30 | PNW Regional EmComm | TG 31771 - PNWDigital/SeattleDMR TS2, BrandMeister N7QT **TS1** | `PNW Rgnl 2 BVV`/`BVC`, `PNW Rgnl 2 KNW` (K7NWS West Tiger 440.3375 CC2), `N7QT PNWR` (Redmond 442.325 CC1) |
-| Wed | 19:00 | PNWDigital Gathering | as above | as above |
+| **Sun** | **19:30** | PNW Regional EmComm | TG 31771 - PNWDigital/SeattleDMR TS2, BrandMeister N7QT **TS1** | `PNW Rgnl 2 BVV` (Cougar VHF 147.025), `BVC` (441.2875), `STU`/`STV` (West Tiger 440.3375 and 146.500, CC1), `N7QT PNWR` (Redmond 442.325 CC1) |
+| **Wed** | **19:00** | PNWDigital Gathering | as above | as above |
+| Mon/Wed/Fri | 08:00 | Cascades Coffee | PNWDigital TG 3191, TS1 | full-time 07:55-09:00 on `STU`/`STV` and Capitol Hill `SEC`; push-to-talk on `BVV`/`BVC`, so kerchunk it there first |
+| Mon-Fri | 17:00 | Happy Hour | PNWDigital TG 3141, TS1 | full-time 16:58-17:10 on `BVC`, 16:55-18:00 on `STU`; push-to-talk otherwise |
+| Mon | 19:00 | Oregon Regional | PNWDigital TG 3141, TS1 | full-time 18:58-20:00 on `BVC`, 18:55-20:00 on `STU` |
+
+The two 31771 nets are the region's real gathering: net control's own logs show
+23-36 check-ins on consecutive Sundays through mid-2026.
 
 N7QT carries 31771 statically on timeslot 1, where PNWDigital and SeattleDMR
 use timeslot 2; the BrandMeister channel follows N7QT's own layout
-(api.brandmeister.network/v2/device/311757/talkgroup).
+(api.brandmeister.network/v2/device/311757/talkgroup, rechecked 2026-09-19 -
+all seven of its statics match what is programmed).
 
 **Hearing them needs Digital Monitor on** (see `docs/at-d890uv-programming.md`).
 Outside a net, the groups on the air without anyone keying them are the
@@ -132,9 +141,30 @@ full-time ones: Washington 1/2 (3153 TS1, 103153 TS2) and PNW 1/2 (3187 TS1,
 103187 TS2) on PNWDigital, King County, Seattle 1/2 and Puget Sound on
 SeattleDMR, and N7QT's static set on BrandMeister. Most others are
 push-to-talk: silent until someone keys them, then held for 15 minutes
-([PNWDigital talkgroups](https://pnwdigital.net/talkgroups/)). BrandMeister's
-per-talkgroup last-heard activity is a live dashboard only, so activity was
-judged from the networks' published full-time groups and nets, not measured.
+([PNWDigital talkgroups](https://pnwdigital.net/talkgroups/)).
+
+**Full-time is per machine, not per network.** Washington 2 (103153), which
+PNWDigital calls its busiest talkgroup, is full-time on Cougar VHF and UHF but
+**push-to-talk on West Tiger and Capitol Hill**; Cascades 1 (3191) is the other
+way round. Sitting on a push-to-talk group is silence by design. The catalog's
+talkgroup tiers are per network (`src/wasds150/catalog/dmr_talkgroup_tiers.py`)
+and do not yet know this, so the first DMR zone can lead with a group that is
+push-to-talk on the machine it is tuned to.
+
+### How busy it actually is
+
+Measured 2026-09-19, because the answer changes what is worth waiting on. The
+status page's Last Active column - time since the last transmission through
+each machine - read 4 h on Cougar VHF, 9 h on Cougar UHF, 10 h on West Tiger,
+13 h on Capitol Hill, 34 h on Baldi UHF, days on Tulalip and Tacoma. Every site
+was online at 100% weekly uptime, so that is quiet, not broken. Over 1 h 46 m
+of [consolidated CallWatch](https://pnwdigital.net/ccw/), 271 calls went
+through the network and **two** of them came from a Washington repeater rather
+than a hotspot or the BrandMeister bridge. On BrandMeister, Washington 3153
+does not reach the top hundred busiest talkgroups over 24 hours.
+
+So: away from the nets above, expect long silences on every local machine.
+Check the network before suspecting the radio.
 
 ## Not confirmed, and deliberately not programmed
 

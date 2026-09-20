@@ -16,7 +16,8 @@ Routing rules:
 * Everything else is an ordinary channel.
 
 Zones come from the plan's block ``bank`` names in plan order. Scan lists
-are one per zone (its non-``skip_scan`` members) plus one per
+are one per zone (its non-``skip_scan`` members, one per repeater timeslot
+where those are DMR talkgroups) plus one per
 :class:`~wasds150.models.plan.ScanGroup`; any list longer than the radio's
 per-list ceiling is split into numbered lists rather than truncated.
 """
@@ -377,8 +378,13 @@ def build_bundle(resolved: ResolvedPlan) -> Atd890Bundle:
     # radio, PF1 sweeps the scan list named on the channel under the cursor
     # and answers "Scan List No Select" on a channel naming none - there is no
     # zone scan. So every zone that scans has exactly one list of the same
-    # name holding exactly its channels, every member names that list, and a
-    # zone either scans all of its channels or none of them.
+    # name, every member names that list, and a zone either scans all of its
+    # channels or none of them.
+    #
+    # DMR is the one place where the list is shorter than the zone. Several
+    # talkgroups on one repeater timeslot are one RF channel, so scanning
+    # them all sweeps the same signal repeatedly; ``one_per_slot`` keeps one
+    # of each. The zone is unchanged and every member still names the list.
     #
     # A block's scanned channels are zoned at the scan-list ceiling (100)
     # rather than the zone ceiling (160), because a longer zone would need two
@@ -401,6 +407,36 @@ def build_bundle(resolved: ResolvedPlan) -> Atd890Bundle:
     limit = profile.scan_list_member_max
     blocks_by_label = {block.label: block for block in plan.blocks}
 
+    def one_per_slot(members: List[PlannedChannel]) -> List[PlannedChannel]:
+        """``members`` with the redundant DMR talkgroups left out.
+
+        Every talkgroup on a repeater's timeslot arrives on the same RF
+        channel, and the channel's receive group list carries that network's
+        whole deck, so one member per repeater and timeslot receives all of
+        them. Scanning the rest only lengthens the sweep: the first DMR list
+        held a hundred members for twenty-eight repeater/timeslot pairs, long
+        enough for a short over to start and finish elsewhere in the list.
+        The zone still holds every talkgroup, one dial turn away to transmit
+        on, and every one of them names this list.
+
+        Where two talkgroups share a slot the lower tier wins, so the sweep
+        stops on the calling group rather than on a parrot.
+        """
+        kept: List[PlannedChannel] = []
+        at: Dict[Tuple[float, Optional[int], Optional[int]], int] = {}
+        for member in members:
+            digital = member.digital
+            if digital is None or digital.protocol != "DMR" or digital.talkgroup is None:
+                kept.append(member)
+                continue
+            key = (round(member.rx_freq_mhz, 4), digital.color_code, digital.timeslot)
+            if key not in at:
+                at[key] = len(kept)
+                kept.append(member)
+            elif member.tier < kept[at[key]].tier:
+                kept[at[key]] = member
+        return kept
+
     def is_far(member: PlannedChannel) -> bool:
         """Unscanned only because the fill pass found it beyond the radius -
         not a block that never scans, and not a lockout the operator chose."""
@@ -416,7 +452,9 @@ def build_bundle(resolved: ResolvedPlan) -> Atd890Bundle:
         chunks = _chunk(members, limit)
         for name, chunk in zip(_numbered(stem, len(chunks)), chunks):
             zones.append(Zone(name=name, members=chunk))
-            scan_lists.append(ScanList(name=name, members=chunk, kind=kind))
+            scan_lists.append(ScanList(name=name, members=one_per_slot(chunk), kind=kind))
+            # Every member names the list, including the talkgroups the list
+            # itself leaves out, so a sweep started from any of them runs it.
             for member in chunk:
                 scan_list_by_channel[member.name] = name
 

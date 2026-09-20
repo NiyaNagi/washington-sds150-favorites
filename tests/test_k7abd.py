@@ -123,4 +123,7 @@ class TestSnapshot:
         assert len(puget.channels) > 300
         for channel in puget.channels:
             assert channel.dmr_talkgroup and channel.dmr_timeslot in (1, 2) and channel.tx_freq_mhz
-            assert "seattledmr.com" in channel.notes
+            # Every row cites where it came from: the Config Builder file, or
+            # the network's own site record for the repeaters
+            # wasds150.recipes.dmr_corrections adds and corrects.
+            assert "seattledmr.com" in channel.notes or "pnwdigital.net" in channel.notes
