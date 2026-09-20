@@ -71,8 +71,15 @@ reachable through a zone whose channels name it - and a channel names one
 list, its own zone's.
 
 So the export keeps one rule: **a zone and its scan list are the same thing.**
-Every scanned zone has one list of the same name holding exactly its
-channels, and every one of those channels names it. `Near Me` is a zone like
+Every scanned zone has one list of the same name, and every one of its
+channels names that list.
+
+The list holds exactly the zone's channels with one exception, DMR: several
+talkgroups on one repeater timeslot are a single RF channel, and the channel's
+receive group list already carries that network's whole deck, so the list
+keeps one of them and sweeps the machine once instead of seven times. The
+others stay in the zone, one dial turn away to transmit on, and still name the
+list. `Near Me` is a zone like
 the rest, first on the knob, holding copies (named with a trailing ` N`) so
 the originals keep scanning their own zones. Only the first scan group is
 built: `Ham All`, `Everything` and the rest are far over 100 and could only

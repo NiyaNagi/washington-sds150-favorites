@@ -44,6 +44,12 @@ from wasds150.radios.tones import NO_TONE, ToneSpec, parse_tone
 #: not state a mode the target radio understands.
 _AM_BANDS = ((108.0, 137.0), (225.0, 400.0))
 
+#: Broadcast bands: AM (medium wave) and FM. A station here transmits a
+#: carrier continuously, so it is worth programming and never worth scanning -
+#: a scan that lands on one stays there until the resume timer moves it, and
+#: on a radio whose resume waits for the carrier to drop, forever.
+_BROADCAST_BANDS = ((0.52, 1.71), (87.5, 108.0))
+
 #: Bands that conventionally run wide FM (5 kHz deviation).  Everything else
 #: in the land-mobile spectrum has migrated to narrowband.
 _WIDE_FM_BANDS = (
@@ -212,6 +218,21 @@ Selected = Tuple[FavoritesList, Department, Channel, Optional[float]]
 
 def service_rank(service_type: Optional[int]) -> int:
     return _SERVICE_RANK.get(service_type, _OTHER_SERVICE) if service_type is not None else _OTHER_SERVICE
+
+
+#: RadioReference publishes a row's short name in an ``alpha:`` note and its
+#: long description as the label, and either can be the one that says what the
+#: channel is. Spokane's ATIS is labelled "Automated Airport Weather Advisory"
+#: with ``alpha: SIA ATIS``, so a lockout reading only the label missed it and
+#: it was the one continuous carrier left in the air blocks' sweeps.
+_ALPHA_NOTE = re.compile(r"\balpha:\s*([^;]+)", re.IGNORECASE)
+
+
+def _skip_text(channel: Channel) -> str:
+    """What a block's ``skip_label_pattern`` is matched against: the label,
+    plus the source's own short name for the channel when it published one."""
+    alpha = _ALPHA_NOTE.search(channel.notes or "")
+    return f"{channel.label} {alpha.group(1).strip()}" if alpha else channel.label
 
 
 def channel_position(department: Optional[Department], channel: Channel) -> Optional[Tuple[float, float]]:
@@ -635,8 +656,14 @@ def _resolve_once(
                     block.skip_scan
                     or bool(
                         block.skip_label_pattern
-                        and re.search(block.skip_label_pattern, channel.label, re.IGNORECASE)
+                        and re.search(block.skip_label_pattern, _skip_text(channel), re.IGNORECASE)
                     )
+                    # A broadcast station is a carrier that never stops,
+                    # whichever block it landed in. The dedicated broadcast
+                    # blocks already skip their own; these are the ones a
+                    # catch-all picked up, and nine of them sat in the FTX-1's
+                    # sweep where its default BUSY resume would park forever.
+                    or _in_any(freq, _BROADCAST_BANDS)
                     # A station the fill pass added from beyond the radius is
                     # there to browse, not to slow every scan.
                     or bool(plan.fill_to_capacity and radius is not None and distance is not None and distance > radius)

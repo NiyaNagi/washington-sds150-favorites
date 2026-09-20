@@ -81,3 +81,33 @@ def test_a_mode_the_radio_cannot_use_there_is_a_capability_violation():
     ems = _ch(1, "EMS", 462.95, mode="AM", block="Business")
     findings = audit_radio("at-d890uv", _resolved("at-d890uv", ems), [], [], SOURCES, home=HOME)
     assert ("capability-violation", "EMS") in _codes(findings)
+
+def test_am_on_an_fm_only_amateur_band_is_unhearable():
+    """146.520 reached three of the scanner's lists as AM. A radio told to
+    demodulate AM there slope-detects the FM carrier into mush, and nothing
+    in the transmit audit notices because the memory is perfectly legal."""
+    bad = _ch(1, "2m Calling", 146.52, mode="AM")
+    findings = audit_radio("th-d75", _resolved("th-d75", bad), [], [], SOURCES, home=HOME)
+    assert ("mode-unhearable", "2m Calling") in _codes(findings)
+    good = _ch(1, "2m Calling", 146.52, mode="FM")
+    assert "mode-unhearable" not in {f.code for f in
+                                     audit_radio("th-d75", _resolved("th-d75", good), [], [], SOURCES, home=HOME)}
+
+
+def test_am_at_50_4_is_left_alone():
+    """6 m AM is real below 51 MHz, so the check stops where the FM simplex
+    and repeater half begins."""
+    findings = audit_radio("ftx1", _resolved("ftx1", _ch(1, "6m AM Calling", 50.4, mode="AM")),
+                           [], [], SOURCES, home=HOME)
+    assert "mode-unhearable" not in {f.code for f in findings}
+
+
+def test_a_broadcast_carrier_in_the_sweep_is_flagged():
+    """A station that never stops transmitting holds the sweep for as long as
+    the radio's resume setting allows - on the FTX-1's default, forever."""
+    station = _ch(1, "KXPA Bellevue", 1.54, mode="AM", block="Other Nearby")
+    findings = audit_radio("ftx1", _resolved("ftx1", station), [], [], SOURCES, home=HOME)
+    assert ("carrier-scanned", "KXPA Bellevue") in _codes(findings)
+    station.skip_scan = True
+    assert "carrier-scanned" not in {f.code for f in
+                                     audit_radio("ftx1", _resolved("ftx1", station), [], [], SOURCES, home=HOME)}

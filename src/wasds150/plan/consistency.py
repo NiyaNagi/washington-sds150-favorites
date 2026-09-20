@@ -43,7 +43,13 @@ from typing import Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
 from wasds150.models.catalog import Catalog, FavoritesList
 from wasds150.plan.audit import ERROR, WARNING, Finding, _calls, _tone_key
 from wasds150.plan.coordination import CoordinationIndex
+from wasds150.plan.resolve import _BROADCAST_BANDS as BROADCAST_BANDS
 from wasds150.plan.resolve import PlannedChannel, ResolvedPlan
+from wasds150.recipes.dmr_corrections import FM_ONLY_AMATEUR
+
+
+def _in_any(freq: Optional[float], bands: Sequence[Tuple[float, float]]) -> bool:
+    return freq is not None and any(low <= freq <= high for low, high in bands)
 from wasds150.plan.scanning import group_members, is_pinned
 from wasds150.radios.profile import RadioProfile
 from wasds150.util.geo import haversine_miles
@@ -250,6 +256,18 @@ def audit_radio(radio_id: str, resolved: ResolvedPlan, machines: Sequence[DStarM
         if ch.transmit and not profile.can_transmit(ch.tx_freq_mhz if ch.tx_freq_mhz is not None else rx):
             findings.append(_finding(ERROR, "capability-violation", radio_id, ch,
                                      f"keyed outside {profile.model}'s transmit bands", "make it receive only"))
+        # Audibility. The transmit checks above ask whether a memory is legal;
+        # these ask whether it can ever produce audio. Both failures are
+        # silent on the radio - no error, just a channel that never opens.
+        if mode == "AM" and _in_any(rx, FM_ONLY_AMATEUR):
+            findings.append(_finding(ERROR, "mode-unhearable", radio_id, ch,
+                                     f"AM on {rx:.4f} MHz, an FM-only amateur segment: the memory "
+                                     "slope-detects the carrier into mush", "program it as FM"))
+        if not ch.skip_scan and _in_any(rx, BROADCAST_BANDS):
+            findings.append(_finding(WARNING, "carrier-scanned", radio_id, ch,
+                                     f"{rx:.4f} MHz is a broadcast station: a continuous carrier that "
+                                     "holds the sweep for as long as the resume setting allows",
+                                     "lock it out of the scan"))
         # D-STAR.
         if mode == "DV":
             call, module = ch.dv_rpt1[:7].strip().upper(), ch.dv_rpt1[7:8].strip().upper()

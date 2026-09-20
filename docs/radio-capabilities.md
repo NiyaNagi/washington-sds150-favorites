@@ -87,7 +87,7 @@ Generated from the radio profiles in `src/wasds150/radios/registry.py` by `wasds
 - Receive: 0.1-524 MHz
 - Transmit (hardware; licence decides use): 144-148, 222-225, 430-450 MHz
 - Modes: AM, CW, DV, FM, LSB, NFM, USB, WFM
-- Memory: 1,000 channels; names up to 16 characters
+- Memory: 1,000 channels; 30 groups/zones of up to 1000; names up to 16 characters
 - Notes: Tri-band 144/222/430 MHz FM/NFM/D-STAR transceiver with a 0.1-524 MHz Band B receiver supporting AM, SSB, CW and WFM. Holds 1,000 ordinary memories in 30 named groups plus a separate 1,500-entry D-STAR repeater list. No P25, DMR, NXDN, trunk tracking or Fusion voice decode. APRS identity is operator-specific and is preserved from the radio rather than synthesized.
 - Verified: yes, checked 2026-09-19
 - Sources:

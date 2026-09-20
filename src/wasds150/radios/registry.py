@@ -196,6 +196,13 @@ TH_D75 = RadioProfile(
     supports_per_channel_tone=True,
     supports_per_channel_mode=True,
     supports_per_channel_step=True,
+    # GRP-0..GRP-29 (user manual 8-4). The export was at 29 of them with
+    # nothing recording the ceiling, so the next block to split would have
+    # overflowed silently; thd75_target.GROUP_COUNT now reads this.
+    zone_max=30,
+    # Any split of the 1,000: the manual states no per-group cap, and the
+    # group number is one byte per memory slot in the image.
+    zone_member_max=1000,
     notes=(
         "Tri-band 144/222/430 MHz FM/NFM/D-STAR transceiver with a 0.1-524 "
         "MHz Band B receiver supporting AM, SSB, CW and WFM. Holds 1,000 "

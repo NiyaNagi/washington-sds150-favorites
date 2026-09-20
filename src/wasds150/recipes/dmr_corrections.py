@@ -379,8 +379,52 @@ def correct_analog_tones(fl: FavoritesList) -> FavoritesList:
     return fl
 
 
+#: Amateur segments that are FM and digital by band plan, where a source
+#: saying AM is simply wrong. 6 m starts at 51.0, not 50.0: AM is real on
+#: 50.4 MHz and through the 50.0-50.3 CW/SSB segment, but 51-54 is the FM
+#: simplex and repeater half, where 52.525 is the FM calling frequency.
+FM_ONLY_AMATEUR: Tuple[Tuple[float, float], ...] = (
+    (51.0, 54.0),
+    (144.0, 148.0),
+    (222.0, 225.0),
+    (420.0, 450.0),
+)
+
+
+def correct_amateur_modes(fl: FavoritesList) -> FavoritesList:
+    """``fl`` with AM coerced to FM on the amateur bands that have no AM.
+
+    Nothing works AM on 2 m, 1.25 m or 70 cm. A memory that believes a source
+    which says otherwise slope-detects the FM carrier into mush, and the
+    operator hears an unintelligible signal on a channel that is working
+    perfectly. 146.520 - the national calling frequency, and by its own label
+    "the most-monitored WA amateur freq" - reached three of the scanner's
+    lists that way, along with 223.500 and 446.000.
+    """
+
+    def wrong(channel: Channel) -> bool:
+        freq = channel.freq_mhz
+        return (
+            (channel.mode or "").strip().upper() == "AM"
+            and freq is not None
+            and any(low <= freq <= high for low, high in FM_ONLY_AMATEUR)
+        )
+
+    if not any(wrong(c) for d in _departments(fl) for c in d.channels):
+        return fl
+    fl = copy.deepcopy(fl)
+    for department in _departments(fl):
+        department.channels = [
+            dataclasses.replace(channel, mode="FM") if wrong(channel) else channel
+            for channel in department.channels
+        ]
+    return fl
+
+
 def correct_network_lists(favorites: Iterable[FavoritesList]) -> List[FavoritesList]:
     return [
-        correct_analog_tones(correct_pairs(correct_color_codes(correct_network_list(fl))))
+        correct_amateur_modes(
+            correct_analog_tones(correct_pairs(correct_color_codes(correct_network_list(fl))))
+        )
         for fl in favorites
     ]
