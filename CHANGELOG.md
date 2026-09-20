@@ -9,6 +9,25 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Added
 
+- **A geo-fence for every department (`wasds150.catalog.locate`).** A
+  department with no position is everywhere: the SDS150's location control
+  cannot exclude it whatever range is set, and the plan's distance filter has
+  only "here" or "infinitely far" for it. That left 4,062 of the scanner's
+  16,529 channels ungated, King County Metro Transit and most of Sno911 among
+  them. The missing fences are derived from what the catalog already knows -
+  the department's own channels' sites, a county named in its or its system's
+  label, the placed departments of the same system, the list's own counties,
+  and a circle over the state for lists whose metadata says all 39 counties.
+  379 unlocated departments become 9, and 4,062 channels become 47. Three
+  rules keep it honest: the statewide fence goes to the scanner only (it
+  overlaps every radius circle, and the plan already says relevant-everywhere
+  with `ChannelSelector.anywhere`), an HF department keeps no fence (where an
+  80 m net is worked from is propagation, not geography), and a derived fence
+  never names a station (`Department.fence_source`).
+- **Audibility checks in `fleet audit`.** The audit has always checked whether
+  a memory may legally transmit and never whether it can produce audio:
+  `mode-unhearable` (AM on an FM-only amateur segment) and `carrier-scanned`
+  (a broadcast station still in a sweep).
 - **Composite scan groups on the AT-D890UV, including one "Ham DMR" list.**
   The exporter used to build only the plan's first scan group as a zone,
   because the rest could not be swept whole. Counting a repeater timeslot once
@@ -100,6 +119,26 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Fixed
 
+- **Memories that could never be heard.** 146.520 - the national 2 m calling
+  frequency, and by its own label "the most-monitored WA amateur freq" -
+  was programmed AM in three of the scanner's lists, along with 223.500,
+  446.000 and 52.525: seventeen rows from a handful of shared source
+  channels. Nothing works AM there, and a radio told to demodulate it
+  slope-detects the FM carrier into mush. Nine medium-wave and twelve FM
+  broadcast stations sat in the FTX-1's and TH-D75's sweeps, picked up by a
+  catch-all block where no lockout applied; a broadcast carrier never stops,
+  and on the FTX-1's default resume one of them ends the sweep for good. And
+  one continuous carrier was left in the air blocks because the lockout read
+  only a channel's label: RadioReference labels Spokane's ATIS "Automated
+  Airport Weather Advisory" and puts `ATIS` in its `alpha:` note, which the
+  lockout now reads too.
+- **The ID-52A's scan group kept moving.** Memory groups were numbered by
+  position, so a block crossing 100 channels renumbered everything after it
+  and moved `Near Me` from group 22 to 23 - and Group Link, which names a
+  group by number, is set by hand and is not carried by a memory import.
+  The scan-group copy is pinned to group 99, and long blocks now split evenly
+  rather than filling to the ceiling, which also retires two stub groups of
+  five and two channels.
 - **The DMR repeaters nearest home, from their operator's live records.** The
   Config Builder snapshot had gone stale in four ways that each cost receive,
   so `wasds150.recipes.dmr_corrections` now takes PNWDigital's own roster and
