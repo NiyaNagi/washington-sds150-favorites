@@ -57,8 +57,10 @@ FAR_PREFIX = "Far "
 FAR_OTHER = "Other"
 FAR_MIN = 10
 
-#: Marks a channel copied into the first scan group's zone. The CPS resolves
+#: Marks a channel copied into a composite scan group's zone. The CPS resolves
 #: zone and scan-list members by name, so the copy cannot share its original's.
+#: A channel in two composite groups is copied twice and the second copy is
+#: numbered (" N2"); which group a copy belongs to is its zone, not its name.
 COPY_SUFFIX = " N"
 
 #: The operator's registered DMR ID and the name the CPS files it under;
@@ -198,6 +200,39 @@ def _numbered(stem: str, count: int) -> List[str]:
     return names
 
 
+def one_per_slot(members: Iterable[PlannedChannel]) -> List[PlannedChannel]:
+    """``members`` with the redundant DMR talkgroups left out.
+
+    Every talkgroup on a repeater's timeslot arrives on the same RF channel,
+    and the channel's receive group list carries that network's whole deck, so
+    one member per repeater and timeslot receives all of them. Scanning the
+    rest only lengthens the sweep: the first DMR list held a hundred members
+    for twenty-eight repeater/timeslot pairs, long enough for a short over to
+    start and finish elsewhere in the list. The zone still holds every
+    talkgroup, one dial turn away to transmit on, and every one of them names
+    the list.
+
+    Where two talkgroups share a slot the lower tier wins, so the sweep stops
+    on the calling group rather than on a parrot. This is also what lets a
+    composite DMR scan group exist at all: four hundred talkgroup channels
+    across every block are forty-odd repeater timeslots, which fits one list.
+    """
+    kept: List[PlannedChannel] = []
+    at: Dict[Tuple[float, Optional[int], Optional[int]], int] = {}
+    for member in members:
+        digital = member.digital
+        if digital is None or digital.protocol != "DMR" or digital.talkgroup is None:
+            kept.append(member)
+            continue
+        key = (round(member.rx_freq_mhz, 4), digital.color_code, digital.timeslot)
+        if key not in at:
+            at[key] = len(kept)
+            kept.append(member)
+        elif member.tier < kept[at[key]].tier:
+            kept[at[key]] = member
+    return kept
+
+
 def _copy_name(name: str, taken: Dict[str, str]) -> str:
     """The original's name with the copy suffix, numbered if that clashes.
 
@@ -271,35 +306,56 @@ def build_bundle(resolved: ResolvedPlan) -> Atd890Bundle:
             )
         seen_names[channel.name.casefold()] = channel.name
 
-    # -- the first scan group, as a zone of its own ----------------------------
+    # -- composite scan groups, each a zone of its own -------------------------
     # The radio has no zone scan and no radio-wide scan list: PF1 sweeps the
     # list named on the channel under the cursor. A composite list is only
     # reachable through a zone whose channels name it, and a channel names one
-    # list - its own zone's - so the composite's zone holds copies. Only the
-    # first group, and only one list's worth: the rest could never be swept
-    # whole, and splitting them into arbitrary chunks gave lists no zone led to.
-    near_name = ""
-    if plan.scan_groups:
-        group = plan.scan_groups[0]
+    # list - its own zone's - so the composite's zone holds copies.
+    #
+    # A group is built when it fits one scan list, because a zone the radio
+    # can only sweep part of is worse than no zone: splitting the rest into
+    # arbitrary chunks gave lists no zone led to. "Ham DMR" fits only because
+    # a repeater timeslot counts once (:func:`one_per_slot`) - four hundred
+    # talkgroup channels are forty-odd channels to sweep. The wide groups
+    # ("Everything", "Ham All", "Public Svc") still do not fit, and say so.
+    composite: List[str] = []
+    cap = profile.scan_list_member_max
+    # Every group draws from the planned channels, never from another group's
+    # copies: a copy keeps its original's block, so reading the growing list
+    # would let a later group copy a copy ("Rptr 0 N N").
+    originals = list(channels)
+    for index, group in enumerate(plan.scan_groups):
         _validate_name(group.name, "scan group")
-        wanted = group_members(group, channels)
-        cap = profile.scan_list_member_max
+        wanted = one_per_slot(group_members(group, originals))
+        if not wanted:
+            warnings.append(f"scan group {group.name!r} matched no scannable channels")
+            continue
         if cap and len(wanted) > cap:
+            # The first group is the plan's headline sweep and the zone the
+            # knob lands on, so it is built short rather than not at all - and
+            # its quota has already ranked it, pinned first then nearest, so
+            # the first members are the best ones. A later group has no such
+            # ranking, and a zone the radio can only sweep part of is worse
+            # than no zone: an arbitrary hundred of five hundred channels
+            # looks like a sweep and is not one.
+            if index:
+                warnings.append(
+                    f"scan group {group.name!r} sweeps {len(wanted)} channels, more than the "
+                    f"{cap} one scan list holds; no zone is built for it"
+                )
+                continue
             warnings.append(
                 f"scan group {group.name!r} matched {len(wanted)} channels; its zone holds the "
                 f"first {cap}, one scan list's worth"
             )
             wanted = wanted[:cap]
-        if wanted:
-            near_name = group.name
-            copies = []
-            for original in wanted:
-                name = _copy_name(original.name, seen_names)
-                seen_names[name.casefold()] = name
-                copies.append(dataclasses.replace(original, name=name, bank=near_name))
-            channels.extend(copies)
-        else:
-            warnings.append(f"scan group {group.name!r} matched no scannable channels")
+        composite.append(group.name)
+        copies = []
+        for original in wanted:
+            name = _copy_name(original.name, seen_names)
+            seen_names[name.casefold()] = name
+            copies.append(dataclasses.replace(original, name=name, bank=group.name))
+        channels.extend(copies)
 
     # -- contacts and receive groups ---------------------------------------
     contacts: "OrderedDict[str, Contact]" = OrderedDict()
@@ -396,9 +452,12 @@ def build_bundle(resolved: ResolvedPlan) -> Atd890Bundle:
     by_bank: "OrderedDict[str, List[PlannedChannel]]" = OrderedDict()
     for channel in channels:
         by_bank.setdefault(channel.bank or channel.block, []).append(channel)
-    if near_name:
-        # The list worth leaving running is the first zone the knob reaches.
-        by_bank.move_to_end(near_name, last=False)
+    # The ready-made sweeps lead, in plan order: the list worth leaving
+    # running is the first zone the knob reaches, and the rest of them are the
+    # next few. The per-service zones follow.
+    for name in reversed(composite):
+        if name in by_bank:
+            by_bank.move_to_end(name, last=False)
     zones: List[Zone] = []
     scan_lists: List[ScanList] = []
     scan_list_by_channel: Dict[str, str] = {}
@@ -406,36 +465,6 @@ def build_bundle(resolved: ResolvedPlan) -> Atd890Bundle:
     far: List[PlannedChannel] = []
     limit = profile.scan_list_member_max
     blocks_by_label = {block.label: block for block in plan.blocks}
-
-    def one_per_slot(members: List[PlannedChannel]) -> List[PlannedChannel]:
-        """``members`` with the redundant DMR talkgroups left out.
-
-        Every talkgroup on a repeater's timeslot arrives on the same RF
-        channel, and the channel's receive group list carries that network's
-        whole deck, so one member per repeater and timeslot receives all of
-        them. Scanning the rest only lengthens the sweep: the first DMR list
-        held a hundred members for twenty-eight repeater/timeslot pairs, long
-        enough for a short over to start and finish elsewhere in the list.
-        The zone still holds every talkgroup, one dial turn away to transmit
-        on, and every one of them names this list.
-
-        Where two talkgroups share a slot the lower tier wins, so the sweep
-        stops on the calling group rather than on a parrot.
-        """
-        kept: List[PlannedChannel] = []
-        at: Dict[Tuple[float, Optional[int], Optional[int]], int] = {}
-        for member in members:
-            digital = member.digital
-            if digital is None or digital.protocol != "DMR" or digital.talkgroup is None:
-                kept.append(member)
-                continue
-            key = (round(member.rx_freq_mhz, 4), digital.color_code, digital.timeslot)
-            if key not in at:
-                at[key] = len(kept)
-                kept.append(member)
-            elif member.tier < kept[at[key]].tier:
-                kept[at[key]] = member
-        return kept
 
     def is_far(member: PlannedChannel) -> bool:
         """Unscanned only because the fill pass found it beyond the radius -
@@ -464,7 +493,7 @@ def build_bundle(resolved: ResolvedPlan) -> Atd890Bundle:
         far.extend(m for m in members if m.skip_scan and is_far(m))
         quiet = [m for m in members if m.skip_scan and not is_far(m)]
         if scanned:
-            add_scanned(bank, scanned, "group" if bank == near_name else "zone")
+            add_scanned(bank, scanned, "group" if bank in composite else "zone")
             unscanned.extend(quiet)
         elif quiet:
             chunks = _chunk(quiet, profile.zone_member_max)

@@ -125,8 +125,8 @@ step and those channels simply stay quiet.
 | File | Contents |
 |---|---|
 | `Channel.CSV` | 77-column channel table: every VHF/UHF memory, ordered by zone. Analog rows carry the transmit CTCSS/DCS; DMR rows carry contact, colour code and timeslot; receive-only rows have `PTT Prohibit = On`. |
-| `DMRZone.CSV` | The first scan group's zone (`Near Me`, as copies), then one zone per plan bank, split into `Name 01`, `Name 02` at 100 scanned members; beyond-radius fill in `Far Ham Analog`, `Far Ham DMR`, `Far Public Svc`, `Far Other`; blocks that never scan (`Weather`, `Data`) with no list. |
-| `ScanList.CSV` | Exactly one scan list per scanned zone, same name, same members. No list exists without a zone. |
+| `DMRZone.CSV` | One zone per scan group that fits a list (`Near Me`, `Ham DMR`, `Rail & Marine`, `Personal`, as copies), then one zone per plan bank, split into `Name 01`, `Name 02` at 100 members; beyond-radius fill in `Far Ham Analog`, `Far Ham DMR`, `Far Public Svc`, `Far Other`; blocks that never scan (`Weather`, `Data`) with no list. |
+| `ScanList.CSV` | Exactly one scan list per scanned zone, same name. Same members too, except that several DMR talkgroups on one repeater timeslot are one RF channel, so the list carries one of them and the zone keeps them all. No list exists without a zone. |
 | `DMRTalkGroups.CSV` | Every talkgroup any channel references, with a `Simplex 99` default. |
 | `DMRReceiveGroupCallList.CSV` | One receive group per network (`PNWDigital RX`, `SeattleDMR RX`, ...) so a DMR channel hears every talkgroup carried on its network. |
 | `RadioIDList.CSV` | `3227807, WA7DAM` - the registered DMR ID. |
@@ -149,13 +149,23 @@ Zones, in scan-priority order:
 | `SAR Interop`, `Wildfire`, `Marine`, `Rail`, `GMRS FRS MURS`, `Business`, `Pub Safety`, `Comm Digital` | no | Receive only |
 | `ACS Data`, `NOAA WX`, `FM Bcast` | no | Programmed, never in any scan list |
 
-Scan groups: only the plan's **first** group is built, as a zone of copies
-with its own identical list (`Near Me` on the fleet plan, `Ham All` on this
-one, capped at 100). The others - `Ham Analog`, `Ham DMR`, `Pub Svc`,
-`Everything` - are not exported for this radio. PF1 only ever sweeps the list
-named on the channel under the cursor, so a composite list is reachable only
-through a zone of its own, and a group over 100 channels could only become
-arbitrary slices that no zone led to.
+Scan groups: every group that fits one scan list is built, as a zone of copies
+with its own list, in plan order ahead of the per-service zones. PF1 only ever
+sweeps the list named on the channel under the cursor, so a composite list is
+reachable only through a zone of its own, and a group over 100 channels could
+only become arbitrary slices that no zone led to.
+
+The fleet plan builds four: `Near Me` (82), **`Ham DMR` (46)**, `Rail & Marine`
+(82) and `Personal` (47). `Ham DMR` fits only because a repeater timeslot
+counts once - 416 talkgroup channels across the DMR Core, Local and Wide blocks
+are **46 channels to sweep, covering 23 machines on all three networks, both
+timeslots**. `Ham All`, `Ham Analog`, `Pub Svc` and `Everything` are still too
+big and are not exported, with a warning naming each.
+
+The **first** group is the exception to the fit rule: it is the zone the knob
+lands on, so it is built short rather than not at all (`Ham All` on the legacy
+`atd890-scan` plan, capped at 100). Its quota has already ranked it - pinned
+first, then nearest - so its first hundred are its best hundred.
 
 ---
 
@@ -210,9 +220,10 @@ So the plan is built at the radio's 100, `ScanList.CSV` carries the first
 :data:`~wasds150.export.atd890_cps.CSV_SCANLIST_MAX` of each list, and
 `scanlists.json` beside it records the full membership for
 `scripts/radios/patch_atd890_scanlists.py` to restore afterwards - see
-[Longer scan lists](#longer-scan-lists). The fleet plan is 32 zones and 30 scan
-lists (every scanned zone is its list), against the 250 of each the manual
-allows; 14 of the lists are over 50 and need the patch.
+[Longer scan lists](#longer-scan-lists). The fleet plan is 37 zones and 35 scan
+lists (every scanned zone has one), against the 250 of each the manual allows;
+12 of the lists are over 50 and need the patch. None of the DMR lists do any
+more - one channel per repeater timeslot brought every one of them under 50.
 
 This is the failure that looks like something else. `Channel.CSV` is ~1,500
 rows and fills nearly the whole progress bar, so the scan-list table is always
@@ -381,10 +392,16 @@ import the others on their own (Tool > Import > DMR Digital Contact List).
   zone scan and no radio-wide scan list - PF1 sweeps the list named on the
   channel under the cursor, and answers "Scan List No Select" on a channel
   naming none (measured on this radio) - so the export makes every scanned
-  zone's channels name one list holding exactly them.
-- `Near Me` is the first zone: copies of the nearest of every local amateur
-  service, named with a trailing ` N`, each naming the `Near Me` list. The
-  originals stay in their own zones and keep scanning those.
+  zone's channels name one list. The list holds exactly them, except on a DMR
+  zone: several talkgroups on one repeater timeslot are the same RF channel,
+  so the list carries one of them and sweeps the machine once instead of
+  seven times. The others are still in the zone to dial up and transmit on.
+- The first four zones are the ready-made sweeps, copies of channels that live
+  elsewhere, named with a trailing ` N` and each naming its own list:
+  `Near Me` (the nearest of every local amateur service), **`Ham DMR`** (every
+  DMR machine in the plan, both timeslots, all three networks - 46 channels),
+  `Rail & Marine` and `Personal` (GMRS/FRS/MURS). The originals stay in their
+  own zones and keep scanning those.
 - `Far Ham Analog`, `Far Ham DMR`, `Far Public Svc` and `Far Other` hold the
   stations the fill pass found beyond the radius: out of their own blocks so
   the local sweep stays quick, but scannable in zones of their own, each

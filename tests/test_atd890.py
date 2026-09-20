@@ -238,27 +238,37 @@ class TestBundle:
 
     def test_zones_scan_lists_and_groups(self):
         bundle = build_bundle(resolve_plan(_scanner_plan(), _scanner_catalog()))
-        # The first scan group is a zone of its own, first on the knob; the
-        # second group is not built at all, because no zone could lead to it.
-        assert [z.name for z in bundle.zones] == ["Ham All", "Ham 2m", "NOAA WX"]
-        assert [s.name for s in bundle.scan_lists] == ["Ham All", "Ham 2m"]
+        # Every scan group that fits one list is a zone of its own, in plan
+        # order, ahead of the blocks' own zones.
+        assert [z.name for z in bundle.zones] == ["Ham All", "Everything", "Ham 2m", "NOAA WX"]
+        assert [s.name for s in bundle.scan_lists] == ["Ham All", "Everything", "Ham 2m"]
         # NOAA is programmed but never in a scan list; broadcast is in the FM list only.
         noaa = next(c for c in bundle.channels if c.label == "KHB60")
         assert all(noaa not in s.members for s in bundle.scan_lists)
         assert noaa.name not in bundle.scan_list_by_channel
-        # The original keeps its own zone's list; its copy names the group's.
+        # The original keeps its own zone's list; each copy names its group's.
         assert bundle.scan_list_by_channel["Cougar WA1"] == "Ham 2m"
         assert bundle.scan_list_by_channel["Cougar WA1 N"] == "Ham All"
-        copies = next(z for z in bundle.zones if z.name == "Ham All").members
-        assert all(c.name.endswith(" N") for c in copies)
+        assert bundle.scan_list_by_channel["Cougar WA1 N2"] == "Everything"
+        # A group copies the planned channels, never another group's copies.
+        assert not [c for c in bundle.channels if c.name.endswith(" N N")]
+        assert len(next(z for z in bundle.zones if z.name == "Everything").members) == 7
+
+    def test_an_oversized_later_scan_group_gets_no_zone(self):
+        """The first group is the zone the knob lands on, so it is built short
+        rather than not at all. A later one is skipped: a zone the radio can
+        only sweep part of looks like a sweep and is not one."""
+        bundle = build_bundle(resolve_plan(_scanner_plan(), _scanner_catalog(n_ham=150)))
+        assert [z.name for z in bundle.zones] == ["Ham All", "Ham 2m 01", "Ham 2m 02", "NOAA WX"]
+        assert len(next(z for z in bundle.zones if z.name == "Ham All").members) == 100
+        assert any("'Ham All' matched 154 channels" in w for w in bundle.warnings)
+        assert any("'Everything' sweeps 154 channels" in w and "no zone is built" in w
+                   for w in bundle.warnings)
 
     def test_scan_lists_split_at_100(self):
         bundle = build_bundle(resolve_plan(_scanner_plan(), _scanner_catalog(n_ham=150)))
         assert [z.name for z in bundle.zones][:3] == ["Ham All", "Ham 2m 01", "Ham 2m 02"]
         assert all(len(s.members) <= 100 for s in bundle.scan_lists)
-        # The group's zone is one list's worth, never a split.
-        assert len(next(z for z in bundle.zones if z.name == "Ham All").members) == 100
-        assert any("its zone holds the first 100" in w for w in bundle.warnings)
         assert len({s.name for s in bundle.scan_lists}) == len(bundle.scan_lists)
 
     def test_every_zone_is_its_scan_list_or_scans_nothing(self):
@@ -318,7 +328,10 @@ class TestBundle:
         bundle = build_bundle(ResolvedPlan(plan=test_plan, profile=AT_D890UV, channels=channels))
 
         names = [z.name for z in bundle.zones]
-        assert names == ["Near Me", "Ham 2m", "Far Ham Analog", "Far Other", "Not Scanned"]
+        # "Public Svc" matched only locked-out channels, so it has no zone.
+        assert names == ["Near Me", "Ham Analog", "Everything", "Ham 2m",
+                         "Far Ham Analog", "Far Other", "Not Scanned"]
+        assert any("'Public Svc' matched no scannable channels" in w for w in bundle.warnings)
         far_other = next(z for z in bundle.zones if z.name == "Far Other")
         # Public Svc had only 3 and Rail had no group of its own: both join Far Other.
         assert sorted(m.name for m in far_other.members) == ["Far PD 0", "Far PD 1", "Far PD 2", "Far Rail"]
@@ -526,12 +539,12 @@ class TestCpsFiles:
         files, _ = self._files()
         zones = list(csv.reader(io.StringIO(files["DMRZone.CSV"])))
         assert zones[0] == list(ZONE_HEADER)
-        # The first scan group's zone leads, then the blocks in plan order.
-        assert [z[1] for z in zones[1:]] == ["Ham All", "Ham 2m", "NOAA WX"]
+        # The scan groups' zones lead, then the blocks in plan order.
+        assert [z[1] for z in zones[1:]] == ["Ham All", "Everything", "Ham 2m", "NOAA WX"]
         assert zones[2][2].split("|")[0] == zones[2][5]
         assert zones[2][3].count("|") == zones[2][2].count("|") == zones[2][4].count("|")
         scans = list(csv.reader(io.StringIO(files["ScanList.CSV"])))
-        assert [s[1] for s in scans[1:]] == ["Ham All", "Ham 2m"]
+        assert [s[1] for s in scans[1:]] == ["Ham All", "Everything", "Ham 2m"]
         assert scans[2][-5:] == ["Selected", "0.5", "0.5", "0.1", "0.1"]
         # A zone and its list carry the same members, in the same order.
         assert scans[1][2] == zones[1][2] and scans[2][2] == zones[2][2]
@@ -568,8 +581,8 @@ class TestCpsFiles:
     def test_write_creates_directory_bundle(self, tmp_path):
         result = write_atd890(resolve_plan(_scanner_plan(), _scanner_catalog()), tmp_path / "bundle")
         assert (tmp_path / "bundle" / "Channel.CSV").is_file()
-        # 7 memories (4 named + 3 repeaters), 40 air, 1 FM, 1 NOAA, and a copy of
-        # each of the 7 Ham channels for the Ham All zone.
-        assert len(result.files) == 11 and result.rows == 4 + 3 + 40 + 1 + 1 + 7
+        # 7 memories (4 named + 3 repeaters), 40 air, 1 FM, 1 NOAA, and a copy
+        # of each of the 7 Ham channels for each of the two scan-group zones.
+        assert len(result.files) == 11 and result.rows == 4 + 3 + 40 + 1 + 1 + 7 + 7
         target = get_target("atd890-cps")
         assert target.kind == "directory" and target.radio_id == "at-d890uv"

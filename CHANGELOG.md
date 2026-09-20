@@ -9,6 +9,19 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Added
 
+- **Composite scan groups on the AT-D890UV, including one "Ham DMR" list.**
+  The exporter used to build only the plan's first scan group as a zone,
+  because the rest could not be swept whole. Counting a repeater timeslot once
+  changes that: the `Ham DMR` group's 416 talkgroup channels across the DMR
+  Core, Local and Wide blocks are **46 channels to sweep, covering all 23
+  machines in the plan on both timeslots and all three networks**. Every group
+  that fits one scan list is now built, in plan order ahead of the per-service
+  zones - `Near Me`, `Ham DMR`, `Rail & Marine` and `Personal` on the fleet
+  plan. The first group is still built short rather than skipped when it
+  overflows, since it is the zone the knob lands on and its quota has already
+  ranked it; a later group that overflows is skipped with a warning naming it,
+  because an arbitrary hundred of five hundred channels looks like a sweep and
+  is not one.
 - **Every radio's capability, researched and written down.** Each profile now
   cites its sources and the date it was checked, and `wasds150 fleet docs`
   writes `docs/radio-capabilities.md` from them (`--check` fails when it
