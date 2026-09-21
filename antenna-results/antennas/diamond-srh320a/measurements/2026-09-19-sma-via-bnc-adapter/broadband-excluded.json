@@ -1,0 +1,43 @@
+{
+  "derived_from": "nanovna_measurements\\2026-09-19_diamond-srh320a\\broadband.rejected-20260919T234041-0700",
+  "calibration_file": "nanovna_measurements\\2026-09-19_2142_handheld-bnc_calibration\\calibration.npz",
+  "calibration": {
+    "created_at": "2026-09-19T21:54:31.097000-07:00",
+    "reference_plane": "antenna side of attached adapter",
+    "standards": "ideal open, short, and 50-ohm load",
+    "source_capture": {
+      "captured_at": "2026-09-19T21:45:43.973701-07:00",
+      "label": "open",
+      "port": "COM17",
+      "start_hz": 50000000,
+      "stop_hz": 1200000000,
+      "segments": 400,
+      "points": 40001,
+      "nominal_frequency_step_hz": 28750.0,
+      "device": {
+        "version": "1.2.50",
+        "info": "Board: NanoVNA-H\n2019-2026 Copyright NanoVNA.com\nbased on  @DiSlord @edy555 ... source\nLicensed under GPL.\nVersion: 1.2.50 [p:101, IF:12k, ADC:192k, Lcd:320x240]\nBuild Time: May 16 2026 - 12:42:11\nArchitecture: ARMv6-M Core Variant: Cortex-M0\nPlatform: STM32F072xB Entry Level Medium Density devices",
+        "calibration": "load Es Er cal'ed",
+        "bandwidth": "bandwidth 3 (1000Hz)"
+      }
+    }
+  },
+  "mode": "truncated",
+  "total_points": 40001,
+  "retained_points": 29907,
+  "retained_fraction": 0.7476563085922852,
+  "retained_range_hz": [
+    50000000,
+    909797500
+  ],
+  "excluded_points": 10094,
+  "excluded_intervals_hz": [
+    [
+      909826250,
+      1200000000
+    ]
+  ],
+  "maximum_excluded_gamma_magnitude": 1.5144819221375605,
+  "physical_samples_discarded_by_truncation": 1916,
+  "reason": "calibrated |Gamma| reached or exceeded 1, which is nonphysical for a passive antenna and indicates the fixture's calibrated dynamic range was exhausted; these frequencies are reported as very poor / outside calibrated dynamic range, never as a measured value"
+}

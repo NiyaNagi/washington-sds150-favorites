@@ -1,0 +1,85 @@
+{
+  "source": "load reconnect verification, 2026-09-20 corrected BNC reference plane (different adapter on CH0)",
+  "services": {
+    "6m": {
+      "floor_median_swr": 1.0009443069421389,
+      "floor_max_swr": 1.0010328271028712
+    },
+    "fm-broadcast": {
+      "floor_median_swr": 1.0012138046153092,
+      "floor_max_swr": 1.0013370916092124
+    },
+    "civil-air": {
+      "floor_median_swr": 1.0013633507278907,
+      "floor_max_swr": 1.0034692374221097
+    },
+    "2m": {
+      "floor_median_swr": 1.0014762083560622,
+      "floor_max_swr": 1.0016030063518773
+    },
+    "vhf-lmr": {
+      "floor_median_swr": 1.001626889211633,
+      "floor_max_swr": 1.002800859343936
+    },
+    "marine-vhf": {
+      "floor_median_swr": 1.0015911699220277,
+      "floor_max_swr": 1.002671061825408
+    },
+    "railroad": {
+      "floor_median_swr": 1.0016068490171663,
+      "floor_max_swr": 1.002671061825408
+    },
+    "noaa-weather": {
+      "floor_median_swr": 1.001615845250898,
+      "floor_max_swr": 1.002800859343936
+    },
+    "1.25m": {
+      "floor_median_swr": 1.0021943791268977,
+      "floor_max_swr": 1.0023073210627182
+    },
+    "military-air": {
+      "floor_median_swr": 1.0026442446766028,
+      "floor_max_swr": 1.019221630888507
+    },
+    "federal-uhf": {
+      "floor_median_swr": 1.0042017407266073,
+      "floor_max_swr": 1.1024896051745647
+    },
+    "70cm": {
+      "floor_median_swr": 1.0046170142119237,
+      "floor_max_swr": 1.008052142882962
+    },
+    "uhf-lmr": {
+      "floor_median_swr": 1.005143826949206,
+      "floor_max_swr": 1.0112340974837473
+    },
+    "t-band": {
+      "floor_median_swr": 1.00579050777855,
+      "floor_max_swr": 1.0095583818641753
+    },
+    "700-public-safety-downlink": {
+      "floor_median_swr": 1.0127818313247547,
+      "floor_max_swr": 1.0180227253315712
+    },
+    "800-public-safety-downlink": {
+      "floor_median_swr": 1.0161854660929155,
+      "floor_max_swr": 1.0201198450893953
+    },
+    "33cm": {
+      "floor_median_swr": 1.0198204856716828,
+      "floor_max_swr": 1.0770944145931762
+    },
+    "900-trunking-downlink": {
+      "floor_median_swr": 1.021133187102097,
+      "floor_max_swr": 1.0331506318616321
+    },
+    "uat-978": {
+      "floor_median_swr": 1.023061680816537,
+      "floor_max_swr": 1.0340911100080052
+    },
+    "ads-b-1090": {
+      "floor_median_swr": 1.0307388697939204,
+      "floor_max_swr": 1.0576442103700885
+    }
+  }
+}

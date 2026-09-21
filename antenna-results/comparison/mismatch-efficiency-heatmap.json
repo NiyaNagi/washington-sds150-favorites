@@ -1,0 +1,2305 @@
+{
+  "schema": "sds150-scanner-antenna-efficiency/1.0",
+  "metric": "Mean fraction of incident power transferred across each service window, 1 - |Gamma|^2, averaged point by point over the authoritative trace. Bounded 0-1. An average 2:1 SWR is 0.889 and 3:1 is 0.750. A window with no valid measurement scores 0.",
+  "retuned_score": "Mean efficiency across all services allowing the best setting per service; equal weight per service window.",
+  "fixed_score": "Mean efficiency across all services for the single best configuration. Identical to retuned_score for fixed antennas.",
+  "usable_threshold": 0.75,
+  "excellent_threshold": 0.8888888888888888,
+  "families": [
+    {
+      "family": "smiley-halfwave",
+      "family_label": "Smiley 2m half-wave telescopic",
+      "short_label": "Smiley 1/2 wave",
+      "measurement_context": "handheld_bench",
+      "configurations": 7,
+      "retuned_score": 0.7618576142434103,
+      "fixed_score": 0.6571513507937183,
+      "fixed_configuration": "smiley-halfwave:setting-5",
+      "fixed_configuration_label": "setting 5 (69 cm)",
+      "usable_bands": 11,
+      "excellent_bands": 6,
+      "services": {
+        "6m": {
+          "efficiency": 0.07117958590393357,
+          "median_swr": 55.85287650676504,
+          "configuration": "smiley-halfwave:setting-7",
+          "configuration_label": "setting 7 (fully extended)"
+        },
+        "fm-broadcast": {
+          "efficiency": 0.6826995136394263,
+          "median_swr": 3.157031921805983,
+          "configuration": "smiley-halfwave:setting-2",
+          "configuration_label": "setting 2 (34.5 cm)"
+        },
+        "civil-air": {
+          "efficiency": 0.8182104511187518,
+          "median_swr": 2.2595728724368915,
+          "configuration": "smiley-halfwave:setting-5",
+          "configuration_label": "setting 5 (69 cm)"
+        },
+        "2m": {
+          "efficiency": 0.9707957609251804,
+          "median_swr": 1.3912466496180966,
+          "configuration": "smiley-halfwave:setting-6",
+          "configuration_label": "setting 6 (80 cm)"
+        },
+        "vhf-lmr": {
+          "efficiency": 0.9073354981670729,
+          "median_swr": 1.8300031155164889,
+          "configuration": "smiley-halfwave:setting-5",
+          "configuration_label": "setting 5 (69 cm)"
+        },
+        "marine-vhf": {
+          "efficiency": 0.9579019930334215,
+          "median_swr": 1.5196996094540214,
+          "configuration": "smiley-halfwave:setting-5",
+          "configuration_label": "setting 5 (69 cm)"
+        },
+        "railroad": {
+          "efficiency": 0.9889032839594165,
+          "median_swr": 1.2236873503813537,
+          "configuration": "smiley-halfwave:setting-5",
+          "configuration_label": "setting 5 (69 cm)"
+        },
+        "noaa-weather": {
+          "efficiency": 0.9961631647368264,
+          "median_swr": 1.1317621578096702,
+          "configuration": "smiley-halfwave:setting-5",
+          "configuration_label": "setting 5 (69 cm)"
+        },
+        "1.25m": {
+          "efficiency": 0.8796016387845949,
+          "median_swr": 2.054100350505726,
+          "configuration": "smiley-halfwave:setting-3",
+          "configuration_label": "setting 3 (46 cm)"
+        },
+        "military-air": {
+          "efficiency": 0.6829558742802718,
+          "median_swr": 2.9634655725176238,
+          "configuration": "smiley-halfwave:setting-1",
+          "configuration_label": "setting 1 (collapsed, 22 cm)"
+        },
+        "federal-uhf": {
+          "efficiency": 0.7755317907053006,
+          "median_swr": 2.812089229781663,
+          "configuration": "smiley-halfwave:setting-6",
+          "configuration_label": "setting 6 (80 cm)"
+        },
+        "70cm": {
+          "efficiency": 0.7967744314628669,
+          "median_swr": 2.561982942820847,
+          "configuration": "smiley-halfwave:setting-3",
+          "configuration_label": "setting 3 (46 cm)"
+        },
+        "uhf-lmr": {
+          "efficiency": 0.7854832333385035,
+          "median_swr": 2.688073416825589,
+          "configuration": "smiley-halfwave:setting-3",
+          "configuration_label": "setting 3 (46 cm)"
+        },
+        "t-band": {
+          "efficiency": 0.6976834197803059,
+          "median_swr": 3.4470938487182243,
+          "configuration": "smiley-halfwave:setting-5",
+          "configuration_label": "setting 5 (69 cm)"
+        },
+        "700-public-safety-downlink": {
+          "efficiency": 0.6433331863626411,
+          "median_swr": 3.9683218693201345,
+          "configuration": "smiley-halfwave:setting-3",
+          "configuration_label": "setting 3 (46 cm)"
+        },
+        "800-public-safety-downlink": {
+          "efficiency": 0.6679978545770275,
+          "median_swr": 3.7210344838971037,
+          "configuration": "smiley-halfwave:setting-5",
+          "configuration_label": "setting 5 (69 cm)"
+        },
+        "33cm": {
+          "efficiency": 0.9446954637087429,
+          "median_swr": 1.5409988124758156,
+          "configuration": "smiley-halfwave:setting-5",
+          "configuration_label": "setting 5 (69 cm)"
+        },
+        "900-trunking-downlink": {
+          "efficiency": 0.7039208196339756,
+          "median_swr": 3.39563005315283,
+          "configuration": "smiley-halfwave:setting-5",
+          "configuration_label": "setting 5 (69 cm)"
+        },
+        "uat-978": {
+          "efficiency": 0.5705030204758419,
+          "median_swr": 4.803318875540763,
+          "configuration": "smiley-halfwave:setting-7",
+          "configuration_label": "setting 7 (fully extended)"
+        },
+        "ads-b-1090": {
+          "efficiency": 0.6954823002741034,
+          "median_swr": 3.462924499897348,
+          "configuration": "smiley-halfwave:setting-5",
+          "configuration_label": "setting 5 (69 cm)"
+        }
+      }
+    },
+    {
+      "family": "taurus-triband-vehicle",
+      "family_label": "Taurus triband vehicle antenna",
+      "short_label": "Taurus vehicle",
+      "measurement_context": "vehicle_installed",
+      "configurations": 1,
+      "retuned_score": 0.700603801508564,
+      "fixed_score": 0.700603801508564,
+      "fixed_configuration": "taurus-triband-vehicle",
+      "fixed_configuration_label": "installed on vehicle",
+      "usable_bands": 9,
+      "excellent_bands": 0,
+      "services": {
+        "6m": {
+          "efficiency": 0.5279222362888487,
+          "median_swr": 5.126478680359158,
+          "configuration": "taurus-triband-vehicle",
+          "configuration_label": "installed on vehicle"
+        },
+        "fm-broadcast": {
+          "efficiency": 0.370991292640946,
+          "median_swr": 8.72243433700499,
+          "configuration": "taurus-triband-vehicle",
+          "configuration_label": "installed on vehicle"
+        },
+        "civil-air": {
+          "efficiency": 0.4745153673059319,
+          "median_swr": 6.1713685060123415,
+          "configuration": "taurus-triband-vehicle",
+          "configuration_label": "installed on vehicle"
+        },
+        "2m": {
+          "efficiency": 0.6226869919431711,
+          "median_swr": 4.198534658967219,
+          "configuration": "taurus-triband-vehicle",
+          "configuration_label": "installed on vehicle"
+        },
+        "vhf-lmr": {
+          "efficiency": 0.8341647629365473,
+          "median_swr": 2.495546822583529,
+          "configuration": "taurus-triband-vehicle",
+          "configuration_label": "installed on vehicle"
+        },
+        "marine-vhf": {
+          "efficiency": 0.7918180118444678,
+          "median_swr": 2.684935749546108,
+          "configuration": "taurus-triband-vehicle",
+          "configuration_label": "installed on vehicle"
+        },
+        "railroad": {
+          "efficiency": 0.8033229910734516,
+          "median_swr": 2.595310436370928,
+          "configuration": "taurus-triband-vehicle",
+          "configuration_label": "installed on vehicle"
+        },
+        "noaa-weather": {
+          "efficiency": 0.8230075254704379,
+          "median_swr": 2.452512395448213,
+          "configuration": "taurus-triband-vehicle",
+          "configuration_label": "installed on vehicle"
+        },
+        "1.25m": {
+          "efficiency": 0.6311737596728709,
+          "median_swr": 4.068857641955716,
+          "configuration": "taurus-triband-vehicle",
+          "configuration_label": "installed on vehicle"
+        },
+        "military-air": {
+          "efficiency": 0.6344210776707714,
+          "median_swr": 4.119096418277927,
+          "configuration": "taurus-triband-vehicle",
+          "configuration_label": "installed on vehicle"
+        },
+        "federal-uhf": {
+          "efficiency": 0.692935858318403,
+          "median_swr": 3.5832556709452903,
+          "configuration": "taurus-triband-vehicle",
+          "configuration_label": "installed on vehicle"
+        },
+        "70cm": {
+          "efficiency": 0.7537116419888761,
+          "median_swr": 2.945796661195055,
+          "configuration": "taurus-triband-vehicle",
+          "configuration_label": "installed on vehicle"
+        },
+        "uhf-lmr": {
+          "efficiency": 0.7671326259014682,
+          "median_swr": 2.852473532341192,
+          "configuration": "taurus-triband-vehicle",
+          "configuration_label": "installed on vehicle"
+        },
+        "t-band": {
+          "efficiency": 0.8240928423588652,
+          "median_swr": 2.4075993637148536,
+          "configuration": "taurus-triband-vehicle",
+          "configuration_label": "installed on vehicle"
+        },
+        "700-public-safety-downlink": {
+          "efficiency": 0.7361358533737319,
+          "median_swr": 3.2760292684331707,
+          "configuration": "taurus-triband-vehicle",
+          "configuration_label": "installed on vehicle"
+        },
+        "800-public-safety-downlink": {
+          "efficiency": 0.8332538163135667,
+          "median_swr": 2.171265687173603,
+          "configuration": "taurus-triband-vehicle",
+          "configuration_label": "installed on vehicle"
+        },
+        "33cm": {
+          "efficiency": 0.756645577615096,
+          "median_swr": 3.1368358366116853,
+          "configuration": "taurus-triband-vehicle",
+          "configuration_label": "installed on vehicle"
+        },
+        "900-trunking-downlink": {
+          "efficiency": 0.7374658162979923,
+          "median_swr": 3.2072875160993704,
+          "configuration": "taurus-triband-vehicle",
+          "configuration_label": "installed on vehicle"
+        },
+        "uat-978": {
+          "efficiency": 0.6932227250179653,
+          "median_swr": 3.6019215812632432,
+          "configuration": "taurus-triband-vehicle",
+          "configuration_label": "installed on vehicle"
+        },
+        "ads-b-1090": {
+          "efficiency": 0.7034552561378699,
+          "median_swr": 3.4749500486354625,
+          "configuration": "taurus-triband-vehicle",
+          "configuration_label": "installed on vehicle"
+        }
+      }
+    },
+    {
+      "family": "uniden-sds150-stock",
+      "family_label": "Uniden SDS150 stock rubber duck",
+      "short_label": "SDS150 stock",
+      "measurement_context": "handheld_bench",
+      "configurations": 2,
+      "retuned_score": 0.5431425487105088,
+      "fixed_score": 0.4396243693103229,
+      "fixed_configuration": "uniden-sds150-stock:sma-direct",
+      "fixed_configuration_label": "bare SMA plane",
+      "usable_bands": 5,
+      "excellent_bands": 1,
+      "services": {
+        "6m": {
+          "efficiency": 0.016174880161053975,
+          "median_swr": 245.0610590106193,
+          "configuration": "uniden-sds150-stock:sma-direct",
+          "configuration_label": "bare SMA plane"
+        },
+        "fm-broadcast": {
+          "efficiency": 0.47656262065451566,
+          "median_swr": 6.566533639460408,
+          "configuration": "uniden-sds150-stock",
+          "configuration_label": "stock with adapter"
+        },
+        "civil-air": {
+          "efficiency": 0.39152889486206555,
+          "median_swr": 7.240141055225093,
+          "configuration": "uniden-sds150-stock:sma-direct",
+          "configuration_label": "bare SMA plane"
+        },
+        "2m": {
+          "efficiency": 0.3683435717857876,
+          "median_swr": 8.698457968520904,
+          "configuration": "uniden-sds150-stock:sma-direct",
+          "configuration_label": "bare SMA plane"
+        },
+        "vhf-lmr": {
+          "efficiency": 0.5097354604782922,
+          "median_swr": 6.376873370430603,
+          "configuration": "uniden-sds150-stock:sma-direct",
+          "configuration_label": "bare SMA plane"
+        },
+        "marine-vhf": {
+          "efficiency": 0.43493224102663697,
+          "median_swr": 7.149198550522775,
+          "configuration": "uniden-sds150-stock:sma-direct",
+          "configuration_label": "bare SMA plane"
+        },
+        "railroad": {
+          "efficiency": 0.4743054731648516,
+          "median_swr": 6.304798907350767,
+          "configuration": "uniden-sds150-stock:sma-direct",
+          "configuration_label": "bare SMA plane"
+        },
+        "noaa-weather": {
+          "efficiency": 0.5427071539535558,
+          "median_swr": 5.166785976146825,
+          "configuration": "uniden-sds150-stock:sma-direct",
+          "configuration_label": "bare SMA plane"
+        },
+        "1.25m": {
+          "efficiency": 0.055279003117921874,
+          "median_swr": 70.30238857705749,
+          "configuration": "uniden-sds150-stock:sma-direct",
+          "configuration_label": "bare SMA plane"
+        },
+        "military-air": {
+          "efficiency": 0.23676396620991572,
+          "median_swr": 22.951946514884618,
+          "configuration": "uniden-sds150-stock:sma-direct",
+          "configuration_label": "bare SMA plane"
+        },
+        "federal-uhf": {
+          "efficiency": 0.8949943009132607,
+          "median_swr": 1.8780239007465516,
+          "configuration": "uniden-sds150-stock",
+          "configuration_label": "stock with adapter"
+        },
+        "70cm": {
+          "efficiency": 0.757543909954313,
+          "median_swr": 3.214707714525424,
+          "configuration": "uniden-sds150-stock",
+          "configuration_label": "stock with adapter"
+        },
+        "uhf-lmr": {
+          "efficiency": 0.852221964730135,
+          "median_swr": 2.120090098561936,
+          "configuration": "uniden-sds150-stock",
+          "configuration_label": "stock with adapter"
+        },
+        "t-band": {
+          "efficiency": 0.7355022916532883,
+          "median_swr": 2.942732189451891,
+          "configuration": "uniden-sds150-stock:sma-direct",
+          "configuration_label": "bare SMA plane"
+        },
+        "700-public-safety-downlink": {
+          "efficiency": 0.5322589012718358,
+          "median_swr": 5.369192401789105,
+          "configuration": "uniden-sds150-stock:sma-direct",
+          "configuration_label": "bare SMA plane"
+        },
+        "800-public-safety-downlink": {
+          "efficiency": 0.5645923277010642,
+          "median_swr": 4.823375186072035,
+          "configuration": "uniden-sds150-stock:sma-direct",
+          "configuration_label": "bare SMA plane"
+        },
+        "33cm": {
+          "efficiency": 0.676496082141445,
+          "median_swr": 3.6256042597235876,
+          "configuration": "uniden-sds150-stock",
+          "configuration_label": "stock with adapter"
+        },
+        "900-trunking-downlink": {
+          "efficiency": 0.7282159559043349,
+          "median_swr": 3.176072065547376,
+          "configuration": "uniden-sds150-stock",
+          "configuration_label": "stock with adapter"
+        },
+        "uat-978": {
+          "efficiency": 0.8116881312455284,
+          "median_swr": 2.532434567971973,
+          "configuration": "uniden-sds150-stock",
+          "configuration_label": "stock with adapter"
+        },
+        "ads-b-1090": {
+          "efficiency": 0.8030038432803736,
+          "median_swr": 2.5961115661579135,
+          "configuration": "uniden-sds150-stock",
+          "configuration_label": "stock with adapter"
+        }
+      }
+    },
+    {
+      "family": "rh789",
+      "family_label": "RH789 telescopic",
+      "short_label": "RH789",
+      "measurement_context": "handheld_bench",
+      "configurations": 6,
+      "retuned_score": 0.5319933686439747,
+      "fixed_score": 0.32590126697403393,
+      "fixed_configuration": "rh789:setting-5",
+      "fixed_configuration_label": "setting 5",
+      "usable_bands": 7,
+      "excellent_bands": 3,
+      "services": {
+        "6m": {
+          "efficiency": 0.07329427477062535,
+          "median_swr": 58.82004227637218,
+          "configuration": "rh789:setting-6",
+          "configuration_label": "setting 6"
+        },
+        "fm-broadcast": {
+          "efficiency": 0.6083389728532534,
+          "median_swr": 4.2354464808086725,
+          "configuration": "rh789:setting-2",
+          "configuration_label": "setting 2"
+        },
+        "civil-air": {
+          "efficiency": 0.15099947065974337,
+          "median_swr": 27.997589509109996,
+          "configuration": "rh789:setting-6",
+          "configuration_label": "setting 6"
+        },
+        "2m": {
+          "efficiency": 0.5700437044152102,
+          "median_swr": 4.787819506075034,
+          "configuration": "rh789:setting-6",
+          "configuration_label": "setting 6"
+        },
+        "vhf-lmr": {
+          "efficiency": 0.6678626672974278,
+          "median_swr": 3.5882911668896957,
+          "configuration": "rh789:setting-5",
+          "configuration_label": "setting 5"
+        },
+        "marine-vhf": {
+          "efficiency": 0.8279868180612192,
+          "median_swr": 2.3473917198775274,
+          "configuration": "rh789:setting-5",
+          "configuration_label": "setting 5"
+        },
+        "railroad": {
+          "efficiency": 0.8613619125292425,
+          "median_swr": 2.1834898833053393,
+          "configuration": "rh789:setting-5",
+          "configuration_label": "setting 5"
+        },
+        "noaa-weather": {
+          "efficiency": 0.8307844260312525,
+          "median_swr": 2.397057246026605,
+          "configuration": "rh789:setting-5",
+          "configuration_label": "setting 5"
+        },
+        "1.25m": {
+          "efficiency": 0.812370612009926,
+          "median_swr": 2.5399174212755784,
+          "configuration": "rh789:setting-3",
+          "configuration_label": "setting 3"
+        },
+        "military-air": {
+          "efficiency": 0.5057124081764622,
+          "median_swr": 6.3971610118673015,
+          "configuration": "rh789:setting-2",
+          "configuration_label": "setting 2"
+        },
+        "federal-uhf": {
+          "efficiency": 0.9216897079447605,
+          "median_swr": 1.7359191746354468,
+          "configuration": "rh789:setting-4",
+          "configuration_label": "setting 4"
+        },
+        "70cm": {
+          "efficiency": 0.6664865839610078,
+          "median_swr": 3.7320854002541126,
+          "configuration": "rh789:setting-4",
+          "configuration_label": "setting 4"
+        },
+        "uhf-lmr": {
+          "efficiency": 0.9688552948774837,
+          "median_swr": 1.3705023651539798,
+          "configuration": "rh789:setting-6",
+          "configuration_label": "setting 6"
+        },
+        "t-band": {
+          "efficiency": 0.9239577946764382,
+          "median_swr": 1.6265760206684499,
+          "configuration": "rh789:setting-3",
+          "configuration_label": "setting 3"
+        },
+        "700-public-safety-downlink": {
+          "efficiency": 0.07995298601452756,
+          "median_swr": 48.06789823532607,
+          "configuration": "rh789:setting-5",
+          "configuration_label": "setting 5"
+        },
+        "800-public-safety-downlink": {
+          "efficiency": 1.494549752299242e-06,
+          "median_swr": 11603.101740329506,
+          "configuration": "rh789:setting-3",
+          "configuration_label": "setting 3"
+        },
+        "33cm": {
+          "efficiency": 0.045424030981859674,
+          "median_swr": 75.23104576537662,
+          "configuration": "rh789:setting-3",
+          "configuration_label": "setting 3"
+        },
+        "900-trunking-downlink": {
+          "efficiency": 0.2168706434340584,
+          "median_swr": 16.290409328936573,
+          "configuration": "rh789:setting-4",
+          "configuration_label": "setting 4"
+        },
+        "uat-978": {
+          "efficiency": 0.4036784326754296,
+          "median_swr": 7.728108681173969,
+          "configuration": "rh789:setting-4",
+          "configuration_label": "setting 4"
+        },
+        "ads-b-1090": {
+          "efficiency": 0.5041951369598145,
+          "median_swr": 5.763544632858926,
+          "configuration": "rh789:setting-1",
+          "configuration_label": "setting 1"
+        }
+      }
+    },
+    {
+      "family": "diamond-rh77ca",
+      "family_label": "Diamond RH77CA",
+      "short_label": "Diamond RH77CA",
+      "measurement_context": "handheld_bench",
+      "configurations": 2,
+      "retuned_score": 0.5180660211956364,
+      "fixed_score": 0.49156729773635516,
+      "fixed_configuration": "diamond-rh77ca",
+      "fixed_configuration_label": "first mounting",
+      "usable_bands": 3,
+      "excellent_bands": 1,
+      "services": {
+        "6m": {
+          "efficiency": 0.050414001824901744,
+          "median_swr": 77.65198591372926,
+          "configuration": "diamond-rh77ca:second-mounting",
+          "configuration_label": "second mounting"
+        },
+        "fm-broadcast": {
+          "efficiency": 0.3197728420618771,
+          "median_swr": 12.774762621062703,
+          "configuration": "diamond-rh77ca:second-mounting",
+          "configuration_label": "second mounting"
+        },
+        "civil-air": {
+          "efficiency": 0.8411915508927457,
+          "median_swr": 2.127626528376058,
+          "configuration": "diamond-rh77ca",
+          "configuration_label": "first mounting"
+        },
+        "2m": {
+          "efficiency": 0.5812945809977692,
+          "median_swr": 4.622004460132208,
+          "configuration": "diamond-rh77ca",
+          "configuration_label": "first mounting"
+        },
+        "vhf-lmr": {
+          "efficiency": 0.6900775519103328,
+          "median_swr": 4.191756480085258,
+          "configuration": "diamond-rh77ca",
+          "configuration_label": "first mounting"
+        },
+        "marine-vhf": {
+          "efficiency": 0.6290521147128194,
+          "median_swr": 4.357289120759165,
+          "configuration": "diamond-rh77ca",
+          "configuration_label": "first mounting"
+        },
+        "railroad": {
+          "efficiency": 0.6084270478418323,
+          "median_swr": 4.341751153094953,
+          "configuration": "diamond-rh77ca",
+          "configuration_label": "first mounting"
+        },
+        "noaa-weather": {
+          "efficiency": 0.6707401123023069,
+          "median_swr": 3.698834426988556,
+          "configuration": "diamond-rh77ca",
+          "configuration_label": "first mounting"
+        },
+        "1.25m": {
+          "efficiency": 0.6711938542881876,
+          "median_swr": 3.6771094503371953,
+          "configuration": "diamond-rh77ca:second-mounting",
+          "configuration_label": "second mounting"
+        },
+        "military-air": {
+          "efficiency": 0.5276045451838967,
+          "median_swr": 5.886627649340149,
+          "configuration": "diamond-rh77ca:second-mounting",
+          "configuration_label": "second mounting"
+        },
+        "federal-uhf": {
+          "efficiency": 0.9697655640236253,
+          "median_swr": 1.3697733798893519,
+          "configuration": "diamond-rh77ca:second-mounting",
+          "configuration_label": "second mounting"
+        },
+        "70cm": {
+          "efficiency": 0.7523180690532754,
+          "median_swr": 3.070170245216021,
+          "configuration": "diamond-rh77ca:second-mounting",
+          "configuration_label": "second mounting"
+        },
+        "uhf-lmr": {
+          "efficiency": 0.5759310644064266,
+          "median_swr": 4.796381355958044,
+          "configuration": "diamond-rh77ca:second-mounting",
+          "configuration_label": "second mounting"
+        },
+        "t-band": {
+          "efficiency": 0.5002251126730188,
+          "median_swr": 5.856931165308145,
+          "configuration": "diamond-rh77ca:second-mounting",
+          "configuration_label": "second mounting"
+        },
+        "700-public-safety-downlink": {
+          "efficiency": 0.3740637057093115,
+          "median_swr": 8.582943408467822,
+          "configuration": "diamond-rh77ca",
+          "configuration_label": "first mounting"
+        },
+        "800-public-safety-downlink": {
+          "efficiency": 0.3450194135042864,
+          "median_swr": 9.51056588441462,
+          "configuration": "diamond-rh77ca:second-mounting",
+          "configuration_label": "second mounting"
+        },
+        "33cm": {
+          "efficiency": 0.3131045621992382,
+          "median_swr": 10.692001874581575,
+          "configuration": "diamond-rh77ca:second-mounting",
+          "configuration_label": "second mounting"
+        },
+        "900-trunking-downlink": {
+          "efficiency": 0.3130043884320493,
+          "median_swr": 10.685049804760888,
+          "configuration": "diamond-rh77ca:second-mounting",
+          "configuration_label": "second mounting"
+        },
+        "uat-978": {
+          "efficiency": 0.3233755396707448,
+          "median_swr": 10.282942709938489,
+          "configuration": "diamond-rh77ca",
+          "configuration_label": "first mounting"
+        },
+        "ads-b-1090": {
+          "efficiency": 0.30474480222408523,
+          "median_swr": 11.02395514209803,
+          "configuration": "diamond-rh77ca",
+          "configuration_label": "first mounting"
+        }
+      }
+    },
+    {
+      "family": "signal-stick",
+      "family_label": "Signal Stick (no counterpoise)",
+      "short_label": "Signal Stick",
+      "measurement_context": "handheld_bench",
+      "configurations": 1,
+      "retuned_score": 0.4609969739010064,
+      "fixed_score": 0.4609969739010064,
+      "fixed_configuration": "signal-stick",
+      "fixed_configuration_label": "no counterpoise",
+      "usable_bands": 1,
+      "excellent_bands": 0,
+      "services": {
+        "6m": {
+          "efficiency": 0.050119091963620944,
+          "median_swr": 78.30052567021762,
+          "configuration": "signal-stick",
+          "configuration_label": "no counterpoise"
+        },
+        "fm-broadcast": {
+          "efficiency": 0.3039220000278961,
+          "median_swr": 14.463233463027233,
+          "configuration": "signal-stick",
+          "configuration_label": "no counterpoise"
+        },
+        "civil-air": {
+          "efficiency": 0.6712957327764542,
+          "median_swr": 3.9225856603422375,
+          "configuration": "signal-stick",
+          "configuration_label": "no counterpoise"
+        },
+        "2m": {
+          "efficiency": 0.45875941950710436,
+          "median_swr": 6.535774904719409,
+          "configuration": "signal-stick",
+          "configuration_label": "no counterpoise"
+        },
+        "vhf-lmr": {
+          "efficiency": 0.6485878377629681,
+          "median_swr": 3.8440297200781073,
+          "configuration": "signal-stick",
+          "configuration_label": "no counterpoise"
+        },
+        "marine-vhf": {
+          "efficiency": 0.5702751424704338,
+          "median_swr": 4.797382866034178,
+          "configuration": "signal-stick",
+          "configuration_label": "no counterpoise"
+        },
+        "railroad": {
+          "efficiency": 0.6191145231162684,
+          "median_swr": 4.219804327512652,
+          "configuration": "signal-stick",
+          "configuration_label": "no counterpoise"
+        },
+        "noaa-weather": {
+          "efficiency": 0.6786088182937503,
+          "median_swr": 3.6263605297950443,
+          "configuration": "signal-stick",
+          "configuration_label": "no counterpoise"
+        },
+        "1.25m": {
+          "efficiency": 0.28948880064560384,
+          "median_swr": 11.691219266894489,
+          "configuration": "signal-stick",
+          "configuration_label": "no counterpoise"
+        },
+        "military-air": {
+          "efficiency": 0.3066025326660187,
+          "median_swr": 16.074050659475873,
+          "configuration": "signal-stick",
+          "configuration_label": "no counterpoise"
+        },
+        "federal-uhf": {
+          "efficiency": 0.7798733659618468,
+          "median_swr": 2.7623607060949964,
+          "configuration": "signal-stick",
+          "configuration_label": "no counterpoise"
+        },
+        "70cm": {
+          "efficiency": 0.5460424810680681,
+          "median_swr": 5.276970615583229,
+          "configuration": "signal-stick",
+          "configuration_label": "no counterpoise"
+        },
+        "uhf-lmr": {
+          "efficiency": 0.4269781007769113,
+          "median_swr": 7.245261192438397,
+          "configuration": "signal-stick",
+          "configuration_label": "no counterpoise"
+        },
+        "t-band": {
+          "efficiency": 0.3405417549116041,
+          "median_swr": 9.979029940316444,
+          "configuration": "signal-stick",
+          "configuration_label": "no counterpoise"
+        },
+        "700-public-safety-downlink": {
+          "efficiency": 0.40462756582103276,
+          "median_swr": 7.7634003243408545,
+          "configuration": "signal-stick",
+          "configuration_label": "no counterpoise"
+        },
+        "800-public-safety-downlink": {
+          "efficiency": 0.28553185015912214,
+          "median_swr": 11.926385756847605,
+          "configuration": "signal-stick",
+          "configuration_label": "no counterpoise"
+        },
+        "33cm": {
+          "efficiency": 0.3872776406988931,
+          "median_swr": 8.173415948680434,
+          "configuration": "signal-stick",
+          "configuration_label": "no counterpoise"
+        },
+        "900-trunking-downlink": {
+          "efficiency": 0.44788646450080827,
+          "median_swr": 6.781361035203544,
+          "configuration": "signal-stick",
+          "configuration_label": "no counterpoise"
+        },
+        "uat-978": {
+          "efficiency": 0.5450351815326374,
+          "median_swr": 5.147919904351284,
+          "configuration": "signal-stick",
+          "configuration_label": "no counterpoise"
+        },
+        "ads-b-1090": {
+          "efficiency": 0.45937117335908373,
+          "median_swr": 6.547598020915805,
+          "configuration": "signal-stick",
+          "configuration_label": "no counterpoise"
+        }
+      }
+    },
+    {
+      "family": "anytone-atd890uv-38cm",
+      "family_label": "AnyTone AT-D890UV OEM long whip",
+      "short_label": "AT-D890UV 38cm",
+      "measurement_context": "handheld_sma",
+      "configurations": 1,
+      "retuned_score": 0.45485604068038105,
+      "fixed_score": 0.45485604068038105,
+      "fixed_configuration": "anytone-atd890uv-38cm",
+      "fixed_configuration_label": "SMA adapter plane",
+      "usable_bands": 6,
+      "excellent_bands": 3,
+      "services": {
+        "6m": {
+          "efficiency": 0.005384620704051289,
+          "median_swr": 755.1067576436968,
+          "configuration": "anytone-atd890uv-38cm",
+          "configuration_label": "SMA adapter plane"
+        },
+        "fm-broadcast": {
+          "efficiency": 0.3136692492455169,
+          "median_swr": 14.948298024727526,
+          "configuration": "anytone-atd890uv-38cm",
+          "configuration_label": "SMA adapter plane"
+        },
+        "civil-air": {
+          "efficiency": 0.4085619665526435,
+          "median_swr": 8.256151760949855,
+          "configuration": "anytone-atd890uv-38cm",
+          "configuration_label": "SMA adapter plane"
+        },
+        "2m": {
+          "efficiency": 0.6694821488927779,
+          "median_swr": 3.7129081796982106,
+          "configuration": "anytone-atd890uv-38cm",
+          "configuration_label": "SMA adapter plane"
+        },
+        "vhf-lmr": {
+          "efficiency": 0.8424907561537673,
+          "median_swr": 2.094492238901902,
+          "configuration": "anytone-atd890uv-38cm",
+          "configuration_label": "SMA adapter plane"
+        },
+        "marine-vhf": {
+          "efficiency": 0.8390341451490672,
+          "median_swr": 2.3117441031443944,
+          "configuration": "anytone-atd890uv-38cm",
+          "configuration_label": "SMA adapter plane"
+        },
+        "railroad": {
+          "efficiency": 0.9495732884896385,
+          "median_swr": 1.5320119729027633,
+          "configuration": "anytone-atd890uv-38cm",
+          "configuration_label": "SMA adapter plane"
+        },
+        "noaa-weather": {
+          "efficiency": 0.9735940587448041,
+          "median_swr": 1.387326726841553,
+          "configuration": "anytone-atd890uv-38cm",
+          "configuration_label": "SMA adapter plane"
+        },
+        "1.25m": {
+          "efficiency": 0.7550134146552627,
+          "median_swr": 2.9839462365260903,
+          "configuration": "anytone-atd890uv-38cm",
+          "configuration_label": "SMA adapter plane"
+        },
+        "military-air": {
+          "efficiency": 0.6539873580612838,
+          "median_swr": 4.124294325835823,
+          "configuration": "anytone-atd890uv-38cm",
+          "configuration_label": "SMA adapter plane"
+        },
+        "federal-uhf": {
+          "efficiency": 0.9466764169716037,
+          "median_swr": 1.564346168156959,
+          "configuration": "anytone-atd890uv-38cm",
+          "configuration_label": "SMA adapter plane"
+        },
+        "70cm": {
+          "efficiency": 0.7315597520164777,
+          "median_swr": 3.2653123960947736,
+          "configuration": "anytone-atd890uv-38cm",
+          "configuration_label": "SMA adapter plane"
+        },
+        "uhf-lmr": {
+          "efficiency": 0.5268177304809313,
+          "median_swr": 5.473377316691171,
+          "configuration": "anytone-atd890uv-38cm",
+          "configuration_label": "SMA adapter plane"
+        },
+        "t-band": {
+          "efficiency": 0.3720773451513584,
+          "median_swr": 8.764493573829638,
+          "configuration": "anytone-atd890uv-38cm",
+          "configuration_label": "SMA adapter plane"
+        },
+        "700-public-safety-downlink": {
+          "efficiency": 0.07132152242217916,
+          "median_swr": 54.088452853836934,
+          "configuration": "anytone-atd890uv-38cm",
+          "configuration_label": "SMA adapter plane"
+        },
+        "800-public-safety-downlink": {
+          "efficiency": 0.03787703991625797,
+          "median_swr": 105.14564898777394,
+          "configuration": "anytone-atd890uv-38cm",
+          "configuration_label": "SMA adapter plane"
+        },
+        "33cm": {
+          "efficiency": 0.0,
+          "median_swr": null,
+          "configuration": "anytone-atd890uv-38cm",
+          "configuration_label": "SMA adapter plane"
+        },
+        "900-trunking-downlink": {
+          "efficiency": 0.0,
+          "median_swr": null,
+          "configuration": "anytone-atd890uv-38cm",
+          "configuration_label": "SMA adapter plane"
+        },
+        "uat-978": {
+          "efficiency": 0.0,
+          "median_swr": null,
+          "configuration": "anytone-atd890uv-38cm",
+          "configuration_label": "SMA adapter plane"
+        },
+        "ads-b-1090": {
+          "efficiency": 0.0,
+          "median_swr": null,
+          "configuration": "anytone-atd890uv-38cm",
+          "configuration_label": "SMA adapter plane"
+        }
+      }
+    },
+    {
+      "family": "tid-td771",
+      "family_label": "TID TD771",
+      "short_label": "TID TD771",
+      "measurement_context": "handheld_bench",
+      "configurations": 1,
+      "retuned_score": 0.45239500498942986,
+      "fixed_score": 0.45239500498942986,
+      "fixed_configuration": "tid-td771",
+      "fixed_configuration_label": "with SMA-to-BNC adapter",
+      "usable_bands": 1,
+      "excellent_bands": 1,
+      "services": {
+        "6m": {
+          "efficiency": 0.0,
+          "median_swr": null,
+          "configuration": "tid-td771",
+          "configuration_label": "with SMA-to-BNC adapter"
+        },
+        "fm-broadcast": {
+          "efficiency": 0.18633003521863448,
+          "median_swr": 19.41459327759742,
+          "configuration": "tid-td771",
+          "configuration_label": "with SMA-to-BNC adapter"
+        },
+        "civil-air": {
+          "efficiency": 0.46627817425872453,
+          "median_swr": 6.319168599552821,
+          "configuration": "tid-td771",
+          "configuration_label": "with SMA-to-BNC adapter"
+        },
+        "2m": {
+          "efficiency": 0.4628768654166598,
+          "median_swr": 6.4765883358548155,
+          "configuration": "tid-td771",
+          "configuration_label": "with SMA-to-BNC adapter"
+        },
+        "vhf-lmr": {
+          "efficiency": 0.3143550733790532,
+          "median_swr": 11.144905878954798,
+          "configuration": "tid-td771",
+          "configuration_label": "with SMA-to-BNC adapter"
+        },
+        "marine-vhf": {
+          "efficiency": 0.3086552019641016,
+          "median_swr": 10.966316841475846,
+          "configuration": "tid-td771",
+          "configuration_label": "with SMA-to-BNC adapter"
+        },
+        "railroad": {
+          "efficiency": 0.3017395651984803,
+          "median_swr": 11.16965113738288,
+          "configuration": "tid-td771",
+          "configuration_label": "with SMA-to-BNC adapter"
+        },
+        "noaa-weather": {
+          "efficiency": 0.3022080832504422,
+          "median_swr": 11.15211966744221,
+          "configuration": "tid-td771",
+          "configuration_label": "with SMA-to-BNC adapter"
+        },
+        "1.25m": {
+          "efficiency": 0.9861178784803121,
+          "median_swr": 1.2639625895286597,
+          "configuration": "tid-td771",
+          "configuration_label": "with SMA-to-BNC adapter"
+        },
+        "military-air": {
+          "efficiency": 0.31384959386900557,
+          "median_swr": 16.82825849007748,
+          "configuration": "tid-td771",
+          "configuration_label": "with SMA-to-BNC adapter"
+        },
+        "federal-uhf": {
+          "efficiency": 0.7445180828766613,
+          "median_swr": 2.9425787261564342,
+          "configuration": "tid-td771",
+          "configuration_label": "with SMA-to-BNC adapter"
+        },
+        "70cm": {
+          "efficiency": 0.6606473231779946,
+          "median_swr": 3.593194572973185,
+          "configuration": "tid-td771",
+          "configuration_label": "with SMA-to-BNC adapter"
+        },
+        "uhf-lmr": {
+          "efficiency": 0.2217123006475372,
+          "median_swr": 17.239892009507454,
+          "configuration": "tid-td771",
+          "configuration_label": "with SMA-to-BNC adapter"
+        },
+        "t-band": {
+          "efficiency": 0.0482764254539089,
+          "median_swr": 33.58876872498789,
+          "configuration": "tid-td771",
+          "configuration_label": "with SMA-to-BNC adapter"
+        },
+        "700-public-safety-downlink": {
+          "efficiency": 0.4313470929687796,
+          "median_swr": 7.121557337710049,
+          "configuration": "tid-td771",
+          "configuration_label": "with SMA-to-BNC adapter"
+        },
+        "800-public-safety-downlink": {
+          "efficiency": 0.5766779746849464,
+          "median_swr": 4.728471801469582,
+          "configuration": "tid-td771",
+          "configuration_label": "with SMA-to-BNC adapter"
+        },
+        "33cm": {
+          "efficiency": 0.6275218643463347,
+          "median_swr": 4.141311582992105,
+          "configuration": "tid-td771",
+          "configuration_label": "with SMA-to-BNC adapter"
+        },
+        "900-trunking-downlink": {
+          "efficiency": 0.6555159339308692,
+          "median_swr": 3.838190780107726,
+          "configuration": "tid-td771",
+          "configuration_label": "with SMA-to-BNC adapter"
+        },
+        "uat-978": {
+          "efficiency": 0.6924369324481218,
+          "median_swr": 3.4884136684752587,
+          "configuration": "tid-td771",
+          "configuration_label": "with SMA-to-BNC adapter"
+        },
+        "ads-b-1090": {
+          "efficiency": 0.7468356982180295,
+          "median_swr": 3.0163626803690136,
+          "configuration": "tid-td771",
+          "configuration_label": "with SMA-to-BNC adapter"
+        }
+      }
+    },
+    {
+      "family": "diamond-srh320a",
+      "family_label": "Diamond SRH320A",
+      "short_label": "Diamond SRH320A",
+      "measurement_context": "handheld_bench",
+      "configurations": 1,
+      "retuned_score": 0.44538429977685307,
+      "fixed_score": 0.44538429977685307,
+      "fixed_configuration": "diamond-srh320a",
+      "fixed_configuration_label": "with BNC-to-SMA adapter",
+      "usable_bands": 7,
+      "excellent_bands": 3,
+      "services": {
+        "6m": {
+          "efficiency": 0.020422099059869303,
+          "median_swr": 196.50224775482224,
+          "configuration": "diamond-srh320a",
+          "configuration_label": "with BNC-to-SMA adapter"
+        },
+        "fm-broadcast": {
+          "efficiency": 0.05066698598720589,
+          "median_swr": 78.40129705313056,
+          "configuration": "diamond-srh320a",
+          "configuration_label": "with BNC-to-SMA adapter"
+        },
+        "civil-air": {
+          "efficiency": 0.2686829993513287,
+          "median_swr": 13.326556566391169,
+          "configuration": "diamond-srh320a",
+          "configuration_label": "with BNC-to-SMA adapter"
+        },
+        "2m": {
+          "efficiency": 0.8200271546784295,
+          "median_swr": 2.456325192461982,
+          "configuration": "diamond-srh320a",
+          "configuration_label": "with BNC-to-SMA adapter"
+        },
+        "vhf-lmr": {
+          "efficiency": 0.8535742476676186,
+          "median_swr": 2.461405453256655,
+          "configuration": "diamond-srh320a",
+          "configuration_label": "with BNC-to-SMA adapter"
+        },
+        "marine-vhf": {
+          "efficiency": 0.9302356233604018,
+          "median_swr": 1.6386161705358877,
+          "configuration": "diamond-srh320a",
+          "configuration_label": "with BNC-to-SMA adapter"
+        },
+        "railroad": {
+          "efficiency": 0.8753947804035376,
+          "median_swr": 2.0889384995837297,
+          "configuration": "diamond-srh320a",
+          "configuration_label": "with BNC-to-SMA adapter"
+        },
+        "noaa-weather": {
+          "efficiency": 0.8057227983551479,
+          "median_swr": 2.577521480923095,
+          "configuration": "diamond-srh320a",
+          "configuration_label": "with BNC-to-SMA adapter"
+        },
+        "1.25m": {
+          "efficiency": 0.9680759449390444,
+          "median_swr": 1.4422552822333217,
+          "configuration": "diamond-srh320a",
+          "configuration_label": "with BNC-to-SMA adapter"
+        },
+        "military-air": {
+          "efficiency": 0.510935748965093,
+          "median_swr": 7.194406259638512,
+          "configuration": "diamond-srh320a",
+          "configuration_label": "with BNC-to-SMA adapter"
+        },
+        "federal-uhf": {
+          "efficiency": 0.9659560631429781,
+          "median_swr": 1.302949247296636,
+          "configuration": "diamond-srh320a",
+          "configuration_label": "with BNC-to-SMA adapter"
+        },
+        "70cm": {
+          "efficiency": 0.6060184338003084,
+          "median_swr": 4.709578284467442,
+          "configuration": "diamond-srh320a",
+          "configuration_label": "with BNC-to-SMA adapter"
+        },
+        "uhf-lmr": {
+          "efficiency": 0.3624971657430828,
+          "median_swr": 8.986092144543273,
+          "configuration": "diamond-srh320a",
+          "configuration_label": "with BNC-to-SMA adapter"
+        },
+        "t-band": {
+          "efficiency": 0.25544856115998255,
+          "median_swr": 13.660192947247953,
+          "configuration": "diamond-srh320a",
+          "configuration_label": "with BNC-to-SMA adapter"
+        },
+        "700-public-safety-downlink": {
+          "efficiency": 0.20338175416207266,
+          "median_swr": 17.612353408228895,
+          "configuration": "diamond-srh320a",
+          "configuration_label": "with BNC-to-SMA adapter"
+        },
+        "800-public-safety-downlink": {
+          "efficiency": 0.19948594863393634,
+          "median_swr": 18.006458969754682,
+          "configuration": "diamond-srh320a",
+          "configuration_label": "with BNC-to-SMA adapter"
+        },
+        "33cm": {
+          "efficiency": 0.14080131387609,
+          "median_swr": 26.394115253716343,
+          "configuration": "diamond-srh320a",
+          "configuration_label": "with BNC-to-SMA adapter"
+        },
+        "900-trunking-downlink": {
+          "efficiency": 0.07035837225093416,
+          "median_swr": 54.564952008789746,
+          "configuration": "diamond-srh320a",
+          "configuration_label": "with BNC-to-SMA adapter"
+        },
+        "uat-978": {
+          "efficiency": 0.0,
+          "median_swr": null,
+          "configuration": "diamond-srh320a",
+          "configuration_label": "with BNC-to-SMA adapter"
+        },
+        "ads-b-1090": {
+          "efficiency": 0.0,
+          "median_swr": null,
+          "configuration": "diamond-srh320a",
+          "configuration_label": "with BNC-to-SMA adapter"
+        }
+      }
+    },
+    {
+      "family": "signal-stick-counterpoise",
+      "family_label": "Signal Stick with counterpoise",
+      "short_label": "Signal Stick + CP",
+      "measurement_context": "handheld_bench",
+      "configurations": 1,
+      "retuned_score": 0.44058016259801197,
+      "fixed_score": 0.44058016259801197,
+      "fixed_configuration": "signal-stick-counterpoise",
+      "fixed_configuration_label": "with ~19.5 in counterpoise",
+      "usable_bands": 2,
+      "excellent_bands": 1,
+      "services": {
+        "6m": {
+          "efficiency": 0.045138780568860996,
+          "median_swr": 87.51267766074008,
+          "configuration": "signal-stick-counterpoise",
+          "configuration_label": "with ~19.5 in counterpoise"
+        },
+        "fm-broadcast": {
+          "efficiency": 0.2245953725160555,
+          "median_swr": 20.516178815191548,
+          "configuration": "signal-stick-counterpoise",
+          "configuration_label": "with ~19.5 in counterpoise"
+        },
+        "civil-air": {
+          "efficiency": 0.7329560286180717,
+          "median_swr": 3.5906811434041925,
+          "configuration": "signal-stick-counterpoise",
+          "configuration_label": "with ~19.5 in counterpoise"
+        },
+        "2m": {
+          "efficiency": 0.9284250665493289,
+          "median_swr": 1.6952979292607255,
+          "configuration": "signal-stick-counterpoise",
+          "configuration_label": "with ~19.5 in counterpoise"
+        },
+        "vhf-lmr": {
+          "efficiency": 0.4297097521813715,
+          "median_swr": 8.932125122267985,
+          "configuration": "signal-stick-counterpoise",
+          "configuration_label": "with ~19.5 in counterpoise"
+        },
+        "marine-vhf": {
+          "efficiency": 0.4657443722975064,
+          "median_swr": 6.509257920940672,
+          "configuration": "signal-stick-counterpoise",
+          "configuration_label": "with ~19.5 in counterpoise"
+        },
+        "railroad": {
+          "efficiency": 0.4018876010049643,
+          "median_swr": 7.884176841918969,
+          "configuration": "signal-stick-counterpoise",
+          "configuration_label": "with ~19.5 in counterpoise"
+        },
+        "noaa-weather": {
+          "efficiency": 0.34597890669035886,
+          "median_swr": 9.476316983535353,
+          "configuration": "signal-stick-counterpoise",
+          "configuration_label": "with ~19.5 in counterpoise"
+        },
+        "1.25m": {
+          "efficiency": 0.22458169003545547,
+          "median_swr": 15.75141974986201,
+          "configuration": "signal-stick-counterpoise",
+          "configuration_label": "with ~19.5 in counterpoise"
+        },
+        "military-air": {
+          "efficiency": 0.30096007659310364,
+          "median_swr": 17.05019185921203,
+          "configuration": "signal-stick-counterpoise",
+          "configuration_label": "with ~19.5 in counterpoise"
+        },
+        "federal-uhf": {
+          "efficiency": 0.7850286853823297,
+          "median_swr": 2.7584289678721303,
+          "configuration": "signal-stick-counterpoise",
+          "configuration_label": "with ~19.5 in counterpoise"
+        },
+        "70cm": {
+          "efficiency": 0.6609996853607575,
+          "median_swr": 3.7757212114127587,
+          "configuration": "signal-stick-counterpoise",
+          "configuration_label": "with ~19.5 in counterpoise"
+        },
+        "uhf-lmr": {
+          "efficiency": 0.4899241012693643,
+          "median_swr": 6.07747748146698,
+          "configuration": "signal-stick-counterpoise",
+          "configuration_label": "with ~19.5 in counterpoise"
+        },
+        "t-band": {
+          "efficiency": 0.35701722750679765,
+          "median_swr": 9.266232185428027,
+          "configuration": "signal-stick-counterpoise",
+          "configuration_label": "with ~19.5 in counterpoise"
+        },
+        "700-public-safety-downlink": {
+          "efficiency": 0.39334156265120523,
+          "median_swr": 8.056792609559707,
+          "configuration": "signal-stick-counterpoise",
+          "configuration_label": "with ~19.5 in counterpoise"
+        },
+        "800-public-safety-downlink": {
+          "efficiency": 0.27572652478125914,
+          "median_swr": 12.404423110545045,
+          "configuration": "signal-stick-counterpoise",
+          "configuration_label": "with ~19.5 in counterpoise"
+        },
+        "33cm": {
+          "efficiency": 0.3937234525471873,
+          "median_swr": 8.02740078458488,
+          "configuration": "signal-stick-counterpoise",
+          "configuration_label": "with ~19.5 in counterpoise"
+        },
+        "900-trunking-downlink": {
+          "efficiency": 0.43368017583930735,
+          "median_swr": 7.079850896963111,
+          "configuration": "signal-stick-counterpoise",
+          "configuration_label": "with ~19.5 in counterpoise"
+        },
+        "uat-978": {
+          "efficiency": 0.5395331732810966,
+          "median_swr": 5.229183691926766,
+          "configuration": "signal-stick-counterpoise",
+          "configuration_label": "with ~19.5 in counterpoise"
+        },
+        "ads-b-1090": {
+          "efficiency": 0.3826510162858597,
+          "median_swr": 8.324930278495636,
+          "configuration": "signal-stick-counterpoise",
+          "configuration_label": "with ~19.5 in counterpoise"
+        }
+      }
+    },
+    {
+      "family": "anytone-atd890uv-16cm",
+      "family_label": "AnyTone AT-D890UV OEM rubber duck",
+      "short_label": "AT-D890UV 16cm",
+      "measurement_context": "handheld_sma",
+      "configurations": 1,
+      "retuned_score": 0.40774171149618726,
+      "fixed_score": 0.40774171149618726,
+      "fixed_configuration": "anytone-atd890uv-16cm",
+      "fixed_configuration_label": "SMA adapter plane",
+      "usable_bands": 2,
+      "excellent_bands": 1,
+      "services": {
+        "6m": {
+          "efficiency": 0.002772579170843216,
+          "median_swr": 1430.842812908024,
+          "configuration": "anytone-atd890uv-16cm",
+          "configuration_label": "SMA adapter plane"
+        },
+        "fm-broadcast": {
+          "efficiency": 0.02502539917215829,
+          "median_swr": 204.30966324413728,
+          "configuration": "anytone-atd890uv-16cm",
+          "configuration_label": "SMA adapter plane"
+        },
+        "civil-air": {
+          "efficiency": 0.4051588654623939,
+          "median_swr": 7.947472313767132,
+          "configuration": "anytone-atd890uv-16cm",
+          "configuration_label": "SMA adapter plane"
+        },
+        "2m": {
+          "efficiency": 0.6761480723479559,
+          "median_swr": 3.620792303229169,
+          "configuration": "anytone-atd890uv-16cm",
+          "configuration_label": "SMA adapter plane"
+        },
+        "vhf-lmr": {
+          "efficiency": 0.5730677375785231,
+          "median_swr": 4.490420272358786,
+          "configuration": "anytone-atd890uv-16cm",
+          "configuration_label": "SMA adapter plane"
+        },
+        "marine-vhf": {
+          "efficiency": 0.7435598823791264,
+          "median_swr": 2.864448234510461,
+          "configuration": "anytone-atd890uv-16cm",
+          "configuration_label": "SMA adapter plane"
+        },
+        "railroad": {
+          "efficiency": 0.5844956336695691,
+          "median_swr": 4.401117530107576,
+          "configuration": "anytone-atd890uv-16cm",
+          "configuration_label": "SMA adapter plane"
+        },
+        "noaa-weather": {
+          "efficiency": 0.4604768015642944,
+          "median_swr": 6.556523608684552,
+          "configuration": "anytone-atd890uv-16cm",
+          "configuration_label": "SMA adapter plane"
+        },
+        "1.25m": {
+          "efficiency": 0.1470895378535385,
+          "median_swr": 24.7132179326415,
+          "configuration": "anytone-atd890uv-16cm",
+          "configuration_label": "SMA adapter plane"
+        },
+        "military-air": {
+          "efficiency": 0.4272365763246442,
+          "median_swr": 9.547139406139795,
+          "configuration": "anytone-atd890uv-16cm",
+          "configuration_label": "SMA adapter plane"
+        },
+        "federal-uhf": {
+          "efficiency": 0.8934303816376887,
+          "median_swr": 1.9582048996888077,
+          "configuration": "anytone-atd890uv-16cm",
+          "configuration_label": "SMA adapter plane"
+        },
+        "70cm": {
+          "efficiency": 0.7632549997404077,
+          "median_swr": 2.9029223664652615,
+          "configuration": "anytone-atd890uv-16cm",
+          "configuration_label": "SMA adapter plane"
+        },
+        "uhf-lmr": {
+          "efficiency": 0.5812233279454078,
+          "median_swr": 4.750904389048094,
+          "configuration": "anytone-atd890uv-16cm",
+          "configuration_label": "SMA adapter plane"
+        },
+        "t-band": {
+          "efficiency": 0.4368501770533352,
+          "median_swr": 7.16437814846474,
+          "configuration": "anytone-atd890uv-16cm",
+          "configuration_label": "SMA adapter plane"
+        },
+        "700-public-safety-downlink": {
+          "efficiency": 0.19266258547789084,
+          "median_swr": 18.708829096066403,
+          "configuration": "anytone-atd890uv-16cm",
+          "configuration_label": "SMA adapter plane"
+        },
+        "800-public-safety-downlink": {
+          "efficiency": 0.26202523180819226,
+          "median_swr": 13.165203919071985,
+          "configuration": "anytone-atd890uv-16cm",
+          "configuration_label": "SMA adapter plane"
+        },
+        "33cm": {
+          "efficiency": 0.29331082583684603,
+          "median_swr": 11.54463001557731,
+          "configuration": "anytone-atd890uv-16cm",
+          "configuration_label": "SMA adapter plane"
+        },
+        "900-trunking-downlink": {
+          "efficiency": 0.27820186914721196,
+          "median_swr": 12.29372152605005,
+          "configuration": "anytone-atd890uv-16cm",
+          "configuration_label": "SMA adapter plane"
+        },
+        "uat-978": {
+          "efficiency": 0.24881879985810257,
+          "median_swr": 14.006953216136525,
+          "configuration": "anytone-atd890uv-16cm",
+          "configuration_label": "SMA adapter plane"
+        },
+        "ads-b-1090": {
+          "efficiency": 0.16002494589561436,
+          "median_swr": 22.948729006300702,
+          "configuration": "anytone-atd890uv-16cm",
+          "configuration_label": "SMA adapter plane"
+        }
+      }
+    },
+    {
+      "family": "icom-id52a-stock",
+      "family_label": "Icom ID-52A OEM antenna",
+      "short_label": "ID-52A OEM",
+      "measurement_context": "handheld_sma",
+      "configurations": 1,
+      "retuned_score": 0.4048395130458539,
+      "fixed_score": 0.4048395130458539,
+      "fixed_configuration": "icom-id52a-stock",
+      "fixed_configuration_label": "bare SMA plane",
+      "usable_bands": 3,
+      "excellent_bands": 0,
+      "services": {
+        "6m": {
+          "efficiency": 0.020931796362223514,
+          "median_swr": 188.25716038292603,
+          "configuration": "icom-id52a-stock",
+          "configuration_label": "bare SMA plane"
+        },
+        "fm-broadcast": {
+          "efficiency": 0.08913103245012088,
+          "median_swr": 47.47685781075219,
+          "configuration": "icom-id52a-stock",
+          "configuration_label": "bare SMA plane"
+        },
+        "civil-air": {
+          "efficiency": 0.5340712007480857,
+          "median_swr": 4.955160809355699,
+          "configuration": "icom-id52a-stock",
+          "configuration_label": "bare SMA plane"
+        },
+        "2m": {
+          "efficiency": 0.5890900452637937,
+          "median_swr": 4.516755447861154,
+          "configuration": "icom-id52a-stock",
+          "configuration_label": "bare SMA plane"
+        },
+        "vhf-lmr": {
+          "efficiency": 0.21119074687789058,
+          "median_swr": 41.62031965310113,
+          "configuration": "icom-id52a-stock",
+          "configuration_label": "bare SMA plane"
+        },
+        "marine-vhf": {
+          "efficiency": 0.1955811687743843,
+          "median_swr": 19.013758071625166,
+          "configuration": "icom-id52a-stock",
+          "configuration_label": "bare SMA plane"
+        },
+        "railroad": {
+          "efficiency": 0.12575123736885288,
+          "median_swr": 30.126403774037833,
+          "configuration": "icom-id52a-stock",
+          "configuration_label": "bare SMA plane"
+        },
+        "noaa-weather": {
+          "efficiency": 0.09142234532217072,
+          "median_swr": 41.784656812432225,
+          "configuration": "icom-id52a-stock",
+          "configuration_label": "bare SMA plane"
+        },
+        "1.25m": {
+          "efficiency": 0.0855080688323962,
+          "median_swr": 44.5958237832827,
+          "configuration": "icom-id52a-stock",
+          "configuration_label": "bare SMA plane"
+        },
+        "military-air": {
+          "efficiency": 0.23883505489596507,
+          "median_swr": 18.89080202354694,
+          "configuration": "icom-id52a-stock",
+          "configuration_label": "bare SMA plane"
+        },
+        "federal-uhf": {
+          "efficiency": 0.6653551577079605,
+          "median_swr": 3.7287899691906046,
+          "configuration": "icom-id52a-stock",
+          "configuration_label": "bare SMA plane"
+        },
+        "70cm": {
+          "efficiency": 0.8118303782294118,
+          "median_swr": 2.5038104638001157,
+          "configuration": "icom-id52a-stock",
+          "configuration_label": "bare SMA plane"
+        },
+        "uhf-lmr": {
+          "efficiency": 0.8493518791202511,
+          "median_swr": 2.2620315566380507,
+          "configuration": "icom-id52a-stock",
+          "configuration_label": "bare SMA plane"
+        },
+        "t-band": {
+          "efficiency": 0.7726629705601292,
+          "median_swr": 2.825826264767981,
+          "configuration": "icom-id52a-stock",
+          "configuration_label": "bare SMA plane"
+        },
+        "700-public-safety-downlink": {
+          "efficiency": 0.35476724173305046,
+          "median_swr": 9.155471340825546,
+          "configuration": "icom-id52a-stock",
+          "configuration_label": "bare SMA plane"
+        },
+        "800-public-safety-downlink": {
+          "efficiency": 0.3311948792082295,
+          "median_swr": 9.96322269347059,
+          "configuration": "icom-id52a-stock",
+          "configuration_label": "bare SMA plane"
+        },
+        "33cm": {
+          "efficiency": 0.4539419036846121,
+          "median_swr": 6.6608996244393825,
+          "configuration": "icom-id52a-stock",
+          "configuration_label": "bare SMA plane"
+        },
+        "900-trunking-downlink": {
+          "efficiency": 0.49612657907279395,
+          "median_swr": 5.890954499866807,
+          "configuration": "icom-id52a-stock",
+          "configuration_label": "bare SMA plane"
+        },
+        "uat-978": {
+          "efficiency": 0.5451137070580111,
+          "median_swr": 5.141563679456523,
+          "configuration": "icom-id52a-stock",
+          "configuration_label": "bare SMA plane"
+        },
+        "ads-b-1090": {
+          "efficiency": 0.6349328676467464,
+          "median_swr": 4.0521524590387425,
+          "configuration": "icom-id52a-stock",
+          "configuration_label": "bare SMA plane"
+        }
+      }
+    },
+    {
+      "family": "diamond-srh77ca",
+      "family_label": "Diamond SRH77CA",
+      "short_label": "Diamond SRH77CA",
+      "measurement_context": "handheld_bench",
+      "configurations": 1,
+      "retuned_score": 0.3817872654468749,
+      "fixed_score": 0.3817872654468749,
+      "fixed_configuration": "diamond-srh77ca",
+      "fixed_configuration_label": "with BNC adapter",
+      "usable_bands": 3,
+      "excellent_bands": 1,
+      "services": {
+        "6m": {
+          "efficiency": 0.009523138352455836,
+          "median_swr": 437.11692824609065,
+          "configuration": "diamond-srh77ca",
+          "configuration_label": "with BNC adapter"
+        },
+        "fm-broadcast": {
+          "efficiency": 0.3801015398277522,
+          "median_swr": 10.926880199086668,
+          "configuration": "diamond-srh77ca",
+          "configuration_label": "with BNC adapter"
+        },
+        "civil-air": {
+          "efficiency": 0.04946834306302616,
+          "median_swr": 81.61448337434351,
+          "configuration": "diamond-srh77ca",
+          "configuration_label": "with BNC adapter"
+        },
+        "2m": {
+          "efficiency": 0.04885250496485411,
+          "median_swr": 79.91517793495649,
+          "configuration": "diamond-srh77ca",
+          "configuration_label": "with BNC adapter"
+        },
+        "vhf-lmr": {
+          "efficiency": 0.07234141297745676,
+          "median_swr": 59.50463169446245,
+          "configuration": "diamond-srh77ca",
+          "configuration_label": "with BNC adapter"
+        },
+        "marine-vhf": {
+          "efficiency": 0.05106309089127474,
+          "median_swr": 78.05247528219786,
+          "configuration": "diamond-srh77ca",
+          "configuration_label": "with BNC adapter"
+        },
+        "railroad": {
+          "efficiency": 0.057827768037404706,
+          "median_swr": 66.78151364121409,
+          "configuration": "diamond-srh77ca",
+          "configuration_label": "with BNC adapter"
+        },
+        "noaa-weather": {
+          "efficiency": 0.06890881760139442,
+          "median_swr": 56.288635302119594,
+          "configuration": "diamond-srh77ca",
+          "configuration_label": "with BNC adapter"
+        },
+        "1.25m": {
+          "efficiency": 0.9726219044763605,
+          "median_swr": 1.395089859778762,
+          "configuration": "diamond-srh77ca",
+          "configuration_label": "with BNC adapter"
+        },
+        "military-air": {
+          "efficiency": 0.3752296015994001,
+          "median_swr": 10.9096883877141,
+          "configuration": "diamond-srh77ca",
+          "configuration_label": "with BNC adapter"
+        },
+        "federal-uhf": {
+          "efficiency": 0.783334946748085,
+          "median_swr": 2.6934246744552284,
+          "configuration": "diamond-srh77ca",
+          "configuration_label": "with BNC adapter"
+        },
+        "70cm": {
+          "efficiency": 0.8685435534895359,
+          "median_swr": 1.858109539764812,
+          "configuration": "diamond-srh77ca",
+          "configuration_label": "with BNC adapter"
+        },
+        "uhf-lmr": {
+          "efficiency": 0.5955525304197986,
+          "median_swr": 4.58726984064603,
+          "configuration": "diamond-srh77ca",
+          "configuration_label": "with BNC adapter"
+        },
+        "t-band": {
+          "efficiency": 0.4612213600724556,
+          "median_swr": 6.5803133376990415,
+          "configuration": "diamond-srh77ca",
+          "configuration_label": "with BNC adapter"
+        },
+        "700-public-safety-downlink": {
+          "efficiency": 0.10688882821936622,
+          "median_swr": 35.66783555352966,
+          "configuration": "diamond-srh77ca",
+          "configuration_label": "with BNC adapter"
+        },
+        "800-public-safety-downlink": {
+          "efficiency": 0.2545451352549142,
+          "median_swr": 13.697337735849484,
+          "configuration": "diamond-srh77ca",
+          "configuration_label": "with BNC adapter"
+        },
+        "33cm": {
+          "efficiency": 0.5460078575752897,
+          "median_swr": 5.135525463484092,
+          "configuration": "diamond-srh77ca",
+          "configuration_label": "with BNC adapter"
+        },
+        "900-trunking-downlink": {
+          "efficiency": 0.586656683526744,
+          "median_swr": 4.586939585832625,
+          "configuration": "diamond-srh77ca",
+          "configuration_label": "with BNC adapter"
+        },
+        "uat-978": {
+          "efficiency": 0.6149297313358906,
+          "median_swr": 4.276800068293066,
+          "configuration": "diamond-srh77ca",
+          "configuration_label": "with BNC adapter"
+        },
+        "ads-b-1090": {
+          "efficiency": 0.7321265605040395,
+          "median_swr": 3.149529414725673,
+          "configuration": "diamond-srh77ca",
+          "configuration_label": "with BNC adapter"
+        }
+      }
+    },
+    {
+      "family": "remtronix-920",
+      "family_label": "Remtronix 920",
+      "short_label": "Remtronix 920",
+      "measurement_context": "handheld_bench",
+      "configurations": 1,
+      "retuned_score": 0.37789683467233787,
+      "fixed_score": 0.37789683467233787,
+      "fixed_configuration": "remtronix-920",
+      "fixed_configuration_label": "BNC direct",
+      "usable_bands": 5,
+      "excellent_bands": 4,
+      "services": {
+        "6m": {
+          "efficiency": 0.0,
+          "median_swr": null,
+          "configuration": "remtronix-920",
+          "configuration_label": "BNC direct"
+        },
+        "fm-broadcast": {
+          "efficiency": 0.21286652167199976,
+          "median_swr": 43.08333334960293,
+          "configuration": "remtronix-920",
+          "configuration_label": "BNC direct"
+        },
+        "civil-air": {
+          "efficiency": 0.07890747284918805,
+          "median_swr": 60.475388224668045,
+          "configuration": "remtronix-920",
+          "configuration_label": "BNC direct"
+        },
+        "2m": {
+          "efficiency": 0.023259090166357903,
+          "median_swr": 161.53277127188215,
+          "configuration": "remtronix-920",
+          "configuration_label": "BNC direct"
+        },
+        "vhf-lmr": {
+          "efficiency": 2.2403536730187156e-05,
+          "median_swr": 211.8195166354512,
+          "configuration": "remtronix-920",
+          "configuration_label": "BNC direct"
+        },
+        "marine-vhf": {
+          "efficiency": 0.0,
+          "median_swr": null,
+          "configuration": "remtronix-920",
+          "configuration_label": "BNC direct"
+        },
+        "railroad": {
+          "efficiency": 0.0,
+          "median_swr": null,
+          "configuration": "remtronix-920",
+          "configuration_label": "BNC direct"
+        },
+        "noaa-weather": {
+          "efficiency": 0.0,
+          "median_swr": null,
+          "configuration": "remtronix-920",
+          "configuration_label": "BNC direct"
+        },
+        "1.25m": {
+          "efficiency": 0.16710344623446366,
+          "median_swr": 21.833575485582806,
+          "configuration": "remtronix-920",
+          "configuration_label": "BNC direct"
+        },
+        "military-air": {
+          "efficiency": 0.6052470213361066,
+          "median_swr": 4.45841575768577,
+          "configuration": "remtronix-920",
+          "configuration_label": "BNC direct"
+        },
+        "federal-uhf": {
+          "efficiency": 0.34976193671718925,
+          "median_swr": 9.332739765512368,
+          "configuration": "remtronix-920",
+          "configuration_label": "BNC direct"
+        },
+        "70cm": {
+          "efficiency": 0.3480133312613128,
+          "median_swr": 9.21698866588915,
+          "configuration": "remtronix-920",
+          "configuration_label": "BNC direct"
+        },
+        "uhf-lmr": {
+          "efficiency": 0.30030864680917835,
+          "median_swr": 11.229665552996101,
+          "configuration": "remtronix-920",
+          "configuration_label": "BNC direct"
+        },
+        "t-band": {
+          "efficiency": 0.21077932333233262,
+          "median_swr": 17.069548976117446,
+          "configuration": "remtronix-920",
+          "configuration_label": "BNC direct"
+        },
+        "700-public-safety-downlink": {
+          "efficiency": 0.9221422790408671,
+          "median_swr": 1.7739438105204273,
+          "configuration": "remtronix-920",
+          "configuration_label": "BNC direct"
+        },
+        "800-public-safety-downlink": {
+          "efficiency": 0.9926456573846731,
+          "median_swr": 1.1718207902175006,
+          "configuration": "remtronix-920",
+          "configuration_label": "BNC direct"
+        },
+        "33cm": {
+          "efficiency": 0.9273144860256454,
+          "median_swr": 1.7499773083665529,
+          "configuration": "remtronix-920",
+          "configuration_label": "BNC direct"
+        },
+        "900-trunking-downlink": {
+          "efficiency": 0.8903658692876136,
+          "median_swr": 1.9911961374537155,
+          "configuration": "remtronix-920",
+          "configuration_label": "BNC direct"
+        },
+        "uat-978": {
+          "efficiency": 0.7801896624483114,
+          "median_swr": 2.7646140853526755,
+          "configuration": "remtronix-920",
+          "configuration_label": "BNC direct"
+        },
+        "ads-b-1090": {
+          "efficiency": 0.7490095453447879,
+          "median_swr": 3.010404779329239,
+          "configuration": "remtronix-920",
+          "configuration_label": "BNC direct"
+        }
+      }
+    },
+    {
+      "family": "generic-extendable",
+      "family_label": "Generic extendable whip",
+      "short_label": "Generic extendable",
+      "measurement_context": "handheld_bench",
+      "configurations": 10,
+      "retuned_score": 0.37536989008585914,
+      "fixed_score": 0.29427713905476166,
+      "fixed_configuration": "generic-extendable:setting-3",
+      "fixed_configuration_label": "setting 3",
+      "usable_bands": 0,
+      "excellent_bands": 0,
+      "services": {
+        "6m": {
+          "efficiency": 0.2672134732784957,
+          "median_swr": 5.013902669070128,
+          "configuration": "generic-extendable:setting-3",
+          "configuration_label": "setting 3"
+        },
+        "fm-broadcast": {
+          "efficiency": 0.6577612026601961,
+          "median_swr": 3.431177151685989,
+          "configuration": "generic-extendable:setting-4",
+          "configuration_label": "setting 4"
+        },
+        "civil-air": {
+          "efficiency": 0.23659739146362835,
+          "median_swr": 56.83693489632425,
+          "configuration": "generic-extendable:setting-3",
+          "configuration_label": "setting 3"
+        },
+        "2m": {
+          "efficiency": 0.09095211604875422,
+          "median_swr": 41.88886649696339,
+          "configuration": "generic-extendable:setting-10",
+          "configuration_label": "setting 10"
+        },
+        "vhf-lmr": {
+          "efficiency": 0.089819047336587,
+          "median_swr": 44.29883480876289,
+          "configuration": "generic-extendable:setting-6",
+          "configuration_label": "setting 6"
+        },
+        "marine-vhf": {
+          "efficiency": 0.06888359852870586,
+          "median_swr": 56.70342224359095,
+          "configuration": "generic-extendable:setting-6",
+          "configuration_label": "setting 6"
+        },
+        "railroad": {
+          "efficiency": 0.07921518942020618,
+          "median_swr": 48.1662307236396,
+          "configuration": "generic-extendable:setting-6",
+          "configuration_label": "setting 6"
+        },
+        "noaa-weather": {
+          "efficiency": 0.08862364050440633,
+          "median_swr": 43.172644950122844,
+          "configuration": "generic-extendable:setting-6",
+          "configuration_label": "setting 6"
+        },
+        "1.25m": {
+          "efficiency": 0.4569966891993872,
+          "median_swr": 6.54303941295685,
+          "configuration": "generic-extendable:setting-4",
+          "configuration_label": "setting 4"
+        },
+        "military-air": {
+          "efficiency": 0.42750273061950567,
+          "median_swr": 7.130151642590509,
+          "configuration": "generic-extendable:setting-2",
+          "configuration_label": "setting 2"
+        },
+        "federal-uhf": {
+          "efficiency": 0.582842701115071,
+          "median_swr": 4.659164438672707,
+          "configuration": "generic-extendable:setting-1",
+          "configuration_label": "setting 1"
+        },
+        "70cm": {
+          "efficiency": 0.5934507958920378,
+          "median_swr": 4.181322545164461,
+          "configuration": "generic-extendable:setting-3",
+          "configuration_label": "setting 3"
+        },
+        "uhf-lmr": {
+          "efficiency": 0.7270575592552843,
+          "median_swr": 3.345535862264291,
+          "configuration": "generic-extendable:setting-3",
+          "configuration_label": "setting 3"
+        },
+        "t-band": {
+          "efficiency": 0.49807070774770745,
+          "median_swr": 6.134666411913668,
+          "configuration": "generic-extendable:setting-3",
+          "configuration_label": "setting 3"
+        },
+        "700-public-safety-downlink": {
+          "efficiency": 0.1568161695861061,
+          "median_swr": 23.406683704686507,
+          "configuration": "generic-extendable:setting-8",
+          "configuration_label": "setting 8"
+        },
+        "800-public-safety-downlink": {
+          "efficiency": 0.2434622944287235,
+          "median_swr": 14.247151563842273,
+          "configuration": "generic-extendable:setting-10",
+          "configuration_label": "setting 10"
+        },
+        "33cm": {
+          "efficiency": 0.47691190330494354,
+          "median_swr": 6.221604502255767,
+          "configuration": "generic-extendable:setting-8",
+          "configuration_label": "setting 8"
+        },
+        "900-trunking-downlink": {
+          "efficiency": 0.5205543662040902,
+          "median_swr": 5.5083839394690655,
+          "configuration": "generic-extendable:setting-8",
+          "configuration_label": "setting 8"
+        },
+        "uat-978": {
+          "efficiency": 0.5589433541621086,
+          "median_swr": 4.94211472400632,
+          "configuration": "generic-extendable:setting-9",
+          "configuration_label": "setting 9"
+        },
+        "ads-b-1090": {
+          "efficiency": 0.6857228709612377,
+          "median_swr": 3.5561249982514425,
+          "configuration": "generic-extendable:setting-7",
+          "configuration_label": "setting 7"
+        }
+      }
+    },
+    {
+      "family": "tidradio-h9-stock",
+      "family_label": "TIDRADIO TD-H9 stock antenna",
+      "short_label": "TD-H9 stock",
+      "measurement_context": "handheld_sma",
+      "configurations": 1,
+      "retuned_score": 0.3076215251688116,
+      "fixed_score": 0.3076215251688116,
+      "fixed_configuration": "tidradio-h9-stock",
+      "fixed_configuration_label": "SMA adapter plane",
+      "usable_bands": 3,
+      "excellent_bands": 2,
+      "services": {
+        "6m": {
+          "efficiency": 0.005706284137331106,
+          "median_swr": 685.6808485695567,
+          "configuration": "tidradio-h9-stock",
+          "configuration_label": "SMA adapter plane"
+        },
+        "fm-broadcast": {
+          "efficiency": 0.039117403900694965,
+          "median_swr": 106.2408897811776,
+          "configuration": "tidradio-h9-stock",
+          "configuration_label": "SMA adapter plane"
+        },
+        "civil-air": {
+          "efficiency": 0.11664125060188398,
+          "median_swr": 34.00035371372658,
+          "configuration": "tidradio-h9-stock",
+          "configuration_label": "SMA adapter plane"
+        },
+        "2m": {
+          "efficiency": 0.1257911264823224,
+          "median_swr": 29.74069768167543,
+          "configuration": "tidradio-h9-stock",
+          "configuration_label": "SMA adapter plane"
+        },
+        "vhf-lmr": {
+          "efficiency": 0.10355649430456267,
+          "median_swr": 37.08138410292135,
+          "configuration": "tidradio-h9-stock",
+          "configuration_label": "SMA adapter plane"
+        },
+        "marine-vhf": {
+          "efficiency": 0.10807142654902623,
+          "median_swr": 36.32034335478786,
+          "configuration": "tidradio-h9-stock",
+          "configuration_label": "SMA adapter plane"
+        },
+        "railroad": {
+          "efficiency": 0.09352949322398287,
+          "median_swr": 40.779599755363975,
+          "configuration": "tidradio-h9-stock",
+          "configuration_label": "SMA adapter plane"
+        },
+        "noaa-weather": {
+          "efficiency": 0.08448498560174589,
+          "median_swr": 44.75493637520328,
+          "configuration": "tidradio-h9-stock",
+          "configuration_label": "SMA adapter plane"
+        },
+        "1.25m": {
+          "efficiency": 0.10964241284164662,
+          "median_swr": 34.529587191149766,
+          "configuration": "tidradio-h9-stock",
+          "configuration_label": "SMA adapter plane"
+        },
+        "military-air": {
+          "efficiency": 0.4251906141065312,
+          "median_swr": 9.075444586926354,
+          "configuration": "tidradio-h9-stock",
+          "configuration_label": "SMA adapter plane"
+        },
+        "federal-uhf": {
+          "efficiency": 0.9452318308659418,
+          "median_swr": 1.6145451621507492,
+          "configuration": "tidradio-h9-stock",
+          "configuration_label": "SMA adapter plane"
+        },
+        "70cm": {
+          "efficiency": 0.9131011210356087,
+          "median_swr": 1.785649422510834,
+          "configuration": "tidradio-h9-stock",
+          "configuration_label": "SMA adapter plane"
+        },
+        "uhf-lmr": {
+          "efficiency": 0.8237616308695929,
+          "median_swr": 2.466569674943152,
+          "configuration": "tidradio-h9-stock",
+          "configuration_label": "SMA adapter plane"
+        },
+        "t-band": {
+          "efficiency": 0.7048449727845794,
+          "median_swr": 3.282168153565515,
+          "configuration": "tidradio-h9-stock",
+          "configuration_label": "SMA adapter plane"
+        },
+        "700-public-safety-downlink": {
+          "efficiency": 0.33471687435102093,
+          "median_swr": 9.84590031938532,
+          "configuration": "tidradio-h9-stock",
+          "configuration_label": "SMA adapter plane"
+        },
+        "800-public-safety-downlink": {
+          "efficiency": 0.2532111605428692,
+          "median_swr": 13.72036633742213,
+          "configuration": "tidradio-h9-stock",
+          "configuration_label": "SMA adapter plane"
+        },
+        "33cm": {
+          "efficiency": 0.2365365873876194,
+          "median_swr": 14.83185639291974,
+          "configuration": "tidradio-h9-stock",
+          "configuration_label": "SMA adapter plane"
+        },
+        "900-trunking-downlink": {
+          "efficiency": 0.2250874202557054,
+          "median_swr": 15.696027448345712,
+          "configuration": "tidradio-h9-stock",
+          "configuration_label": "SMA adapter plane"
+        },
+        "uat-978": {
+          "efficiency": 0.2140072727959546,
+          "median_swr": 16.595767681639202,
+          "configuration": "tidradio-h9-stock",
+          "configuration_label": "SMA adapter plane"
+        },
+        "ads-b-1090": {
+          "efficiency": 0.2902001407376125,
+          "median_swr": 11.696093389854004,
+          "configuration": "tidradio-h9-stock",
+          "configuration_label": "SMA adapter plane"
+        }
+      }
+    },
+    {
+      "family": "kenwood-thd75a-stock",
+      "family_label": "Kenwood TH-D75A OEM antenna",
+      "short_label": "TH-D75A OEM",
+      "measurement_context": "handheld_sma",
+      "configurations": 1,
+      "retuned_score": 0.30068752689395795,
+      "fixed_score": 0.30068752689395795,
+      "fixed_configuration": "kenwood-thd75a-stock",
+      "fixed_configuration_label": "bare SMA plane",
+      "usable_bands": 2,
+      "excellent_bands": 2,
+      "services": {
+        "6m": {
+          "efficiency": 0.01999013847062134,
+          "median_swr": 197.49131480856767,
+          "configuration": "kenwood-thd75a-stock",
+          "configuration_label": "bare SMA plane"
+        },
+        "fm-broadcast": {
+          "efficiency": 0.13541095160764374,
+          "median_swr": 35.24695946006296,
+          "configuration": "kenwood-thd75a-stock",
+          "configuration_label": "bare SMA plane"
+        },
+        "civil-air": {
+          "efficiency": 0.5372650353931566,
+          "median_swr": 5.51884060557942,
+          "configuration": "kenwood-thd75a-stock",
+          "configuration_label": "bare SMA plane"
+        },
+        "2m": {
+          "efficiency": 0.15360969798879617,
+          "median_swr": 24.30742995520836,
+          "configuration": "kenwood-thd75a-stock",
+          "configuration_label": "bare SMA plane"
+        },
+        "vhf-lmr": {
+          "efficiency": 0.06308365395274076,
+          "median_swr": 65.60036740590861,
+          "configuration": "kenwood-thd75a-stock",
+          "configuration_label": "bare SMA plane"
+        },
+        "marine-vhf": {
+          "efficiency": 0.055564217681262525,
+          "median_swr": 71.04930837428941,
+          "configuration": "kenwood-thd75a-stock",
+          "configuration_label": "bare SMA plane"
+        },
+        "railroad": {
+          "efficiency": 0.05346608288317257,
+          "median_swr": 72.71078607725264,
+          "configuration": "kenwood-thd75a-stock",
+          "configuration_label": "bare SMA plane"
+        },
+        "noaa-weather": {
+          "efficiency": 0.05482409156617103,
+          "median_swr": 71.9032248530196,
+          "configuration": "kenwood-thd75a-stock",
+          "configuration_label": "bare SMA plane"
+        },
+        "1.25m": {
+          "efficiency": 0.40189107048402123,
+          "median_swr": 8.0708457864599,
+          "configuration": "kenwood-thd75a-stock",
+          "configuration_label": "bare SMA plane"
+        },
+        "military-air": {
+          "efficiency": 0.2207760815674753,
+          "median_swr": 27.87490337876549,
+          "configuration": "kenwood-thd75a-stock",
+          "configuration_label": "bare SMA plane"
+        },
+        "federal-uhf": {
+          "efficiency": 0.8907764088663445,
+          "median_swr": 1.9720543956293632,
+          "configuration": "kenwood-thd75a-stock",
+          "configuration_label": "bare SMA plane"
+        },
+        "70cm": {
+          "efficiency": 0.929125120647833,
+          "median_swr": 1.6553288077239137,
+          "configuration": "kenwood-thd75a-stock",
+          "configuration_label": "bare SMA plane"
+        },
+        "uhf-lmr": {
+          "efficiency": 0.7408430847352917,
+          "median_swr": 3.140998493107583,
+          "configuration": "kenwood-thd75a-stock",
+          "configuration_label": "bare SMA plane"
+        },
+        "t-band": {
+          "efficiency": 0.658580228660071,
+          "median_swr": 3.6667912295044003,
+          "configuration": "kenwood-thd75a-stock",
+          "configuration_label": "bare SMA plane"
+        },
+        "700-public-safety-downlink": {
+          "efficiency": 0.13797695571589988,
+          "median_swr": 26.969018506335654,
+          "configuration": "kenwood-thd75a-stock",
+          "configuration_label": "bare SMA plane"
+        },
+        "800-public-safety-downlink": {
+          "efficiency": 0.1356885823025658,
+          "median_swr": 27.459797437421734,
+          "configuration": "kenwood-thd75a-stock",
+          "configuration_label": "bare SMA plane"
+        },
+        "33cm": {
+          "efficiency": 0.15426838471071885,
+          "median_swr": 23.981147967714097,
+          "configuration": "kenwood-thd75a-stock",
+          "configuration_label": "bare SMA plane"
+        },
+        "900-trunking-downlink": {
+          "efficiency": 0.15888168793036397,
+          "median_swr": 23.156937096030838,
+          "configuration": "kenwood-thd75a-stock",
+          "configuration_label": "bare SMA plane"
+        },
+        "uat-978": {
+          "efficiency": 0.192315681456637,
+          "median_swr": 18.73304324862405,
+          "configuration": "kenwood-thd75a-stock",
+          "configuration_label": "bare SMA plane"
+        },
+        "ads-b-1090": {
+          "efficiency": 0.31941338125837176,
+          "median_swr": 10.39539857648455,
+          "configuration": "kenwood-thd75a-stock",
+          "configuration_label": "bare SMA plane"
+        }
+      }
+    }
+  ]
+}

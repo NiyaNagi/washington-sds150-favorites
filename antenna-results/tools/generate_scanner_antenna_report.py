@@ -165,6 +165,7 @@ SERVICES: Tuple[Service, ...] = (
 SERVICE_BY_KEY: Dict[str, Service] = {service.key: service for service in SERVICES}
 CONTEXT_LABELS = {
     "handheld_bench": "Handheld bench fixture",
+    "handheld_sma": "Handheld bench fixture, SMA plane",
     "vehicle_installed": "Installed vehicle",
 }
 
@@ -352,6 +353,17 @@ FAMILIES: Tuple[Family, ...] = (
                 directory="uniden-sds150-stock/measurements/2026-08-16",
                 note="The antenna shipped with the scanner, measured through the required adapter.",
             ),
+            Config(
+                key="uniden-sds150-stock:sma-direct",
+                label="bare SMA plane",
+                directory="uniden-sds150-stock/measurements/2026-09-20-sma-direct",
+                note=(
+                    "The same antenna recaptured 2026-09-20 screwed directly to "
+                    "CH0 against a calibration solved at that bare SMA plane, with "
+                    "no adapter in the path. The only antenna in the survey "
+                    "measured at two different reference planes."
+                ),
+            ),
         ),
         overview=(
             "The reference point: whatever the scanner already has on it. In this "
@@ -410,33 +422,421 @@ FAMILIES: Tuple[Family, ...] = (
         ),
     ),
     Family(
-        key="tidradio-h9-stock",
-        label="TIDRADIO H9 stock antenna",
-        short_label="TIDRADIO H9 stock",
+        key="diamond-rh77ca",
+        label="Diamond RH77CA",
+        short_label="Diamond RH77CA",
         kind="fixed",
-        connection="SMA antenna with adapter (as attempted)",
-        valid=False,
+        connection="BNC antenna, direct to the measurement plane",
+        valid=True,
         configs=(
             Config(
-                key="tidradio-h9-stock",
-                label="single broadband attempt",
-                directory="tidradio-h9-stock/measurements/2026-08-16",
-                note="Single broadband capture; invalid / inconclusive.",
+                key="diamond-rh77ca",
+                label="first mounting",
+                directory="diamond-rh77ca/measurements/2026-09-19-bnc-direct",
+                note=(
+                    "BNC straight onto the calibrated plane with no adapter, "
+                    "2026-09-19."
+                ),
+            ),
+            Config(
+                key="diamond-rh77ca:second-mounting",
+                label="second mounting",
+                directory=(
+                    "diamond-rh77ca/measurements/"
+                    "2026-09-20-bnc-direct-second-mounting"
+                ),
+                note=(
+                    "The same antenna and the same calibration, remounted and "
+                    "recaptured on 2026-09-20 to test the first result. Kept as a "
+                    "separate row because the two mountings disagree by far more "
+                    "than the drift within either one."
+                ),
             ),
         ),
         overview=(
-            "One broadband capture was taken and immediately looked electrically "
-            "open across the bands this antenna is designed for. Testing was "
-            "stopped before any zoom or reseat verification."
+            "The BNC sibling of the SRH77CA, measured in the September 2026 "
+            "session on a mechanically secured fixture. Federal UHF is its one "
+            "broad window here; both nominal amateur bands match poorly without a "
+            "chassis, which is the same behaviour the SRH77CA shows. It is the "
+            "only family captured at two independent mountings, so it also carries "
+            "this survey's measured remount spread."
         ),
-        invalid_reason=(
-            "The capture shows a near-total reflection across the antenna's own "
-            "design bands: 2m, VHF land mobile, marine, railroad, NOAA weather, "
-            "1.25m, UHF land mobile, and the T-band all read as an effectively "
-            "infinite standing-wave ratio, which is the signature of an open or "
-            "unseated connection rather than a working dual-band whip. The capture "
-            "was never repeated after a reseat, so nothing here can be attributed "
-            "to the antenna itself."
+        fixture_note=(
+            "Fixed upright bench geometry on a secured fixture, no added "
+            "counterpoise; the USB cable remained part of the RF environment."
+        ),
+        cautions=(
+            "The two mountings disagree by a median |dGamma| of 0.164 at 2m, "
+            "against a drift floor of about 0.010 within one mounting. Read the "
+            "VHF figures as roughly plus or minus 1 SWR, not to three decimals; "
+            "see the session uncertainty note.",
+            "That both mountings, and a third discarded free-standing capture, "
+            "put 2m between 4.26 and 5.43 with no point at or below 2:1 is the "
+            "robust part of this result.",
+            "The UHF resonances repeat across mountings to 0.1 MHz (392.7/392.8 "
+            "and 400.8 MHz), while the VHF behaviour moves with every remount. At "
+            "VHF the instrument body and cable are half the antenna.",
+            "2m and 1.25m are poor in this no-chassis fixture and should not be "
+            "read as the antenna's on-radio performance.",
+        ),
+    ),
+    Family(
+        key="diamond-srh320a",
+        label="Diamond SRH320A",
+        short_label="Diamond SRH320A",
+        kind="fixed",
+        connection="SMA antenna with a BNC adapter",
+        valid=True,
+        configs=(
+            Config(
+                key="diamond-srh320a",
+                label="with BNC-to-SMA adapter",
+                directory=(
+                    "diamond-srh320a/measurements/2026-09-19-sma-via-bnc-adapter"
+                ),
+                note=(
+                    "Single fixed configuration measured through the required "
+                    "BNC-to-SMA adapter, which sits outboard of the calibration "
+                    "plane and is part of the measured assembly."
+                ),
+            ),
+        ),
+        overview=(
+            "The strongest 1.25m and federal-UHF match in the whole survey: the "
+            "entire 222-225 MHz allocation stays under 1.47 and 96 percent of "
+            "406.1-420 MHz is at or below 2:1. Above roughly 910 MHz it exhausts "
+            "the fixture's calibrated dynamic range and is reported as very poor "
+            "rather than measured."
+        ),
+        fixture_note=(
+            "Fixed upright bench geometry on a secured fixture, no added "
+            "counterpoise; the USB cable remained part of the RF environment."
+        ),
+        cautions=(
+            "Its broadband Touchstone is truncated at 909.798 MHz because the "
+            "calibrated sweep reached a nonphysical reflection above that point; "
+            "33cm, UAT 978 and ADS-B 1090 have no valid measurement at all.",
+            "70cm, UHF land mobile and the T-band are poor; this is a 1.25m and "
+            "federal-UHF antenna in this fixture.",
+            "Measured at a single mounting; see the session uncertainty note.",
+        ),
+    ),
+    Family(
+        key="signal-stick",
+        label="Signal Stick (no counterpoise)",
+        short_label="Signal Stick",
+        kind="fixed",
+        connection="BNC antenna, direct to the measurement plane",
+        valid=True,
+        configs=(
+            Config(
+                key="signal-stick",
+                label="no counterpoise",
+                directory="signal-stick/measurements/2026-09-20-no-counterpoise",
+                note=(
+                    "Flexible whip with no counterpoise fitted, BNC straight onto "
+                    "the calibrated plane."
+                ),
+            ),
+        ),
+        overview=(
+            "Measured without its counterpoise, this antenna matches poorly "
+            "everywhere: 2m sits at 6.4-6.8 and 1.25m above 11. That is the "
+            "expected and physically correct result for a whip whose only return "
+            "path is the instrument body and its cable."
+        ),
+        fixture_note=(
+            "Fixed upright bench geometry on a secured fixture, no counterpoise "
+            "fitted; the USB cable remained part of the RF environment."
+        ),
+        cautions=(
+            "This configuration is the control for the counterpoise comparison, "
+            "not a recommendation. Fit the counterpoise before judging the "
+            "antenna.",
+            "One isolated sample at 465.811 MHz exceeded a physical reflection "
+            "and was excluded from the broadband Touchstone.",
+        ),
+    ),
+    Family(
+        key="signal-stick-counterpoise",
+        label="Signal Stick with counterpoise",
+        short_label="Signal Stick + CP",
+        kind="fixed",
+        connection="BNC antenna with counterpoise, direct to the measurement plane",
+        valid=True,
+        configs=(
+            Config(
+                key="signal-stick-counterpoise",
+                label="with ~19.5 in counterpoise",
+                directory=(
+                    "signal-stick-counterpoise/measurements/"
+                    "2026-09-20-with-counterpoise"
+                ),
+                note=(
+                    "Same whip with the SignalStuff counterpoise, about 19.5 in, "
+                    "attached at the connector and hanging straight down."
+                ),
+            ),
+        ),
+        overview=(
+            "Fitting the counterpoise transforms 2m and detunes everything else. "
+            "The 2m minimum falls from 6.41 to 1.39, coverage at or below 2:1 goes "
+            "from nothing to 84 percent, and the minimum moves down to 144.0 MHz, "
+            "while VHF land mobile, NOAA weather and 1.25m all get substantially "
+            "worse."
+        ),
+        fixture_note=(
+            "Fixed upright bench geometry on a secured fixture, counterpoise of "
+            "about 19.5 in hanging vertically from the connector; the USB cable "
+            "remained part of the RF environment."
+        ),
+        cautions=(
+            "Counterpoise length and routing change this result materially. Only "
+            "the vertical hanging arrangement was measured.",
+            "The two Signal Stick entries were captured at separate mountings "
+            "rather than interleaved, so the counterpoise figure carries one "
+            "remount of uncertainty. The 2m change is roughly two orders of "
+            "magnitude larger than that, but the smaller shifts on other services "
+            "are not separable from remount effects.",
+        ),
+    ),
+    Family(
+        key="tidradio-h9-stock",
+        label="TIDRADIO TD-H9 stock antenna",
+        short_label="TD-H9 stock",
+        kind="fixed",
+        connection="SMA-female antenna via an SMA male-to-male adapter",
+        valid=True,
+        configs=(
+            Config(
+                key="tidradio-h9-stock",
+                label="SMA adapter plane",
+                directory="tidradio-h9-stock/measurements/2026-09-20-sma-adapter",
+                note=(
+                    "Recaptured 2026-09-20 at the SMA male-to-male adapter plane "
+                    "after the August attempt was rejected as inconclusive."
+                ),
+            ),
+        ),
+        overview=(
+            "The August 2026 capture of this antenna was rejected as invalid: it "
+            "read electrically open across every band it is designed for. The "
+            "September recapture shows a working UHF antenna, so that first result "
+            "was a connection fault, not the antenna. It is one of the strongest "
+            "UHF performers measured, and like every counterpoise-less whip here "
+            "it is very poor at VHF on this fixture."
+        ),
+        measurement_context="handheld_sma",
+        fixture_note=(
+            "Fixed upright bench geometry on a secured fixture, no counterpoise; "
+            "the USB cable remained part of the RF environment."
+        ),
+        cautions=(
+            "Its 2m and VHF figures describe the antenna plus a fixture with no "
+            "radio chassis, not its behaviour on a TD-H9.",
+            "The August capture is preserved separately and remains invalid.",
+        ),
+    ),
+    Family(
+        key="kenwood-thd75a-stock",
+        label="Kenwood TH-D75A OEM antenna",
+        short_label="TH-D75A OEM",
+        kind="fixed",
+        connection="SMA-male antenna direct to the measurement plane",
+        valid=True,
+        configs=(
+            Config(
+                key="kenwood-thd75a-stock",
+                label="bare SMA plane",
+                directory="kenwood-thd75a-stock/measurements/2026-09-20-sma-direct",
+                note=(
+                    "Supplied antenna screwed directly to CH0 with no adapter, "
+                    "against a calibration solved at that bare SMA plane."
+                ),
+            ),
+        ),
+        overview=(
+            "The control experiment for the whole September session. A known-good "
+            "dual-band whip that works on both bands on its radio: the instrument "
+            "places its 70cm resonance exactly where it belongs and returns a good "
+            "UHF match, while the same sweep reads about 24:1 on 2m. It is the "
+            "clearest demonstration that this fixture cannot measure VHF match for "
+            "a counterpoise-less handheld antenna."
+        ),
+        measurement_context="handheld_sma",
+        fixture_note=(
+            "Fixed upright bench geometry on a secured fixture, no counterpoise; "
+            "the USB cable remained part of the RF environment."
+        ),
+        cautions=(
+            "Do not read the VHF figures as this antenna's performance on a "
+            "TH-D75A. It is a compact helical that depends on the radio chassis "
+            "more than any other antenna measured here.",
+            "No part number is marked on the antenna.",
+        ),
+    ),
+    Family(
+        key="icom-id52a-stock",
+        label="Icom ID-52A OEM antenna",
+        short_label="ID-52A OEM",
+        kind="fixed",
+        connection="SMA-male antenna direct to the measurement plane",
+        valid=True,
+        configs=(
+            Config(
+                key="icom-id52a-stock",
+                label="bare SMA plane",
+                directory="icom-id52a-stock/measurements/2026-09-20-sma-direct",
+                note=(
+                    "Supplied antenna screwed directly to CH0 with no adapter, "
+                    "against a calibration solved at that bare SMA plane."
+                ),
+            ),
+        ),
+        overview=(
+            "Measured on the same plane as the TH-D75A OEM whip and far better at "
+            "VHF, at 4.5 median on 2m against 24.3, which is a real antenna "
+            "difference rather than a fixture artefact. Its best window is UHF land "
+            "mobile. 1.25m is very poor, as expected for a 2m/70cm design."
+        ),
+        measurement_context="handheld_sma",
+        fixture_note=(
+            "Fixed upright bench geometry on a secured fixture, no counterpoise; "
+            "the USB cable remained part of the RF environment."
+        ),
+        cautions=(
+            "VHF figures describe the antenna plus a fixture with no radio chassis.",
+            "No part number is marked on the antenna.",
+        ),
+    ),
+    Family(
+        key="anytone-atd890uv-16cm",
+        label="AnyTone AT-D890UV OEM rubber duck",
+        short_label="AT-D890UV 16cm",
+        kind="fixed",
+        connection="SMA-female antenna via an SMA male-to-male adapter",
+        valid=True,
+        configs=(
+            Config(
+                key="anytone-atd890uv-16cm",
+                label="SMA adapter plane",
+                directory="anytone-atd890uv-16cm/measurements/2026-09-20-sma-adapter",
+                note=(
+                    "AnyTone's short OEM dual-band antenna, approximately 16 cm, "
+                    "measured at the adapter's outer face with the adapter "
+                    "de-embedded by its own calibration."
+                ),
+            ),
+        ),
+        overview=(
+            "AnyTone's short supplied whip. Federal UHF is its one broad window at "
+            "88 percent of the band at or below 2:1; 1.25m is a deep gap."
+        ),
+        measurement_context="handheld_sma",
+        fixture_note=(
+            "Fixed upright bench geometry on a secured fixture, no counterpoise; "
+            "the USB cable remained part of the RF environment."
+        ),
+        cautions=(
+            "VHF figures describe the antenna plus a fixture with no radio chassis.",
+            "AnyTone does not give this antenna a separate part number; it is "
+            "identified by its approximate 16 cm length.",
+        ),
+    ),
+    Family(
+        key="anytone-atd890uv-38cm",
+        label="AnyTone AT-D890UV OEM long whip",
+        short_label="AT-D890UV 38cm",
+        kind="fixed",
+        connection="SMA-female antenna via an SMA male-to-male adapter",
+        valid=True,
+        configs=(
+            Config(
+                key="anytone-atd890uv-38cm",
+                label="SMA adapter plane",
+                directory="anytone-atd890uv-38cm/measurements/2026-09-20-sma-adapter",
+                note=(
+                    "AnyTone's long OEM dual-band antenna, approximately 38 cm, "
+                    "measured at the adapter's outer face."
+                ),
+            ),
+        ),
+        overview=(
+            "The long AnyTone whip holds the entire NOAA weather window and the "
+            "whole federal-UHF block at or below 2:1, the only antenna in the "
+            "survey to do both. It is poor on its own nominal 2m and 70cm bands in "
+            "this fixture."
+        ),
+        measurement_context="handheld_sma",
+        fixture_note=(
+            "Fixed upright bench geometry on a secured fixture, no counterpoise; "
+            "the USB cable remained part of the RF environment."
+        ),
+        cautions=(
+            "Above 877.454 MHz it exhausts the fixture's calibrated dynamic range: "
+            "the broadband Touchstone is truncated there and 33cm, 900 MHz "
+            "trunking, UAT 978 and ADS-B 1090 have no valid measurement at all.",
+            "VHF figures describe the antenna plus a fixture with no radio chassis.",
+        ),
+    ),
+    Family(
+        key="smiley-halfwave",
+        label="Smiley 2m half-wave telescopic",
+        short_label="Smiley 1/2 wave",
+        kind="telescopic",
+        connection="BNC antenna, direct to the measurement plane",
+        valid=True,
+        configs=(
+            Config("smiley-halfwave:setting-1", "setting 1 (collapsed, 22 cm)",
+                   "smiley-halfwave/measurements/setting-1-collapsed",
+                   "Fully collapsed, 22 cm."),
+            Config("smiley-halfwave:setting-2", "setting 2 (34.5 cm)",
+                   "smiley-halfwave/measurements/setting-2",
+                   "Five sections retracted, 34.5 cm."),
+            Config("smiley-halfwave:setting-3", "setting 3 (46 cm)",
+                   "smiley-halfwave/measurements/setting-3",
+                   "Four sections retracted, 46 cm."),
+            Config("smiley-halfwave:setting-4", "setting 4 (57.5 cm)",
+                   "smiley-halfwave/measurements/setting-4",
+                   "Three sections retracted, 57.5 cm."),
+            Config("smiley-halfwave:setting-5", "setting 5 (69 cm)",
+                   "smiley-halfwave/measurements/setting-5",
+                   "Two sections retracted, 69 cm."),
+            Config("smiley-halfwave:setting-6", "setting 6 (80 cm)",
+                   "smiley-halfwave/measurements/setting-6",
+                   "One section retracted, 80 cm. The best 2m match in the survey."),
+            Config("smiley-halfwave:setting-7", "setting 7 (fully extended)",
+                   "smiley-halfwave/measurements/setting-7-fully-extended",
+                   "Fully extended; length not measured, catalogue figure is 36 in."),
+        ),
+        overview=(
+            "Smiley Antenna Co. 2m half-wave telescopic flex, 144-148 MHz, BNC, "
+            "collapsing to 8 in and extending to 36 in. Measured at all seven "
+            "lengths, it is the only antenna in this survey with a broad 2m match, "
+            "and it achieves it with no counterpoise at all. A half-wave is fed at "
+            "high impedance and barely depends on a ground plane, which is exactly "
+            "why it succeeds on a fixture where every quarter-wave whip fails."
+        ),
+        measurement_context="handheld_bench",
+        fixture_note=(
+            "Fixed upright bench geometry on a secured fixture, no counterpoise; "
+            "the USB cable remained part of the RF environment. Changing setting "
+            "means handling the antenna, so every setting change is also a remount."
+        ),
+        cautions=(
+            "Setting 6 at 80 cm is a sharp optimum: 100 percent of 2m at or below "
+            "2:1, against 0 percent at both 69 cm and fully extended. Length "
+            "matters more than any other variable measured in this survey.",
+            "Resonant frequency and best match do not track together. Setting 5 is "
+            "the only setting whose minimum falls inside the band rather than at "
+            "the 144 MHz edge, yet it matches worse than setting 6, so the coil's "
+            "matching network rather than length alone sets the match.",
+            "Its baseline is the weakest of the September session, failing the p95 "
+            "gate at 1.03800 above 300 MHz. The 2m floor of 1.00148 is excellent, "
+            "so VHF results are solid and UHF results carry more uncertainty.",
+            "Federal UHF has no valid measurement at settings 2 and 5.",
+            "The manufacturer's 7 dBd gain claim is not measurable from SWR and is "
+            "recorded here only as a claim.",
         ),
     ),
 )
@@ -502,18 +902,25 @@ RECOMMENDATIONS: Tuple[Recommendation, ...] = (
     Recommendation(
         "VHF land mobile, marine, railroad, and NOAA weather (150-174 MHz)",
         ("vhf-lmr", "marine-vhf", "railroad", "noaa-weather"),
-        "rh789:setting-5",
-        (),
-        "Extend the RH789 to setting 5 for handheld use. The installed Taurus also "
-        "provides usable but uneven VHF-high coverage in its separate vehicle context.",
+        "smiley-halfwave:setting-5",
+        ("diamond-srh320a", "anytone-atd890uv-38cm", "rh789:setting-5"),
+        "The Smiley at 69 cm holds all of NOAA weather, marine and railroad at or "
+        "below 2:1 and two thirds of 150-174 MHz, the best VHF-high result in the "
+        "survey. The AnyTone long whip also covers the whole NOAA window. The "
+        "SRH320A is the best hands-off fixed choice at a 2.46 median. The installed "
+        "Taurus provides usable but uneven VHF-high coverage in its separate "
+        "vehicle context.",
     ),
     Recommendation(
         "Federal UHF (406.1-420 MHz)",
         ("federal-uhf",),
-        "rh789:setting-4",
-        ("uniden-sds150-stock", "diamond-srh77ca"),
-        "RH789 at setting 4 is the best broad match. The stock SDS150 antenna is a "
-        "reasonable no-change alternate near the top of the band.",
+        "diamond-srh320a",
+        ("anytone-atd890uv-38cm", "anytone-atd890uv-16cm", "tidradio-h9-stock"),
+        "The SRH320A is the strongest measured federal-UHF match: 1.08 minimum, "
+        "1.30 median, 96.4 percent of the window at or below 2:1. The AnyTone long "
+        "whip and the TD-H9 stock antenna both hold the entire block at or below "
+        "2:1 with slightly higher medians, and the AnyTone rubber duck reaches 88 "
+        "percent. This is the best-served band in the whole survey.",
     ),
     Recommendation(
         "UHF land mobile (450-470 MHz)",
@@ -534,17 +941,21 @@ RECOMMENDATIONS: Tuple[Recommendation, ...] = (
         "1.25m / 222-225 MHz",
         ("1.25m",),
         "tid-td771",
-        ("diamond-srh77ca",),
-        "The TD771 is excellent across the whole allocation; the Diamond SRH77CA is "
-        "a close and equally hands-off alternate.",
+        ("diamond-srh77ca", "diamond-srh320a"),
+        "The TD771 is excellent across the whole allocation; the Diamond SRH77CA "
+        "and SRH320A are close, equally hands-off alternates. All three hold the "
+        "entire 222-225 MHz allocation at or below 2:1.",
     ),
     Recommendation(
         "70cm / 420-450 MHz",
         ("70cm",),
-        "diamond-srh77ca",
-        ("uniden-sds150-stock",),
-        "The Diamond is the strongest broad choice. The stock antenna is useful "
-        "near the lower band edge only.",
+        "kenwood-thd75a-stock",
+        ("tidradio-h9-stock", "diamond-srh77ca"),
+        "The TH-D75A OEM whip is the strongest 70cm match measured, at a 1.66 "
+        "median and 86.5 percent of 420-450 MHz at or below 2:1, with the TD-H9 "
+        "stock antenna close behind at 76.7 percent. Both are supplied antennas "
+        "that cost nothing extra. The Diamond SRH77CA remains the best result at "
+        "the original SMA-to-BNC bench plane.",
     ),
     Recommendation(
         "Military air (225-400 MHz)",
@@ -579,8 +990,22 @@ RECOMMENDATIONS: Tuple[Recommendation, ...] = (
         "1090 MHz. Match is not the same as aircraft-tracking sensitivity.",
     ),
     Recommendation(
-        "Civil air (118-137 MHz), 2m, and 6m",
-        ("civil-air", "2m", "6m"),
+        "2m / 144-148 MHz",
+        ("2m",),
+        "smiley-halfwave:setting-6",
+        ("signal-stick-counterpoise", "diamond-srh320a"),
+        "The Smiley half-wave at 80 cm is the clear winner: 1.22 minimum and 100 "
+        "percent of 144-148 MHz at or below 2:1, with no counterpoise needed. "
+        "Length is critical, not incidental - the same antenna covers none of the "
+        "band at 69 cm or fully extended. The Signal Stick reaches 84.2 percent but "
+        "only with its counterpoise fitted, which costs it VHF land mobile, NOAA "
+        "weather and 1.25m. Every quarter-wave whip here is poor on 2m because the "
+        "fixture gives them no chassis to work against; the half-wave does not need "
+        "one, which is exactly why it wins.",
+    ),
+    Recommendation(
+        "Civil air (118-137 MHz) and 6m",
+        ("civil-air", "6m"),
         None,
         (),
         "No tested configuration has a broad match on these bands. No recommendation "
@@ -675,7 +1100,17 @@ def load_data(root: Path) -> Dict[str, ConfigData]:
     return loaded
 
 
-def trace_for_service(data: ConfigData, service: Service) -> Tuple[Trace, str]:
+def trace_for_service(
+    data: ConfigData, service: Service
+) -> Optional[Tuple[Trace, str]]:
+    """Return the authoritative trace for a service, or None if unmeasured.
+
+    None means no valid data exists for this configuration and service: the
+    averaged zoom failed the passive-physics gate and the broadband capture
+    does not reach the window either, because the fixture's calibrated dynamic
+    range was exhausted there. That is reported as an explicit absence rather
+    than an inferred value.
+    """
     if service.key in data.zooms:
         return data.zooms[service.key], "averaged_zoom"
     mask = (
@@ -683,8 +1118,22 @@ def trace_for_service(data: ConfigData, service: Service) -> Tuple[Trace, str]:
         & (data.broadband.frequency_hz <= service.stop_hz)
     )
     if not np.any(mask):
-        raise ValueError(f"No broadband points for {data.config.key} / {service.key}")
+        return None
     return Trace(data.broadband.frequency_hz[mask], data.broadband.gamma[mask]), "broadband"
+
+
+UNMEASURED_ANALYSIS: Dict[str, object] = {
+    "points": 0,
+    "minimum_swr": None,
+    "minimum_swr_frequency_hz": None,
+    "median_swr": None,
+    "maximum_swr": None,
+    "coverage_at_or_below_2_percent": 0.0,
+    "coverage_at_or_below_3_percent": 0.0,
+    "resistance_at_minimum_ohm": None,
+    "reactance_at_minimum_ohm": None,
+    "return_loss_at_minimum_swr_db": None,
+}
 
 
 def finite_or_none(value: float) -> Optional[float]:
@@ -729,7 +1178,8 @@ def build_rows(data: Dict[str, ConfigData]) -> List[Dict[str, object]]:
     for config_key in VALID_CONFIG_KEYS:
         config_data = data[config_key]
         for service in SERVICES:
-            trace, source = trace_for_service(config_data, service)
+            resolved = trace_for_service(config_data, service)
+            source = resolved[1] if resolved is not None else "unmeasured"
             row: Dict[str, object] = {
                 "family": config_data.family.key,
                 "family_label": config_data.family.label,
@@ -745,7 +1195,10 @@ def build_rows(data: Dict[str, ConfigData]) -> List[Dict[str, object]]:
                 "stop_hz": service.stop_hz,
                 "source": source,
             }
-            row.update(analyze_trace(trace))
+            if resolved is None:
+                row.update(UNMEASURED_ANALYSIS)
+            else:
+                row.update(analyze_trace(resolved[0]))
             row["coverage_status"] = coverage_status(row)
             rows.append(row)
     for service in SERVICES:
@@ -1045,7 +1498,10 @@ def write_best_settings(
 
 
 def source_link(config: Config) -> str:
-    return f"{Path(config.directory).relative_to(Path(config.directory).parts[0])}/antenna.s1p"
+    relative = Path(config.directory).relative_to(Path(config.directory).parts[0])
+    # as_posix(), not str(): a Windows run would otherwise emit backslashes and
+    # break every generated link.
+    return f"{relative.as_posix()}/antenna.s1p"
 
 
 def family_readme(
@@ -1094,6 +1550,33 @@ def family_readme(
         lines.extend([
             "- Full 222-225 MHz allocation is approximately 1.33-1.46 SWR.",
             "- Broadly useful across 420-450 MHz: minimum 1.46, median 1.86.",
+        ])
+    elif family.key == "diamond-rh77ca":
+        lines.extend([
+            "- Federal UHF is its one broad window in both mountings: 1.36 and 1.30 minimum, 1.70 and 1.37 median.",
+            "- 2m is poor and reproducibly so: 4.26, 5.43 and 4.82 minimum across three mountings, with no point at or below 2:1 in any of them.",
+            "- The two mountings disagree by a median |dGamma| of 0.164 at 2m, so treat the VHF numbers as approximate.",
+            "- Strongest dips sit at 392.7-420.8 MHz, below the 70cm band, and repeat across mountings to 0.1 MHz.",
+            "- There is no resonance near 146 MHz on this fixture at all.",
+        ])
+    elif family.key == "diamond-srh320a":
+        lines.extend([
+            "- The survey's best 1.25m result: 1.39-1.46 across the whole allocation, 100% at or below 2:1.",
+            "- Federal UHF is 1.08 minimum, 1.30 median, 96.4% at or below 2:1.",
+            "- VHF land mobile is partial, with a 1.04 minimum near 155.65 MHz.",
+            "- 70cm, UHF land mobile and T-band are poor; above 909.798 MHz there is no valid measurement.",
+        ])
+    elif family.key == "signal-stick":
+        lines.extend([
+            "- Without a counterpoise this whip matches poorly everywhere: 2m 6.41-6.84, 1.25m 11.06-12.68.",
+            "- Kept as the measured control for the counterpoise comparison, not as a recommendation.",
+        ])
+    elif family.key == "signal-stick-counterpoise":
+        lines.extend([
+            "- The counterpoise transforms 2m: minimum 1.39 at 144.0 MHz, 1.70 median, 84.2% at or below 2:1.",
+            "- It detunes everything else: VHF land mobile median rises 3.84 to 8.93, NOAA 3.63 to 9.48, 1.25m 11.69 to 15.75.",
+            "- 70cm improves but stays poor: median 5.28 to 3.78.",
+            "- Counterpoise length and routing change this result; only ~19.5 in hanging vertically was measured.",
         ])
     elif family.key == "generic-extendable":
         lines.extend([
@@ -1183,6 +1666,281 @@ No repeat verification was performed because the user skipped it. These files mu
 SWR is impedance match only—not receive gain, sensitivity, pattern, or decoding performance.
 """
     output.write_text(text, encoding="utf-8")
+
+
+EFFICIENCY_USABLE = 0.75
+EFFICIENCY_EXCELLENT = 8.0 / 9.0
+
+
+def service_efficiency_and_swr(
+    data: ConfigData, service: Service
+) -> Tuple[float, Optional[float]]:
+    """Mismatch efficiency plus the median SWR of the same trace.
+
+    The two describe the same window from different angles: efficiency is what
+    aggregates across bands, median SWR is what the rest of this survey quotes.
+    Returning them together guarantees they always come from the same
+    configuration and the same authoritative trace.
+    """
+    resolved = trace_for_service(data, service)
+    if resolved is None:
+        return 0.0, None
+    trace = resolved[0]
+    magnitude = np.abs(trace.gamma)
+    magnitude = np.where(np.isfinite(magnitude), magnitude, 1.0)
+    magnitude = np.clip(magnitude, 0.0, 1.0)
+    efficiency = float(np.mean(1.0 - magnitude**2))
+    swr = trace.swr
+    finite = swr[np.isfinite(swr)]
+    median_swr = float(np.median(finite)) if finite.size else None
+    return efficiency, median_swr
+
+
+def service_efficiency(data: ConfigData, service: Service) -> float:
+    """Mean fraction of power transferred across a service window.
+
+    ``1 - |Gamma|^2`` is the share of incident power that is not reflected. It
+    is bounded to 0-1, so it averages across bands meaningfully, which raw SWR
+    does not: a single 25:1 band dominates any mean of SWR values while adding
+    almost nothing a listener could use. A window with no valid measurement
+    scores 0, which is the honest reading - those windows failed because the
+    calibrated reflection reached or exceeded unity, meaning essentially no
+    power was getting in or out.
+
+    For reference, an average SWR of 2:1 across a window is an efficiency of
+    0.889 and 3:1 is 0.750.
+    """
+    resolved = trace_for_service(data, service)
+    if resolved is None:
+        return 0.0
+    magnitude = np.abs(resolved[0].gamma)
+    magnitude = np.where(np.isfinite(magnitude), magnitude, 1.0)
+    magnitude = np.clip(magnitude, 0.0, 1.0)
+    return float(np.mean(1.0 - magnitude**2))
+
+
+def build_efficiency(data: Dict[str, ConfigData]) -> List[Dict[str, object]]:
+    """Per family, the best configuration for each service and an aggregate.
+
+    ``retuned_score`` allows a different setting per band, which is what a
+    telescopic antenna actually offers. ``fixed_score`` is the best single
+    configuration averaged over every band, which is what you get if you set it
+    once and leave it. For a fixed antenna the two are identical.
+    """
+    by_family: Dict[str, List[Tuple[str, ConfigData]]] = {}
+    for key, config_data in data.items():
+        by_family.setdefault(config_data.family.key, []).append((key, config_data))
+
+    summary: List[Dict[str, object]] = []
+    for family in VALID_FAMILIES:
+        configs = by_family.get(family.key)
+        if not configs:
+            continue
+        cells: Dict[str, Dict[str, object]] = {}
+        for service in SERVICES:
+            scored = []
+            for key, config_data in configs:
+                efficiency, median_swr = service_efficiency_and_swr(config_data, service)
+                scored.append((efficiency, median_swr, key, config_data))
+            scored.sort(key=lambda item: item[0], reverse=True)
+            efficiency, median_swr, key, config_data = scored[0]
+            cells[service.key] = {
+                "efficiency": efficiency,
+                "median_swr": median_swr,
+                "configuration": key,
+                "configuration_label": config_data.config.label,
+            }
+        retuned = float(np.mean([cell["efficiency"] for cell in cells.values()]))
+        fixed_score, fixed_key, fixed_label = -1.0, "", ""
+        for key, config_data in configs:
+            mean = float(
+                np.mean([service_efficiency(config_data, service) for service in SERVICES])
+            )
+            if mean > fixed_score:
+                fixed_score, fixed_key = mean, key
+                fixed_label = config_data.config.label
+        summary.append(
+            {
+                "family": family.key,
+                "family_label": family.label,
+                "short_label": family.short_label,
+                "measurement_context": family.measurement_context,
+                "configurations": len(configs),
+                "retuned_score": retuned,
+                "fixed_score": fixed_score,
+                "fixed_configuration": fixed_key,
+                "fixed_configuration_label": fixed_label,
+                "usable_bands": sum(
+                    1 for cell in cells.values() if cell["efficiency"] >= EFFICIENCY_USABLE
+                ),
+                "excellent_bands": sum(
+                    1 for cell in cells.values() if cell["efficiency"] >= EFFICIENCY_EXCELLENT
+                ),
+                "services": cells,
+            }
+        )
+    summary.sort(key=lambda item: -float(item["retuned_score"]))
+    return summary
+
+
+def build_configuration_efficiency(
+    data: Dict[str, ConfigData]
+) -> List[Dict[str, object]]:
+    """Every configuration scored in its own right, telescopic settings included.
+
+    The family table credits a telescopic antenna with its best setting per
+    band, which is what it can actually deliver but is not a like-for-like
+    comparison against a fixed whip. This table scores each setting as the
+    single fixed antenna it would be if you left it there, so a setting of the
+    RH789 and a Diamond SRH77CA are judged on the same terms.
+    """
+    scored: List[Dict[str, object]] = []
+    for family in VALID_FAMILIES:
+        for config in family.configs:
+            config_data = data.get(config.key)
+            if config_data is None:
+                continue
+            cells: Dict[str, Dict[str, object]] = {}
+            for service in SERVICES:
+                efficiency, median_swr = service_efficiency_and_swr(config_data, service)
+                cells[service.key] = {
+                    "efficiency": efficiency,
+                    "median_swr": median_swr,
+                }
+            values = [float(cell["efficiency"]) for cell in cells.values()]
+            scored.append(
+                {
+                    "configuration": config.key,
+                    "configuration_label": config.label,
+                    "family": family.key,
+                    "family_label": family.label,
+                    "short_label": family.short_label,
+                    "measurement_context": family.measurement_context,
+                    "kind": family.kind,
+                    "score": float(np.mean(values)),
+                    "usable_bands": sum(1 for v in values if v >= EFFICIENCY_USABLE),
+                    "excellent_bands": sum(1 for v in values if v >= EFFICIENCY_EXCELLENT),
+                    "services": cells,
+                }
+            )
+    scored.sort(key=lambda item: -float(item["score"]))
+    return scored
+
+
+def write_configuration_efficiency(
+    scored: Sequence[Dict[str, object]], comparison: Path
+) -> None:
+    with (comparison / "mismatch-efficiency-by-configuration.csv").open(
+        "w", newline="", encoding="utf-8"
+    ) as handle:
+        writer = csv.writer(handle)
+        writer.writerow(
+            ["rank", "configuration", "configuration_label", "family", "family_label",
+             "kind", "measurement_context", "score", "usable_bands", "excellent_bands"]
+            + [f"{service.key}__efficiency" for service in SERVICES]
+            + [f"{service.key}__median_swr" for service in SERVICES]
+        )
+        for index, item in enumerate(scored, start=1):
+            cells = item["services"]
+            writer.writerow(
+                [
+                    index, item["configuration"], item["configuration_label"],
+                    item["family"], item["family_label"], item["kind"],
+                    item["measurement_context"],
+                    f"{float(item['score']):.6f}",
+                    item["usable_bands"], item["excellent_bands"],
+                ]
+                + [f"{float(cells[s.key]['efficiency']):.6f}" for s in SERVICES]
+                + [
+                    ""
+                    if cells[s.key]["median_swr"] is None
+                    else f"{float(cells[s.key]['median_swr']):.4f}"
+                    for s in SERVICES
+                ]
+            )
+    (comparison / "mismatch-efficiency-by-configuration.json").write_text(
+        json.dumps(
+            {
+                "schema": "sds150-scanner-antenna-efficiency-by-configuration/1.0",
+                "metric": (
+                    "Mean fraction of incident power transferred across each service "
+                    "window, 1 - |Gamma|^2. Every configuration is scored as the fixed "
+                    "antenna it would be if left at that setting, so telescopic "
+                    "settings and fixed whips are judged on the same terms."
+                ),
+                "usable_threshold": EFFICIENCY_USABLE,
+                "excellent_threshold": EFFICIENCY_EXCELLENT,
+                "configurations": scored,
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+
+def write_efficiency_artifacts(
+    summary: Sequence[Dict[str, object]], comparison: Path
+) -> None:
+    with (comparison / "mismatch-efficiency-heatmap.csv").open(
+        "w", newline="", encoding="utf-8"
+    ) as handle:
+        writer = csv.writer(handle)
+        writer.writerow(
+            ["family", "family_label", "measurement_context", "configurations",
+             "retuned_score", "fixed_score", "fixed_configuration_label",
+             "usable_bands", "excellent_bands"]
+            + [f"{service.key}__efficiency" for service in SERVICES]
+            + [f"{service.key}__median_swr" for service in SERVICES]
+            + [f"{service.key}__best_setting" for service in SERVICES]
+        )
+        for item in summary:
+            cells = item["services"]
+            writer.writerow(
+                [
+                    item["family"], item["family_label"], item["measurement_context"],
+                    item["configurations"],
+                    f"{float(item['retuned_score']):.6f}",
+                    f"{float(item['fixed_score']):.6f}",
+                    item["fixed_configuration_label"],
+                    item["usable_bands"], item["excellent_bands"],
+                ]
+                + [f"{float(cells[s.key]['efficiency']):.6f}" for s in SERVICES]
+                + [
+                    ""
+                    if cells[s.key]["median_swr"] is None
+                    else f"{float(cells[s.key]['median_swr']):.4f}"
+                    for s in SERVICES
+                ]
+                + [cells[s.key]["configuration_label"] for s in SERVICES]
+            )
+    (comparison / "mismatch-efficiency-heatmap.json").write_text(
+        json.dumps(
+            {
+                "schema": "sds150-scanner-antenna-efficiency/1.0",
+                "metric": (
+                    "Mean fraction of incident power transferred across each service "
+                    "window, 1 - |Gamma|^2, averaged point by point over the "
+                    "authoritative trace. Bounded 0-1. An average 2:1 SWR is 0.889 "
+                    "and 3:1 is 0.750. A window with no valid measurement scores 0."
+                ),
+                "retuned_score": (
+                    "Mean efficiency across all services allowing the best setting "
+                    "per service; equal weight per service window."
+                ),
+                "fixed_score": (
+                    "Mean efficiency across all services for the single best "
+                    "configuration. Identical to retuned_score for fixed antennas."
+                ),
+                "usable_threshold": EFFICIENCY_USABLE,
+                "excellent_threshold": EFFICIENCY_EXCELLENT,
+                "families": summary,
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
 
 
 def write_scorecards(rows: Sequence[Dict[str, object]], comparison: Path) -> None:
@@ -1771,27 +2529,61 @@ def package_readme(root: Path) -> None:
         ("RH789", "antennas/rh789/README.md", "valid", "settings 1-6; manually retuned VHF/UHF"),
         ("TID TD771", "antennas/tid-td771/README.md", "valid", "fixed; exceptional 222-225 MHz"),
         ("Diamond SRH77CA", "antennas/diamond-srh77ca/README.md", "valid", "fixed; broad 420-450 MHz"),
+        ("Diamond RH77CA", "antennas/diamond-rh77ca/README.md", "valid", "fixed; broad 406-420 MHz"),
+        ("Diamond SRH320A", "antennas/diamond-srh320a/README.md", "valid", "fixed; best 222-225 MHz and 406-420 MHz; no valid data above 909.798 MHz"),
+        ("Signal Stick", "antennas/signal-stick/README.md", "valid / control", "fixed; measured without its counterpoise"),
+        ("Signal Stick with counterpoise", "antennas/signal-stick-counterpoise/README.md", "valid", "fixed; 84% of 2m at or below 2:1 with the wire fitted"),
+        ("Smiley 2m half-wave telescopic", "antennas/smiley-halfwave/README.md", "valid", "settings 1-7, 22-91 cm; **the only broad 2m match in the survey** and the best all-rounder"),
+        ("Kenwood TH-D75A OEM", "antennas/kenwood-thd75a-stock/README.md", "valid", "fixed, bare SMA plane; best measured 70cm; the fixture control experiment"),
+        ("Icom ID-52A OEM", "antennas/icom-id52a-stock/README.md", "valid", "fixed, bare SMA plane; best window is UHF land mobile"),
+        ("AnyTone AT-D890UV rubber duck", "antennas/anytone-atd890uv-16cm/README.md", "valid", "fixed ~16 cm, SMA adapter plane; 88% of federal UHF"),
+        ("AnyTone AT-D890UV long whip", "antennas/anytone-atd890uv-38cm/README.md", "valid", "fixed ~38 cm, SMA adapter plane; full NOAA and full federal UHF"),
         ("Generic extendable", "antennas/generic-extendable/README.md", "valid / experimental", "settings 1-10; geometry-sensitive"),
         ("Uniden SDS150 stock", "antennas/uniden-sds150-stock/README.md", "valid", "reference antenna"),
         ("Taurus triband vehicle", "antennas/taurus-triband-vehicle/README.md", "valid / installed vehicle", "fixed installation; VHF-high and partial 800/900 MHz"),
-        ("TIDRADIO H9 stock", "antennas/tidradio-h9-stock/README.md", "invalid / inconclusive", "preserved, excluded"),
-        ("JYR8010 EFHW", "antennas/jyr8010-efhw/README.md", "preserved HF report", "separate prior report"),
+        ("TIDRADIO TD-H9 stock", "antennas/tidradio-h9-stock/README.md", "valid", "fixed, SMA adapter plane; full federal UHF, strong 70cm. The rejected August capture is preserved separately"),
+        ("JYR8010 EFHW", "antennas/jyr8010-efhw/README.md", "valid HF reports and siting study", "39.6 m / 130 ft **80m-band** EFHW; historical baseline, [two-choke office-feed installation](antennas/jyr8010-efhw/two-choke-office-feed/README.md), and [CN97ap deployment siting study](antennas/jyr8010-efhw/deployment-siting-cn97ap/README.md)"),
+        ("GOWENIC-module 40m EFHW", "antennas/gowenic-efhw/README.md", "valid HF reports", "62.5 ft sloper; 75 ft outdoor baseline plus [100 ft/window office-feed comparison](antennas/gowenic-efhw/installed-office-feed/README.md)"),
     ]
     lines = [
         "# Antenna measurement results",
         "",
-        f"Reproducible reports built from calibrated complex S11 measurements. The scanner survey compares {len(VALID_FAMILIES)} valid antenna families and {len(VALID_CONFIG_KEYS)} configurations across {len(SERVICES)} receive-service windows; the earlier JYR8010 EFHW HF report remains intact.",
+        f"Reproducible reports built from calibrated complex S11 measurements. The scanner survey compares {len(VALID_FAMILIES)} valid antenna families and {len(VALID_CONFIG_KEYS)} configurations across {len(SERVICES)} receive-service windows; the JYR8010 and final GOWENIC-module EFHW HF reports are preserved separately.",
         "",
         "> **SWR is impedance match only.** It cannot establish receive gain, scanner sensitivity, radiation pattern, or decode performance.",
         "",
+        "## Reproduce an antenna deployment",
+        "",
+        "- [Complete calibrated NanoVNA methodology](docs/NANOVNA-DEPLOYMENT-METHODOLOGY.md)",
+        "  defines hardware setup, reference planes, 40,001-point segmented capture,",
+        "  software OSL math, standard/load/open-path quality gates, repeatability,",
+        "  analysis, visualization, interpretation limits, evidence preservation, and",
+        "  publication.",
+        "- [August 2026 EFHW session record](docs/2026-08-EFHW-SESSION-RECORD.md)",
+        "  preserves the chronological GOWENIC and JYR8010 configurations, commands,",
+        "  results, failures, corrections, reviews, and commits.",
+        "- [September 2026 handheld session uncertainty](docs/2026-09-HANDHELD-SESSION-UNCERTAINTY.md)",
+        "  records the measured fixture floor, mounting repeatability, and dynamic-range",
+        "  limits behind the RH77CA, SRH320A and Signal Stick entries.",
+        "- [Reusable LLM deployment prompt](prompts/REPEAT-ANTENNA-DEPLOYMENT.md) is a",
+        "  copy-paste contract for repeating the same process on another antenna.",
+        "- [NanoVNA acquisition and validation tools](tools/README.md) include the exact",
+        "  capture engine, pinned dependencies, and fail-closed evidence validator.",
+        "- [Toolchain manifest](docs/TOOLCHAIN-MANIFEST.json) records exact runtime",
+        "  versions and SHA-256 identities for the acquisition and report scripts.",
+        "",
         "## Headline recommendations",
         "",
-        "- **Best one for typical SDS150 modern public safety:** Remtronix 920.",
+        "- **Best all-rounder:** the Smiley 2m half-wave telescopic. At 69 cm it covers more services broadly than anything else measured; at 80 cm it is the only antenna with a broad 2m match.",
+        "- **Best one for typical SDS150 modern public safety:** Remtronix 920, which holds all of 700 and 800 MHz at or below 2:1.",
         "- **Best when manual VHF/UHF retuning matters more:** RH789, while accepting poor 700/800/900 MHz.",
-        "- **Best two:** Remtronix 920 + RH789.",
-        "- Add/substitute TD771 for 222-225 MHz; choose Diamond SRH77CA for broad 420-450 MHz.",
+        "- **Best two:** Remtronix 920 + Smiley half-wave.",
+        "- **2m:** Smiley at 80 cm (100% at or below 2:1). **1.25m:** TID TD771. **70cm:** Kenwood TH-D75A OEM. **UHF land mobile:** RH789 setting 6. **Federal UHF:** Diamond SRH320A.",
+        "- **VHF high (marine, railroad, NOAA):** Smiley at 69 cm covers all three at or below 2:1; the AnyTone long whip covers the whole NOAA window.",
         "- **Installed vehicle option:** Taurus triband for useful VHF-high and partial 800/900 MHz coverage.",
         "- The generated inventory gap table identifies services with only partial or poor full-window match.",
+        "",
+        "> **Read the VHF numbers with care.** Every quarter-wave handheld here is measured with no radio chassis and no counterpoise, so the instrument body and its cable become the other half of the antenna. A known-good Kenwood TH-D75A OEM whip reads about 24:1 on 2m in this fixture while returning the survey's best 70cm result. These VHF figures rank antennas against each other on this bench; they do not predict on-radio VHF performance. The Smiley wins 2m because a half-wave genuinely does not need a counterpoise, which is a real advantage rather than a fixture artefact. See the [September 2026 session uncertainty note](docs/2026-09-HANDHELD-SESSION-UNCERTAINTY.md).",
         "",
         "See the [full comparison, coverage matrix, and gap table](comparison/README.md) or open the [offline interactive report](comparison/interactive-report.html).",
         "",
@@ -1818,6 +2610,8 @@ def package_readme(root: Path) -> None:
         "",
         "Load reconnect verification: median 1.00135, p95 1.01044, maximum 1.19335 across the full sweep; VHF maximum 1.00127. See the [preserved calibration baseline](calibration-baselines/sma-to-bnc/2026-08-16-nanovna-h/README.md).",
         "",
+        "The September 2026 handheld additions use their own [2026-09-19 baseline](calibration-baselines/sma-to-bnc/2026-09-19-nanovna-h/README.md): median 1.00677, p95 1.02379, maximum 1.16781, with a per-service floor table. That session also measured its mounting repeatability, which is much coarser than the calibration floor and is the dominant uncertainty for counterpoise-less handheld whips; see the [session uncertainty note](docs/2026-09-HANDHELD-SESSION-UNCERTAINTY.md).",
+        "",
         "The separate [vehicle-adapter baseline](calibration-baselines/vehicle-adapter/2026-08-16-nanovna-h/README.md) verifies the BNC reference plane used for the installed Taurus antenna. Full-span reconnect verification was median 1.02638, p95 1.11973, and maximum 1.23518; uncertainty is highest above 1 GHz.",
         "",
         "The saved calibration is reusable only with the same unchanged adapter chain and a load verification each session. Calibration accuracy does not remove antenna-fixture uncertainty.",
@@ -1828,6 +2622,7 @@ def package_readme(root: Path) -> None:
         "",
         "- `antennas/*/measurements/`: preserved S1P, raw NPZ, JSON, and authoritative zoom artifacts.",
         "- `antennas/*/charts/` and family READMEs: generated analysis.",
+        "- `antennas/jyr8010-efhw/deployment-siting-cn97ap/`: site-specific deployment design - GIS parcel data, USGS 3DEP terrain horizon, great-circle bearings, and predicted DX coverage. **Analysis and prediction, not measurement**; see its `METHOD.md` for per-model confidence.",
         "- `comparison/`: CSV/JSON scorecards, charts, recommendations, and offline report.",
         "- `calibration-baselines/`: immutable OSL and verification captures.",
         "- [`manual-testing/`](manual-testing/): immutable historical coarse reconnaissance; not used for current rankings.",
@@ -1940,6 +2735,9 @@ def generate(root: Path) -> Tuple[int, int]:
     comparison = root / "comparison"
     write_scorecards(rows, comparison)
     write_coverage_artifacts(family_coverage, inventory_coverage, comparison)
+    efficiency = build_efficiency(data)
+    write_efficiency_artifacts(efficiency, comparison)
+    write_configuration_efficiency(build_configuration_efficiency(data), comparison)
     with plt.rc_context(PLOT_STYLE):
         for family in VALID_FAMILIES:
             directory = root / "antennas" / family.key
@@ -1961,7 +2759,13 @@ def generate(root: Path) -> Tuple[int, int]:
             family_readme(family, rows, directory / "README.md", best_settings)
         plot_comparisons(data, rows, comparison)
         plot_family_coverage(family_coverage, comparison)
-    invalid_readme(FAMILY_BY_KEY["tidradio-h9-stock"], root / "antennas/tidradio-h9-stock/README.md")
+    # Only families still marked invalid get the invalid-entry README. The
+    # TD-H9 was recaptured on 2026-09-20 and is now valid, so it takes the
+    # ordinary family README written in the loop above; writing the invalid
+    # template over it would claim it is excluded from rankings it now appears in.
+    for family in FAMILIES:
+        if not family.valid:
+            invalid_readme(family, root / "antennas" / family.key / "README.md")
     comparison_readme(comparison / "README.md", inventory_coverage)
     interactive_report(rows, comparison / "interactive-report.html")
     package_readme(root)

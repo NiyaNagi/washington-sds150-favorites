@@ -1,0 +1,106 @@
+{
+  "source": "load reconnect verification, 2026-09-19 rebuilt BNC plane",
+  "note": "per-service reconnect uncertainty floor; a measured antenna SWR cannot be resolved below this",
+  "services": {
+    "6m": {
+      "floor_median_swr": 1.0006686995334695,
+      "floor_max_swr": 1.000762045754086,
+      "points": 140
+    },
+    "fm-broadcast": {
+      "floor_median_swr": 1.0011986862998823,
+      "floor_max_swr": 1.0013581514134755,
+      "points": 696
+    },
+    "civil-air": {
+      "floor_median_swr": 1.0015388931212759,
+      "floor_max_swr": 1.0017537033177066,
+      "points": 661
+    },
+    "2m": {
+      "floor_median_swr": 1.001752646716437,
+      "floor_max_swr": 1.0018595001821406,
+      "points": 139
+    },
+    "vhf-lmr": {
+      "floor_median_swr": 1.0019413375077235,
+      "floor_max_swr": 1.0028024897873467,
+      "points": 835
+    },
+    "marine-vhf": {
+      "floor_median_swr": 1.0018996996298442,
+      "floor_max_swr": 1.0024404592008478,
+      "points": 209
+    },
+    "railroad": {
+      "floor_median_swr": 1.0019264686144906,
+      "floor_max_swr": 1.0024404592008478,
+      "points": 61
+    },
+    "noaa-weather": {
+      "floor_median_swr": 1.0019644950145463,
+      "floor_max_swr": 1.0019928985661224,
+      "points": 5
+    },
+    "1.25m": {
+      "floor_median_swr": 1.0026435504139943,
+      "floor_max_swr": 1.0027502459542696,
+      "points": 104
+    },
+    "military-air": {
+      "floor_median_swr": 1.0035068738813195,
+      "floor_max_swr": 1.0193104553697654,
+      "points": 6087
+    },
+    "federal-uhf": {
+      "floor_median_swr": 1.0047573715125726,
+      "floor_max_swr": 1.1413421784430207,
+      "points": 483
+    },
+    "70cm": {
+      "floor_median_swr": 1.0049843782627277,
+      "floor_max_swr": 1.010496541532947,
+      "points": 1044
+    },
+    "uhf-lmr": {
+      "floor_median_swr": 1.005265078778882,
+      "floor_max_swr": 1.0142109602336353,
+      "points": 695
+    },
+    "t-band": {
+      "floor_median_swr": 1.005650908774788,
+      "floor_max_swr": 1.0089173370256597,
+      "points": 1461
+    },
+    "700-public-safety-downlink": {
+      "floor_median_swr": 1.0089298036894558,
+      "floor_max_swr": 1.0113451876935893,
+      "points": 209
+    },
+    "800-public-safety-downlink": {
+      "floor_median_swr": 1.0099320443996351,
+      "floor_max_swr": 1.0138651363357598,
+      "points": 626
+    },
+    "33cm": {
+      "floor_median_swr": 1.0124790377149995,
+      "floor_max_swr": 1.0621210109359722,
+      "points": 905
+    },
+    "900-trunking-downlink": {
+      "floor_median_swr": 1.0125535483270958,
+      "floor_max_swr": 1.0237627699477918,
+      "points": 209
+    },
+    "uat-978": {
+      "floor_median_swr": 1.0131717347986313,
+      "floor_max_swr": 1.0373038345004937,
+      "points": 139
+    },
+    "ads-b-1090": {
+      "floor_median_swr": 1.0181861870499769,
+      "floor_max_swr": 1.0626805801463857,
+      "points": 139
+    }
+  }
+}

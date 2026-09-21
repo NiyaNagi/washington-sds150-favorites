@@ -1,0 +1,85 @@
+{
+  "source": "load reconnect verification, 2026-09-20 SMA male-to-male adapter outer face",
+  "services": {
+    "6m": {
+      "floor_median_swr": 1.0008433453521903,
+      "floor_max_swr": 1.0009318839527208
+    },
+    "fm-broadcast": {
+      "floor_median_swr": 1.0013172852992793,
+      "floor_max_swr": 1.0014311928875657
+    },
+    "civil-air": {
+      "floor_median_swr": 1.0015123974855469,
+      "floor_max_swr": 1.0020948568782753
+    },
+    "2m": {
+      "floor_median_swr": 1.0016284415756027,
+      "floor_max_swr": 1.001786139535342
+    },
+    "vhf-lmr": {
+      "floor_median_swr": 1.0016920273337515,
+      "floor_max_swr": 1.0034469862548938
+    },
+    "marine-vhf": {
+      "floor_median_swr": 1.0016818785096544,
+      "floor_max_swr": 1.002616419052106
+    },
+    "railroad": {
+      "floor_median_swr": 1.0016977145503945,
+      "floor_max_swr": 1.002616419052106
+    },
+    "noaa-weather": {
+      "floor_median_swr": 1.00172271003317,
+      "floor_max_swr": 1.0022258015271186
+    },
+    "1.25m": {
+      "floor_median_swr": 1.001899471666432,
+      "floor_max_swr": 1.00200496273882
+    },
+    "military-air": {
+      "floor_median_swr": 1.0018846148108789,
+      "floor_max_swr": 1.0122403539230154
+    },
+    "federal-uhf": {
+      "floor_median_swr": 1.0022627040229608,
+      "floor_max_swr": 1.1051866146490403
+    },
+    "70cm": {
+      "floor_median_swr": 1.0022396806196245,
+      "floor_max_swr": 1.005769724990775
+    },
+    "uhf-lmr": {
+      "floor_median_swr": 1.0022490757454947,
+      "floor_max_swr": 1.0627723527851918
+    },
+    "t-band": {
+      "floor_median_swr": 1.0022910702834742,
+      "floor_max_swr": 1.0051137091489335
+    },
+    "700-public-safety-downlink": {
+      "floor_median_swr": 1.0035866575946222,
+      "floor_max_swr": 1.0088609563646684
+    },
+    "800-public-safety-downlink": {
+      "floor_median_swr": 1.0039577809083622,
+      "floor_max_swr": 1.0075488061931503
+    },
+    "33cm": {
+      "floor_median_swr": 1.0062338267757387,
+      "floor_max_swr": 1.1038700133215835
+    },
+    "900-trunking-downlink": {
+      "floor_median_swr": 1.006276227398078,
+      "floor_max_swr": 1.0172983567090195
+    },
+    "uat-978": {
+      "floor_median_swr": 1.0077149703525152,
+      "floor_max_swr": 1.0211973979921658
+    },
+    "ads-b-1090": {
+      "floor_median_swr": 1.0093570532542722,
+      "floor_max_swr": 1.033736443300225
+    }
+  }
+}

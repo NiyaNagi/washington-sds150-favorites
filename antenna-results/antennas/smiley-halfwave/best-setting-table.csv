@@ -1,0 +1,21 @@
+service,service_label,configuration,configuration_label,source,minimum_swr,median_swr,maximum_swr,coverage_at_or_below_2_percent,coverage_at_or_below_3_percent
+6m,6m amateur,smiley-halfwave:setting-7,setting 7 (fully extended),broadband,40.305927370071245,55.85287650676504,67.05456863043071,0.0,0.0
+fm-broadcast,FM broadcast,smiley-halfwave:setting-2,setting 2 (34.5 cm),averaged_zoom,1.3276516135214163,3.157031921805983,11.165303630006068,23.83808095952024,45.877061469265364
+civil-air,Civil air,smiley-halfwave:setting-5,setting 5 (69 cm),averaged_zoom,1.3869344967437063,2.2595728724368915,4.397091347506259,38.08095952023988,68.16591704147926
+2m,2m amateur,smiley-halfwave:setting-6,setting 6 (80 cm),averaged_zoom,1.2226871300135533,1.3912466496180966,1.6328002230312146,100.0,100.0
+vhf-lmr,VHF LMR,smiley-halfwave:setting-5,setting 5 (69 cm),averaged_zoom,1.102917648201838,1.8300031155164889,3.3675883372204027,67.86606696651674,93.80309845077461
+marine-vhf,Marine VHF,smiley-halfwave:setting-5,setting 5 (69 cm),averaged_zoom,1.2180183706480079,1.5196996094540214,1.7723138468914472,100.0,100.0
+railroad,Railroad,smiley-halfwave:setting-5,setting 5 (69 cm),averaged_zoom,1.1618168685147088,1.2236873503813537,1.3183493949517093,100.0,100.0
+noaa-weather,NOAA weather,smiley-halfwave:setting-5,setting 5 (69 cm),averaged_zoom,1.1242802561926657,1.1317621578096702,1.1409421968530358,100.0,100.0
+1.25m,1.25m amateur,smiley-halfwave:setting-3,setting 3 (46 cm),averaged_zoom,2.0180900866399476,2.054100350505726,2.1419588992751977,0.0,100.0
+military-air,Military air,smiley-halfwave:setting-1,"setting 1 (collapsed, 22 cm)",averaged_zoom,1.6961452917937154,2.9634655725176238,12.361318428094378,32.066793320667934,50.204979502049795
+federal-uhf,Federal UHF,smiley-halfwave:setting-6,setting 6 (80 cm),averaged_zoom,2.3276365389807387,2.812089229781663,4.087657025779337,0.0,66.91654172913543
+70cm,70cm amateur,smiley-halfwave:setting-3,setting 3 (46 cm),averaged_zoom,2.359440806035014,2.561982942820847,3.2936052847252726,0.0,86.2045984671776
+uhf-lmr,UHF LMR,smiley-halfwave:setting-3,setting 3 (46 cm),averaged_zoom,2.430283956532519,2.688073416825589,3.168771323290421,0.0,82.2088955522239
+t-band,T-band,smiley-halfwave:setting-5,setting 5 (69 cm),averaged_zoom,2.749338171526676,3.4470938487182243,4.433154378015904,0.0,25.368657835541114
+700-public-safety-downlink,700 MHz public safety,smiley-halfwave:setting-3,setting 3 (46 cm),averaged_zoom,3.892245977106542,3.9683218693201345,4.00733777087442,0.0,0.0
+800-public-safety-downlink,800 MHz public safety,smiley-halfwave:setting-5,setting 5 (69 cm),averaged_zoom,3.428107114165588,3.7210344838971037,4.046654208025171,0.0,0.0
+33cm,33cm amateur,smiley-halfwave:setting-5,setting 5 (69 cm),averaged_zoom,1.1692656275793636,1.5409988124758156,2.3853268112910353,88.055972013993,100.0
+900-trunking-downlink,900 MHz trunking,smiley-halfwave:setting-5,setting 5 (69 cm),averaged_zoom,3.0918452122742948,3.39563005315283,3.6777061588369384,0.0,0.0
+uat-978,UAT 978,smiley-halfwave:setting-7,setting 7 (fully extended),averaged_zoom,4.458120894691857,4.803318875540763,5.254880968192662,0.0,0.0
+ads-b-1090,ADS-B 1090,smiley-halfwave:setting-5,setting 5 (69 cm),averaged_zoom,3.3069334152336802,3.462924499897348,3.7298942308936933,0.0,0.0

@@ -1,19 +1,46 @@
-# TIDRADIO H9 stock antenna — invalid / inconclusive
+# TIDRADIO TD-H9 stock antenna
 
-> **Excluded from every scorecard, chart, ranking, and recommendation.**
+The August 2026 capture of this antenna was rejected as invalid: it read electrically open across every band it is designed for. The September recapture shows a working UHF antenna, so that first result was a connection fault, not the antenna. It is one of the strongest UHF performers measured, and like every counterpoise-less whip here it is very poor at VHF on this fixture.
 
-One broadband capture was taken and immediately looked electrically open across the bands this antenna is designed for. Testing was stopped before any zoom or reseat verification.
+> **SWR is impedance match only.** It does not measure receive gain, sensitivity, radiation pattern, or on-air decoding.
 
-## Why this capture is invalid
+## Measurement inventory
 
-The capture shows a near-total reflection across the antenna's own design bands: 2m, VHF land mobile, marine, railroad, NOAA weather, 1.25m, UHF land mobile, and the T-band all read as an effectively infinite standing-wave ratio, which is the signature of an open or unseated connection rather than a working dual-band whip. The capture was never repeated after a reseat, so nothing here can be attributed to the antenna itself.
+- Connection: SMA-female antenna via an SMA male-to-male adapter.
+- Measurement context: Handheld bench fixture, SMA plane.
+- Calibrated 50-1200 MHz broadband sweep: 40,001 points (~28.75 kHz spacing).
+- Three-pass complex-averaged service zooms override broadband data for the same configuration and service.
+- [SMA adapter plane](measurements/2026-09-20-sma-adapter/antenna.s1p): Recaptured 2026-09-20 at the SMA male-to-male adapter plane after the August attempt was rejected as inconclusive.
 
-The raw capture is preserved for traceability:
+## Conclusions
 
-- [antenna.s1p](measurements/2026-08-16/antenna.s1p)
-- [antenna_raw.npz](measurements/2026-08-16/antenna_raw.npz)
-- [summary.json](measurements/2026-08-16/summary.json)
+- Useful around 406-470 MHz, strongest at the 420 MHz edge.
+- Broadest measured handheld-fixture match across both UAT 978 and ADS-B 1090, though match alone does not establish tracking sensitivity.
+- Poor at VHF and 700/800 MHz in this no-radio-chassis fixture.
 
-No repeat verification was performed because the user skipped it. These files must not be interpreted as antenna performance. A new, reseated capture plus verification would be required before including this model.
+## Analysis charts
 
-SWR is impedance match only—not receive gain, sensitivity, pattern, or decoding performance.
+### Broadband overview
+
+![TD-H9 stock Broadband overview](charts/broadband-overview.png)
+
+### Scanner scorecard
+
+![TD-H9 stock Scanner scorecard](charts/scanner-scorecard.png)
+
+### Authoritative averaged zoom panels
+
+![TD-H9 stock Authoritative averaged zoom panels](charts/authoritative-zoom-panels.png)
+
+### Impedance and return loss
+
+![TD-H9 stock Impedance and return loss](charts/impedance-return-loss.png)
+
+
+## Caveats
+
+- Its 2m and VHF figures describe the antenna plus a fixture with no radio chassis, not its behaviour on a TD-H9.
+- The August capture is preserved separately and remains invalid.
+- Fixed upright bench geometry on a secured fixture, no counterpoise; the USB cable remained part of the RF environment.
+- Vehicle body, mounting location, feed line, and antenna-side adapter are part of this installed result.
+- [Package method and calibration notes](../../README.md) · [immutable historical manual testing](../../manual-testing/)

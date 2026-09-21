@@ -57,6 +57,37 @@ preexisting backup is refused and never recursively deleted.
 
 Use `--port` on `status`, `capture`, or `measure` when the serial device differs.
 
+`capture_scanner_zooms.py` captures the averaged scanner-service zooms that are
+authoritative over broadband for the same configuration and service. Its service
+table, segment counts, averaging math, summary schema and file formats are
+byte-equivalent to the archived August 2026 helper, so its output is directly
+comparable to the preserved survey data; it adds the hardened scan wrapper, the
+nonfinite and `|Gamma| >= 1` gates, and atomic staged publication.
+
+```bash
+.venv-nanovna/bin/python antenna-results/tools/capture_scanner_zooms.py \
+  --port COM17 --calibration path/to/calibration.npz \
+  --output path/to/zooms --averages 3
+```
+
+Pass `--services` to capture a subset. Long runs are worth splitting into
+batches: the NanoVNA's serial session hung twice during the September 2026
+session under sustained segment scanning and needed a physical power cycle each
+time.
+
+`derive_band_limited_broadband.py` recovers the usable part of a sweep that
+`measure` refused for a nonphysical `|Gamma| >= 1`, from the preserved raw
+capture. It drops an isolated outlier and keeps the span, or truncates at a wide
+nonphysical region rather than stitching across it, and records which mode it
+used along with every excluded interval.
+
+```bash
+.venv-nanovna/bin/python antenna-results/tools/derive_band_limited_broadband.py \
+  --rejected-dir path/to/broadband.rejected-TIMESTAMP \
+  --calibration path/to/calibration.npz \
+  --output-dir path/to/broadband-band-limited
+```
+
 ## Validation
 
 `validate_nanovna_run.py` formalizes the checks that were originally run as

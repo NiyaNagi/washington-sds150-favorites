@@ -11,6 +11,7 @@ The reference point: whatever the scanner already has on it. In this fixture it 
 - Calibrated 50-1200 MHz broadband sweep: 40,001 points (~28.75 kHz spacing).
 - Three-pass complex-averaged service zooms override broadband data for the same configuration and service.
 - [stock with adapter](measurements/2026-08-16/antenna.s1p): The antenna shipped with the scanner, measured through the required adapter.
+- [bare SMA plane](measurements/2026-09-20-sma-direct/antenna.s1p): The same antenna recaptured 2026-09-20 screwed directly to CH0 against a calibration solved at that bare SMA plane, with no adapter in the path. The only antenna in the survey measured at two different reference planes.
 
 ## Conclusions
 

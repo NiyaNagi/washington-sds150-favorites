@@ -38,6 +38,14 @@ local-sentinel/
 .venv-chirp/
 .venv-cad/
 
+# NanoVNA acquisition environment (antenna-results/tools/requirements-nanovna.txt).
+.venv-nanovna/
+
+# Disposable NanoVNA capture staging. The evidence that matters is copied into
+# antenna-results/antennas/*/measurements/ and calibration-baselines/ by the
+# packaging step; this tree also holds rejected and superseded captures.
+nanovna_measurements/
+
 # Radio images read off a user's own hardware.
 *.img
 *.d75

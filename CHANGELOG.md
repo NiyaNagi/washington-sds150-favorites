@@ -9,6 +9,136 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Added
 
+- **Four handheld antennas in the scanner survey, and the measurement that
+  says how far to trust them.** The Diamond RH77CA, Diamond SRH320A and the
+  Signal Stick with and without its counterpoise were captured on 2026-09-19/20
+  against a fresh 50-1200 MHz OSL calibration, each with a broadband sweep and
+  19 three-pass averaged service zooms. The survey is now 11 valid families and
+  25 configurations. Two results move the recommendations: the **SRH320A** has
+  the best federal UHF in the survey (1.08 minimum, 96.4% of 406.1-420 MHz at
+  or below 2:1), holds all of 222-225 MHz under 1.47, and has the best
+  150-174 MHz median of the handheld fixture; and the **Signal Stick is the
+  only broad 2m match, but only with its counterpoise** - 6.405 minimum and no
+  coverage bare, against 1.386 at 144.0 MHz and 84.2% at or below 2:1 with the
+  ~19.5 in wire fitted, which simultaneously detunes VHF land mobile, NOAA
+  weather and 1.25m.
+  The session also measured what the fixture is worth, in
+  [`docs/2026-09-HANDHELD-SESSION-UNCERTAINTY.md`](antenna-results/docs/2026-09-HANDHELD-SESSION-UNCERTAINTY.md).
+  A terminated load repeats to a median `|dGamma|` of 0.00064, but these
+  antennas have no counterpoise and no chassis, so the instrument body and its
+  USB cable are the other half of the antenna: free-standing, two identical
+  sweeps differed by 0.149 at 2m, and securing the fixture improved that ~13x.
+  Across a remount the same antenna moved from a 2m minimum of 1.08 to 1.39.
+  Per-band differences smaller than a few tenths at VHF are not established - a
+  limitation the August 2026 entries share unmeasured. The counterpoise result
+  is ~2 orders of magnitude clear of it.
+- **An aggregate score that works across bands: mismatch efficiency.** Ranking
+  by any single band, or by a mean of SWR values, misleads - one 25:1 window
+  swamps a mean of SWRs while contributing nothing a listener could use. The
+  survey now also scores `1 - |Gamma|^2`, the share of incident power actually
+  transferred, averaged point by point across each window. It is bounded 0-1 so
+  it averages honestly; an average 2:1 SWR is 0.889 and 3:1 is 0.750, and a
+  window with no valid measurement scores 0, which is the honest reading since
+  those failed because reflection reached unity. Every service window carries
+  equal weight. Two new published artifacts:
+  `comparison/mismatch-efficiency-heatmap.{csv,json}` gives each family's best
+  configuration per band plus a retuned and a fixed aggregate, and
+  `comparison/mismatch-efficiency-by-configuration.{csv,json}` scores all 39
+  configurations individually, so a telescopic setting and a fixed whip are
+  judged on the same terms.
+  The per-configuration view is the fairer one and it moves things: all seven
+  Smiley lengths rank 2-8, so even its worst setting beats every fixed
+  handheld, while the RH789's family score of 53 turns out to come from
+  cherry-picking settings - its best single setting scores 33. It also shows
+  where a flat average misleads in the other direction: **Remtronix 920 scores
+  38**, bottom third, yet holds four windows at 2:1 or better and owns all
+  three public-safety blocks, against a Signal Stick bare at 46 with none.
+- **The TD-H9 README claimed it was excluded from rankings it appears in.**
+  Flipping that family to valid left the old `invalid_readme()` call
+  overwriting its generated README with the invalid-entry template, complete
+  with an empty "why this capture is invalid" section and links to superseded
+  August files. The invalid template is now written only for families still
+  marked invalid.
+- **Seven more antennas, three more reference planes, and the survey's first
+  broad 2m match.** The scanner survey goes from 7 valid families and 21
+  configurations to **16 families and 39 configurations**. Added against three
+  newly cut and verified calibrations: the **Kenwood TH-D75A OEM**, **Icom
+  ID-52A OEM** and **Uniden SDS150 OEM** at a bare CH0 SMA plane (verified
+  median 1.00090, p95 1.01082 - better than any BNC fixture in this repo); the
+  **AnyTone AT-D890UV OEM rubber duck (~16 cm)** and **long whip (~38 cm)** and
+  the **TIDRADIO TD-H9 stock** antenna at an SMA male-to-male adapter plane,
+  with the adapter de-embedded by its own female-standard calibration; and the
+  **Smiley 2m half-wave telescopic** at all seven lengths on a fresh BNC plane.
+  The SDS150 stock antenna is now the only one measured at two planes.
+  The headline result is the **Smiley at 80 cm: 1.223 minimum and 100% of
+  144-148 MHz at or below 2:1**, the only broad 2m match in the survey, with no
+  counterpoise. It is also the best all-rounder - at 69 cm it covers NOAA,
+  marine and railroad at or below 2:1 plus two thirds of 150-174 MHz, more
+  services broadly than any other single configuration. Length is decisive
+  rather than incidental: the same antenna covers none of 2m at 69 cm or fully
+  extended.
+  Recommendations were rewritten against the measured data, which moved 2m,
+  70cm, VHF-high and federal UHF to new winners, and the **TIDRADIO TD-H9 stock
+  entry is retired from invalid/inconclusive to valid** - the August capture
+  really was a connection fault, and the antenna holds the whole federal-UHF
+  block and 76.7% of 70cm at or below 2:1.
+- **A cross-platform bug in the report generator.** `source_link()` used
+  `str(Path.relative_to(...))`, so running the generator on Windows emitted
+  backslashes and broke the measurement link in every family README. Now
+  `as_posix()`.
+- **Generator template staleness.** `antenna-results/README.md` had been
+  hand-edited after the generator last ran, so regenerating silently deleted
+  the "Reproduce an antenna deployment" section, the GOWENIC EFHW row and the
+  JYR8010 siting-study detail. Restored into the template, so the file the
+  generator writes now matches what the repository intends to publish.
+- **A control experiment that bounds what the handheld fixture can measure
+  (provisional, excluded from the survey).** The Kenwood TH-D75A stock whip was
+  captured screwed directly to CH0 with the SMA-to-BNC adapter removed, while
+  corrected by a calibration solved at that adapter's BNC face, so its
+  reference plane does not match and it is deliberately kept out of every
+  ranking - see
+  [`antennas/kenwood-thd75a-stock/PROVISIONAL.md`](antenna-results/antennas/kenwood-thd75a-stock/PROVISIONAL.md).
+  It is worth keeping because it is a known-good dual-band antenna: the
+  instrument puts its 70cm resonance at 427.5 MHz and returns **the best 70cm
+  figures of the whole session** (1.230 minimum, 1.435 median, 86.1% at or
+  below 2:1), while the same sweep reads **about 25:1 on 2m**. The plane
+  mismatch cannot explain that, since a few centimetres of adapter is
+  negligible against a 2 m wavelength and that error is smallest at VHF. The
+  conclusion is that **this fixture cannot measure VHF match for a
+  counterpoise-less handheld antenna at all** - with no chassis, the instrument
+  body and its cable are the other half of the antenna. Every VHF figure in the
+  September session therefore describes the antenna plus the fixture, and the
+  RH77CA's poor 2m is confirmed as a fixture property rather than an antenna
+  fault.
+- **The RH77CA published at two mountings.** Its 2m result looked wrong, so the
+  whole test was repeated against the same calibration at a fresh mounting and
+  both runs are published as `first mounting` and `second mounting`. The poor
+  2m reproduces - three independent mountings give minima of 4.263, 5.430 and
+  4.816 with no point at or below 2:1 in any of them - while the two runs
+  disagree by a median `|dGamma|` of 0.164 at 2m, so the VHF figures are worth
+  about plus or minus 1 SWR and not three decimals. The informative split is
+  that the UHF resonances repeat across mountings to 0.1 MHz (392.7/392.8 and
+  400.8 MHz) while the VHF behaviour moves every time: at UHF the radiator is
+  electrically large, at VHF the instrument body and cable are half the
+  antenna. This dual-band 2m/70cm whip has no resonance near 146 MHz on this
+  fixture and its strongest dips sit below the 70cm band, both signatures of an
+  assembly fed against a cable rather than a handheld chassis. It is the
+  survey's only directly measured remount spread.
+- **`antenna-results/tools/capture_scanner_zooms.py`.** A hardened entry point
+  for averaged service zooms. The archived August helper could not run from its
+  own directory and predated the fail-closed gates; this one keeps its service
+  table, segment counts and averaging math byte-for-byte while adding the
+  hardened scan wrapper, nonfinite and `|Gamma| >= 1` rejection before anything
+  is written, and atomic staged publication with a rollback backup.
+- **`antenna-results/tools/derive_band_limited_broadband.py`.** Recovers the
+  usable part of a sweep that `measure` refused. It recomputes `Gamma` from the
+  preserved raw capture and picks a mode from the shape of the damage: an
+  isolated outlier is dropped and the span kept, while a wide nonphysical
+  region truncates the sweep rather than stitching a continuous curve across
+  noise. It records the mode, retained range and every excluded interval. The
+  SRH320A truncates at 909.798 MHz and has no valid UAT 978 or ADS-B 1090 data
+  at all, which the report shows as very poor / outside calibrated dynamic
+  range rather than as a measurement.
 - **A geo-fence for every department (`wasds150.catalog.locate`).** A
   department with no position is everywhere: the SDS150's location control
   cannot exclude it whatever range is set, and the plan's distance filter has
