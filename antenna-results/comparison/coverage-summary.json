@@ -37,8 +37,8 @@
       "reactance_at_minimum_ohm": null,
       "return_loss_at_minimum_swr_db": null,
       "coverage_status": "gap",
-      "rank": 37,
-      "context_rank": 31
+      "rank": 45,
+      "context_rank": 39
     },
     {
       "family": "remtronix-920",
@@ -63,8 +63,8 @@
       "reactance_at_minimum_ohm": -42.07013467003651,
       "return_loss_at_minimum_swr_db": 8.725490604590942,
       "coverage_status": "gap",
-      "rank": 33,
-      "context_rank": 30
+      "rank": 41,
+      "context_rank": 38
     },
     {
       "family": "remtronix-920",
@@ -89,8 +89,8 @@
       "reactance_at_minimum_ohm": -466.6055612910938,
       "return_loss_at_minimum_swr_db": 0.8432115809335157,
       "coverage_status": "gap",
-      "rank": 35,
-      "context_rank": 29
+      "rank": 43,
+      "context_rank": 37
     },
     {
       "family": "remtronix-920",
@@ -115,8 +115,8 @@
       "reactance_at_minimum_ohm": -233.32000286697308,
       "return_loss_at_minimum_swr_db": 0.15303322345614037,
       "coverage_status": "gap",
-      "rank": 37,
-      "context_rank": 31
+      "rank": 45,
+      "context_rank": 39
     },
     {
       "family": "remtronix-920",
@@ -141,8 +141,8 @@
       "reactance_at_minimum_ohm": -201.11035641414406,
       "return_loss_at_minimum_swr_db": 0.08201278434407802,
       "coverage_status": "gap",
-      "rank": 38,
-      "context_rank": 32
+      "rank": 46,
+      "context_rank": 40
     },
     {
       "family": "remtronix-920",
@@ -167,8 +167,8 @@
       "reactance_at_minimum_ohm": null,
       "return_loss_at_minimum_swr_db": null,
       "coverage_status": "gap",
-      "rank": 35,
-      "context_rank": 29
+      "rank": 43,
+      "context_rank": 37
     },
     {
       "family": "remtronix-920",
@@ -193,8 +193,8 @@
       "reactance_at_minimum_ohm": null,
       "return_loss_at_minimum_swr_db": null,
       "coverage_status": "gap",
-      "rank": 35,
-      "context_rank": 29
+      "rank": 43,
+      "context_rank": 37
     },
     {
       "family": "remtronix-920",
@@ -219,8 +219,8 @@
       "reactance_at_minimum_ohm": null,
       "return_loss_at_minimum_swr_db": null,
       "coverage_status": "gap",
-      "rank": 34,
-      "context_rank": 28
+      "rank": 42,
+      "context_rank": 36
     },
     {
       "family": "remtronix-920",
@@ -245,8 +245,8 @@
       "reactance_at_minimum_ohm": -77.12791456257881,
       "return_loss_at_minimum_swr_db": 0.8510870715258203,
       "coverage_status": "gap",
-      "rank": 27,
-      "context_rank": 24
+      "rank": 35,
+      "context_rank": 32
     },
     {
       "family": "remtronix-920",
@@ -271,8 +271,8 @@
       "reactance_at_minimum_ohm": 1.4314624229435537,
       "return_loss_at_minimum_swr_db": 35.436127548672054,
       "coverage_status": "partial only",
-      "rank": 5,
-      "context_rank": 3
+      "rank": 6,
+      "context_rank": 4
     },
     {
       "family": "remtronix-920",
@@ -297,8 +297,8 @@
       "reactance_at_minimum_ohm": -126.77111343977101,
       "return_loss_at_minimum_swr_db": 1.9965323285458885,
       "coverage_status": "gap",
-      "rank": 26,
-      "context_rank": 20
+      "rank": 33,
+      "context_rank": 27
     },
     {
       "family": "remtronix-920",
@@ -323,8 +323,8 @@
       "reactance_at_minimum_ohm": -112.84693640234096,
       "return_loss_at_minimum_swr_db": 2.086745568810568,
       "coverage_status": "gap",
-      "rank": 28,
-      "context_rank": 22
+      "rank": 35,
+      "context_rank": 29
     },
     {
       "family": "remtronix-920",
@@ -349,8 +349,8 @@
       "reactance_at_minimum_ohm": -99.11448936698025,
       "return_loss_at_minimum_swr_db": 1.7020508808695054,
       "coverage_status": "gap",
-      "rank": 28,
-      "context_rank": 22
+      "rank": 36,
+      "context_rank": 30
     },
     {
       "family": "remtronix-920",
@@ -375,8 +375,8 @@
       "reactance_at_minimum_ohm": -93.46912398498868,
       "return_loss_at_minimum_swr_db": 1.9465199241092894,
       "coverage_status": "gap",
-      "rank": 29,
-      "context_rank": 23
+      "rank": 37,
+      "context_rank": 31
     },
     {
       "family": "remtronix-920",
@@ -557,8 +557,8 @@
       "reactance_at_minimum_ohm": -137.82398270914788,
       "return_loss_at_minimum_swr_db": 0.6669709174871185,
       "coverage_status": "gap",
-      "rank": 5,
-      "context_rank": 4
+      "rank": 11,
+      "context_rank": 10
     },
     {
       "family": "rh789",
@@ -609,8 +609,8 @@
       "reactance_at_minimum_ohm": -162.6988249624931,
       "return_loss_at_minimum_swr_db": 1.5936349201220028,
       "coverage_status": "gap",
-      "rank": 20,
-      "context_rank": 15
+      "rank": 28,
+      "context_rank": 23
     },
     {
       "family": "rh789",
@@ -791,8 +791,8 @@
       "reactance_at_minimum_ohm": -29.1120572176134,
       "return_loss_at_minimum_swr_db": 10.907066937293548,
       "coverage_status": "partial only",
-      "rank": 10,
-      "context_rank": 8
+      "rank": 15,
+      "context_rank": 13
     },
     {
       "family": "rh789",
@@ -843,8 +843,8 @@
       "reactance_at_minimum_ohm": -18.272970692378234,
       "return_loss_at_minimum_swr_db": 10.403618966899089,
       "coverage_status": "partial only",
-      "rank": 19,
-      "context_rank": 13
+      "rank": 21,
+      "context_rank": 15
     },
     {
       "family": "rh789",
@@ -921,8 +921,8 @@
       "reactance_at_minimum_ohm": -52.494104659317955,
       "return_loss_at_minimum_swr_db": 0.5481187437877936,
       "coverage_status": "gap",
-      "rank": 29,
-      "context_rank": 24
+      "rank": 37,
+      "context_rank": 32
     },
     {
       "family": "rh789",
@@ -947,8 +947,8 @@
       "reactance_at_minimum_ohm": null,
       "return_loss_at_minimum_swr_db": null,
       "coverage_status": "gap",
-      "rank": 35,
-      "context_rank": 29
+      "rank": 43,
+      "context_rank": 37
     },
     {
       "family": "rh789",
@@ -973,8 +973,8 @@
       "reactance_at_minimum_ohm": -27.022371470053987,
       "return_loss_at_minimum_swr_db": 2.753114151556566,
       "coverage_status": "gap",
-      "rank": 33,
-      "context_rank": 28
+      "rank": 41,
+      "context_rank": 36
     },
     {
       "family": "rh789",
@@ -999,8 +999,8 @@
       "reactance_at_minimum_ohm": -20.956085519476797,
       "return_loss_at_minimum_swr_db": 1.3069398593087493,
       "coverage_status": "gap",
-      "rank": 31,
-      "context_rank": 27
+      "rank": 39,
+      "context_rank": 35
     },
     {
       "family": "rh789",
@@ -1077,8 +1077,8 @@
       "reactance_at_minimum_ohm": null,
       "return_loss_at_minimum_swr_db": null,
       "coverage_status": "gap",
-      "rank": 39,
-      "context_rank": 33
+      "rank": 47,
+      "context_rank": 41
     },
     {
       "family": "tid-td771",
@@ -1103,8 +1103,8 @@
       "reactance_at_minimum_ohm": -63.18035698940879,
       "return_loss_at_minimum_swr_db": 1.5682129577635955,
       "coverage_status": "gap",
-      "rank": 27,
-      "context_rank": 25
+      "rank": 33,
+      "context_rank": 31
     },
     {
       "family": "tid-td771",
@@ -1129,8 +1129,8 @@
       "reactance_at_minimum_ohm": 61.61081104616094,
       "return_loss_at_minimum_swr_db": 3.429522344948443,
       "coverage_status": "gap",
-      "rank": 15,
-      "context_rank": 12
+      "rank": 18,
+      "context_rank": 15
     },
     {
       "family": "tid-td771",
@@ -1155,8 +1155,8 @@
       "reactance_at_minimum_ohm": 89.31276041450367,
       "return_loss_at_minimum_swr_db": 3.0136191181675724,
       "coverage_status": "gap",
-      "rank": 17,
-      "context_rank": 13
+      "rank": 18,
+      "context_rank": 14
     },
     {
       "family": "tid-td771",
@@ -1181,8 +1181,8 @@
       "reactance_at_minimum_ohm": 144.04548204955293,
       "return_loss_at_minimum_swr_db": 2.1301576348592364,
       "coverage_status": "gap",
-      "rank": 19,
-      "context_rank": 16
+      "rank": 22,
+      "context_rank": 19
     },
     {
       "family": "tid-td771",
@@ -1207,8 +1207,8 @@
       "reactance_at_minimum_ohm": 244.93110214235617,
       "return_loss_at_minimum_swr_db": 1.7085746729549784,
       "coverage_status": "gap",
-      "rank": 19,
-      "context_rank": 16
+      "rank": 21,
+      "context_rank": 18
     },
     {
       "family": "tid-td771",
@@ -1233,8 +1233,8 @@
       "reactance_at_minimum_ohm": 65.69717099148035,
       "return_loss_at_minimum_swr_db": 1.584342811503099,
       "coverage_status": "gap",
-      "rank": 19,
-      "context_rank": 16
+      "rank": 21,
+      "context_rank": 18
     },
     {
       "family": "tid-td771",
@@ -1259,8 +1259,8 @@
       "reactance_at_minimum_ohm": -156.61397385210657,
       "return_loss_at_minimum_swr_db": 1.5787886271213925,
       "coverage_status": "gap",
-      "rank": 18,
-      "context_rank": 15
+      "rank": 21,
+      "context_rank": 18
     },
     {
       "family": "tid-td771",
@@ -1311,8 +1311,8 @@
       "reactance_at_minimum_ohm": 2.514073219938708,
       "return_loss_at_minimum_swr_db": 17.388012993160643,
       "coverage_status": "isolated resonance",
-      "rank": 28,
-      "context_rank": 24
+      "rank": 36,
+      "context_rank": 32
     },
     {
       "family": "tid-td771",
@@ -1363,8 +1363,8 @@
       "reactance_at_minimum_ohm": -32.52167782880356,
       "return_loss_at_minimum_swr_db": 10.004955047721067,
       "coverage_status": "partial only",
-      "rank": 12,
-      "context_rank": 6
+      "rank": 14,
+      "context_rank": 8
     },
     {
       "family": "tid-td771",
@@ -1389,8 +1389,8 @@
       "reactance_at_minimum_ohm": -64.4601691179754,
       "return_loss_at_minimum_swr_db": 2.8764282805354897,
       "coverage_status": "gap",
-      "rank": 31,
-      "context_rank": 25
+      "rank": 39,
+      "context_rank": 33
     },
     {
       "family": "tid-td771",
@@ -1415,8 +1415,8 @@
       "reactance_at_minimum_ohm": -61.147501406012296,
       "return_loss_at_minimum_swr_db": 0.9973017411710354,
       "coverage_status": "gap",
-      "rank": 35,
-      "context_rank": 29
+      "rank": 43,
+      "context_rank": 37
     },
     {
       "family": "tid-td771",
@@ -1441,8 +1441,8 @@
       "reactance_at_minimum_ohm": 9.284910319869203,
       "return_loss_at_minimum_swr_db": 2.553600078986309,
       "coverage_status": "gap",
-      "rank": 11,
-      "context_rank": 10
+      "rank": 13,
+      "context_rank": 12
     },
     {
       "family": "tid-td771",
@@ -1597,8 +1597,8 @@
       "reactance_at_minimum_ohm": -200.9159278428654,
       "return_loss_at_minimum_swr_db": 0.06712296881333152,
       "coverage_status": "gap",
-      "rank": 29,
-      "context_rank": 26
+      "rank": 37,
+      "context_rank": 34
     },
     {
       "family": "diamond-srh77ca",
@@ -1623,8 +1623,8 @@
       "reactance_at_minimum_ohm": 9.108767786827281,
       "return_loss_at_minimum_swr_db": 10.795365975206305,
       "coverage_status": "isolated resonance",
-      "rank": 18,
-      "context_rank": 17
+      "rank": 22,
+      "context_rank": 21
     },
     {
       "family": "diamond-srh77ca",
@@ -1649,8 +1649,8 @@
       "reactance_at_minimum_ohm": -131.83772380488827,
       "return_loss_at_minimum_swr_db": 0.36259893146390026,
       "coverage_status": "gap",
-      "rank": 38,
-      "context_rank": 32
+      "rank": 46,
+      "context_rank": 40
     },
     {
       "family": "diamond-srh77ca",
@@ -1675,8 +1675,8 @@
       "reactance_at_minimum_ohm": -110.91875062920577,
       "return_loss_at_minimum_swr_db": 0.27132345623733073,
       "coverage_status": "gap",
-      "rank": 34,
-      "context_rank": 28
+      "rank": 42,
+      "context_rank": 36
     },
     {
       "family": "diamond-srh77ca",
@@ -1701,8 +1701,8 @@
       "reactance_at_minimum_ohm": -59.07575929728219,
       "return_loss_at_minimum_swr_db": 0.7582882172257643,
       "coverage_status": "gap",
-      "rank": 27,
-      "context_rank": 22
+      "rank": 35,
+      "context_rank": 30
     },
     {
       "family": "diamond-srh77ca",
@@ -1727,8 +1727,8 @@
       "reactance_at_minimum_ohm": -79.44863599778854,
       "return_loss_at_minimum_swr_db": 0.29196743932715385,
       "coverage_status": "gap",
-      "rank": 28,
-      "context_rank": 22
+      "rank": 36,
+      "context_rank": 30
     },
     {
       "family": "diamond-srh77ca",
@@ -1753,8 +1753,8 @@
       "reactance_at_minimum_ohm": -79.76912831728573,
       "return_loss_at_minimum_swr_db": 0.28898621265020785,
       "coverage_status": "gap",
-      "rank": 27,
-      "context_rank": 22
+      "rank": 35,
+      "context_rank": 30
     },
     {
       "family": "diamond-srh77ca",
@@ -1779,8 +1779,8 @@
       "reactance_at_minimum_ohm": -78.47049332240317,
       "return_loss_at_minimum_swr_db": 0.32646928606746195,
       "coverage_status": "gap",
-      "rank": 27,
-      "context_rank": 22
+      "rank": 35,
+      "context_rank": 30
     },
     {
       "family": "diamond-srh77ca",
@@ -1831,8 +1831,8 @@
       "reactance_at_minimum_ohm": -7.128455772413884,
       "return_loss_at_minimum_swr_db": 19.756354396349256,
       "coverage_status": "isolated resonance",
-      "rank": 21,
-      "context_rank": 17
+      "rank": 29,
+      "context_rank": 25
     },
     {
       "family": "diamond-srh77ca",
@@ -1909,8 +1909,8 @@
       "reactance_at_minimum_ohm": -47.570097787827834,
       "return_loss_at_minimum_swr_db": 5.414257481879324,
       "coverage_status": "gap",
-      "rank": 13,
-      "context_rank": 9
+      "rank": 15,
+      "context_rank": 11
     },
     {
       "family": "diamond-srh77ca",
@@ -1935,8 +1935,8 @@
       "reactance_at_minimum_ohm": -50.87248586241147,
       "return_loss_at_minimum_swr_db": 3.9808239575232807,
       "coverage_status": "gap",
-      "rank": 19,
-      "context_rank": 15
+      "rank": 24,
+      "context_rank": 20
     },
     {
       "family": "diamond-srh77ca",
@@ -1961,8 +1961,8 @@
       "reactance_at_minimum_ohm": -13.713066280824531,
       "return_loss_at_minimum_swr_db": 0.5714412199580652,
       "coverage_status": "gap",
-      "rank": 27,
-      "context_rank": 22
+      "rank": 35,
+      "context_rank": 30
     },
     {
       "family": "diamond-srh77ca",
@@ -1987,8 +1987,8 @@
       "reactance_at_minimum_ohm": 1.8363536349845748,
       "return_loss_at_minimum_swr_db": 1.4813356247647862,
       "coverage_status": "gap",
-      "rank": 19,
-      "context_rank": 16
+      "rank": 27,
+      "context_rank": 24
     },
     {
       "family": "diamond-srh77ca",
@@ -2117,8 +2117,8 @@
       "reactance_at_minimum_ohm": -43.29944159297068,
       "return_loss_at_minimum_swr_db": 8.431564305932437,
       "coverage_status": "gap",
-      "rank": 20,
-      "context_rank": 19
+      "rank": 28,
+      "context_rank": 27
     },
     {
       "family": "generic-extendable",
@@ -2169,8 +2169,8 @@
       "reactance_at_minimum_ohm": -24.988578549804828,
       "return_loss_at_minimum_swr_db": 12.225327480075611,
       "coverage_status": "isolated resonance",
-      "rank": 34,
-      "context_rank": 28
+      "rank": 42,
+      "context_rank": 36
     },
     {
       "family": "generic-extendable",
@@ -2195,8 +2195,8 @@
       "reactance_at_minimum_ohm": -194.68898125235418,
       "return_loss_at_minimum_swr_db": 0.49107997760826927,
       "coverage_status": "gap",
-      "rank": 24,
-      "context_rank": 18
+      "rank": 32,
+      "context_rank": 26
     },
     {
       "family": "generic-extendable",
@@ -2221,8 +2221,8 @@
       "reactance_at_minimum_ohm": -141.00778880299524,
       "return_loss_at_minimum_swr_db": 0.7243838034184227,
       "coverage_status": "gap",
-      "rank": 24,
-      "context_rank": 19
+      "rank": 32,
+      "context_rank": 27
     },
     {
       "family": "generic-extendable",
@@ -2247,8 +2247,8 @@
       "reactance_at_minimum_ohm": -153.54297442605636,
       "return_loss_at_minimum_swr_db": 0.3921604948363625,
       "coverage_status": "gap",
-      "rank": 23,
-      "context_rank": 18
+      "rank": 31,
+      "context_rank": 26
     },
     {
       "family": "generic-extendable",
@@ -2273,8 +2273,8 @@
       "reactance_at_minimum_ohm": -154.3962219484092,
       "return_loss_at_minimum_swr_db": 0.38402153947533924,
       "coverage_status": "gap",
-      "rank": 24,
-      "context_rank": 19
+      "rank": 32,
+      "context_rank": 27
     },
     {
       "family": "generic-extendable",
@@ -2299,8 +2299,8 @@
       "reactance_at_minimum_ohm": -152.64602384499432,
       "return_loss_at_minimum_swr_db": 0.41290287415306104,
       "coverage_status": "gap",
-      "rank": 23,
-      "context_rank": 19
+      "rank": 31,
+      "context_rank": 27
     },
     {
       "family": "generic-extendable",
@@ -2325,8 +2325,8 @@
       "reactance_at_minimum_ohm": -83.64228954775301,
       "return_loss_at_minimum_swr_db": 2.855956761300919,
       "coverage_status": "gap",
-      "rank": 11,
-      "context_rank": 9
+      "rank": 15,
+      "context_rank": 13
     },
     {
       "family": "generic-extendable",
@@ -2351,8 +2351,8 @@
       "reactance_at_minimum_ohm": 0.3534293542542243,
       "return_loss_at_minimum_swr_db": 48.76163240007422,
       "coverage_status": "isolated resonance",
-      "rank": 30,
-      "context_rank": 26
+      "rank": 38,
+      "context_rank": 34
     },
     {
       "family": "generic-extendable",
@@ -2377,8 +2377,8 @@
       "reactance_at_minimum_ohm": -66.7938245654372,
       "return_loss_at_minimum_swr_db": 5.36007055426789,
       "coverage_status": "gap",
-      "rank": 21,
-      "context_rank": 15
+      "rank": 23,
+      "context_rank": 17
     },
     {
       "family": "generic-extendable",
@@ -2403,8 +2403,8 @@
       "reactance_at_minimum_ohm": -33.68968630049345,
       "return_loss_at_minimum_swr_db": 6.963582047007037,
       "coverage_status": "partial only",
-      "rank": 16,
-      "context_rank": 10
+      "rank": 18,
+      "context_rank": 12
     },
     {
       "family": "generic-extendable",
@@ -2429,8 +2429,8 @@
       "reactance_at_minimum_ohm": -34.51142058880944,
       "return_loss_at_minimum_swr_db": 6.911191478778856,
       "coverage_status": "partial only",
-      "rank": 10,
-      "context_rank": 6
+      "rank": 11,
+      "context_rank": 7
     },
     {
       "family": "generic-extendable",
@@ -2455,8 +2455,8 @@
       "reactance_at_minimum_ohm": -42.947905302448135,
       "return_loss_at_minimum_swr_db": 6.076308392061426,
       "coverage_status": "gap",
-      "rank": 18,
-      "context_rank": 14
+      "rank": 22,
+      "context_rank": 18
     },
     {
       "family": "generic-extendable",
@@ -2481,8 +2481,8 @@
       "reactance_at_minimum_ohm": -15.819305180451057,
       "return_loss_at_minimum_swr_db": 0.845157875923166,
       "coverage_status": "gap",
-      "rank": 21,
-      "context_rank": 17
+      "rank": 29,
+      "context_rank": 25
     },
     {
       "family": "generic-extendable",
@@ -2507,8 +2507,8 @@
       "reactance_at_minimum_ohm": 2.969136380235442,
       "return_loss_at_minimum_swr_db": 30.45303033848173,
       "coverage_status": "isolated resonance",
-      "rank": 33,
-      "context_rank": 27
+      "rank": 41,
+      "context_rank": 35
     },
     {
       "family": "generic-extendable",
@@ -2637,8 +2637,8 @@
       "reactance_at_minimum_ohm": -457.3770582759071,
       "return_loss_at_minimum_swr_db": 0.07404627155743686,
       "coverage_status": "gap",
-      "rank": 25,
-      "context_rank": 22
+      "rank": 33,
+      "context_rank": 30
     },
     {
       "family": "uniden-sds150-stock",
@@ -2663,8 +2663,8 @@
       "reactance_at_minimum_ohm": -55.43401271505536,
       "return_loss_at_minimum_swr_db": 6.6858536660063805,
       "coverage_status": "gap",
-      "rank": 11,
-      "context_rank": 11
+      "rank": 13,
+      "context_rank": 13
     },
     {
       "family": "uniden-sds150-stock",
@@ -2689,8 +2689,8 @@
       "reactance_at_minimum_ohm": -117.25103667458612,
       "return_loss_at_minimum_swr_db": 3.3047015929423864,
       "coverage_status": "gap",
-      "rank": 16,
-      "context_rank": 13
+      "rank": 19,
+      "context_rank": 16
     },
     {
       "family": "uniden-sds150-stock",
@@ -2715,8 +2715,8 @@
       "reactance_at_minimum_ohm": -159.53501444182737,
       "return_loss_at_minimum_swr_db": 2.047735423717929,
       "coverage_status": "gap",
-      "rank": 19,
-      "context_rank": 15
+      "rank": 22,
+      "context_rank": 18
     },
     {
       "family": "uniden-sds150-stock",
@@ -2741,8 +2741,8 @@
       "reactance_at_minimum_ohm": -57.786210861395986,
       "return_loss_at_minimum_swr_db": 6.794043738130498,
       "coverage_status": "gap",
-      "rank": 21,
-      "context_rank": 18
+      "rank": 29,
+      "context_rank": 26
     },
     {
       "family": "uniden-sds150-stock",
@@ -2767,8 +2767,8 @@
       "reactance_at_minimum_ohm": -109.77714939660623,
       "return_loss_at_minimum_swr_db": 3.166577306709484,
       "coverage_status": "gap",
-      "rank": 16,
-      "context_rank": 13
+      "rank": 17,
+      "context_rank": 14
     },
     {
       "family": "uniden-sds150-stock",
@@ -2845,8 +2845,8 @@
       "reactance_at_minimum_ohm": -139.62742605564756,
       "return_loss_at_minimum_swr_db": 0.2662164225447359,
       "coverage_status": "gap",
-      "rank": 32,
-      "context_rank": 26
+      "rank": 40,
+      "context_rank": 34
     },
     {
       "family": "uniden-sds150-stock",
@@ -2871,8 +2871,8 @@
       "reactance_at_minimum_ohm": -47.77788727513615,
       "return_loss_at_minimum_swr_db": 5.149362424377978,
       "coverage_status": "gap",
-      "rank": 34,
-      "context_rank": 29
+      "rank": 42,
+      "context_rank": 37
     },
     {
       "family": "uniden-sds150-stock",
@@ -2923,8 +2923,8 @@
       "reactance_at_minimum_ohm": -2.2246368969361856,
       "return_loss_at_minimum_swr_db": 31.52510586714446,
       "coverage_status": "partial only",
-      "rank": 10,
-      "context_rank": 5
+      "rank": 11,
+      "context_rank": 6
     },
     {
       "family": "uniden-sds150-stock",
@@ -3001,8 +3001,8 @@
       "reactance_at_minimum_ohm": -41.102429403440475,
       "return_loss_at_minimum_swr_db": 3.422799859486486,
       "coverage_status": "gap",
-      "rank": 8,
-      "context_rank": 7
+      "rank": 9,
+      "context_rank": 8
     },
     {
       "family": "uniden-sds150-stock",
@@ -3183,7 +3183,7 @@
       "reactance_at_minimum_ohm": 46.83679431318977,
       "return_loss_at_minimum_swr_db": 2.5523327616466225,
       "coverage_status": "gap",
-      "rank": 13,
+      "rank": 16,
       "context_rank": 1
     },
     {
@@ -3209,7 +3209,7 @@
       "reactance_at_minimum_ohm": 88.8198273349419,
       "return_loss_at_minimum_swr_db": 3.3435464020171795,
       "coverage_status": "gap",
-      "rank": 14,
+      "rank": 17,
       "context_rank": 1
     },
     {
@@ -3365,7 +3365,7 @@
       "reactance_at_minimum_ohm": 36.094025439655574,
       "return_loss_at_minimum_swr_db": 4.404046136953218,
       "coverage_status": "gap",
-      "rank": 8,
+      "rank": 9,
       "context_rank": 1
     },
     {
@@ -3391,7 +3391,7 @@
       "reactance_at_minimum_ohm": 22.758231396252945,
       "return_loss_at_minimum_swr_db": 6.922125697852925,
       "coverage_status": "gap",
-      "rank": 2,
+      "rank": 3,
       "context_rank": 1
     },
     {
@@ -3677,8 +3677,8 @@
       "reactance_at_minimum_ohm": -388.1676907018547,
       "return_loss_at_minimum_swr_db": 0.24381808924741008,
       "coverage_status": "gap",
-      "rank": 10,
-      "context_rank": 9
+      "rank": 16,
+      "context_rank": 15
     },
     {
       "family": "diamond-rh77ca",
@@ -3703,8 +3703,8 @@
       "reactance_at_minimum_ohm": -85.80758029922856,
       "return_loss_at_minimum_swr_db": 4.264038904370075,
       "coverage_status": "gap",
-      "rank": 23,
-      "context_rank": 22
+      "rank": 27,
+      "context_rank": 26
     },
     {
       "family": "diamond-rh77ca",
@@ -3911,8 +3911,8 @@
       "reactance_at_minimum_ohm": -2.4772044268404856,
       "return_loss_at_minimum_swr_db": 23.298985979684662,
       "coverage_status": "isolated resonance",
-      "rank": 12,
-      "context_rank": 10
+      "rank": 18,
+      "context_rank": 16
     },
     {
       "family": "diamond-rh77ca",
@@ -3963,8 +3963,8 @@
       "reactance_at_minimum_ohm": 30.007985171007665,
       "return_loss_at_minimum_swr_db": 11.01883147652636,
       "coverage_status": "partial only",
-      "rank": 9,
-      "context_rank": 4
+      "rank": 10,
+      "context_rank": 5
     },
     {
       "family": "diamond-rh77ca",
@@ -3989,8 +3989,8 @@
       "reactance_at_minimum_ohm": 94.09162776640709,
       "return_loss_at_minimum_swr_db": 4.368466067471415,
       "coverage_status": "gap",
-      "rank": 15,
-      "context_rank": 10
+      "rank": 17,
+      "context_rank": 12
     },
     {
       "family": "diamond-rh77ca",
@@ -4015,8 +4015,8 @@
       "reactance_at_minimum_ohm": 84.39707047035928,
       "return_loss_at_minimum_swr_db": 3.645655387405708,
       "coverage_status": "gap",
-      "rank": 16,
-      "context_rank": 12
+      "rank": 20,
+      "context_rank": 16
     },
     {
       "family": "diamond-rh77ca",
@@ -4041,8 +4041,8 @@
       "reactance_at_minimum_ohm": 18.58535694853135,
       "return_loss_at_minimum_swr_db": 2.0594692539639285,
       "coverage_status": "gap",
-      "rank": 14,
-      "context_rank": 13
+      "rank": 22,
+      "context_rank": 21
     },
     {
       "family": "diamond-rh77ca",
@@ -4067,8 +4067,8 @@
       "reactance_at_minimum_ohm": -181.70789252892683,
       "return_loss_at_minimum_swr_db": 1.8962026368323335,
       "coverage_status": "gap",
-      "rank": 13,
-      "context_rank": 12
+      "rank": 20,
+      "context_rank": 19
     },
     {
       "family": "diamond-rh77ca",
@@ -4093,8 +4093,8 @@
       "reactance_at_minimum_ohm": -165.70177152268982,
       "return_loss_at_minimum_swr_db": 2.477599017334441,
       "coverage_status": "gap",
-      "rank": 26,
-      "context_rank": 24
+      "rank": 34,
+      "context_rank": 32
     },
     {
       "family": "diamond-rh77ca",
@@ -4119,8 +4119,8 @@
       "reactance_at_minimum_ohm": -247.85571458619782,
       "return_loss_at_minimum_swr_db": 1.739503394519466,
       "coverage_status": "gap",
-      "rank": 27,
-      "context_rank": 25
+      "rank": 35,
+      "context_rank": 33
     },
     {
       "family": "diamond-rh77ca",
@@ -4145,8 +4145,8 @@
       "reactance_at_minimum_ohm": -210.3873306790288,
       "return_loss_at_minimum_swr_db": 2.033266699266679,
       "coverage_status": "gap",
-      "rank": 29,
-      "context_rank": 27
+      "rank": 36,
+      "context_rank": 34
     },
     {
       "family": "diamond-rh77ca",
@@ -4171,8 +4171,8 @@
       "reactance_at_minimum_ohm": -217.50721046238556,
       "return_loss_at_minimum_swr_db": 1.7235293108023628,
       "coverage_status": "gap",
-      "rank": 34,
-      "context_rank": 31
+      "rank": 42,
+      "context_rank": 39
     },
     {
       "family": "diamond-srh320a",
@@ -4197,8 +4197,8 @@
       "reactance_at_minimum_ohm": -239.27984135949018,
       "return_loss_at_minimum_swr_db": 0.09778701854244752,
       "coverage_status": "gap",
-      "rank": 23,
-      "context_rank": 21
+      "rank": 31,
+      "context_rank": 29
     },
     {
       "family": "diamond-srh320a",
@@ -4223,8 +4223,8 @@
       "reactance_at_minimum_ohm": -86.49117640577386,
       "return_loss_at_minimum_swr_db": 0.25774437002776296,
       "coverage_status": "gap",
-      "rank": 36,
-      "context_rank": 32
+      "rank": 44,
+      "context_rank": 40
     },
     {
       "family": "diamond-srh320a",
@@ -4249,8 +4249,8 @@
       "reactance_at_minimum_ohm": -38.40673025948331,
       "return_loss_at_minimum_swr_db": 2.135596492928304,
       "coverage_status": "gap",
-      "rank": 19,
-      "context_rank": 14
+      "rank": 24,
+      "context_rank": 19
     },
     {
       "family": "diamond-srh320a",
@@ -4431,8 +4431,8 @@
       "reactance_at_minimum_ohm": -0.6293379930069339,
       "return_loss_at_minimum_swr_db": 16.58189983476405,
       "coverage_status": "isolated resonance",
-      "rank": 13,
-      "context_rank": 11
+      "rank": 19,
+      "context_rank": 17
     },
     {
       "family": "diamond-srh320a",
@@ -4483,8 +4483,8 @@
       "reactance_at_minimum_ohm": 13.232956012555071,
       "return_loss_at_minimum_swr_db": 9.168425734332894,
       "coverage_status": "gap",
-      "rank": 20,
-      "context_rank": 14
+      "rank": 22,
+      "context_rank": 16
     },
     {
       "family": "diamond-srh320a",
@@ -4509,8 +4509,8 @@
       "reactance_at_minimum_ohm": -122.0790392010477,
       "return_loss_at_minimum_swr_db": 2.4459483759951484,
       "coverage_status": "gap",
-      "rank": 26,
-      "context_rank": 20
+      "rank": 33,
+      "context_rank": 27
     },
     {
       "family": "diamond-srh320a",
@@ -4535,8 +4535,8 @@
       "reactance_at_minimum_ohm": -98.54152283291309,
       "return_loss_at_minimum_swr_db": 1.6388303865883138,
       "coverage_status": "gap",
-      "rank": 28,
-      "context_rank": 22
+      "rank": 36,
+      "context_rank": 30
     },
     {
       "family": "diamond-srh320a",
@@ -4561,8 +4561,8 @@
       "reactance_at_minimum_ohm": -28.277653417480074,
       "return_loss_at_minimum_swr_db": 1.2263090025105376,
       "coverage_status": "gap",
-      "rank": 19,
-      "context_rank": 16
+      "rank": 27,
+      "context_rank": 24
     },
     {
       "family": "diamond-srh320a",
@@ -4587,8 +4587,8 @@
       "reactance_at_minimum_ohm": -23.37045967859521,
       "return_loss_at_minimum_swr_db": 1.0314667871050212,
       "coverage_status": "gap",
-      "rank": 24,
-      "context_rank": 20
+      "rank": 32,
+      "context_rank": 28
     },
     {
       "family": "diamond-srh320a",
@@ -4613,8 +4613,8 @@
       "reactance_at_minimum_ohm": -17.52561111773135,
       "return_loss_at_minimum_swr_db": 0.8275595115591726,
       "coverage_status": "gap",
-      "rank": 32,
-      "context_rank": 27
+      "rank": 40,
+      "context_rank": 35
     },
     {
       "family": "diamond-srh320a",
@@ -4639,8 +4639,8 @@
       "reactance_at_minimum_ohm": -16.74183280735602,
       "return_loss_at_minimum_swr_db": 0.4642629858849524,
       "coverage_status": "gap",
-      "rank": 35,
-      "context_rank": 30
+      "rank": 43,
+      "context_rank": 38
     },
     {
       "family": "diamond-srh320a",
@@ -4665,8 +4665,8 @@
       "reactance_at_minimum_ohm": null,
       "return_loss_at_minimum_swr_db": null,
       "coverage_status": "gap",
-      "rank": 38,
-      "context_rank": 33
+      "rank": 46,
+      "context_rank": 41
     },
     {
       "family": "diamond-srh320a",
@@ -4691,8 +4691,8 @@
       "reactance_at_minimum_ohm": null,
       "return_loss_at_minimum_swr_db": null,
       "coverage_status": "gap",
-      "rank": 38,
-      "context_rank": 33
+      "rank": 46,
+      "context_rank": 41
     },
     {
       "family": "signal-stick",
@@ -4717,8 +4717,8 @@
       "reactance_at_minimum_ohm": -502.16601440675356,
       "return_loss_at_minimum_swr_db": 0.2516129801868822,
       "coverage_status": "gap",
-      "rank": 11,
-      "context_rank": 10
+      "rank": 17,
+      "context_rank": 16
     },
     {
       "family": "signal-stick",
@@ -4743,8 +4743,8 @@
       "reactance_at_minimum_ohm": -89.88389124253666,
       "return_loss_at_minimum_swr_db": 4.357483669917174,
       "coverage_status": "gap",
-      "rank": 25,
-      "context_rank": 24
+      "rank": 30,
+      "context_rank": 29
     },
     {
       "family": "signal-stick",
@@ -4769,8 +4769,8 @@
       "reactance_at_minimum_ohm": -3.485359346426129,
       "return_loss_at_minimum_swr_db": 10.90238377748219,
       "coverage_status": "partial only",
-      "rank": 10,
-      "context_rank": 10
+      "rank": 11,
+      "context_rank": 11
     },
     {
       "family": "signal-stick",
@@ -4795,8 +4795,8 @@
       "reactance_at_minimum_ohm": -77.90790497645396,
       "return_loss_at_minimum_swr_db": 2.7346228038851113,
       "coverage_status": "gap",
-      "rank": 18,
-      "context_rank": 14
+      "rank": 19,
+      "context_rank": 15
     },
     {
       "family": "signal-stick",
@@ -4925,8 +4925,8 @@
       "reactance_at_minimum_ohm": 269.18452916467703,
       "return_loss_at_minimum_swr_db": 1.5746242687167977,
       "coverage_status": "gap",
-      "rank": 19,
-      "context_rank": 16
+      "rank": 25,
+      "context_rank": 22
     },
     {
       "family": "signal-stick",
@@ -4951,8 +4951,8 @@
       "reactance_at_minimum_ohm": -8.079088243994645,
       "return_loss_at_minimum_swr_db": 9.088155931118425,
       "coverage_status": "gap",
-      "rank": 27,
-      "context_rank": 23
+      "rank": 35,
+      "context_rank": 31
     },
     {
       "family": "signal-stick",
@@ -5003,8 +5003,8 @@
       "reactance_at_minimum_ohm": 64.01475847866259,
       "return_loss_at_minimum_swr_db": 5.275995694673581,
       "coverage_status": "gap",
-      "rank": 23,
-      "context_rank": 17
+      "rank": 26,
+      "context_rank": 20
     },
     {
       "family": "signal-stick",
@@ -5029,8 +5029,8 @@
       "reactance_at_minimum_ohm": 122.52019666587366,
       "return_loss_at_minimum_swr_db": 2.7565675541228463,
       "coverage_status": "gap",
-      "rank": 23,
-      "context_rank": 17
+      "rank": 29,
+      "context_rank": 23
     },
     {
       "family": "signal-stick",
@@ -5055,8 +5055,8 @@
       "reactance_at_minimum_ohm": 150.53919583529913,
       "return_loss_at_minimum_swr_db": 2.447396897091631,
       "coverage_status": "gap",
-      "rank": 26,
-      "context_rank": 20
+      "rank": 34,
+      "context_rank": 28
     },
     {
       "family": "signal-stick",
@@ -5081,8 +5081,8 @@
       "reactance_at_minimum_ohm": 31.97281621109598,
       "return_loss_at_minimum_swr_db": 2.3750629546481226,
       "coverage_status": "gap",
-      "rank": 12,
-      "context_rank": 11
+      "rank": 18,
+      "context_rank": 17
     },
     {
       "family": "signal-stick",
@@ -5107,8 +5107,8 @@
       "reactance_at_minimum_ohm": -269.2515170787127,
       "return_loss_at_minimum_swr_db": 1.5132430350505008,
       "coverage_status": "gap",
-      "rank": 16,
-      "context_rank": 14
+      "rank": 24,
+      "context_rank": 22
     },
     {
       "family": "signal-stick",
@@ -5133,8 +5133,8 @@
       "reactance_at_minimum_ohm": -146.66163012826615,
       "return_loss_at_minimum_swr_db": 2.7739636761205078,
       "coverage_status": "gap",
-      "rank": 22,
-      "context_rank": 20
+      "rank": 26,
+      "context_rank": 24
     },
     {
       "family": "signal-stick",
@@ -5211,8 +5211,8 @@
       "reactance_at_minimum_ohm": -27.54839808314008,
       "return_loss_at_minimum_swr_db": 2.8255342404045365,
       "coverage_status": "gap",
-      "rank": 28,
-      "context_rank": 26
+      "rank": 30,
+      "context_rank": 28
     },
     {
       "family": "signal-stick-counterpoise",
@@ -5237,8 +5237,8 @@
       "reactance_at_minimum_ohm": -497.7623140414413,
       "return_loss_at_minimum_swr_db": 0.22191282690975353,
       "coverage_status": "gap",
-      "rank": 14,
-      "context_rank": 13
+      "rank": 21,
+      "context_rank": 20
     },
     {
       "family": "signal-stick-counterpoise",
@@ -5263,8 +5263,8 @@
       "reactance_at_minimum_ohm": -123.46794963658914,
       "return_loss_at_minimum_swr_db": 2.7855022539858174,
       "coverage_status": "gap",
-      "rank": 30,
-      "context_rank": 28
+      "rank": 36,
+      "context_rank": 34
     },
     {
       "family": "signal-stick-counterpoise",
@@ -5289,8 +5289,8 @@
       "reactance_at_minimum_ohm": -25.062135084435884,
       "return_loss_at_minimum_swr_db": 12.149949093957094,
       "coverage_status": "partial only",
-      "rank": 9,
-      "context_rank": 9
+      "rank": 10,
+      "context_rank": 10
     },
     {
       "family": "signal-stick-counterpoise",
@@ -5341,8 +5341,8 @@
       "reactance_at_minimum_ohm": 51.819518672293654,
       "return_loss_at_minimum_swr_db": 6.731243399518656,
       "coverage_status": "gap",
-      "rank": 16,
-      "context_rank": 13
+      "rank": 18,
+      "context_rank": 15
     },
     {
       "family": "signal-stick-counterpoise",
@@ -5393,8 +5393,8 @@
       "reactance_at_minimum_ohm": 109.09092028095377,
       "return_loss_at_minimum_swr_db": 2.519459256544827,
       "coverage_status": "gap",
-      "rank": 16,
-      "context_rank": 13
+      "rank": 17,
+      "context_rank": 14
     },
     {
       "family": "signal-stick-counterpoise",
@@ -5419,8 +5419,8 @@
       "reactance_at_minimum_ohm": 132.84987830378483,
       "return_loss_at_minimum_swr_db": 1.8726394042885772,
       "coverage_status": "gap",
-      "rank": 16,
-      "context_rank": 13
+      "rank": 17,
+      "context_rank": 14
     },
     {
       "family": "signal-stick-counterpoise",
@@ -5445,8 +5445,8 @@
       "reactance_at_minimum_ohm": 217.18095167249345,
       "return_loss_at_minimum_swr_db": 1.165041539492418,
       "coverage_status": "gap",
-      "rank": 24,
-      "context_rank": 21
+      "rank": 31,
+      "context_rank": 28
     },
     {
       "family": "signal-stick-counterpoise",
@@ -5471,8 +5471,8 @@
       "reactance_at_minimum_ohm": -30.026913998252468,
       "return_loss_at_minimum_swr_db": 7.292739495039373,
       "coverage_status": "gap",
-      "rank": 29,
-      "context_rank": 25
+      "rank": 37,
+      "context_rank": 33
     },
     {
       "family": "signal-stick-counterpoise",
@@ -5523,8 +5523,8 @@
       "reactance_at_minimum_ohm": 25.40810733886176,
       "return_loss_at_minimum_swr_db": 6.164443444134142,
       "coverage_status": "gap",
-      "rank": 15,
-      "context_rank": 9
+      "rank": 17,
+      "context_rank": 11
     },
     {
       "family": "signal-stick-counterpoise",
@@ -5549,8 +5549,8 @@
       "reactance_at_minimum_ohm": 101.03914816292618,
       "return_loss_at_minimum_swr_db": 3.7130569905764688,
       "coverage_status": "gap",
-      "rank": 22,
-      "context_rank": 16
+      "rank": 27,
+      "context_rank": 21
     },
     {
       "family": "signal-stick-counterpoise",
@@ -5575,8 +5575,8 @@
       "reactance_at_minimum_ohm": 156.3891690470317,
       "return_loss_at_minimum_swr_db": 2.525336439473513,
       "coverage_status": "gap",
-      "rank": 25,
-      "context_rank": 19
+      "rank": 33,
+      "context_rank": 27
     },
     {
       "family": "signal-stick-counterpoise",
@@ -5601,8 +5601,8 @@
       "reactance_at_minimum_ohm": 162.0411315418212,
       "return_loss_at_minimum_swr_db": 2.29619263698492,
       "coverage_status": "gap",
-      "rank": 13,
-      "context_rank": 12
+      "rank": 20,
+      "context_rank": 19
     },
     {
       "family": "signal-stick-counterpoise",
@@ -5627,8 +5627,8 @@
       "reactance_at_minimum_ohm": -238.76966073041248,
       "return_loss_at_minimum_swr_db": 1.5206850983668474,
       "coverage_status": "gap",
-      "rank": 17,
-      "context_rank": 15
+      "rank": 25,
+      "context_rank": 23
     },
     {
       "family": "signal-stick-counterpoise",
@@ -5653,8 +5653,8 @@
       "reactance_at_minimum_ohm": -135.17828005927578,
       "return_loss_at_minimum_swr_db": 2.8285083172969956,
       "coverage_status": "gap",
-      "rank": 21,
-      "context_rank": 19
+      "rank": 25,
+      "context_rank": 23
     },
     {
       "family": "signal-stick-counterpoise",
@@ -5731,8 +5731,528 @@
       "reactance_at_minimum_ohm": 15.74505319573135,
       "return_loss_at_minimum_swr_db": 2.374495691307245,
       "coverage_status": "gap",
-      "rank": 31,
-      "context_rank": 29
+      "rank": 38,
+      "context_rank": 36
+    },
+    {
+      "family": "comet-bnc-w100rx",
+      "family_label": "Comet BNC-W100RX telescopic",
+      "measurement_context": "handheld_bench",
+      "measurement_context_label": "Handheld bench fixture",
+      "configuration": "comet-bnc-w100rx:setting-8",
+      "configuration_label": "setting 8 (fully extended, 99.5 cm)",
+      "service": "6m",
+      "service_label": "6m amateur",
+      "start_hz": 50000000,
+      "stop_hz": 54000000,
+      "source": "broadband",
+      "points": 140,
+      "minimum_swr": 8.949981987485778,
+      "minimum_swr_frequency_hz": 53938750.0,
+      "median_swr": 10.379079246726281,
+      "maximum_swr": 11.302761068224658,
+      "coverage_at_or_below_2_percent": 0.0,
+      "coverage_at_or_below_3_percent": 0.0,
+      "resistance_at_minimum_ohm": 57.470237545832845,
+      "reactance_at_minimum_ohm": -142.25369859782523,
+      "return_loss_at_minimum_swr_db": 1.9491229975394597,
+      "coverage_status": "gap",
+      "rank": 2,
+      "context_rank": 1
+    },
+    {
+      "family": "comet-bnc-w100rx",
+      "family_label": "Comet BNC-W100RX telescopic",
+      "measurement_context": "handheld_bench",
+      "measurement_context_label": "Handheld bench fixture",
+      "configuration": "comet-bnc-w100rx:setting-6",
+      "configuration_label": "setting 6 (78 cm)",
+      "service": "fm-broadcast",
+      "service_label": "FM broadcast",
+      "start_hz": 88000000,
+      "stop_hz": 108000000,
+      "source": "averaged_zoom",
+      "points": 2001,
+      "minimum_swr": 1.611721051482858,
+      "minimum_swr_frequency_hz": 105970000.0,
+      "median_swr": 6.099483932414218,
+      "maximum_swr": 13.161911496783338,
+      "coverage_at_or_below_2_percent": 17.44127936031984,
+      "coverage_at_or_below_3_percent": 30.634682658670666,
+      "resistance_at_minimum_ohm": 80.48773495685346,
+      "reactance_at_minimum_ohm": -2.2052847059938374,
+      "return_loss_at_minimum_swr_db": 12.607467265764338,
+      "coverage_status": "partial only",
+      "rank": 11,
+      "context_rank": 11
+    },
+    {
+      "family": "comet-bnc-w100rx",
+      "family_label": "Comet BNC-W100RX telescopic",
+      "measurement_context": "handheld_bench",
+      "measurement_context_label": "Handheld bench fixture",
+      "configuration": "comet-bnc-w100rx:setting-3",
+      "configuration_label": "setting 3 (44 cm)",
+      "service": "civil-air",
+      "service_label": "Civil air",
+      "start_hz": 118000000,
+      "stop_hz": 137000000,
+      "source": "averaged_zoom",
+      "points": 2001,
+      "minimum_swr": 2.1363568819979726,
+      "minimum_swr_frequency_hz": 123947000.0,
+      "median_swr": 3.052838363819197,
+      "maximum_swr": 6.1389744689790176,
+      "coverage_at_or_below_2_percent": 0.0,
+      "coverage_at_or_below_3_percent": 48.125937031484256,
+      "resistance_at_minimum_ohm": 95.12107314060772,
+      "reactance_at_minimum_ohm": -28.96298200251174,
+      "return_loss_at_minimum_swr_db": 8.818214563355987,
+      "coverage_status": "partial only",
+      "rank": 4,
+      "context_rank": 4
+    },
+    {
+      "family": "comet-bnc-w100rx",
+      "family_label": "Comet BNC-W100RX telescopic",
+      "measurement_context": "handheld_bench",
+      "measurement_context_label": "Handheld bench fixture",
+      "configuration": "comet-bnc-w100rx:setting-3",
+      "configuration_label": "setting 3 (44 cm)",
+      "service": "2m",
+      "service_label": "2m amateur",
+      "start_hz": 144000000,
+      "stop_hz": 148000000,
+      "source": "averaged_zoom",
+      "points": 1001,
+      "minimum_swr": 5.2607413678914074,
+      "minimum_swr_frequency_hz": 144616000.0,
+      "median_swr": 5.54402650575314,
+      "maximum_swr": 6.065490289718988,
+      "coverage_at_or_below_2_percent": 0.0,
+      "coverage_at_or_below_3_percent": 0.0,
+      "resistance_at_minimum_ohm": 206.6586988289381,
+      "reactance_at_minimum_ohm": -105.4288383687267,
+      "return_loss_at_minimum_swr_db": 3.342811811690583,
+      "coverage_status": "gap",
+      "rank": 16,
+      "context_rank": 12
+    },
+    {
+      "family": "comet-bnc-w100rx",
+      "family_label": "Comet BNC-W100RX telescopic",
+      "measurement_context": "handheld_bench",
+      "measurement_context_label": "Handheld bench fixture",
+      "configuration": "comet-bnc-w100rx:setting-3",
+      "configuration_label": "setting 3 (44 cm)",
+      "service": "vhf-lmr",
+      "service_label": "VHF LMR",
+      "start_hz": 150000000,
+      "stop_hz": 174000000,
+      "source": "averaged_zoom",
+      "points": 2001,
+      "minimum_swr": 5.210647982085239,
+      "minimum_swr_frequency_hz": 173988000.0,
+      "median_swr": 8.43056371310967,
+      "maximum_swr": 11.018003659106789,
+      "coverage_at_or_below_2_percent": 0.0,
+      "coverage_at_or_below_3_percent": 0.0,
+      "resistance_at_minimum_ohm": 84.15306139568142,
+      "reactance_at_minimum_ohm": -114.67507033658154,
+      "return_loss_at_minimum_swr_db": 3.3757595824832225,
+      "coverage_status": "gap",
+      "rank": 16,
+      "context_rank": 13
+    },
+    {
+      "family": "comet-bnc-w100rx",
+      "family_label": "Comet BNC-W100RX telescopic",
+      "measurement_context": "handheld_bench",
+      "measurement_context_label": "Handheld bench fixture",
+      "configuration": "comet-bnc-w100rx:setting-4",
+      "configuration_label": "setting 4 (56 cm)",
+      "service": "marine-vhf",
+      "service_label": "Marine VHF",
+      "start_hz": 156000000,
+      "stop_hz": 162000000,
+      "source": "averaged_zoom",
+      "points": 1001,
+      "minimum_swr": 6.264619546447168,
+      "minimum_swr_frequency_hz": 162000000.0,
+      "median_swr": 7.119072586952767,
+      "maximum_swr": 9.432474430083092,
+      "coverage_at_or_below_2_percent": 0.0,
+      "coverage_at_or_below_3_percent": 0.0,
+      "resistance_at_minimum_ohm": 131.60640107597072,
+      "reactance_at_minimum_ohm": -149.84442275056344,
+      "return_loss_at_minimum_swr_db": 2.7969176603719226,
+      "coverage_status": "gap",
+      "rank": 16,
+      "context_rank": 13
+    },
+    {
+      "family": "comet-bnc-w100rx",
+      "family_label": "Comet BNC-W100RX telescopic",
+      "measurement_context": "handheld_bench",
+      "measurement_context_label": "Handheld bench fixture",
+      "configuration": "comet-bnc-w100rx:setting-4",
+      "configuration_label": "setting 4 (56 cm)",
+      "service": "railroad",
+      "service_label": "Railroad",
+      "start_hz": 159810000,
+      "stop_hz": 161565000,
+      "source": "averaged_zoom",
+      "points": 1001,
+      "minimum_swr": 6.827529560026847,
+      "minimum_swr_frequency_hz": 161559735.0,
+      "median_swr": 7.123215865531041,
+      "maximum_swr": 7.505848668569501,
+      "coverage_at_or_below_2_percent": 0.0,
+      "coverage_at_or_below_3_percent": 0.0,
+      "resistance_at_minimum_ohm": 138.852125030534,
+      "reactance_at_minimum_ohm": -163.21088072554437,
+      "return_loss_at_minimum_swr_db": 2.562804624429593,
+      "coverage_status": "gap",
+      "rank": 16,
+      "context_rank": 13
+    },
+    {
+      "family": "comet-bnc-w100rx",
+      "family_label": "Comet BNC-W100RX telescopic",
+      "measurement_context": "handheld_bench",
+      "measurement_context_label": "Handheld bench fixture",
+      "configuration": "comet-bnc-w100rx:setting-4",
+      "configuration_label": "setting 4 (56 cm)",
+      "service": "noaa-weather",
+      "service_label": "NOAA weather",
+      "start_hz": 162400000,
+      "stop_hz": 162550000,
+      "source": "averaged_zoom",
+      "points": 101,
+      "minimum_swr": 6.613333626445567,
+      "minimum_swr_frequency_hz": 162496000.0,
+      "median_swr": 6.6570199059990625,
+      "maximum_swr": 7.259213469822874,
+      "coverage_at_or_below_2_percent": 0.0,
+      "coverage_at_or_below_3_percent": 0.0,
+      "resistance_at_minimum_ohm": 135.4741963948334,
+      "reactance_at_minimum_ohm": -158.01201052209754,
+      "return_loss_at_minimum_swr_db": 2.647080129056749,
+      "coverage_status": "gap",
+      "rank": 14,
+      "context_rank": 11
+    },
+    {
+      "family": "comet-bnc-w100rx",
+      "family_label": "Comet BNC-W100RX telescopic",
+      "measurement_context": "handheld_bench",
+      "measurement_context_label": "Handheld bench fixture",
+      "configuration": "comet-bnc-w100rx:setting-8",
+      "configuration_label": "setting 8 (fully extended, 99.5 cm)",
+      "service": "1.25m",
+      "service_label": "1.25m amateur",
+      "start_hz": 222000000,
+      "stop_hz": 225000000,
+      "source": "averaged_zoom",
+      "points": 1001,
+      "minimum_swr": 3.9320702880570284,
+      "minimum_swr_frequency_hz": 222030000.0,
+      "median_swr": 4.010249546745708,
+      "maximum_swr": 4.113074514838383,
+      "coverage_at_or_below_2_percent": 0.0,
+      "coverage_at_or_below_3_percent": 0.0,
+      "resistance_at_minimum_ohm": 148.45483205673779,
+      "reactance_at_minimum_ohm": -80.84335734350448,
+      "return_loss_at_minimum_swr_db": 4.5170976025368805,
+      "coverage_status": "gap",
+      "rank": 8,
+      "context_rank": 7
+    },
+    {
+      "family": "comet-bnc-w100rx",
+      "family_label": "Comet BNC-W100RX telescopic",
+      "measurement_context": "handheld_bench",
+      "measurement_context_label": "Handheld bench fixture",
+      "configuration": "comet-bnc-w100rx:setting-1",
+      "configuration_label": "setting 1 (collapsed, 21 cm)",
+      "service": "military-air",
+      "service_label": "Military air",
+      "start_hz": 225000000,
+      "stop_hz": 400000000,
+      "source": "averaged_zoom",
+      "points": 10001,
+      "minimum_swr": 1.5649917867929342,
+      "minimum_swr_frequency_hz": 314145000.0,
+      "median_swr": 2.7855223513697243,
+      "maximum_swr": 11.843832837378443,
+      "coverage_at_or_below_2_percent": 14.678532146785322,
+      "coverage_at_or_below_3_percent": 55.78442155784422,
+      "resistance_at_minimum_ohm": 67.77014706247756,
+      "reactance_at_minimum_ohm": -19.374858054576023,
+      "return_loss_at_minimum_swr_db": 13.140876884696324,
+      "coverage_status": "partial only",
+      "rank": 1,
+      "context_rank": 1
+    },
+    {
+      "family": "comet-bnc-w100rx",
+      "family_label": "Comet BNC-W100RX telescopic",
+      "measurement_context": "handheld_bench",
+      "measurement_context_label": "Handheld bench fixture",
+      "configuration": "comet-bnc-w100rx:setting-6",
+      "configuration_label": "setting 6 (78 cm)",
+      "service": "federal-uhf",
+      "service_label": "Federal UHF",
+      "start_hz": 406100000,
+      "stop_hz": 420000000,
+      "source": "averaged_zoom",
+      "points": 2001,
+      "minimum_swr": 3.3093821387640903,
+      "minimum_swr_frequency_hz": 419965250.0,
+      "median_swr": 4.119195854284208,
+      "maximum_swr": 7.770606312235076,
+      "coverage_at_or_below_2_percent": 0.0,
+      "coverage_at_or_below_3_percent": 0.0,
+      "resistance_at_minimum_ohm": 70.67769866722871,
+      "reactance_at_minimum_ohm": -72.5773853948724,
+      "return_loss_at_minimum_swr_db": 5.418384094486828,
+      "coverage_status": "gap",
+      "rank": 21,
+      "context_rank": 15
+    },
+    {
+      "family": "comet-bnc-w100rx",
+      "family_label": "Comet BNC-W100RX telescopic",
+      "measurement_context": "handheld_bench",
+      "measurement_context_label": "Handheld bench fixture",
+      "configuration": "comet-bnc-w100rx:setting-6",
+      "configuration_label": "setting 6 (78 cm)",
+      "service": "70cm",
+      "service_label": "70cm amateur",
+      "start_hz": 420000000,
+      "stop_hz": 450000000,
+      "source": "averaged_zoom",
+      "points": 3001,
+      "minimum_swr": 2.822991862772207,
+      "minimum_swr_frequency_hz": 433300000.0,
+      "median_swr": 2.993395046275115,
+      "maximum_swr": 3.7583419710410504,
+      "coverage_at_or_below_2_percent": 0.0,
+      "coverage_at_or_below_3_percent": 51.58280573142286,
+      "resistance_at_minimum_ohm": 102.41941559896827,
+      "reactance_at_minimum_ohm": -57.27778503050852,
+      "return_loss_at_minimum_swr_db": 6.432372870236693,
+      "coverage_status": "partial only",
+      "rank": 9,
+      "context_rank": 4
+    },
+    {
+      "family": "comet-bnc-w100rx",
+      "family_label": "Comet BNC-W100RX telescopic",
+      "measurement_context": "handheld_bench",
+      "measurement_context_label": "Handheld bench fixture",
+      "configuration": "comet-bnc-w100rx:setting-8",
+      "configuration_label": "setting 8 (fully extended, 99.5 cm)",
+      "service": "uhf-lmr",
+      "service_label": "UHF LMR",
+      "start_hz": 450000000,
+      "stop_hz": 470000000,
+      "source": "averaged_zoom",
+      "points": 2001,
+      "minimum_swr": 2.9916975503379413,
+      "minimum_swr_frequency_hz": 465810000.0,
+      "median_swr": 3.1232238435029083,
+      "maximum_swr": 3.512064467270519,
+      "coverage_at_or_below_2_percent": 0.0,
+      "coverage_at_or_below_3_percent": 0.14992503748125938,
+      "resistance_at_minimum_ohm": 119.6803007798525,
+      "reactance_at_minimum_ohm": -55.49050331512574,
+      "return_loss_at_minimum_swr_db": 6.038684765882066,
+      "coverage_status": "gap",
+      "rank": 8,
+      "context_rank": 5
+    },
+    {
+      "family": "comet-bnc-w100rx",
+      "family_label": "Comet BNC-W100RX telescopic",
+      "measurement_context": "handheld_bench",
+      "measurement_context_label": "Handheld bench fixture",
+      "configuration": "comet-bnc-w100rx:setting-5",
+      "configuration_label": "setting 5 (67 cm)",
+      "service": "t-band",
+      "service_label": "T-band",
+      "start_hz": 470000000,
+      "stop_hz": 512000000,
+      "source": "averaged_zoom",
+      "points": 4001,
+      "minimum_swr": 3.150738495185043,
+      "minimum_swr_frequency_hz": 486558500.0,
+      "median_swr": 3.5466291019829983,
+      "maximum_swr": 4.412084294664158,
+      "coverage_at_or_below_2_percent": 0.0,
+      "coverage_at_or_below_3_percent": 0.0,
+      "resistance_at_minimum_ohm": 92.14227567938487,
+      "reactance_at_minimum_ohm": -70.62467541689351,
+      "return_loss_at_minimum_swr_db": 5.710755287736715,
+      "coverage_status": "gap",
+      "rank": 7,
+      "context_rank": 4
+    },
+    {
+      "family": "comet-bnc-w100rx",
+      "family_label": "Comet BNC-W100RX telescopic",
+      "measurement_context": "handheld_bench",
+      "measurement_context_label": "Handheld bench fixture",
+      "configuration": "comet-bnc-w100rx:setting-3",
+      "configuration_label": "setting 3 (44 cm)",
+      "service": "700-public-safety-downlink",
+      "service_label": "700 MHz public safety",
+      "start_hz": 769000000,
+      "stop_hz": 775000000,
+      "source": "averaged_zoom",
+      "points": 1001,
+      "minimum_swr": 5.125807427180911,
+      "minimum_swr_frequency_hz": 773482000.0,
+      "median_swr": 5.35625088783937,
+      "maximum_swr": 5.534106171368007,
+      "coverage_at_or_below_2_percent": 0.0,
+      "coverage_at_or_below_3_percent": 0.0,
+      "resistance_at_minimum_ohm": 81.27973584599893,
+      "reactance_at_minimum_ohm": -111.88237728403152,
+      "return_loss_at_minimum_swr_db": 3.433087734619622,
+      "coverage_status": "gap",
+      "rank": 8,
+      "context_rank": 7
+    },
+    {
+      "family": "comet-bnc-w100rx",
+      "family_label": "Comet BNC-W100RX telescopic",
+      "measurement_context": "handheld_bench",
+      "measurement_context_label": "Handheld bench fixture",
+      "configuration": "comet-bnc-w100rx:setting-1",
+      "configuration_label": "setting 1 (collapsed, 21 cm)",
+      "service": "800-public-safety-downlink",
+      "service_label": "800 MHz public safety",
+      "start_hz": 851000000,
+      "stop_hz": 869000000,
+      "source": "averaged_zoom",
+      "points": 2001,
+      "minimum_swr": 6.995808142425483,
+      "minimum_swr_frequency_hz": 864482000.0,
+      "median_swr": 7.234729377842295,
+      "maximum_swr": 7.515500413137443,
+      "coverage_at_or_below_2_percent": 0.0,
+      "coverage_at_or_below_3_percent": 0.0,
+      "resistance_at_minimum_ohm": 47.61423350262205,
+      "reactance_at_minimum_ohm": -110.58115727786479,
+      "return_loss_at_minimum_swr_db": 2.5002927439941756,
+      "coverage_status": "gap",
+      "rank": 13,
+      "context_rank": 12
+    },
+    {
+      "family": "comet-bnc-w100rx",
+      "family_label": "Comet BNC-W100RX telescopic",
+      "measurement_context": "handheld_bench",
+      "measurement_context_label": "Handheld bench fixture",
+      "configuration": "comet-bnc-w100rx:setting-4",
+      "configuration_label": "setting 4 (56 cm)",
+      "service": "33cm",
+      "service_label": "33cm amateur",
+      "start_hz": 902000000,
+      "stop_hz": 928000000,
+      "source": "averaged_zoom",
+      "points": 2001,
+      "minimum_swr": 6.039668460725728,
+      "minimum_swr_frequency_hz": 909995000.0,
+      "median_swr": 7.333719067595313,
+      "maximum_swr": 8.844697404679557,
+      "coverage_at_or_below_2_percent": 0.0,
+      "coverage_at_or_below_3_percent": 0.0,
+      "resistance_at_minimum_ohm": 48.73204283422947,
+      "reactance_at_minimum_ohm": -101.21704502274739,
+      "return_loss_at_minimum_swr_db": 2.9030047846090734,
+      "coverage_status": "gap",
+      "rank": 19,
+      "context_rank": 17
+    },
+    {
+      "family": "comet-bnc-w100rx",
+      "family_label": "Comet BNC-W100RX telescopic",
+      "measurement_context": "handheld_bench",
+      "measurement_context_label": "Handheld bench fixture",
+      "configuration": "comet-bnc-w100rx:setting-4",
+      "configuration_label": "setting 4 (56 cm)",
+      "service": "900-trunking-downlink",
+      "service_label": "900 MHz trunking",
+      "start_hz": 935000000,
+      "stop_hz": 941000000,
+      "source": "averaged_zoom",
+      "points": 1001,
+      "minimum_swr": 7.281100998780236,
+      "minimum_swr_frequency_hz": 935090000.0,
+      "median_swr": 7.575292589283067,
+      "maximum_swr": 8.209630040772646,
+      "coverage_at_or_below_2_percent": 0.0,
+      "coverage_at_or_below_3_percent": 0.0,
+      "resistance_at_minimum_ohm": 43.52937647666696,
+      "reactance_at_minimum_ohm": -108.40296583037374,
+      "return_loss_at_minimum_swr_db": 2.4010460927139987,
+      "coverage_status": "gap",
+      "rank": 26,
+      "context_rank": 24
+    },
+    {
+      "family": "comet-bnc-w100rx",
+      "family_label": "Comet BNC-W100RX telescopic",
+      "measurement_context": "handheld_bench",
+      "measurement_context_label": "Handheld bench fixture",
+      "configuration": "comet-bnc-w100rx:setting-6",
+      "configuration_label": "setting 6 (78 cm)",
+      "service": "uat-978",
+      "service_label": "UAT 978",
+      "start_hz": 976000000,
+      "stop_hz": 980000000,
+      "source": "averaged_zoom",
+      "points": 1001,
+      "minimum_swr": 6.5405033039568,
+      "minimum_swr_frequency_hz": 978256000.0,
+      "median_swr": 7.745265200820911,
+      "maximum_swr": 8.834791984522532,
+      "coverage_at_or_below_2_percent": 0.0,
+      "coverage_at_or_below_3_percent": 0.0,
+      "resistance_at_minimum_ohm": 40.79659635072019,
+      "reactance_at_minimum_ohm": -97.4116418591143,
+      "return_loss_at_minimum_swr_db": 2.67702232760408,
+      "coverage_status": "gap",
+      "rank": 28,
+      "context_rank": 26
+    },
+    {
+      "family": "comet-bnc-w100rx",
+      "family_label": "Comet BNC-W100RX telescopic",
+      "measurement_context": "handheld_bench",
+      "measurement_context_label": "Handheld bench fixture",
+      "configuration": "comet-bnc-w100rx:setting-1",
+      "configuration_label": "setting 1 (collapsed, 21 cm)",
+      "service": "ads-b-1090",
+      "service_label": "ADS-B 1090",
+      "start_hz": 1088000000,
+      "stop_hz": 1092000000,
+      "source": "averaged_zoom",
+      "points": 1001,
+      "minimum_swr": 5.281811606291454,
+      "minimum_swr_frequency_hz": 1091908000.0,
+      "median_swr": 5.970176433583397,
+      "maximum_swr": 6.36856296290249,
+      "coverage_at_or_below_2_percent": 0.0,
+      "coverage_at_or_below_3_percent": 0.0,
+      "resistance_at_minimum_ohm": 42.60440875244107,
+      "reactance_at_minimum_ohm": -85.67146460330181,
+      "return_loss_at_minimum_swr_db": 3.32914705170622,
+      "coverage_status": "gap",
+      "rank": 26,
+      "context_rank": 24
     },
     {
       "family": "tidradio-h9-stock",
@@ -5757,7 +6277,7 @@
       "reactance_at_minimum_ohm": -858.1905411396341,
       "return_loss_at_minimum_swr_db": 0.027311005379886778,
       "coverage_status": "gap",
-      "rank": 30,
+      "rank": 38,
       "context_rank": 3
     },
     {
@@ -5783,7 +6303,7 @@
       "reactance_at_minimum_ohm": -543.347266962078,
       "return_loss_at_minimum_swr_db": 0.2817119798613806,
       "coverage_status": "gap",
-      "rank": 37,
+      "rank": 45,
       "context_rank": 4
     },
     {
@@ -5809,7 +6329,7 @@
       "reactance_at_minimum_ohm": -347.12254853503526,
       "return_loss_at_minimum_swr_db": 1.0247161237267146,
       "coverage_status": "gap",
-      "rank": 22,
+      "rank": 30,
       "context_rank": 5
     },
     {
@@ -5835,7 +6355,7 @@
       "reactance_at_minimum_ohm": -311.46102570217255,
       "return_loss_at_minimum_swr_db": 0.6554394653984268,
       "coverage_status": "gap",
-      "rank": 23,
+      "rank": 31,
       "context_rank": 5
     },
     {
@@ -5861,7 +6381,7 @@
       "reactance_at_minimum_ohm": -305.0169365520202,
       "return_loss_at_minimum_swr_db": 0.6539063202637253,
       "coverage_status": "gap",
-      "rank": 22,
+      "rank": 30,
       "context_rank": 3
     },
     {
@@ -5887,7 +6407,7 @@
       "reactance_at_minimum_ohm": -307.2493700731375,
       "return_loss_at_minimum_swr_db": 0.731939898653214,
       "coverage_status": "gap",
-      "rank": 22,
+      "rank": 30,
       "context_rank": 4
     },
     {
@@ -5913,7 +6433,7 @@
       "reactance_at_minimum_ohm": -310.40514711091436,
       "return_loss_at_minimum_swr_db": 0.4871987204767344,
       "coverage_status": "gap",
-      "rank": 22,
+      "rank": 30,
       "context_rank": 4
     },
     {
@@ -5939,7 +6459,7 @@
       "reactance_at_minimum_ohm": -301.7050454103501,
       "return_loss_at_minimum_swr_db": 0.4123621858763886,
       "coverage_status": "gap",
-      "rank": 24,
+      "rank": 32,
       "context_rank": 4
     },
     {
@@ -5965,7 +6485,7 @@
       "reactance_at_minimum_ohm": -208.31088356402847,
       "return_loss_at_minimum_swr_db": 0.5627486838925166,
       "coverage_status": "gap",
-      "rank": 29,
+      "rank": 37,
       "context_rank": 4
     },
     {
@@ -5991,7 +6511,7 @@
       "reactance_at_minimum_ohm": -35.09214280268047,
       "return_loss_at_minimum_swr_db": 9.962143074303434,
       "coverage_status": "isolated resonance",
-      "rank": 18,
+      "rank": 26,
       "context_rank": 2
     },
     {
@@ -6121,7 +6641,7 @@
       "reactance_at_minimum_ohm": -175.64391611663376,
       "return_loss_at_minimum_swr_db": 1.8032195657109553,
       "coverage_status": "gap",
-      "rank": 18,
+      "rank": 26,
       "context_rank": 2
     },
     {
@@ -6147,7 +6667,7 @@
       "reactance_at_minimum_ohm": -152.00653555191414,
       "return_loss_at_minimum_swr_db": 1.318342015003997,
       "coverage_status": "gap",
-      "rank": 20,
+      "rank": 28,
       "context_rank": 3
     },
     {
@@ -6173,7 +6693,7 @@
       "reactance_at_minimum_ohm": -145.6112088407152,
       "return_loss_at_minimum_swr_db": 1.7654016707620082,
       "coverage_status": "gap",
-      "rank": 30,
+      "rank": 38,
       "context_rank": 3
     },
     {
@@ -6199,7 +6719,7 @@
       "reactance_at_minimum_ohm": -134.75564520240405,
       "return_loss_at_minimum_swr_db": 1.1903846745285138,
       "coverage_status": "gap",
-      "rank": 30,
+      "rank": 38,
       "context_rank": 3
     },
     {
@@ -6225,7 +6745,7 @@
       "reactance_at_minimum_ohm": -121.4874911709444,
       "return_loss_at_minimum_swr_db": 1.159959535493138,
       "coverage_status": "gap",
-      "rank": 32,
+      "rank": 40,
       "context_rank": 3
     },
     {
@@ -6251,7 +6771,7 @@
       "reactance_at_minimum_ohm": -93.96923674725069,
       "return_loss_at_minimum_swr_db": 1.7240123873426279,
       "coverage_status": "gap",
-      "rank": 35,
+      "rank": 43,
       "context_rank": 3
     },
     {
@@ -6277,7 +6797,7 @@
       "reactance_at_minimum_ohm": -509.4312379288807,
       "return_loss_at_minimum_swr_db": 0.09295857464875196,
       "coverage_status": "gap",
-      "rank": 24,
+      "rank": 32,
       "context_rank": 2
     },
     {
@@ -6303,7 +6823,7 @@
       "reactance_at_minimum_ohm": -148.48603241355772,
       "return_loss_at_minimum_swr_db": 1.685942584121023,
       "coverage_status": "gap",
-      "rank": 32,
+      "rank": 39,
       "context_rank": 2
     },
     {
@@ -6329,7 +6849,7 @@
       "reactance_at_minimum_ohm": -38.38574918520297,
       "return_loss_at_minimum_swr_db": 6.99720243191578,
       "coverage_status": "partial only",
-      "rank": 13,
+      "rank": 16,
       "context_rank": 2
     },
     {
@@ -6355,7 +6875,7 @@
       "reactance_at_minimum_ohm": -427.8105050474592,
       "return_loss_at_minimum_swr_db": 0.8701679100644543,
       "coverage_status": "gap",
-      "rank": 21,
+      "rank": 29,
       "context_rank": 4
     },
     {
@@ -6381,7 +6901,7 @@
       "reactance_at_minimum_ohm": -409.6034261841738,
       "return_loss_at_minimum_swr_db": 0.4749202411391711,
       "coverage_status": "gap",
-      "rank": 28,
+      "rank": 36,
       "context_rank": 5
     },
     {
@@ -6407,7 +6927,7 @@
       "reactance_at_minimum_ohm": -347.33628359542496,
       "return_loss_at_minimum_swr_db": 0.4224358071537881,
       "coverage_status": "gap",
-      "rank": 27,
+      "rank": 35,
       "context_rank": 5
     },
     {
@@ -6433,7 +6953,7 @@
       "reactance_at_minimum_ohm": -289.9425751173302,
       "return_loss_at_minimum_swr_db": 0.25873634938555345,
       "coverage_status": "gap",
-      "rank": 28,
+      "rank": 36,
       "context_rank": 5
     },
     {
@@ -6459,7 +6979,7 @@
       "reactance_at_minimum_ohm": -274.1916414787345,
       "return_loss_at_minimum_swr_db": 0.26413843470851694,
       "coverage_status": "gap",
-      "rank": 28,
+      "rank": 36,
       "context_rank": 5
     },
     {
@@ -6485,7 +7005,7 @@
       "reactance_at_minimum_ohm": 89.46492397835846,
       "return_loss_at_minimum_swr_db": 3.6156879212336053,
       "coverage_status": "gap",
-      "rank": 13,
+      "rank": 17,
       "context_rank": 2
     },
     {
@@ -6511,7 +7031,7 @@
       "reactance_at_minimum_ohm": -39.33551807517062,
       "return_loss_at_minimum_swr_db": 7.698786821948987,
       "coverage_status": "gap",
-      "rank": 35,
+      "rank": 43,
       "context_rank": 5
     },
     {
@@ -6589,7 +7109,7 @@
       "reactance_at_minimum_ohm": -14.486670966019526,
       "return_loss_at_minimum_swr_db": 8.162091666643912,
       "coverage_status": "partial only",
-      "rank": 8,
+      "rank": 9,
       "context_rank": 3
     },
     {
@@ -6615,7 +7135,7 @@
       "reactance_at_minimum_ohm": -54.1577571155004,
       "return_loss_at_minimum_swr_db": 6.593907312330622,
       "coverage_status": "gap",
-      "rank": 7,
+      "rank": 8,
       "context_rank": 3
     },
     {
@@ -6641,7 +7161,7 @@
       "reactance_at_minimum_ohm": -73.85057025227614,
       "return_loss_at_minimum_swr_db": 0.7715701757023339,
       "coverage_status": "gap",
-      "rank": 24,
+      "rank": 32,
       "context_rank": 4
     },
     {
@@ -6667,7 +7187,7 @@
       "reactance_at_minimum_ohm": -59.19813973236271,
       "return_loss_at_minimum_swr_db": 0.6929603025231301,
       "coverage_status": "gap",
-      "rank": 27,
+      "rank": 35,
       "context_rank": 4
     },
     {
@@ -6693,7 +7213,7 @@
       "reactance_at_minimum_ohm": -51.69381550434886,
       "return_loss_at_minimum_swr_db": 2.306706632697141,
       "coverage_status": "gap",
-      "rank": 31,
+      "rank": 39,
       "context_rank": 4
     },
     {
@@ -6719,7 +7239,7 @@
       "reactance_at_minimum_ohm": -52.8821279168354,
       "return_loss_at_minimum_swr_db": 0.8979675873753717,
       "coverage_status": "gap",
-      "rank": 32,
+      "rank": 40,
       "context_rank": 4
     },
     {
@@ -6745,7 +7265,7 @@
       "reactance_at_minimum_ohm": -49.07440884056487,
       "return_loss_at_minimum_swr_db": 1.0851730546459517,
       "coverage_status": "gap",
-      "rank": 34,
+      "rank": 42,
       "context_rank": 4
     },
     {
@@ -6771,7 +7291,7 @@
       "reactance_at_minimum_ohm": -39.44326183429912,
       "return_loss_at_minimum_swr_db": 1.9234668700093052,
       "coverage_status": "gap",
-      "rank": 33,
+      "rank": 41,
       "context_rank": 2
     },
     {
@@ -6797,7 +7317,7 @@
       "reactance_at_minimum_ohm": -455.6890316907721,
       "return_loss_at_minimum_swr_db": 0.09510257119873095,
       "coverage_status": "gap",
-      "rank": 22,
+      "rank": 30,
       "context_rank": 1
     },
     {
@@ -6823,7 +7343,7 @@
       "reactance_at_minimum_ohm": -177.4302769893964,
       "return_loss_at_minimum_swr_db": 0.6792498565499483,
       "coverage_status": "gap",
-      "rank": 34,
+      "rank": 42,
       "context_rank": 3
     },
     {
@@ -6849,7 +7369,7 @@
       "reactance_at_minimum_ohm": -91.29406302460207,
       "return_loss_at_minimum_swr_db": 4.5420730971701415,
       "coverage_status": "gap",
-      "rank": 12,
+      "rank": 15,
       "context_rank": 1
     },
     {
@@ -6901,7 +7421,7 @@
       "reactance_at_minimum_ohm": -49.69240181083451,
       "return_loss_at_minimum_swr_db": 5.1496371867531,
       "coverage_status": "gap",
-      "rank": 23,
+      "rank": 31,
       "context_rank": 4
     },
     {
@@ -6927,7 +7447,7 @@
       "reactance_at_minimum_ohm": -40.55564984773626,
       "return_loss_at_minimum_swr_db": 2.004145633228856,
       "coverage_status": "gap",
-      "rank": 21,
+      "rank": 27,
       "context_rank": 3
     },
     {
@@ -6953,7 +7473,7 @@
       "reactance_at_minimum_ohm": -501.84792352564705,
       "return_loss_at_minimum_swr_db": 0.7250917875661291,
       "coverage_status": "gap",
-      "rank": 21,
+      "rank": 29,
       "context_rank": 3
     },
     {
@@ -6979,7 +7499,7 @@
       "reactance_at_minimum_ohm": -415.0138431456655,
       "return_loss_at_minimum_swr_db": 0.442108936030038,
       "coverage_status": "gap",
-      "rank": 22,
+      "rank": 30,
       "context_rank": 3
     },
     {
@@ -7005,7 +7525,7 @@
       "reactance_at_minimum_ohm": -140.04592168193287,
       "return_loss_at_minimum_swr_db": 0.441665452291352,
       "coverage_status": "gap",
-      "rank": 30,
+      "rank": 38,
       "context_rank": 5
     },
     {
@@ -7031,7 +7551,7 @@
       "reactance_at_minimum_ohm": -46.522953878916866,
       "return_loss_at_minimum_swr_db": 3.7328895109267552,
       "coverage_status": "gap",
-      "rank": 31,
+      "rank": 39,
       "context_rank": 4
     },
     {
@@ -7161,7 +7681,7 @@
       "reactance_at_minimum_ohm": -44.185247664882354,
       "return_loss_at_minimum_swr_db": 1.9992081772555046,
       "coverage_status": "gap",
-      "rank": 16,
+      "rank": 24,
       "context_rank": 1
     },
     {
@@ -7187,7 +7707,7 @@
       "reactance_at_minimum_ohm": -31.3437925537998,
       "return_loss_at_minimum_swr_db": 1.8518019991561807,
       "coverage_status": "gap",
-      "rank": 14,
+      "rank": 22,
       "context_rank": 1
     },
     {
@@ -7317,7 +7837,7 @@
       "reactance_at_minimum_ohm": -528.2954876206799,
       "return_loss_at_minimum_swr_db": 0.013456702158717955,
       "coverage_status": "gap",
-      "rank": 32,
+      "rank": 40,
       "context_rank": 5
     },
     {
@@ -7343,7 +7863,7 @@
       "reactance_at_minimum_ohm": -186.57007097529464,
       "return_loss_at_minimum_swr_db": 0.3005734677513101,
       "coverage_status": "gap",
-      "rank": 38,
+      "rank": 46,
       "context_rank": 5
     },
     {
@@ -7369,7 +7889,7 @@
       "reactance_at_minimum_ohm": -121.41464672752298,
       "return_loss_at_minimum_swr_db": 2.948963762917138,
       "coverage_status": "gap",
-      "rank": 17,
+      "rank": 20,
       "context_rank": 3
     },
     {
@@ -7525,7 +8045,7 @@
       "reactance_at_minimum_ohm": -190.4724470718739,
       "return_loss_at_minimum_swr_db": 0.7437640665639997,
       "coverage_status": "gap",
-      "rank": 28,
+      "rank": 36,
       "context_rank": 3
     },
     {
@@ -7551,7 +8071,7 @@
       "reactance_at_minimum_ohm": -27.77255973194447,
       "return_loss_at_minimum_swr_db": 11.674978434230656,
       "coverage_status": "isolated resonance",
-      "rank": 20,
+      "rank": 28,
       "context_rank": 3
     },
     {
@@ -7629,7 +8149,7 @@
       "reactance_at_minimum_ohm": -67.55059910311194,
       "return_loss_at_minimum_swr_db": 4.543967191393245,
       "coverage_status": "gap",
-      "rank": 14,
+      "rank": 16,
       "context_rank": 4
     },
     {
@@ -7655,7 +8175,7 @@
       "reactance_at_minimum_ohm": -125.26426070353627,
       "return_loss_at_minimum_swr_db": 3.3536507008847947,
       "coverage_status": "gap",
-      "rank": 21,
+      "rank": 26,
       "context_rank": 4
     },
     {
@@ -7681,7 +8201,7 @@
       "reactance_at_minimum_ohm": -76.76871080815417,
       "return_loss_at_minimum_swr_db": 1.123091574314124,
       "coverage_status": "gap",
-      "rank": 20,
+      "rank": 28,
       "context_rank": 3
     },
     {
@@ -7707,7 +8227,7 @@
       "reactance_at_minimum_ohm": -67.55064424784455,
       "return_loss_at_minimum_swr_db": 1.3818085399436775,
       "coverage_status": "gap",
-      "rank": 18,
+      "rank": 26,
       "context_rank": 2
     },
     {
@@ -7733,7 +8253,7 @@
       "reactance_at_minimum_ohm": -66.15816975745506,
       "return_loss_at_minimum_swr_db": 2.3995989947002574,
       "coverage_status": "gap",
-      "rank": 29,
+      "rank": 37,
       "context_rank": 2
     },
     {
@@ -7759,7 +8279,7 @@
       "reactance_at_minimum_ohm": -63.97160920082583,
       "return_loss_at_minimum_swr_db": 1.5951602933112214,
       "coverage_status": "gap",
-      "rank": 29,
+      "rank": 37,
       "context_rank": 2
     },
     {
@@ -7785,7 +8305,7 @@
       "reactance_at_minimum_ohm": -60.63321009821802,
       "return_loss_at_minimum_swr_db": 1.6219046837671283,
       "coverage_status": "gap",
-      "rank": 31,
+      "rank": 39,
       "context_rank": 2
     },
     {
@@ -7811,7 +8331,7 @@
       "reactance_at_minimum_ohm": -48.217903467174565,
       "return_loss_at_minimum_swr_db": 0.9227900362211606,
       "coverage_status": "gap",
-      "rank": 37,
+      "rank": 45,
       "context_rank": 4
     },
     {
@@ -7837,7 +8357,7 @@
       "reactance_at_minimum_ohm": -145.54400618929384,
       "return_loss_at_minimum_swr_db": 0.03050996668722097,
       "coverage_status": "gap",
-      "rank": 31,
+      "rank": 39,
       "context_rank": 4
     },
     {
@@ -7863,7 +8383,7 @@
       "reactance_at_minimum_ohm": -45.57187725571813,
       "return_loss_at_minimum_swr_db": 4.139260740101674,
       "coverage_status": "gap",
-      "rank": 26,
+      "rank": 31,
       "context_rank": 1
     },
     {
@@ -7889,7 +8409,7 @@
       "reactance_at_minimum_ohm": -50.93098061278345,
       "return_loss_at_minimum_swr_db": 3.487230844355142,
       "coverage_status": "gap",
-      "rank": 18,
+      "rank": 22,
       "context_rank": 4
     },
     {
@@ -8071,7 +8591,7 @@
       "reactance_at_minimum_ohm": -1.2344746145968182,
       "return_loss_at_minimum_swr_db": 24.356420131352937,
       "coverage_status": "partial only",
-      "rank": 3,
+      "rank": 4,
       "context_rank": 1
     },
     {
@@ -8123,7 +8643,7 @@
       "reactance_at_minimum_ohm": 36.04472178506348,
       "return_loss_at_minimum_swr_db": 9.637713432115337,
       "coverage_status": "partial only",
-      "rank": 11,
+      "rank": 12,
       "context_rank": 5
     },
     {
@@ -8149,7 +8669,7 @@
       "reactance_at_minimum_ohm": 95.45636830375896,
       "return_loss_at_minimum_swr_db": 4.103320949280789,
       "coverage_status": "gap",
-      "rank": 20,
+      "rank": 23,
       "context_rank": 5
     },
     {
@@ -8175,7 +8695,7 @@
       "reactance_at_minimum_ohm": 151.3520324205665,
       "return_loss_at_minimum_swr_db": 2.7110704583131424,
       "coverage_status": "gap",
-      "rank": 24,
+      "rank": 31,
       "context_rank": 5
     },
     {
@@ -8201,7 +8721,7 @@
       "reactance_at_minimum_ohm": -112.52639728426092,
       "return_loss_at_minimum_swr_db": 0.36339055092542755,
       "coverage_status": "gap",
-      "rank": 30,
+      "rank": 38,
       "context_rank": 5
     },
     {
@@ -8227,7 +8747,7 @@
       "reactance_at_minimum_ohm": -75.92424220322617,
       "return_loss_at_minimum_swr_db": 0.33085359990848884,
       "coverage_status": "gap",
-      "rank": 30,
+      "rank": 38,
       "context_rank": 5
     },
     {
@@ -8253,7 +8773,7 @@
       "reactance_at_minimum_ohm": null,
       "return_loss_at_minimum_swr_db": null,
       "coverage_status": "gap",
-      "rank": 39,
+      "rank": 47,
       "context_rank": 5
     },
     {
@@ -8279,7 +8799,7 @@
       "reactance_at_minimum_ohm": null,
       "return_loss_at_minimum_swr_db": null,
       "coverage_status": "gap",
-      "rank": 39,
+      "rank": 47,
       "context_rank": 5
     },
     {
@@ -8305,7 +8825,7 @@
       "reactance_at_minimum_ohm": null,
       "return_loss_at_minimum_swr_db": null,
       "coverage_status": "gap",
-      "rank": 39,
+      "rank": 47,
       "context_rank": 5
     },
     {
@@ -8331,7 +8851,7 @@
       "reactance_at_minimum_ohm": null,
       "return_loss_at_minimum_swr_db": null,
       "coverage_status": "gap",
-      "rank": 39,
+      "rank": 47,
       "context_rank": 5
     },
     {
@@ -8357,8 +8877,8 @@
       "reactance_at_minimum_ohm": -262.1594769619271,
       "return_loss_at_minimum_swr_db": 0.43108659487154755,
       "coverage_status": "gap",
-      "rank": 4,
-      "context_rank": 3
+      "rank": 10,
+      "context_rank": 9
     },
     {
       "family": "smiley-halfwave",
@@ -8591,8 +9111,8 @@
       "reactance_at_minimum_ohm": -10.701123568002528,
       "return_loss_at_minimum_swr_db": 11.760868036442796,
       "coverage_status": "partial only",
-      "rank": 1,
-      "context_rank": 1
+      "rank": 2,
+      "context_rank": 2
     },
     {
       "family": "smiley-halfwave",
@@ -8879,8 +9399,8 @@
       "reactance_at_minimum_ohm": -43.29944159297068,
       "return_loss_at_minimum_swr_db": 8.431564305932437,
       "coverage_status": "gap",
-      "rank": 20,
-      "context_rank": 19
+      "rank": 28,
+      "context_rank": 27
     },
     {
       "family": "smiley-halfwave",
@@ -9091,27 +9611,27 @@
       "context_rank": 1
     },
     {
-      "family": "smiley-halfwave",
-      "family_label": "Smiley 2m half-wave telescopic",
+      "family": "comet-bnc-w100rx",
+      "family_label": "Comet BNC-W100RX telescopic",
       "measurement_context": "handheld_bench",
       "measurement_context_label": "Handheld bench fixture",
-      "configuration": "smiley-halfwave:setting-1",
-      "configuration_label": "setting 1 (collapsed, 22 cm)",
+      "configuration": "comet-bnc-w100rx:setting-1",
+      "configuration_label": "setting 1 (collapsed, 21 cm)",
       "service": "military-air",
       "service_label": "Military air",
       "start_hz": 225000000,
       "stop_hz": 400000000,
       "source": "averaged_zoom",
       "points": 10001,
-      "minimum_swr": 1.6961452917937154,
-      "minimum_swr_frequency_hz": 361097500.0,
-      "median_swr": 2.9634655725176238,
-      "maximum_swr": 12.361318428094378,
-      "coverage_at_or_below_2_percent": 32.066793320667934,
-      "coverage_at_or_below_3_percent": 50.204979502049795,
-      "resistance_at_minimum_ohm": 82.65373826458884,
-      "reactance_at_minimum_ohm": -10.701123568002528,
-      "return_loss_at_minimum_swr_db": 11.760868036442796,
+      "minimum_swr": 1.5649917867929342,
+      "minimum_swr_frequency_hz": 314145000.0,
+      "median_swr": 2.7855223513697243,
+      "maximum_swr": 11.843832837378443,
+      "coverage_at_or_below_2_percent": 14.678532146785322,
+      "coverage_at_or_below_3_percent": 55.78442155784422,
+      "resistance_at_minimum_ohm": 67.77014706247756,
+      "reactance_at_minimum_ohm": -19.374858054576023,
+      "return_loss_at_minimum_swr_db": 13.140876884696324,
       "coverage_status": "partial only",
       "rank": 1,
       "context_rank": 1

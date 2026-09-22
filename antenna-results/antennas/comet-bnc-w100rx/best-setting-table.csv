@@ -1,0 +1,21 @@
+service,service_label,configuration,configuration_label,source,minimum_swr,median_swr,maximum_swr,coverage_at_or_below_2_percent,coverage_at_or_below_3_percent
+6m,6m amateur,comet-bnc-w100rx:setting-8,"setting 8 (fully extended, 99.5 cm)",broadband,8.949981987485778,10.379079246726281,11.302761068224658,0.0,0.0
+fm-broadcast,FM broadcast,comet-bnc-w100rx:setting-7,setting 7 (89 cm),averaged_zoom,2.4877460808142082,5.119363359805458,12.423099319671476,0.0,22.08895552223888
+civil-air,Civil air,comet-bnc-w100rx:setting-3,setting 3 (44 cm),averaged_zoom,2.1363568819979726,3.052838363819197,6.1389744689790176,0.0,48.125937031484256
+2m,2m amateur,comet-bnc-w100rx:setting-3,setting 3 (44 cm),averaged_zoom,5.2607413678914074,5.54402650575314,6.065490289718988,0.0,0.0
+vhf-lmr,VHF LMR,comet-bnc-w100rx:setting-3,setting 3 (44 cm),averaged_zoom,5.210647982085239,8.43056371310967,11.018003659106789,0.0,0.0
+marine-vhf,Marine VHF,comet-bnc-w100rx:setting-4,setting 4 (56 cm),averaged_zoom,6.264619546447168,7.119072586952767,9.432474430083092,0.0,0.0
+railroad,Railroad,comet-bnc-w100rx:setting-4,setting 4 (56 cm),averaged_zoom,6.827529560026847,7.123215865531041,7.505848668569501,0.0,0.0
+noaa-weather,NOAA weather,comet-bnc-w100rx:setting-4,setting 4 (56 cm),averaged_zoom,6.613333626445567,6.6570199059990625,7.259213469822874,0.0,0.0
+1.25m,1.25m amateur,comet-bnc-w100rx:setting-8,"setting 8 (fully extended, 99.5 cm)",averaged_zoom,3.9320702880570284,4.010249546745708,4.113074514838383,0.0,0.0
+military-air,Military air,comet-bnc-w100rx:setting-1,"setting 1 (collapsed, 21 cm)",averaged_zoom,1.5649917867929342,2.7855223513697243,11.843832837378443,14.678532146785322,55.78442155784422
+federal-uhf,Federal UHF,comet-bnc-w100rx:setting-6,setting 6 (78 cm),averaged_zoom,3.3093821387640903,4.119195854284208,7.770606312235076,0.0,0.0
+70cm,70cm amateur,comet-bnc-w100rx:setting-6,setting 6 (78 cm),averaged_zoom,2.822991862772207,2.993395046275115,3.7583419710410504,0.0,51.58280573142286
+uhf-lmr,UHF LMR,comet-bnc-w100rx:setting-8,"setting 8 (fully extended, 99.5 cm)",averaged_zoom,2.9916975503379413,3.1232238435029083,3.512064467270519,0.0,0.14992503748125938
+t-band,T-band,comet-bnc-w100rx:setting-5,setting 5 (67 cm),averaged_zoom,3.150738495185043,3.5466291019829983,4.412084294664158,0.0,0.0
+700-public-safety-downlink,700 MHz public safety,comet-bnc-w100rx:setting-3,setting 3 (44 cm),averaged_zoom,5.125807427180911,5.35625088783937,5.534106171368007,0.0,0.0
+800-public-safety-downlink,800 MHz public safety,comet-bnc-w100rx:setting-1,"setting 1 (collapsed, 21 cm)",averaged_zoom,6.995808142425483,7.234729377842295,7.515500413137443,0.0,0.0
+33cm,33cm amateur,comet-bnc-w100rx:setting-4,setting 4 (56 cm),averaged_zoom,6.039668460725728,7.333719067595313,8.844697404679557,0.0,0.0
+900-trunking-downlink,900 MHz trunking,comet-bnc-w100rx:setting-4,setting 4 (56 cm),averaged_zoom,7.281100998780236,7.575292589283067,8.209630040772646,0.0,0.0
+uat-978,UAT 978,comet-bnc-w100rx:setting-6,setting 6 (78 cm),averaged_zoom,6.5405033039568,7.745265200820911,8.834791984522532,0.0,0.0
+ads-b-1090,ADS-B 1090,comet-bnc-w100rx:setting-1,"setting 1 (collapsed, 21 cm)",averaged_zoom,5.281811606291454,5.970176433583397,6.36856296290249,0.0,0.0

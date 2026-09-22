@@ -1321,6 +1321,100 @@
       }
     },
     {
+      "configuration": "comet-bnc-w100rx:setting-3",
+      "configuration_label": "setting 3 (44 cm)",
+      "family": "comet-bnc-w100rx",
+      "family_label": "Comet BNC-W100RX telescopic",
+      "short_label": "Comet W100RX",
+      "measurement_context": "handheld_bench",
+      "kind": "telescopic",
+      "score": 0.441752698757978,
+      "usable_bands": 0,
+      "excellent_bands": 0,
+      "services": {
+        "6m": {
+          "efficiency": 0.07460888515008741,
+          "median_swr": 50.535129920033086
+        },
+        "fm-broadcast": {
+          "efficiency": 0.20345577498900458,
+          "median_swr": 19.019134209042672
+        },
+        "civil-air": {
+          "efficiency": 0.7147780385032487,
+          "median_swr": 3.052838363819197
+        },
+        "2m": {
+          "efficiency": 0.5146459738946023,
+          "median_swr": 5.54402650575314
+        },
+        "vhf-lmr": {
+          "efficiency": 0.3965020856175344,
+          "median_swr": 8.43056371310967
+        },
+        "marine-vhf": {
+          "efficiency": 0.32272596096377015,
+          "median_swr": 10.293978753644192
+        },
+        "railroad": {
+          "efficiency": 0.3080363039703053,
+          "median_swr": 10.925867625118666
+        },
+        "noaa-weather": {
+          "efficiency": 0.3078540243157319,
+          "median_swr": 10.89034056738207
+        },
+        "1.25m": {
+          "efficiency": 0.6330161633544353,
+          "median_swr": 4.077245398153502
+        },
+        "military-air": {
+          "efficiency": 0.40418134191721555,
+          "median_swr": 8.248868614616878
+        },
+        "federal-uhf": {
+          "efficiency": 0.598699562049358,
+          "median_swr": 4.481791609473553
+        },
+        "70cm": {
+          "efficiency": 0.6764530821259807,
+          "median_swr": 3.5560725197552046
+        },
+        "uhf-lmr": {
+          "efficiency": 0.6910575223584289,
+          "median_swr": 3.496643660533302
+        },
+        "t-band": {
+          "efficiency": 0.6234971503009054,
+          "median_swr": 4.131678732363026
+        },
+        "700-public-safety-downlink": {
+          "efficiency": 0.5301815551294431,
+          "median_swr": 5.35625088783937
+        },
+        "800-public-safety-downlink": {
+          "efficiency": 0.38808282801812705,
+          "median_swr": 8.173769987664876
+        },
+        "33cm": {
+          "efficiency": 0.3611836579780609,
+          "median_swr": 8.969079261022594
+        },
+        "900-trunking-downlink": {
+          "efficiency": 0.337568036702465,
+          "median_swr": 9.746267342381918
+        },
+        "uat-978": {
+          "efficiency": 0.3198389829605855,
+          "median_swr": 10.400931299486913
+        },
+        "ads-b-1090": {
+          "efficiency": 0.4286870448602711,
+          "median_swr": 7.194371033862917
+        }
+      }
+    },
+    {
       "configuration": "signal-stick-counterpoise",
       "configuration_label": "with ~19.5 in counterpoise",
       "family": "signal-stick-counterpoise",
@@ -1505,6 +1599,100 @@
         "ads-b-1090": {
           "efficiency": 0.45885952577376804,
           "median_swr": 6.563568638006156
+        }
+      }
+    },
+    {
+      "configuration": "comet-bnc-w100rx:setting-4",
+      "configuration_label": "setting 4 (56 cm)",
+      "family": "comet-bnc-w100rx",
+      "family_label": "Comet BNC-W100RX telescopic",
+      "short_label": "Comet W100RX",
+      "measurement_context": "handheld_bench",
+      "kind": "telescopic",
+      "score": 0.41736813433140635,
+      "usable_bands": 0,
+      "excellent_bands": 0,
+      "services": {
+        "6m": {
+          "efficiency": 0.10213337636723942,
+          "median_swr": 36.77406965628566
+        },
+        "fm-broadcast": {
+          "efficiency": 0.2878077558329575,
+          "median_swr": 13.801051259428487
+        },
+        "civil-air": {
+          "efficiency": 0.6440968153405593,
+          "median_swr": 4.25091550732757
+        },
+        "2m": {
+          "efficiency": 0.43320761942143754,
+          "median_swr": 7.080550534038549
+        },
+        "vhf-lmr": {
+          "efficiency": 0.41706860178828653,
+          "median_swr": 8.618248923257788
+        },
+        "marine-vhf": {
+          "efficiency": 0.4292871931231946,
+          "median_swr": 7.119072586952767
+        },
+        "railroad": {
+          "efficiency": 0.4313976606360536,
+          "median_swr": 7.123215865531041
+        },
+        "noaa-weather": {
+          "efficiency": 0.45392168307558944,
+          "median_swr": 6.6570199059990625
+        },
+        "1.25m": {
+          "efficiency": 0.28718378156023205,
+          "median_swr": 11.858289713087439
+        },
+        "military-air": {
+          "efficiency": 0.49083448170216154,
+          "median_swr": 8.406772395682875
+        },
+        "federal-uhf": {
+          "efficiency": 0.5732283951238359,
+          "median_swr": 4.710220111394012
+        },
+        "70cm": {
+          "efficiency": 0.5008868448925838,
+          "median_swr": 5.857100332032225
+        },
+        "uhf-lmr": {
+          "efficiency": 0.42836498311336485,
+          "median_swr": 7.251564445639123
+        },
+        "t-band": {
+          "efficiency": 0.3635045069178476,
+          "median_swr": 8.983926388729078
+        },
+        "700-public-safety-downlink": {
+          "efficiency": 0.39256907597138646,
+          "median_swr": 8.054549908701295
+        },
+        "800-public-safety-downlink": {
+          "efficiency": 0.4226721533707879,
+          "median_swr": 7.324714974941918
+        },
+        "33cm": {
+          "efficiency": 0.42134748908270336,
+          "median_swr": 7.333719067595313
+        },
+        "900-trunking-downlink": {
+          "efficiency": 0.4119737710822687,
+          "median_swr": 7.575292589283067
+        },
+        "uat-978": {
+          "efficiency": 0.403461907525761,
+          "median_swr": 7.779098023791672
+        },
+        "ads-b-1090": {
+          "efficiency": 0.45241459069987555,
+          "median_swr": 6.690959825815039
         }
       }
     },
@@ -1791,6 +1979,100 @@
       }
     },
     {
+      "configuration": "comet-bnc-w100rx:setting-6",
+      "configuration_label": "setting 6 (78 cm)",
+      "family": "comet-bnc-w100rx",
+      "family_label": "Comet BNC-W100RX telescopic",
+      "short_label": "Comet W100RX",
+      "measurement_context": "handheld_bench",
+      "kind": "telescopic",
+      "score": 0.39031224095270184,
+      "usable_bands": 0,
+      "excellent_bands": 0,
+      "services": {
+        "6m": {
+          "efficiency": 0.174156889382007,
+          "median_swr": 20.763790503215365
+        },
+        "fm-broadcast": {
+          "efficiency": 0.5525744043490189,
+          "median_swr": 6.099483932414218
+        },
+        "civil-air": {
+          "efficiency": 0.2749979816882399,
+          "median_swr": 13.449610120057125
+        },
+        "2m": {
+          "efficiency": 0.25177078565368044,
+          "median_swr": 13.829691788320511
+        },
+        "vhf-lmr": {
+          "efficiency": 0.17752280896201877,
+          "median_swr": 19.339023066554606
+        },
+        "marine-vhf": {
+          "efficiency": 0.24468025937320229,
+          "median_swr": 13.99213440026783
+        },
+        "railroad": {
+          "efficiency": 0.20812390130124095,
+          "median_swr": 17.216752389300034
+        },
+        "noaa-weather": {
+          "efficiency": 0.20433355244148643,
+          "median_swr": 17.475637862692494
+        },
+        "1.25m": {
+          "efficiency": 0.37802123727468,
+          "median_swr": 8.45062761988644
+        },
+        "military-air": {
+          "efficiency": 0.5084321747089695,
+          "median_swr": 5.351709577272151
+        },
+        "federal-uhf": {
+          "efficiency": 0.631614798593748,
+          "median_swr": 4.119195854284208
+        },
+        "70cm": {
+          "efficiency": 0.7402815540854208,
+          "median_swr": 2.993395046275115
+        },
+        "uhf-lmr": {
+          "efficiency": 0.5735864527356257,
+          "median_swr": 4.827109282636578
+        },
+        "t-band": {
+          "efficiency": 0.4130989523036767,
+          "median_swr": 7.6450762733346345
+        },
+        "700-public-safety-downlink": {
+          "efficiency": 0.5046602436037371,
+          "median_swr": 5.752384049372147
+        },
+        "800-public-safety-downlink": {
+          "efficiency": 0.3687708266527825,
+          "median_swr": 8.723901429571805
+        },
+        "33cm": {
+          "efficiency": 0.4006767356619743,
+          "median_swr": 7.81697923474878
+        },
+        "900-trunking-downlink": {
+          "efficiency": 0.40330855744073074,
+          "median_swr": 7.786861033321218
+        },
+        "uat-978": {
+          "efficiency": 0.40499574533614857,
+          "median_swr": 7.745265200820911
+        },
+        "ads-b-1090": {
+          "efficiency": 0.39063695750564686,
+          "median_swr": 8.112149309497035
+        }
+      }
+    },
+    {
       "configuration": "diamond-srh77ca",
       "configuration_label": "with BNC adapter",
       "family": "diamond-srh77ca",
@@ -1885,6 +2167,194 @@
       }
     },
     {
+      "configuration": "comet-bnc-w100rx:setting-5",
+      "configuration_label": "setting 5 (67 cm)",
+      "family": "comet-bnc-w100rx",
+      "family_label": "Comet BNC-W100RX telescopic",
+      "short_label": "Comet W100RX",
+      "measurement_context": "handheld_bench",
+      "kind": "telescopic",
+      "score": 0.3811483508807604,
+      "usable_bands": 0,
+      "excellent_bands": 0,
+      "services": {
+        "6m": {
+          "efficiency": 0.1371681711561312,
+          "median_swr": 26.71682546403133
+        },
+        "fm-broadcast": {
+          "efficiency": 0.4459574983968679,
+          "median_swr": 9.139097073953849
+        },
+        "civil-air": {
+          "efficiency": 0.41896483070299123,
+          "median_swr": 8.069372394812273
+        },
+        "2m": {
+          "efficiency": 0.35025111075590687,
+          "median_swr": 9.312842153458059
+        },
+        "vhf-lmr": {
+          "efficiency": 0.3576933326432124,
+          "median_swr": 9.980064144789024
+        },
+        "marine-vhf": {
+          "efficiency": 0.28098370006144907,
+          "median_swr": 12.570307382602783
+        },
+        "railroad": {
+          "efficiency": 0.2987182534655441,
+          "median_swr": 11.337594719333543
+        },
+        "noaa-weather": {
+          "efficiency": 0.3440554459999592,
+          "median_swr": 9.539010846922102
+        },
+        "1.25m": {
+          "efficiency": 0.20033146761044407,
+          "median_swr": 17.923914102935267
+        },
+        "military-air": {
+          "efficiency": 0.5238117519900015,
+          "median_swr": 6.170059822446166
+        },
+        "federal-uhf": {
+          "efficiency": 0.38860280372677497,
+          "median_swr": 8.156502779055254
+        },
+        "70cm": {
+          "efficiency": 0.41584773447394735,
+          "median_swr": 7.716270956084031
+        },
+        "uhf-lmr": {
+          "efficiency": 0.5227076563246992,
+          "median_swr": 5.58377658033453
+        },
+        "t-band": {
+          "efficiency": 0.6795393434602626,
+          "median_swr": 3.5466291019829983
+        },
+        "700-public-safety-downlink": {
+          "efficiency": 0.38094852089641934,
+          "median_swr": 8.388749132873018
+        },
+        "800-public-safety-downlink": {
+          "efficiency": 0.3744123654599968,
+          "median_swr": 8.553352857529182
+        },
+        "33cm": {
+          "efficiency": 0.40753694483088404,
+          "median_swr": 7.6649034139877354
+        },
+        "900-trunking-downlink": {
+          "efficiency": 0.3776054670388632,
+          "median_swr": 8.468559883377653
+        },
+        "uat-978": {
+          "efficiency": 0.3317007659768437,
+          "median_swr": 9.949949821514627
+        },
+        "ads-b-1090": {
+          "efficiency": 0.38612985264400934,
+          "median_swr": 8.23266754853016
+        }
+      }
+    },
+    {
+      "configuration": "comet-bnc-w100rx:setting-8",
+      "configuration_label": "setting 8 (fully extended, 99.5 cm)",
+      "family": "comet-bnc-w100rx",
+      "family_label": "Comet BNC-W100RX telescopic",
+      "short_label": "Comet W100RX",
+      "measurement_context": "handheld_bench",
+      "kind": "telescopic",
+      "score": 0.37833806353076865,
+      "usable_bands": 0,
+      "excellent_bands": 0,
+      "services": {
+        "6m": {
+          "efficiency": 0.3217865505656931,
+          "median_swr": 10.379079246726281
+        },
+        "fm-broadcast": {
+          "efficiency": 0.4830570135437259,
+          "median_swr": 7.110356508091873
+        },
+        "civil-air": {
+          "efficiency": 0.1708205400169524,
+          "median_swr": 21.55898522096955
+        },
+        "2m": {
+          "efficiency": 0.18088700767001656,
+          "median_swr": 20.194008008583303
+        },
+        "vhf-lmr": {
+          "efficiency": 0.2084140830794334,
+          "median_swr": 17.362744033434698
+        },
+        "marine-vhf": {
+          "efficiency": 0.19932238559841897,
+          "median_swr": 18.381563208905803
+        },
+        "railroad": {
+          "efficiency": 0.1796123806565824,
+          "median_swr": 20.260026218389125
+        },
+        "noaa-weather": {
+          "efficiency": 0.17120437828059853,
+          "median_swr": 21.26655340336144
+        },
+        "1.25m": {
+          "efficiency": 0.6392135063515938,
+          "median_swr": 4.010249546745708
+        },
+        "military-air": {
+          "efficiency": 0.5047914003985753,
+          "median_swr": 6.530530912278364
+        },
+        "federal-uhf": {
+          "efficiency": 0.3882029771736062,
+          "median_swr": 8.246083661147274
+        },
+        "70cm": {
+          "efficiency": 0.5377008809567275,
+          "median_swr": 5.429636759869381
+        },
+        "uhf-lmr": {
+          "efficiency": 0.7292992547553009,
+          "median_swr": 3.1232238435029083
+        },
+        "t-band": {
+          "efficiency": 0.5412282166219687,
+          "median_swr": 5.099475113974937
+        },
+        "700-public-safety-downlink": {
+          "efficiency": 0.4269428944488933,
+          "median_swr": 7.2412123473117855
+        },
+        "800-public-safety-downlink": {
+          "efficiency": 0.4130969015104874,
+          "median_swr": 7.540277578576613
+        },
+        "33cm": {
+          "efficiency": 0.38515077094777084,
+          "median_swr": 8.255579321880152
+        },
+        "900-trunking-downlink": {
+          "efficiency": 0.35161735799148836,
+          "median_swr": 9.263327627813817
+        },
+        "uat-978": {
+          "efficiency": 0.35320298975979053,
+          "median_swr": 9.207002625932901
+        },
+        "ads-b-1090": {
+          "efficiency": 0.3812097802877489,
+          "median_swr": 8.37848117575342
+        }
+      }
+    },
+    {
       "configuration": "remtronix-920",
       "configuration_label": "BNC direct",
       "family": "remtronix-920",
@@ -1975,6 +2445,288 @@
         "ads-b-1090": {
           "efficiency": 0.7490095453447879,
           "median_swr": 3.010404779329239
+        }
+      }
+    },
+    {
+      "configuration": "comet-bnc-w100rx:setting-7",
+      "configuration_label": "setting 7 (89 cm)",
+      "family": "comet-bnc-w100rx",
+      "family_label": "Comet BNC-W100RX telescopic",
+      "short_label": "Comet W100RX",
+      "measurement_context": "handheld_bench",
+      "kind": "telescopic",
+      "score": 0.3575550689634621,
+      "usable_bands": 0,
+      "excellent_bands": 0,
+      "services": {
+        "6m": {
+          "efficiency": 0.22762863731661825,
+          "median_swr": 15.632916535260662
+        },
+        "fm-broadcast": {
+          "efficiency": 0.5512168586101854,
+          "median_swr": 5.119363359805458
+        },
+        "civil-air": {
+          "efficiency": 0.20116978512670325,
+          "median_swr": 18.648312056165615
+        },
+        "2m": {
+          "efficiency": 0.1817362580970893,
+          "median_swr": 20.039437724743777
+        },
+        "vhf-lmr": {
+          "efficiency": 0.13529854158772048,
+          "median_swr": 28.581433576224835
+        },
+        "marine-vhf": {
+          "efficiency": 0.12617803476389833,
+          "median_swr": 29.660501830768442
+        },
+        "railroad": {
+          "efficiency": 0.12489762517233687,
+          "median_swr": 30.025459323372534
+        },
+        "noaa-weather": {
+          "efficiency": 0.12254344824502408,
+          "median_swr": 30.4672723044445
+        },
+        "1.25m": {
+          "efficiency": 0.6138179451340703,
+          "median_swr": 4.2760380868516314
+        },
+        "military-air": {
+          "efficiency": 0.5525092875131351,
+          "median_swr": 4.909672248889707
+        },
+        "federal-uhf": {
+          "efficiency": 0.5780272451902945,
+          "median_swr": 4.659300632259129
+        },
+        "70cm": {
+          "efficiency": 0.4589907770939309,
+          "median_swr": 6.908831750530593
+        },
+        "uhf-lmr": {
+          "efficiency": 0.4277917552601624,
+          "median_swr": 7.241410827170077
+        },
+        "t-band": {
+          "efficiency": 0.5187256681065666,
+          "median_swr": 5.820444144737343
+        },
+        "700-public-safety-downlink": {
+          "efficiency": 0.4290495275486358,
+          "median_swr": 7.191165760618557
+        },
+        "800-public-safety-downlink": {
+          "efficiency": 0.39978087396858514,
+          "median_swr": 7.874548373150714
+        },
+        "33cm": {
+          "efficiency": 0.37555849090528154,
+          "median_swr": 8.549291171654179
+        },
+        "900-trunking-downlink": {
+          "efficiency": 0.3682885247655543,
+          "median_swr": 8.740758069467665
+        },
+        "uat-978": {
+          "efficiency": 0.3736270149641048,
+          "median_swr": 8.588330082388389
+        },
+        "ads-b-1090": {
+          "efficiency": 0.384265079899345,
+          "median_swr": 8.289614078948162
+        }
+      }
+    },
+    {
+      "configuration": "comet-bnc-w100rx:setting-2",
+      "configuration_label": "setting 2 (33 cm)",
+      "family": "comet-bnc-w100rx",
+      "family_label": "Comet BNC-W100RX telescopic",
+      "short_label": "Comet W100RX",
+      "measurement_context": "handheld_bench",
+      "kind": "telescopic",
+      "score": 0.3558868797453876,
+      "usable_bands": 0,
+      "excellent_bands": 0,
+      "services": {
+        "6m": {
+          "efficiency": 0.0458722992385913,
+          "median_swr": 83.52573848695266
+        },
+        "fm-broadcast": {
+          "efficiency": 0.1571410536098021,
+          "median_swr": 25.231334166626272
+        },
+        "civil-air": {
+          "efficiency": 0.5688657306479343,
+          "median_swr": 4.532052362416701
+        },
+        "2m": {
+          "efficiency": 0.44722301349401294,
+          "median_swr": 6.718433895051843
+        },
+        "vhf-lmr": {
+          "efficiency": 0.288268801242779,
+          "median_swr": 12.60827007666406
+        },
+        "marine-vhf": {
+          "efficiency": 0.25613708085044906,
+          "median_swr": 13.737918654216717
+        },
+        "railroad": {
+          "efficiency": 0.2347743508731172,
+          "median_swr": 14.970087039157173
+        },
+        "noaa-weather": {
+          "efficiency": 0.22209740360621905,
+          "median_swr": 15.880156975110076
+        },
+        "1.25m": {
+          "efficiency": 0.6273608877698813,
+          "median_swr": 4.135931932810335
+        },
+        "military-air": {
+          "efficiency": 0.5535919213251046,
+          "median_swr": 6.08162066034386
+        },
+        "federal-uhf": {
+          "efficiency": 0.3133106714078743,
+          "median_swr": 10.630157702312694
+        },
+        "70cm": {
+          "efficiency": 0.3317862062531207,
+          "median_swr": 9.997242038947558
+        },
+        "uhf-lmr": {
+          "efficiency": 0.3537977644841967,
+          "median_swr": 9.20389182839961
+        },
+        "t-band": {
+          "efficiency": 0.4187707682763256,
+          "median_swr": 7.841449522758879
+        },
+        "700-public-safety-downlink": {
+          "efficiency": 0.42006615733141034,
+          "median_swr": 7.391438327444526
+        },
+        "800-public-safety-downlink": {
+          "efficiency": 0.34138569132917773,
+          "median_swr": 9.612941170406481
+        },
+        "33cm": {
+          "efficiency": 0.3574451964926485,
+          "median_swr": 9.076253397583393
+        },
+        "900-trunking-downlink": {
+          "efficiency": 0.3518658868205568,
+          "median_swr": 9.249452474452468
+        },
+        "uat-978": {
+          "efficiency": 0.35923893556656783,
+          "median_swr": 9.017442567414808
+        },
+        "ads-b-1090": {
+          "efficiency": 0.4687377742879818,
+          "median_swr": 6.375196267480989
+        }
+      }
+    },
+    {
+      "configuration": "comet-bnc-w100rx:setting-1",
+      "configuration_label": "setting 1 (collapsed, 21 cm)",
+      "family": "comet-bnc-w100rx",
+      "family_label": "Comet BNC-W100RX telescopic",
+      "short_label": "Comet W100RX",
+      "measurement_context": "handheld_bench",
+      "kind": "telescopic",
+      "score": 0.3558634871287892,
+      "usable_bands": 0,
+      "excellent_bands": 0,
+      "services": {
+        "6m": {
+          "efficiency": 0.026717916417232302,
+          "median_swr": 145.6292597997039
+        },
+        "fm-broadcast": {
+          "efficiency": 0.09581690690179387,
+          "median_swr": 41.6168836204755
+        },
+        "civil-air": {
+          "efficiency": 0.29233578273921057,
+          "median_swr": 11.80461299077772
+        },
+        "2m": {
+          "efficiency": 0.3576850525408723,
+          "median_swr": 8.969079018262413
+        },
+        "vhf-lmr": {
+          "efficiency": 0.1960902385565655,
+          "median_swr": 21.671905329174166
+        },
+        "marine-vhf": {
+          "efficiency": 0.19059965989861508,
+          "median_swr": 19.2106049152621
+        },
+        "railroad": {
+          "efficiency": 0.16594365426405297,
+          "median_swr": 22.09840876429661
+        },
+        "noaa-weather": {
+          "efficiency": 0.14863595644527083,
+          "median_swr": 24.758611305711433
+        },
+        "1.25m": {
+          "efficiency": 0.3087382106133298,
+          "median_swr": 10.82449663968076
+        },
+        "military-air": {
+          "efficiency": 0.7105198581906819,
+          "median_swr": 2.7855223513697243
+        },
+        "federal-uhf": {
+          "efficiency": 0.5688742652165294,
+          "median_swr": 4.829646293126348
+        },
+        "70cm": {
+          "efficiency": 0.5495009325939714,
+          "median_swr": 5.050348059952746
+        },
+        "uhf-lmr": {
+          "efficiency": 0.5012538663339499,
+          "median_swr": 5.820320548252303
+        },
+        "t-band": {
+          "efficiency": 0.4763173590902306,
+          "median_swr": 6.235651034009973
+        },
+        "700-public-safety-downlink": {
+          "efficiency": 0.4162467428868378,
+          "median_swr": 7.475646675178388
+        },
+        "800-public-safety-downlink": {
+          "efficiency": 0.4260330190597314,
+          "median_swr": 7.234729377842295
+        },
+        "33cm": {
+          "efficiency": 0.41616436782863553,
+          "median_swr": 7.462576438399066
+        },
+        "900-trunking-downlink": {
+          "efficiency": 0.39238738269444284,
+          "median_swr": 8.064370723293786
+        },
+        "uat-978": {
+          "efficiency": 0.3858381790362691,
+          "median_swr": 8.244738816345969
+        },
+        "ads-b-1090": {
+          "efficiency": 0.4915703912675605,
+          "median_swr": 5.970176433583397
         }
       }
     },

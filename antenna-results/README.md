@@ -1,6 +1,6 @@
 # Antenna measurement results
 
-Reproducible reports built from calibrated complex S11 measurements. The scanner survey compares 17 valid antenna families and 39 configurations across 20 receive-service windows; the JYR8010 and final GOWENIC-module EFHW HF reports are preserved separately.
+Reproducible reports built from calibrated complex S11 measurements. The scanner survey compares 18 valid antenna families and 47 configurations across 20 receive-service windows; the JYR8010 and final GOWENIC-module EFHW HF reports are preserved separately.
 
 > **SWR is impedance match only.** It cannot establish receive gain, scanner sensitivity, radiation pattern, or decode performance.
 
@@ -52,6 +52,7 @@ See the [full comparison, coverage matrix, and gap table](comparison/README.md) 
 | [Signal Stick](antennas/signal-stick/README.md) | valid / control | fixed; measured without its counterpoise |
 | [Signal Stick with counterpoise](antennas/signal-stick-counterpoise/README.md) | valid | fixed; 84% of 2m at or below 2:1 with the wire fitted |
 | [Smiley 2m half-wave telescopic](antennas/smiley-halfwave/README.md) | valid | settings 1-7, 22-91 cm; **the only broad 2m match in the survey** and the best all-rounder |
+| [Comet BNC-W100RX telescopic](antennas/comet-bnc-w100rx/README.md) | valid | settings 1-8, 21-99.5 cm; 25-1300 MHz wideband receive design, no good match at any length |
 | [Kenwood TH-D75A OEM](antennas/kenwood-thd75a-stock/README.md) | valid | fixed, bare SMA plane; best measured 70cm; the fixture control experiment |
 | [Icom ID-52A OEM](antennas/icom-id52a-stock/README.md) | valid | fixed, bare SMA plane; best window is UHF land mobile |
 | [AnyTone AT-D890UV rubber duck](antennas/anytone-atd890uv-16cm/README.md) | valid | fixed ~16 cm, SMA adapter plane; 88% of federal UHF |

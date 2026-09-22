@@ -601,6 +601,71 @@ FAMILIES: Tuple[Family, ...] = (
         ),
     ),
     Family(
+        key="comet-bnc-w100rx",
+        label="Comet BNC-W100RX telescopic",
+        short_label="Comet W100RX",
+        kind="telescopic",
+        connection="BNC antenna, direct to the measurement plane",
+        valid=True,
+        configs=(
+            Config("comet-bnc-w100rx:setting-1", "setting 1 (collapsed, 21 cm)",
+                   "comet-bnc-w100rx/measurements/setting-1-collapsed",
+                   "Fully collapsed, 21 cm."),
+            Config("comet-bnc-w100rx:setting-2", "setting 2 (33 cm)",
+                   "comet-bnc-w100rx/measurements/setting-2",
+                   "Six sections retracted, 33 cm."),
+            Config("comet-bnc-w100rx:setting-3", "setting 3 (44 cm)",
+                   "comet-bnc-w100rx/measurements/setting-3",
+                   "Five sections retracted, 44 cm."),
+            Config("comet-bnc-w100rx:setting-4", "setting 4 (56 cm)",
+                   "comet-bnc-w100rx/measurements/setting-4",
+                   "Four sections retracted, 56 cm."),
+            Config("comet-bnc-w100rx:setting-5", "setting 5 (67 cm)",
+                   "comet-bnc-w100rx/measurements/setting-5",
+                   "Three sections retracted, 67 cm."),
+            Config("comet-bnc-w100rx:setting-6", "setting 6 (78 cm)",
+                   "comet-bnc-w100rx/measurements/setting-6",
+                   "Two sections retracted, 78 cm."),
+            Config("comet-bnc-w100rx:setting-7", "setting 7 (89 cm)",
+                   "comet-bnc-w100rx/measurements/setting-7",
+                   "One section retracted, 89 cm."),
+            Config("comet-bnc-w100rx:setting-8", "setting 8 (fully extended, 99.5 cm)",
+                   "comet-bnc-w100rx/measurements/setting-8-fully-extended",
+                   "Fully extended, 99.5 cm."),
+        ),
+        overview=(
+            "A 25-1300 MHz wideband receive antenna, BNC, eight sections including "
+            "the base, measured at all eight lengths. Its resonance walks cleanly "
+            "up the spectrum as it is retracted - 62.9, 67.2, 105.8, 108.5, 117.6, "
+            "124.1, 255.0 and 315.0 MHz - but its best match at any length is only "
+            "1.56:1, and most service windows sit between 4:1 and 25:1. That is "
+            "what a wideband receive antenna is: a deliberate broadband compromise "
+            "rather than a resonant design."
+        ),
+        measurement_context="handheld_bench",
+        fixture_note=(
+            "Fixed upright bench geometry on a secured fixture, no counterpoise; "
+            "the USB cable remained part of the RF environment. Changing setting "
+            "means handling the antenna, so every setting change is also a remount."
+        ),
+        cautions=(
+            "SWR understates this antenna more than any other here. It is "
+            "receive-only, and on receive a few dB of mismatch loss is usually "
+            "swamped by external noise, so a poor match does not mean poor "
+            "listening. Nothing in this survey measures receive sensitivity.",
+            "Unlike the Smiley, it carries no matching coil, so at lengths near a "
+            "half-wave it presents a very high impedance and reads badly - 20:1 on "
+            "2m at full extension.",
+            "Captured against the 2026-09-20 BNC calibration without a fresh load "
+            "reconnect verification, at the operator's direction; the adapter was "
+            "assumed undisturbed since the Smiley run.",
+            "Federal UHF has no valid measurement at settings 2, 5 and 8: a "
+            "persistent local transmitter at 411.675 MHz pushed the calibrated "
+            "reflection past unity. The same frequency is the worst point in the "
+            "2026-09-19 load verification and broke the Smiley's federal-UHF zooms.",
+        ),
+    ),
+    Family(
         key="tidradio-h9-stock",
         label="TIDRADIO TD-H9 stock antenna",
         short_label="TD-H9 stock",
@@ -2534,6 +2599,7 @@ def package_readme(root: Path) -> None:
         ("Signal Stick", "antennas/signal-stick/README.md", "valid / control", "fixed; measured without its counterpoise"),
         ("Signal Stick with counterpoise", "antennas/signal-stick-counterpoise/README.md", "valid", "fixed; 84% of 2m at or below 2:1 with the wire fitted"),
         ("Smiley 2m half-wave telescopic", "antennas/smiley-halfwave/README.md", "valid", "settings 1-7, 22-91 cm; **the only broad 2m match in the survey** and the best all-rounder"),
+        ("Comet BNC-W100RX telescopic", "antennas/comet-bnc-w100rx/README.md", "valid", "settings 1-8, 21-99.5 cm; 25-1300 MHz wideband receive design, no good match at any length"),
         ("Kenwood TH-D75A OEM", "antennas/kenwood-thd75a-stock/README.md", "valid", "fixed, bare SMA plane; best measured 70cm; the fixture control experiment"),
         ("Icom ID-52A OEM", "antennas/icom-id52a-stock/README.md", "valid", "fixed, bare SMA plane; best window is UHF land mobile"),
         ("AnyTone AT-D890UV rubber duck", "antennas/anytone-atd890uv-16cm/README.md", "valid", "fixed ~16 cm, SMA adapter plane; 88% of federal UHF"),

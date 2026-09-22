@@ -50,7 +50,7 @@ Coverage classes use the complete service window, not an isolated low-SWR point:
 | Railroad | broad <=2:1 | Smiley 2m half-wave telescopic - setting 5 (69 cm) | Handheld bench fixture | 1.22 | 100.0% | 100.0% |
 | NOAA weather | broad <=2:1 | Smiley 2m half-wave telescopic - setting 5 (69 cm) | Handheld bench fixture | 1.13 | 100.0% | 100.0% |
 | 1.25m amateur | broad <=2:1 | TID TD771 - with SMA-to-BNC adapter | Handheld bench fixture | 1.26 | 100.0% | 100.0% |
-| Military air | partial only | Smiley 2m half-wave telescopic - setting 1 (collapsed, 22 cm) | Handheld bench fixture | 2.96 | 32.1% | 50.2% |
+| Military air | partial only | Comet BNC-W100RX telescopic - setting 1 (collapsed, 21 cm) | Handheld bench fixture | 2.79 | 14.7% | 55.8% |
 | Federal UHF | broad <=2:1 | Diamond RH77CA - second mounting | Handheld bench fixture | 1.37 | 100.0% | 100.0% |
 | 70cm amateur | broad <=2:1 | Kenwood TH-D75A OEM antenna - bare SMA plane | Handheld bench fixture, SMA plane | 1.66 | 86.5% | 100.0% |
 | UHF LMR | broad <=2:1 | RH789 telescopic - setting 6 | Handheld bench fixture | 1.37 | 100.0% | 100.0% |

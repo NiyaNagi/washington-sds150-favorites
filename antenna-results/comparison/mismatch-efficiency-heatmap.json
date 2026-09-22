@@ -412,6 +412,141 @@
       }
     },
     {
+      "family": "comet-bnc-w100rx",
+      "family_label": "Comet BNC-W100RX telescopic",
+      "short_label": "Comet W100RX",
+      "measurement_context": "handheld_bench",
+      "configurations": 8,
+      "retuned_score": 0.5326015196165275,
+      "fixed_score": 0.441752698757978,
+      "fixed_configuration": "comet-bnc-w100rx:setting-3",
+      "fixed_configuration_label": "setting 3 (44 cm)",
+      "usable_bands": 0,
+      "excellent_bands": 0,
+      "services": {
+        "6m": {
+          "efficiency": 0.3217865505656931,
+          "median_swr": 10.379079246726281,
+          "configuration": "comet-bnc-w100rx:setting-8",
+          "configuration_label": "setting 8 (fully extended, 99.5 cm)"
+        },
+        "fm-broadcast": {
+          "efficiency": 0.5525744043490189,
+          "median_swr": 6.099483932414218,
+          "configuration": "comet-bnc-w100rx:setting-6",
+          "configuration_label": "setting 6 (78 cm)"
+        },
+        "civil-air": {
+          "efficiency": 0.7147780385032487,
+          "median_swr": 3.052838363819197,
+          "configuration": "comet-bnc-w100rx:setting-3",
+          "configuration_label": "setting 3 (44 cm)"
+        },
+        "2m": {
+          "efficiency": 0.5146459738946023,
+          "median_swr": 5.54402650575314,
+          "configuration": "comet-bnc-w100rx:setting-3",
+          "configuration_label": "setting 3 (44 cm)"
+        },
+        "vhf-lmr": {
+          "efficiency": 0.41706860178828653,
+          "median_swr": 8.618248923257788,
+          "configuration": "comet-bnc-w100rx:setting-4",
+          "configuration_label": "setting 4 (56 cm)"
+        },
+        "marine-vhf": {
+          "efficiency": 0.4292871931231946,
+          "median_swr": 7.119072586952767,
+          "configuration": "comet-bnc-w100rx:setting-4",
+          "configuration_label": "setting 4 (56 cm)"
+        },
+        "railroad": {
+          "efficiency": 0.4313976606360536,
+          "median_swr": 7.123215865531041,
+          "configuration": "comet-bnc-w100rx:setting-4",
+          "configuration_label": "setting 4 (56 cm)"
+        },
+        "noaa-weather": {
+          "efficiency": 0.45392168307558944,
+          "median_swr": 6.6570199059990625,
+          "configuration": "comet-bnc-w100rx:setting-4",
+          "configuration_label": "setting 4 (56 cm)"
+        },
+        "1.25m": {
+          "efficiency": 0.6392135063515938,
+          "median_swr": 4.010249546745708,
+          "configuration": "comet-bnc-w100rx:setting-8",
+          "configuration_label": "setting 8 (fully extended, 99.5 cm)"
+        },
+        "military-air": {
+          "efficiency": 0.7105198581906819,
+          "median_swr": 2.7855223513697243,
+          "configuration": "comet-bnc-w100rx:setting-1",
+          "configuration_label": "setting 1 (collapsed, 21 cm)"
+        },
+        "federal-uhf": {
+          "efficiency": 0.631614798593748,
+          "median_swr": 4.119195854284208,
+          "configuration": "comet-bnc-w100rx:setting-6",
+          "configuration_label": "setting 6 (78 cm)"
+        },
+        "70cm": {
+          "efficiency": 0.7402815540854208,
+          "median_swr": 2.993395046275115,
+          "configuration": "comet-bnc-w100rx:setting-6",
+          "configuration_label": "setting 6 (78 cm)"
+        },
+        "uhf-lmr": {
+          "efficiency": 0.7292992547553009,
+          "median_swr": 3.1232238435029083,
+          "configuration": "comet-bnc-w100rx:setting-8",
+          "configuration_label": "setting 8 (fully extended, 99.5 cm)"
+        },
+        "t-band": {
+          "efficiency": 0.6795393434602626,
+          "median_swr": 3.5466291019829983,
+          "configuration": "comet-bnc-w100rx:setting-5",
+          "configuration_label": "setting 5 (67 cm)"
+        },
+        "700-public-safety-downlink": {
+          "efficiency": 0.5301815551294431,
+          "median_swr": 5.35625088783937,
+          "configuration": "comet-bnc-w100rx:setting-3",
+          "configuration_label": "setting 3 (44 cm)"
+        },
+        "800-public-safety-downlink": {
+          "efficiency": 0.4260330190597314,
+          "median_swr": 7.234729377842295,
+          "configuration": "comet-bnc-w100rx:setting-1",
+          "configuration_label": "setting 1 (collapsed, 21 cm)"
+        },
+        "33cm": {
+          "efficiency": 0.42134748908270336,
+          "median_swr": 7.333719067595313,
+          "configuration": "comet-bnc-w100rx:setting-4",
+          "configuration_label": "setting 4 (56 cm)"
+        },
+        "900-trunking-downlink": {
+          "efficiency": 0.4119737710822687,
+          "median_swr": 7.575292589283067,
+          "configuration": "comet-bnc-w100rx:setting-4",
+          "configuration_label": "setting 4 (56 cm)"
+        },
+        "uat-978": {
+          "efficiency": 0.40499574533614857,
+          "median_swr": 7.745265200820911,
+          "configuration": "comet-bnc-w100rx:setting-6",
+          "configuration_label": "setting 6 (78 cm)"
+        },
+        "ads-b-1090": {
+          "efficiency": 0.4915703912675605,
+          "median_swr": 5.970176433583397,
+          "configuration": "comet-bnc-w100rx:setting-1",
+          "configuration_label": "setting 1 (collapsed, 21 cm)"
+        }
+      }
+    },
+    {
       "family": "rh789",
       "family_label": "RH789 telescopic",
       "short_label": "RH789",

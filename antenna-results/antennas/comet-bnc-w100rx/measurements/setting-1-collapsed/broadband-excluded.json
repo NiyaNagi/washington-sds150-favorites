@@ -1,0 +1,43 @@
+{
+  "derived_from": "C:\\Users\\Adam Steenwyk\\Documents\\Code\\washington-sds150-favorites\\nanovna_measurements\\2026-09-21_comet-bnc-w100rx\\setting-1-collapsed\\broadband.rejected-20260921T165848-0700",
+  "calibration_file": "nanovna_measurements\\2026-09-20_bnc-v2_calibration\\calibration.npz",
+  "calibration": {
+    "created_at": "2026-09-20T20:38:45.043765-07:00",
+    "reference_plane": "antenna side of attached adapter",
+    "standards": "ideal open, short, and 50-ohm load",
+    "source_capture": {
+      "captured_at": "2026-09-20T20:11:17.504701-07:00",
+      "label": "open",
+      "port": "COM17",
+      "start_hz": 50000000,
+      "stop_hz": 1200000000,
+      "segments": 400,
+      "points": 40001,
+      "nominal_frequency_step_hz": 28750.0,
+      "device": {
+        "version": "1.2.50",
+        "info": "Board: NanoVNA-H\n2019-2026 Copyright NanoVNA.com\nbased on  @DiSlord @edy555 ... source\nLicensed under GPL.\nVersion: 1.2.50 [p:101, IF:12k, ADC:192k, Lcd:320x240]\nBuild Time: May 16 2026 - 12:42:11\nArchitecture: ARMv6-M Core Variant: Cortex-M0\nPlatform: STM32F072xB Entry Level Medium Density devices",
+        "calibration": "load Es Er cal'ed",
+        "bandwidth": "bandwidth 3 (1000Hz)"
+      }
+    }
+  },
+  "mode": "isolated",
+  "total_points": 40001,
+  "retained_points": 40000,
+  "retained_fraction": 0.9999750006249843,
+  "retained_range_hz": [
+    50000000,
+    1200000000
+  ],
+  "excluded_points": 1,
+  "excluded_intervals_hz": [
+    [
+      411675000,
+      411675000
+    ]
+  ],
+  "maximum_excluded_gamma_magnitude": 1.3676165048351354,
+  "physical_samples_discarded_by_truncation": 0,
+  "reason": "calibrated |Gamma| reached or exceeded 1, which is nonphysical for a passive antenna and indicates the fixture's calibrated dynamic range was exhausted; these frequencies are reported as very poor / outside calibrated dynamic range, never as a measured value"
+}

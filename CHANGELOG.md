@@ -32,6 +32,26 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   Per-band differences smaller than a few tenths at VHF are not established - a
   limitation the August 2026 entries share unmeasured. The counterpoise result
   is ~2 orders of magnitude clear of it.
+- **Comet BNC-W100RX at all eight lengths, and the clearest case against
+  trusting one number.** A 25-1300 MHz wideband receive antenna, BNC, measured
+  2026-09-21 at 21, 33, 44, 56, 67, 78, 89 and 99.5 cm - 149 of 152 services.
+  Its resonance walks cleanly up the spectrum as it retracts (62.9, 67.2,
+  105.8, 108.5, 117.6, 124.1, 255.0, 315.0 MHz), so the physics is sound, but
+  **its best match at any length is 1.56:1** and it holds **no window at even
+  3:1**. It still scores 53 retuned, which would place it in tier A. That pairs
+  with the Remtronix 920, which scores 38 while holding four windows at 2:1 or
+  better: one antenna is excellent in a few places, the other mediocre
+  everywhere, and a single aggregate flatters the second and buries the first.
+  SWR understates this antenna more than any other here - it is receive-only,
+  and on receive a few dB of mismatch loss is usually swamped by external noise,
+  which is what a broadband compromise is designed around. Nothing in this
+  survey measures receive sensitivity.
+  Captured against the 2026-09-20 BNC calibration without a fresh load
+  verification, at the operator's direction; recorded in the package metadata.
+  Federal UHF failed at settings 2, 5 and 8 to a **persistent local transmitter
+  at 411.675 MHz** - the same frequency that is the worst point in the
+  2026-09-19 load verification and that broke the Smiley's federal-UHF zooms, so
+  it is an identified interferer rather than noise.
 - **An aggregate score that works across bands: mismatch efficiency.** Ranking
   by any single band, or by a mean of SWR values, misleads - one 25:1 window
   swamps a mean of SWRs while contributing nothing a listener could use. The
