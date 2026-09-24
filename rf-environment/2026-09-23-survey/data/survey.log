@@ -117,3 +117,144 @@
 21:56:40 E_wide: firmware omitted 2 pts near 344.750 MHz; filled from neighbours
 21:56:40 E_wide pass 2/2 13997 pts 78s rbw=32kHz
 21:56:40 done p3
+22:39:42 start p4 version=tinySA_v1.4-175-g1419a93
+22:43:09 start p4 version=tinySA_v1.4-175-g1419a93
+22:43:43 S_wide: firmware omitted 3 pts near 137.475 MHz; filled from neighbours
+22:43:48 S_wide: firmware omitted 20 pts near 137.900 MHz; filled from neighbours
+22:44:07 S_wide: firmware omitted 8 pts near 210.875 MHz; filled from neighbours
+22:44:41 S_wide: firmware omitted 3 pts near 335.475 MHz; filled from neighbours
+22:44:47 S_wide: firmware omitted 1 pts near 344.725 MHz; filled from neighbours
+22:44:47 S_wide pass 1/3 13997 pts 98s rbw=32kHz
+22:45:20 S_wide: firmware omitted 3 pts near 136.375 MHz; filled from neighbours
+22:45:26 S_wide: firmware omitted 20 pts near 137.875 MHz; filled from neighbours
+22:45:45 S_wide: firmware omitted 4 pts near 210.825 MHz; filled from neighbours
+22:46:15 S_wide: firmware omitted 5 pts near 335.450 MHz; filled from neighbours
+22:46:21 S_wide: firmware omitted 3 pts near 344.725 MHz; filled from neighbours
+22:46:21 S_wide pass 2/3 13997 pts 94s rbw=32kHz
+22:46:54 S_wide: firmware omitted 9 pts near 137.075 MHz; filled from neighbours
+22:46:59 S_wide: firmware omitted 25 pts near 137.925 MHz; filled from neighbours
+22:48:07 S_wide: scan timed out at 181.350 MHz; resyncing (attempt 1)
+22:55:19 start p4 version=tinySA_v1.4-175-g1419a93
+22:55:52 S_wide: firmware omitted 3 pts near 137.225 MHz; filled from neighbours
+22:55:58 S_wide: firmware omitted 15 pts near 138.075 MHz; filled from neighbours
+22:56:17 S_wide: firmware omitted 5 pts near 210.925 MHz; filled from neighbours
+22:56:47 S_wide: firmware omitted 4 pts near 340.000 MHz; filled from neighbours
+22:56:53 S_wide: firmware omitted 2 pts near 344.650 MHz; filled from neighbours
+22:56:53 S_wide pass 1/3 13997 pts 94s rbw=32kHz
+22:57:26 S_wide: firmware omitted 6 pts near 136.850 MHz; filled from neighbours
+22:57:31 S_wide: firmware omitted 22 pts near 137.900 MHz; filled from neighbours
+22:57:51 S_wide: firmware omitted 7 pts near 210.775 MHz; filled from neighbours
+22:58:21 S_wide: firmware omitted 1 pts near 340.125 MHz; filled from neighbours
+22:58:26 S_wide: firmware omitted 2 pts near 344.700 MHz; filled from neighbours
+22:58:27 S_wide pass 2/3 13997 pts 94s rbw=32kHz
+22:59:00 S_wide: firmware omitted 4 pts near 136.875 MHz; filled from neighbours
+22:59:05 S_wide: firmware omitted 17 pts near 138.150 MHz; filled from neighbours
+22:59:24 S_wide: firmware omitted 5 pts near 210.775 MHz; filled from neighbours
+22:59:56 S_wide: firmware omitted 4 pts near 340.000 MHz; filled from neighbours
+23:00:02 S_wide: firmware omitted 2 pts near 344.700 MHz; filled from neighbours
+23:00:03 S_wide pass 3/3 13997 pts 96s rbw=32kHz
+23:00:06 S_6m pass 1/3 801 pts 3s rbw=11kHz
+23:00:10 S_6m pass 2/3 801 pts 3s rbw=11kHz
+23:00:13 S_6m pass 3/3 801 pts 3s rbw=11kHz
+23:00:40 S_air pass 1/2 3482 pts 27s rbw=11kHz
+23:01:07 S_air pass 2/2 3482 pts 27s rbw=11kHz
+23:01:11 S_2m pass 1/5 801 pts 3s rbw=11kHz
+23:01:16 S_2m pass 2/5 801 pts 5s rbw=11kHz
+23:01:20 S_2m pass 3/5 801 pts 5s rbw=11kHz
+23:01:24 S_2m pass 4/5 801 pts 3s rbw=11kHz
+23:01:29 S_2m pass 5/5 801 pts 5s rbw=11kHz
+23:02:01 S_vhf pass 1/3 4161 pts 32s rbw=11kHz
+23:02:34 S_vhf pass 2/3 4161 pts 32s rbw=11kHz
+23:03:06 S_vhf pass 3/3 4161 pts 32s rbw=11kHz
+23:03:11 S_220 pass 1/3 1201 pts 5s rbw=11kHz
+23:03:16 S_220 pass 2/3 1201 pts 5s rbw=11kHz
+23:03:21 S_220 pass 3/3 1201 pts 5s rbw=11kHz
+23:04:15 Hopen_hi pass 1/2 18401 pts 53s rbw=32kHz
+23:05:20 Hopen_hi: scan timed out at 543.500 MHz; resyncing (attempt 1)
+23:06:09 Hopen_hi pass 2/2 18401 pts 115s rbw=32kHz
+23:06:18 Hopen_700 pass 1/1 1441 pts 8s rbw=11kHz
+23:06:27 Hopen_800 pass 1/1 1521 pts 9s rbw=11kHz
+23:06:33 Hopen_900 pass 1/1 1761 pts 5s rbw=32kHz
+23:06:33 done p4
+23:13:52 start p5 version=tinySA_v1.4-175-g1419a93
+23:14:23 SH_wide pass 1/3 10401 pts 30s rbw=32kHz
+23:14:53 SH_wide pass 2/3 10401 pts 30s rbw=32kHz
+23:16:20 SH_wide: scan timed out at 472.000 MHz; resyncing (attempt 1)
+23:16:24 SH_wide pass 3/3 10401 pts 91s rbw=32kHz
+23:16:44 SH_70cm pass 1/3 4801 pts 20s rbw=11kHz
+23:17:04 SH_70cm pass 2/3 4801 pts 20s rbw=11kHz
+23:17:23 SH_70cm pass 3/3 4801 pts 20s rbw=11kHz
+23:17:37 SH_uhf pass 1/3 3201 pts 13s rbw=11kHz
+23:17:50 SH_uhf pass 2/3 3201 pts 13s rbw=11kHz
+23:18:03 SH_uhf pass 3/3 3201 pts 13s rbw=11kHz
+23:18:04 done p5
+23:19:44 start p6 version=tinySA_v1.4-175-g1419a93
+23:20:14 D_lo pass 1/3 7001 pts 29s rbw=11kHz
+23:20:43 D_lo pass 2/3 7001 pts 29s rbw=11kHz
+23:21:12 D_lo pass 3/3 7001 pts 29s rbw=11kHz
+23:21:18 D_wide: firmware omitted 2 pts near 4.125 MHz; filled from neighbours
+23:22:32 D_wide: firmware omitted 2 pts near 340.000 MHz; filled from neighbours
+23:22:37 D_wide: firmware omitted 2 pts near 344.675 MHz; filled from neighbours
+23:22:38 D_wide pass 1/3 13997 pts 86s rbw=32kHz
+23:23:55 D_wide: firmware omitted 4 pts near 335.425 MHz; filled from neighbours
+23:23:57 D_wide pass 2/3 13997 pts 80s rbw=32kHz
+23:25:13 D_wide: firmware omitted 1 pts near 340.100 MHz; filled from neighbours
+23:25:19 D_wide: firmware omitted 1 pts near 344.650 MHz; filled from neighbours
+23:25:19 D_wide pass 3/3 13997 pts 82s rbw=32kHz
+23:25:23 D_6m pass 1/3 801 pts 3s rbw=11kHz
+23:25:27 D_6m pass 2/3 801 pts 3s rbw=11kHz
+23:25:30 D_6m pass 3/3 801 pts 3s rbw=11kHz
+23:25:57 D_air pass 1/2 3482 pts 27s rbw=11kHz
+23:26:24 D_air pass 2/2 3482 pts 27s rbw=11kHz
+23:26:27 D_2m pass 1/5 801 pts 3s rbw=11kHz
+23:26:31 D_2m pass 2/5 801 pts 3s rbw=11kHz
+23:26:34 D_2m pass 3/5 801 pts 3s rbw=11kHz
+23:26:38 D_2m pass 4/5 801 pts 3s rbw=11kHz
+23:26:41 D_2m pass 5/5 801 pts 3s rbw=11kHz
+23:27:13 D_vhf pass 1/3 4161 pts 32s rbw=11kHz
+23:27:45 D_vhf pass 2/3 4161 pts 32s rbw=11kHz
+23:28:18 D_vhf pass 3/3 4161 pts 32s rbw=11kHz
+23:28:23 D_220 pass 1/3 1201 pts 5s rbw=11kHz
+23:28:28 D_220 pass 2/3 1201 pts 5s rbw=11kHz
+23:28:33 D_220 pass 3/3 1201 pts 5s rbw=11kHz
+23:28:37 D_6m_att10 pass 1/1 801 pts 3s rbw=11kHz
+23:28:56 D_air_att10: firmware omitted 16 pts near 121.686 MHz; filled from neighbours
+23:29:03 D_air_att10: firmware omitted 56 pts near 122.511 MHz; filled from neighbours
+23:29:11 D_air_att10: firmware omitted 63 pts near 124.993 MHz; filled from neighbours
+23:29:18 D_air_att10: firmware omitted 60 pts near 127.326 MHz; filled from neighbours
+23:29:26 D_air_att10: firmware omitted 23 pts near 129.750 MHz; filled from neighbours
+23:29:30 D_air_att10 pass 1/1 3482 pts 53s rbw=11kHz
+23:29:35 D_2m_att10: firmware omitted 12 pts near 145.070 MHz; filled from neighbours
+23:29:40 D_2m_att10: firmware omitted 29 pts near 145.525 MHz; filled from neighbours
+23:29:43 D_2m_att10: firmware omitted 14 pts near 146.950 MHz; filled from neighbours
+23:29:43 D_2m_att10 pass 1/1 801 pts 13s rbw=11kHz
+23:30:16 D_vhf_att10 pass 1/1 4161 pts 32s rbw=11kHz
+23:30:16 done p6
+23:35:43 start p7 version=tinySA_v1.4-175-g1419a93
+23:37:08 DH_wide pass 1/3 28801 pts 85s rbw=32kHz
+23:38:32 DH_wide pass 2/3 28801 pts 85s rbw=32kHz
+23:39:57 DH_wide pass 3/3 28801 pts 85s rbw=32kHz
+23:40:17 DH_70cm pass 1/3 4801 pts 20s rbw=11kHz
+23:40:37 DH_70cm pass 2/3 4801 pts 20s rbw=11kHz
+23:40:57 DH_70cm pass 3/3 4801 pts 20s rbw=11kHz
+23:41:10 DH_uhf pass 1/3 3201 pts 13s rbw=11kHz
+23:41:24 DH_uhf pass 2/3 3201 pts 13s rbw=11kHz
+23:41:37 DH_uhf pass 3/3 3201 pts 13s rbw=11kHz
+23:41:46 DH_700 pass 1/3 1441 pts 9s rbw=11kHz
+23:41:54 DH_700 pass 2/3 1441 pts 8s rbw=11kHz
+23:42:03 DH_700 pass 3/3 1441 pts 8s rbw=11kHz
+23:42:12 DH_800 pass 1/3 1521 pts 9s rbw=11kHz
+23:42:21 DH_800 pass 2/3 1521 pts 9s rbw=11kHz
+23:42:30 DH_800 pass 3/3 1521 pts 9s rbw=11kHz
+23:42:35 DH_900 pass 1/10 1761 pts 5s rbw=32kHz
+23:42:41 DH_900 pass 2/10 1761 pts 5s rbw=32kHz
+23:42:46 DH_900 pass 3/10 1761 pts 5s rbw=32kHz
+23:42:51 DH_900 pass 4/10 1761 pts 5s rbw=32kHz
+23:42:56 DH_900 pass 5/10 1761 pts 5s rbw=32kHz
+23:43:01 DH_900 pass 6/10 1761 pts 5s rbw=32kHz
+23:43:06 DH_900 pass 7/10 1761 pts 5s rbw=32kHz
+23:43:12 DH_900 pass 8/10 1761 pts 5s rbw=32kHz
+23:43:17 DH_900 pass 9/10 1761 pts 5s rbw=32kHz
+23:43:22 DH_900 pass 10/10 1761 pts 5s rbw=32kHz
+23:44:46 DH_wide_att10 pass 1/1 28801 pts 83s rbw=32kHz
+23:44:46 done p7

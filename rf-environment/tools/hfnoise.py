@@ -1,12 +1,16 @@
 """HF external-noise estimate per band vs ITU-R P.372 man-made noise categories.
 
-python hfnoise.py rf/p3__E_hf.json rf/p1__Lopen_hf.json
+python hfnoise.py <antenna sweep.json> <empty-port baseline.json> [antenna key, default efhw]
+
 Floor = 20th percentile (over the band) of the per-point minimum across passes,
 so carriers and intermittent signals are excluded. The instrument's own noise
-(open-port baseline) is subtracted in linear power. Fa = N[dBm/Hz] + 174.
-No antenna-efficiency / feedline correction is applied, so Fa is a LOWER bound.
+(open-port baseline) is subtracted in linear power. Fa = N[dBm/Hz] + 174, then
+referred to the antenna terminals with the feedline model in lineloss.py.
+Transformer loss and antenna mismatch are not corrected, so Fa is still a lower
+bound.
 """
 import json, math, re, sys
+from lineloss import correct_fa, loss_db, FEEDS
 
 BANDS = [("160m", 1.8, 2.0), ("80m", 3.5, 4.0), ("60m", 5.33, 5.41), ("40m", 7.0, 7.3),
          ("30m", 10.1, 10.15), ("20m", 14.0, 14.35), ("17m", 18.068, 18.168), ("15m", 21.0, 21.45),
@@ -28,11 +32,14 @@ def band_floor(rec, lo, hi):
 
 ant = json.load(open(sys.argv[1]))
 base = json.load(open(sys.argv[2]))
+key = sys.argv[3] if len(sys.argv) > 3 else "efhw"
 rbw = rbw_hz(ant["rbw_actual"])
-print(f"RBW {rbw/1e3:.1f} kHz; Fa is a lower bound (no antenna/feedline loss correction)")
-print(f"{'band':6s} {'ant dBm':>8s} {'inst dBm':>8s} {'ext dBm':>8s} {'dBm/Hz':>8s} {'Fa dB':>6s}  " +
+print(f"RBW {rbw/1e3:.1f} kHz; feed: {FEEDS[key]['desc']} (corrected); transformer/mismatch not corrected")
+print(f"{'band':6s} {'ant dBm':>8s} {'inst dBm':>8s} {'ext dBm':>8s} {'loss':>5s} {'Fa dB':>6s}  " +
       "  ".join(f"{n[:5]:>5s}" for n, _, _ in ITU) + "  gal   verdict")
 for name, lo, hi in BANDS:
+    if hi * 1e6 < ant["freqs"][0] or lo * 1e6 > ant["freqs"][-1]:
+        continue
     a, n = band_floor(ant, lo, hi)
     b, _ = band_floor(base, lo, hi)
     pa, pb = 10 ** (a / 10), 10 ** (b / 10)
@@ -40,13 +47,11 @@ for name, lo, hi in BANDS:
         print(f"{name:6s} {a:8.1f} {b:8.1f}    below instrument floor")
         continue
     ext = 10 * math.log10(pa - pb)
-    nhz = ext - 10 * math.log10(rbw)
-    fa = nhz + 174
     fc = math.sqrt(lo * hi)
+    fa = correct_fa(ext - 10 * math.log10(rbw) + 174, key, fc)
     ref = [c - d * math.log10(fc) for _, c, d in ITU]
     gal = GAL[0] - GAL[1] * math.log10(fc)
-    # verdict: nearest category at or below the measurement
     above = [(ITU[k][0], fa - ref[k]) for k in range(len(ITU))]
     cat = next((nm for nm, dlt in above if dlt >= -3), "below quiet rural")
-    print(f"{name:6s} {a:8.1f} {b:8.1f} {ext:8.1f} {nhz:8.1f} {fa:6.1f}  " +
+    print(f"{name:6s} {a:8.1f} {b:8.1f} {ext:8.1f} {loss_db(key, fc):5.2f} {fa:6.1f}  " +
           "  ".join(f"{r:5.1f}" for r in ref) + f"  {gal:4.1f}  ~{cat} ({fa - ref[1]:+.1f} dB vs residential)")

@@ -47,6 +47,52 @@ PHASES = {
         ("E_lo",   "low", 30e6, 60e6, 10, 5e3, 3),
         ("E_wide", "low", 0.1e6, 350e6, 30, 25e3, 2),
     ],
+    # Diamond SG7900 (porch, 16 ft RG-8X + window + 20 ft KMR400) on LOW; HIGH open -> baseline to 960 MHz
+    "p4": [
+        ("S_wide", "low", 0.1e6, 350e6, 30, 25e3, 3),
+        ("S_6m",   "low", 50e6, 54e6, 10, 5e3, 3),
+        ("S_air",  "low", 108e6, 137e6, 10, 8.33e3, 2),
+        ("S_2m",   "low", 144e6, 148e6, 10, 5e3, 5),
+        ("S_vhf",  "low", 148e6, 174e6, 10, 6.25e3, 3),
+        ("S_220",  "low", 219e6, 225e6, 10, 5e3, 3),
+        ("Hopen_hi",  "high", 500e6, 960e6, 30, 25e3, 2),
+        ("Hopen_700", "high", 758e6, 776e6, 10, 12.5e3, 1),
+        ("Hopen_800", "high", 851e6, 870e6, 10, 12.5e3, 1),
+        ("Hopen_900", "high", 896e6, 940e6, 30, 25e3, 1),
+    ],
+    # SG7900 on HIGH; LOW open
+    "p5": [
+        ("SH_wide", "high", 240e6, 500e6, 30, 25e3, 3),
+        ("SH_70cm", "high", 420e6, 450e6, 10, 6.25e3, 3),
+        ("SH_uhf",  "high", 450e6, 470e6, 10, 6.25e3, 3),
+    ],
+    # Diamond D3000N discone (roof, 75 ft KMR400 + window + 20 ft KMR400) on LOW; HIGH open
+    "p6": [
+        ("D_lo",   "low", 25e6, 60e6, 10, 5e3, 3),
+        ("D_wide", "low", 0.1e6, 350e6, 30, 25e3, 3),
+        ("D_6m",   "low", 50e6, 54e6, 10, 5e3, 3),
+        ("D_air",  "low", 108e6, 137e6, 10, 8.33e3, 2),
+        ("D_2m",   "low", 144e6, 148e6, 10, 5e3, 5),
+        ("D_vhf",  "low", 148e6, 174e6, 10, 6.25e3, 3),
+        ("D_220",  "low", 219e6, 225e6, 10, 5e3, 3),
+        # FM reaches -26 dBm on the roof discone: repeat with 10 dB attenuation to expose analyzer-made products
+        ("D_6m_att10",  "low", 50e6, 54e6, 10, 5e3, 1, 10),
+        ("D_air_att10", "low", 108e6, 137e6, 10, 8.33e3, 1, 10),
+        ("D_2m_att10",  "low", 144e6, 148e6, 10, 5e3, 1, 10),
+        ("D_vhf_att10", "low", 148e6, 174e6, 10, 6.25e3, 1, 10),
+    ],
+    # discone on HIGH to 960 MHz; LOW open
+    "p7": [
+        ("DH_wide", "high", 240e6, 960e6, 30, 25e3, 3),
+        ("DH_70cm", "high", 420e6, 450e6, 10, 6.25e3, 3),
+        ("DH_uhf",  "high", 450e6, 470e6, 10, 6.25e3, 3),
+        ("DH_700",  "high", 758e6, 776e6, 10, 12.5e3, 3),
+        ("DH_800",  "high", 851e6, 870e6, 10, 12.5e3, 3),
+        ("DH_900",  "high", 896e6, 940e6, 30, 25e3, 10),
+        # the HIGH input has no filter; FM at -26 dBm makes 3rd harmonics at 264-324 MHz. The ~20 dB HIGH
+        # attenuator step separates analyzer-made products (they fall) from real signals (they hold).
+        ("DH_wide_att10", "high", 240e6, 960e6, 30, 25e3, 1, 10),
+    ],
 }
 
 
@@ -59,12 +105,23 @@ def log(msg):
 
 def scan_exact(t, name, chunk):
     """Scan exactly these points; retry, then split the chunk if lines go missing."""
-    for attempt in range(2):
-        r = t.scan(chunk[0], chunk[-1], len(chunk))
+    r = []
+    for attempt in range(3):
+        try:
+            # a 290-point chunk takes 1-10 s; a lost prompt must not stall the run for the default 600 s
+            r = t.scan(chunk[0], chunk[-1], len(chunk), timeout=60)
+        except TimeoutError:
+            log(f"{name}: scan timed out at {chunk[0]/1e6:.3f} MHz; resyncing (attempt {attempt + 1})")
+            t.s.write(b"\r")
+            time.sleep(1.0)
+            t.s.reset_input_buffer()
+            continue
         if len(r) == len(chunk):
             return [v for _, v in r]
         time.sleep(0.3)
         t.s.reset_input_buffer()
+    if not r:
+        raise RuntimeError(f"{name}: no data at {chunk[0]/1e6:.3f} MHz after 3 attempts")
     # The firmware silently omits a few frequencies (e.g. 344.65 MHz in LOW).
     # Keep what came back and fill each gap from its nearest measured neighbour.
     got = {int(round(f)): v for f, v in r}

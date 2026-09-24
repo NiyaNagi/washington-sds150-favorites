@@ -9,6 +9,7 @@ from pathlib import Path
 
 import matplotlib
 matplotlib.use("Agg")
+from lineloss import correct_fa
 import matplotlib.pyplot as plt
 
 SURVEY = Path(__file__).resolve().parents[1] / "2026-09-23-survey"
@@ -17,10 +18,14 @@ CHARTS.mkdir(exist_ok=True)
 
 THEMES = {
     "light": dict(surface="#fcfcfb", ink="#0b0b0b", ink2="#52514e", muted="#898781", grid="#e1e0d9",
-                  axis="#c3c2b7", band="#f0efec", s1="#2a78d6", s2="#eb6834", s3="#1baf7a"),
+                  axis="#c3c2b7", band="#f0efec", s1="#2a78d6", s2="#eb6834", s3="#1baf7a", s4="#eda100"),
     "dark": dict(surface="#1a1a19", ink="#ffffff", ink2="#c3c2b7", muted="#898781", grid="#2c2c2a",
-                 axis="#383835", band="#262624", s1="#3987e5", s2="#d95926", s3="#199e70"),
+                 axis="#383835", band="#262624", s1="#3987e5", s2="#d95926", s3="#199e70", s4="#c98500"),
 }
+# one colour per antenna in every chart (validated: 4 adjacent on lines; desk/sg7900/discone all-pairs on dots)
+ANT_COLOR = {"desk": "s1", "efhw": "s2", "sg7900": "s3", "discone": "s4"}
+ANT_LABEL = {"desk": "Smiley on the desk", "efhw": "EFHW (roof feed)", "sg7900": "SG7900 under the porch",
+             "discone": "D3000N discone, roof"}
 HAM = [(1.8, 2.0, "160"), (3.5, 4.0, "80"), (5.33, 5.41, "60"), (7.0, 7.3, "40"), (10.1, 10.15, "30"),
        (14.0, 14.35, "20"), (18.068, 18.168, "17"), (21.0, 21.45, "15"), (24.89, 24.99, "12"), (28.0, 29.7, "10")]
 VHF_BANDS = [(50, 54, "6m"), (144, 148, "2m"), (222, 225, "1.25m")]
@@ -86,38 +91,38 @@ def block_median(rec, lo, hi):
 
 
 # 1 ------------------------------------------------------------------------
+WIDE = {"desk": "p2__L_wide.json", "efhw": "p3__E_wide.json", "sg7900": "p4__S_wide.json", "discone": "p6__D_wide.json"}
+
+
 def chart_floor_excess(th, theme):
-    smiley, efhw, base = load("p2__L_wide.json"), load("p3__E_wide.json"), load("p1__Lopen_wide.json")
-    xs, ys, ye = [], [], []
+    base = load("p1__Lopen_wide.json")
+    recs = {k: load(v) for k, v in WIDE.items() if (DATA / v).exists()}
     step = 2e6
+    xs, ys = [], {k: [] for k in recs}
     f = 0.0
     while f < 350e6:
         b = block_median(base, f, f + step)
-        s = block_median(smiley, f, f + step)
-        e = block_median(efhw, f, f + step)
         if b is not None:
             xs.append((f + step / 2) / 1e6)
-            ys.append(max(0.0, s - b))
-            ye.append(max(0.0, e - b))
+            for k, r in recs.items():
+                ys[k].append(max(0.0, block_median(r, f, f + step) - b))
         f += step
     fig, ax = figure(th)
     fig.subplots_adjust(left=0.07, right=0.98, top=0.78, bottom=0.13)
     for lo, hi, lab in VHF_BANDS + [(1.8, 29.7, "HF")]:
         ax.axvspan(lo, hi, color=th["band"], lw=0, zorder=0)
-        ax.text((lo + hi) / 2, 33, lab, color=th["muted"], fontsize=8.5, ha="center")
+        ax.text((lo + hi) / 2, 38, lab, color=th["muted"], fontsize=8.5, ha="center")
     ax.axvspan(88, 108, color=th["band"], lw=0, zorder=0, alpha=0.5)
-    ax.text(98, 33, "FM bcst", color=th["muted"], fontsize=8.5, ha="center")
-    ax.plot(xs, ys, color=th["s1"], lw=2, solid_joinstyle="round", label="Smiley whip on the desk")
-    ax.plot(xs, ye, color=th["s2"], lw=2, solid_joinstyle="round", label="EFHW, outdoors")
+    ax.text(98, 38, "FM bcst", color=th["muted"], fontsize=8.5, ha="center")
+    for k in recs:
+        ax.plot(xs, ys[k], color=th[ANT_COLOR[k]], lw=2, solid_joinstyle="round", label=ANT_LABEL[k])
     ax.set_xlim(0, 350)
-    ax.set_ylim(0, 36)
+    ax.set_ylim(0, 41)
     style(ax, th, "MHz", "dB above the tinySA's own floor")
     legend(ax, th, "upper right")
-    ax.annotate("desk hash:\n60–86 MHz, up to +29 dB", xy=(69, 29), xytext=(118, 30), color=th["ink2"], fontsize=8.5,
-                arrowprops=dict(arrowstyle="-", color=th["muted"], lw=1))
-    title(fig, th, "The VHF noise is at the desk, not in the neighbourhood",
-          "Median noise floor above the empty-port baseline, 2 MHz blocks, 32 kHz RBW. The outdoor EFHW still hears FM at −55 dBm, "
-          "so it would show this hash if it were ambient. Its HF rise is ordinary HF noise on a long wire (see the HF charts).")
+    title(fig, th, "VHF hash is worst at the desk, lower on the porch, absent on the roof",
+          "Median noise floor above the empty-port baseline, 2 MHz blocks, 32 kHz RBW, as measured at the tinySA (no feedline "
+          "correction). The FM band (clipped) and the discone's 186–216 MHz spikes (VHF TV 9, 11, 13) are real stations.")
     save(fig, "floor-excess", theme)
 
 
@@ -242,8 +247,8 @@ def hf_fa():
             return mins[int(len(mins) * 0.2)]
         a, b = fl(ant), fl(base)
         ext = 10 * math.log10(10 ** (a / 10) - 10 ** (b / 10))
-        fa = ext - 10 * math.log10(rbw) + 174
         fc = math.sqrt(lo * hi)
+        fa = correct_fa(ext - 10 * math.log10(rbw) + 174, "efhw", fc)  # refer to the antenna: feedline loss
         rows.append((name, fa, [c - d * math.log10(fc) for _, c, d in ITU]))
     return rows
 
@@ -338,11 +343,132 @@ def chart_zero_span(th, theme):
     save(fig, "zero-span", theme)
 
 
+# 8 ------------------------------------------------------------------------
+def chart_vhf_noise(th, theme):
+    import vhfnoise
+    rows = [r for r in vhfnoise.compute(DATA) if any(r["ant"][k] for k in ("desk", "sg7900", "discone"))]
+    x = list(range(len(rows)))
+    n_itu = sum(1 for r in rows if r["itu"])
+    fig, ax = figure(th, 9.6, 4.8)
+    fig.subplots_adjust(left=0.07, right=0.98, top=0.76, bottom=0.17)
+    for xi, r in zip(x, rows):
+        if r["high_input"]:
+            ax.axvspan(xi - 0.42, xi + 0.42, color=th["band"], lw=0, zorder=0)
+    greys = {"city": th["ink2"], "residential": th["muted"], "rural": th["muted"], "galactic": th["axis"]}
+    for cat in ("city", "residential", "rural", "galactic"):
+        ys = [r["itu"][cat] for r in rows[:n_itu]]
+        ax.plot(x[:n_itu], ys, color=greys[cat], lw=1.2, zorder=1)
+        ax.text(n_itu - 1 + 0.3, ys[-1], cat, color=th["ink2"], fontsize=8, va="center")
+    offs = {"desk": -0.24, "sg7900": 0.0, "discone": 0.24}
+    for k, dx in offs.items():
+        col = th[ANT_COLOR[k]]
+        det = [(xi + dx, r["ant"][k]["fa"]) for xi, r in zip(x, rows) if r["ant"][k] and r["ant"][k]["fa"] is not None]
+        und = [(xi + dx, r["ant"][k]["limit"]) for xi, r in zip(x, rows) if r["ant"][k] and r["ant"][k]["fa"] is None]
+        ax.scatter([a for a, _ in det], [b for _, b in det], s=46, color=col, edgecolors=th["surface"], linewidths=2,
+                   zorder=4, label=ANT_LABEL[k])
+        ax.scatter([a for a, _ in und], [b for _, b in und], s=46, facecolors=th["surface"], edgecolors=col,
+                   linewidths=1.8, zorder=4)
+        if k == "desk":
+            for a, b in det:
+                ax.text(a, b + 1.8, f"{b:.0f}", color=th["ink"], fontsize=8, ha="center", zorder=5)
+    ax.scatter([], [], s=46, facecolors=th["surface"], edgecolors=th["muted"], linewidths=1.8,
+               label="hollow: upper bound")
+    labels = [r["band"].replace(" MHz", "\nMHz").replace("UHF ", "UHF\n").replace(" PS", "\nPS") for r in rows]
+    ax.set_xticks(x, labels, fontsize=8.5)
+    ax.set_xlim(-0.6, len(rows) - 0.4)
+    ax.set_ylim(-5, 58)
+    style(ax, th, "", "Fa at the antenna, dB above kT₀B")
+    ax.text(n_itu + 0.1, 46, "shaded = HIGH input; no ITU curve above 250 MHz.\ndiscone HIGH values are masked by the analyzer's "
+            "own FM harmonics", color=th["muted"], fontsize=8, va="center")
+    ax.legend(loc="upper left", frameon=False, fontsize=8.5, labelcolor=th["ink2"], handlelength=1.2, ncols=4,
+              columnspacing=1.2)
+    title(fig, th, "External noise per band on every antenna, vs ITU-R P.372",
+          "Carriers excluded (20th percentile of the minimum over sweeps), the tinySA's own floor subtracted, feedline loss "
+          "added back so every value is at the antenna. Hollow markers are upper bounds: below the tinySA's detection limit, "
+          "or (discone above 240 MHz) masked by FM harmonics the analyzer makes itself.")
+    save(fig, "vhf-noise-itu", theme)
+
+
+# 9 ------------------------------------------------------------------------
+def chart_birdie_by_antenna(th, theme):
+    files = {"desk": "p2__L_2m.json", "sg7900": "p4__S_2m.json", "discone": "p6__D_2m.json"}
+    lo, hi = 147.40, 147.52
+    fig, ax = figure(th)
+    fig.subplots_adjust(left=0.07, right=0.98, top=0.78, bottom=0.13)
+    for c, lab in ((147.450, "147.450"), (147.4625, "147.4625 DMR")):
+        ax.axvspan(c - 0.00625, c + 0.00625, color=th["band"], lw=0, zorder=0)
+    ax.axvline(147.456, color=th["muted"], lw=1, zorder=1)
+    ax.text(147.4565, -64, " 147.456 = 12 × 12.288 MHz", color=th["ink2"], fontsize=8.5)
+    for k, fn in files.items():
+        if not (DATA / fn).exists():
+            continue
+        rec = load(fn)
+        F = [f / 1e6 for f in rec["freqs"]]
+        idx = [i for i, f in enumerate(F) if lo <= f <= hi]
+        md = [statistics.median(p[i] for p in rec["passes"]) for i in idx]
+        ax.plot([F[i] for i in idx], md, color=th[ANT_COLOR[k]], lw=2, solid_joinstyle="round", label=ANT_LABEL[k])
+    ax.text(147.450, -118.5, "147.450", color=th["muted"], fontsize=8, ha="center")
+    ax.text(147.4625, -115.5, "147.4625 DMR", color=th["muted"], fontsize=8, ha="center")
+    ax.set_xlim(lo, hi)
+    ax.set_ylim(-120, -62)
+    style(ax, th, "MHz", "dBm, median of 5 sweeps")
+    legend(ax, th, "upper right")
+    title(fig, th, "The 147.456 MHz birdie on each antenna",
+          "Grey bands are the programmed 147.450 and 147.4625 channels. Levels are as measured at the tinySA; "
+          "the SG7900 and discone sit behind 1.2 and 1.7 dB of feedline.")
+    save(fig, "birdie-by-antenna", theme)
+
+
+# 10 -----------------------------------------------------------------------
+HIGH_SERVICES = [(420, 450, "70cm"), (450, 470, "UHF"), (470, 608, "UHF TV"), (617, 652, "LTE 600\ndown"),
+                 (729, 768, "LTE 700\ndown"), (769, 775, "700\nPS"), (851, 869, "800\nPS"), (869, 894, "cell\n850"),
+                 (902, 928, "ISM /\n33cm"), (929, 932, "pag.")]
+
+
+def chart_discone_high(th, theme):
+    if not (DATA / "p7__DH_wide.json").exists():
+        return
+    rec = load("p7__DH_wide.json")
+    b1, b2 = load("p2__Hopen_wide.json"), load("p4__Hopen_hi.json")
+    F = [f / 1e6 for f in rec["freqs"]]
+    mh = maxhold(rec)
+    md = [statistics.median(p[i] for p in rec["passes"]) for i in range(len(F))]
+    bf = [f / 1e6 for f in b1["freqs"]] + [f / 1e6 for f in b2["freqs"] if f > b1["freqs"][-1]]
+    bv = [statistics.median(p[i] for p in b1["passes"]) for i in range(len(b1["freqs"]))] + \
+         [statistics.median(p[i] for p in b2["passes"]) for i, f in enumerate(b2["freqs"]) if f > b1["freqs"][-1]]
+    fig, ax = figure(th, 9.6, 4.4)
+    fig.subplots_adjust(left=0.07, right=0.98, top=0.76, bottom=0.12)
+    for lo, hi, lab in HIGH_SERVICES:
+        ax.axvspan(lo, hi, color=th["band"], lw=0, zorder=0)
+        ax.text((lo + hi) / 2, -42, lab, color=th["muted"], fontsize=7.5, ha="center", va="top")
+    # FM harmonics made inside the unfiltered HIGH input: x3 proven by the attenuator (falls up to 20 dB);
+    # x4..x9 are the smooth humps centred on n x ~98 MHz and n x 20 MHz wide
+    ax.axvspan(264, 324, facecolor="none", edgecolor=th["muted"], hatch="////", lw=0, zorder=0)
+    ax.text(294, -42, "FM × 3\nanalyzer-made", color=th["ink2"], fontsize=7.5, ha="center", va="top")
+    for n in range(4, 10):
+        fc = n * 98.0
+        if fc < 955:
+            ax.text(fc, -123.5, f"FM×{n}", color=th["ink2"], fontsize=7.5, ha="center", va="bottom")
+    ax.plot(bf, smooth(bv, 3), color=th["muted"], lw=1.1, label="empty port (tinySA floor)")
+    ax.plot(F, smooth(md, 2), color=th[ANT_COLOR["discone"]], lw=1.2, label="discone, median of 3 sweeps")
+    ax.set_xlim(240, 960)
+    ax.set_ylim(-126, -36)
+    style(ax, th, "MHz", "dBm at the tinySA (32 kHz RBW)")
+    ax.legend(loc="upper right", bbox_to_anchor=(1.0, 0.8), frameon=False, fontsize=8.5, labelcolor=th["ink2"],
+              handlelength=1.4)
+    title(fig, th, "Roof discone above 240 MHz: real stations on top of the analyzer's own FM harmonics",
+          "HIGH input, median of three sweeps. FM broadcast at up to −26 dBm overdrives the unfiltered input, which then makes "
+          "FM ×3…×9 humps (labelled at the bottom). Carriers above the humps are real; the floor between them is not the roof's.")
+    save(fig, "discone-high", theme)
+
+
 CHARTS_FN = [chart_floor_excess, chart_6m_comb, chart_birdies, chart_clock_ladder, chart_hf_noise, chart_hf_floor,
-             chart_zero_span]
+             chart_zero_span, chart_vhf_noise, chart_birdie_by_antenna, chart_discone_high]
 
 if __name__ == "__main__":
-    plt.rcParams.update({"font.family": ["Segoe UI", "DejaVu Sans"], "svg.fonttype": "none"})
+    # a fixed hashsalt keeps clip-path ids stable, so re-running only changes charts whose data changed
+    plt.rcParams.update({"font.family": ["Segoe UI", "DejaVu Sans"], "svg.fonttype": "none",
+                         "svg.hashsalt": "rf-environment"})
     for theme, th in THEMES.items():
         for fn in CHARTS_FN:
             fn(th, theme)

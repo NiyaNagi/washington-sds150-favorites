@@ -9,7 +9,8 @@ class TinySA:
     def __init__(self, port=PORT):
         if port.upper() == "COM3":
             raise SystemExit("refusing COM3")
-        self.s = serial.Serial(port, 115200, timeout=0.5)
+        # write_timeout: a frozen tinySA stops draining USB; fail instead of blocking forever
+        self.s = serial.Serial(port, 115200, timeout=0.5, write_timeout=5)
         self.s.reset_input_buffer()
         self.s.write(b"\r")
         self._read_until_prompt(5)

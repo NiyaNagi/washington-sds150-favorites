@@ -5,7 +5,7 @@ External signals keep the same displayed dBm when input attenuation is added
 Overload/intermod products made inside the analyzer drop by >= the attenuation.
 """
 from paths import RF, FREQ_INDEX, CATALOG, RADIO_DATA, PROGRAMMED, HOME_QTH  # noqa: F401
-import json, os, statistics
+import json, os, statistics, sys
 from tsa import TinySA
 
 OUT = str(RF)
@@ -42,6 +42,7 @@ for f, rbw in PTS:
         row[att] = max(x[1] for x in r)
     print(f"point {f/1e6:9.3f} MHz rbw{rbw}: " + "  ".join(f"att{a} {v:6.1f}" for a, v in row.items()), flush=True)
     res[f"pt{f}"] = row
-json.dump(res, open(os.path.join(OUT, "atten_test_smiley.json"), "w"))
+label = sys.argv[1] if len(sys.argv) > 1 else "smiley"
+json.dump(res, open(os.path.join(OUT, f"atten_test_{label}.json"), "w"))
 t.cmd("attenuate auto"); t.cmd("rbw auto"); t.cmd("resume")
 t.close()
