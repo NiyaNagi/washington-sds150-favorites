@@ -1,0 +1,408 @@
+{
+ "date": "2026-09-23",
+ "instrument": "tinySA (basic, hw v0.3) firmware tinySA_v1.4-175-g1419a93",
+ "location": "Ames Lake / Redmond WA, operator's office desk",
+ "levels": "dBm as displayed by the tinySA; no antenna-factor correction",
+ "files": [
+  {
+   "file": "atten_test_smiley.json",
+   "kind": "attenuator test",
+   "setup": "LOW port: Smiley 2m half-wave telescopic at 69 cm on the desk; HIGH port: open (baseline)"
+  },
+  {
+   "file": "p1__H_70cm.json",
+   "kind": "sweep",
+   "setup": "HIGH port: stock telescopic whip on the desk beside the PC; LOW port: open (baseline)",
+   "mode": "high",
+   "start_mhz": 420.0,
+   "stop_mhz": 450.0,
+   "rbw": "11kHz",
+   "step_khz": 6.25,
+   "passes": 3,
+   "attenuation_db": 0
+  },
+  {
+   "file": "p1__H_uhf.json",
+   "kind": "sweep",
+   "setup": "HIGH port: stock telescopic whip on the desk beside the PC; LOW port: open (baseline)",
+   "mode": "high",
+   "start_mhz": 450.0,
+   "stop_mhz": 470.0,
+   "rbw": "11kHz",
+   "step_khz": 6.25,
+   "passes": 3,
+   "attenuation_db": 0
+  },
+  {
+   "file": "p1__H_wide.json",
+   "kind": "sweep",
+   "setup": "HIGH port: stock telescopic whip on the desk beside the PC; LOW port: open (baseline)",
+   "mode": "high",
+   "start_mhz": 240.0,
+   "stop_mhz": 500.0,
+   "rbw": "32kHz",
+   "step_khz": 25.0,
+   "passes": 4,
+   "attenuation_db": 0
+  },
+  {
+   "file": "p1__Lopen_220.json",
+   "kind": "sweep",
+   "setup": "HIGH port: stock telescopic whip on the desk beside the PC; LOW port: open (baseline)",
+   "mode": "low",
+   "start_mhz": 219.0,
+   "stop_mhz": 225.0,
+   "rbw": "11kHz",
+   "step_khz": 5.0,
+   "passes": 1,
+   "attenuation_db": 0
+  },
+  {
+   "file": "p1__Lopen_2m.json",
+   "kind": "sweep",
+   "setup": "HIGH port: stock telescopic whip on the desk beside the PC; LOW port: open (baseline)",
+   "mode": "low",
+   "start_mhz": 144.0,
+   "stop_mhz": 148.0,
+   "rbw": "11kHz",
+   "step_khz": 5.0,
+   "passes": 1,
+   "attenuation_db": 0
+  },
+  {
+   "file": "p1__Lopen_6m.json",
+   "kind": "sweep",
+   "setup": "HIGH port: stock telescopic whip on the desk beside the PC; LOW port: open (baseline)",
+   "mode": "low",
+   "start_mhz": 50.0,
+   "stop_mhz": 54.0,
+   "rbw": "11kHz",
+   "step_khz": 5.0,
+   "passes": 1,
+   "attenuation_db": 0
+  },
+  {
+   "file": "p1__Lopen_air.json",
+   "kind": "sweep",
+   "setup": "HIGH port: stock telescopic whip on the desk beside the PC; LOW port: open (baseline)",
+   "mode": "low",
+   "start_mhz": 108.0,
+   "stop_mhz": 137.0,
+   "rbw": "11kHz",
+   "step_khz": 8.33,
+   "passes": 1,
+   "attenuation_db": 0
+  },
+  {
+   "file": "p1__Lopen_hf.json",
+   "kind": "sweep",
+   "setup": "HIGH port: stock telescopic whip on the desk beside the PC; LOW port: open (baseline)",
+   "mode": "low",
+   "start_mhz": 0.1,
+   "stop_mhz": 30.0,
+   "rbw": "11kHz",
+   "step_khz": 5.0,
+   "passes": 1,
+   "attenuation_db": 0
+  },
+  {
+   "file": "p1__Lopen_vhf.json",
+   "kind": "sweep",
+   "setup": "HIGH port: stock telescopic whip on the desk beside the PC; LOW port: open (baseline)",
+   "mode": "low",
+   "start_mhz": 148.0,
+   "stop_mhz": 174.0,
+   "rbw": "11kHz",
+   "step_khz": 6.25,
+   "passes": 1,
+   "attenuation_db": 0
+  },
+  {
+   "file": "p1__Lopen_vlf.json",
+   "kind": "sweep",
+   "setup": "HIGH port: stock telescopic whip on the desk beside the PC; LOW port: open (baseline)",
+   "mode": "low",
+   "start_mhz": 0.0,
+   "stop_mhz": 1.0,
+   "rbw": "11kHz",
+   "step_khz": 2.5,
+   "passes": 2,
+   "attenuation_db": 0
+  },
+  {
+   "file": "p1__Lopen_wide.json",
+   "kind": "sweep",
+   "setup": "HIGH port: stock telescopic whip on the desk beside the PC; LOW port: open (baseline)",
+   "mode": "low",
+   "start_mhz": 0.1,
+   "stop_mhz": 350.0,
+   "rbw": "32kHz",
+   "step_khz": 25.0,
+   "passes": 2,
+   "attenuation_db": 0
+  },
+  {
+   "file": "p2__Hopen_70cm.json",
+   "kind": "sweep",
+   "setup": "LOW port: Smiley 2m half-wave telescopic at 69 cm on the desk; HIGH port: open (baseline)",
+   "mode": "high",
+   "start_mhz": 420.0,
+   "stop_mhz": 470.0,
+   "rbw": "11kHz",
+   "step_khz": 6.25,
+   "passes": 1,
+   "attenuation_db": 0
+  },
+  {
+   "file": "p2__Hopen_wide.json",
+   "kind": "sweep",
+   "setup": "LOW port: Smiley 2m half-wave telescopic at 69 cm on the desk; HIGH port: open (baseline)",
+   "mode": "high",
+   "start_mhz": 240.0,
+   "stop_mhz": 500.0,
+   "rbw": "32kHz",
+   "step_khz": 25.0,
+   "passes": 2,
+   "attenuation_db": 0
+  },
+  {
+   "file": "p2__L_220.json",
+   "kind": "sweep",
+   "setup": "LOW port: Smiley 2m half-wave telescopic at 69 cm on the desk; HIGH port: open (baseline)",
+   "mode": "low",
+   "start_mhz": 219.0,
+   "stop_mhz": 225.0,
+   "rbw": "11kHz",
+   "step_khz": 5.0,
+   "passes": 4,
+   "attenuation_db": 0
+  },
+  {
+   "file": "p2__L_2m.json",
+   "kind": "sweep",
+   "setup": "LOW port: Smiley 2m half-wave telescopic at 69 cm on the desk; HIGH port: open (baseline)",
+   "mode": "low",
+   "start_mhz": 144.0,
+   "stop_mhz": 148.0,
+   "rbw": "11kHz",
+   "step_khz": 5.0,
+   "passes": 5,
+   "attenuation_db": 0
+  },
+  {
+   "file": "p2__L_6m.json",
+   "kind": "sweep",
+   "setup": "LOW port: Smiley 2m half-wave telescopic at 69 cm on the desk; HIGH port: open (baseline)",
+   "mode": "low",
+   "start_mhz": 50.0,
+   "stop_mhz": 54.0,
+   "rbw": "11kHz",
+   "step_khz": 5.0,
+   "passes": 4,
+   "attenuation_db": 0
+  },
+  {
+   "file": "p2__L_air.json",
+   "kind": "sweep",
+   "setup": "LOW port: Smiley 2m half-wave telescopic at 69 cm on the desk; HIGH port: open (baseline)",
+   "mode": "low",
+   "start_mhz": 108.0,
+   "stop_mhz": 137.0,
+   "rbw": "11kHz",
+   "step_khz": 8.33,
+   "passes": 3,
+   "attenuation_db": 0
+  },
+  {
+   "file": "p2__L_hf.json",
+   "kind": "sweep",
+   "setup": "LOW port: Smiley 2m half-wave telescopic at 69 cm on the desk; HIGH port: open (baseline)",
+   "mode": "low",
+   "start_mhz": 0.1,
+   "stop_mhz": 30.0,
+   "rbw": "11kHz",
+   "step_khz": 5.0,
+   "passes": 3,
+   "attenuation_db": 0
+  },
+  {
+   "file": "p2__L_vhf.json",
+   "kind": "sweep",
+   "setup": "LOW port: Smiley 2m half-wave telescopic at 69 cm on the desk; HIGH port: open (baseline)",
+   "mode": "low",
+   "start_mhz": 148.0,
+   "stop_mhz": 174.0,
+   "rbw": "11kHz",
+   "step_khz": 6.25,
+   "passes": 3,
+   "attenuation_db": 0
+  },
+  {
+   "file": "p2__L_vlf.json",
+   "kind": "sweep",
+   "setup": "LOW port: Smiley 2m half-wave telescopic at 69 cm on the desk; HIGH port: open (baseline)",
+   "mode": "low",
+   "start_mhz": 0.0,
+   "stop_mhz": 1.0,
+   "rbw": "11kHz",
+   "step_khz": 2.5,
+   "passes": 3,
+   "attenuation_db": 0
+  },
+  {
+   "file": "p2__L_wide.json",
+   "kind": "sweep",
+   "setup": "LOW port: Smiley 2m half-wave telescopic at 69 cm on the desk; HIGH port: open (baseline)",
+   "mode": "low",
+   "start_mhz": 0.1,
+   "stop_mhz": 350.0,
+   "rbw": "32kHz",
+   "step_khz": 25.0,
+   "passes": 4,
+   "attenuation_db": 0
+  },
+  {
+   "file": "p3__E_hf.json",
+   "kind": "sweep",
+   "setup": "LOW port: JYR8010 80m EFHW feedline (office feed, radio disconnected); HIGH port: open",
+   "mode": "low",
+   "start_mhz": 0.1,
+   "stop_mhz": 30.0,
+   "rbw": "11kHz",
+   "step_khz": 5.0,
+   "passes": 4,
+   "attenuation_db": 0
+  },
+  {
+   "file": "p3__E_hf3k.json",
+   "kind": "sweep",
+   "setup": "LOW port: JYR8010 80m EFHW feedline (office feed, radio disconnected); HIGH port: open",
+   "mode": "low",
+   "start_mhz": 1.8,
+   "stop_mhz": 30.0,
+   "rbw": "3kHz",
+   "step_khz": 2.5,
+   "passes": 1,
+   "attenuation_db": 0
+  },
+  {
+   "file": "p3__E_hf_att10.json",
+   "kind": "sweep",
+   "setup": "LOW port: JYR8010 80m EFHW feedline (office feed, radio disconnected); HIGH port: open",
+   "mode": "low",
+   "start_mhz": 0.1,
+   "stop_mhz": 30.0,
+   "rbw": "11kHz",
+   "step_khz": 5.0,
+   "passes": 1,
+   "attenuation_db": 10
+  },
+  {
+   "file": "p3__E_lo.json",
+   "kind": "sweep",
+   "setup": "LOW port: JYR8010 80m EFHW feedline (office feed, radio disconnected); HIGH port: open",
+   "mode": "low",
+   "start_mhz": 30.0,
+   "stop_mhz": 60.0,
+   "rbw": "11kHz",
+   "step_khz": 5.0,
+   "passes": 3,
+   "attenuation_db": 0
+  },
+  {
+   "file": "p3__E_vlf.json",
+   "kind": "sweep",
+   "setup": "LOW port: JYR8010 80m EFHW feedline (office feed, radio disconnected); HIGH port: open",
+   "mode": "low",
+   "start_mhz": 0.0,
+   "stop_mhz": 1.0,
+   "rbw": "11kHz",
+   "step_khz": 2.5,
+   "passes": 3,
+   "attenuation_db": 0
+  },
+  {
+   "file": "p3__E_wide.json",
+   "kind": "sweep",
+   "setup": "LOW port: JYR8010 80m EFHW feedline (office feed, radio disconnected); HIGH port: open",
+   "mode": "low",
+   "start_mhz": 0.1,
+   "stop_mhz": 350.0,
+   "rbw": "32kHz",
+   "step_khz": 25.0,
+   "passes": 2,
+   "attenuation_db": 0
+  },
+  {
+   "file": "zoom__hi_cands.json",
+   "kind": "zoom",
+   "setup": "HIGH port: stock telescopic whip on the desk beside the PC; LOW port: open (baseline)",
+   "mode": "high",
+   "rbw": "3kHz"
+  },
+  {
+   "file": "zs__hf_fast.json",
+   "kind": "zero-span",
+   "setup": "LOW port: JYR8010 80m EFHW feedline (office feed, radio disconnected); HIGH port: open",
+   "mode": "low",
+   "rbw": "32kHz",
+   "freqs_mhz": [
+    16.7,
+    10.75,
+    5.15,
+    13.2,
+    7.15,
+    21.3
+   ]
+  },
+  {
+   "file": "zs__hf_slow.json",
+   "kind": "zero-span",
+   "setup": "LOW port: JYR8010 80m EFHW feedline (office feed, radio disconnected); HIGH port: open",
+   "mode": "low",
+   "rbw": "32kHz",
+   "freqs_mhz": [
+    16.7,
+    5.15,
+    13.2
+   ]
+  },
+  {
+   "file": "zs__hi_fast.json",
+   "kind": "zero-span",
+   "setup": "HIGH port: stock telescopic whip on the desk beside the PC; LOW port: open (baseline)",
+   "mode": "high",
+   "rbw": "112kHz",
+   "freqs_mhz": [
+    446.3,
+    442.35,
+    454.55,
+    420.5,
+    284.0,
+    300.5
+   ]
+  },
+  {
+   "file": "zs__hi_slow.json",
+   "kind": "zero-span",
+   "setup": "HIGH port: stock telescopic whip on the desk beside the PC; LOW port: open (baseline)",
+   "mode": "high",
+   "rbw": "112kHz",
+   "freqs_mhz": [
+    446.3,
+    442.35,
+    284.0
+   ]
+  },
+  {
+   "file": "zs__hi_test.json",
+   "kind": "zero-span",
+   "setup": "HIGH port: stock telescopic whip on the desk beside the PC; LOW port: open (baseline)",
+   "mode": "high",
+   "rbw": "112kHz",
+   "freqs_mhz": [
+    446.3
+   ]
+  }
+ ]
+}
